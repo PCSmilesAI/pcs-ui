@@ -1,10 +1,8 @@
-const GIST_ID = '24025555424dd200727b06d461cffdc9';
-const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN; // Replace this securely
 
+const GIST_ID = '24025555424dd200727b06d461cffdc9';
 const GIST_FILENAME = 'users.json';
 
 const headers = {
-  'Authorization': `token ${GITHUB_TOKEN}`,
   'Accept': 'application/vnd.github.v3+json'
 };
 
@@ -20,25 +18,21 @@ async function getUsers() {
   return JSON.parse(content);
 }
 
-// 💾 Save updated users list to Gist
+// 💾 Save updated users list to Gist via serverless function
 async function saveUsers(users) {
-  const updatedContent = JSON.stringify(users, null, 2);
-
-  const body = {
-    files: {
-      [GIST_FILENAME]: {
-        content: updatedContent
-      }
-    }
-  };
-
-  const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-    method: 'PATCH',
-    headers,
-    body: JSON.stringify(body)
+  const res = await fetch('/api/update-gist', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ users })
   });
 
-  return res.ok;
+  const result = await res.json();
+  if (!res.ok) {
+    console.error("Serverless save error:", result.error);
+    return false;
+  }
+
+  return true;
 }
 
 // ➕ Signup function
@@ -48,8 +42,8 @@ async function signupUser(name, email, password) {
   if (exists) return { success: false, message: 'Email already registered.' };
 
   users.push({ name, email, password });
-  await saveUsers(users);
-  return { success: true };
+  const ok = await saveUsers(users);
+  return ok ? { success: true } : { success: false, message: 'Failed to save user.' };
 }
 
 // 🔐 Login function
