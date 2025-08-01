@@ -1,137 +1,96 @@
+import React, { useState } from 'react';
+import NavBar from './components/NavBar.jsx';
+import ForMePage from './pages/ForMePage.jsx';
+import ToBePaidPage from './pages/ToBePaidPage.jsx';
+import CompletePage from './pages/CompletePage.jsx';
+import VendorsPage from './pages/VendorsPage.jsx';
+import AllInvoicesPage from './pages/AllInvoicesPage.jsx';
+import InvoiceDetailPage from './pages/InvoiceDetailPage.jsx';
+import FilterPanel from './components/FilterPanel.jsx';
 
-import { useState } from 'react';
-import { Menu, X, UserCircle, Search, Filter } from 'lucide-react';
-import InvoiceTable from './InvoiceTable';
-import InvoiceDetail from './InvoiceDetail';
-import VendorTable from './VendorTable';
-import './index.css';
-
-const Button = ({ children, variant = 'default', ...props }) => {
-  const base = 'px-4 py-2 rounded-full text-sm transition';
-  const variants = {
-    default: 'bg-primary text-white hover:bg-secondary',
-    outline: 'border border-primary text-primary hover:bg-secondary hover:text-white',
-    ghost: 'text-primary hover:text-white hover:bg-secondary',
-    destructive: 'bg-red-500 text-white hover:bg-red-600'
-  };
-  return <button className={`${base} ${variants[variant] || ''}`} {...props}>{children}</button>;
-};
-
-const TABS = ["For Me", "To Be Paid", "Complete", "Vendors", "All Invoices"];
-
-const MOCK_DATA = [
-  {
-    Invoice: "IN761993",
-    Vendor: "Artisan Dental",
-    Amount: 1265.4,
-    Office: "Roseburg",
-    "Due Date": "2025-07-26",
-    Category: "Dental Lab",
-    Status: "To Be Paid",
-    "Date Completed": "2025-08-09",
-    LineItems: [
-      { ID: "1185", Name: "Z360 Anterior", QTY: 3, "Unit Price": "$173.00", Total: "$519.00" },
-      { ID: "3039", Name: "Flipper with Wire", QTY: 2, "Unit Price": "$238.00", Total: "$476.00" }
-    ]
-  },
-  {
-    Invoice: "4307",
-    Vendor: "Exodus Dental",
-    Amount: 1349.08,
-    Office: "Lebanon",
-    "Due Date": "2025-07-29",
-    Category: "Dental Lab",
-    Status: "Approval",
-    "Date Completed": "2025-08-10",
-    LineItems: [
-      { ID: "8001", Name: "Crown Prep", QTY: 4, "Unit Price": "$200.00", Total: "$800.00" },
-      { ID: "8002", Name: "X-Ray", QTY: 1, "Unit Price": "$549.08", Total: "$549.08" }
-    ]
-  }
-];
-
-const VENDORS = [
-  { Name: "Artisan Dental", "Payment Method": "ACH", "Outstanding Amount": "$2,365.40", Contact: "123-456-7890" },
-  { Name: "Exodus Dental", "Payment Method": "ACH", "Outstanding Amount": "$1,349.08", Contact: "987-654-3210" }
-];
-
+/*
+ * Top level application component. This component holds the
+ * navigation state and delegates rendering of individual pages
+ * based on which tab has been selected. When a row in a table
+ * is clicked the current page is temporarily replaced with
+ * the invoice detail view. A simple previousPage state is
+ * maintained so that the user can navigate back from the
+ * detail screen.
+ */
 export default function App() {
-  const [activeTab, setActiveTab] = useState("For Me");
-  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  // Possible page identifiers: forMe, toBePaid, complete, vendors,
+  // allInvoices, detail
+  const [currentPage, setCurrentPage] = useState('forMe');
+  const [previousPage, setPreviousPage] = useState('forMe');
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const filteredData = MOCK_DATA.filter(inv => {
-    if (activeTab === "For Me") return true;
-    if (activeTab === "To Be Paid") return inv.Status === "To Be Paid";
-    if (activeTab === "Complete") return inv.Status === "Complete";
-    if (activeTab === "All Invoices") return true;
-    return false;
-  });
+  /**
+   * Handle row click from tables. Stores the selected invoice and
+   * switches to the detail page. The previous page is remembered
+   * so the user can return to the correct list after viewing an
+   * invoice.
+   *
+   * @param {Object} invoice - The invoice data associated with the row.
+   */
+  function handleRowClick(invoice) {
+    setSelectedInvoice(invoice);
+    setPreviousPage(currentPage);
+    setCurrentPage('detail');
+  }
+
+  /**
+   * Navigate back from the invoice detail screen.
+   */
+  function handleBack() {
+    setSelectedInvoice(null);
+    setCurrentPage(previousPage);
+  }
+
+  /**
+   * Toggle the filter panel visibility. The filter panel slides in
+   * from the right on large screens and overlays the content on
+   * smaller devices. Sorting icons and other conditional UI
+   * elements can listen to this state.
+   */
+  function toggleFilter() {
+    setIsFilterOpen(!isFilterOpen);
+  }
 
   return (
-    <div className="min-h-screen bg-white font-sans">
-      <div className="flex items-center justify-between border-b px-6 py-4">
-        <div className="flex gap-2 flex-wrap">
-          {TABS.map((tab) => (
-            <Button
-              key={tab}
-              variant={activeTab === tab ? 'default' : 'outline'}
-              onClick={() => {
-                setActiveTab(tab);
-                setSelectedInvoice(null);
-              }}
-            >
-              {tab}
-            </Button>
-          ))}
-        </div>
+    <div className="min-h-screen flex flex-col">
+      {/* Navigation bar at the top of every page */}
+      <NavBar
+        currentPage={currentPage}
+        onChangePage={(page) => setCurrentPage(page)}
+        onToggleFilter={toggleFilter}
+      />
 
-        <div className="flex items-center gap-3 relative">
-          <Button variant="ghost" size="icon">
-            <Search className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <Filter className="w-5 h-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowAccountMenu((prev) => !prev)}
-          >
-            <UserCircle className="w-6 h-6" />
-          </Button>
-
-          {showAccountMenu && (
-            <div className="absolute right-0 top-10 z-50 w-48 rounded-md border bg-white shadow-md">
-              <ul className="text-sm text-gray-700">
-                {['Account', 'Company Info', 'Payout Account', 'Reports'].map((item) => (
-                  <li
-                    key={item}
-                    className="px-4 py-2 hover:bg-secondary hover:text-white cursor-pointer"
-                    onClick={() => setShowAccountMenu(false)}
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="p-6">
-        {selectedInvoice ? (
-          <InvoiceDetail invoice={selectedInvoice} onBack={() => setSelectedInvoice(null)} />
-        ) : (
-          <>
-            <h2 className="text-xl font-semibold text-primary mb-4">{activeTab}</h2>
-            {activeTab === "Vendors" ? (
-              <VendorTable data={VENDORS} />
-            ) : (
-              <InvoiceTable data={filteredData} onSelectInvoice={setSelectedInvoice} />
-            )}
-          </>
+      {/* Main content area. A max-width container keeps content
+          centred on large displays while allowing it to grow on
+          smaller screens. */}
+      <div className="flex-1 relative overflow-hidden">
+        {currentPage === 'forMe' && <ForMePage onRowClick={handleRowClick} />}
+        {currentPage === 'toBePaid' && <ToBePaidPage onRowClick={handleRowClick} />}
+        {currentPage === 'complete' && <CompletePage onRowClick={handleRowClick} />}
+        {currentPage === 'vendors' && <VendorsPage />}
+        {currentPage === 'allInvoices' && (
+          <AllInvoicesPage
+            onRowClick={handleRowClick}
+            isFilterOpen={isFilterOpen}
+          />
         )}
+        {currentPage === 'detail' && selectedInvoice && (
+          <InvoiceDetailPage invoice={selectedInvoice} onBack={handleBack} />
+        )}
+
+        {/* Filter panel overlay. Only rendered on the All Invoices
+            page. It remains mounted while open to preserve
+            internal state if needed. */}
+        <FilterPanel
+          isOpen={isFilterOpen}
+          onClose={() => setIsFilterOpen(false)}
+        />
       </div>
     </div>
   );
