@@ -20,19 +20,31 @@ async function getUsers() {
 
 // 💾 Save updated users list to Gist via serverless function
 async function saveUsers(users) {
-  const res = await fetch('/api/update-gist', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ users })
-  });
+  try {
+    const res = await fetch('/api/update-gist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ users })
+    });
 
-  const result = await res.json();
-  if (!res.ok) {
-    console.error("Serverless save error:", result.error);
+    let result;
+    try {
+      result = await res.json();
+    } catch (jsonError) {
+      console.error("Failed to parse response as JSON", jsonError);
+      return false;
+    }
+
+    if (!res.ok) {
+      console.error("Serverless save error:", result?.error || result);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error("saveUsers() failed to reach API:", err);
     return false;
   }
-
-  return true;
 }
 
 // ➕ Signup function

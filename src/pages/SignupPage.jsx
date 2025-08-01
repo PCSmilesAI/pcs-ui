@@ -16,8 +16,6 @@ export default function SignupPage() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    console.log("🔥 Signup attempt:", { name, email, password, adminCode });
-
     if (!name || !email || !password || !adminCode) {
       setError('Please fill out all fields');
       return;
@@ -28,26 +26,30 @@ export default function SignupPage() {
       return;
     }
 
-    const result = await signupUser(name, email, password);
-    console.log("📬 Gist signup result:", result);
-
-    if (result.success) {
-      localStorage.setItem('loggedInUser', JSON.stringify({ name, email }));
-      navigate('/');
-    } else {
-      setError(result.message || 'Signup failed');
+    try {
+      const result = await signupUser(name, email, password);
+      console.log("📬 Signup result:", result);
+      if (result.success) {
+        localStorage.setItem('loggedInUser', JSON.stringify({ name, email }));
+        navigate('/');
+      } else {
+        setError(result.message || 'Signup failed');
+      }
+    } catch (err) {
+      console.error("🔥 Signup error:", err);
+      setError('Unexpected error occurred.');
     }
   }
 
   return (
-    <div className="signup-container">
-      <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit} className="signup-form">
+    <div className="signup-container" style={{ padding: '2rem', maxWidth: '500px', margin: '0 auto' }}>
+      <h2 style={{ textAlign: 'center' }}>Sign Up</h2>
+      <form onSubmit={handleSubmit} className="signup-form" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <input type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
         <input type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} />
         <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
         <input type="text" placeholder="Admin Code" value={adminCode} onChange={e => setAdminCode(e.target.value)} />
-        {error && <p className="error">{error}</p>}
+        {error && <p className="error" style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
         <button type="submit">Sign Up</button>
       </form>
     </div>
