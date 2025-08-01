@@ -88,7 +88,7 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
       {/* Left section: title and navigation tabs */}
       <div className="flex items-center space-x-6">
         <h1 className="text-2xl font-semibold text-primary whitespace-nowrap">
-          PCS AI Dashboard
+          PCS AI Dashboard TEST
         </h1>
         <nav className="flex items-center space-x-2">
           {tabs.map(renderTab)}
