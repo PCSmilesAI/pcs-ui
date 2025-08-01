@@ -204,15 +204,24 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter, onSe
           </button>
           {isAccountOpen && (
             <div style={dropdownStyle}>
-              {['Account', 'Company Info', 'Payout Account', 'Reports'].map((item) => (
+              {[
+                { label: 'Account', key: 'account' },
+                { label: 'Company Info', key: 'companyInfo' },
+                { label: 'Payout Account', key: 'payoutAccount' },
+                { label: 'Reports', key: 'reports' },
+              ].map(({ label, key }) => (
                 <button
-                  key={item}
+                  key={key}
                   style={dropdownItemStyle}
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f7fc')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  onClick={() => setIsAccountOpen(false)}
+                  onClick={() => {
+                    // navigate to the selected account page and close dropdown
+                    setIsAccountOpen(false);
+                    if (onChangePage) onChangePage(key);
+                  }}
                 >
-                  {item}
+                  {label}
                 </button>
               ))}
             </div>

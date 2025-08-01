@@ -6,6 +6,10 @@ import CompletePage from './pages/CompletePage.jsx';
 import VendorsPage from './pages/VendorsPage.jsx';
 import AllInvoicesPage from './pages/AllInvoicesPage.jsx';
 import InvoiceDetailPage from './pages/InvoiceDetailPage.jsx';
+import AccountPage from './pages/AccountPage.jsx';
+import CompanyInfoPage from './pages/CompanyInfoPage.jsx';
+import PayoutAccountPage from './pages/PayoutAccountPage.jsx';
+import ReportsPage from './pages/ReportsPage.jsx';
 import FilterPanel from './components/FilterPanel.jsx';
 
 /*
@@ -156,6 +160,12 @@ export default function App() {
           {currentPage === 'detail' && selectedInvoice && (
             <InvoiceDetailPage invoice={selectedInvoice} onBack={handleBack} />
           )}
+
+          {/* Account and related pages */}
+          {currentPage === 'account' && <AccountPage />}
+          {currentPage === 'companyInfo' && <CompanyInfoPage />}
+          {currentPage === 'payoutAccount' && <PayoutAccountPage />}
+          {currentPage === 'reports' && <ReportsPage />}
         </div>
       </div>
 
