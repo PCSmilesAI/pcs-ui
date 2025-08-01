@@ -36,7 +36,8 @@ export default function App() {
 
   // Initialize auth state on mount
   React.useEffect(() => {
-    const logged = localStorage.getItem('loggedInUser');
+    // Check session storage for a logged in user to persist session
+    const logged = sessionStorage.getItem('loggedInUser');
     if (logged) {
       setIsAuthenticated(true);
       return;
@@ -153,6 +154,12 @@ export default function App() {
               onChangePage={(page) => setCurrentPage(page)}
               onToggleFilter={toggleFilter}
               onSearch={handleSearch}
+              onLogout={() => {
+                // Clear current session and return to login page
+                sessionStorage.removeItem('loggedInUser');
+                setIsAuthenticated(false);
+                setAuthMode('login');
+              }}
             />
             {/* Content area separated from the nav by a top border */}
             <div

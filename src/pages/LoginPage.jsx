@@ -19,8 +19,8 @@ export default function LoginPage({ onLogin, onSwitchMode }) {
       setError('Invalid email or password');
       return;
     }
-    // Persist logged in user
-    localStorage.setItem('loggedInUser', JSON.stringify(user));
+    // Persist logged in user in session storage only
+    sessionStorage.setItem('loggedInUser', JSON.stringify(user));
     if (onLogin) onLogin();
   }
 

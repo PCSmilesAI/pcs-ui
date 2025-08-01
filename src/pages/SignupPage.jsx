@@ -45,7 +45,8 @@ export default function SignupPage({ onSignup, onSwitchMode }) {
     const newUser = { name, email, password, ip };
     const updatedUsers = [...users, newUser];
     localStorage.setItem('users', JSON.stringify(updatedUsers));
-    localStorage.setItem('loggedInUser', JSON.stringify(newUser));
+    // Persist the new user for this session only
+    sessionStorage.setItem('loggedInUser', JSON.stringify(newUser));
     if (onSignup) onSignup();
   }
 

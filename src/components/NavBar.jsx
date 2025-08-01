@@ -4,7 +4,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 // Navigation bar implemented with inline styles. This component avoids
 // reliance on Tailwind so that styling always appears even when
 // Tailwind isn't processed. It exposes the same props as before.
-export default function NavBar({ currentPage, onChangePage, onToggleFilter, onSearch }) {
+export default function NavBar({ currentPage, onChangePage, onToggleFilter, onSearch, onLogout }) {
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -204,6 +204,7 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter, onSe
           </button>
           {isAccountOpen && (
             <div style={dropdownStyle}>
+              {/* Account menu items and logout */}
               {[
                 { label: 'Account', key: 'account' },
                 { label: 'Company Info', key: 'companyInfo' },
@@ -216,7 +217,6 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter, onSe
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f7fc')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   onClick={() => {
-                    // navigate to the selected account page and close dropdown
                     setIsAccountOpen(false);
                     if (onChangePage) onChangePage(key);
                   }}
@@ -224,6 +224,19 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter, onSe
                   {label}
                 </button>
               ))}
+              {/* Logout option */}
+              <button
+                key="logout"
+                style={dropdownItemStyle}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f7fc')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                onClick={() => {
+                  setIsAccountOpen(false);
+                  if (onLogout) onLogout();
+                }}
+              >
+                Log Out
+              </button>
             </div>
           )}
         </div>
