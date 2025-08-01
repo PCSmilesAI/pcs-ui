@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import InvoiceTable from '../components/InvoiceTable.jsx';
 
 /**
  * The All Invoices page aggregates every invoice into a single
@@ -94,60 +95,102 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
     });
   }
 
+  // Wrapper style replicates padding around the table
+  const wrapperStyle = { padding: '24px' };
+
+  // Render header cells with sort icons when the filter panel is open
+  const headerRows = (
+    <tr>
+      {columns.map((col) => {
+        const isSorted = sortConfig.key === col.key;
+        return (
+          <th
+            key={col.key}
+            style={{
+              padding: '12px 16px',
+              borderRight: '1px solid #357ab2',
+              borderBottom: '1px solid #357ab2',
+              backgroundColor: '#ffffff',
+              fontWeight: 500,
+              color: '#5a5a5a',
+              fontSize: '14px',
+              textAlign: col.align || 'left',
+            }}
+          >
+            <button
+              onClick={() => handleSort(col.key)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                font: 'inherit',
+                color: '#5a5a5a',
+              }}
+            >
+              <span style={{ pointerEvents: 'none' }}>{col.label}</span>
+              {isFilterOpen && (
+                <span style={{ color: '#357ab2', fontSize: '12px' }}>
+                  {isSorted ? (
+                    sortConfig.direction === 'asc' ? (
+                      <i className="fas fa-sort-up"></i>
+                    ) : sortConfig.direction === 'desc' ? (
+                      <i className="fas fa-sort-down"></i>
+                    ) : (
+                      <i className="fas fa-sort"></i>
+                    )
+                  ) : (
+                    <i className="fas fa-sort"></i>
+                  )}
+                </span>
+              )}
+            </button>
+          </th>
+        );
+      })}
+    </tr>
+  );
+
   return (
-    <div className="px-6 py-4">
-      <table className="w-full border-t border-l border-blue-600 text-sm">
-        <thead className="bg-white">
-          <tr>
-            {columns.map((col) => {
-              const isSorted = sortConfig.key === col.key;
-              return (
-                <th
-                  key={col.key}
-                  className={`px-4 py-3 border-r border-blue-600 font-medium text-gray-600 text-${
-                    col.align || 'left'
-                  }`}
-                >
-                    <button
-                    className="flex items-center space-x-1 w-full focus:outline-none"
-                    onClick={() => handleSort(col.key)}
-                  >
-                    <span className="select-none">{col.label}</span>
-                    {/* Only show sort icons when the filter panel is open */}
-                    {isFilterOpen && (
-                        <span className="text-blue-600 text-xs">
-                        {isSorted ? (
-                          sortConfig.direction === 'asc' ? (
-                            <i className="fas fa-sort-up"></i>
-                          ) : sortConfig.direction === 'desc' ? (
-                            <i className="fas fa-sort-down"></i>
-                          ) : (
-                        <i className="fas fa-sort"></i>
-                          )
-                        ) : (
-                          <i className="fas fa-sort"></i>
-                        )}
-                      </span>
-                    )}
-                    </button>
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
+    <div style={wrapperStyle}>
+      {/* We cannot easily reuse InvoiceTable here because of the sort
+          icons in the header. Instead we manually construct a table
+          with inline styles and call the existing onRowClick handler
+          for row selection. */}
+      <table
+        style={{
+          width: '100%',
+          borderCollapse: 'collapse',
+          borderLeft: '1px solid #357ab2',
+          borderTop: '1px solid #357ab2',
+        }}
+      >
+        <thead>{headerRows}</thead>
         <tbody>
           {sortedRows.map((row, rowIndex) => (
             <tr
               key={rowIndex}
               onClick={() => onRowClick && onRowClick(row)}
-              className="cursor-pointer table-row-hover border-b border-blue-600"
+              style={{
+                cursor: onRowClick ? 'pointer' : 'default',
+                backgroundColor: '#ffffff',
+              }}
             >
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={`px-4 py-3 border-r border-blue-600 text-${
-                    col.align || 'left'
-                  }`}
+                  style={{
+                    padding: '12px 16px',
+                    borderRight: '1px solid #357ab2',
+                    borderBottom: '1px solid #357ab2',
+                    fontSize: '14px',
+                    color: '#1f1f1f',
+                    textAlign: col.align || 'left',
+                  }}
                 >
                   {row[col.key]}
                 </td>

@@ -37,8 +37,9 @@ export default function CompletePage({ onRowClick }) {
     { key: 'office', label: 'Office' },
     { key: 'dateCompleted', label: 'Date Completed' },
   ];
+  const wrapperStyle = { padding: '24px' };
   return (
-    <div className="px-6 py-4">
+    <div style={wrapperStyle}>
       <InvoiceTable columns={columns} rows={rows} onRowClick={onRowClick} />
     </div>
   );

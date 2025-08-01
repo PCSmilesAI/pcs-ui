@@ -44,8 +44,13 @@ export default function ForMePage({ onRowClick }) {
     { key: 'category', label: 'Category' },
   ];
 
+  // Wrapper styles set padding around the table. Using inline styles
+  // ensures the padding is applied even without a CSS framework.
+  const wrapperStyle = {
+    padding: '24px',
+  };
   return (
-    <div className="px-6 py-4">
+    <div style={wrapperStyle}>
       <InvoiceTable columns={columns} rows={rows} onRowClick={onRowClick} />
     </div>
   );

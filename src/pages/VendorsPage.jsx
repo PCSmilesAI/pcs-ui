@@ -26,8 +26,9 @@ export default function VendorsPage() {
       contact: '123-456-7890',
     },
   ];
+  const wrapperStyle = { padding: '24px' };
   return (
-    <div className="px-6 py-4">
+    <div style={wrapperStyle}>
       <VendorTable rows={rows} />
     </div>
   );

@@ -41,8 +41,9 @@ export default function ToBePaidPage({ onRowClick }) {
     { key: 'dueDate', label: 'Due Date' },
     { key: 'status', label: 'Status' },
   ];
+  const wrapperStyle = { padding: '24px' };
   return (
-    <div className="px-6 py-4">
+    <div style={wrapperStyle}>
       <InvoiceTable columns={columns} rows={rows} onRowClick={onRowClick} />
     </div>
   );

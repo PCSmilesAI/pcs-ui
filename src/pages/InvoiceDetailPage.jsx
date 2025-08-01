@@ -7,12 +7,9 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
  * repair). Below the summary the left column shows invoice
  * status, details and line items. The right column contains a
  * placeholder for the invoice PDF. A back arrow returns the user
- * to the previous list.
- *
- * Props:
- *  - invoice: object containing invoice data (invoice, vendor,
- *    amount, office, category)
- *  - onBack: function() invoked when the back arrow is clicked
+ * to the previous list. This version uses only inline styles so
+ * that the layout and colours appear even if no CSS preprocessor
+ * is available.
  */
 export default function InvoiceDetailPage({ invoice, onBack }) {
   // Line items used for every invoice. In a real application this
@@ -23,66 +20,164 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     { id: '3255', name: 'Strengthner Bar', qty: 1, unit: '$41.00', total: '$41.00' },
   ];
 
+  // Basic styles used throughout the detail page
+  const wrapperStyle = { padding: '24px' };
+  const headerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '16px',
+  };
+  const summaryStyle = {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '12px',
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#357ab2',
+  };
+  const buttonRowStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    marginBottom: '24px',
+  };
+  const actionButtonStyle = {
+    padding: '8px 16px',
+    borderRadius: '9999px',
+    fontSize: '14px',
+    fontWeight: '500',
+    border: '1px solid #357ab2',
+    color: '#357ab2',
+    backgroundColor: '#ffffff',
+    cursor: 'pointer',
+  };
+  const mainGridStyle = {
+    display: 'grid',
+    // On larger screens mimic a two-thirds / one-third layout by
+    // explicitly defining two columns. On smaller screens this
+    // naturally stacks because overflow is allowed and width
+    // collapses. Using percentages avoids reliance on media queries.
+    gridTemplateColumns: '2fr 1fr',
+    borderTop: '1px solid #357ab2',
+    borderLeft: '1px solid #357ab2',
+  };
+  const leftColumnStyle = {
+    borderRight: '1px solid #357ab2',
+  };
+  const rightColumnStyle = {
+    borderRight: '1px solid #357ab2',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '16px',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  };
+  // Section styles within left column
+  const sectionStyle = {
+    borderBottom: '1px solid #357ab2',
+    padding: '16px',
+  };
+  const sectionTitleStyle = {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#357ab2',
+    marginBottom: '8px',
+  };
+  const tableStyle = {
+    width: '100%',
+    borderCollapse: 'collapse',
+    borderLeft: '1px solid #357ab2',
+    borderTop: '1px solid #357ab2',
+    fontSize: '14px',
+  };
+  const cellHeaderStyle = {
+    padding: '8px 12px',
+    borderRight: '1px solid #357ab2',
+    borderBottom: '1px solid #357ab2',
+    fontWeight: '500',
+    color: '#5a5a5a',
+    backgroundColor: '#ffffff',
+    textAlign: 'left',
+  };
+  const cellStyle = {
+    padding: '8px 12px',
+    borderRight: '1px solid #357ab2',
+    borderBottom: '1px solid #357ab2',
+    color: '#1f1f1f',
+    backgroundColor: '#ffffff',
+  };
+
   return (
-    <div className="px-6 py-4">
+    <div style={wrapperStyle}>
       {/* Header with back arrow and invoice summary */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
-        <button
-          onClick={onBack}
-          className="text-blue-600 hover:text-blue-700 focus:outline-none"
+      <div style={headerStyle}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button
+            onClick={onBack}
             aria-label="Back"
+            style={{
+              color: '#357ab2',
+              background: 'none',
+              border: 'none',
+              fontSize: '20px',
+              cursor: 'pointer',
+            }}
           >
-          <i className="fas fa-arrow-left text-xl"></i>
+            <i className="fas fa-arrow-left"></i>
           </button>
-          <div className="flex items-baseline space-x-3 text-lg font-semibold text-primary">
+          <div style={summaryStyle}>
             <span>{invoice.invoice}</span>
             <span>{invoice.vendor}</span>
             <span>{invoice.amount}</span>
             <span>{invoice.office}</span>
           </div>
         </div>
-        {/* Placeholder for a download icon on the right side of header */}
+        {/* Download icon on right */}
         <button
-          className="text-blue-600 hover:text-blue-700 focus:outline-none"
           aria-label="Download"
+          style={{
+            color: '#357ab2',
+            background: 'none',
+            border: 'none',
+            fontSize: '20px',
+            cursor: 'pointer',
+          }}
         >
-          <i className="fas fa-download text-xl"></i>
+          <i className="fas fa-download"></i>
         </button>
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center space-x-4 mb-6">
+      <div style={buttonRowStyle}>
         {['Approve', 'Reject', 'Repair'].map((action) => (
           <button
             key={action}
-            className="px-4 py-2 rounded-full text-sm font-medium border border-blue-600 text-blue-600 hover:bg-blue-100 focus:outline-none"
+            style={actionButtonStyle}
           >
             {action}
           </button>
         ))}
       </div>
 
-      {/* Main content: two columns */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-blue-600">
-        {/* Left column: spans two thirds of width on desktop */}
-        <div className="md:col-span-2 border-r border-blue-600">
+      {/* Main content: two columns using grid. On small screens it
+          stacks; on larger screens we allow it to span 2/3 and 1/3
+          implicitly via the parent container. */}
+      <div style={mainGridStyle}>
+        {/* Left column: invoice status, details and line items */}
+        <div style={leftColumnStyle}>
           {/* Invoice Status section */}
-          <div className="border-b border-blue-600 p-4">
-            <h2 className="text-lg font-semibold text-blue-600 mb-2">Invoice Status</h2>
-            <table className="w-full text-sm border-t border-l border-blue-600">
+          <div style={sectionStyle}>
+            <h2 style={sectionTitleStyle}>Invoice Status</h2>
+            <table style={tableStyle}>
               <tbody>
-                <tr className="border-b border-blue-600">
-                  <td className="px-3 py-2 border-r border-blue-600 font-medium text-gray-700">
-                    Approval
-                  </td>
-                  <td className="px-3 py-2">McKay&nbsp;&nbsp;Mckaym@pacificcrestsmiles.com</td>
+                <tr>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Approval</td>
+                  <td style={cellStyle}>McKay  Mckaym@pacificcrestsmiles.com</td>
                 </tr>
                 <tr>
-                  <td className="px-3 py-2 border-r border-blue-600 font-medium text-gray-700">
-                    Payment
-                  </td>
-                  <td className="px-3 py-2">
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Payment</td>
+                  <td style={cellStyle}>
                     {invoice.amount} — To Be Paid
                   </td>
                 </tr>
@@ -90,64 +185,50 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             </table>
           </div>
           {/* Invoice Details section */}
-          <div className="border-b border-blue-600 p-4">
-            <h2 className="text-lg font-semibold text-blue-600 mb-2">Invoice Details</h2>
-            <table className="w-full text-sm border-t border-l border-blue-600">
+          <div style={sectionStyle}>
+            <h2 style={sectionTitleStyle}>Invoice Details</h2>
+            <table style={tableStyle}>
               <tbody>
-                <tr className="border-b border-blue-600">
-                  <td className="px-3 py-2 border-r border-blue-600 font-medium text-gray-700">
-                    Invoice #
-                  </td>
-                  <td className="px-3 py-2">{invoice.invoice}</td>
-                </tr>
-                <tr className="border-b border-blue-600">
-                  <td className="px-3 py-2 border-r border-blue-600 font-medium text-gray-700">
-                    Vendor
-                  </td>
-                  <td className="px-3 py-2">{invoice.vendor}</td>
-                </tr>
-                <tr className="border-b border-blue-600">
-                  <td className="px-3 py-2 border-r border-blue-600 font-medium text-gray-700">
-                    Office
-                  </td>
-                  <td className="px-3 py-2">{invoice.office}</td>
+                <tr>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Invoice #</td>
+                  <td style={cellStyle}>{invoice.invoice}</td>
                 </tr>
                 <tr>
-                  <td className="px-3 py-2 border-r border-primary font-medium text-gray-700">
-                    Category
-                  </td>
-                  <td className="px-3 py-2">{invoice.category || 'Dental Lab'}</td>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Vendor</td>
+                  <td style={cellStyle}>{invoice.vendor}</td>
+                </tr>
+                <tr>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Office</td>
+                  <td style={cellStyle}>{invoice.office}</td>
+                </tr>
+                <tr>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Category</td>
+                  <td style={cellStyle}>{invoice.category || 'Dental Lab'}</td>
                 </tr>
               </tbody>
             </table>
           </div>
           {/* Line Items section */}
-          <div className="p-4">
-            <h2 className="text-lg font-semibold text-blue-600 mb-2">Line Items</h2>
-            <table className="w-full text-sm border-t border-l border-blue-600">
-              <thead className="bg-white">
+          <div style={{ padding: '16px' }}>
+            <h2 style={sectionTitleStyle}>Line Items</h2>
+            <table style={tableStyle}>
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 border-r border-blue-600 font-medium text-gray-600">ID</th>
-                  <th className="px-3 py-2 border-r border-blue-600 font-medium text-gray-600">Name</th>
-                  <th className="px-3 py-2 border-r border-blue-600 font-medium text-gray-600 text-center">
-                    QTY
-                  </th>
-                  <th className="px-3 py-2 border-r border-blue-600 font-medium text-gray-600 text-right">
-                    Unit Price
-                  </th>
-                  <th className="px-3 py-2 border-r border-blue-600 font-medium text-gray-600 text-right">
-                    Total
-                  </th>
+                  <th style={{ ...cellHeaderStyle, textAlign: 'left' }}>ID</th>
+                  <th style={{ ...cellHeaderStyle, textAlign: 'left' }}>Name</th>
+                  <th style={{ ...cellHeaderStyle, textAlign: 'center' }}>QTY</th>
+                  <th style={{ ...cellHeaderStyle, textAlign: 'right' }}>Unit Price</th>
+                  <th style={{ ...cellHeaderStyle, textAlign: 'right' }}>Total</th>
                 </tr>
               </thead>
               <tbody>
                 {lineItems.map((item, idx) => (
-                  <tr key={idx} className="border-b border-blue-600">
-                    <td className="px-3 py-2 border-r border-blue-600">{item.id}</td>
-                    <td className="px-3 py-2 border-r border-blue-600">{item.name}</td>
-                    <td className="px-3 py-2 border-r border-blue-600 text-center">{item.qty}</td>
-                    <td className="px-3 py-2 border-r border-blue-600 text-right">{item.unit}</td>
-                    <td className="px-3 py-2 border-r border-blue-600 text-right">{item.total}</td>
+                  <tr key={idx}>
+                    <td style={cellStyle}>{item.id}</td>
+                    <td style={cellStyle}>{item.name}</td>
+                    <td style={{ ...cellStyle, textAlign: 'center' }}>{item.qty}</td>
+                    <td style={{ ...cellStyle, textAlign: 'right' }}>{item.unit}</td>
+                    <td style={{ ...cellStyle, textAlign: 'right' }}>{item.total}</td>
                   </tr>
                 ))}
               </tbody>
@@ -155,9 +236,18 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
           </div>
         </div>
         {/* Right column: PDF placeholder */}
-        <div className="border-r border-primary flex flex-col p-4 justify-start items-center">
-          <div className="w-full h-full border border-primary flex items-center justify-center">
-            <span className="text-gray-400">Invoice PDF</span>
+        <div style={rightColumnStyle}>
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              border: '1px solid #357ab2',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <span style={{ color: '#a0aec0' }}>Invoice PDF</span>
           </div>
         </div>
       </div>

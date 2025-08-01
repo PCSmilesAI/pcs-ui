@@ -13,95 +13,108 @@ import React from 'react';
  *  - onClose: function() called when the overlay is clicked
  */
 export default function FilterPanel({ isOpen, onClose }) {
+  // Only render when open. We use inline styles for the overlay and
+  // panel so that the presentation is independent of any CSS build.
   if (!isOpen) return null;
+  // Base styles
+  const overlayStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 40,
+    display: 'flex',
+  };
+  const dimStyle = {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  };
+  const panelStyle = {
+    width: '320px',
+    maxWidth: '100%',
+    backgroundColor: '#ffffff',
+    borderLeft: '1px solid #357ab2',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    overflowY: 'auto',
+    padding: '16px',
+  };
+  const headerStyle = {
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#357ab2',
+    marginBottom: '16px',
+  };
+  const labelStyle = {
+    display: 'block',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#4a5568',
+    marginBottom: '4px',
+  };
+  const inputStyle = {
+    width: '100%',
+    border: '1px solid #cbd5e0',
+    borderRadius: '4px',
+    padding: '8px',
+    fontSize: '14px',
+    marginBottom: '12px',
+  };
   return (
-    <div className="fixed inset-0 z-40 flex" aria-modal="true" role="dialog">
+    <div style={overlayStyle} aria-modal="true" role="dialog">
       {/* Overlay to dim the rest of the interface */}
-      <div
-        className="flex-1 bg-black bg-opacity-30"
-        onClick={onClose}
-      />
+      <div style={dimStyle} onClick={onClose} />
       {/* Actual filter panel */}
-      <aside className="w-80 max-w-sm bg-white border-l border-primary shadow-xl overflow-y-auto p-4">
-        <h2 className="text-xl font-semibold text-primary mb-4">Filters</h2>
-        <div className="space-y-4">
-          {/* Vendor */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Vendor
-            </label>
-            <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary focus:border-primary">
-              <option value="">Choose options</option>
-              <option>Artisan Dental</option>
-              <option>Exodus Dental Solutions</option>
-              <option>Henry Schein</option>
-            </select>
-          </div>
-          {/* Min Amount */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Min Amount
-            </label>
-            <input
-              type="number"
-              placeholder="$"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-            />
-          </div>
-          {/* Max Amount */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Max Amount
-            </label>
-            <input
-              type="number"
-              placeholder="$"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-            />
-          </div>
-          {/* Office */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Office
-            </label>
-            <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary focus:border-primary">
-              <option value="">Choose options</option>
-              <option>Roseburg</option>
-              <option>Lebanon</option>
-              <option>Eugene</option>
-            </select>
-          </div>
-          {/* Due Date Start */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Due Date Start
-            </label>
-            <input
-              type="date"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-            />
-          </div>
-          {/* Due Date End */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Due Date End
-            </label>
-            <input
-              type="date"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-            />
-          </div>
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category
-            </label>
-            <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-primary focus:border-primary">
-              <option value="">Choose options</option>
-              <option>Dental Lab</option>
-              <option>Dental Supplies</option>
-            </select>
-          </div>
+      <aside style={panelStyle}>
+        <h2 style={headerStyle}>Filters</h2>
+        {/* Vendor */}
+        <div>
+          <label style={labelStyle}>Vendor</label>
+          <select style={inputStyle}>
+            <option value="">Choose options</option>
+            <option>Artisan Dental</option>
+            <option>Exodus Dental Solutions</option>
+            <option>Henry Schein</option>
+          </select>
+        </div>
+        {/* Min Amount */}
+        <div>
+          <label style={labelStyle}>Min Amount</label>
+          <input type="number" placeholder="$" style={inputStyle} />
+        </div>
+        {/* Max Amount */}
+        <div>
+          <label style={labelStyle}>Max Amount</label>
+          <input type="number" placeholder="$" style={inputStyle} />
+        </div>
+        {/* Office */}
+        <div>
+          <label style={labelStyle}>Office</label>
+          <select style={inputStyle}>
+            <option value="">Choose options</option>
+            <option>Roseburg</option>
+            <option>Lebanon</option>
+            <option>Eugene</option>
+          </select>
+        </div>
+        {/* Due Date Start */}
+        <div>
+          <label style={labelStyle}>Due Date Start</label>
+          <input type="date" style={inputStyle} />
+        </div>
+        {/* Due Date End */}
+        <div>
+          <label style={labelStyle}>Due Date End</label>
+          <input type="date" style={inputStyle} />
+        </div>
+        {/* Category */}
+        <div>
+          <label style={labelStyle}>Category</label>
+          <select style={inputStyle}>
+            <option value="">Choose options</option>
+            <option>Dental Lab</option>
+            <option>Dental Supplies</option>
+          </select>
         </div>
       </aside>
     </div>

@@ -58,24 +58,91 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Top window bar with subtle grey tone and control dots */}
-      <div className="bg-gray-200 h-6 flex items-center pl-3 space-x-2 border-b border-gray-300">
-        <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-        <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-        <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+    // Root container uses inline styles instead of Tailwind. It fills the
+    // viewport, sets a light gray background and arranges its children
+    // vertically.
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#edf3f8',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* Top window bar with subtle grey tone and control dots. We use
+          inline styles so that these colors show up even when no
+          external CSS is processed. */}
+      <div
+        style={{
+          backgroundColor: '#d7dee8',
+          height: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          paddingLeft: '12px',
+          borderBottom: '1px solid #c2cad6',
+        }}
+      >
+        {/* Control dots */}
+        <div
+          style={{
+            width: '10px',
+            height: '10px',
+            backgroundColor: '#b7beca',
+            borderRadius: '50%',
+            marginRight: '6px',
+          }}
+        ></div>
+        <div
+          style={{
+            width: '10px',
+            height: '10px',
+            backgroundColor: '#b7beca',
+            borderRadius: '50%',
+            marginRight: '6px',
+          }}
+        ></div>
+        <div
+          style={{
+            width: '10px',
+            height: '10px',
+            backgroundColor: '#b7beca',
+            borderRadius: '50%',
+          }}
+        ></div>
       </div>
 
-      {/* White panel containing the nav and page content with blue borders */}
-      <div className="flex-1 flex flex-col bg-white border-l border-r border-b border-blue-600 overflow-hidden">
+      {/* Main white panel that contains the navigation bar and page
+          content. It has blue borders on the left, right and bottom
+          to match the wireframes. */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: '#ffffff',
+          borderLeft: '1px solid #357ab2',
+          borderRight: '1px solid #357ab2',
+          borderBottom: '1px solid #357ab2',
+          overflow: 'hidden',
+        }}
+      >
         {/* Navigation bar sits at the top of the panel */}
         <NavBar
           currentPage={currentPage}
           onChangePage={(page) => setCurrentPage(page)}
           onToggleFilter={toggleFilter}
         />
-        {/* Content area separated from the nav by a top border */}
-        <div className="flex-1 relative overflow-auto border-t border-blue-600">
+
+        {/* Content area separated from the nav by a top border. The
+            border is drawn using inline style so it always appears. */}
+        <div
+          style={{
+            flex: 1,
+            position: 'relative',
+            overflow: 'auto',
+            borderTop: '1px solid #357ab2',
+          }}
+        >
           {currentPage === 'forMe' && <ForMePage onRowClick={handleRowClick} />}
           {currentPage === 'toBePaid' && <ToBePaidPage onRowClick={handleRowClick} />}
           {currentPage === 'complete' && <CompletePage onRowClick={handleRowClick} />}
@@ -92,7 +159,8 @@ export default function App() {
         </div>
       </div>
 
-      {/* Filter panel overlay. Renders outside the panel so it covers everything */}
+      {/* Filter panel overlay. Renders outside the panel so it covers
+          everything. This component handles its own inline styles. */}
       <FilterPanel
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
