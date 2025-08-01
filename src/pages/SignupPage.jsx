@@ -41,34 +41,22 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="auth-form">
-      <h2>Sign Up</h2>
+    <div className="signup-form">
+      <h2>Create Account</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Your Name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        />
-        <input
-          type="email"
-          placeholder="Email Address"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Admin Code"
-          value={adminCode}
-          onChange={e => setAdminCode(e.target.value)}
-        />
-        {error && <div className="error">{error}</div>}
+        <label>Name</label>
+        <input value={name} onChange={(e) => setName(e.target.value)} />
+
+        <label>Email</label>
+        <input value={email} onChange={(e) => setEmail(e.target.value)} />
+
+        <label>Password</label>
+        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+
+        <label>Admin Code</label>
+        <input value={adminCode} onChange={(e) => setAdminCode(e.target.value)} />
+
+        {error && <p className="error">{error}</p>}
         <button type="submit">Sign Up</button>
       </form>
     </div>
