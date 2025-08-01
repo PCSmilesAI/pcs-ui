@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 /**
@@ -31,7 +31,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   const summaryStyle = {
     display: 'flex',
     alignItems: 'baseline',
-    gap: '12px',
+    gap: '24px', // more spacing between data points
     fontSize: '18px',
     fontWeight: '600',
     color: '#357ab2',
@@ -54,11 +54,10 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   };
   const mainGridStyle = {
     display: 'grid',
-    // On larger screens mimic a two-thirds / one-third layout by
-    // explicitly defining two columns. On smaller screens this
-    // naturally stacks because overflow is allowed and width
-    // collapses. Using percentages avoids reliance on media queries.
-    gridTemplateColumns: '2fr 1fr',
+    // Use equal columns to center the divider on the page. Each column
+    // takes up half of the available width so the vertical line sits
+    // precisely in the middle.
+    gridTemplateColumns: '1fr 1fr',
     borderTop: '1px solid #357ab2',
     borderLeft: '1px solid #357ab2',
   };
@@ -108,6 +107,32 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     backgroundColor: '#ffffff',
   };
 
+  // State for editable fields. Payment amount can be modified by the
+  // user. Other details and line items could be lifted into state
+  // similarly; here we demonstrate for payment and details.
+  const [paymentAmount, setPaymentAmount] = useState(invoice.amount);
+  const [details, setDetails] = useState({
+    invoice: invoice.invoice,
+    vendor: invoice.vendor,
+    office: invoice.office,
+    category: invoice.category || 'Dental Lab',
+  });
+  const [items, setItems] = useState(
+    lineItems.map((item) => ({ ...item }))
+  );
+
+  function handleDetailChange(field, value) {
+    setDetails((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function handleItemChange(index, field, value) {
+    setItems((prev) => {
+      const updated = prev.slice();
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  }
+
   return (
     <div style={wrapperStyle}>
       {/* Header with back arrow and invoice summary */}
@@ -127,10 +152,10 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             <i className="fas fa-arrow-left"></i>
           </button>
           <div style={summaryStyle}>
-            <span>{invoice.invoice}</span>
-            <span>{invoice.vendor}</span>
-            <span>{invoice.amount}</span>
-            <span>{invoice.office}</span>
+            <span>{details.invoice}</span>
+            <span>{details.vendor}</span>
+            <span>{paymentAmount}</span>
+            <span>{details.office}</span>
           </div>
         </div>
         {/* Download icon on right */}
@@ -171,15 +196,30 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             <h2 style={sectionTitleStyle}>Invoice Status</h2>
             <table style={tableStyle}>
               <tbody>
+                {/* Row 1: Approval with name and email */}
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Approval</td>
-                  <td style={cellStyle}>McKay  Mckaym@pacificcrestsmiles.com</td>
+                  <td style={cellStyle}>McKay</td>
+                  <td style={cellStyle}>mckaym@pacificcrestsmiles.com</td>
                 </tr>
+                {/* Row 2: Payment with editable amount and status */}
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Payment</td>
                   <td style={cellStyle}>
-                    {invoice.amount} — To Be Paid
+                    <input
+                      type="text"
+                      value={paymentAmount}
+                      onChange={(e) => setPaymentAmount(e.target.value)}
+                      style={{
+                        border: '1px solid #cbd5e0',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '14px',
+                        width: '80px',
+                      }}
+                    />
                   </td>
+                  <td style={cellStyle}>{invoice.status || 'To Be Paid'}</td>
                 </tr>
               </tbody>
             </table>
@@ -191,19 +231,71 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
               <tbody>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Invoice #</td>
-                  <td style={cellStyle}>{invoice.invoice}</td>
+                  <td style={cellStyle}>
+                    <input
+                      type="text"
+                      value={details.invoice}
+                      onChange={(e) => handleDetailChange('invoice', e.target.value)}
+                      style={{
+                        border: '1px solid #cbd5e0',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '14px',
+                        width: '100%',
+                      }}
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Vendor</td>
-                  <td style={cellStyle}>{invoice.vendor}</td>
+                  <td style={cellStyle}>
+                    <input
+                      type="text"
+                      value={details.vendor}
+                      onChange={(e) => handleDetailChange('vendor', e.target.value)}
+                      style={{
+                        border: '1px solid #cbd5e0',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '14px',
+                        width: '100%',
+                      }}
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Office</td>
-                  <td style={cellStyle}>{invoice.office}</td>
+                  <td style={cellStyle}>
+                    <input
+                      type="text"
+                      value={details.office}
+                      onChange={(e) => handleDetailChange('office', e.target.value)}
+                      style={{
+                        border: '1px solid #cbd5e0',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '14px',
+                        width: '100%',
+                      }}
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Category</td>
-                  <td style={cellStyle}>{invoice.category || 'Dental Lab'}</td>
+                  <td style={cellStyle}>
+                    <input
+                      type="text"
+                      value={details.category}
+                      onChange={(e) => handleDetailChange('category', e.target.value)}
+                      style={{
+                        border: '1px solid #cbd5e0',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '14px',
+                        width: '100%',
+                      }}
+                    />
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -222,13 +314,81 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                 </tr>
               </thead>
               <tbody>
-                {lineItems.map((item, idx) => (
+                {items.map((item, idx) => (
                   <tr key={idx}>
-                    <td style={cellStyle}>{item.id}</td>
-                    <td style={cellStyle}>{item.name}</td>
-                    <td style={{ ...cellStyle, textAlign: 'center' }}>{item.qty}</td>
-                    <td style={{ ...cellStyle, textAlign: 'right' }}>{item.unit}</td>
-                    <td style={{ ...cellStyle, textAlign: 'right' }}>{item.total}</td>
+                    <td style={cellStyle}>
+                      <input
+                        type="text"
+                        value={item.id}
+                        onChange={(e) => handleItemChange(idx, 'id', e.target.value)}
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                          padding: '4px 6px',
+                          fontSize: '14px',
+                          width: '100%',
+                        }}
+                      />
+                    </td>
+                    <td style={cellStyle}>
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                          padding: '4px 6px',
+                          fontSize: '14px',
+                          width: '100%',
+                        }}
+                      />
+                    </td>
+                    <td style={{ ...cellStyle, textAlign: 'center' }}>
+                      <input
+                        type="number"
+                        value={item.qty}
+                        onChange={(e) => handleItemChange(idx, 'qty', e.target.value)}
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                          padding: '4px 6px',
+                          fontSize: '14px',
+                          width: '60px',
+                          textAlign: 'center',
+                        }}
+                      />
+                    </td>
+                    <td style={{ ...cellStyle, textAlign: 'right' }}>
+                      <input
+                        type="text"
+                        value={item.unit}
+                        onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                          padding: '4px 6px',
+                          fontSize: '14px',
+                          width: '100%',
+                          textAlign: 'right',
+                        }}
+                      />
+                    </td>
+                    <td style={{ ...cellStyle, textAlign: 'right' }}>
+                      <input
+                        type="text"
+                        value={item.total}
+                        onChange={(e) => handleItemChange(idx, 'total', e.target.value)}
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                          padding: '4px 6px',
+                          fontSize: '14px',
+                          width: '100%',
+                          textAlign: 'right',
+                        }}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -6,6 +6,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 // Tailwind isn't processed. It exposes the same props as before.
 export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Close the account menu when clicking outside
@@ -145,20 +146,45 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
     fontSize: '14px',
     cursor: 'pointer',
   };
+  // Style for the search input when it is shown
+  const searchInputStyle = {
+    border: '1px solid #357ab2',
+    borderRadius: '4px',
+    padding: '6px 12px',
+    fontSize: '14px',
+    marginLeft: '8px',
+    outline: 'none',
+    width: '180px',
+  };
 
   return (
     <div style={containerStyle}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span style={titleStyle}>PCS AI Dashboard TEST</span>
+        <span style={titleStyle}>PCS AI Dashboard</span>
         <nav style={{ display: 'flex', alignItems: 'center' }}>
           {tabs.map(renderTab)}
         </nav>
       </div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         {renderAllInvoicesButton()}
-        <button style={iconButtonStyle} aria-label="Search">
+        {/* Search icon toggles display of search input */}
+        <button
+          style={iconButtonStyle}
+          aria-label="Search"
+          onClick={() => setIsSearchOpen(!isSearchOpen)}
+        >
           <i className="fas fa-search"></i>
         </button>
+        {isSearchOpen && (
+          <input
+            type="text"
+            placeholder="Search..."
+            style={searchInputStyle}
+            // For now the search input doesn't filter data but could
+            // be wired up to onChange events to update a search term
+            onBlur={() => setIsSearchOpen(false)}
+          />
+        )}
         <button onClick={onToggleFilter} style={iconButtonStyle} aria-label="Filters">
           <i className="fas fa-filter"></i>
         </button>

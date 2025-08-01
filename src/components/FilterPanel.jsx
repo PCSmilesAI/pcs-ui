@@ -116,6 +116,26 @@ export default function FilterPanel({ isOpen, onClose }) {
             <option>Dental Supplies</option>
           </select>
         </div>
+
+        {/* Apply button */}
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={onClose}
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#357ab2',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+            }}
+          >
+            Apply
+          </button>
+        </div>
       </aside>
     </div>
   );
