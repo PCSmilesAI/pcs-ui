@@ -24,6 +24,10 @@ export default function App() {
   const [previousPage, setPreviousPage] = useState('forMe');
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  // Search query entered via the nav bar
+  const [searchQuery, setSearchQuery] = useState('');
+  // Filter criteria selected from the filter panel
+  const [filters, setFilters] = useState({});
 
   /**
    * Handle row click from tables. Stores the selected invoice and
@@ -57,10 +61,25 @@ export default function App() {
     setIsFilterOpen(!isFilterOpen);
   }
 
+  /**
+   * Handle changes to the search input. This value is passed to
+   * individual pages which filter their data accordingly.
+   */
+  function handleSearch(query) {
+    setSearchQuery(query);
+  }
+
+  /**
+   * Handle application of filter criteria. When the user clicks
+   * Apply in the filter panel we update our filter state and
+   * close the panel.
+   */
+  function handleApplyFilters(criteria) {
+    setFilters(criteria);
+    setIsFilterOpen(false);
+  }
+
   return (
-    // Root container uses inline styles instead of Tailwind. It fills the
-    // viewport, sets a light gray background and arranges its children
-    // vertically.
     <div
       style={{
         minHeight: '100vh',
@@ -69,48 +88,6 @@ export default function App() {
         flexDirection: 'column',
       }}
     >
-      {/* Top window bar with subtle grey tone and control dots. We use
-          inline styles so that these colors show up even when no
-          external CSS is processed. */}
-      <div
-        style={{
-          backgroundColor: '#d7dee8',
-          height: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          paddingLeft: '12px',
-          borderBottom: '1px solid #c2cad6',
-        }}
-      >
-        {/* Control dots */}
-        <div
-          style={{
-            width: '10px',
-            height: '10px',
-            backgroundColor: '#b7beca',
-            borderRadius: '50%',
-            marginRight: '6px',
-          }}
-        ></div>
-        <div
-          style={{
-            width: '10px',
-            height: '10px',
-            backgroundColor: '#b7beca',
-            borderRadius: '50%',
-            marginRight: '6px',
-          }}
-        ></div>
-        <div
-          style={{
-            width: '10px',
-            height: '10px',
-            backgroundColor: '#b7beca',
-            borderRadius: '50%',
-          }}
-        ></div>
-      </div>
-
       {/* Main white panel that contains the navigation bar and page
           content. It has blue borders on the left, right and bottom
           to match the wireframes. */}
@@ -131,6 +108,7 @@ export default function App() {
           currentPage={currentPage}
           onChangePage={(page) => setCurrentPage(page)}
           onToggleFilter={toggleFilter}
+          onSearch={handleSearch}
         />
 
         {/* Content area separated from the nav by a top border. The
@@ -143,14 +121,36 @@ export default function App() {
             borderTop: '1px solid #357ab2',
           }}
         >
-          {currentPage === 'forMe' && <ForMePage onRowClick={handleRowClick} />}
-          {currentPage === 'toBePaid' && <ToBePaidPage onRowClick={handleRowClick} />}
-          {currentPage === 'complete' && <CompletePage onRowClick={handleRowClick} />}
-          {currentPage === 'vendors' && <VendorsPage />}
+          {currentPage === 'forMe' && (
+            <ForMePage
+              onRowClick={handleRowClick}
+              searchQuery={searchQuery}
+              filters={filters}
+            />
+          )}
+          {currentPage === 'toBePaid' && (
+            <ToBePaidPage
+              onRowClick={handleRowClick}
+              searchQuery={searchQuery}
+              filters={filters}
+            />
+          )}
+          {currentPage === 'complete' && (
+            <CompletePage
+              onRowClick={handleRowClick}
+              searchQuery={searchQuery}
+              filters={filters}
+            />
+          )}
+          {currentPage === 'vendors' && (
+            <VendorsPage searchQuery={searchQuery} filters={filters} />
+          )}
           {currentPage === 'allInvoices' && (
             <AllInvoicesPage
               onRowClick={handleRowClick}
               isFilterOpen={isFilterOpen}
+              searchQuery={searchQuery}
+              filters={filters}
             />
           )}
           {currentPage === 'detail' && selectedInvoice && (
@@ -159,11 +159,12 @@ export default function App() {
         </div>
       </div>
 
-      {/* Filter panel overlay. Renders outside the panel so it covers
-          everything. This component handles its own inline styles. */}
+      {/* Filter panel overlay. We pass onApplyFilters so the panel can
+          propagate selected filters back to the app. */}
       <FilterPanel
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
+        onApplyFilters={handleApplyFilters}
       />
     </div>
   );

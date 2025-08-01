@@ -6,7 +6,8 @@ import InvoiceTable from '../components/InvoiceTable.jsx';
  * payment and includes a status column. Row clicks propagate to
  * the parent via onRowClick.
  */
-export default function ToBePaidPage({ onRowClick }) {
+export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {} }) {
+  // Original rows
   const rows = [
     {
       invoice: 'IN761993',
@@ -42,9 +43,41 @@ export default function ToBePaidPage({ onRowClick }) {
     { key: 'status', label: 'Status' },
   ];
   const wrapperStyle = { padding: '24px' };
+  // Apply search and filter
+  const filteredRows = rows.filter((row) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      const matches = Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(query)
+      );
+      if (!matches) return false;
+    }
+    // vendor
+    if (filters.vendor && row.vendor !== filters.vendor) return false;
+    // office
+    if (filters.office && row.office !== filters.office) return false;
+    // amount filters
+    const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
+    if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;
+    if (filters.maxAmount && amt > parseFloat(filters.maxAmount)) return false;
+    // dueDate filters
+    if (filters.dueStart || filters.dueEnd) {
+      const [m, d, y] = row.dueDate.split('-');
+      const rowDate = new Date(`20${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`);
+      if (filters.dueStart) {
+        const startDate = new Date(filters.dueStart);
+        if (rowDate < startDate) return false;
+      }
+      if (filters.dueEnd) {
+        const endDate = new Date(filters.dueEnd);
+        if (rowDate > endDate) return false;
+      }
+    }
+    return true;
+  });
   return (
     <div style={wrapperStyle}>
-      <InvoiceTable columns={columns} rows={rows} onRowClick={onRowClick} />
+      <InvoiceTable columns={columns} rows={filteredRows} onRowClick={onRowClick} />
     </div>
   );
 }

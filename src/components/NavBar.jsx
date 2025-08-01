@@ -4,9 +4,10 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 // Navigation bar implemented with inline styles. This component avoids
 // reliance on Tailwind so that styling always appears even when
 // Tailwind isn't processed. It exposes the same props as before.
-export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
+export default function NavBar({ currentPage, onChangePage, onToggleFilter, onSearch }) {
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
   const dropdownRef = useRef(null);
 
   // Close the account menu when clicking outside
@@ -179,10 +180,15 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
           <input
             type="text"
             placeholder="Search..."
-            style={searchInputStyle}
-            // For now the search input doesn't filter data but could
-            // be wired up to onChange events to update a search term
+            value={searchValue}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSearchValue(val);
+              // propagate search term to parent
+              if (onSearch) onSearch(val);
+            }}
             onBlur={() => setIsSearchOpen(false)}
+            style={searchInputStyle}
           />
         )}
         <button onClick={onToggleFilter} style={iconButtonStyle} aria-label="Filters">

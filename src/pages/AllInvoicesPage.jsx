@@ -9,7 +9,7 @@ import InvoiceTable from '../components/InvoiceTable.jsx';
  * through ascending/descending/unsorted states. Sorting logic is
  * performed locally on the array of row objects.
  */
-export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
+export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery = '', filters = {} }) {
   // Local state for sorting configuration
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
@@ -65,16 +65,41 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
     return 0;
   }
 
-  // Derive a sorted version of the data based on the current
+  // Apply search and filters first, then sort. Filtered data is derived
+  // from the original unsorted array using the criteria passed in.
+  const filteredData = data.filter((row) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      const matches = Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(query)
+      );
+      if (!matches) return false;
+    }
+    // vendor filter
+    if (filters.vendor && row.vendor !== filters.vendor) return false;
+    // office filter
+    if (filters.office && row.office !== filters.office) return false;
+    // status filter (not in filters currently, but category can map to status?)
+    if (filters.category && row.status !== filters.category) return false;
+    // amount filter
+    const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
+    if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;
+    if (filters.maxAmount && amt > parseFloat(filters.maxAmount)) return false;
+    // dueStart/dueEnd apply? There is no due date column; skip
+    return true;
+  });
+
+  // Derive a sorted version of the filtered data based on the current
   // sorting configuration. When no sorting is active return
   // the original ordering.
   const sortedRows = React.useMemo(() => {
-    if (!sortConfig.key || !sortConfig.direction) return data;
-    const sorted = [...data].sort((a, b) =>
+    const base = filteredData;
+    if (!sortConfig.key || !sortConfig.direction) return base;
+    const sorted = [...base].sort((a, b) =>
       compare(a, b, sortConfig.key, sortConfig.direction)
     );
     return sorted;
-  }, [data, sortConfig]);
+  }, [filteredData, sortConfig]);
 
   /**
    * Handler invoked when a header cell is clicked. Cycles

@@ -12,10 +12,20 @@ import React from 'react';
  *  - isOpen: boolean controlling visibility
  *  - onClose: function() called when the overlay is clicked
  */
-export default function FilterPanel({ isOpen, onClose }) {
+export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
   // Only render when open. We use inline styles for the overlay and
   // panel so that the presentation is independent of any CSS build.
   if (!isOpen) return null;
+
+  // Local state for each filter field. These are tracked so that
+  // we can return the selected values when the user clicks Apply.
+  const [vendor, setVendor] = React.useState('');
+  const [minAmount, setMinAmount] = React.useState('');
+  const [maxAmount, setMaxAmount] = React.useState('');
+  const [office, setOffice] = React.useState('');
+  const [dueStart, setDueStart] = React.useState('');
+  const [dueEnd, setDueEnd] = React.useState('');
+  const [category, setCategory] = React.useState('');
   // Base styles
   const overlayStyle = {
     position: 'fixed',
@@ -70,57 +80,105 @@ export default function FilterPanel({ isOpen, onClose }) {
         {/* Vendor */}
         <div>
           <label style={labelStyle}>Vendor</label>
-          <select style={inputStyle}>
+          <select
+            style={inputStyle}
+            value={vendor}
+            onChange={(e) => setVendor(e.target.value)}
+          >
             <option value="">Choose options</option>
-            <option>Artisan Dental</option>
-            <option>Exodus Dental Solutions</option>
-            <option>Henry Schein</option>
+            <option value="Artisan Dental">Artisan Dental</option>
+            <option value="Exodus Dental Solutions">Exodus Dental Solutions</option>
+            <option value="Henry Schein">Henry Schein</option>
           </select>
         </div>
         {/* Min Amount */}
         <div>
           <label style={labelStyle}>Min Amount</label>
-          <input type="number" placeholder="$" style={inputStyle} />
+          <input
+            type="number"
+            placeholder="$"
+            value={minAmount}
+            onChange={(e) => setMinAmount(e.target.value)}
+            style={inputStyle}
+          />
         </div>
         {/* Max Amount */}
         <div>
           <label style={labelStyle}>Max Amount</label>
-          <input type="number" placeholder="$" style={inputStyle} />
+          <input
+            type="number"
+            placeholder="$"
+            value={maxAmount}
+            onChange={(e) => setMaxAmount(e.target.value)}
+            style={inputStyle}
+          />
         </div>
         {/* Office */}
         <div>
           <label style={labelStyle}>Office</label>
-          <select style={inputStyle}>
+          <select
+            style={inputStyle}
+            value={office}
+            onChange={(e) => setOffice(e.target.value)}
+          >
             <option value="">Choose options</option>
-            <option>Roseburg</option>
-            <option>Lebanon</option>
-            <option>Eugene</option>
+            <option value="Roseburg">Roseburg</option>
+            <option value="Lebanon">Lebanon</option>
+            <option value="Eugene">Eugene</option>
           </select>
         </div>
         {/* Due Date Start */}
         <div>
           <label style={labelStyle}>Due Date Start</label>
-          <input type="date" style={inputStyle} />
+          <input
+            type="date"
+            value={dueStart}
+            onChange={(e) => setDueStart(e.target.value)}
+            style={inputStyle}
+          />
         </div>
         {/* Due Date End */}
         <div>
           <label style={labelStyle}>Due Date End</label>
-          <input type="date" style={inputStyle} />
+          <input
+            type="date"
+            value={dueEnd}
+            onChange={(e) => setDueEnd(e.target.value)}
+            style={inputStyle}
+          />
         </div>
         {/* Category */}
         <div>
           <label style={labelStyle}>Category</label>
-          <select style={inputStyle}>
+          <select
+            style={inputStyle}
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
             <option value="">Choose options</option>
-            <option>Dental Lab</option>
-            <option>Dental Supplies</option>
+            <option value="Dental Lab">Dental Lab</option>
+            <option value="Dental Supplies">Dental Supplies</option>
           </select>
         </div>
 
         {/* Apply button */}
         <div style={{ marginTop: '16px' }}>
           <button
-            onClick={onClose}
+            onClick={() => {
+              // Build a filter criteria object and call onApplyFilters
+              const criteria = {
+                vendor,
+                minAmount,
+                maxAmount,
+                office,
+                dueStart,
+                dueEnd,
+                category,
+              };
+              if (onApplyFilters) {
+                onApplyFilters(criteria);
+              }
+            }}
             style={{
               width: '100%',
               padding: '10px',

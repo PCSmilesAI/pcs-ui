@@ -241,7 +241,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                         borderRadius: '4px',
                         padding: '4px 8px',
                         fontSize: '14px',
-                        width: '100%',
+                        width: 'calc(100% - 16px)',
+                        boxSizing: 'border-box',
                       }}
                     />
                   </td>
@@ -258,7 +259,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                         borderRadius: '4px',
                         padding: '4px 8px',
                         fontSize: '14px',
-                        width: '100%',
+                        width: 'calc(100% - 16px)',
+                        boxSizing: 'border-box',
                       }}
                     />
                   </td>
@@ -275,7 +277,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                         borderRadius: '4px',
                         padding: '4px 8px',
                         fontSize: '14px',
-                        width: '100%',
+                        width: 'calc(100% - 16px)',
+                        boxSizing: 'border-box',
                       }}
                     />
                   </td>
@@ -292,7 +295,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                         borderRadius: '4px',
                         padding: '4px 8px',
                         fontSize: '14px',
-                        width: '100%',
+                        width: 'calc(100% - 16px)',
+                        boxSizing: 'border-box',
                       }}
                     />
                   </td>
@@ -326,7 +330,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                           borderRadius: '4px',
                           padding: '4px 6px',
                           fontSize: '14px',
-                          width: '100%',
+                          width: 'calc(100% - 12px)',
+                          boxSizing: 'border-box',
                         }}
                       />
                     </td>
@@ -340,7 +345,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                           borderRadius: '4px',
                           padding: '4px 6px',
                           fontSize: '14px',
-                          width: '100%',
+                          width: 'calc(100% - 12px)',
+                          boxSizing: 'border-box',
                         }}
                       />
                     </td>
@@ -369,7 +375,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                           borderRadius: '4px',
                           padding: '4px 6px',
                           fontSize: '14px',
-                          width: '100%',
+                          width: 'calc(100% - 12px)',
+                          boxSizing: 'border-box',
                           textAlign: 'right',
                         }}
                       />
@@ -384,8 +391,9 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                           borderRadius: '4px',
                           padding: '4px 6px',
                           fontSize: '14px',
-                          width: '100%',
+                          width: 'calc(100% - 12px)',
                           textAlign: 'right',
+                          boxSizing: 'border-box',
                         }}
                       />
                     </td>
