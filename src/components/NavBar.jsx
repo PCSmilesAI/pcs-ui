@@ -46,8 +46,9 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
    */
   const renderTab = (tab) => {
     const isActive = currentPage === tab.key;
+    // Use slightly larger horizontal padding and font for better prominence
     const baseClasses =
-      'px-4 py-2 rounded-full text-sm font-medium transition-colors';
+      'px-5 py-2.5 rounded-full text-sm font-medium transition-colors';
     const activeClasses =
       'bg-primary text-white border border-primary';
     const inactiveClasses =
@@ -69,7 +70,7 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
   // highlighted.
   const renderAllInvoicesButton = () => {
     const isActive = currentPage === 'allInvoices';
-    const base = 'px-4 py-2 rounded-full text-sm font-medium transition-colors';
+    const base = 'px-5 py-2.5 rounded-full text-sm font-medium transition-colors';
     const active = 'bg-primary text-white border border-primary';
     const inactive = 'bg-white text-primary border border-primary hover:bg-secondary';
     return (

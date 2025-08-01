@@ -58,16 +58,24 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#edf3f8] py-6">
-      <div className="w-full bg-white border-l border-r border-b border-primary shadow-sm overflow-hidden">
-        {/* Navigation bar sits inside the bordered container */}
+    <div className="min-h-screen bg-[#edf3f8] flex flex-col">
+      {/* Top window bar with subtle grey tone and control dots */}
+      <div className="bg-[#d7dee8] h-6 flex items-center pl-3 space-x-2 border-b border-[#c2cad6]">
+        <div className="w-2.5 h-2.5 bg-[#b7beca] rounded-full"></div>
+        <div className="w-2.5 h-2.5 bg-[#b7beca] rounded-full"></div>
+        <div className="w-2.5 h-2.5 bg-[#b7beca] rounded-full"></div>
+      </div>
+
+      {/* White panel containing the nav and page content with blue borders */}
+      <div className="flex-1 flex flex-col bg-white border-l border-r border-b border-primary overflow-hidden">
+        {/* Navigation bar sits at the top of the panel */}
         <NavBar
           currentPage={currentPage}
           onChangePage={(page) => setCurrentPage(page)}
           onToggleFilter={toggleFilter}
         />
-        {/* Main content area. Wrap each page inside padding to match the wireframe. */}
-        <div className="relative">
+        {/* Content area separated from the nav by a top border */}
+        <div className="flex-1 relative overflow-auto border-t border-primary">
           {currentPage === 'forMe' && <ForMePage onRowClick={handleRowClick} />}
           {currentPage === 'toBePaid' && <ToBePaidPage onRowClick={handleRowClick} />}
           {currentPage === 'complete' && <CompletePage onRowClick={handleRowClick} />}
@@ -83,7 +91,8 @@ export default function App() {
           )}
         </div>
       </div>
-      {/* Filter panel overlay. Renders outside the card so it covers everything */}
+
+      {/* Filter panel overlay. Renders outside the panel so it covers everything */}
       <FilterPanel
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
