@@ -24,7 +24,7 @@ export default function InvoiceTable({ columns, rows, onRowClick }) {
           {columns.map((col) => (
             <th
               key={col.key}
-              className={`px-4 py-2 border-r border-primary font-medium text-gray-600 text-${
+              className={`px-4 py-3 border-r border-primary font-medium text-gray-600 text-${
                 col.align || 'left'
               }`}
             >
@@ -41,9 +41,9 @@ export default function InvoiceTable({ columns, rows, onRowClick }) {
             className="cursor-pointer table-row-hover border-b border-primary"
           >
             {columns.map((col) => (
-              <td
+            <td
                 key={col.key}
-                className={`px-4 py-2 border-r border-primary text-${col.align || 'left'}`}
+                className={`px-4 py-3 border-r border-primary text-${col.align || 'left'}`}
               >
                 {row[col.key]}
               </td>

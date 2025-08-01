@@ -104,11 +104,11 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
               return (
                 <th
                   key={col.key}
-                  className={`px-4 py-2 border-r border-primary font-medium text-gray-600 text-${
+                  className={`px-4 py-3 border-r border-primary font-medium text-gray-600 text-${
                     col.align || 'left'
                   }`}
                 >
-                  <button
+                    <button
                     className="flex items-center space-x-1 w-full focus:outline-none"
                     onClick={() => handleSort(col.key)}
                   >
@@ -129,7 +129,7 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
                         )}
                       </span>
                     )}
-                  </button>
+                    </button>
                 </th>
               );
             })}
@@ -145,7 +145,7 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={`px-4 py-2 border-r border-primary text-${
+                  className={`px-4 py-3 border-r border-primary text-${
                     col.align || 'left'
                   }`}
                 >

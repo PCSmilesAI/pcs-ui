@@ -58,40 +58,36 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Navigation bar at the top of every page */}
-      <NavBar
-        currentPage={currentPage}
-        onChangePage={(page) => setCurrentPage(page)}
-        onToggleFilter={toggleFilter}
-      />
-
-      {/* Main content area. A max-width container keeps content
-          centred on large displays while allowing it to grow on
-          smaller screens. */}
-      <div className="flex-1 relative overflow-hidden">
-        {currentPage === 'forMe' && <ForMePage onRowClick={handleRowClick} />}
-        {currentPage === 'toBePaid' && <ToBePaidPage onRowClick={handleRowClick} />}
-        {currentPage === 'complete' && <CompletePage onRowClick={handleRowClick} />}
-        {currentPage === 'vendors' && <VendorsPage />}
-        {currentPage === 'allInvoices' && (
-          <AllInvoicesPage
-            onRowClick={handleRowClick}
-            isFilterOpen={isFilterOpen}
-          />
-        )}
-        {currentPage === 'detail' && selectedInvoice && (
-          <InvoiceDetailPage invoice={selectedInvoice} onBack={handleBack} />
-        )}
-
-        {/* Filter panel overlay. Only rendered on the All Invoices
-            page. It remains mounted while open to preserve
-            internal state if needed. */}
-        <FilterPanel
-          isOpen={isFilterOpen}
-          onClose={() => setIsFilterOpen(false)}
+    <div className="min-h-screen bg-[#edf3f8] py-6 px-2">
+      <div className="max-w-7xl mx-auto bg-white border-l border-r border-b border-primary shadow-sm overflow-hidden">
+        {/* Navigation bar sits inside the bordered container */}
+        <NavBar
+          currentPage={currentPage}
+          onChangePage={(page) => setCurrentPage(page)}
+          onToggleFilter={toggleFilter}
         />
+        {/* Main content area. Wrap each page inside padding to match the wireframe. */}
+        <div className="relative">
+          {currentPage === 'forMe' && <ForMePage onRowClick={handleRowClick} />}
+          {currentPage === 'toBePaid' && <ToBePaidPage onRowClick={handleRowClick} />}
+          {currentPage === 'complete' && <CompletePage onRowClick={handleRowClick} />}
+          {currentPage === 'vendors' && <VendorsPage />}
+          {currentPage === 'allInvoices' && (
+            <AllInvoicesPage
+              onRowClick={handleRowClick}
+              isFilterOpen={isFilterOpen}
+            />
+          )}
+          {currentPage === 'detail' && selectedInvoice && (
+            <InvoiceDetailPage invoice={selectedInvoice} onBack={handleBack} />
+          )}
+        </div>
       </div>
+      {/* Filter panel overlay. Renders outside the card so it covers everything */}
+      <FilterPanel
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+      />
     </div>
   );
 }
