@@ -58,8 +58,8 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#edf3f8] py-6 px-2">
-      <div className="max-w-7xl mx-auto bg-white border-l border-r border-b border-primary shadow-sm overflow-hidden">
+    <div className="min-h-screen bg-[#edf3f8] py-6">
+      <div className="w-full bg-white border-l border-r border-b border-primary shadow-sm overflow-hidden">
         {/* Navigation bar sits inside the bordered container */}
         <NavBar
           currentPage={currentPage}

@@ -24,7 +24,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="px-6 py-4">
       {/* Header with back arrow and invoice summary */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">

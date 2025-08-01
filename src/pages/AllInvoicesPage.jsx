@@ -95,7 +95,7 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="px-6 py-4">
       <table className="w-full border-t border-l border-primary text-sm">
         <thead className="bg-white">
           <tr>
