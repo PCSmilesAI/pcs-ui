@@ -1,5 +1,5 @@
 const GIST_ID = '24025555424dd200727b06d461cffdc9';
-const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN_HERE'; // Replace this securely
+const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN; // Replace this securely
 
 const GIST_FILENAME = 'users.json';
 
