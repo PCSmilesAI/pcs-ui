@@ -10,6 +10,8 @@ import AccountPage from './pages/AccountPage.jsx';
 import CompanyInfoPage from './pages/CompanyInfoPage.jsx';
 import PayoutAccountPage from './pages/PayoutAccountPage.jsx';
 import ReportsPage from './pages/ReportsPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import SignupPage from './pages/SignupPage.jsx';
 import FilterPanel from './components/FilterPanel.jsx';
 
 /*
@@ -22,8 +24,33 @@ import FilterPanel from './components/FilterPanel.jsx';
  * detail screen.
  */
 export default function App() {
-  // Possible page identifiers: forMe, toBePaid, complete, vendors,
-  // allInvoices, detail
+  /**
+   * Authentication state. When false the application will render
+   * either the login or signup view depending on whether any users
+   * exist in local storage. When true the main dashboard UI is
+   * presented. The authMode state tracks which auth view to
+   * display ('login' or 'signup').
+   */
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authMode, setAuthMode] = useState('signup');
+
+  // Initialize auth state on mount
+  React.useEffect(() => {
+    const logged = localStorage.getItem('loggedInUser');
+    if (logged) {
+      setIsAuthenticated(true);
+      return;
+    }
+    // If there are existing users choose login, otherwise signup
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    setAuthMode(users.length > 0 ? 'login' : 'signup');
+  }, []);
+
+  /**
+   * Dashboard navigation state. Only relevant when authenticated.
+   * Possible page identifiers: forMe, toBePaid, complete, vendors,
+   * allInvoices, detail, account, companyInfo, payoutAccount, reports
+   */
   const [currentPage, setCurrentPage] = useState('forMe');
   const [previousPage, setPreviousPage] = useState('forMe');
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -92,90 +119,99 @@ export default function App() {
         flexDirection: 'column',
       }}
     >
-      {/* Main white panel that contains the navigation bar and page
-          content. It has blue borders on the left, right and bottom
-          to match the wireframes. */}
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: '#ffffff',
-          borderLeft: '1px solid #357ab2',
-          borderRight: '1px solid #357ab2',
-          borderBottom: '1px solid #357ab2',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Navigation bar sits at the top of the panel */}
-        <NavBar
-          currentPage={currentPage}
-          onChangePage={(page) => setCurrentPage(page)}
-          onToggleFilter={toggleFilter}
-          onSearch={handleSearch}
-        />
-
-        {/* Content area separated from the nav by a top border. The
-            border is drawn using inline style so it always appears. */}
-        <div
-          style={{
-            flex: 1,
-            position: 'relative',
-            overflow: 'auto',
-            borderTop: '1px solid #357ab2',
-          }}
-        >
-          {currentPage === 'forMe' && (
-            <ForMePage
-              onRowClick={handleRowClick}
-              searchQuery={searchQuery}
-              filters={filters}
+      {/* Authentication gating: render login or signup when not authenticated */}
+      {!isAuthenticated ? (
+        authMode === 'login' ? (
+          <LoginPage
+            onLogin={() => setIsAuthenticated(true)}
+            onSwitchMode={() => setAuthMode('signup')}
+          />
+        ) : (
+          <SignupPage
+            onSignup={() => setIsAuthenticated(true)}
+            onSwitchMode={() => setAuthMode('login')}
+          />
+        )
+      ) : (
+        <>
+          {/* Main white panel that contains the navigation bar and page content */}
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: '#ffffff',
+              borderLeft: '1px solid #357ab2',
+              borderRight: '1px solid #357ab2',
+              borderBottom: '1px solid #357ab2',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Navigation bar sits at the top of the panel */}
+            <NavBar
+              currentPage={currentPage}
+              onChangePage={(page) => setCurrentPage(page)}
+              onToggleFilter={toggleFilter}
+              onSearch={handleSearch}
             />
-          )}
-          {currentPage === 'toBePaid' && (
-            <ToBePaidPage
-              onRowClick={handleRowClick}
-              searchQuery={searchQuery}
-              filters={filters}
-            />
-          )}
-          {currentPage === 'complete' && (
-            <CompletePage
-              onRowClick={handleRowClick}
-              searchQuery={searchQuery}
-              filters={filters}
-            />
-          )}
-          {currentPage === 'vendors' && (
-            <VendorsPage searchQuery={searchQuery} filters={filters} />
-          )}
-          {currentPage === 'allInvoices' && (
-            <AllInvoicesPage
-              onRowClick={handleRowClick}
-              isFilterOpen={isFilterOpen}
-              searchQuery={searchQuery}
-              filters={filters}
-            />
-          )}
-          {currentPage === 'detail' && selectedInvoice && (
-            <InvoiceDetailPage invoice={selectedInvoice} onBack={handleBack} />
-          )}
-
-          {/* Account and related pages */}
-          {currentPage === 'account' && <AccountPage />}
-          {currentPage === 'companyInfo' && <CompanyInfoPage />}
-          {currentPage === 'payoutAccount' && <PayoutAccountPage />}
-          {currentPage === 'reports' && <ReportsPage />}
-        </div>
-      </div>
-
-      {/* Filter panel overlay. We pass onApplyFilters so the panel can
-          propagate selected filters back to the app. */}
-      <FilterPanel
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        onApplyFilters={handleApplyFilters}
-      />
+            {/* Content area separated from the nav by a top border */}
+            <div
+              style={{
+                flex: 1,
+                position: 'relative',
+                overflow: 'auto',
+                borderTop: '1px solid #357ab2',
+              }}
+            >
+              {currentPage === 'forMe' && (
+                <ForMePage
+                  onRowClick={handleRowClick}
+                  searchQuery={searchQuery}
+                  filters={filters}
+                />
+              )}
+              {currentPage === 'toBePaid' && (
+                <ToBePaidPage
+                  onRowClick={handleRowClick}
+                  searchQuery={searchQuery}
+                  filters={filters}
+                />
+              )}
+              {currentPage === 'complete' && (
+                <CompletePage
+                  onRowClick={handleRowClick}
+                  searchQuery={searchQuery}
+                  filters={filters}
+                />
+              )}
+              {currentPage === 'vendors' && (
+                <VendorsPage searchQuery={searchQuery} filters={filters} />
+              )}
+              {currentPage === 'allInvoices' && (
+                <AllInvoicesPage
+                  onRowClick={handleRowClick}
+                  isFilterOpen={isFilterOpen}
+                  searchQuery={searchQuery}
+                  filters={filters}
+                />
+              )}
+              {currentPage === 'detail' && selectedInvoice && (
+                <InvoiceDetailPage invoice={selectedInvoice} onBack={handleBack} />
+              )}
+              {currentPage === 'account' && <AccountPage />}
+              {currentPage === 'companyInfo' && <CompanyInfoPage />}
+              {currentPage === 'payoutAccount' && <PayoutAccountPage />}
+              {currentPage === 'reports' && <ReportsPage />}
+            </div>
+          </div>
+          {/* Filter panel overlay */}
+          <FilterPanel
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+            onApplyFilters={handleApplyFilters}
+          />
+        </>
+      )}
     </div>
   );
 }
