@@ -18,13 +18,13 @@ import React from 'react';
  */
 export default function InvoiceTable({ columns, rows, onRowClick }) {
   return (
-    <table className="w-full border-t border-l border-primary text-sm">
+    <table className="w-full border-t border-l border-blue-600 text-sm">
       <thead className="bg-white">
         <tr>
           {columns.map((col) => (
             <th
               key={col.key}
-              className={`px-4 py-3 border-r border-primary font-medium text-gray-600 text-${
+              className={`px-4 py-3 border-r border-blue-600 font-medium text-gray-600 text-${
                 col.align || 'left'
               }`}
             >
@@ -38,12 +38,12 @@ export default function InvoiceTable({ columns, rows, onRowClick }) {
           <tr
             key={rowIndex}
             onClick={() => onRowClick && onRowClick(row)}
-            className="cursor-pointer table-row-hover border-b border-primary"
+            className="cursor-pointer table-row-hover border-b border-blue-600"
           >
             {columns.map((col) => (
-            <td
+              <td
                 key={col.key}
-                className={`px-4 py-3 border-r border-primary text-${col.align || 'left'}`}
+                className={`px-4 py-3 border-r border-blue-600 text-${col.align || 'left'}`}
               >
                 {row[col.key]}
               </td>

@@ -28,12 +28,12 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       {/* Header with back arrow and invoice summary */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">
-          <button
-            onClick={onBack}
-            className="text-primary hover:text-primary focus:outline-none"
+        <button
+          onClick={onBack}
+          className="text-blue-600 hover:text-blue-700 focus:outline-none"
             aria-label="Back"
           >
-            <i className="fas fa-arrow-left text-xl"></i>
+          <i className="fas fa-arrow-left text-xl"></i>
           </button>
           <div className="flex items-baseline space-x-3 text-lg font-semibold text-primary">
             <span>{invoice.invoice}</span>
@@ -44,7 +44,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         </div>
         {/* Placeholder for a download icon on the right side of header */}
         <button
-          className="text-primary hover:text-primary focus:outline-none"
+          className="text-blue-600 hover:text-blue-700 focus:outline-none"
           aria-label="Download"
         >
           <i className="fas fa-download text-xl"></i>
@@ -56,7 +56,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         {['Approve', 'Reject', 'Repair'].map((action) => (
           <button
             key={action}
-            className="px-4 py-2 rounded-full text-sm font-medium border border-primary text-primary hover:bg-secondary focus:outline-none"
+            className="px-4 py-2 rounded-full text-sm font-medium border border-blue-600 text-blue-600 hover:bg-blue-100 focus:outline-none"
           >
             {action}
           </button>
@@ -64,22 +64,22 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       </div>
 
       {/* Main content: two columns */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-primary">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-blue-600">
         {/* Left column: spans two thirds of width on desktop */}
-        <div className="md:col-span-2 border-r border-primary">
+        <div className="md:col-span-2 border-r border-blue-600">
           {/* Invoice Status section */}
-          <div className="border-b border-primary p-4">
-            <h2 className="text-lg font-semibold text-primary mb-2">Invoice Status</h2>
-            <table className="w-full text-sm border-t border-l border-primary">
+          <div className="border-b border-blue-600 p-4">
+            <h2 className="text-lg font-semibold text-blue-600 mb-2">Invoice Status</h2>
+            <table className="w-full text-sm border-t border-l border-blue-600">
               <tbody>
-                <tr className="border-b border-primary">
-                  <td className="px-3 py-2 border-r border-primary font-medium text-gray-700">
+                <tr className="border-b border-blue-600">
+                  <td className="px-3 py-2 border-r border-blue-600 font-medium text-gray-700">
                     Approval
                   </td>
                   <td className="px-3 py-2">McKay&nbsp;&nbsp;Mckaym@pacificcrestsmiles.com</td>
                 </tr>
                 <tr>
-                  <td className="px-3 py-2 border-r border-primary font-medium text-gray-700">
+                  <td className="px-3 py-2 border-r border-blue-600 font-medium text-gray-700">
                     Payment
                   </td>
                   <td className="px-3 py-2">
@@ -90,24 +90,24 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             </table>
           </div>
           {/* Invoice Details section */}
-          <div className="border-b border-primary p-4">
-            <h2 className="text-lg font-semibold text-primary mb-2">Invoice Details</h2>
-            <table className="w-full text-sm border-t border-l border-primary">
+          <div className="border-b border-blue-600 p-4">
+            <h2 className="text-lg font-semibold text-blue-600 mb-2">Invoice Details</h2>
+            <table className="w-full text-sm border-t border-l border-blue-600">
               <tbody>
-                <tr className="border-b border-primary">
-                  <td className="px-3 py-2 border-r border-primary font-medium text-gray-700">
+                <tr className="border-b border-blue-600">
+                  <td className="px-3 py-2 border-r border-blue-600 font-medium text-gray-700">
                     Invoice #
                   </td>
                   <td className="px-3 py-2">{invoice.invoice}</td>
                 </tr>
-                <tr className="border-b border-primary">
-                  <td className="px-3 py-2 border-r border-primary font-medium text-gray-700">
+                <tr className="border-b border-blue-600">
+                  <td className="px-3 py-2 border-r border-blue-600 font-medium text-gray-700">
                     Vendor
                   </td>
                   <td className="px-3 py-2">{invoice.vendor}</td>
                 </tr>
-                <tr className="border-b border-primary">
-                  <td className="px-3 py-2 border-r border-primary font-medium text-gray-700">
+                <tr className="border-b border-blue-600">
+                  <td className="px-3 py-2 border-r border-blue-600 font-medium text-gray-700">
                     Office
                   </td>
                   <td className="px-3 py-2">{invoice.office}</td>
@@ -123,31 +123,31 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
           </div>
           {/* Line Items section */}
           <div className="p-4">
-            <h2 className="text-lg font-semibold text-primary mb-2">Line Items</h2>
-            <table className="w-full text-sm border-t border-l border-primary">
+            <h2 className="text-lg font-semibold text-blue-600 mb-2">Line Items</h2>
+            <table className="w-full text-sm border-t border-l border-blue-600">
               <thead className="bg-white">
                 <tr>
-                  <th className="px-3 py-2 border-r border-primary font-medium text-gray-600">ID</th>
-                  <th className="px-3 py-2 border-r border-primary font-medium text-gray-600">Name</th>
-                  <th className="px-3 py-2 border-r border-primary font-medium text-gray-600 text-center">
+                  <th className="px-3 py-2 border-r border-blue-600 font-medium text-gray-600">ID</th>
+                  <th className="px-3 py-2 border-r border-blue-600 font-medium text-gray-600">Name</th>
+                  <th className="px-3 py-2 border-r border-blue-600 font-medium text-gray-600 text-center">
                     QTY
                   </th>
-                  <th className="px-3 py-2 border-r border-primary font-medium text-gray-600 text-right">
+                  <th className="px-3 py-2 border-r border-blue-600 font-medium text-gray-600 text-right">
                     Unit Price
                   </th>
-                  <th className="px-3 py-2 border-r border-primary font-medium text-gray-600 text-right">
+                  <th className="px-3 py-2 border-r border-blue-600 font-medium text-gray-600 text-right">
                     Total
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {lineItems.map((item, idx) => (
-                  <tr key={idx} className="border-b border-primary">
-                    <td className="px-3 py-2 border-r border-primary">{item.id}</td>
-                    <td className="px-3 py-2 border-r border-primary">{item.name}</td>
-                    <td className="px-3 py-2 border-r border-primary text-center">{item.qty}</td>
-                    <td className="px-3 py-2 border-r border-primary text-right">{item.unit}</td>
-                    <td className="px-3 py-2 border-r border-primary text-right">{item.total}</td>
+                  <tr key={idx} className="border-b border-blue-600">
+                    <td className="px-3 py-2 border-r border-blue-600">{item.id}</td>
+                    <td className="px-3 py-2 border-r border-blue-600">{item.name}</td>
+                    <td className="px-3 py-2 border-r border-blue-600 text-center">{item.qty}</td>
+                    <td className="px-3 py-2 border-r border-blue-600 text-right">{item.unit}</td>
+                    <td className="px-3 py-2 border-r border-blue-600 text-right">{item.total}</td>
                   </tr>
                 ))}
               </tbody>

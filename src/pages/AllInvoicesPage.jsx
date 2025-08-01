@@ -96,7 +96,7 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
 
   return (
     <div className="px-6 py-4">
-      <table className="w-full border-t border-l border-primary text-sm">
+      <table className="w-full border-t border-l border-blue-600 text-sm">
         <thead className="bg-white">
           <tr>
             {columns.map((col) => {
@@ -104,7 +104,7 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
               return (
                 <th
                   key={col.key}
-                  className={`px-4 py-3 border-r border-primary font-medium text-gray-600 text-${
+                  className={`px-4 py-3 border-r border-blue-600 font-medium text-gray-600 text-${
                     col.align || 'left'
                   }`}
                 >
@@ -115,14 +115,14 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
                     <span className="select-none">{col.label}</span>
                     {/* Only show sort icons when the filter panel is open */}
                     {isFilterOpen && (
-                      <span className="text-primary text-xs">
+                        <span className="text-blue-600 text-xs">
                         {isSorted ? (
                           sortConfig.direction === 'asc' ? (
                             <i className="fas fa-sort-up"></i>
                           ) : sortConfig.direction === 'desc' ? (
                             <i className="fas fa-sort-down"></i>
                           ) : (
-                            <i className="fas fa-sort"></i>
+                        <i className="fas fa-sort"></i>
                           )
                         ) : (
                           <i className="fas fa-sort"></i>
@@ -140,12 +140,12 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen }) {
             <tr
               key={rowIndex}
               onClick={() => onRowClick && onRowClick(row)}
-              className="cursor-pointer table-row-hover border-b border-primary"
+              className="cursor-pointer table-row-hover border-b border-blue-600"
             >
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={`px-4 py-3 border-r border-primary text-${
+                  className={`px-4 py-3 border-r border-blue-600 text-${
                     col.align || 'left'
                   }`}
                 >

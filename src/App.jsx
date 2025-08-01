@@ -58,16 +58,16 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#edf3f8] flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Top window bar with subtle grey tone and control dots */}
-      <div className="bg-[#d7dee8] h-6 flex items-center pl-3 space-x-2 border-b border-[#c2cad6]">
-        <div className="w-2.5 h-2.5 bg-[#b7beca] rounded-full"></div>
-        <div className="w-2.5 h-2.5 bg-[#b7beca] rounded-full"></div>
-        <div className="w-2.5 h-2.5 bg-[#b7beca] rounded-full"></div>
+      <div className="bg-gray-200 h-6 flex items-center pl-3 space-x-2 border-b border-gray-300">
+        <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+        <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+        <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
       </div>
 
       {/* White panel containing the nav and page content with blue borders */}
-      <div className="flex-1 flex flex-col bg-white border-l border-r border-b border-primary overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white border-l border-r border-b border-blue-600 overflow-hidden">
         {/* Navigation bar sits at the top of the panel */}
         <NavBar
           currentPage={currentPage}
@@ -75,7 +75,7 @@ export default function App() {
           onToggleFilter={toggleFilter}
         />
         {/* Content area separated from the nav by a top border */}
-        <div className="flex-1 relative overflow-auto border-t border-primary">
+        <div className="flex-1 relative overflow-auto border-t border-blue-600">
           {currentPage === 'forMe' && <ForMePage onRowClick={handleRowClick} />}
           {currentPage === 'toBePaid' && <ToBePaidPage onRowClick={handleRowClick} />}
           {currentPage === 'complete' && <CompletePage onRowClick={handleRowClick} />}

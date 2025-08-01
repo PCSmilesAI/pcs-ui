@@ -6,47 +6,20 @@
 /*
  * Global styles for the PCS AI Dashboard.
  *
- * We define a few CSS custom properties for the primary,
- * secondary and accent colours used throughout the UI. These
- * variables mirror the design system provided in the wireframes
- * and are referenced via inline Tailwind classes (e.g.
- * text-[color]) so that the palette can be updated in a single
- * location.
+ * We rely primarily on Tailwind utility classes for styling. A few
+ * custom classes are defined here to handle hover states and
+ * background defaults. Colours are chosen from Tailwind's palette
+ * to approximate the design system provided in the wireframes.
  */
-:root {
-  --primary-color: #357ab2;
-  --secondary-color: #a7c9e6;
-  --accent-color: #74b4e4;
-}
 
 /* Base body styling: light background and sensible defaults */
 body {
-  @apply bg-[#edf3f8] text-gray-800 antialiased;
+  @apply bg-gray-100 text-gray-800 antialiased;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
-/* Utility class for a thin blue border matching the design */
-.border-primary {
-  border-color: var(--primary-color);
-}
-
-/* Utility class for a blue text colour */
-.text-primary {
-  color: var(--primary-color);
-}
-
-/* Utility class for a blue background */
-.bg-primary {
-  background-color: var(--primary-color);
-}
-
-/* Utility class for a lighter blue background (secondary) */
-.bg-secondary {
-  background-color: var(--secondary-color);
-}
-
-/* Utility class for a subtle hover effect on table rows */
+/* Subtle hover effect on table rows */
 .table-row-hover:hover {
-  background-color: rgba(0, 0, 0, 0.03);
+  @apply bg-gray-50;
 }

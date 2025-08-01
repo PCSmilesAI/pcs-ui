@@ -50,9 +50,9 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
     const baseClasses =
       'px-5 py-2.5 rounded-full text-sm font-medium transition-colors';
     const activeClasses =
-      'bg-primary text-white border border-primary';
+      'bg-blue-600 text-white border border-blue-600';
     const inactiveClasses =
-      'bg-white text-primary border border-primary hover:bg-secondary';
+      'bg-white text-blue-600 border border-blue-600 hover:bg-blue-100';
     return (
       <button
         key={tab.key}
@@ -71,8 +71,8 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
   const renderAllInvoicesButton = () => {
     const isActive = currentPage === 'allInvoices';
     const base = 'px-5 py-2.5 rounded-full text-sm font-medium transition-colors';
-    const active = 'bg-primary text-white border border-primary';
-    const inactive = 'bg-white text-primary border border-primary hover:bg-secondary';
+    const active = 'bg-blue-600 text-white border border-blue-600';
+    const inactive = 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-100';
     return (
       <button
         className={`${base} ${isActive ? active : inactive}`}
@@ -84,10 +84,10 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
   };
 
   return (
-    <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-primary">
+    <div className="bg-white px-4 py-4 flex items-center justify-between border-b border-blue-600">
       {/* Left section: title and navigation tabs */}
       <div className="flex items-center space-x-6">
-        <h1 className="text-2xl font-semibold text-primary whitespace-nowrap">
+        <h1 className="text-2xl font-semibold text-blue-600 whitespace-nowrap">
           PCS AI Dashboard TEST
         </h1>
         <nav className="flex items-center space-x-2">
@@ -97,17 +97,17 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
       {/* Right section: all invoices button, search, filter, account */}
       <div className="flex items-center space-x-4">
         {renderAllInvoicesButton()}
-        {/* Search button: currently non-functional */}
+        {/* Search button */}
         <button
-          className="text-primary hover:text-primary focus:outline-none"
+          className="text-blue-600 hover:text-blue-700 focus:outline-none"
           aria-label="Search"
         >
           <i className="fas fa-search text-lg"></i>
         </button>
-        {/* Filter button: toggles filter panel */}
+        {/* Filter button */}
         <button
           onClick={onToggleFilter}
-          className="text-primary hover:text-primary focus:outline-none"
+          className="text-blue-600 hover:text-blue-700 focus:outline-none"
           aria-label="Filters"
         >
           <i className="fas fa-filter text-lg"></i>
@@ -116,7 +116,7 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsAccountOpen(!isAccountOpen)}
-            className="text-primary hover:text-primary focus:outline-none w-8 h-8 flex items-center justify-center rounded-full border border-primary"
+            className="text-blue-600 hover:text-blue-700 focus:outline-none w-8 h-8 flex items-center justify-center rounded-full border border-blue-600"
             aria-label="Account"
           >
             <i className="fas fa-user"></i>
@@ -126,10 +126,10 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
               className="absolute right-0 mt-2 w-40 bg-white border border-primary rounded-md shadow-lg z-50"
               style={{ minWidth: '8rem' }}
             >
-              <ul className="text-sm text-gray-700 divide-y divide-primary">
+              <ul className="text-sm text-gray-700 divide-y divide-blue-600">
                 <li>
                   <button
-                    className="w-full text-left px-4 py-2 hover:bg-secondary"
+                    className="w-full text-left px-4 py-2 hover:bg-blue-50"
                     onClick={() => {
                       /* no-op */
                       setIsAccountOpen(false);
@@ -140,7 +140,7 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
                 </li>
                 <li>
                   <button
-                    className="w-full text-left px-4 py-2 hover:bg-secondary"
+                    className="w-full text-left px-4 py-2 hover:bg-blue-50"
                     onClick={() => {
                       setIsAccountOpen(false);
                     }}
@@ -150,7 +150,7 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
                 </li>
                 <li>
                   <button
-                    className="w-full text-left px-4 py-2 hover:bg-secondary"
+                    className="w-full text-left px-4 py-2 hover:bg-blue-50"
                     onClick={() => {
                       setIsAccountOpen(false);
                     }}
@@ -160,7 +160,7 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter }) {
                 </li>
                 <li>
                   <button
-                    className="w-full text-left px-4 py-2 hover:bg-secondary"
+                    className="w-full text-left px-4 py-2 hover:bg-blue-50"
                     onClick={() => {
                       setIsAccountOpen(false);
                     }}
