@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { signupUser } from '../utils/gist_user_store';
+import { useNavigate } from 'react-router-dom';
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -28,7 +28,6 @@ export default function SignupPage() {
 
     try {
       const result = await signupUser(name, email, password);
-      console.log("📬 Signup result:", result);
       if (result.success) {
         localStorage.setItem('loggedInUser', JSON.stringify({ name, email }));
         navigate('/');
@@ -36,20 +35,40 @@ export default function SignupPage() {
         setError(result.message || 'Signup failed');
       }
     } catch (err) {
-      console.error("🔥 Signup error:", err);
-      setError('Unexpected error occurred.');
+      console.error('Signup error:', err);
+      setError('Unexpected error occurred');
     }
   }
 
   return (
-    <div className="signup-container" style={{ padding: '2rem', maxWidth: '500px', margin: '0 auto' }}>
-      <h2 style={{ textAlign: 'center' }}>Sign Up</h2>
-      <form onSubmit={handleSubmit} className="signup-form" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <input type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
-        <input type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} />
-        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-        <input type="text" placeholder="Admin Code" value={adminCode} onChange={e => setAdminCode(e.target.value)} />
-        {error && <p className="error" style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
+    <div className="auth-form">
+      <h2>Sign Up</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Your Name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Admin Code"
+          value={adminCode}
+          onChange={e => setAdminCode(e.target.value)}
+        />
+        {error && <div className="error">{error}</div>}
         <button type="submit">Sign Up</button>
       </form>
     </div>
