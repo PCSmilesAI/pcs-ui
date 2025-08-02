@@ -65,7 +65,6 @@ export default function AccountPage() {
   };
   const messageStyle = { color: '#357ab2', marginTop: '8px' };
 
-  const { user, logout } = useAuth();
 const { user: loggedInUser, logout } = useAuth();
 
   return (
