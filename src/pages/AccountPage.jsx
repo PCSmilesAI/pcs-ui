@@ -1,5 +1,5 @@
-import React
-import { useAuth } from '../context/AuthContext';, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Account page for managing the current user's personal details. Displays
