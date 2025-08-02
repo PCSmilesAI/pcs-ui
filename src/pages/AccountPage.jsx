@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React
+import { useAuth } from '../context/AuthContext';, { useState, useEffect } from 'react';
 
 /**
  * Account page for managing the current user's personal details. Displays
@@ -64,20 +65,25 @@ export default function AccountPage() {
   };
   const messageStyle = { color: '#357ab2', marginTop: '8px' };
 
+  const { user, logout } = useAuth();
+
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Account</h1>
       {user && (
         <div style={infoStyle}>
           <strong>Name:</strong> {user.name}
-        </div>
+        <button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
+    </div>
       )}
       <div style={infoStyle}>
         <strong>Email:</strong> {user?.email || 'Unknown'}
-      </div>
+      <button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
+    </div>
       <div style={infoStyle}>
         <strong>Access Level:</strong> {accessLevel}
-      </div>
+      <button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
+    </div>
       <div>
         <label style={labelStyle}>Change Password</label>
         <input
@@ -95,8 +101,11 @@ export default function AccountPage() {
           style={inputStyle}
         />
         <button onClick={handleChangePassword} style={buttonStyle}>Save Password</button>
-        {message && <div style={messageStyle}>{message}</div>}
-      </div>
+        {message && <div style={messageStyle}>{message}<button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
+    </div>}
+      <button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
+    </div>
+    <button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
     </div>
   );
 }
