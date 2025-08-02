@@ -1,0 +1,17 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3038198528",
+  "invoice_date": "2025-07-30",
+  "total": "279.00",
+  "office_location": "Milwaukie",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03873718",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    }
+  ]
+}

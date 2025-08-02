@@ -1,0 +1,45 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "4307",
+  "invoice_date": "6/14/2025",
+  "total": "363.00",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "P/ Package Finish Direct",
+      "Quantity": "N/A",
+      "unit_price": "248.00",
+      "line_item_total": "248.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Single Anterior (3 x $16.00)",
+      "Quantity": "N/A",
+      "unit_price": "48.00",
+      "line_item_total": "48.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Additional Wire Clasp (2)",
+      "Quantity": "N/A",
+      "unit_price": "39.00",
+      "line_item_total": "39.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Duplicate Model (2 x $14.00)",
+      "Quantity": "N/A",
+      "unit_price": "28.00",
+      "line_item_total": "28.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Rush",
+      "Quantity": "N/A",
+      "unit_price": "59.00",
+      "line_item_total": "59.00"
+    }
+  ]
+}

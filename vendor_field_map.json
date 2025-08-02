@@ -1,0 +1,149 @@
+{
+  "exodus_dental_solutions": {
+    "invoice_number": {
+      "regex": "No\\.\\s*(\\d+)",
+      "source": "ocr"
+    },
+    "invoice_date": {
+      "regex": "(\\d{1,2}/\\d{1,2}/\\d{4})",
+      "source": "ocr"
+    },
+    "vendor_name": {
+      "first_line_ocr": true
+    },
+    "office_location": {
+      "label": "Ship To:",
+      "source": "ocr_block_below"
+    },
+    "total": {
+      "label": "Total:",
+      "location": "bottom_right",
+      "ignore_parentheses": true
+    },
+    "line_items": {
+      "description": "Description",
+      "total": "rightmost_value_on_line",
+      "ignore_values_in_parentheses": true
+    }
+  },
+  "patterson_dental": {
+    "split_per_page": true,
+    "invoice_number": {
+      "label": "Invoice #",
+      "below_label": true,
+      "format": "XXXXXXXXXX"
+    },
+    "invoice_date": {
+      "label": "Invoice Date:",
+      "format": "MM-DD-YYYY"
+    },
+    "vendor_name": {
+      "fixed_text": "Patterson Dental Supply, Inc."
+    },
+    "office_location": {
+      "near_label": "Ship To"
+    },
+    "total": {
+      "location": "bottom_right"
+    },
+    "line_items": {
+      "product_no": "Product #",
+      "description": "Description",
+      "unit_price": "Unit Price",
+      "qty": "Ordered",
+      "total": "Amount"
+    }
+  },
+  "tc_dental_lab": {
+    "invoice_number": {
+      "label": "Invoice Number:",
+      "below_label": true,
+      "format": "XXX-XXX"
+    },
+    "invoice_date": {
+      "label": "Invoice Date:",
+      "below_label": true
+    },
+    "due_date": {
+      "label": "Due Date:",
+      "below_label": true
+    },
+    "vendor_name": {
+      "first_line_ocr": true,
+      "fixed_text": "TC Dental Laboratory, Inc."
+    },
+    "office_location": {
+      "below_text": "Smiles Dental",
+      "in_parentheses": true
+    },
+    "total": {
+      "label": "SUB TOTAL",
+      "right_of_label": true
+    },
+    "line_items": {
+      "description": "ITEM DESCRIPTION",
+      "unit_price": "UNIT PRICE",
+      "qty": "QUANTITY",
+      "total": "TOTAL"
+    }
+  },
+  "artisan_dental": {
+    "invoice_number": {
+      "label": "INVOICE NO.",
+      "format": "INXXXXXX"
+    },
+    "invoice_date": {
+      "label": "INVOICE DATE",
+      "format": "MM/DD/YYYY"
+    },
+    "vendor_name": {
+      "fixed_text": "Artisan Dental Laboratory"
+    },
+    "office_location": {
+      "below_text": "Pacific Crest Smiles"
+    },
+    "total": {
+      "label": "TOTAL",
+      "location": "bottom_right"
+    },
+    "line_items": {
+      "product_no": "MOULD & SHADE DWT & GR.",
+      "description": "SERVICE",
+      "qty": "QUANTITY",
+      "total": "AMOUNT"
+    }
+  },
+  "henry_schein": {
+    "invoice_number": {
+      "grid_box": "Invoice#",
+      "format": "XXXXXXXX"
+    },
+    "invoice_date": {
+      "grid_box": "Invoice Date"
+    },
+    "due_date": {
+      "grid_box": "Due Date"
+    },
+    "vendor_name": {
+      "fixed_text": "HENRY SCHEIN"
+    },
+    "office_location": {
+      "label": "Ship/Sold-To:",
+      "top_right_block": true
+    },
+    "total": {
+      "grid_box": "Invoice total"
+    },
+    "line_items": {
+      "product_no": "ITEM CODE",
+      "description": {
+        "label": "DESCRIPTION",
+        "multiline": false,
+        "bold_only": true
+      },
+      "qty": "QTY ORDERED",
+      "unit_price": "UNIT PRICE",
+      "total": "EXT. PRICE"
+    }
+  }
+}
