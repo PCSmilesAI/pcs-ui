@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 /**
  * Account page for managing the current user's personal details. Displays
@@ -7,8 +7,19 @@ import React, { useState } from 'react';
  * local state to illustrate the UI.
  */
 export default function AccountPage() {
-  const [email] = useState('mckaym@pacificcrestsmiles.com');
-  const [accessLevel] = useState('Admin');
+  // Read the logged in user from localStorage.  If none is found
+  // default to an empty object.  We store only name and email.
+  const [user, setUser] = useState(() => {
+    try {
+      const data = localStorage.getItem('loggedInUser');
+      return data ? JSON.parse(data) : null;
+    } catch (err) {
+      return null;
+    }
+  });
+  // Access level is not stored with the user so default to
+  // "Employee" for now.  This could be extended in the future.
+  const [accessLevel] = useState('Employee');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -56,8 +67,13 @@ export default function AccountPage() {
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Account</h1>
+      {user && (
+        <div style={infoStyle}>
+          <strong>Name:</strong> {user.name}
+        </div>
+      )}
       <div style={infoStyle}>
-        <strong>Email:</strong> {email}
+        <strong>Email:</strong> {user?.email || 'Unknown'}
       </div>
       <div style={infoStyle}>
         <strong>Access Level:</strong> {accessLevel}

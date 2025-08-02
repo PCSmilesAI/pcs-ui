@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../utils/gist_user_store';
 
 /**
  * Login page for existing users. Requires email and password. On
@@ -11,17 +13,35 @@ export default function LoginPage({ onLogin, onSwitchMode }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  function handleSubmit(e) {
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const user = users.find((u) => u.email === email);
-    if (!user || user.password !== password) {
-      setError('Invalid email or password');
-      return;
+    // Call the remote login helper.  This validates credentials
+    // against the GitHub Gist. If invalid, it returns a message.
+    try {
+      const result = await loginUser(email, password);
+      if (!result.success || !result.user) {
+        setError(result.message || 'Invalid email or password');
+        return;
+      }
+      // Persist only name and email locally. Do not store password.
+      const { name, email: userEmail } = result.user;
+      localStorage.setItem(
+        'loggedInUser',
+        JSON.stringify({ name, email: userEmail })
+      );
+      // Notify parent to update authentication state
+      if (onLogin) onLogin();
+      // Navigate to account page
+      try {
+        navigate('/account');
+      } catch (_) {
+        // ignore navigate errors
+      }
+    } catch (err) {
+      setError('An unexpected error occurred.');
     }
-    // Persist logged in user in session storage only
-    sessionStorage.setItem('loggedInUser', JSON.stringify(user));
-    if (onLogin) onLogin();
   }
 
   // Styles

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { signupUser } from '../utils/gist_user_store';
 
 /**
  * Signup page for new users. Collects name, email, password and an
@@ -16,6 +18,8 @@ export default function SignupPage({ onSignup, onSwitchMode }) {
 
   const REQUIRED_CODE = 'PCSAI-Access2025';
 
+  const navigate = useNavigate();
+
   async function handleSubmit(e) {
     e.preventDefault();
     // Basic validation
@@ -27,27 +31,31 @@ export default function SignupPage({ onSignup, onSwitchMode }) {
       setError('Invalid admin code');
       return;
     }
-    // Check if user already exists
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    if (users.some((u) => u.email === email)) {
-      setError('A user with that email already exists');
-      return;
-    }
-    // Fetch IP address for record. Fallback to 'unknown' on error.
-    let ip = 'unknown';
+    // Call the remote signup function. This persists the user in
+    // the GitHub Gist via the serverless API. On failure it
+    // returns an error message.
     try {
-      const resp = await fetch('https://api.ipify.org?format=json');
-      const data = await resp.json();
-      ip = data.ip;
+      const result = await signupUser(name, email, password);
+      if (!result.success) {
+        setError(result.message || 'Signup failed.');
+        return;
+      }
+      // Save minimal user info locally for subsequent sessions. Do
+      // not persist the password.
+      localStorage.setItem('loggedInUser', JSON.stringify({ name, email }));
+      // Notify the parent component that signup completed to update
+      // authentication state if needed.
+      if (onSignup) onSignup();
+      // Navigate to the account page after successful signup.  This
+      // will only have an effect if react-router-dom is set up.
+      try {
+        navigate('/account');
+      } catch (_) {
+        // ignore navigate errors when router is not available
+      }
     } catch (err) {
-      // ignore errors
+      setError('An unexpected error occurred.');
     }
-    const newUser = { name, email, password, ip };
-    const updatedUsers = [...users, newUser];
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    // Persist the new user for this session only
-    sessionStorage.setItem('loggedInUser', JSON.stringify(newUser));
-    if (onSignup) onSignup();
   }
 
   // Styles
