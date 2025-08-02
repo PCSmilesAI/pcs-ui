@@ -73,16 +73,13 @@ const { user: loggedInUser, logout } = useAuth();
       {user && (
         <div style={infoStyle}>
           <strong>Name:</strong> {user.name}
-        <button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
     </div>
       )}
       <div style={infoStyle}>
         <strong>Email:</strong> {user?.email || 'Unknown'}
-      <button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
     </div>
       <div style={infoStyle}>
         <strong>Access Level:</strong> {accessLevel}
-      <button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
     </div>
       <div>
         <label style={labelStyle}>Change Password</label>
@@ -101,11 +98,8 @@ const { user: loggedInUser, logout } = useAuth();
           style={inputStyle}
         />
         <button onClick={handleChangePassword} style={buttonStyle}>Save Password</button>
-        {message && <div style={messageStyle}>{message}<button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
     </div>}
-      <button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
     </div>
-    <button onClick={logout} style={{ marginTop: "1rem" }}>Log Out</button>
     </div>
   );
 }
