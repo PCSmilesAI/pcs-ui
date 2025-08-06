@@ -22,7 +22,16 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
       try {
         console.log('🔄 AllInvoicesPage: Starting to load invoices...');
         setLoading(true);
-        const response = await fetch('/invoice_queue.json');
+        
+        // Add cache-busting timestamp to force fresh request
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/invoice_queue.json?t=${timestamp}`, {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
         console.log('📡 AllInvoicesPage: Fetch response status:', response.status);
         
         if (!response.ok) {

@@ -23,7 +23,15 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
         const testUrl = window.location.origin + '/invoice_queue.json';
         console.log('🔍 ForMePage: Testing URL:', testUrl);
         
-        const response = await fetch('/invoice_queue.json');
+        // Add cache-busting timestamp to force fresh request
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/invoice_queue.json?t=${timestamp}`, {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
         console.log('📡 ForMePage: Fetch response status:', response.status);
         console.log('📡 ForMePage: Fetch response ok:', response.ok);
         console.log('📡 ForMePage: Fetch response headers:', Object.fromEntries(response.headers.entries()));
