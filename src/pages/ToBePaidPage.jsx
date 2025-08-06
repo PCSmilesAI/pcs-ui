@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 
 /**
@@ -7,33 +7,67 @@ import InvoiceTable from '../components/InvoiceTable.jsx';
  * the parent via onRowClick.
  */
 export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {} }) {
-  // Original rows
-  const rows = [
-    {
-      invoice: 'IN761993',
-      vendor: 'Artisan Dental',
-      amount: '$1,265.40',
-      office: 'Roseburg',
-      dueDate: '7-26-25',
-      status: 'Incomplete',
-    },
-    {
-      invoice: '4307',
-      vendor: 'Exodus Dental Solutions',
-      amount: '$1,349.08',
-      office: 'Lebanon',
-      dueDate: '7-29-25',
-      status: 'Pending',
-    },
-    {
-      invoice: '44250801',
-      vendor: 'Henry Schein',
-      amount: '$1,622.47',
-      office: 'Eugene',
-      dueDate: '7-30-25',
-      status: 'Pending',
-    },
-  ];
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load invoice data from the queue
+  useEffect(() => {
+    const loadInvoices = async () => {
+      try {
+        console.log('🔄 ToBePaidPage: Starting to load invoices...');
+        setLoading(true);
+        const response = await fetch('/invoice_queue.json');
+        console.log('📡 ToBePaidPage: Fetch response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load invoices: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('📊 ToBePaidPage: Raw data received:', data.length, 'invoices');
+        
+        // Transform the queue data to match the expected format
+        // Filter for invoices that are "new" or "uploaded" (to be paid)
+        const transformedData = data
+          .filter(invoice => invoice.status === 'new' || invoice.status === 'uploaded')
+          .map(invoice => ({
+            invoice: invoice.invoice_number || 'Unknown',
+            vendor: invoice.vendor || 'Unknown',
+            amount: `$${invoice.total || '0.00'}`,
+            office: invoice.clinic_id || 'Unknown',
+            dueDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: '2-digit'
+            }) : 'N/A',
+            status: invoice.status === 'new' ? 'Pending' : 'Incomplete',
+            // Add additional fields for detail view
+            invoice_date: invoice.invoice_date,
+            json_path: invoice.json_path,
+            pdf_path: invoice.pdf_path,
+            timestamp: invoice.timestamp,
+            assigned_to: invoice.assigned_to,
+            approved: invoice.approved
+          }));
+        
+        console.log('✅ ToBePaidPage: Data transformed successfully:', transformedData.length, 'invoices to be paid');
+        setInvoices(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error('❌ ToBePaidPage: Error loading invoices:', err);
+        setError(err.message);
+        // Fallback to empty array if loading fails
+        setInvoices([]);
+      } finally {
+        console.log('🏁 ToBePaidPage: Loading complete');
+        setLoading(false);
+      }
+    };
+
+    loadInvoices();
+  }, []);
+
   const columns = [
     { key: 'invoice', label: 'Invoice' },
     { key: 'vendor', label: 'Vendor' },
@@ -42,9 +76,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     { key: 'dueDate', label: 'Due Date' },
     { key: 'status', label: 'Status' },
   ];
+
   const wrapperStyle = { padding: '24px' };
+
   // Apply search and filter
-  const filteredRows = rows.filter((row) => {
+  const filteredRows = invoices.filter((row) => {
     const query = searchQuery.trim().toLowerCase();
     if (query) {
       const matches = Object.values(row).some((val) =>
@@ -75,8 +111,33 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     }
     return true;
   });
+
+  console.log('🎨 ToBePaidPage: Rendering with', filteredRows.length, 'invoices, loading:', loading, 'error:', error);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-gray-600">Loading invoices...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-red-600">Error loading invoices: {error}</div>
+      </div>
+    );
+  }
+
   return (
     <div style={wrapperStyle}>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">To Be Paid</h1>
+        <p className="text-gray-600 mt-2">
+          {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} awaiting payment
+        </p>
+      </div>
       <InvoiceTable columns={columns} rows={filteredRows} onRowClick={onRowClick} />
     </div>
   );

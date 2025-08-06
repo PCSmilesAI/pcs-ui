@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 
 /**
@@ -7,29 +7,66 @@ import InvoiceTable from '../components/InvoiceTable.jsx';
  * completed. Rows are interactive.
  */
 export default function CompletePage({ onRowClick, searchQuery = '', filters = {} }) {
-  const rows = [
-    {
-      invoice: 'IN761993',
-      vendor: 'Artisan Dental',
-      amount: '$1,265.40',
-      office: 'Roseburg',
-      dateCompleted: '7-30-25',
-    },
-    {
-      invoice: '4307',
-      vendor: 'Exodus Dental Solutions',
-      amount: '$1,349.08',
-      office: 'Lebanon',
-      dateCompleted: '7-30-25',
-    },
-    {
-      invoice: '44250801',
-      vendor: 'Henry Schein',
-      amount: '$1,622.47',
-      office: 'Eugene',
-      dateCompleted: '8-13-25',
-    },
-  ];
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load invoice data from the queue
+  useEffect(() => {
+    const loadInvoices = async () => {
+      try {
+        console.log('🔄 CompletePage: Starting to load invoices...');
+        setLoading(true);
+        const response = await fetch('/invoice_queue.json');
+        console.log('📡 CompletePage: Fetch response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load invoices: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('📊 CompletePage: Raw data received:', data.length, 'invoices');
+        
+        // Transform the queue data to match the expected format
+        // Filter for invoices that are "complete" or "approved"
+        const transformedData = data
+          .filter(invoice => invoice.status === 'complete' || invoice.status === 'approved')
+          .map(invoice => ({
+            invoice: invoice.invoice_number || 'Unknown',
+            vendor: invoice.vendor || 'Unknown',
+            amount: `$${invoice.total || '0.00'}`,
+            office: invoice.clinic_id || 'Unknown',
+            dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: '2-digit'
+            }) : 'N/A',
+            // Add additional fields for detail view
+            invoice_date: invoice.invoice_date,
+            json_path: invoice.json_path,
+            pdf_path: invoice.pdf_path,
+            timestamp: invoice.timestamp,
+            assigned_to: invoice.assigned_to,
+            approved: invoice.approved
+          }));
+        
+        console.log('✅ CompletePage: Data transformed successfully:', transformedData.length, 'completed invoices');
+        setInvoices(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error('❌ CompletePage: Error loading invoices:', err);
+        setError(err.message);
+        // Fallback to empty array if loading fails
+        setInvoices([]);
+      } finally {
+        console.log('🏁 CompletePage: Loading complete');
+        setLoading(false);
+      }
+    };
+
+    loadInvoices();
+  }, []);
+
   const columns = [
     { key: 'invoice', label: 'Invoice' },
     { key: 'vendor', label: 'Vendor' },
@@ -37,9 +74,11 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
     { key: 'office', label: 'Office' },
     { key: 'dateCompleted', label: 'Date Completed' },
   ];
+
   const wrapperStyle = { padding: '24px' };
+
   // Filter logic
-  const filteredRows = rows.filter((row) => {
+  const filteredRows = invoices.filter((row) => {
     const query = searchQuery.trim().toLowerCase();
     if (query) {
       const matches = Object.values(row).some((val) =>
@@ -70,8 +109,33 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
     }
     return true;
   });
+
+  console.log('🎨 CompletePage: Rendering with', filteredRows.length, 'invoices, loading:', loading, 'error:', error);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-gray-600">Loading invoices...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-red-600">Error loading invoices: {error}</div>
+      </div>
+    );
+  }
+
   return (
     <div style={wrapperStyle}>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Complete</h1>
+        <p className="text-gray-600 mt-2">
+          {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} completed
+        </p>
+      </div>
       <InvoiceTable
         columns={columns}
         rows={filteredRows}
