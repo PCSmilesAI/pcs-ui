@@ -3,7 +3,7 @@ import InvoiceTable from '../components/InvoiceTable.jsx';
 
 /**
  * Page for the "For Me" view. Displays a table of invoices
- * assigned to the user. Clicking on a row will open the detail
+ * assigned to the user that are NOT yet approved. Clicking on a row will open the detail
  * screen via the passed onRowClick handler.
  */
 export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }) {
@@ -15,68 +15,56 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
   useEffect(() => {
     const loadInvoices = async () => {
       try {
+        console.log('🔄 ForMePage: Starting to load invoices...');
         setLoading(true);
         const response = await fetch('/invoice_queue.json');
+        console.log('📡 ForMePage: Fetch response status:', response.status);
+        
         if (!response.ok) {
           throw new Error(`Failed to load invoices: ${response.status}`);
         }
         const data = await response.json();
+        console.log('📊 ForMePage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
-        const transformedData = data.map(invoice => ({
-          invoice: invoice.invoice_number || 'Unknown',
-          vendor: invoice.vendor || 'Unknown',
-          amount: `$${invoice.total || '0.00'}`,
-          office: invoice.clinic_id || 'Unknown',
-          dueDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
-            month: 'numeric',
-            day: 'numeric',
-            year: '2-digit'
-          }) : 'N/A',
-          category: invoice.vendor || 'Unknown',
-          // Add additional fields for detail view
-          invoice_date: invoice.invoice_date,
-          json_path: invoice.json_path,
-          pdf_path: invoice.pdf_path,
-          timestamp: invoice.timestamp,
-          assigned_to: invoice.assigned_to,
-          approved: invoice.approved,
-          status: invoice.status
-        }));
+        // Filter for invoices that are NOT approved (status: 'new' or 'uploaded', approved: false)
+        const transformedData = data
+          .filter(invoice => {
+            const isNotApproved = !invoice.approved && (invoice.status === 'new' || invoice.status === 'uploaded');
+            console.log(`📋 Invoice ${invoice.invoice_number}: status=${invoice.status}, approved=${invoice.approved}, showing=${isNotApproved}`);
+            return isNotApproved;
+          })
+          .map(invoice => ({
+            invoice: invoice.invoice_number || 'Unknown',
+            vendor: invoice.vendor || 'Unknown',
+            amount: `$${invoice.total || '0.00'}`,
+            office: invoice.clinic_id || 'Unknown',
+            dueDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: '2-digit'
+            }) : 'N/A',
+            category: invoice.vendor || 'Unknown',
+            // Add additional fields for detail view
+            invoice_date: invoice.invoice_date,
+            json_path: invoice.json_path,
+            pdf_path: invoice.pdf_path,
+            timestamp: invoice.timestamp,
+            assigned_to: invoice.assigned_to,
+            approved: invoice.approved,
+            status: invoice.status
+          }));
         
+        console.log('✅ ForMePage: Data transformed successfully:', transformedData.length, 'unapproved invoices');
         setInvoices(transformedData);
         setError(null);
       } catch (err) {
-        console.error('Error loading invoices:', err);
+        console.error('❌ ForMePage: Error loading invoices:', err);
         setError(err.message);
-        // Fallback to static data if loading fails
-        setInvoices([
-          {
-            invoice: 'IN761993',
-            vendor: 'Artisan Dental',
-            amount: '$1,265.40',
-            office: 'Roseburg',
-            dueDate: '7-26-25',
-            category: 'Dental Lab',
-          },
-          {
-            invoice: '4307',
-            vendor: 'Exodus Dental Solutions',
-            amount: '$349.08',
-            office: 'Lebanon',
-            dueDate: '7-29-25',
-            category: 'Dental Lab',
-          },
-          {
-            invoice: '44250801',
-            vendor: 'Henry Schein',
-            amount: '$622.47',
-            office: 'Eugene',
-            dueDate: '7-30-25',
-            category: 'Dental Supplies',
-          },
-        ]);
+        // Fallback to empty array if loading fails
+        setInvoices([]);
       } finally {
+        console.log('🏁 ForMePage: Loading complete');
         setLoading(false);
       }
     };
@@ -131,6 +119,8 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
     return true;
   });
 
+  console.log('🎨 ForMePage: Rendering with', filteredRows.length, 'invoices, loading:', loading, 'error:', error);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -152,7 +142,7 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">For Me</h1>
         <p className="text-gray-600 mt-2">
-          {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} found
+          {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} awaiting approval
         </p>
       </div>
       <InvoiceTable

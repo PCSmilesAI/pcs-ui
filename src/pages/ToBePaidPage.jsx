@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 
 /**
- * Page for the "To Be Paid" view. Shows invoices awaiting
- * payment and includes a status column. Row clicks propagate to
+ * Page for the "To Be Paid" view. Shows invoices that have been
+ * approved and are awaiting payment. Row clicks propagate to
  * the parent via onRowClick.
  */
 export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {} }) {
@@ -28,9 +28,13 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         console.log('📊 ToBePaidPage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
-        // Filter for invoices that are "new" or "uploaded" (to be paid)
+        // Filter for invoices that ARE approved (approved: true)
         const transformedData = data
-          .filter(invoice => invoice.status === 'new' || invoice.status === 'uploaded')
+          .filter(invoice => {
+            const isApproved = invoice.approved === true;
+            console.log(`📋 Invoice ${invoice.invoice_number}: approved=${invoice.approved}, showing=${isApproved}`);
+            return isApproved;
+          })
           .map(invoice => ({
             invoice: invoice.invoice_number || 'Unknown',
             vendor: invoice.vendor || 'Unknown',
@@ -41,7 +45,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               day: 'numeric',
               year: '2-digit'
             }) : 'N/A',
-            status: invoice.status === 'new' ? 'Pending' : 'Incomplete',
+            status: 'Pending Payment',
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
             json_path: invoice.json_path,
@@ -51,7 +55,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             approved: invoice.approved
           }));
         
-        console.log('✅ ToBePaidPage: Data transformed successfully:', transformedData.length, 'invoices to be paid');
+        console.log('✅ ToBePaidPage: Data transformed successfully:', transformedData.length, 'approved invoices');
         setInvoices(transformedData);
         setError(null);
       } catch (err) {
@@ -135,7 +139,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">To Be Paid</h1>
         <p className="text-gray-600 mt-2">
-          {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} awaiting payment
+          {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} approved and awaiting payment
         </p>
       </div>
       <InvoiceTable columns={columns} rows={filteredRows} onRowClick={onRowClick} />
