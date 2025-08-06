@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Sync Public Script
-Automatically copies invoice_queue.json and email_invoices/ to public/ directory for frontend access.
+Automatically copies invoice_queue.json, email_invoices/, and output_jsons/ to public/ directory for frontend access.
 """
 
 import os
@@ -48,6 +48,28 @@ def sync_email_invoices():
         print(f"❌ Error syncing email invoices: {e}")
         return False
 
+def sync_output_jsons():
+    """Copy output_jsons directory to public directory"""
+    source = "output_jsons"
+    destination = "public/output_jsons"
+    
+    if not os.path.exists(source):
+        print(f"❌ Source directory not found: {source}")
+        return False
+    
+    try:
+        # Remove existing destination directory if it exists
+        if os.path.exists(destination):
+            shutil.rmtree(destination)
+        
+        # Copy the entire directory
+        shutil.copytree(source, destination)
+        print(f"✅ Synced {source}/ to {destination}/")
+        return True
+    except Exception as e:
+        print(f"❌ Error syncing output jsons: {e}")
+        return False
+
 def main():
     """Main function - continuously sync the files"""
     print("🔄 Starting Invoice Queue Sync Service")
@@ -56,10 +78,12 @@ def main():
     # Initial sync
     sync_invoice_queue()
     sync_email_invoices()
+    sync_output_jsons()
     
     # Monitor for changes
     last_queue_modified = 0
     last_invoices_modified = 0
+    last_jsons_modified = 0
     
     while True:
         try:
@@ -78,6 +102,14 @@ def main():
                     print(f"📄 Email invoices modified at {datetime.now().strftime('%H:%M:%S')}")
                     sync_email_invoices()
                     last_invoices_modified = current_modified
+            
+            # Check output_jsons directory
+            if os.path.exists("output_jsons"):
+                current_modified = os.path.getmtime("output_jsons")
+                if current_modified > last_jsons_modified:
+                    print(f"📋 Output JSONs modified at {datetime.now().strftime('%H:%M:%S')}")
+                    sync_output_jsons()
+                    last_jsons_modified = current_modified
             
             time.sleep(2)  # Check every 2 seconds
             

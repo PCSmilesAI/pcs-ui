@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 /**
@@ -12,13 +12,86 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
  * is available.
  */
 export default function InvoiceDetailPage({ invoice, onBack }) {
-  // Line items used for every invoice. In a real application this
-  // data would come from an API.
-  const lineItems = [
-    { id: '1185', name: 'Z360 Anterior', qty: 3, unit: '$173.00', total: '$519.00' },
-    { id: '3039', name: 'Flipper with Wire 4-6 Teeth', qty: 2, unit: '$238.00', total: '$476.00' },
-    { id: '3255', name: 'Strengthner Bar', qty: 1, unit: '$41.00', total: '$41.00' },
-  ];
+  // State for editable fields. Payment amount can be modified by the
+  // user. Other details and line items could be lifted into state
+  // similarly; here we demonstrate for payment and details.
+  const [paymentAmount, setPaymentAmount] = useState(invoice.amount);
+  const [details, setDetails] = useState({
+    invoice: invoice.invoice,
+    vendor: invoice.vendor,
+    office: invoice.office,
+    category: invoice.category || 'Dental Lab',
+    invoice_date: invoice.invoice_date || '',
+  });
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load line items from JSON data
+  useEffect(() => {
+    async function loadLineItems() {
+      if (invoice.json_path) {
+        try {
+          const response = await fetch(`/${invoice.json_path}`);
+          if (response.ok) {
+            const jsonData = await response.json();
+            if (jsonData.line_items && Array.isArray(jsonData.line_items)) {
+              // Transform the line items to match the UI format
+              const transformedItems = jsonData.line_items.map((item, index) => ({
+                id: item.product_number || `item-${index}`,
+                name: item.product_name || '',
+                qty: item.Quantity || '1',
+                unit: `$${item.unit_price || '0.00'}`,
+                total: `$${item.line_item_total || '0.00'}`,
+              }));
+              setItems(transformedItems);
+            } else {
+              // Fallback to empty array if no line items
+              setItems([]);
+            }
+          } else {
+            console.warn('Failed to load JSON data for line items');
+            setItems([]);
+          }
+        } catch (error) {
+          console.error('Error loading line items:', error);
+          setItems([]);
+        }
+      } else {
+        // Fallback to empty array if no JSON path
+        setItems([]);
+      }
+      setLoading(false);
+    }
+
+    loadLineItems();
+  }, [invoice.json_path]);
+
+  function handleDetailChange(field, value) {
+    setDetails((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function handleItemChange(index, field, value) {
+    setItems((prev) => {
+      const updated = prev.slice();
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  }
+
+  // Function to handle PDF download
+  function handleDownload() {
+    if (invoice.pdf_path) {
+      // Create a link element to trigger the download
+      const link = document.createElement('a');
+      link.href = `/${invoice.pdf_path}`;
+      link.download = `${invoice.invoice || invoice.invoice_number}_${invoice.vendor}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      console.warn('No PDF path available for download');
+    }
+  }
 
   // Basic styles used throughout the detail page
   const wrapperStyle = { padding: '24px' };
@@ -106,47 +179,6 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     color: '#1f1f1f',
     backgroundColor: '#ffffff',
   };
-
-  // State for editable fields. Payment amount can be modified by the
-  // user. Other details and line items could be lifted into state
-  // similarly; here we demonstrate for payment and details.
-  const [paymentAmount, setPaymentAmount] = useState(invoice.amount);
-  const [details, setDetails] = useState({
-    invoice: invoice.invoice,
-    vendor: invoice.vendor,
-    office: invoice.office,
-    category: invoice.category || 'Dental Lab',
-  });
-  const [items, setItems] = useState(
-    lineItems.map((item) => ({ ...item }))
-  );
-
-  function handleDetailChange(field, value) {
-    setDetails((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function handleItemChange(index, field, value) {
-    setItems((prev) => {
-      const updated = prev.slice();
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
-    });
-  }
-
-  // Function to handle PDF download
-  function handleDownload() {
-    if (invoice.pdf_path) {
-      // Create a link element to trigger the download
-      const link = document.createElement('a');
-      link.href = `/${invoice.pdf_path}`;
-      link.download = `${invoice.invoice || invoice.invoice_number}_${invoice.vendor}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      console.warn('No PDF path available for download');
-    }
-  }
 
   return (
     <div style={wrapperStyle}>
@@ -264,6 +296,24 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                   </td>
                 </tr>
                 <tr>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Invoice Date</td>
+                  <td style={cellStyle}>
+                    <input
+                      type="text"
+                      value={details.invoice_date}
+                      onChange={(e) => handleDetailChange('invoice_date', e.target.value)}
+                      style={{
+                        border: '1px solid #cbd5e0',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '14px',
+                        width: 'calc(100% - 16px)',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </td>
+                </tr>
+                <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Vendor</td>
                   <td style={cellStyle}>
                     <input
@@ -323,100 +373,110 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
           {/* Line Items section */}
           <div style={{ padding: '16px' }}>
             <h2 style={sectionTitleStyle}>Line Items</h2>
-            <table style={tableStyle}>
-              <thead>
-                <tr>
-                  <th style={{ ...cellHeaderStyle, textAlign: 'left' }}>ID</th>
-                  <th style={{ ...cellHeaderStyle, textAlign: 'left' }}>Name</th>
-                  <th style={{ ...cellHeaderStyle, textAlign: 'center' }}>QTY</th>
-                  <th style={{ ...cellHeaderStyle, textAlign: 'right' }}>Unit Price</th>
-                  <th style={{ ...cellHeaderStyle, textAlign: 'right' }}>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, idx) => (
-                  <tr key={idx}>
-                    <td style={cellStyle}>
-                      <input
-                        type="text"
-                        value={item.id}
-                        onChange={(e) => handleItemChange(idx, 'id', e.target.value)}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                          padding: '4px 6px',
-                          fontSize: '14px',
-                          width: 'calc(100% - 12px)',
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    </td>
-                    <td style={cellStyle}>
-                      <input
-                        type="text"
-                        value={item.name}
-                        onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                          padding: '4px 6px',
-                          fontSize: '14px',
-                          width: 'calc(100% - 12px)',
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    </td>
-                    <td style={{ ...cellStyle, textAlign: 'center' }}>
-                      <input
-                        type="number"
-                        value={item.qty}
-                        onChange={(e) => handleItemChange(idx, 'qty', e.target.value)}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                          padding: '4px 6px',
-                          fontSize: '14px',
-                          width: '60px',
-                          textAlign: 'center',
-                        }}
-                      />
-                    </td>
-                    <td style={{ ...cellStyle, textAlign: 'right' }}>
-                      <input
-                        type="text"
-                        value={item.unit}
-                        onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                          padding: '4px 6px',
-                          fontSize: '14px',
-                          width: 'calc(100% - 12px)',
-                          boxSizing: 'border-box',
-                          textAlign: 'right',
-                        }}
-                      />
-                    </td>
-                    <td style={{ ...cellStyle, textAlign: 'right' }}>
-                      <input
-                        type="text"
-                        value={item.total}
-                        onChange={(e) => handleItemChange(idx, 'total', e.target.value)}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                          padding: '4px 6px',
-                          fontSize: '14px',
-                          width: 'calc(100% - 12px)',
-                          textAlign: 'right',
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    </td>
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                Loading line items...
+              </div>
+            ) : items.length > 0 ? (
+              <table style={tableStyle}>
+                <thead>
+                  <tr>
+                    <th style={{ ...cellHeaderStyle, textAlign: 'left' }}>ID</th>
+                    <th style={{ ...cellHeaderStyle, textAlign: 'left' }}>Name</th>
+                    <th style={{ ...cellHeaderStyle, textAlign: 'center' }}>QTY</th>
+                    <th style={{ ...cellHeaderStyle, textAlign: 'right' }}>Unit Price</th>
+                    <th style={{ ...cellHeaderStyle, textAlign: 'right' }}>Total</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {items.map((item, idx) => (
+                    <tr key={idx}>
+                      <td style={cellStyle}>
+                        <input
+                          type="text"
+                          value={item.id}
+                          onChange={(e) => handleItemChange(idx, 'id', e.target.value)}
+                          style={{
+                            border: '1px solid #cbd5e0',
+                            borderRadius: '4px',
+                            padding: '4px 6px',
+                            fontSize: '14px',
+                            width: 'calc(100% - 12px)',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </td>
+                      <td style={cellStyle}>
+                        <input
+                          type="text"
+                          value={item.name}
+                          onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
+                          style={{
+                            border: '1px solid #cbd5e0',
+                            borderRadius: '4px',
+                            padding: '4px 6px',
+                            fontSize: '14px',
+                            width: 'calc(100% - 12px)',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </td>
+                      <td style={{ ...cellStyle, textAlign: 'center' }}>
+                        <input
+                          type="number"
+                          value={item.qty}
+                          onChange={(e) => handleItemChange(idx, 'qty', e.target.value)}
+                          style={{
+                            border: '1px solid #cbd5e0',
+                            borderRadius: '4px',
+                            padding: '4px 6px',
+                            fontSize: '14px',
+                            width: '60px',
+                            textAlign: 'center',
+                          }}
+                        />
+                      </td>
+                      <td style={{ ...cellStyle, textAlign: 'right' }}>
+                        <input
+                          type="text"
+                          value={item.unit}
+                          onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
+                          style={{
+                            border: '1px solid #cbd5e0',
+                            borderRadius: '4px',
+                            padding: '4px 6px',
+                            fontSize: '14px',
+                            width: 'calc(100% - 12px)',
+                            boxSizing: 'border-box',
+                            textAlign: 'right',
+                          }}
+                        />
+                      </td>
+                      <td style={{ ...cellStyle, textAlign: 'right' }}>
+                        <input
+                          type="text"
+                          value={item.total}
+                          onChange={(e) => handleItemChange(idx, 'total', e.target.value)}
+                          style={{
+                            border: '1px solid #cbd5e0',
+                            borderRadius: '4px',
+                            padding: '4px 6px',
+                            fontSize: '14px',
+                            width: 'calc(100% - 12px)',
+                            textAlign: 'right',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                No line items found
+              </div>
+            )}
           </div>
         </div>
         {/* Right column: PDF viewer */}
