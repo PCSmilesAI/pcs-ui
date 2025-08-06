@@ -1,0 +1,298 @@
+[
+  {
+    "source_pdf": "epic_invoice_1.pdf",
+    "expected_output": {
+      "vendor": "Epic Dental Lab",
+      "invoice_number": "5206",
+      "invoice_date": "06/16/2025",
+      "total": "311.00",
+      "office_location": "Riddle",
+      "vendor_name": "Epic Dental Lab",
+      "line_items": [
+        {
+          "product_number": "Set up/Process LRPD",
+          "product_name": "Set up & process lower RPD to finish",
+          "Quantity": "1",
+          "unit_price": "273.00",
+          "line_item_total": "273.00"
+        },
+        {
+          "product_number": "Teeth LRPD",
+          "product_name": "Teeth LRPD",
+          "Quantity": "1",
+          "unit_price": "38.00",
+          "line_item_total": "38.00"
+        }
+      ]
+    }
+  },
+  {
+    "source_pdf": "epic_invoice_2.pdf",
+    "expected_output": {
+      "vendor": "Epic Dental Lab",
+      "invoice_number": "5241",
+      "invoice_date": "06/24/2025",
+      "total": "153.00",
+      "office_location": "Roseburg",
+      "vendor_name": "Epic Dental Lab",
+      "line_items": [
+        {
+          "product_number": "Process FUD",
+          "product_name": "Process FUD to finish",
+          "Quantity": "1",
+          "unit_price": "153.00",
+          "line_item_total": "153.00"
+        }
+      ]
+    }
+  },
+  {
+    "source_pdf": "epic_invoice_3.pdf",
+    "expected_output": {
+      "vendor": "Epic Dental Lab",
+      "invoice_number": "5166",
+      "invoice_date": "06/10/2025",
+      "total": "51.00",
+      "office_location": "Roseburg",
+      "vendor_name": "Epic Dental Lab",
+      "line_items": [
+        {
+          "product_number": "wax rim lower",
+          "product_name": "Lower wax bite rim",
+          "Quantity": "1",
+          "unit_price": "51.00",
+          "line_item_total": "51.00"
+        }
+      ]
+    }
+  },
+  {
+    "source_pdf": "epic_invoice_4.pdf",
+    "expected_output": {
+      "vendor": "Epic Dental Lab",
+      "invoice_number": "5179",
+      "invoice_date": "06/11/2025",
+      "total": "225.00",
+      "office_location": "Roseburg",
+      "vendor_name": "Epic Dental Lab",
+      "line_items": [
+        {
+          "product_number": "Framework URPD",
+          "product_name": "Upper cast partial framework",
+          "Quantity": "1",
+          "unit_price": "225.00",
+          "line_item_total": "225.00"
+        }
+      ]
+    }
+  },
+  {
+    "source_pdf": "epic_invoice_5.pdf",
+    "expected_output": {
+      "vendor": "Epic Dental Lab",
+      "invoice_number": "5252",
+      "invoice_date": "06/25/2025",
+      "total": "276.00",
+      "office_location": "Riddle",
+      "vendor_name": "Epic Dental Lab",
+      "line_items": [
+        {
+          "product_number": "Framework URPD",
+          "product_name": "Upper cast partial framework",
+          "Quantity": "1",
+          "unit_price": "225.00",
+          "line_item_total": "225.00"
+        },
+        {
+          "product_number": "Wax bite rim",
+          "product_name": "Upper wax bite rim",
+          "Quantity": "1",
+          "unit_price": "51.00",
+          "line_item_total": "51.00"
+        }
+      ]
+    }
+  },
+  {
+    "source_pdf": "epic_invoice_6.pdf",
+    "expected_output": {
+      "vendor": "Epic Dental Lab",
+      "invoice_number": "5371",
+      "invoice_date": "07/20/2025",
+      "total": "336.00",
+      "office_location": "Riddle",
+      "vendor_name": "Epic Dental Lab",
+      "line_items": [
+        {
+          "product_number": "Process FUD",
+          "product_name": "Process FUD to finish",
+          "Quantity": "1.00",
+          "unit_price": "153.00",
+          "line_item_total": "153.00"
+        },
+        {
+          "product_number": "Process LRPD",
+          "product_name": "Process lower partial to finish",
+          "Quantity": "1.00",
+          "unit_price": "153.00",
+          "line_item_total": "153.00"
+        },
+        {
+          "product_number": "ID Tag",
+          "product_name": "ID Tag",
+          "Quantity": "2.00",
+          "unit_price": "30.00",
+          "line_item_total": "30.00"
+        }
+      ]
+    }
+  },
+  {
+    "source_pdf": "epic_invoice_7.pdf",
+    "expected_output": {
+      "vendor": "Epic Dental Lab",
+      "invoice_number": "4956",
+      "invoice_date": "05/18/2025",
+      "total": "316.00",
+      "office_location": "Riddle",
+      "vendor_name": "Epic Dental Lab",
+      "line_items": [
+        {
+          "product_number": "Set up LRPD",
+          "product_name": "Set up LRPD for wax try-in",
+          "Quantity": "1.00",
+          "unit_price": "120.00",
+          "line_item_total": "120.00"
+        },
+        {
+          "product_number": "Set up URPD",
+          "product_name": "Set up URPD for wax try-in",
+          "Quantity": "1.00",
+          "unit_price": "120.00",
+          "line_item_total": "120.00"
+        },
+        {
+          "product_number": "Teeth LRPD",
+          "product_name": "Teeth LRPD",
+          "Quantity": "1.00",
+          "unit_price": "38.00",
+          "line_item_total": "38.00"
+        },
+        {
+          "product_number": "Teeth URPD",
+          "product_name": "Teeth URPD",
+          "Quantity": "1.00",
+          "unit_price": "38.00",
+          "line_item_total": "38.00"
+        }
+      ]
+    }
+  },
+  {
+    "source_pdf": "epic_invoice_8.pdf",
+    "expected_output": {
+      "vendor": "Epic Dental Lab",
+      "invoice_number": "4957",
+      "invoice_date": "05/18/2025",
+      "total": "232.00",
+      "office_location": "Riddle",
+      "vendor_name": "Epic Dental Lab",
+      "line_items": [
+        {
+          "product_number": "Acrylic URPD 5-9",
+          "product_name": "Acrylic URPD (5\u20139 units)",
+          "Quantity": "1.00",
+          "unit_price": "232.00",
+          "line_item_total": "232.00"
+        }
+      ]
+    }
+  },
+  {
+    "source_pdf": "epic_invoice_9.pdf",
+    "expected_output": {
+      "vendor": "Epic Dental Lab",
+      "invoice_number": "4789",
+      "invoice_date": "05/16/2025",
+      "total": "195.00",
+      "office_location": "Roseburg",
+      "vendor_name": "Epic Dental Lab",
+      "line_items": [
+        {
+          "product_number": "Framework LRPD",
+          "product_name": "Lower cast partial framework",
+          "Quantity": "1.00",
+          "unit_price": "195.00",
+          "line_item_total": "195.00"
+        }
+      ]
+    }
+  },
+  {
+    "source_pdf": "epic_invoice_10.pdf",
+    "expected_output": {
+      "vendor": "Epic Dental Lab",
+      "invoice_number": "4793",
+      "invoice_date": "05/16/2025",
+      "total": "353.00",
+      "office_location": "Roseburg",
+      "vendor_name": "Epic Dental Lab",
+      "line_items": [
+        {
+          "product_number": "Set up LRPD",
+          "product_name": "Set up LRPD for wax try-in",
+          "Quantity": "1.00",
+          "unit_price": "120.00",
+          "line_item_total": "120.00"
+        },
+        {
+          "product_number": "Set-up FUD",
+          "product_name": "Set-up wax try in of FUD",
+          "Quantity": "1.00",
+          "unit_price": "120.00",
+          "line_item_total": "120.00"
+        },
+        {
+          "product_number": "Teeth",
+          "product_name": "Set of premium teeth",
+          "Quantity": "1.00",
+          "unit_price": "75.00",
+          "line_item_total": "75.00"
+        },
+        {
+          "product_number": "Teeth LRPD",
+          "product_name": "Teeth LRPD",
+          "Quantity": "1.00",
+          "unit_price": "38.00",
+          "line_item_total": "38.00"
+        }
+      ]
+    }
+  {
+  "source_pdf": "epic_invoice_11.pdf",
+  "expected_output": {
+    "vendor": "Epic Dental Lab",
+    "invoice_number": "4840",
+    "invoice_date": "04/02/2025",
+    "total": "208.00",
+    "office_location": "Vancouver",
+    "vendor_name": "Epic Dental Lab",
+    "line_items": [
+      {
+        "product_number": "Reset/Process FUD",
+        "product_name": "Reset / Process of FUD",
+        "Quantity": "1.00",
+        "unit_price": "153.00",
+        "line_item_total": "153.00"
+      },
+      {
+        "product_number": "Teeth",
+        "product_name": "Set of premium teeth",
+        "Quantity": "1.00",
+        "unit_price": "55.00",
+        "line_item_total": "55.00"
+      }
+    ]
+  }
+}}
+]

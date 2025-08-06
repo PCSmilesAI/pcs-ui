@@ -1,0 +1,249 @@
+[2025-08-06T09:54:06.255027] 🚀 Starting Invoice Queue Writer
+[2025-08-06T09:54:06.255190] ==================================================
+[2025-08-06T09:54:06.255432] 📄 Found 76 new JSON files to process
+[2025-08-06T09:54:06.255527] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.255775] ✅ Added invoice 3038216492 to queue
+[2025-08-06T09:54:06.255802] 📊 Vendor: patterson_dental
+[2025-08-06T09:54:06.255823] 💰 Total: $1864.51
+[2025-08-06T09:54:06.255843] 🏥 Clinic: Roseburg
+[2025-08-06T09:54:06.256045] ✅ Added invoice  to queue
+[2025-08-06T09:54:06.256069] 📊 Vendor: Henry Schein
+[2025-08-06T09:54:06.256088] 💰 Total: $
+[2025-08-06T09:54:06.256106] 🏥 Clinic: 
+[2025-08-06T09:54:06.256292] ✅ Added invoice 251-608 to queue
+[2025-08-06T09:54:06.256314] 📊 Vendor: tc dental laboratory, inc.
+[2025-08-06T09:54:06.256332] 💰 Total: $267.00
+[2025-08-06T09:54:06.256350] 🏥 Clinic: Salem
+[2025-08-06T09:54:06.256536] ✅ Added invoice 4307 to queue
+[2025-08-06T09:54:06.256565] 📊 Vendor: 
+[2025-08-06T09:54:06.256586] 💰 Total: $363.0
+[2025-08-06T09:54:06.256606] 🏥 Clinic: 
+[2025-08-06T09:54:06.256687] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:06.256763] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.256838] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.256905] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.256973] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:06.257047] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:06.257239] ✅ Added invoice 3038197656 to queue
+[2025-08-06T09:54:06.257260] 📊 Vendor: patterson_dental
+[2025-08-06T09:54:06.257280] 💰 Total: $877.88
+[2025-08-06T09:54:06.257303] 🏥 Clinic: Riddle
+[2025-08-06T09:54:06.257380] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.257458] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:06.257523] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.257608] ⚠️ Invoice 44048990 already in queue, skipping
+[2025-08-06T09:54:06.257809] ✅ Added invoice 3037868803 to queue
+[2025-08-06T09:54:06.257830] 📊 Vendor: patterson_dental
+[2025-08-06T09:54:06.257851] 💰 Total: $281.79
+[2025-08-06T09:54:06.257879] 🏥 Clinic: Vancouver
+[2025-08-06T09:54:06.257966] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:06.258041] ⚠️ Invoice 44048990 already in queue, skipping
+[2025-08-06T09:54:06.258105] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.258173] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.258251] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.258453] ✅ Added invoice 3036332425 to queue
+[2025-08-06T09:54:06.258481] 📊 Vendor: patterson_dental
+[2025-08-06T09:54:06.258506] 💰 Total: $362.60
+[2025-08-06T09:54:06.258528] 🏥 Clinic: Ridgefield
+[2025-08-06T09:54:06.258747] ✅ Added invoice 3038072963 to queue
+[2025-08-06T09:54:06.258768] 📊 Vendor: patterson_dental
+[2025-08-06T09:54:06.258786] 💰 Total: $369.76
+[2025-08-06T09:54:06.258808] 🏥 Clinic: Eugene
+[2025-08-06T09:54:06.258893] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.258971] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.259039] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:06.259129] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:06.259205] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.259271] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.259342] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.259418] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.259495] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.259561] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.259640] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:06.259717] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.259785] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.259872] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.259958] ⚠️ Invoice 3036332425 already in queue, skipping
+[2025-08-06T09:54:06.260030] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:06.260099] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.260182] ⚠️ Invoice 44048990 already in queue, skipping
+[2025-08-06T09:54:06.260258] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.260453] ✅ Added invoice UNKNOWN to queue
+[2025-08-06T09:54:06.260487] 📊 Vendor: 
+[2025-08-06T09:54:06.260511] 💰 Total: $
+[2025-08-06T09:54:06.260530] 🏥 Clinic: 
+[2025-08-06T09:54:06.260603] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:06.260677] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:06.260761] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.260842] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:06.260915] ⚠️ Invoice 44250801 already in queue, skipping
+[2025-08-06T09:54:06.260986] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.261054] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.261121] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.261197] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.261282] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.261357] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:06.261432] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:06.261651] ✅ Added invoice 5371 to queue
+[2025-08-06T09:54:06.261675] 📊 Vendor: Epic Dental Lab
+[2025-08-06T09:54:06.261695] 💰 Total: $0.00
+[2025-08-06T09:54:06.261714] 🏥 Clinic: Riddle
+[2025-08-06T09:54:06.261797] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.262008] ✅ Added invoice 3038198528 to queue
+[2025-08-06T09:54:06.262030] 📊 Vendor: patterson_dental
+[2025-08-06T09:54:06.262049] 💰 Total: $279.00
+[2025-08-06T09:54:06.262068] 🏥 Clinic: Milwaukie
+[2025-08-06T09:54:06.262155] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:06.262384] ✅ Added invoice 43912059 to queue
+[2025-08-06T09:54:06.262405] 📊 Vendor: Henry Schein
+[2025-08-06T09:54:06.262424] 💰 Total: $396.87
+[2025-08-06T09:54:06.262443] 🏥 Clinic: Riddle
+[2025-08-06T09:54:06.262520] ⚠️ Invoice 4307 already in queue, skipping
+[2025-08-06T09:54:06.262602] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.262686] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.262900] ✅ Added invoice 251-879 to queue
+[2025-08-06T09:54:06.262930] 📊 Vendor: tc dental laboratory, inc.
+[2025-08-06T09:54:06.262956] 💰 Total: $178.00
+[2025-08-06T09:54:06.262976] 🏥 Clinic: Salem
+[2025-08-06T09:54:06.263049] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.263297] ✅ Added invoice 3036495819 to queue
+[2025-08-06T09:54:06.263324] 📊 Vendor: patterson_dental
+[2025-08-06T09:54:06.263344] 💰 Total: $228.81
+[2025-08-06T09:54:06.263364] 🏥 Clinic: Roseburg
+[2025-08-06T09:54:06.263449] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.263539] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:06.263613] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.263707] ⚠️ Invoice 44250801 already in queue, skipping
+[2025-08-06T09:54:06.263790] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.263873] ⚠️ Invoice 44250801 already in queue, skipping
+[2025-08-06T09:54:06.263947] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.264177] ✅ Added invoice 252-487 to queue
+[2025-08-06T09:54:06.264200] 📊 Vendor: tc dental laboratory, inc.
+[2025-08-06T09:54:06.264220] 💰 Total: $445.00
+[2025-08-06T09:54:06.264239] 🏥 Clinic: Salem
+[2025-08-06T09:54:06.264324] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.264497] 📄 Found 61 new JSON files to process
+[2025-08-06T09:54:06.264593] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.264678] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:06.264750] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.264829] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.264915] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.264988] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:06.265060] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:06.265140] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.265219] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:06.265297] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.265382] ⚠️ Invoice 44048990 already in queue, skipping
+[2025-08-06T09:54:06.265456] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:06.265541] ⚠️ Invoice 44048990 already in queue, skipping
+[2025-08-06T09:54:06.265620] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.265692] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.265761] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.265833] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.265918] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.265989] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:06.266062] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:06.266144] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.266217] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.266286] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.266371] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.266444] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.266519] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.266609] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:06.266684] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.266765] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.266846] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.266917] ⚠️ Invoice 3036332425 already in queue, skipping
+[2025-08-06T09:54:06.267006] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:06.267083] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.267153] ⚠️ Invoice 44048990 already in queue, skipping
+[2025-08-06T09:54:06.267235] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.267307] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:06.267393] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:06.267485] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.267567] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:06.267656] ⚠️ Invoice 44250801 already in queue, skipping
+[2025-08-06T09:54:06.267726] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.267808] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.267886] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.267957] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.268042] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.268117] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:06.268209] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:06.268279] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.268350] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:06.268433] ⚠️ Invoice 4307 already in queue, skipping
+[2025-08-06T09:54:06.268503] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.268585] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.268663] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.268731] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.268838] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:06.268918] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.268999] ⚠️ Invoice 44250801 already in queue, skipping
+[2025-08-06T09:54:06.269082] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:06.269157] ⚠️ Invoice 44250801 already in queue, skipping
+[2025-08-06T09:54:06.269243] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:06.269319] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:16.277605] 📄 Found 61 new JSON files to process
+[2025-08-06T09:54:16.277926] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:16.278408] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:16.278548] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:16.278684] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.278824] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.278963] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:16.279089] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:16.279206] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.279343] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:16.279461] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.279586] ⚠️ Invoice 44048990 already in queue, skipping
+[2025-08-06T09:54:16.279723] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:16.279853] ⚠️ Invoice 44048990 already in queue, skipping
+[2025-08-06T09:54:16.279990] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.280132] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.280249] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.280371] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.280490] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.280611] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:16.280733] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:16.280851] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.280971] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.281090] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.281211] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.281327] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.281445] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.281562] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:16.281665] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.281775] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.281877] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.281985] ⚠️ Invoice 3036332425 already in queue, skipping
+[2025-08-06T09:54:16.282090] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:16.282190] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.282291] ⚠️ Invoice 44048990 already in queue, skipping
+[2025-08-06T09:54:16.282389] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.282493] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:16.282602] ⚠️ Invoice 44213044 already in queue, skipping
+[2025-08-06T09:54:16.282702] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.282805] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:16.282910] ⚠️ Invoice 44250801 already in queue, skipping
+[2025-08-06T09:54:16.283007] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.283104] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.283204] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.283305] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:16.283412] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:16.283515] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:16.283657] ⚠️ Invoice 44507826 already in queue, skipping
+[2025-08-06T09:54:16.283692] ❌ Error adding invoice to queue: [Errno 32] Broken pipe
+[2025-08-06T09:54:16.283778] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.283862] ⚠️ Invoice 44557050 already in queue, skipping
+[2025-08-06T09:54:16.283951] ⚠️ Invoice 4307 already in queue, skipping
+[2025-08-06T09:54:16.284033] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.284114] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.284196] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.284278] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.284362] ⚠️ Invoice 44007187 already in queue, skipping
+[2025-08-06T09:54:16.284444] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.284531] ⚠️ Invoice 44250801 already in queue, skipping
+[2025-08-06T09:54:16.284615] ⚠️ Invoice 44134561 already in queue, skipping
+[2025-08-06T09:54:16.284701] ⚠️ Invoice 44250801 already in queue, skipping
+[2025-08-06T09:54:16.284784] ⚠️ Invoice  already in queue, skipping
+[2025-08-06T09:54:16.284866] ⚠️ Invoice 44134561 already in queue, skipping

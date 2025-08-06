@@ -20,7 +20,7 @@ cities = df.iloc[0]
 addresses = df.iloc[1]
 OFFICE_CITY_MAP = {str(address).strip().lower(): str(city).strip() for city, address in zip(cities, addresses)}
 
-OUTPUT_DIR = os.path.expanduser("~/Desktop/MemorAI_PCS/output_jsons/")
+OUTPUT_DIR = "output_jsons/"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def is_scanned(pdf_path: str) -> bool:
@@ -166,10 +166,36 @@ def parse_scanned_invoice(pdf_path: str) -> Dict:
     return result
 
 def parse(pdf_path: str) -> Dict:
+    # Check for HISTORICAL keyword - if found, skip this PDF entirely
+    try:
+        if is_scanned(pdf_path):
+            # For scanned PDFs, use OCR to check for HISTORICAL
+            page = convert_from_path(pdf_path, dpi=300)[0]
+            ocr_text = pytesseract.image_to_string(page).upper()
+        else:
+            # For digital PDFs, extract text directly
+            doc = fitz.open(pdf_path)
+            ocr_text = ""
+            for page in doc:
+                ocr_text += page.get_text()
+            ocr_text = ocr_text.upper()
+        
+        if "HISTORICAL" in ocr_text:
+            print("⏭️ Skipping HISTORICAL document - not a true invoice")
+            return None
+            
+    except Exception as e:
+        print(f"⚠️ Error checking for HISTORICAL keyword: {e}")
+        # Continue with parsing if we can't check for HISTORICAL
+    
     result = parse_scanned_invoice(pdf_path) if is_scanned(pdf_path) else parse_digital_invoice(pdf_path)
-    outpath = os.path.join(OUTPUT_DIR, Path(pdf_path).stem + ".json")
-    with open(outpath, "w") as f:
-        json.dump(result, f, indent=2)
+    
+    # Only save if we got a valid result
+    if result:
+        outpath = os.path.join(OUTPUT_DIR, Path(pdf_path).stem + ".json")
+        with open(outpath, "w") as f:
+            json.dump(result, f, indent=2)
+    
     return result
 
 if __name__ == "__main__":

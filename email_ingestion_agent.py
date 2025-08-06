@@ -1,54 +1,94 @@
-
 import imaplib
 import email
 from email.header import decode_header
 import os
 import time
 import subprocess
-from dotenv import load_dotenv
+import re
+from datetime import datetime
 
-# Load credentials
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
 EMAIL_USER = "invoices@pcsmilesai.com"
 EMAIL_PASS = "Inv!PCSAI"
 IMAP_SERVER = "imap.secureserver.net"
-# Allowed vendors
-ALLOWED_VENDORS = {
-    "Exodus Dental Solutions",
-    "Patterson Dental",
-    "TC Dental Lab",
-    "Henry Schein",
-    "Artisan Dental"
-}
 
-# Paths
-SAVE_DIR = os.path.expanduser("~/Desktop/MemorAI_PCS/processed_invoices/")
-VENDOR_ROUTER_PATH = os.path.expanduser("~/Desktop/MemorAI_PCS/vendor_router.py")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SAVE_DIR = os.path.join(BASE_DIR, "email_invoices")  # Changed to email_invoices
+VENDOR_ROUTER_PATH = os.path.join(BASE_DIR, "vendor_router.py")
+LOG_PATH = os.path.join(BASE_DIR, "log.txt")
+
 os.makedirs(SAVE_DIR, exist_ok=True)
+
+def log(msg):
+    timestamp = datetime.now().isoformat()
+    with open(LOG_PATH, "a") as f:
+        f.write(f"[{timestamp}] {msg}\n")
+    print(f"[{timestamp}] {msg}")
 
 def connect_imap():
     mail = imaplib.IMAP4_SSL(IMAP_SERVER)
     mail.login(EMAIL_USER, EMAIL_PASS)
     return mail
 
-def run_vendor_router(filepath):
+def detect_vendor_from_email(msg):
+    """Detect vendor from email sender, subject, or body"""
+    vendor_keywords = {
+        'epic': ['epic', 'epic dental', 'epicdentallab'],
+        'patterson': ['patterson', 'patterson dental'],
+        'henry': ['henry', 'henry schein'],
+        'exodus': ['exodus', 'exodus dental'],
+        'artisan': ['artisan', 'artisan dental'],
+        'tc': ['tc dental', 'tc dental lab']
+    }
+    
+    # Check sender email
+    sender = msg.get('From', '').lower()
+    for vendor, keywords in vendor_keywords.items():
+        if any(keyword in sender for keyword in keywords):
+            return vendor
+    
+    # Check subject
+    subject = msg.get('Subject', '').lower()
+    for vendor, keywords in vendor_keywords.items():
+        if any(keyword in subject for keyword in keywords):
+            return vendor
+    
+    # Check email body
+    body = ""
+    if msg.is_multipart():
+        for part in msg.walk():
+            if part.get_content_type() == "text/plain":
+                body += part.get_payload(decode=True).decode('utf-8', errors='ignore').lower()
+    else:
+        body = msg.get_payload(decode=True).decode('utf-8', errors='ignore').lower()
+    
+    for vendor, keywords in vendor_keywords.items():
+        if any(keyword in body for keyword in keywords):
+            return vendor
+    
+    return None
+
+def run_vendor_router(filepath, detected_vendor=None):
     try:
-        result = subprocess.run(
-            ["python3", VENDOR_ROUTER_PATH, filepath],
-            capture_output=True,
-            text=True
-        )
+        cmd = ["python3", VENDOR_ROUTER_PATH, filepath]
+        if detected_vendor:
+            cmd.append(detected_vendor)
+        
+        result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
             vendor_name = result.stdout.strip()
-            print(f"🔍 Vendor detected: {vendor_name}")
+            log(f"🔍 Vendor detected: {vendor_name}")
             return vendor_name
         else:
-            print(f"❌ Router error: {result.stderr.strip()}")
+            log(f"❌ Router error: {result.stderr.strip()}")
     except Exception as e:
-        print(f"❌ Exception in router: {e}")
+        log(f"❌ Exception in router: {e}")
     return None
 
 def process_attachments(msg):
+    detected_vendor = detect_vendor_from_email(msg)
+    if detected_vendor:
+        log(f"📧 Vendor detected from email: {detected_vendor}")
+    
     for part in msg.walk():
         if part.get_content_maintype() == 'multipart':
             continue
@@ -58,16 +98,18 @@ def process_attachments(msg):
         filename = part.get_filename()
         if filename and filename.lower().endswith(".pdf"):
             filepath = os.path.join(SAVE_DIR, filename)
+            if os.path.exists(filepath):
+                log(f"⏩ Skipped duplicate attachment: {filename}")
+                continue
             with open(filepath, 'wb') as f:
                 f.write(part.get_payload(decode=True))
-            print(f"✅ Saved: {filepath}")
+            log(f"✅ Saved: {filepath}")
 
-            vendor = run_vendor_router(filepath)
-            if vendor in ALLOWED_VENDORS:
-                print(f"📦 Accepted invoice from: {vendor}")
+            vendor = run_vendor_router(filepath, detected_vendor)
+            if vendor:
+                log(f"📦 Parsed and routed invoice: {vendor}")
             else:
-                print(f"⏩ Ignored unknown vendor: {vendor}")
-                os.remove(filepath)
+                log("⏩ Ignored: unknown or unparseable vendor")
 
 def move_to_processed(mail, uid):
     mail.uid('COPY', uid, 'Processed')
@@ -75,29 +117,33 @@ def move_to_processed(mail, uid):
     mail.expunge()
 
 def check_inbox():
-    print("📥 Checking inbox...")
-    mail = connect_imap()
-    mail.select("INBOX")
-    status, messages = mail.uid('search', None, 'UNSEEN')
-    if status != 'OK':
-        print("❌ Failed to search.")
-        return
-
-    for uid in messages[0].split():
-        status, msg_data = mail.uid('fetch', uid, '(RFC822)')
+    log("📥 Checking inbox...")
+    try:
+        mail = connect_imap()
+        mail.select("INBOX")
+        status, messages = mail.uid('search', None, 'UNSEEN')
         if status != 'OK':
-            continue
+            log("❌ Failed to search inbox.")
+            return
 
-        msg = email.message_from_bytes(msg_data[0][1])
-        subject = decode_header(msg["Subject"])[0][0]
-        print(f"📧 New email: {subject if isinstance(subject, str) else subject.decode()}")
+        for uid in messages[0].split():
+            status, msg_data = mail.uid('fetch', uid, '(RFC822)')
+            if status != 'OK':
+                continue
+            msg = email.message_from_bytes(msg_data[0][1])
+            subject = decode_header(msg["Subject"])[0][0]
+            if isinstance(subject, bytes):
+                subject = subject.decode(errors='ignore')
+            log(f"📧 New email: {subject}")
+            process_attachments(msg)
+            move_to_processed(mail, uid)
 
-        process_attachments(msg)
-        move_to_processed(mail, uid)
-
-    mail.logout()
+        mail.logout()
+    except Exception as e:
+        log(f"❌ Exception in inbox check: {e}")
 
 if __name__ == "__main__":
+    log("🚀 Starting autonomous invoice watcher (10s loop)...")
     while True:
         check_inbox()
-        time.sleep(120)  # Check every 2 minutes
+        time.sleep(10)

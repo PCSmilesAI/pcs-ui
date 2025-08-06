@@ -1,101 +1,116 @@
-import sys
-import os
-import fitz
-import pytesseract
-from pdf2image import convert_from_path
-import subprocess
-import time
-import re
+#!/usr/bin/env python3
+"""
+Vendor Router - Routes PDF invoices to appropriate vendor parsers
+"""
 
-# Config
-KNOWN_VENDORS = {
-    "exodus": {
-        "keywords": ["exodus dental solutions"],
-        "parser": "exodus_agent.py"
-    },
-    "patterson": {
-        "keywords": ["patterson dental"],
-        "parser": "patterson_invoice_parser_FINAL_WITH_JSON_SAFE.py"
-    },
-    "tc_dental": {
-        "keywords": ["tc dental lab"],
-        "parser": "parse_tc_dental_invoice.py"
-    },
-    "henry": {
-        "keywords": ["henry schein"],
-        "parser": "henry_parser.py"
-    },
-    "artisan": {
-        "keywords": ["artisan dental"],
-        "parser": "parse_artisan_dental_exporting_fixed.py"
-    }
+import os
+import sys
+import subprocess
+import json
+from datetime import datetime
+
+PARSER_FOLDER = os.path.dirname(__file__)
+OUTPUT_FOLDER = os.path.join(PARSER_FOLDER, "output_jsons/")
+QUEUE_WRITER = os.path.join(PARSER_FOLDER, "invoice_queue_writer.py")
+
+# Vendor parser mappings
+VENDOR_PARSERS = {
+    'epic': 'epic_parser.py',
+    'patterson': 'patterson_invoice_parser_FINAL_WITH_JSON_SAFE.py',
+    'henry': 'henry_parser.py',
+    'exodus': 'exodus_parser.py',
+    'artisan': 'parse_artisan_dental_exporting_fixed.py',
+    'tc': 'parse_tc_dental_invoice.py'
 }
 
-PARSER_FOLDER = os.path.expanduser("~/Desktop/MemorAI_PCS/")
-OUTPUT_FOLDER = os.path.expanduser("~/Desktop/MemorAI_PCS/output_jsons/")
-QUEUE_WRITER = os.path.expanduser("~/Desktop/MemorAI_PCS/invoice_queue_writer.py")
-
-def extract_text(pdf_path):
-    try:
-        doc = fitz.open(pdf_path)
-        text = "\n".join([page.get_text() for page in doc])
-        if len(text.strip()) > 20:
-            return text.lower()
-    except:
-        pass
-
-    try:
-        images = convert_from_path(pdf_path)
-        ocr_text = "\n".join([pytesseract.image_to_string(img) for img in images])
-        return ocr_text.lower()
-    except:
-        return ""
-
-def detect_vendor(text):
-    for slug, data in KNOWN_VENDORS.items():
-        for kw in data["keywords"]:
-            if kw in text:
-                return slug, data["parser"]
-    return None, None
-
-def run_parser(script, pdf_path):
-    parser_path = os.path.join(PARSER_FOLDER, script)
-    result = subprocess.run(["python3", parser_path, pdf_path], capture_output=True, text=True)
-    return result
-
-def find_latest_json(invoice_number_prefix):
-    files = sorted(
-        [f for f in os.listdir(OUTPUT_FOLDER) if f.endswith(".json") and invoice_number_prefix in f],
-        key=lambda f: os.path.getmtime(os.path.join(OUTPUT_FOLDER, f)),
-        reverse=True
-    )
-    if files:
-        return os.path.join(OUTPUT_FOLDER, files[0])
+def detect_vendor_from_pdf(filepath):
+    """Detect vendor by running all parsers and seeing which one succeeds"""
+    for vendor, parser in VENDOR_PARSERS.items():
+        parser_path = os.path.join(PARSER_FOLDER, parser)
+        if not os.path.exists(parser_path):
+            continue
+            
+        try:
+            result = subprocess.run(
+                ["python3", parser_path, filepath],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            # Check for successful parsing based on vendor-specific indicators
+            if result.returncode == 0:
+                if vendor == 'epic' and "Extracted" in result.stdout:
+                    return vendor
+                elif vendor == 'henry' and ("Henry schein" in result.stdout or "Henry Schein" in result.stdout):
+                    return vendor
+                elif vendor == 'patterson' and ("Patterson" in result.stdout):
+                    return vendor
+                elif vendor == 'exodus' and ("Exodus" in result.stdout):
+                    return vendor
+                elif vendor == 'artisan' and ("Artisan" in result.stdout):
+                    return vendor
+                elif vendor == 'tc' and ("TC" in result.stdout or "T.C." in result.stdout):
+                    return vendor
+                # For other vendors, check if they output valid JSON
+                elif "vendor" in result.stdout and "invoice_number" in result.stdout:
+                    return vendor
+                    
+        except subprocess.TimeoutExpired:
+            continue
+        except Exception:
+            continue
+    
     return None
 
-if __name__ == "__main__":
+def run_parser(filepath, vendor):
+    """Run the appropriate vendor parser"""
+    parser = VENDOR_PARSERS.get(vendor)
+    if not parser:
+        return False
+        
+    parser_path = os.path.join(PARSER_FOLDER, parser)
+    if not os.path.exists(parser_path):
+        return False
+        
+    try:
+        result = subprocess.run(
+            ["python3", parser_path, filepath],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
+
+def main():
     if len(sys.argv) < 2:
-        print("Usage: python3 vendor_router.py <invoice.pdf>")
+        print("Usage: python3 vendor_router.py <pdf_filepath> [detected_vendor]")
         sys.exit(1)
+    
+    filepath = sys.argv[1]
+    detected_vendor = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    if not os.path.exists(filepath):
+        print(f"File not found: {filepath}")
+        sys.exit(1)
+    
+    # If vendor was detected from email, try that first
+    if detected_vendor and detected_vendor in VENDOR_PARSERS:
+        if run_parser(filepath, detected_vendor):
+            print(detected_vendor)
+            sys.exit(0)
+    
+    # Otherwise, try to detect vendor from PDF content
+    vendor = detect_vendor_from_pdf(filepath)
+    if vendor:
+        print(vendor)
+        sys.exit(0)
+    
+    # If no vendor detected, exit with error
+    print("unknown", file=sys.stderr)
+    sys.exit(1)
 
-    pdf_path = sys.argv[1]
-    text = extract_text(pdf_path)
-    vendor_slug, parser_script = detect_vendor(text)
-
-    if vendor_slug and parser_script:
-        result = run_parser(parser_script, pdf_path)
-
-        # Attempt to extract invoice number from parser output
-        output_text = result.stdout + result.stderr
-        match = re.search(r'"?invoice_number"?\s*[:=]\s*"?([A-Za-z0-9\-_]+)"?', output_text)
-        invoice_id = match.group(1) if match else None
-
-        if invoice_id:
-            time.sleep(1)  # wait briefly for file system write
-            json_path = find_latest_json(invoice_id)
-            if json_path and os.path.exists(QUEUE_WRITER):
-                subprocess.run(["python3", QUEUE_WRITER, json_path, pdf_path])
-        print(KNOWN_VENDORS[vendor_slug]["keywords"][0].title())
-    else:
-        print("Unknown")
-        sys.exit(2)
+if __name__ == "__main__":
+    main()
