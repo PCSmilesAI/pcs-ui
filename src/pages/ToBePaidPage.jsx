@@ -16,12 +16,20 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     const loadInvoices = async () => {
       try {
         console.log('🔄 ToBePaidPage: Starting to load invoices...');
+        console.log('🌐 ToBePaidPage: Fetching from URL:', window.location.origin + '/invoice_queue.json');
         setLoading(true);
+        
+        // Test the URL first
+        const testUrl = window.location.origin + '/invoice_queue.json';
+        console.log('🔍 ToBePaidPage: Testing URL:', testUrl);
+        
         const response = await fetch('/invoice_queue.json');
         console.log('📡 ToBePaidPage: Fetch response status:', response.status);
+        console.log('📡 ToBePaidPage: Fetch response ok:', response.ok);
+        console.log('📡 ToBePaidPage: Fetch response headers:', Object.fromEntries(response.headers.entries()));
         
         if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status}`);
+          throw new Error(`Failed to load invoices: ${response.status} - ${response.statusText}`);
         }
         
         const data = await response.json();
@@ -60,6 +68,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         setError(null);
       } catch (err) {
         console.error('❌ ToBePaidPage: Error loading invoices:', err);
+        console.error('❌ ToBePaidPage: Error details:', {
+          message: err.message,
+          stack: err.stack,
+          url: window.location.origin + '/invoice_queue.json'
+        });
         setError(err.message);
         // Fallback to empty array if loading fails
         setInvoices([]);

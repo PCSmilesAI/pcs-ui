@@ -16,12 +16,20 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
     const loadInvoices = async () => {
       try {
         console.log('🔄 ForMePage: Starting to load invoices...');
+        console.log('🌐 ForMePage: Fetching from URL:', window.location.origin + '/invoice_queue.json');
         setLoading(true);
+        
+        // Test the URL first
+        const testUrl = window.location.origin + '/invoice_queue.json';
+        console.log('🔍 ForMePage: Testing URL:', testUrl);
+        
         const response = await fetch('/invoice_queue.json');
         console.log('📡 ForMePage: Fetch response status:', response.status);
+        console.log('📡 ForMePage: Fetch response ok:', response.ok);
+        console.log('📡 ForMePage: Fetch response headers:', Object.fromEntries(response.headers.entries()));
         
         if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status}`);
+          throw new Error(`Failed to load invoices: ${response.status} - ${response.statusText}`);
         }
         const data = await response.json();
         console.log('📊 ForMePage: Raw data received:', data.length, 'invoices');
@@ -60,6 +68,11 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
         setError(null);
       } catch (err) {
         console.error('❌ ForMePage: Error loading invoices:', err);
+        console.error('❌ ForMePage: Error details:', {
+          message: err.message,
+          stack: err.stack,
+          url: window.location.origin + '/invoice_queue.json'
+        });
         setError(err.message);
         // Fallback to empty array if loading fails
         setInvoices([]);
