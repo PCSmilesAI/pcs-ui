@@ -1,0 +1,199 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3036495819",
+  "invoice_date": "2025-04-19",
+  "total": "228.81",
+  "office_location": "Roseburg",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03722354",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03732227",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03742944",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03742944",
+      "product_name": "50160622        STEM QD W/GAGE PORT ASSY",
+      "Quantity": "1.000",
+      "unit_price": "29.88",
+      "line_item_total": "29.88"
+    },
+    {
+      "product_number": "73179157",
+      "product_name": "SPRT CLINICAL MONTHLY",
+      "Quantity": "1.000",
+      "unit_price": "259.00",
+      "line_item_total": "259.00"
+    },
+    {
+      "product_number": "73179157",
+      "product_name": "SPRT CLINICAL MONTHLY",
+      "Quantity": "1.000",
+      "unit_price": "259.00",
+      "line_item_total": "259.00"
+    },
+    {
+      "product_number": "71339753",
+      "product_name": "EAGLESOFT CORE BUNDLE MO",
+      "Quantity": "1.000",
+      "unit_price": "259.00",
+      "line_item_total": "259.00"
+    },
+    {
+      "product_number": "03764904",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03770364",
+      "product_name": "50106229        TOGGLE FOOT CONTROL W/PIN GRAY3",
+      "Quantity": "1.000",
+      "unit_price": "18.75",
+      "line_item_total": "18.75"
+    },
+    {
+      "product_number": "03779193",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03779193",
+      "product_name": "56512115        O-RING .239 ID X .070 WALL,--010",
+      "Quantity": "1.000",
+      "unit_price": "0.35",
+      "line_item_total": "0.35"
+    },
+    {
+      "product_number": "03785223",
+      "product_name": "200002234        NRC SHIPPING FEE",
+      "Quantity": "1.000",
+      "unit_price": "10.00",
+      "line_item_total": "10.00"
+    },
+    {
+      "product_number": "03795724",
+      "product_name": "200002013        NATIONAL REPAIR LABOR",
+      "Quantity": "0.250",
+      "unit_price": "140.00",
+      "line_item_total": "35.00"
+    },
+    {
+      "product_number": "03795724",
+      "product_name": "200002234        NRC SHIPPING FEE",
+      "Quantity": "1.000",
+      "unit_price": "10.00",
+      "line_item_total": "10.00"
+    },
+    {
+      "product_number": "03784937",
+      "product_name": "200002013        NATIONAL REPAIR LABOR",
+      "Quantity": "0.250",
+      "unit_price": "140.00",
+      "line_item_total": "35.00"
+    },
+    {
+      "product_number": "03795725",
+      "product_name": "200002013        NATIONAL REPAIR LABOR",
+      "Quantity": "0.250",
+      "unit_price": "140.00",
+      "line_item_total": "35.00"
+    },
+    {
+      "product_number": "03795725",
+      "product_name": "57705138        NRC ONLY M8700L TURBINE ASSEMBLE",
+      "Quantity": "1.000",
+      "unit_price": "276.02",
+      "line_item_total": "276.02"
+    },
+    {
+      "product_number": "03795726",
+      "product_name": "200002013        NATIONAL REPAIR LABOR",
+      "Quantity": "0.250",
+      "unit_price": "140.00",
+      "line_item_total": "35.00"
+    },
+    {
+      "product_number": "03795726",
+      "product_name": "57705138        NRC ONLY M8700L TURBINE ASSEMBLE",
+      "Quantity": "1.000",
+      "unit_price": "276.02",
+      "line_item_total": "276.02"
+    },
+    {
+      "product_number": "03795727",
+      "product_name": "200002013        NATIONAL REPAIR LABOR",
+      "Quantity": "0.500",
+      "unit_price": "140.00",
+      "line_item_total": "70.00"
+    },
+    {
+      "product_number": "03809224",
+      "product_name": "200002234        NRC SHIPPING FEE",
+      "Quantity": "1.000",
+      "unit_price": "10.00",
+      "line_item_total": "10.00"
+    },
+    {
+      "product_number": "03760420",
+      "product_name": "200001073        RENTAL DROP OFF FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03811642",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03799444",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03814319",
+      "product_name": "50107292        PREV MAINTENANCE KIT AS70, AS70 NEO",
+      "Quantity": "1.000",
+      "unit_price": "793.75",
+      "line_item_total": "793.75"
+    },
+    {
+      "product_number": "03814140",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03814140",
+      "product_name": "50161695        CTL BLOCK COOLANT H2O",
+      "Quantity": "1.000",
+      "unit_price": "79.00",
+      "line_item_total": "79.00"
+    }
+  ]
+}

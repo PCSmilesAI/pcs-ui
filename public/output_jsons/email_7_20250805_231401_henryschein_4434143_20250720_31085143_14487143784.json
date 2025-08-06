@@ -1,0 +1,17 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "44048990",
+  "invoice_date": "07/18/25",
+  "invoice_total": "17.03",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "141-8937",
+      "product_name": "2/PK FlexiProp Medium Medium",
+      "Quantity": "1",
+      "unit_price": "17.03",
+      "line_item_total": "17.03"
+    }
+  ]
+}

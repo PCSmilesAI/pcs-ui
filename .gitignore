@@ -16,8 +16,6 @@ out/
 log.txt
 ui_upload.log
 flowstack.log
-email_invoices/
-output_jsons/
 processed_invoices/
 
 # macOS

@@ -1,0 +1,24 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3036332425",
+  "invoice_date": "2025-04-11",
+  "total": "362.60",
+  "office_location": "Ridgefield",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "73179157",
+      "product_name": "SPRT CLINICAL MONTHLY",
+      "Quantity": "1.000",
+      "unit_price": "259.00",
+      "line_item_total": "259.00"
+    },
+    {
+      "product_number": "73179157",
+      "product_name": "SPRT CLINICAL MONTHLY",
+      "Quantity": "1.000",
+      "unit_price": "259.00",
+      "line_item_total": "259.00"
+    }
+  ]
+}

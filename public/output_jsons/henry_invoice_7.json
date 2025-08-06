@@ -1,0 +1,17 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "44557050",
+  "invoice_date": "07/24/25",
+  "invoice_total": "28.92",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "107-6371",
+      "product_name": "EA Sodium Hypochlorite 6% 16oz/Bt",
+      "Quantity": "1",
+      "unit_price": "13.43",
+      "line_item_total": "13.43"
+    }
+  ]
+}

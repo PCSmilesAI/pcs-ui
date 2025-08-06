@@ -1,0 +1,17 @@
+{
+  "invoice_number": "44134561",
+  "invoice_date": "07/16/25",
+  "invoice_total": "93.37",
+  "office_location": "Lebanon",
+  "vendor": "Henry schein",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "543-0219",
+      "product_name": "3.40Z/BT PreviDent 5000 Booster",
+      "Quantity": "12",
+      "unit_price": "6.49",
+      "line_item_total": "77.88"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3038197656",
+  "invoice_date": "2025-07-30",
+  "total": "877.88",
+  "office_location": "Riddle",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03874385",
+      "product_name": "55821046        CHECK VALVE 5000",
+      "Quantity": "1.000",
+      "unit_price": "170.99",
+      "line_item_total": "170.99"
+    }
+  ]
+}

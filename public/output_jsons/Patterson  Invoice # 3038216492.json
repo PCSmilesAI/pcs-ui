@@ -1,0 +1,59 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3038216492",
+  "invoice_date": "2025-07-31",
+  "total": "1864.51",
+  "office_location": "Roseburg",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03835451",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03851408",
+      "product_name": "51419241        SYRINGE HEAD ASSEMBLY, CE AUTOCLAVABLE",
+      "Quantity": "1.000",
+      "unit_price": "356.25",
+      "line_item_total": "356.25"
+    },
+    {
+      "product_number": "03875754",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03875895",
+      "product_name": "51034115        CONVERSION KIT,1040 BRAKE HANDLE,1.12 D",
+      "Quantity": "1.000",
+      "unit_price": "256.25",
+      "line_item_total": "256.25"
+    },
+    {
+      "product_number": "03875895",
+      "product_name": "51419316        HANDLE,AUTOCLAVABLE SYRINGE",
+      "Quantity": "1.000",
+      "unit_price": "26.25",
+      "line_item_total": "26.25"
+    },
+    {
+      "product_number": "03875895",
+      "product_name": "51423946        TERMINAL ASSY W/STEM,2 BARB,AUTOCLAVABLE",
+      "Quantity": "1.000",
+      "unit_price": "90.00",
+      "line_item_total": "90.00"
+    },
+    {
+      "product_number": "03875895",
+      "product_name": "71277599        SYR BUTTON REPL AUTOCL",
+      "Quantity": "1.000",
+      "unit_price": "42.49",
+      "line_item_total": "42.49"
+    }
+  ]
+}

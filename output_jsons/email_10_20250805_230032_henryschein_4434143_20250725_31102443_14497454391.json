@@ -1,0 +1,101 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "44507826",
+  "invoice_date": "07/24/25",
+  "invoice_total": "359.47",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "112-4856",
+      "product_name": "200/BX Self Seal Sterilization Pouch 2.75x9",
+      "Quantity": "4",
+      "unit_price": "7.58",
+      "line_item_total": "30.32"
+    },
+    {
+      "product_number": "112-4857",
+      "product_name": "200/BX Self Seal Sterilization Pouch 3.5x5.25",
+      "Quantity": "2",
+      "unit_price": "6.32",
+      "line_item_total": "12.64"
+    },
+    {
+      "product_number": "112-4853",
+      "product_name": "200/BX Self Seal Sterilization Pouch 3.5x9",
+      "Quantity": "3",
+      "unit_price": "8.08",
+      "line_item_total": "24.24"
+    },
+    {
+      "product_number": "112-4863",
+      "product_name": "200/BX Self Seal Sterilization Pouch 4.25x11",
+      "Quantity": "3",
+      "unit_price": "11.15",
+      "line_item_total": "33.45"
+    },
+    {
+      "product_number": "112-4854",
+      "product_name": "200/BX Self Seal Sterilization Pouch 5.25x10",
+      "Quantity": "3",
+      "unit_price": "10.73",
+      "line_item_total": "32.19"
+    },
+    {
+      "product_number": "570-1933",
+      "product_name": "225/BX Dental Chair Barrier Sleeve 24\"Lx27.5\"W",
+      "Quantity": "1",
+      "unit_price": "19.18",
+      "line_item_total": "19.18"
+    },
+    {
+      "product_number": "112-4599",
+      "product_name": "36/PK Matrix Bands Tofflemire #2 .002",
+      "Quantity": "1",
+      "unit_price": "5.30",
+      "line_item_total": "5.30"
+    },
+    {
+      "product_number": "543-3435",
+      "product_name": "72/BX Sensitivity Bundle",
+      "Quantity": "1",
+      "unit_price": "48.24",
+      "line_item_total": "48.24"
+    },
+    {
+      "product_number": "900-4565",
+      "product_name": "12/PK Impression Trays #3 Med/U Perforated",
+      "Quantity": "2",
+      "unit_price": "4.80",
+      "line_item_total": "9.60"
+    },
+    {
+      "product_number": "100-9224",
+      "product_name": "12/BX Articulating Paper Combination Red/Blue",
+      "Quantity": "2",
+      "unit_price": "3.54",
+      "line_item_total": "7.08"
+    },
+    {
+      "product_number": "570-3250",
+      "product_name": "EA Digital Sensor Holder Arm Bitewing",
+      "Quantity": "4",
+      "unit_price": "19.59",
+      "line_item_total": "78.36"
+    },
+    {
+      "product_number": "170-0631",
+      "product_name": "25/PK Bulk EZ Tips Refill",
+      "Quantity": "19",
+      "unit_price": "26.19",
+      "line_item_total": "26.19"
+    },
+    {
+      "product_number": "170-0578",
+      "product_name": "25/PK Bulk EZ Tips Refill",
+      "Quantity": "17",
+      "unit_price": "26.19",
+      "line_item_total": "26.19"
+    }
+  ]
+}

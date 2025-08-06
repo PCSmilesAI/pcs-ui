@@ -1,0 +1,52 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "44213044",
+  "invoice_date": "07/17/25",
+  "invoice_total": "750.82",
+  "office_location": "Salem",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "900-7428",
+      "product_name": "5/PK Maxima Diamond FG KS2-SC",
+      "Quantity": "3",
+      "unit_price": "29.80",
+      "line_item_total": "89.40"
+    },
+    {
+      "product_number": "570-1510",
+      "product_name": "EA Lead-Free Steam Indicator Tape 3/4\"x60L\"",
+      "Quantity": "3",
+      "unit_price": "7.12",
+      "line_item_total": "21.36"
+    },
+    {
+      "product_number": "100-6188",
+      "product_name": "144/PK Prophy Cups Webbed Screw Type Hard White",
+      "Quantity": "3",
+      "unit_price": "18.98",
+      "line_item_total": "56.94"
+    },
+    {
+      "product_number": "100-8502",
+      "product_name": "5/PK Surgical Bur FG",
+      "Quantity": "557",
+      "unit_price": "10.49",
+      "line_item_total": "31.47"
+    },
+    {
+      "product_number": "131-3943",
+      "product_name": "3.4OZ/BT Prevident",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "233.64"
+    },
+    {
+      "product_number": "543-0219",
+      "product_name": "3.4OZ/BT PreviDent",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "311.52"
+    }
+  ]
+}

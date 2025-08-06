@@ -1,0 +1,42 @@
+{
+  "invoice_number": "4307",
+  "invoice_date": "6/14/2025",
+  "line_items": [
+    {
+      "product_no": "EXODUS",
+      "desc": "P/ Package Finish Direct",
+      "qty": 1,
+      "unit_price": 248.0,
+      "total": 248.0
+    },
+    {
+      "product_no": "EXODUS",
+      "desc": "Single Anterior (3 x",
+      "qty": 3,
+      "unit_price": 16.0,
+      "total": 48.0
+    },
+    {
+      "product_no": "EXODUS",
+      "desc": "Additional Wire Clasp (2)",
+      "qty": 1,
+      "unit_price": 39.0,
+      "total": 39.0
+    },
+    {
+      "product_no": "EXODUS",
+      "desc": "Duplicate Model (2 x",
+      "qty": 2,
+      "unit_price": 14.0,
+      "total": 28.0
+    },
+    {
+      "product_no": "EXODUS",
+      "desc": "Rush",
+      "qty": 1,
+      "unit_price": 59.0,
+      "total": 59.0
+    }
+  ],
+  "total": 363.0
+}
