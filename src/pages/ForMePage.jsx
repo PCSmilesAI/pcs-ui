@@ -25,7 +25,10 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
         
         // Add cache-busting timestamp to force fresh request
         const timestamp = new Date().getTime();
-        const response = await fetch(`/invoice_queue.json?t=${timestamp}`, {
+        const fetchUrl = `/invoice_queue.json?t=${timestamp}`;
+        console.log('🔍 ForMePage: Fetching from URL:', fetchUrl);
+        
+        const response = await fetch(fetchUrl, {
           method: 'GET',
           headers: {
             'Cache-Control': 'no-cache',
