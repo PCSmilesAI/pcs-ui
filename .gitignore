@@ -19,7 +19,6 @@ flowstack.log
 email_invoices/
 output_jsons/
 processed_invoices/
-invoice_queue.json
 
 # macOS
 .DS_Store
