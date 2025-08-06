@@ -5,9 +5,9 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
  * Detail view for a single invoice. Displays high level summary
  * information at the top along with actions (approve, reject,
  * repair). Below the summary the left column shows invoice
- * status, details and line items. The right column contains a
- * placeholder for the invoice PDF. A back arrow returns the user
- * to the previous list. This version uses only inline styles so
+ * status, details and line items. The right column contains the
+ * actual invoice PDF. A back arrow returns the user to the
+ * previous list. This version uses only inline styles so
  * that the layout and colours appear even if no CSS preprocessor
  * is available.
  */
@@ -133,6 +133,21 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     });
   }
 
+  // Function to handle PDF download
+  function handleDownload() {
+    if (invoice.pdf_path) {
+      // Create a link element to trigger the download
+      const link = document.createElement('a');
+      link.href = `/${invoice.pdf_path}`;
+      link.download = `${invoice.invoice || invoice.invoice_number}_${invoice.vendor}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      console.warn('No PDF path available for download');
+    }
+  }
+
   return (
     <div style={wrapperStyle}>
       {/* Header with back arrow and invoice summary */}
@@ -160,6 +175,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         </div>
         {/* Download icon on right */}
         <button
+          onClick={handleDownload}
           aria-label="Download"
           style={{
             color: '#357ab2',
@@ -403,20 +419,33 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             </table>
           </div>
         </div>
-        {/* Right column: PDF placeholder */}
+        {/* Right column: PDF viewer */}
         <div style={rightColumnStyle}>
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              border: '1px solid #357ab2',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <span style={{ color: '#a0aec0' }}>Invoice PDF</span>
-          </div>
+          {invoice.pdf_path ? (
+            <iframe
+              src={`/${invoice.pdf_path}`}
+              style={{
+                width: '100%',
+                height: '100%',
+                border: '1px solid #357ab2',
+                borderRadius: '4px',
+              }}
+              title="Invoice PDF"
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                border: '1px solid #357ab2',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <span style={{ color: '#a0aec0' }}>No PDF Available</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
