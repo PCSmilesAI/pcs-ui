@@ -20,12 +20,17 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
   useEffect(() => {
     const loadInvoices = async () => {
       try {
+        console.log('🔄 AllInvoicesPage: Starting to load invoices...');
         setLoading(true);
         const response = await fetch('/invoice_queue.json');
+        console.log('📡 AllInvoicesPage: Fetch response status:', response.status);
+        
         if (!response.ok) {
           throw new Error(`Failed to load invoices: ${response.status}`);
         }
+        
         const data = await response.json();
+        console.log('📊 AllInvoicesPage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
         const transformedData = data.map(invoice => ({
@@ -43,12 +48,14 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
           approved: invoice.approved
         }));
         
+        console.log('✅ AllInvoicesPage: Data transformed successfully:', transformedData.length, 'invoices');
         setInvoices(transformedData);
         setError(null);
       } catch (err) {
-        console.error('Error loading invoices:', err);
+        console.error('❌ AllInvoicesPage: Error loading invoices:', err);
         setError(err.message);
         // Fallback to static data if loading fails
+        console.log('🔄 AllInvoicesPage: Using fallback data...');
         setInvoices([
           {
             invoice: 'IN761993',
@@ -73,6 +80,7 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
           },
         ]);
       } finally {
+        console.log('🏁 AllInvoicesPage: Loading complete');
         setLoading(false);
       }
     };
@@ -159,6 +167,8 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
     }
     setSortConfig({ key, direction });
   }
+
+  console.log('🎨 AllInvoicesPage: Rendering with', sortedRows.length, 'invoices, loading:', loading, 'error:', error);
 
   if (loading) {
     return (

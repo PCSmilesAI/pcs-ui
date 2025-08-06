@@ -36,14 +36,18 @@ export default function App() {
 
   // Initialize auth state on mount
   React.useEffect(() => {
+    console.log('🔐 App: Initializing authentication state...');
     // Check session storage for a logged in user to persist session
     const logged = sessionStorage.getItem('loggedInUser');
+    console.log('🔐 App: Session storage loggedInUser:', logged);
     if (logged) {
+      console.log('✅ App: User is authenticated from session storage');
       setIsAuthenticated(true);
       return;
     }
     // If there are existing users choose login, otherwise signup
     const users = JSON.parse(localStorage.getItem('users') || '[]');
+    console.log('👥 App: Found users in localStorage:', users.length);
     setAuthMode(users.length > 0 ? 'login' : 'signup');
   }, []);
 
@@ -111,6 +115,15 @@ export default function App() {
     setIsFilterOpen(false);
   }
 
+  // Debug logging for page changes
+  React.useEffect(() => {
+    console.log('📄 App: Current page changed to:', currentPage);
+  }, [currentPage]);
+
+  React.useEffect(() => {
+    console.log('🔐 App: Authentication state changed to:', isAuthenticated);
+  }, [isAuthenticated]);
+
   return (
     <div
       style={{
@@ -124,12 +137,20 @@ export default function App() {
       {!isAuthenticated ? (
         authMode === 'login' ? (
           <LoginPage
-            onLogin={() => setIsAuthenticated(true)}
+            onLogin={() => {
+              console.log('🔐 App: User logged in, setting authenticated to true');
+              sessionStorage.setItem('loggedInUser', 'true');
+              setIsAuthenticated(true);
+            }}
             onSwitchMode={() => setAuthMode('signup')}
           />
         ) : (
           <SignupPage
-            onSignup={() => setIsAuthenticated(true)}
+            onSignup={() => {
+              console.log('🔐 App: User signed up, setting authenticated to true');
+              sessionStorage.setItem('loggedInUser', 'true');
+              setIsAuthenticated(true);
+            }}
             onSwitchMode={() => setAuthMode('login')}
           />
         )
@@ -151,10 +172,14 @@ export default function App() {
             {/* Navigation bar sits at the top of the panel */}
             <NavBar
               currentPage={currentPage}
-              onChangePage={(page) => setCurrentPage(page)}
+              onChangePage={(page) => {
+                console.log('🔄 App: Changing page from', currentPage, 'to', page);
+                setCurrentPage(page);
+              }}
               onToggleFilter={toggleFilter}
               onSearch={handleSearch}
               onLogout={() => {
+                console.log('🔐 App: User logging out, clearing session');
                 // Clear current session and return to login page
                 sessionStorage.removeItem('loggedInUser');
                 setIsAuthenticated(false);
