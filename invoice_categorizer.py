@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Invoice Categorizer
-Intelligently categorizes invoices based on line items with cost prioritization.
+Intelligently categorizes invoices based on vendor hard-coded categories and line items with cost prioritization.
 """
 
 import json
@@ -10,7 +10,17 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
-# Category definitions with keywords and patterns
+# Hard-coded vendor categories
+HARDCODED_VENDOR_CATEGORIES = {
+    "Exodus Dental Solutions": "Dental Lab",
+    "Epic Dental Lab": "Dental Lab", 
+    "Patterson Dental": "Dental Supplies",
+    "TC Dental Lab": "Dental Lab",
+    "Henry Schein": "Dental Supplies",
+    "Artisan Dental": "Dental Lab"
+}
+
+# Category definitions with keywords and patterns for smart detection
 CATEGORY_KEYWORDS = {
     "Dental Lab": [
         # Lab-specific terms
@@ -133,6 +143,15 @@ def categorize_line_items(line_items: List[Dict]) -> str:
     
     return best_category[0]
 
+def categorize_invoice(vendor: str, line_items: List[Dict]) -> str:
+    """Categorize an invoice using hard-coded vendor categories or smart line item detection."""
+    # First, check if vendor has a hard-coded category
+    if vendor in HARDCODED_VENDOR_CATEGORIES:
+        return HARDCODED_VENDOR_CATEGORIES[vendor]
+    
+    # If no hard-coded category, use smart line item detection
+    return categorize_line_items(line_items)
+
 def update_invoice_categories():
     """Update all invoices in the queue with proper categories."""
     queue_file = "invoice_queue.json"
@@ -146,10 +165,13 @@ def update_invoice_categories():
         queue = json.load(f)
     
     print(f"📋 Processing {len(queue)} invoices for categorization...")
+    print(f"🏷️  Hard-coded vendors: {list(HARDCODED_VENDOR_CATEGORIES.keys())}")
     
     updated_count = 0
     for invoice in queue:
         json_path = invoice.get('json_path', '')
+        vendor = invoice.get('vendor', '')
+        
         if not json_path or not os.path.exists(json_path):
             continue
         
@@ -161,18 +183,24 @@ def update_invoice_categories():
             # Get line items
             line_items = invoice_data.get('line_items', [])
             
-            # Categorize based on line items
-            category = categorize_line_items(line_items)
+            # Categorize based on vendor and line items
+            category = categorize_invoice(vendor, line_items)
             
             # Update the category in the queue
             old_category = invoice.get('category', 'Unknown')
             invoice['category'] = category
             
+            # Determine categorization method
+            if vendor in HARDCODED_VENDOR_CATEGORIES:
+                method = "Hard-coded"
+            else:
+                method = "Smart detection"
+            
             if old_category != category:
-                print(f"🔄 {invoice.get('invoice_number', 'Unknown')}: {old_category} → {category}")
+                print(f"🔄 {invoice.get('invoice_number', 'Unknown')} ({vendor}): {old_category} → {category} [{method}]")
                 updated_count += 1
             else:
-                print(f"✅ {invoice.get('invoice_number', 'Unknown')}: {category}")
+                print(f"✅ {invoice.get('invoice_number', 'Unknown')} ({vendor}): {category} [{method}]")
                 
         except Exception as e:
             print(f"❌ Error processing {invoice.get('invoice_number', 'Unknown')}: {e}")
@@ -188,6 +216,16 @@ def update_invoice_categories():
 
 def test_categorization():
     """Test the categorization logic with sample data."""
+    print("🧪 Testing categorization logic...")
+    
+    # Test hard-coded vendors
+    print("\n📋 Testing hard-coded vendor categories:")
+    for vendor, expected_category in HARDCODED_VENDOR_CATEGORIES.items():
+        category = categorize_invoice(vendor, [])
+        print(f"  {vendor}: {category} (expected: {expected_category})")
+    
+    # Test smart detection
+    print("\n📋 Testing smart line item detection:")
     test_items = [
         {"product_name": "Porcelain Crown", "product_number": "CROWN-001", "line_item_total": "150.00"},
         {"product_name": "Composite Filling Material", "product_number": "COMP-002", "line_item_total": "25.00"},
@@ -196,9 +234,8 @@ def test_categorization():
         {"product_name": "Lab Fee - CAD/CAM Milling", "product_number": "LAB-005", "line_item_total": "200.00"},
     ]
     
-    print("🧪 Testing categorization logic...")
-    category = categorize_line_items(test_items)
-    print(f"📊 Test result: {category}")
+    category = categorize_invoice("Unknown Vendor", test_items)
+    print(f"  Unknown Vendor with mixed items: {category}")
     
     # Show individual item analysis
     print("\n📋 Individual item analysis:")
@@ -208,13 +245,13 @@ def test_categorization():
         print(f"  {item_text}: {scores}")
 
 if __name__ == "__main__":
-    print("🎯 Invoice Categorizer")
-    print("=" * 50)
+    print("🎯 Invoice Categorizer (Hybrid: Hard-coded + Smart Detection)")
+    print("=" * 70)
     
     # Test the logic first
     test_categorization()
     
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 70)
     
     # Update all invoices
     update_invoice_categories() 
