@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Vancouver",
+    "address": "16415 SE 15th St, Suite 105, Vancouver, WA",
+    "manager": "Jennifer Fortman",
+    "email": "jenniferf@pacificcrestsmiles.com"
+  },
+  {
+    "name": "Ridgefield",
+    "address": "109 S 65th Ave Ste 104, Ridgefield, WA",
+    "manager": "Jessica Weaver",
+    "email": "jessicaw@pacificcrestsmiles.com"
+  },
+  {
+    "name": "Eugene",
+    "address": "2201 Willamette St, Ste A, Eugene, OR",
+    "manager": "Casie Nacinovich",
+    "email": "casien@pacificcrestsmiles.com"
+  },
+  {
+    "name": "Lebanon",
+    "address": "175 Park St, Lebanon, OR",
+    "manager": "Ginny Dane",
+    "email": "ginnyd@pacificcrestsmiles.com"
+  },
+  {
+    "name": "Milwaukie",
+    "address": "11084 SE Oak St, Milwaukie, OR",
+    "manager": "Corwina Bjorkland",
+    "email": "corwinab@pacificcrestsmiles.com"
+  },
+  {
+    "name": "Riddle",
+    "address": "150 Main St\nPO Box 107, Riddle, OR",
+    "manager": "Camille Spicer",
+    "email": "camilles@pacificcrestsmiles.com"
+  },
+  {
+    "name": "Roseburg",
+    "address": "1683 West Harvard Ave, Roseburg, OR",
+    "manager": "Takisha Pappas",
+    "email": "takishap@pacificcrestsmiles.com"
+  },
+  {
+    "name": "Salem",
+    "address": "2245 Mission St SE, Salem, OR",
+    "manager": "Triscia Solesbee",
+    "email": "triscias@pacificcrestsmiles.com"
+  }
+]
