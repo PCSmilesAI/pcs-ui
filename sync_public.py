@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
 Sync Public Script
-Automatically copies invoice_queue.json, email_invoices/, and output_jsons/ to public/ directory for frontend access.
+Automatically copies invoice_queue.json, email_invoices/, output_jsons/, and converts office_info.xls to JSON.
 """
 
 import os
 import shutil
 import time
+import subprocess
 from datetime import datetime
 
 def sync_invoice_queue():
@@ -70,6 +71,29 @@ def sync_output_jsons():
         print(f"❌ Error syncing output jsons: {e}")
         return False
 
+def convert_office_info():
+    """Convert smiles_office_info.xls to JSON format"""
+    xls_file = "smiles_office_info.xls"
+    
+    if not os.path.exists(xls_file):
+        print(f"❌ Office info file not found: {xls_file}")
+        return False
+    
+    try:
+        # Run the conversion script
+        result = subprocess.run(['python3', 'convert_office_info.py'], 
+                              capture_output=True, text=True, timeout=30)
+        
+        if result.returncode == 0:
+            print(f"✅ Converted {xls_file} to office_info.json")
+            return True
+        else:
+            print(f"❌ Error converting office info: {result.stderr}")
+            return False
+    except Exception as e:
+        print(f"❌ Error running office info conversion: {e}")
+        return False
+
 def main():
     """Main function - continuously sync the files"""
     print("🔄 Starting Invoice Queue Sync Service")
@@ -79,11 +103,13 @@ def main():
     sync_invoice_queue()
     sync_email_invoices()
     sync_output_jsons()
+    convert_office_info()
     
     # Monitor for changes
     last_queue_modified = 0
     last_invoices_modified = 0
     last_jsons_modified = 0
+    last_office_info_modified = 0
     
     while True:
         try:
@@ -110,6 +136,14 @@ def main():
                     print(f"📋 Output JSONs modified at {datetime.now().strftime('%H:%M:%S')}")
                     sync_output_jsons()
                     last_jsons_modified = current_modified
+            
+            # Check office info file
+            if os.path.exists("smiles_office_info.xls"):
+                current_modified = os.path.getmtime("smiles_office_info.xls")
+                if current_modified > last_office_info_modified:
+                    print(f"🏢 Office info file modified at {datetime.now().strftime('%H:%M:%S')}")
+                    convert_office_info()
+                    last_office_info_modified = current_modified
             
             time.sleep(2)  # Check every 2 seconds
             
