@@ -48,6 +48,7 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
           amount: `$${invoice.total || '0.00'}`,
           office: invoice.clinic_id || 'Unknown',
           status: invoice.status || 'New',
+          category: invoice.category || 'Other',
           // Add additional fields for detail view
           invoice_date: invoice.invoice_date,
           json_path: invoice.json_path,
@@ -103,6 +104,7 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
     { key: 'vendor', label: 'Vendor' },
     { key: 'amount', label: 'Amount', align: 'right' },
     { key: 'office', label: 'Office' },
+    { key: 'category', label: 'Category' },
     { key: 'status', label: 'Status' },
   ];
 

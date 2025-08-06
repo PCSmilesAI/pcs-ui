@@ -63,7 +63,7 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
               day: 'numeric',
               year: '2-digit'
             }) : 'N/A',
-            category: invoice.vendor || 'Unknown',
+            category: invoice.category || 'Other',
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
             json_path: invoice.json_path,
