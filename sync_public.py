@@ -94,6 +94,23 @@ def convert_office_info():
         print(f"❌ Error running office info conversion: {e}")
         return False
 
+def run_invoice_categorizer():
+    """Run the invoice categorizer to update categories"""
+    try:
+        # Run the categorizer script
+        result = subprocess.run(['python3', 'invoice_categorizer.py'], 
+                              capture_output=True, text=True, timeout=60)
+        
+        if result.returncode == 0:
+            print(f"✅ Updated invoice categories")
+            return True
+        else:
+            print(f"❌ Error running categorizer: {result.stderr}")
+            return False
+    except Exception as e:
+        print(f"❌ Error running invoice categorizer: {e}")
+        return False
+
 def main():
     """Main function - continuously sync the files"""
     print("🔄 Starting Invoice Queue Sync Service")
@@ -104,6 +121,7 @@ def main():
     sync_email_invoices()
     sync_output_jsons()
     convert_office_info()
+    run_invoice_categorizer()
     
     # Monitor for changes
     last_queue_modified = 0
@@ -119,6 +137,7 @@ def main():
                 if current_modified > last_queue_modified:
                     print(f"📝 Queue file modified at {datetime.now().strftime('%H:%M:%S')}")
                     sync_invoice_queue()
+                    run_invoice_categorizer()  # Re-categorize when queue changes
                     last_queue_modified = current_modified
             
             # Check email_invoices directory
