@@ -195,12 +195,9 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
         </p>
       </div>
       <InvoiceTable
-        data={sortedRows}
+        rows={sortedRows}
         columns={columns}
         onRowClick={onRowClick}
-        isFilterOpen={isFilterOpen}
-        onSort={handleSort}
-        sortConfig={sortConfig}
       />
     </div>
   );
