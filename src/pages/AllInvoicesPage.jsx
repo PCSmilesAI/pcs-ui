@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 
@@ -12,31 +12,73 @@ import InvoiceTable from '../components/InvoiceTable.jsx';
 export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery = '', filters = {} }) {
   // Local state for sorting configuration
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Original unsorted data
-  const data = [
-    {
-      invoice: 'IN761993',
-      vendor: 'Artisan Dental',
-      amount: '$1,265.40',
-      office: 'Roseburg',
-      status: 'To Be Paid',
-    },
-    {
-      invoice: '4307',
-      vendor: 'Exodus Dental Solutions',
-      amount: '$1,349.08',
-      office: 'Lebanon',
-      status: 'Approval',
-    },
-    {
-      invoice: '44250801',
-      vendor: 'Henry Schein',
-      amount: '$1,622.47',
-      office: 'Eugene',
-      status: 'Complete',
-    },
-  ];
+  // Load invoice data from the queue
+  useEffect(() => {
+    const loadInvoices = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/invoice_queue.json');
+        if (!response.ok) {
+          throw new Error(`Failed to load invoices: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        // Transform the queue data to match the expected format
+        const transformedData = data.map(invoice => ({
+          invoice: invoice.invoice_number || 'Unknown',
+          vendor: invoice.vendor || 'Unknown',
+          amount: `$${invoice.total || '0.00'}`,
+          office: invoice.clinic_id || 'Unknown',
+          status: invoice.status || 'New',
+          // Add additional fields for detail view
+          invoice_date: invoice.invoice_date,
+          json_path: invoice.json_path,
+          pdf_path: invoice.pdf_path,
+          timestamp: invoice.timestamp,
+          assigned_to: invoice.assigned_to,
+          approved: invoice.approved
+        }));
+        
+        setInvoices(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error('Error loading invoices:', err);
+        setError(err.message);
+        // Fallback to static data if loading fails
+        setInvoices([
+          {
+            invoice: 'IN761993',
+            vendor: 'Artisan Dental',
+            amount: '$1,265.40',
+            office: 'Roseburg',
+            status: 'To Be Paid',
+          },
+          {
+            invoice: '4307',
+            vendor: 'Exodus Dental Solutions',
+            amount: '$1,349.08',
+            office: 'Lebanon',
+            status: 'Approval',
+          },
+          {
+            invoice: '44250801',
+            vendor: 'Henry Schein',
+            amount: '$1,622.47',
+            office: 'Eugene',
+            status: 'Complete',
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInvoices();
+  }, []);
 
   // Column definitions. Align right for the amount column.
   const columns = [
@@ -67,7 +109,7 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
 
   // Apply search and filters first, then sort. Filtered data is derived
   // from the original unsorted array using the criteria passed in.
-  const filteredData = data.filter((row) => {
+  const filteredData = invoices.filter((row) => {
     const query = searchQuery.trim().toLowerCase();
     if (query) {
       const matches = Object.values(row).some((val) =>
@@ -102,128 +144,54 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
   }, [filteredData, sortConfig]);
 
   /**
-   * Handler invoked when a header cell is clicked. Cycles
-   * sorting through ascending → descending → none. When the
-   * user clicks a new column the sorting starts in ascending
-   * order.
+   * Handle column header clicks to cycle through sort states.
+   * The sort state is maintained in local state and applied
+   * to the filtered data.
    */
   function handleSort(key) {
-    setSortConfig((current) => {
-      if (current.key !== key) {
-        return { key, direction: 'asc' };
-      }
-      if (current.direction === 'asc') {
-        return { key, direction: 'desc' };
-      }
-      // Reset sorting
-      return { key: null, direction: null };
-    });
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    } else if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      // Clear sorting
+      setSortConfig({ key: null, direction: null });
+      return;
+    }
+    setSortConfig({ key, direction });
   }
 
-  // Wrapper style replicates padding around the table
-  const wrapperStyle = { padding: '24px' };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-gray-600">Loading invoices...</div>
+      </div>
+    );
+  }
 
-  // Render header cells with sort icons when the filter panel is open
-  const headerRows = (
-    <tr>
-      {columns.map((col) => {
-        const isSorted = sortConfig.key === col.key;
-        return (
-          <th
-            key={col.key}
-            style={{
-              padding: '12px 16px',
-              borderRight: '1px solid #357ab2',
-              borderBottom: '1px solid #357ab2',
-              backgroundColor: '#ffffff',
-              fontWeight: 500,
-              color: '#5a5a5a',
-              fontSize: '14px',
-              textAlign: col.align || 'left',
-            }}
-          >
-            <button
-              onClick={() => handleSort(col.key)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                font: 'inherit',
-                color: '#5a5a5a',
-              }}
-            >
-              <span style={{ pointerEvents: 'none' }}>{col.label}</span>
-              {isFilterOpen && (
-                <span style={{ color: '#357ab2', fontSize: '12px' }}>
-                  {isSorted ? (
-                    sortConfig.direction === 'asc' ? (
-                      <i className="fas fa-sort-up"></i>
-                    ) : sortConfig.direction === 'desc' ? (
-                      <i className="fas fa-sort-down"></i>
-                    ) : (
-                      <i className="fas fa-sort"></i>
-                    )
-                  ) : (
-                    <i className="fas fa-sort"></i>
-                  )}
-                </span>
-              )}
-            </button>
-          </th>
-        );
-      })}
-    </tr>
-  );
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-red-600">Error loading invoices: {error}</div>
+      </div>
+    );
+  }
 
   return (
-    <div style={wrapperStyle}>
-      {/* We cannot easily reuse InvoiceTable here because of the sort
-          icons in the header. Instead we manually construct a table
-          with inline styles and call the existing onRowClick handler
-          for row selection. */}
-      <table
-        style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          borderLeft: '1px solid #357ab2',
-          borderTop: '1px solid #357ab2',
-        }}
-      >
-        <thead>{headerRows}</thead>
-        <tbody>
-          {sortedRows.map((row, rowIndex) => (
-            <tr
-              key={rowIndex}
-              onClick={() => onRowClick && onRowClick(row)}
-              style={{
-                cursor: onRowClick ? 'pointer' : 'default',
-                backgroundColor: '#ffffff',
-              }}
-            >
-              {columns.map((col) => (
-                <td
-                  key={col.key}
-                  style={{
-                    padding: '12px 16px',
-                    borderRight: '1px solid #357ab2',
-                    borderBottom: '1px solid #357ab2',
-                    fontSize: '14px',
-                    color: '#1f1f1f',
-                    textAlign: col.align || 'left',
-                  }}
-                >
-                  {row[col.key]}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">All Invoices</h1>
+        <p className="text-gray-600 mt-2">
+          {sortedRows.length} invoice{sortedRows.length !== 1 ? 's' : ''} found
+        </p>
+      </div>
+      <InvoiceTable
+        data={sortedRows}
+        columns={columns}
+        onRowClick={onRowClick}
+        isFilterOpen={isFilterOpen}
+        onSort={handleSort}
+        sortConfig={sortConfig}
+      />
     </div>
   );
 }
