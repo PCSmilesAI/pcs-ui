@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Refresh - PCS AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #357ab2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #2a5f8f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Force Refresh PCS AI</h1>
+        <p>This will clear all cached data and reload the application with fresh data.</p>
+        
+        <button onclick="forceRefresh()">🔄 Force Hard Refresh</button>
+        <button onclick="goToMain()">🏠 Go to Main App</button>
+        
+        <div id="status" style="margin-top: 20px; padding: 10px; border-radius: 4px;"></div>
+    </div>
+
+    <script>
+        function forceRefresh() {
+            const status = document.getElementById('status');
+            status.innerHTML = '🔄 Clearing cache and refreshing...';
+            status.style.backgroundColor = '#fff3cd';
+            status.style.color = '#856404';
+            
+            // Clear all caches
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+            
+            // Force reload with cache cleared
+            setTimeout(() => {
+                window.location.href = '/?t=' + Date.now() + '&refresh=true';
+            }, 1000);
+        }
+        
+        function goToMain() {
+            window.location.href = '/?t=' + Date.now();
+        }
+        
+        // Auto-refresh if this page was loaded with refresh parameter
+        if (window.location.search.includes('refresh=true')) {
+            setTimeout(() => {
+                window.location.href = '/?t=' + Date.now();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

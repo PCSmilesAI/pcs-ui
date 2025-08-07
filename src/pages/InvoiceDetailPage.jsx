@@ -197,7 +197,11 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     const status = invoice.status || 'new';
     const approved = invoice.approved || false;
 
-    console.log('Button logic - Status:', status, 'Approved:', approved);
+    console.log('🔍 InvoiceDetailPage Debug:');
+    console.log('  - Invoice Number:', invoice.invoice_number);
+    console.log('  - Status:', status);
+    console.log('  - Approved:', approved);
+    console.log('  - Full invoice object:', invoice);
 
     if (status === 'removed') {
       return []; // No buttons for removed invoices
