@@ -25,6 +25,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   });
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
 
   // Load line items from JSON data
   useEffect(() => {
@@ -93,6 +94,98 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     }
   }
 
+  // Function to update invoice status in the queue
+  async function updateInvoiceStatus(newStatus, newApproved = null) {
+    setProcessing(true);
+    try {
+      // Call the API to update the invoice status
+      const response = await fetch('/api/update-invoice-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          invoice_number: invoice.invoice_number,
+          status: newStatus,
+          approved: newApproved
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update invoice status');
+      }
+
+      const result = await response.json();
+      console.log('Invoice status updated:', result);
+      
+      // Show success message
+      alert(`Invoice ${newStatus.toLowerCase()} successfully!`);
+      
+      // Navigate back to refresh the list
+      onBack();
+      
+    } catch (error) {
+      console.error('Error updating invoice status:', error);
+      alert('Error updating invoice status. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  // Button click handlers
+  function handleApprove() {
+    updateInvoiceStatus('approved', true);
+  }
+
+  function handleReject() {
+    updateInvoiceStatus('rejected', false);
+  }
+
+  function handleRepair() {
+    updateInvoiceStatus('repair', false);
+  }
+
+  function handlePaid() {
+    updateInvoiceStatus('completed', true);
+  }
+
+  function handleRemove() {
+    if (confirm('Are you sure you want to remove this invoice from the system?')) {
+      updateInvoiceStatus('removed', false);
+    }
+  }
+
+  // Determine which buttons to show based on invoice status
+  function getActionButtons() {
+    const status = invoice.status || 'new';
+    const approved = invoice.approved || false;
+
+    if (status === 'removed') {
+      return []; // No buttons for removed invoices
+    }
+
+    if (status === 'completed') {
+      return [
+        { label: 'Remove', onClick: handleRemove, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } }
+      ];
+    }
+
+    if (approved && status === 'approved') {
+      return [
+        { label: 'Paid', onClick: handlePaid, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
+        { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
+        { label: 'Repair', onClick: handleRepair, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
+      ];
+    }
+
+    // Default buttons for new/unapproved invoices
+    return [
+      { label: 'Approve', onClick: handleApprove, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
+      { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
+      { label: 'Repair', onClick: handleRepair, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
+    ];
+  }
+
   // Basic styles used throughout the detail page
   const wrapperStyle = { padding: '24px' };
   const headerStyle = {
@@ -124,6 +217,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     color: '#357ab2',
     backgroundColor: '#ffffff',
     cursor: 'pointer',
+    transition: 'all 0.2s ease',
   };
   const mainGridStyle = {
     display: 'grid',
@@ -199,16 +293,14 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             <i className="fas fa-arrow-left"></i>
           </button>
           <div style={summaryStyle}>
-            <span>{details.invoice}</span>
-            <span>{details.vendor}</span>
-            <span>{paymentAmount}</span>
-            <span>{details.office}</span>
+            <span>{invoice.invoice || invoice.invoice_number}</span>
+            <span>{invoice.vendor}</span>
+            <span>{invoice.amount}</span>
           </div>
         </div>
-        {/* Download icon on right */}
         <button
           onClick={handleDownload}
-          aria-label="Download"
+          aria-label="Download PDF"
           style={{
             color: '#357ab2',
             background: 'none',
@@ -223,12 +315,18 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
 
       {/* Action buttons */}
       <div style={buttonRowStyle}>
-        {['Approve', 'Reject', 'Repair'].map((action) => (
+        {getActionButtons().map((button) => (
           <button
-            key={action}
-            style={actionButtonStyle}
+            key={button.label}
+            onClick={button.onClick}
+            disabled={processing}
+            style={{
+              ...button.style,
+              opacity: processing ? 0.6 : 1,
+              cursor: processing ? 'not-allowed' : 'pointer',
+            }}
           >
-            {action}
+            {processing ? 'Processing...' : button.label}
           </button>
         ))}
       </div>
@@ -267,7 +365,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                       }}
                     />
                   </td>
-                  <td style={cellStyle}>{invoice.status || 'To Be Paid'}</td>
+                  <td style={cellStyle}>{invoice.status || 'New'}</td>
                 </tr>
               </tbody>
             </table>
@@ -371,100 +469,80 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             </table>
           </div>
           {/* Line Items section */}
-          <div style={{ padding: '16px' }}>
+          <div style={sectionStyle}>
             <h2 style={sectionTitleStyle}>Line Items</h2>
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                Loading line items...
-              </div>
+              <div style={{ textAlign: 'center', padding: '20px' }}>Loading line items...</div>
             ) : items.length > 0 ? (
               <table style={tableStyle}>
                 <thead>
                   <tr>
-                    <th style={{ ...cellHeaderStyle, textAlign: 'left' }}>ID</th>
-                    <th style={{ ...cellHeaderStyle, textAlign: 'left' }}>Name</th>
-                    <th style={{ ...cellHeaderStyle, textAlign: 'center' }}>QTY</th>
-                    <th style={{ ...cellHeaderStyle, textAlign: 'right' }}>Unit Price</th>
-                    <th style={{ ...cellHeaderStyle, textAlign: 'right' }}>Total</th>
+                    <th style={cellHeaderStyle}>Item</th>
+                    <th style={cellHeaderStyle}>Qty</th>
+                    <th style={cellHeaderStyle}>Unit</th>
+                    <th style={cellHeaderStyle}>Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((item, idx) => (
-                    <tr key={idx}>
-                      <td style={cellStyle}>
-                        <input
-                          type="text"
-                          value={item.id}
-                          onChange={(e) => handleItemChange(idx, 'id', e.target.value)}
-                          style={{
-                            border: '1px solid #cbd5e0',
-                            borderRadius: '4px',
-                            padding: '4px 6px',
-                            fontSize: '14px',
-                            width: 'calc(100% - 12px)',
-                            boxSizing: 'border-box',
-                          }}
-                        />
-                      </td>
+                  {items.map((item, index) => (
+                    <tr key={item.id || index}>
                       <td style={cellStyle}>
                         <input
                           type="text"
                           value={item.name}
-                          onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
+                          onChange={(e) => handleItemChange(index, 'name', e.target.value)}
                           style={{
                             border: '1px solid #cbd5e0',
                             borderRadius: '4px',
-                            padding: '4px 6px',
+                            padding: '4px 8px',
                             fontSize: '14px',
-                            width: 'calc(100% - 12px)',
+                            width: 'calc(100% - 16px)',
                             boxSizing: 'border-box',
                           }}
                         />
                       </td>
-                      <td style={{ ...cellStyle, textAlign: 'center' }}>
+                      <td style={cellStyle}>
                         <input
-                          type="number"
+                          type="text"
                           value={item.qty}
-                          onChange={(e) => handleItemChange(idx, 'qty', e.target.value)}
+                          onChange={(e) => handleItemChange(index, 'qty', e.target.value)}
                           style={{
                             border: '1px solid #cbd5e0',
                             borderRadius: '4px',
-                            padding: '4px 6px',
+                            padding: '4px 8px',
                             fontSize: '14px',
                             width: '60px',
                             textAlign: 'center',
                           }}
                         />
                       </td>
-                      <td style={{ ...cellStyle, textAlign: 'right' }}>
+                      <td style={cellStyle}>
                         <input
                           type="text"
                           value={item.unit}
-                          onChange={(e) => handleItemChange(idx, 'unit', e.target.value)}
+                          onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
                           style={{
                             border: '1px solid #cbd5e0',
                             borderRadius: '4px',
-                            padding: '4px 6px',
+                            padding: '4px 8px',
                             fontSize: '14px',
-                            width: 'calc(100% - 12px)',
-                            boxSizing: 'border-box',
+                            width: '80px',
                             textAlign: 'right',
                           }}
                         />
                       </td>
-                      <td style={{ ...cellStyle, textAlign: 'right' }}>
+                      <td style={cellStyle}>
                         <input
                           type="text"
                           value={item.total}
-                          onChange={(e) => handleItemChange(idx, 'total', e.target.value)}
+                          onChange={(e) => handleItemChange(index, 'total', e.target.value)}
                           style={{
                             border: '1px solid #cbd5e0',
                             borderRadius: '4px',
-                            padding: '4px 6px',
+                            padding: '4px 8px',
                             fontSize: '14px',
-                            width: 'calc(100% - 12px)',
+                            width: '80px',
                             textAlign: 'right',
-                            boxSizing: 'border-box',
                           }}
                         />
                       </td>
@@ -474,7 +552,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
               </table>
             ) : (
               <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                No line items found
+                No line items available
               </div>
             )}
           </div>
@@ -487,23 +565,14 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
               style={{
                 width: '100%',
                 height: '100%',
-                border: '1px solid #357ab2',
-                borderRadius: '4px',
+                border: 'none',
+                minHeight: '600px',
               }}
               title="Invoice PDF"
             />
           ) : (
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                border: '1px solid #357ab2',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <span style={{ color: '#a0aec0' }}>No PDF Available</span>
+            <div style={{ textAlign: 'center', color: '#666' }}>
+              No PDF available
             </div>
           )}
         </div>
