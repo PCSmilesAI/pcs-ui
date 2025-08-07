@@ -68,7 +68,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             pdf_path: invoice.pdf_path,
             timestamp: invoice.timestamp,
             assigned_to: invoice.assigned_to,
-            approved: invoice.approved
+            approved: invoice.approved,
+            status: invoice.status
           }));
         
         console.log('✅ ToBePaidPage: Data transformed successfully:', transformedData.length, 'approved invoices');
