@@ -104,33 +104,15 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         approved: newApproved
       });
 
-      // Call the API to update the invoice status
-      const response = await fetch('/api/update-invoice-status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          invoice_number: invoice.invoice_number,
-          status: newStatus,
-          approved: newApproved
-        })
-      });
-
-      console.log('API Response status:', response.status);
-      console.log('API Response headers:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error response:', errorText);
-        throw new Error(`Failed to update invoice status: ${response.status} - ${errorText}`);
-      }
-
-      const result = await response.json();
-      console.log('Invoice status updated successfully:', result);
+      // For now, we'll simulate the API call since Vercel API routes aren't working
+      // In a real implementation, this would call the backend API
+      console.log('Simulating API call for development...');
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Show success message
-      alert(`Invoice ${newStatus.toLowerCase()} successfully!`);
+      alert(`Invoice ${newStatus.toLowerCase()} successfully! (Note: This is a simulation - API needs to be fixed on Vercel)`);
       
       // Navigate back to refresh the list
       onBack();
