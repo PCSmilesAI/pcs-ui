@@ -12,11 +12,21 @@
   "routes": [
     {
       "src": "/invoice_queue.json",
-      "dest": "/invoice_queue.json"
+      "dest": "/invoice_queue.json",
+      "headers": {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+      }
     },
     {
       "src": "/office_info.json",
-      "dest": "/office_info.json"
+      "dest": "/office_info.json",
+      "headers": {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+      }
     },
     {
       "src": "/email_invoices/(.*)",
