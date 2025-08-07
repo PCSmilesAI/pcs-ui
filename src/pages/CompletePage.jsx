@@ -17,7 +17,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
       try {
         console.log('🔄 CompletePage: Starting to load invoices...');
         setLoading(true);
-        const response = await fetch('/invoice_queue.json');
+        const response = await fetch(`/invoice_queue.json?t=${Date.now()}`);
         console.log('📡 CompletePage: Fetch response status:', response.status);
         
         if (!response.ok) {
