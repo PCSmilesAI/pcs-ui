@@ -98,6 +98,12 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   async function updateInvoiceStatus(newStatus, newApproved = null) {
     setProcessing(true);
     try {
+      console.log('Attempting to update invoice:', {
+        invoice_number: invoice.invoice_number,
+        status: newStatus,
+        approved: newApproved
+      });
+
       // Call the API to update the invoice status
       const response = await fetch('/api/update-invoice-status', {
         method: 'POST',
@@ -111,12 +117,17 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         })
       });
 
+      console.log('API Response status:', response.status);
+      console.log('API Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error('Failed to update invoice status');
+        const errorText = await response.text();
+        console.error('API Error response:', errorText);
+        throw new Error(`Failed to update invoice status: ${response.status} - ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('Invoice status updated:', result);
+      console.log('Invoice status updated successfully:', result);
       
       // Show success message
       alert(`Invoice ${newStatus.toLowerCase()} successfully!`);
@@ -126,7 +137,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       
     } catch (error) {
       console.error('Error updating invoice status:', error);
-      alert('Error updating invoice status. Please try again.');
+      alert(`Error updating invoice status: ${error.message}`);
     } finally {
       setProcessing(false);
     }
