@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/invoice_queue.json",
+      "dest": "/invoice_queue.json"
+    },
+    {
+      "src": "/office_info.json",
+      "dest": "/office_info.json"
+    },
+    {
+      "src": "/email_invoices/(.*)",
+      "dest": "/email_invoices/$1"
+    },
+    {
+      "src": "/output_jsons/(.*)",
+      "dest": "/output_jsons/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+} 
