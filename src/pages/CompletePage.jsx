@@ -28,9 +28,9 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
         console.log('📊 CompletePage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
-        // Filter for invoices that are "complete" or "approved"
+        // Filter for invoices that are "completed" (have been paid)
         const transformedData = data
-          .filter(invoice => invoice.status === 'complete' || invoice.status === 'approved')
+          .filter(invoice => invoice.status === 'completed')
           .map(invoice => ({
             invoice: invoice.invoice_number || 'Unknown',
             vendor: invoice.vendor || 'Unknown',

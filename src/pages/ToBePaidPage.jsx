@@ -44,11 +44,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         console.log('📊 ToBePaidPage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
-        // Filter for invoices that ARE approved (approved: true)
+        // Filter for invoices that ARE approved and have status 'approved' (ready to be paid)
         const transformedData = data
           .filter(invoice => {
-            const isApproved = invoice.approved === true;
-            console.log(`📋 Invoice ${invoice.invoice_number}: approved=${invoice.approved}, showing=${isApproved}`);
+            const isApproved = invoice.approved === true && invoice.status === 'approved';
+            console.log(`📋 Invoice ${invoice.invoice_number}: approved=${invoice.approved}, status=${invoice.status}, showing=${isApproved}`);
             return isApproved;
           })
           .map(invoice => ({
