@@ -154,6 +154,15 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         // Update the invoice object passed from parent
         Object.assign(invoice, updatedInvoice);
       }
+
+      // Persist client-side override so lists reflect the change immediately
+      try {
+        const { setOverride } = await import('../utils/status_overrides');
+        setOverride(invoice.invoice_number, {
+          status: newStatus,
+          ...(newApproved !== null ? { approved: newApproved } : {})
+        });
+      } catch (_) {}
       
       // Show success message
       alert(`Invoice ${newStatus.toLowerCase()} successfully!`);

@@ -40,7 +40,12 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           throw new Error(`Failed to load invoices: ${response.status} - ${response.statusText}`);
         }
         
-        const data = await response.json();
+        let data = await response.json();
+        // Apply client-side overrides so tab movement is immediate even if API cannot persist
+        try {
+          const { applyOverrides } = await import('../utils/status_overrides');
+          data = applyOverrides(data);
+        } catch (_) {}
         console.log('📊 ToBePaidPage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
