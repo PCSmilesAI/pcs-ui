@@ -38,7 +38,11 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
           throw new Error(`Failed to load invoices: ${response.status}`);
         }
         
-        const data = await response.json();
+        let data = await response.json();
+        try {
+          const { applyOverrides } = await import('../utils/status_overrides');
+          data = applyOverrides(data);
+        } catch (_) {}
         console.log('📊 AllInvoicesPage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format

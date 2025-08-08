@@ -58,6 +58,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           })
           .map(invoice => ({
             invoice: invoice.invoice_number || 'Unknown',
+            invoice_number: invoice.invoice_number, // needed by detail view
             vendor: invoice.vendor || 'Unknown',
             amount: `$${invoice.total || '0.00'}`,
             office: invoice.clinic_id || 'Unknown',
@@ -66,7 +67,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               day: 'numeric',
               year: '2-digit'
             }) : 'N/A',
-            status: 'Pending Payment',
+            displayStatus: 'Pending Payment',
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
             json_path: invoice.json_path,
