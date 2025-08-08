@@ -5,7 +5,7 @@ import VendorTable from '../components/VendorTable.jsx';
  * Page for the "Vendors" view. Displays a list of vendors with
  * payment method, outstanding amount and contact information.
  */
-export default function VendorsPage({ searchQuery = '', filters = {} }) {
+export default function VendorsPage({ searchQuery = '', filters = {}, onVendorClick }) {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -121,7 +121,12 @@ export default function VendorsPage({ searchQuery = '', filters = {} }) {
           {filteredRows.length} vendor{filteredRows.length !== 1 ? 's' : ''} with outstanding invoices
         </p>
       </div>
-      <VendorTable rows={filteredRows} />
+      <VendorTable
+        rows={filteredRows}
+        onRowClick={(row) => {
+          if (onVendorClick) onVendorClick(row);
+        }}
+      />
     </div>
   );
 }

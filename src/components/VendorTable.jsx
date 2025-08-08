@@ -6,12 +6,12 @@ import InvoiceTable from './InvoiceTable.jsx';
  * information. Vendors have a name, payment method, an outstanding
  * amount and a contact number. Rows are not interactive.
  */
-export default function VendorTable({ rows }) {
+export default function VendorTable({ rows, onRowClick }) {
   const columns = [
     { key: 'name', label: 'Name' },
     { key: 'method', label: 'Payment Method' },
     { key: 'amount', label: 'Outstanding Amount', align: 'right' },
     { key: 'contact', label: 'Contact' },
   ];
-  return <InvoiceTable columns={columns} rows={rows} />;
+  return <InvoiceTable columns={columns} rows={rows} onRowClick={onRowClick} />;
 }

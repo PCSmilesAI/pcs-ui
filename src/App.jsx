@@ -218,7 +218,15 @@ export default function App() {
                 />
               )}
               {currentPage === 'vendors' && (
-                <VendorsPage searchQuery={searchQuery} filters={filters} />
+                <VendorsPage
+                  searchQuery={searchQuery}
+                  filters={filters}
+                  onVendorClick={(vendorRow) => {
+                    // For now, open All Invoices filtered by this vendor
+                    setFilters((prev) => ({ ...prev, vendor: vendorRow.name }));
+                    setCurrentPage('allInvoices');
+                  }}
+                />
               )}
               {currentPage === 'allInvoices' && (
                 <AllInvoicesPage
