@@ -74,7 +74,8 @@ export default function App() {
    * @param {Object} invoice - The invoice data associated with the row.
    */
   function handleRowClick(invoice) {
-    setSelectedInvoice(invoice);
+    // Preserve the source page to help the detail view render correct action buttons
+    setSelectedInvoice({ ...invoice, _sourcePage: currentPage });
     setPreviousPage(currentPage);
     setCurrentPage('detail');
   }

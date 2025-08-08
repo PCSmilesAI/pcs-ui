@@ -244,7 +244,11 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
 
   // Determine which buttons to show based on invoice status
   function getActionButtons() {
-    const status = invoice.status || 'new';
+    let status = invoice.status || 'new';
+    // If coming from Completed page and status is missing, treat as completed
+    if ((!invoice.status || invoice.status === 'new') && invoice._sourcePage === 'complete') {
+      status = 'completed';
+    }
     const approved = invoice.approved || false;
 
     console.log('🔍 InvoiceDetailPage Debug:');
@@ -567,82 +571,82 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             {loading ? (
               <div style={{ textAlign: 'center', padding: '20px' }}>Loading line items...</div>
             ) : items.length > 0 ? (
-              <table style={tableStyle}>
-                <thead>
-                  <tr>
+            <table style={tableStyle}>
+              <thead>
+                <tr>
                     <th style={cellHeaderStyle}>Item</th>
                     <th style={cellHeaderStyle}>Qty</th>
                     <th style={cellHeaderStyle}>Unit</th>
                     <th style={cellHeaderStyle}>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
+                </tr>
+              </thead>
+              <tbody>
                   {items.map((item, index) => (
                     <tr key={item.id || index}>
-                      <td style={cellStyle}>
-                        <input
-                          type="text"
+                    <td style={cellStyle}>
+                      <input
+                        type="text"
                           value={item.name}
                           onChange={(e) => handleItemChange(index, 'name', e.target.value)}
-                          style={{
-                            border: '1px solid #cbd5e0',
-                            borderRadius: '4px',
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
                             padding: '4px 8px',
-                            fontSize: '14px',
+                          fontSize: '14px',
                             width: 'calc(100% - 16px)',
-                            boxSizing: 'border-box',
-                          }}
-                        />
-                      </td>
-                      <td style={cellStyle}>
-                        <input
-                          type="text"
-                          value={item.qty}
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </td>
+                    <td style={cellStyle}>
+                      <input
+                        type="text"
+                        value={item.qty}
                           onChange={(e) => handleItemChange(index, 'qty', e.target.value)}
-                          style={{
-                            border: '1px solid #cbd5e0',
-                            borderRadius: '4px',
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
                             padding: '4px 8px',
-                            fontSize: '14px',
-                            width: '60px',
-                            textAlign: 'center',
-                          }}
-                        />
-                      </td>
+                          fontSize: '14px',
+                          width: '60px',
+                          textAlign: 'center',
+                        }}
+                      />
+                    </td>
                       <td style={cellStyle}>
-                        <input
-                          type="text"
-                          value={item.unit}
+                      <input
+                        type="text"
+                        value={item.unit}
                           onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
-                          style={{
-                            border: '1px solid #cbd5e0',
-                            borderRadius: '4px',
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
                             padding: '4px 8px',
-                            fontSize: '14px',
+                          fontSize: '14px',
                             width: '80px',
-                            textAlign: 'right',
-                          }}
-                        />
-                      </td>
+                          textAlign: 'right',
+                        }}
+                      />
+                    </td>
                       <td style={cellStyle}>
-                        <input
-                          type="text"
-                          value={item.total}
+                      <input
+                        type="text"
+                        value={item.total}
                           onChange={(e) => handleItemChange(index, 'total', e.target.value)}
-                          style={{
-                            border: '1px solid #cbd5e0',
-                            borderRadius: '4px',
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
                             padding: '4px 8px',
-                            fontSize: '14px',
+                          fontSize: '14px',
                             width: '80px',
-                            textAlign: 'right',
-                          }}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          textAlign: 'right',
+                        }}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
             ) : (
               <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
                 No line items available
@@ -655,9 +659,9 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
           {invoice.pdf_path ? (
             <iframe
               src={`/${invoice.pdf_path}`}
-              style={{
-                width: '100%',
-                height: '100%',
+            style={{
+              width: '100%',
+              height: '100%',
                 border: 'none',
                 minHeight: '600px',
               }}
@@ -666,7 +670,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
           ) : (
             <div style={{ textAlign: 'center', color: '#666' }}>
               No PDF available
-            </div>
+          </div>
           )}
         </div>
       </div>
