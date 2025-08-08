@@ -101,6 +101,8 @@ def _extract_relative_due_date(text: str, invoice_date: str) -> Optional[str]:
     patterns = [
         # "Due X days from date"
         r'[Dd]ue\s+(\d+)\s+[Dd]ays?\s+[Ff]rom\s+[Dd]ate',
+        # "Net Due X Days from Inv. Date" (Patterson pattern)
+        r'[Nn]et\s+[Dd]ue\s+(\d+)\s+[Dd]ays?\s+[Ff]rom\s+[Ii]nv\.?\s*[Dd]ate',
         # "Net X days"
         r'[Nn]et\s+(\d+)\s+[Dd]ays?',
         # "Payment terms: X days"
@@ -109,6 +111,8 @@ def _extract_relative_due_date(text: str, invoice_date: str) -> Optional[str]:
         r'[Tt]erms?\s*:?\s*[Nn]et\s+(\d+)',
         # "X days from invoice date"
         r'(\d+)\s+[Dd]ays?\s+[Ff]rom\s+[Ii]nvoice\s+[Dd]ate',
+        # "X days past due" (Artisan pattern)
+        r'(\d+)\s+[Dd]ays?\s+[Pp]ast\s+[Dd]ue',
     ]
     
     for pattern in patterns:
@@ -180,6 +184,16 @@ def test_due_date_extraction():
             "text": "Payment Due: 03/01/2025",
             "invoice_date": "01/15/2025",
             "expected": "03/01/2025"
+        },
+        {
+            "text": "Invoice Date: 07/11/2025\nNet Due 30 Days from Inv. Date",
+            "invoice_date": "07/11/2025",
+            "expected": "08/10/2025"  # 30 days later
+        },
+        {
+            "text": "Invoice Date: 07/18/2025\nLATE CHARGE: A penalty for late payment of 1-3/4% per month (21% per annum) will be added to all accounts 30 days past due.",
+            "invoice_date": "07/18/2025",
+            "expected": "08/17/2025"  # 30 days later
         }
     ]
     
