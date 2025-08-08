@@ -86,6 +86,52 @@ app.post('/update-invoice-status', async (req, res) => {
   }
 });
 
+// API endpoint for removing an invoice entirely and deleting related files
+app.post('/remove-invoice', async (req, res) => {
+  try {
+    const { invoice_number, json_path, pdf_path } = req.body || {};
+    if (!invoice_number) {
+      return res.status(400).json({ error: 'invoice_number is required' });
+    }
+
+    const publicQueuePath = path.join(__dirname, 'public', 'invoice_queue.json');
+    const rootQueuePath = path.join(__dirname, 'invoice_queue.json');
+
+    if (!fs.existsSync(publicQueuePath)) {
+      return res.status(404).json({ error: 'Invoice queue not found' });
+    }
+
+    const queue = JSON.parse(fs.readFileSync(publicQueuePath, 'utf8'));
+    const filtered = queue.filter(inv => inv.invoice_number !== invoice_number);
+    fs.writeFileSync(publicQueuePath, JSON.stringify(filtered, null, 2));
+    if (fs.existsSync(rootQueuePath)) {
+      fs.writeFileSync(rootQueuePath, JSON.stringify(filtered, null, 2));
+    }
+
+    // Best-effort: remove associated files in both root and public
+    const tryUnlink = (p) => {
+      if (!p) return;
+      const candidates = [
+        path.join(__dirname, p),
+        path.join(__dirname, 'public', p),
+      ];
+      for (const filePath of candidates) {
+        try {
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        } catch (_) {}
+      }
+    };
+
+    tryUnlink(json_path);
+    tryUnlink(pdf_path);
+
+    res.json({ success: true, invoice_number });
+  } catch (error) {
+    console.error('Error removing invoice:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Development API server running on http://localhost:${PORT}`);
 }); 

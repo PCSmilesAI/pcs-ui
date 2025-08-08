@@ -196,8 +196,49 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   }
 
   function handleRemove() {
+    if (invoice.status === 'completed') {
+      handleRemoveCompletely();
+      return;
+    }
     if (confirm('Are you sure you want to remove this invoice from the system?')) {
       updateInvoiceStatus('removed', false);
+    }
+  }
+
+  // Strong remove for completed invoices: delete from queue + delete files
+  async function handleRemoveCompletely() {
+    if (!confirm('This will permanently remove the invoice and its files. Continue?')) return;
+    setProcessing(true);
+    try {
+      // Call API if available (local/dev)
+      try {
+        const resp = await fetch('/api/remove-invoice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            invoice_number: invoice.invoice_number,
+            json_path: invoice.json_path,
+            pdf_path: invoice.pdf_path,
+          })
+        });
+        if (!resp.ok) throw new Error('API remove failed');
+      } catch (_) {
+        // fall back to client-side only
+      }
+
+      // Ensure disappearance from all tabs via override
+      try {
+        const { setOverride } = await import('../utils/status_overrides');
+        setOverride(invoice.invoice_number, { status: 'removed', approved: false });
+      } catch (_) {}
+
+      alert('Invoice removed');
+      onBack();
+    } catch (e) {
+      console.error(e);
+      alert('Failed to remove invoice');
+    } finally {
+      setProcessing(false);
     }
   }
 
@@ -218,7 +259,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
 
     if (status === 'completed') {
       return [
-        { label: 'Remove', onClick: handleRemove, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } }
+        { label: 'Remove', onClick: handleRemoveCompletely, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } }
       ];
     }
 
