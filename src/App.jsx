@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import NavBar from './components/NavBar.jsx';
+import VendorDetailPage from './pages/VendorDetailPage.jsx';
 import ForMePage from './pages/ForMePage.jsx';
 import ToBePaidPage from './pages/ToBePaidPage.jsx';
 import CompletePage from './pages/CompletePage.jsx';
@@ -59,6 +60,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState('forMe');
   const [previousPage, setPreviousPage] = useState('forMe');
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedVendor, setSelectedVendor] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   // Search query entered via the nav bar
   const [searchQuery, setSearchQuery] = useState('');
@@ -222,9 +224,8 @@ export default function App() {
                   searchQuery={searchQuery}
                   filters={filters}
                   onVendorClick={(vendorRow) => {
-                    // For now, open All Invoices filtered by this vendor
-                    setFilters((prev) => ({ ...prev, vendor: vendorRow.name }));
-                    setCurrentPage('allInvoices');
+                    setSelectedVendor(vendorRow.name);
+                    setCurrentPage('vendorDetail');
                   }}
                 />
               )}
@@ -238,6 +239,13 @@ export default function App() {
               )}
               {currentPage === 'detail' && selectedInvoice && (
                 <InvoiceDetailPage invoice={selectedInvoice} onBack={handleBack} />
+              )}
+              {currentPage === 'vendorDetail' && selectedVendor && (
+                <VendorDetailPage
+                  vendor={selectedVendor}
+                  onBack={() => setCurrentPage('vendors')}
+                  onRowClick={handleRowClick}
+                />
               )}
               {currentPage === 'account' && <AccountPage />}
               {currentPage === 'companyInfo' && <CompanyInfoPage />}
