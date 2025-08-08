@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 /**
  * Reports page summarises invoice data into charts and tables. The
@@ -8,23 +8,62 @@ import React, { useState, useMemo } from 'react';
  * relative widths to approximate a pie chart and bar chart.
  */
 export default function ReportsPage() {
-  // Combine invoice data from all sections. Dates are provided in
-  // YYYY‑MM‑DD format for easy comparison. Amounts are numeric.
-  const allInvoices = [
-    { vendor: 'Artisan Dental', amount: 1265.4, date: '2025-07-26' },
-    { vendor: 'Exodus Dental Solutions', amount: 349.08, date: '2025-07-29' },
-    { vendor: 'Henry Schein', amount: 622.47, date: '2025-07-30' },
-    { vendor: 'Artisan Dental', amount: 1265.4, date: '2025-07-26' },
-    { vendor: 'Exodus Dental Solutions', amount: 1349.08, date: '2025-07-29' },
-    { vendor: 'Henry Schein', amount: 1622.47, date: '2025-07-30' },
-    { vendor: 'Artisan Dental', amount: 1265.4, date: '2025-07-30' },
-    { vendor: 'Exodus Dental Solutions', amount: 1349.08, date: '2025-07-30' },
-    { vendor: 'Henry Schein', amount: 1622.47, date: '2025-08-13' },
-  ];
+  // Dynamically load all invoices from the same source as "All Invoices"
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  // Determine the current month and year for filtering. In a real
-  // application you would use new Date() but here we assume July 2025.
-  const currentDate = new Date('2025-07-31');
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/invoice_queue.json?t=${Date.now()}`, {
+          method: 'GET',
+          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+        });
+        if (!response.ok) throw new Error(`Failed to load invoices: ${response.status}`);
+        let data = await response.json();
+        // Apply client-side overrides (mirrors list pages)
+        try {
+          const { applyOverrides } = await import('../utils/status_overrides');
+          data = applyOverrides(data);
+        } catch (_) {}
+
+        // Map to generic structure used by reports
+        const mapped = (data || []).map((inv) => {
+          // invoice_date is typically MM/DD/YY or MM/DD/YYYY
+          let y = '2000', m = '01', d = '01';
+          if (inv.invoice_date) {
+            const parts = String(inv.invoice_date).split('/');
+            if (parts.length === 3) {
+              m = parts[0].padStart(2, '0');
+              d = parts[1].padStart(2, '0');
+              const yy = parts[2];
+              y = yy.length === 2 ? `20${yy}` : yy;
+            }
+          }
+          const isoDate = `${y}-${m}-${d}`;
+          const amount = parseFloat(String(inv.total || '0').replace(/[^0-9.]/g, '')) || 0;
+          return {
+            vendor: inv.vendor || 'Unknown',
+            amount,
+            date: isoDate,
+          };
+        });
+        setInvoices(mapped);
+        setError('');
+      } catch (e) {
+        setError(e.message || 'Failed to load reports');
+        setInvoices([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  // Determine current month and year for filtering.
+  const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
 
@@ -37,7 +76,7 @@ export default function ReportsPage() {
    * current year, month‑to‑date keeps those from the current month.
    */
   const filteredInvoices = useMemo(() => {
-    return allInvoices.filter(({ date }) => {
+    return invoices.filter(({ date }) => {
       const dt = new Date(date);
       if (range === 'year') {
         return dt.getFullYear() === currentYear;
@@ -47,7 +86,7 @@ export default function ReportsPage() {
       }
       return true; // all time
     });
-  }, [range]);
+  }, [range, invoices, currentMonth, currentYear]);
 
   /**
    * Aggregate the filtered invoices by vendor. Returns an array of
@@ -126,6 +165,12 @@ export default function ReportsPage() {
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Reports</h1>
+      {loading && (
+        <div style={{ marginBottom: '12px', color: '#357ab2' }}>Loading reports…</div>
+      )}
+      {error && (
+        <div style={{ marginBottom: '12px', color: '#dc2626' }}>Error: {error}</div>
+      )}
       {/* Range selector */}
       <div style={buttonRowStyle}>
         {['all', 'year', 'month'].map((key) => (
