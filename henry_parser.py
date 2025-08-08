@@ -84,10 +84,26 @@ def parse_digital_invoice(pdf_path: str) -> Dict:
         else:
             i += 1
 
+    # Extract due date
+    due_date = ""
+    try:
+        from due_date_extractor import extract_due_date
+        invoice_date_str = invoice_date.group(1) if invoice_date else ""
+        due_date = extract_due_date(text, invoice_date_str)
+        if due_date:
+            print(f"📅 Found due date: {due_date}")
+        else:
+            print("⚠️ No due date found")
+    except ImportError:
+        print("⚠️ due_date_extractor module not found, skipping due date extraction")
+    except Exception as e:
+        print(f"⚠️ Error extracting due date: {e}")
+
     return {
         "vendor": "Henry schein",
         "invoice_number": invoice_number.group(1) if invoice_number else "",
         "invoice_date": invoice_date.group(1) if invoice_date else "",
+        "due_date": due_date,
         "invoice_total": invoice_total.group(1) if invoice_total else "",
         "office_location": clean_office(office_block.group(1)) if office_block else "",
         "vendor_name": "Henry Schein",
@@ -163,6 +179,26 @@ def parse_scanned_invoice(pdf_path: str) -> Dict:
             })
 
     result["line_items"] = items
+    
+    # Extract due date for scanned invoices
+    try:
+        from due_date_extractor import extract_due_date
+        # Get all OCR text for due date extraction
+        all_text = " ".join(data["text"])
+        due_date = extract_due_date(all_text, result.get("invoice_date", ""))
+        if due_date:
+            result["due_date"] = due_date
+            print(f"📅 Found due date: {due_date}")
+        else:
+            result["due_date"] = ""
+            print("⚠️ No due date found")
+    except ImportError:
+        print("⚠️ due_date_extractor module not found, skipping due date extraction")
+        result["due_date"] = ""
+    except Exception as e:
+        print(f"⚠️ Error extracting due date: {e}")
+        result["due_date"] = ""
+    
     return result
 
 def parse(pdf_path: str) -> Dict:

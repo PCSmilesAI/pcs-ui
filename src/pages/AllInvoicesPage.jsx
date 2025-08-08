@@ -55,6 +55,7 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
           category: invoice.category || 'Other',
           // Add additional fields for detail view
           invoice_date: invoice.invoice_date,
+          due_date: invoice.due_date,
           json_path: invoice.json_path,
           pdf_path: invoice.pdf_path,
           timestamp: invoice.timestamp,

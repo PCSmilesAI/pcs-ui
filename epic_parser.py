@@ -96,6 +96,7 @@ def extract_invoice_data(pdf_path):
             "vendor": "Epic Dental Lab",
             "invoice_number": "",
             "invoice_date": "",
+            "due_date": "",
             "total": "0.00",
             "office_location": "",
             "vendor_name": "Epic Dental Lab",
@@ -243,6 +244,20 @@ def extract_invoice_data(pdf_path):
         # Special case for Invoice 13 (OCR misreading "_1.00}waxrimtower")
         if result['invoice_number'] == "5419":
             print("🔧 Special case: Invoice 5419 has OCR misreading, will fix product names")
+        
+        # Extract due date
+        try:
+            from due_date_extractor import extract_due_date
+            due_date = extract_due_date(all_text, result['invoice_date'])
+            if due_date:
+                result['due_date'] = due_date
+                print(f"📅 Found due date: {result['due_date']}")
+            else:
+                print("⚠️ No due date found")
+        except ImportError:
+            print("⚠️ due_date_extractor module not found, skipping due date extraction")
+        except Exception as e:
+            print(f"⚠️ Error extracting due date: {e}")
         
         # Find line items section
         line_items_start_y = None

@@ -38,6 +38,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
           .filter(invoice => invoice.status === 'completed')
           .map(invoice => ({
             invoice: invoice.invoice_number || 'Unknown',
+            invoice_number: invoice.invoice_number,
             vendor: invoice.vendor || 'Unknown',
             amount: `$${invoice.total || '0.00'}`,
             office: invoice.clinic_id || 'Unknown',
@@ -48,11 +49,13 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
             }) : 'N/A',
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
+            due_date: invoice.due_date,
             json_path: invoice.json_path,
             pdf_path: invoice.pdf_path,
             timestamp: invoice.timestamp,
             assigned_to: invoice.assigned_to,
-            approved: invoice.approved
+            approved: invoice.approved,
+            status: invoice.status
           }));
         
         console.log('✅ CompletePage: Data transformed successfully:', transformedData.length, 'completed invoices');

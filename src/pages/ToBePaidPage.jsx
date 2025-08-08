@@ -62,14 +62,19 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             vendor: invoice.vendor || 'Unknown',
             amount: `$${invoice.total || '0.00'}`,
             office: invoice.clinic_id || 'Unknown',
-            dueDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
+            dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
               year: '2-digit'
-            }) : 'N/A',
+            }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: '2-digit'
+            }) : 'N/A'),
             displayStatus: 'Pending Payment',
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
+            due_date: invoice.due_date,
             json_path: invoice.json_path,
             pdf_path: invoice.pdf_path,
             timestamp: invoice.timestamp,

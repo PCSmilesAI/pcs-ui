@@ -153,6 +153,23 @@ def parse_exodus_invoice(pdf_path: str) -> Dict:
             # Not an amount line; skip or move ahead
             i += 1
 
+    # Extract due date
+    try:
+        from due_date_extractor import extract_due_date
+        due_date = extract_due_date(text, result.get("invoice_date", ""))
+        if due_date:
+            result["due_date"] = due_date
+            print(f"📅 Found due date: {due_date}")
+        else:
+            result["due_date"] = ""
+            print("⚠️ No due date found")
+    except ImportError:
+        print("⚠️ due_date_extractor module not found, skipping due date extraction")
+        result["due_date"] = ""
+    except Exception as e:
+        print(f"⚠️ Error extracting due date: {e}")
+        result["due_date"] = ""
+
     return result
 
 

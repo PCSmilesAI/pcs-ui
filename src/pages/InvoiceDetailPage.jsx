@@ -22,6 +22,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     office: invoice.office,
     category: invoice.category || 'Dental Lab',
     invoice_date: invoice.invoice_date || '',
+    due_date: invoice.due_date || '',
   });
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -497,6 +498,24 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                       type="text"
                       value={details.invoice_date}
                       onChange={(e) => handleDetailChange('invoice_date', e.target.value)}
+                      style={{
+                        border: '1px solid #cbd5e0',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '14px',
+                        width: 'calc(100% - 16px)',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Due Date</td>
+                  <td style={cellStyle}>
+                    <input
+                      type="text"
+                      value={details.due_date}
+                      onChange={(e) => handleDetailChange('due_date', e.target.value)}
                       style={{
                         border: '1px solid #cbd5e0',
                         borderRadius: '4px',
