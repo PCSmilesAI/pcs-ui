@@ -60,6 +60,7 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
           })
           .map(invoice => ({
             invoice: invoice.invoice_number || 'Unknown',
+            invoice_number: invoice.invoice_number, // needed by detail view
             vendor: invoice.vendor || 'Unknown',
             amount: `$${invoice.total || '0.00'}`,
             office: invoice.clinic_id || 'Unknown',
