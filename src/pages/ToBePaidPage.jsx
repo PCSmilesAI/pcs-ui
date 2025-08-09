@@ -71,6 +71,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               day: 'numeric',
               year: '2-digit'
             }) : 'N/A'),
+            invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: '2-digit'
+            }) : 'N/A',
             displayStatus: 'Pending Payment',
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
@@ -110,6 +115,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     { key: 'vendor', label: 'Vendor' },
     { key: 'amount', label: 'Amount', align: 'right' },
     { key: 'office', label: 'Office' },
+    { key: 'invoiceDate', label: 'Invoice Date' },
     { key: 'dueDate', label: 'Due Date' },
     { key: 'status', label: 'Status' },
   ];
