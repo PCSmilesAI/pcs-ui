@@ -157,6 +157,26 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
         if (rowDate > endDate) return false;
       }
     }
+    // Due Within filter
+    if (filters.dueWithin) {
+      const days = parseInt(filters.dueWithin);
+      if (!isNaN(days)) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day
+        
+        // Convert row.dueDate (M-D-YY) to Date
+        const [m, d, y] = row.dueDate.split('-');
+        const dueDate = new Date(`20${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`);
+        dueDate.setHours(0, 0, 0, 0); // Reset time to start of day
+        
+        // Calculate days difference
+        const timeDiff = dueDate.getTime() - today.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        
+        // Filter: due date must be within the specified days AND not past due
+        if (daysDiff < 0 || daysDiff > days) return false;
+      }
+    }
     return true;
   });
 

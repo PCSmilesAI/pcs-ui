@@ -25,6 +25,7 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
   const [office, setOffice] = React.useState('');
   const [dueStart, setDueStart] = React.useState('');
   const [dueEnd, setDueEnd] = React.useState('');
+  const [dueWithin, setDueWithin] = React.useState('');
   const [category, setCategory] = React.useState('');
   // Base styles
   const overlayStyle = {
@@ -147,6 +148,20 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
             style={inputStyle}
           />
         </div>
+        {/* Due Within */}
+        <div>
+          <label style={labelStyle}>Due Within</label>
+          <select
+            style={inputStyle}
+            value={dueWithin}
+            onChange={(e) => setDueWithin(e.target.value)}
+          >
+            <option value="">Choose options</option>
+            <option value="7">7 Days</option>
+            <option value="10">10 Days</option>
+            <option value="14">14 Days</option>
+          </select>
+        </div>
         {/* Category */}
         <div>
           <label style={labelStyle}>Category</label>
@@ -173,6 +188,7 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
                 office,
                 dueStart,
                 dueEnd,
+                dueWithin,
                 category,
               };
               if (onApplyFilters) {
