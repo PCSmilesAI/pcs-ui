@@ -87,9 +87,15 @@ def parse_digital_invoice(pdf_path: str) -> Dict:
     # Extract due date; if blank, fallback to invoice_date + 30 days
     due_date = ""
     try:
-        from due_date_extractor import extract_due_date
         invoice_date_str = invoice_date.group(1) if invoice_date else ""
-        due_date = extract_due_date(text, invoice_date_str) or ""
+        
+        # Try to extract due date from the text
+        due_date_match = re.search(r"Due Date\s*\n?\s*(\d{2}/\d{2}/\d{2})", text)
+        if due_date_match:
+            due_date = due_date_match.group(1)
+            print(f"📅 Extracted due date: {due_date}")
+        
+        # If no due date found, fallback to invoice_date + 30 days
         if not due_date and invoice_date_str:
             from datetime import datetime, timedelta
             base = None
