@@ -131,19 +131,16 @@ def parse_invoice(pdf_path: str) -> Dict[str, Any]:
             office_location = city.split()[0]
             break
 
-    # Extract due date
+    # Due date rule for Artisan: always 30 days from invoice date (no parsing)
+    from datetime import datetime, timedelta
     due_date = ""
-    try:
-        from due_date_extractor import extract_due_date
-        due_date = extract_due_date(all_text, invoice_date)
-        if due_date:
-            print(f"📅 Found due date: {due_date}")
-        else:
-            print("⚠️ No due date found")
-    except ImportError:
-        print("⚠️ due_date_extractor module not found, skipping due date extraction")
-    except Exception as e:
-        print(f"⚠️ Error extracting due date: {e}")
+    if invoice_date:
+        try:
+            base = datetime.strptime(invoice_date, "%m/%d/%Y")
+            due_date = (base + timedelta(days=30)).strftime("%m/%d/%Y")
+            print(f"📅 Computed due date (invoice_date + 30): {due_date}")
+        except Exception as e:
+            print(f"⚠️ Failed to compute due date: {e}")
 
     return {
         'vendor': 'artisan dental laboratory',

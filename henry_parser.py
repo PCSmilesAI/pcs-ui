@@ -84,16 +84,29 @@ def parse_digital_invoice(pdf_path: str) -> Dict:
         else:
             i += 1
 
-    # Extract due date
+    # Extract due date; if blank, fallback to invoice_date + 30 days
     due_date = ""
     try:
         from due_date_extractor import extract_due_date
         invoice_date_str = invoice_date.group(1) if invoice_date else ""
-        due_date = extract_due_date(text, invoice_date_str)
+        due_date = extract_due_date(text, invoice_date_str) or ""
+        if not due_date and invoice_date_str:
+            from datetime import datetime, timedelta
+            base = None
+            try:
+                # Henry uses MM/DD/YY
+                base = datetime.strptime(invoice_date_str, "%m/%d/%y")
+            except Exception:
+                try:
+                    base = datetime.strptime(invoice_date_str, "%m/%d/%Y")
+                except Exception:
+                    base = None
+            if base:
+                due_date = (base + timedelta(days=30)).strftime("%m/%d/%Y")
         if due_date:
-            print(f"📅 Found due date: {due_date}")
+            print(f"📅 Henry due date: {due_date}")
         else:
-            print("⚠️ No due date found")
+            print("⚠️ Henry due date not found and fallback failed")
     except ImportError:
         print("⚠️ due_date_extractor module not found, skipping due date extraction")
     except Exception as e:
@@ -180,18 +193,26 @@ def parse_scanned_invoice(pdf_path: str) -> Dict:
 
     result["line_items"] = items
     
-    # Extract due date for scanned invoices
+    # Extract due date for scanned invoices; fallback to invoice_date + 30
     try:
         from due_date_extractor import extract_due_date
-        # Get all OCR text for due date extraction
         all_text = " ".join(data["text"])
-        due_date = extract_due_date(all_text, result.get("invoice_date", ""))
-        if due_date:
-            result["due_date"] = due_date
-            print(f"📅 Found due date: {due_date}")
-        else:
-            result["due_date"] = ""
-            print("⚠️ No due date found")
+        dd = extract_due_date(all_text, result.get("invoice_date", "")) or ""
+        if not dd and result.get("invoice_date"):
+            from datetime import datetime, timedelta
+            base = None
+            inv = result.get("invoice_date", "")
+            try:
+                base = datetime.strptime(inv, "%m/%d/%y")
+            except Exception:
+                try:
+                    base = datetime.strptime(inv, "%m/%d/%Y")
+                except Exception:
+                    base = None
+            if base:
+                dd = (base + timedelta(days=30)).strftime("%m/%d/%Y")
+        result["due_date"] = dd
+        print(f"📅 Henry scanned due date: {dd or 'N/A'}")
     except ImportError:
         print("⚠️ due_date_extractor module not found, skipping due date extraction")
         result["due_date"] = ""

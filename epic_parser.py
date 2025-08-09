@@ -245,19 +245,15 @@ def extract_invoice_data(pdf_path):
         if result['invoice_number'] == "5419":
             print("🔧 Special case: Invoice 5419 has OCR misreading, will fix product names")
         
-        # Extract due date
+        # Due date rule for Epic: always 30 days from invoice date (no parsing field on PDF)
         try:
-            from due_date_extractor import extract_due_date
-            due_date = extract_due_date(all_text, result['invoice_date'])
-            if due_date:
-                result['due_date'] = due_date
-                print(f"📅 Found due date: {result['due_date']}")
-            else:
-                print("⚠️ No due date found")
-        except ImportError:
-            print("⚠️ due_date_extractor module not found, skipping due date extraction")
+            from datetime import datetime, timedelta
+            if result.get('invoice_date'):
+                base = datetime.strptime(result['invoice_date'], "%m/%d/%Y")
+                result['due_date'] = (base + timedelta(days=30)).strftime("%m/%d/%Y")
+                print(f"📅 Computed due date (invoice_date + 30): {result['due_date']}")
         except Exception as e:
-            print(f"⚠️ Error extracting due date: {e}")
+            print(f"⚠️ Error computing Epic due date: {e}")
         
         # Find line items section
         line_items_start_y = None

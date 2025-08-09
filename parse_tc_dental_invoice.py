@@ -61,19 +61,23 @@ def parse_tc_dental_invoice(pdf_path: str) -> dict:
                     "line_item_total": line_total
                 })
 
-    # Extract due date
+    # TC Dental: parse exact due date; no fallback logic (must be perfect)
     due_date = ""
-    try:
-        from due_date_extractor import extract_due_date
-        due_date = extract_due_date(text, invoice_date)
-        if due_date:
-            print(f"📅 Found due date: {due_date}")
-        else:
-            print("⚠️ No due date found")
-    except ImportError:
-        print("⚠️ due_date_extractor module not found, skipping due date extraction")
-    except Exception as e:
-        print(f"⚠️ Error extracting due date: {e}")
+    # Look for explicit "Due Date:" label or standalone pattern near header
+    m = re.search(r'Due Date\s*:\s*([0-9]{1,2}/[0-9]{1,2}/[0-9]{4})', text, re.IGNORECASE)
+    if not m:
+        # Some layouts may have it on a separate line following the header
+        m = re.search(r'\bDue Date\b\s*\n\s*([0-9]{1,2}/[0-9]{1,2}/[0-9]{4})', text, re.IGNORECASE)
+    if not m:
+        # Fallback: search lines close to "Invoice Date:" section
+        header_block = re.search(r'Invoice Date\s*:\s*[0-9/]+[\s\S]{0,200}?Due Date\s*:?\s*([0-9/]{8,10})', text, re.IGNORECASE)
+        if header_block:
+            m = header_block
+    if m:
+        due_date = m.group(1)
+        print(f"📅 TC Dental due date parsed: {due_date}")
+    else:
+        print("❌ TC Dental due date not found in text")
 
     return {
         "vendor": vendor,

@@ -250,19 +250,17 @@ def parse_patterson_invoice(pdf_path: str) -> Dict[str, Any]:
     if missing:
         raise RuntimeError(f"Missing required fields in invoice: {', '.join(missing)}")
 
-    # Extract due date
+    # Due date rule for Patterson: 30 days from invoice date (Net Due 30 Days from Inv. Date)
+    from datetime import datetime, timedelta
     due_date = ""
-    try:
-        from due_date_extractor import extract_due_date
-        due_date = extract_due_date(text, invoice_date)
-        if due_date:
-            print(f"📅 Found due date: {due_date}")
-        else:
-            print("⚠️ No due date found")
-    except ImportError:
-        print("⚠️ due_date_extractor module not found, skipping due date extraction")
-    except Exception as e:
-        print(f"⚠️ Error extracting due date: {e}")
+    if invoice_date:
+        try:
+            # invoice_date is in YYYY-MM-DD format
+            base = datetime.strptime(invoice_date, "%Y-%m-%d")
+            due_date = (base + timedelta(days=30)).strftime("%m/%d/%Y")
+            print(f"📅 Computed due date (invoice_date + 30): {due_date}")
+        except Exception as e:
+            print(f"⚠️ Failed to compute due date: {e}")
 
     return {
         "vendor": "patterson_dental",
