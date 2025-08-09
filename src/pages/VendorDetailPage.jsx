@@ -51,6 +51,13 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
                     year: '2-digit',
                   })
                 : 'N/A'),
+          invoiceDate: invoice.invoice_date
+            ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
+                month: 'numeric',
+                day: 'numeric',
+                year: '2-digit',
+              })
+            : 'N/A',
           status: invoice.status,
           // extras for detail
           invoice_date: invoice.invoice_date,
@@ -112,7 +119,8 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
       { key: 'invoice', label: 'Invoice' },
       { key: 'amount', label: 'Amount', align: 'right' },
       { key: 'office', label: 'Office' },
-      { key: 'dueDate', label: 'Invoice Date' },
+      { key: 'dueDate', label: 'Due Date' },
+      { key: 'invoiceDate', label: 'Invoice Date' },
       { key: 'status', label: 'Status' },
     ],
     []
