@@ -8,11 +8,12 @@
     "status": "approved",
     "json_path": "output_jsons/email_5_20250805_232223_henryschein_4434143_20250719_31082503_14485030066.json",
     "pdf_path": "email_invoices/email_5_20250805_232223_henryschein_4434143_20250719_31082503_14485030066.pdf",
-    "timestamp": "2025-08-07T02:20:33.573Z",
+    "timestamp": "2025-08-07T13:08:26.303Z",
     "assigned_to": null,
     "approved": true,
     "uploaded_at": "2025-08-06T09:56:05.750727",
-    "category": "Dental Supplies"
+    "category": "Dental Supplies",
+    "due_date": "08/17/25"
   },
   {
     "invoice_number": "44134561",
@@ -27,7 +28,8 @@
     "assigned_to": null,
     "approved": false,
     "uploaded_at": "2025-08-06T09:56:06.755906",
-    "category": "Dental Supplies"
+    "category": "Dental Supplies",
+    "due_date": "08/15/2025"
   },
   {
     "invoice_number": "44557050",
@@ -42,7 +44,8 @@
     "assigned_to": null,
     "approved": false,
     "uploaded_at": "2025-08-06T09:56:07.759508",
-    "category": "Dental Supplies"
+    "category": "Dental Supplies",
+    "due_date": "08/23/25"
   },
   {
     "invoice_number": "44213044",
@@ -57,7 +60,8 @@
     "assigned_to": null,
     "approved": false,
     "uploaded_at": "2025-08-06T09:56:08.766636",
-    "category": "Dental Supplies"
+    "category": "Dental Supplies",
+    "due_date": "08/16/25"
   },
   {
     "invoice_number": "44507826",
@@ -72,7 +76,8 @@
     "assigned_to": null,
     "approved": false,
     "uploaded_at": "2025-08-06T09:56:09.772301",
-    "category": "Dental Supplies"
+    "category": "Dental Supplies",
+    "due_date": "08/23/25"
   },
   {
     "invoice_number": "44048990",
@@ -87,7 +92,8 @@
     "assigned_to": null,
     "approved": false,
     "uploaded_at": "2025-08-06T09:56:10.774961",
-    "category": "Dental Supplies"
+    "category": "Dental Supplies",
+    "due_date": "08/17/25"
   },
   {
     "invoice_number": "44250801",
@@ -102,6 +108,7 @@
     "assigned_to": null,
     "approved": false,
     "uploaded_at": "2025-08-06T09:56:11.781096",
-    "category": "Dental Supplies"
+    "category": "Dental Supplies",
+    "due_date": "08/17/25"
   }
 ]
