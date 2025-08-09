@@ -119,8 +119,8 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
       { key: 'invoice', label: 'Invoice' },
       { key: 'amount', label: 'Amount', align: 'right' },
       { key: 'office', label: 'Office' },
-      { key: 'dueDate', label: 'Due Date' },
       { key: 'invoiceDate', label: 'Invoice Date' },
+      { key: 'dueDate', label: 'Due Date' },
       { key: 'status', label: 'Status' },
     ],
     []
