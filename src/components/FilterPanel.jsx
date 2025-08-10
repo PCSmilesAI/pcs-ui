@@ -23,8 +23,6 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
   const [minAmount, setMinAmount] = React.useState('');
   const [maxAmount, setMaxAmount] = React.useState('');
   const [office, setOffice] = React.useState('');
-  const [dueStart, setDueStart] = React.useState('');
-  const [dueEnd, setDueEnd] = React.useState('');
   const [dueWithin, setDueWithin] = React.useState('');
   const [category, setCategory] = React.useState('');
   // Base styles
@@ -128,26 +126,6 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
             <option value="Eugene">Eugene</option>
           </select>
         </div>
-        {/* Due Date Start */}
-        <div>
-          <label style={labelStyle}>Due Date Start</label>
-          <input
-            type="date"
-            value={dueStart}
-            onChange={(e) => setDueStart(e.target.value)}
-            style={inputStyle}
-          />
-        </div>
-        {/* Due Date End */}
-        <div>
-          <label style={labelStyle}>Due Date End</label>
-          <input
-            type="date"
-            value={dueEnd}
-            onChange={(e) => setDueEnd(e.target.value)}
-            style={inputStyle}
-          />
-        </div>
         {/* Due Within */}
         <div>
           <label style={labelStyle}>Due Within</label>
@@ -186,8 +164,6 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
                 minAmount,
                 maxAmount,
                 office,
-                dueStart,
-                dueEnd,
                 dueWithin,
                 category,
               };

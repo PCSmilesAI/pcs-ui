@@ -141,31 +141,6 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
       const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
       if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;
       if (filters.maxAmount && amt > parseFloat(filters.maxAmount)) return false;
-      // dueDate filters
-      if (filters.dueStart || filters.dueEnd) {
-        // Only process if dueDate is not 'N/A' and has valid format
-        if (row.dueDate && row.dueDate !== 'N/A' && row.dueDate.includes('-')) {
-          try {
-            const [m, d, y] = row.dueDate.split('-');
-            if (m && d && y) {
-              const rowDate = new Date(`20${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`);
-              if (!isNaN(rowDate.getTime())) {
-                if (filters.dueStart) {
-                  const startDate = new Date(filters.dueStart);
-                  if (rowDate < startDate) return false;
-                }
-                if (filters.dueEnd) {
-                  const endDate = new Date(filters.dueEnd);
-                  if (rowDate > endDate) return false;
-                }
-              }
-            }
-          } catch (error) {
-            console.warn('⚠️ Error parsing due date:', row.dueDate, error);
-            // If date parsing fails, skip this filter for this row
-          }
-        }
-      }
       // Due Within filter
       if (filters.dueWithin) {
         const days = parseInt(filters.dueWithin);
