@@ -3,9 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load environment variables from env file
+dotenv.config({ path: path.join(__dirname, 'env') });
 
 const app = express();
 const PORT = 3001;
@@ -13,6 +17,146 @@ const PORT = 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// QuickBooks OAuth Connect Route
+app.get('/api/qbo/connect', (req, res) => {
+  try {
+    const clientId = process.env.QBO_CLIENT_ID;
+    const redirectUri = process.env.QBO_REDIRECT_URI;
+    const scopes = process.env.QBO_SCOPES;
+    const qboEnv = process.env.QBO_ENV || 'sandbox';
+    
+    if (!clientId || !redirectUri || !scopes) {
+      console.error('❌ Missing required environment variables for QBO OAuth');
+      return res.status(500).json({ error: 'Missing required environment variables' });
+    }
+
+    // Determine the base URL based on environment
+    const baseUrl = qboEnv === 'sandbox' 
+      ? 'https://sandbox-accounts.platform.intuit.com'
+      : 'https://accounts.platform.intuit.com';
+
+    // Build the OAuth authorization URL
+    const authUrl = new URL('/oauth2/v1/authorizations/request', baseUrl);
+    authUrl.searchParams.set('client_id', clientId);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('scope', scopes);
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+    authUrl.searchParams.set('state', 'qbo_oauth_' + Date.now()); // Simple state for CSRF protection
+
+    console.log('🔗 Redirecting to QuickBooks OAuth:', authUrl.toString());
+    
+    // Redirect the user to QuickBooks for authorization
+    res.redirect(authUrl.toString());
+    
+  } catch (error) {
+    console.error('❌ Error in QBO connect route:', error);
+    res.status(500).json({ error: 'Failed to initiate OAuth flow' });
+  }
+});
+
+// QuickBooks OAuth Callback Route
+app.get('/api/qbo/callback', async (req, res) => {
+  try {
+    const { code, state, realmId } = req.query;
+    
+    if (!code) {
+      console.error('❌ No authorization code received from QuickBooks');
+      return res.status(400).json({ error: 'No authorization code received' });
+    }
+
+    console.log('✅ Received authorization code from QuickBooks');
+    console.log('📋 Code:', code ? '***' + code.slice(-4) : 'none');
+    console.log('🏢 Realm ID:', realmId || 'none');
+    console.log('🔒 State:', state || 'none');
+
+    // Exchange authorization code for access token
+    const tokenResponse = await exchangeCodeForToken(code, realmId);
+    
+    if (tokenResponse.success) {
+      console.log('🎉 Successfully obtained access token');
+      console.log('🔑 Access Token:', tokenResponse.accessToken ? '***' + tokenResponse.accessToken.slice(-4) : 'none');
+      console.log('🔄 Refresh Token:', tokenResponse.refreshToken ? '***' + tokenResponse.refreshToken.slice(-4) : 'none');
+      
+      // Store tokens securely (you'll want to implement proper storage)
+      // For now, we'll just log them and return success
+      
+      res.json({
+        success: true,
+        message: 'OAuth flow completed successfully',
+        realmId: realmId,
+        accessTokenReceived: !!tokenResponse.accessToken,
+        refreshTokenReceived: !!tokenResponse.refreshToken
+      });
+      
+    } else {
+      console.error('❌ Failed to exchange code for token:', tokenResponse.error);
+      res.status(500).json({ error: 'Failed to exchange authorization code for access token' });
+    }
+    
+  } catch (error) {
+    console.error('❌ Error in QBO callback route:', error);
+    res.status(500).json({ error: 'Failed to process OAuth callback' });
+  }
+});
+
+async function exchangeCodeForToken(authorizationCode, realmId) {
+  try {
+    const clientId = process.env.QBO_CLIENT_ID;
+    const clientSecret = process.env.QBO_CLIENT_SECRET;
+    const redirectUri = process.env.QBO_REDIRECT_URI;
+    const qboEnv = process.env.QBO_ENV || 'sandbox';
+    
+    if (!clientId || !clientSecret || !redirectUri) {
+      throw new Error('Missing required environment variables for token exchange');
+    }
+
+    // Determine the token endpoint based on environment
+    const tokenEndpoint = qboEnv === 'sandbox'
+      ? 'https://sandbox-oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
+      : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
+
+    const tokenRequestBody = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: authorizationCode,
+      redirect_uri: redirectUri
+    });
+
+    console.log('🔄 Exchanging authorization code for access token...');
+    
+    const tokenResponse = await fetch(tokenEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`
+      },
+      body: tokenRequestBody.toString()
+    });
+
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text();
+      console.error('❌ Token exchange failed:', tokenResponse.status, errorText);
+      throw new Error(`Token exchange failed: ${tokenResponse.status} ${errorText}`);
+    }
+
+    const tokenData = await tokenResponse.json();
+    
+    return {
+      success: true,
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token,
+      expiresIn: tokenData.expires_in,
+      tokenType: tokenData.token_type
+    };
+    
+  } catch (error) {
+    console.error('❌ Error in token exchange:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
 
 // API endpoint for updating invoice status
 app.post('/update-invoice-status', async (req, res) => {
