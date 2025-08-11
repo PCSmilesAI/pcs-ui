@@ -15,6 +15,18 @@
   ],
   "routes": [
     {
+      "src": "/api/qbo/connect",
+      "dest": "/api/qbo/connect.js"
+    },
+    {
+      "src": "/api/qbo/callback",
+      "dest": "/api/qbo/callback.js"
+    },
+    {
+      "src": "/api/qbo/test",
+      "dest": "/api/qbo/test.js"
+    },
+    {
       "src": "/invoice_queue.json",
       "dest": "/invoice_queue.json",
       "headers": {
