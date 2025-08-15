@@ -1,0 +1,25 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "5252",
+  "invoice_date": "06/25/2025",
+  "due_date": "07/25/2025",
+  "total": "276.00",
+  "office_location": "Riddle",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "Framework URPD",
+      "product_name": "Upper cast partial framework",
+      "Quantity": "1",
+      "unit_price": "225.00",
+      "line_item_total": "225.00"
+    },
+    {
+      "product_number": "Wax bite rim",
+      "product_name": "Upper wax bite rim",
+      "Quantity": "1.00",
+      "unit_price": "51.00",
+      "line_item_total": "51.00"
+    }
+  ]
+}

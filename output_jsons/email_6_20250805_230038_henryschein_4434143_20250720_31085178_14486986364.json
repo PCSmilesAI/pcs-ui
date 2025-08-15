@@ -1,7 +1,9 @@
+⚠️ Henry due date not found and fallback failed
 {
   "vendor": "Henry schein",
   "invoice_number": "",
   "invoice_date": "",
+  "due_date": "",
   "invoice_total": "",
   "office_location": "",
   "vendor_name": "Henry Schein",

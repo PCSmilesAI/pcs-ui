@@ -1,1 +1,18 @@
-{"vendor": "Henry schein", "invoice_number": "44007187", "invoice_date": "07/18/25", "total": "64.78", "office_location": "Lebanon", "vendor_name": "Henry Schein", "line_items": [{"product_number": "107-5076", "product_name": "Burnisher DE Ball 25-26", "Quantity": "2", "unit_price": "32.39", "line_item_total": "64.78"}]}
+{
+  "vendor": "Henry schein",
+  "invoice_number": "44007187",
+  "invoice_date": "07/18/25",
+  "due_date": "08/17/2025",
+  "invoice_total": "64.78",
+  "office_location": "Lebanon",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "107-5076",
+      "product_name": "EA Burnisher DE Ball 25-26",
+      "Quantity": "2",
+      "unit_price": "32.39",
+      "line_item_total": "64.78"
+    }
+  ]
+}

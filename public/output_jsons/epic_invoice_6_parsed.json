@@ -1,0 +1,32 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "5371",
+  "invoice_date": "07/20/2025",
+  "due_date": "08/19/2025",
+  "total": "336.00",
+  "office_location": "Riddle",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "Process LRPD",
+      "product_name": "Process lower partial to finish",
+      "Quantity": "1.00",
+      "unit_price": "153.00",
+      "line_item_total": "153.00"
+    },
+    {
+      "product_number": "Process FUD",
+      "product_name": "Process FUD to finish",
+      "Quantity": "1.00",
+      "unit_price": "153.00",
+      "line_item_total": "153.00"
+    },
+    {
+      "product_number": "ID Tag",
+      "product_name": "ID Tag",
+      "Quantity": "2.00",
+      "unit_price": "30.00",
+      "line_item_total": "30.00"
+    }
+  ]
+}

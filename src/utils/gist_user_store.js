@@ -44,15 +44,56 @@ async function saveUsers(users) {
 
 // ➕ Signup function with password hashing
 async function signupUser(name, email, password) {
-  const users = await getUsers();
-  const exists = users.find(user => user.email === email);
-  if (exists) return { success: false, message: 'Email already registered.' };
+  try {
+    console.log('🔐 Attempting to signup user:', { name, email });
+    
+    const users = await getUsers();
+    console.log('📋 Retrieved existing users:', users.length);
+    
+    const exists = users.find(user => user.email === email);
+    if (exists) {
+      console.log('❌ User already exists:', email);
+      return { success: false, message: 'Email already registered.' };
+    }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  users.push({ name, email, password: hashedPassword });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    users.push({ name, email, password: hashedPassword });
+    console.log('✅ User added to local array, attempting to save...');
 
-  const ok = await saveUsers(users);
-  return ok ? { success: true } : { success: false, message: 'Failed to save user.' };
+    const ok = await saveUsers(users);
+    if (ok) {
+      console.log('🎉 User saved successfully');
+      return { success: true };
+    } else {
+      console.error('❌ Failed to save user to database');
+      return { 
+        success: false, 
+        message: 'Failed to save user. This may be due to network restrictions or rate limiting. Please try again or contact support if the problem persists.' 
+      };
+    }
+  } catch (error) {
+    console.error('🔥 Signup error:', error);
+    
+    // Handle specific error types
+    if (error.message.includes('fetch')) {
+      return { 
+        success: false, 
+        message: 'Network error. Please check your internet connection and try again.' 
+      };
+    }
+    
+    if (error.message.includes('rate limit')) {
+      return { 
+        success: false, 
+        message: 'Too many requests. Please wait a moment and try again.' 
+      };
+    }
+    
+    return { 
+      success: false, 
+      message: 'An unexpected error occurred. Please try again or contact support.' 
+    };
+  }
 }
 
 // 🔐 Login function with password comparison

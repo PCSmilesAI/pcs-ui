@@ -16,15 +16,39 @@
   "routes": [
     {
       "src": "/api/qbo/connect",
-      "dest": "/api/qbo/connect.js"
+      "dest": "/api/qbo/connect.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
     },
     {
       "src": "/api/qbo/callback",
-      "dest": "/api/qbo/callback.js"
+      "dest": "/api/qbo/callback.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
     },
     {
       "src": "/api/qbo/test",
-      "dest": "/api/qbo/test.js"
+      "dest": "/api/qbo/test.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
+    },
+    {
+      "src": "/api/update-gist",
+      "dest": "/api/update-gist.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
     },
     {
       "src": "/invoice_queue.json",

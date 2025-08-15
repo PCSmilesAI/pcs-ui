@@ -1,0 +1,39 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "4793",
+  "invoice_date": "05/16/2025",
+  "due_date": "06/15/2025",
+  "total": "353.00",
+  "office_location": "Roseburg",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "Set LRPD",
+      "product_name": "Set LRPD for try-in",
+      "Quantity": "1.00",
+      "unit_price": "120.00",
+      "line_item_total": "120.00"
+    },
+    {
+      "product_number": "Set-up FUD",
+      "product_name": "Set-up wax try in of FUD",
+      "Quantity": "1.00",
+      "unit_price": "120.00",
+      "line_item_total": "120.00"
+    },
+    {
+      "product_number": "Set of premium teeth",
+      "product_name": "Set of premium teeth",
+      "Quantity": "1.00",
+      "unit_price": "75.00",
+      "line_item_total": "75.00"
+    },
+    {
+      "product_number": "Teeth LRPD",
+      "product_name": "Teeth LRPD",
+      "Quantity": "1.00",
+      "unit_price": "38.00",
+      "line_item_total": "38.00"
+    }
+  ]
+}

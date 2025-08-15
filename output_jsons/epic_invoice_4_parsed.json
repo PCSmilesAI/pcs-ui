@@ -1,0 +1,18 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "5179",
+  "invoice_date": "06/11/2025",
+  "due_date": "07/11/2025",
+  "total": "225.00",
+  "office_location": "Roseburg",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "at oe",
+      "product_name": "at oe",
+      "Quantity": "1.00",
+      "unit_price": "225.00",
+      "line_item_total": "225.00"
+    }
+  ]
+}

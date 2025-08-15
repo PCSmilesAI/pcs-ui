@@ -1,0 +1,18 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "5166",
+  "invoice_date": "06/10/2025",
+  "due_date": "07/10/2025",
+  "total": "51.00",
+  "office_location": "Roseburg",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "waxrimiower",
+      "product_name": "waxrimiower",
+      "Quantity": "1",
+      "unit_price": "51.00",
+      "line_item_total": "51.00"
+    }
+  ]
+}

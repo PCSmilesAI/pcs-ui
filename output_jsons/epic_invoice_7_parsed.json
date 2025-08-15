@@ -1,0 +1,39 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "4956",
+  "invoice_date": "05/18/2025",
+  "due_date": "06/17/2025",
+  "total": "316.00",
+  "office_location": "Riddle",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "Set LRPD",
+      "product_name": "Set LRPD for try-in",
+      "Quantity": "1.00",
+      "unit_price": "120.00",
+      "line_item_total": "120.00"
+    },
+    {
+      "product_number": "Set URPD",
+      "product_name": "Set URPD for try-in",
+      "Quantity": "1.00",
+      "unit_price": "120.00",
+      "line_item_total": "120.00"
+    },
+    {
+      "product_number": "Teeth LRPD",
+      "product_name": "Teeth LRPD",
+      "Quantity": "1.00",
+      "unit_price": "38.00",
+      "line_item_total": "38.00"
+    },
+    {
+      "product_number": "Teeth URPD",
+      "product_name": "Teeth URPD",
+      "Quantity": "1.00",
+      "unit_price": "38.00",
+      "line_item_total": "38.00"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "4957",
+  "invoice_date": "04/23/2025",
+  "due_date": "05/23/2025",
+  "total": "232.00",
+  "office_location": "Riddle",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "Acrylic URPD",
+      "product_name": "Acrylic URPD (5-9 units)",
+      "Quantity": "1",
+      "unit_price": "232.00",
+      "line_item_total": "232.00"
+    }
+  ]
+}

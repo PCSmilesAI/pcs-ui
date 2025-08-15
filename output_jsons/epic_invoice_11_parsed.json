@@ -1,0 +1,18 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "4840",
+  "invoice_date": "04/02/2025",
+  "due_date": "05/02/2025",
+  "total": "208.00",
+  "office_location": "Roseburg",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "Set of premium teeth",
+      "product_name": "Set of premium teeth",
+      "Quantity": "1.00",
+      "unit_price": "59.00",
+      "line_item_total": "59.00"
+    }
+  ]
+}

@@ -22,6 +22,8 @@ export default function SignupPage({ onSignup, onSwitchMode }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setError(''); // Clear previous errors
+    
     // Basic validation
     if (!name || !email || !password) {
       setError('Please fill in all fields');
@@ -31,21 +33,32 @@ export default function SignupPage({ onSignup, onSwitchMode }) {
       setError('Invalid admin code');
       return;
     }
+    
+    console.log('🚀 Starting signup process for:', email);
+    
     // Call the remote signup function. This persists the user in
     // the GitHub Gist via the serverless API. On failure it
     // returns an error message.
     try {
       const result = await signupUser(name, email, password);
+      console.log('📡 Signup result:', result);
+      
       if (!result.success) {
         setError(result.message || 'Signup failed.');
+        console.error('❌ Signup failed:', result.message);
         return;
       }
+      
+      console.log('✅ Signup successful, saving to localStorage...');
+      
       // Save minimal user info locally for subsequent sessions. Do
       // not persist the password.
       localStorage.setItem('loggedInUser', JSON.stringify({ name, email }));
+      
       // Notify the parent component that signup completed to update
       // authentication state if needed.
       if (onSignup) onSignup();
+      
       // Navigate to the account page after successful signup.  This
       // will only have an effect if react-router-dom is set up.
       try {
@@ -54,7 +67,8 @@ export default function SignupPage({ onSignup, onSwitchMode }) {
         // ignore navigate errors when router is not available
       }
     } catch (err) {
-      setError('An unexpected error occurred.');
+      console.error('🔥 Unexpected signup error:', err);
+      setError('An unexpected error occurred. Please check your internet connection and try again.');
     }
   }
 

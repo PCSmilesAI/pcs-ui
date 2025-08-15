@@ -1,0 +1,18 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "4789",
+  "invoice_date": "03/24/2025",
+  "due_date": "04/23/2025",
+  "total": "195.00",
+  "office_location": "Roseburg",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "framework",
+      "product_name": "framework",
+      "Quantity": "1",
+      "unit_price": "195.00",
+      "line_item_total": "195.00"
+    }
+  ]
+}

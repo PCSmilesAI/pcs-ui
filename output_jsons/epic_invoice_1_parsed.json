@@ -1,0 +1,25 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "5206",
+  "invoice_date": "06/16/2025",
+  "due_date": "07/16/2025",
+  "total": "311.00",
+  "office_location": "Riddle",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "Set up/Process LRPD",
+      "product_name": "Set up & process lower RPD to finish",
+      "Quantity": "1.00",
+      "unit_price": "273.00",
+      "line_item_total": "273.00"
+    },
+    {
+      "product_number": "Teeth LRPD",
+      "product_name": "Teeth LRPD",
+      "Quantity": "1.00",
+      "unit_price": "38.00",
+      "line_item_total": "38.00"
+    }
+  ]
+}

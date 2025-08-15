@@ -1,3 +1,10 @@
 EMAIL_USER=invoices@pcsmilesai.com
 EMAIL_PASS=Inv!PCSAI
 EMAIL_IMAP_SERVER=imap.secureserver.net
+
+QBO_ENV=sandbox
+QBO_CLIENT_ID=ABzNrOV8FZ5uhyb0Gk46qPTcqxJq1JVWapDv9mgODpsUgfeHIf
+QBO_CLIENT_SECRET=CJOwVumqdyckWdBL1Mjm0fTu3OwMNZFIY4YpuWUs
+QBO_SCOPES=com.intuit.quickbooks.accounting
+QBO_REDIRECT_URI=https://pcsmilesai.com/api/qbo/callback
+QBO_WEBHOOK_VERIFIER=9cd0c139-77ca-451b-b177-18242d8358d0

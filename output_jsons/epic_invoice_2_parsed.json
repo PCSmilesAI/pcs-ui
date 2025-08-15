@@ -1,0 +1,18 @@
+{
+  "vendor": "Epic Dental Lab",
+  "invoice_number": "5241",
+  "invoice_date": "06/24/2025",
+  "due_date": "07/24/2025",
+  "total": "153.00",
+  "office_location": "Roseburg",
+  "vendor_name": "Epic Dental Lab",
+  "line_items": [
+    {
+      "product_number": "Process FUD Process FUD finish",
+      "product_name": "Process FUD Process FUD finish",
+      "Quantity": "1",
+      "unit_price": "153.00",
+      "line_item_total": "153.00"
+    }
+  ]
+}

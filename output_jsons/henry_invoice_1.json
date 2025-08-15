@@ -1,0 +1,60 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "43912059",
+  "invoice_date": "07/10/25",
+  "due_date": "08/09/25",
+  "invoice_total": "396.87",
+  "office_location": "Riddle",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "492-0054",
+      "product_name": "50/BX ICX Water Treatment Tablets 0.7 Ltr Btl",
+      "Quantity": "1",
+      "unit_price": "39.59",
+      "line_item_total": "39.59"
+    },
+    {
+      "product_number": "777-2324",
+      "product_name": "20/PK Filtek One Bulk Fill A1",
+      "Quantity": "1",
+      "unit_price": "94.46",
+      "line_item_total": "94.46"
+    },
+    {
+      "product_number": "112-7321",
+      "product_name": "300/BX Essentials",
+      "Quantity": "300",
+      "unit_price": "11.59",
+      "line_item_total": "23.18"
+    },
+    {
+      "product_number": "300-0496",
+      "product_name": "100/PK Strata-G Wedge Refill Blue Small",
+      "Quantity": "1",
+      "unit_price": "63.19",
+      "line_item_total": "63.19"
+    },
+    {
+      "product_number": "543-3743",
+      "product_name": "72/BX Whole Mouth Clean Bundle",
+      "Quantity": "2",
+      "unit_price": "59.76",
+      "line_item_total": "119.52"
+    },
+    {
+      "product_number": "145-8601",
+      "product_name": "6/BX Colgate Minecraft Toothbrush Kids 5+",
+      "Quantity": "2",
+      "unit_price": "9.99",
+      "line_item_total": "19.98"
+    },
+    {
+      "product_number": "640-8482",
+      "product_name": "65/CN CaviWipes Towelettes XLarge",
+      "Quantity": "2",
+      "unit_price": "15.23",
+      "line_item_total": "30.46"
+    }
+  ]
+}
