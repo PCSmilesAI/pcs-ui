@@ -16,7 +16,7 @@
   "routes": [
     {
       "src": "/api/qbo/connect",
-      "dest": "/api/qbo/connect.js",
+      "dest": "/api/qbo/connect-vercel.js",
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -25,7 +25,7 @@
     },
     {
       "src": "/api/qbo/callback",
-      "dest": "/api/qbo/callback.js",
+      "dest": "/api/qbo/callback-vercel.js",
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",

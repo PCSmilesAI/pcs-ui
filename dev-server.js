@@ -4,50 +4,178 @@ import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import OAuthClient from 'intuit-oauth';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables from env file
-dotenv.config({ path: path.join(__dirname, 'env') });
+dotenv.config({ path: './env' });
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
+// QuickBooks OAuth Client - Direct implementation for Express server
+class QBOAuthClient {
+  constructor() {
+    this.clientId = process.env.QBO_CLIENT_ID;
+    this.clientSecret = process.env.QBO_CLIENT_SECRET;
+    this.redirectUri = process.env.QBO_REDIRECT_URI;
+    this.environment = process.env.QBO_ENV || 'sandbox';
+    this.scopes = process.env.QBO_SCOPES;
+    
+    // Initialize Intuit OAuth client
+    this.oauthClient = new OAuthClient({
+      clientId: this.clientId,
+      clientSecret: this.clientSecret,
+      environment: this.environment,
+      redirectUri: this.redirectUri,
+    });
+    
+    // Store tokens in memory (in production, use secure storage)
+    this.tokens = null;
+  }
+
+  getAuthorizationUrl(stateToken = null) {
+    try {
+      if (!this.clientId || !this.redirectUri || !this.scopes) {
+        throw new Error('Missing required environment variables for QBO OAuth');
+      }
+
+      // Generate state token if not provided
+      const state = stateToken || this.generateStateToken();
+      
+      // Build authorization URL using Intuit's OAuth client
+      const authUrl = this.oauthClient.authorizeUri({
+        scope: this.scopes,
+        state: state
+      });
+
+      console.log('🔗 Generated QuickBooks OAuth URL:', authUrl);
+      return authUrl;
+      
+    } catch (error) {
+      console.error('❌ Error generating authorization URL:', error);
+      throw error;
+    }
+  }
+
+  async exchangeCodeForToken(authCode, realmId) {
+    try {
+      if (!authCode) {
+        throw new Error('Authorization code is required');
+      }
+
+      console.log('🔄 Exchanging authorization code for access token...');
+      console.log('📋 Code:', authCode ? '***' + authCode.slice(-4) : 'none');
+      console.log('🏢 Realm ID:', realmId || 'none');
+
+      // Exchange code for tokens using Intuit's OAuth client
+      const tokenResponse = await this.oauthClient.createToken(authCode, realmId);
+      
+      if (tokenResponse.token) {
+        // Store tokens
+        this.tokens = {
+          accessToken: tokenResponse.token.access_token,
+          refreshToken: tokenResponse.token.refresh_token,
+          expiresIn: tokenResponse.token.expires_in,
+          tokenType: tokenResponse.token.token_type,
+          realmId: realmId
+        };
+
+        console.log('🎉 Successfully obtained access token');
+        console.log('🔑 Access Token:', this.tokens.accessToken ? '***' + this.tokens.accessToken.slice(-4) : 'none');
+        console.log('🔄 Refresh Token:', this.tokens.refreshToken ? '***' + this.tokens.refreshToken.slice(-4) : 'none');
+
+        return {
+          success: true,
+          accessToken: this.tokens.accessToken,
+          refreshToken: this.tokens.refreshToken,
+          expiresIn: this.tokens.expiresIn,
+          tokenType: this.tokens.tokenType,
+          realmId: realmId
+        };
+      } else {
+        throw new Error('No token received from QuickBooks');
+      }
+
+    } catch (error) {
+      console.error('❌ Error exchanging code for token:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  async refreshAccessToken(refreshToken = null) {
+    try {
+      const token = refreshToken || (this.tokens ? this.tokens.refreshToken : null);
+      
+      if (!token) {
+        throw new Error('Refresh token is required');
+      }
+
+      console.log('🔄 Refreshing access token...');
+
+      // Use Intuit's OAuth client to refresh token
+      const refreshResponse = await this.oauthClient.refreshUsingToken(token);
+      
+      if (refreshResponse.token) {
+        // Update stored tokens
+        this.tokens = {
+          accessToken: refreshResponse.token.access_token,
+          refreshToken: refreshResponse.token.refresh_token,
+          expiresIn: refreshResponse.token.expires_in,
+          tokenType: refreshResponse.token.token_type,
+          realmId: this.tokens ? this.tokens.realmId : null
+        };
+
+        console.log('✅ Access token refreshed successfully');
+        return {
+          success: true,
+          accessToken: this.tokens.accessToken,
+          refreshToken: this.tokens.refreshToken,
+          expiresIn: this.tokens.expiresIn
+        };
+      } else {
+        throw new Error('No token received during refresh');
+      }
+
+    } catch (error) {
+      console.error('❌ Error refreshing access token:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  generateStateToken() {
+    return 'qbo_oauth_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  hasValidTokens() {
+    return !!(this.tokens && this.tokens.accessToken);
+  }
+}
+
 // QuickBooks OAuth Connect Route
 app.get('/api/qbo/connect', (req, res) => {
   try {
-    const clientId = process.env.QBO_CLIENT_ID;
-    const redirectUri = process.env.QBO_REDIRECT_URI;
-    const scopes = process.env.QBO_SCOPES;
-    const qboEnv = process.env.QBO_ENV || 'sandbox';
+    const qbClient = new QBOAuthClient();
     
-    if (!clientId || !redirectUri || !scopes) {
-      console.error('❌ Missing required environment variables for QBO OAuth');
-      return res.status(500).json({ error: 'Missing required environment variables' });
-    }
-
-    // Determine the base URL based on environment
-    const baseUrl = qboEnv === 'sandbox' 
-      ? 'https://sandbox-accounts.platform.intuit.com'
-      : 'https://accounts.platform.intuit.com';
-
-    // Build the OAuth authorization URL
-    const authUrl = new URL('/oauth2/v1/authorizations/request', baseUrl);
-    authUrl.searchParams.set('client_id', clientId);
-    authUrl.searchParams.set('response_type', 'code');
-    authUrl.searchParams.set('scope', scopes);
-    authUrl.searchParams.set('redirect_uri', redirectUri);
-    authUrl.searchParams.set('state', 'qbo_oauth_' + Date.now()); // Simple state for CSRF protection
-
-    console.log('🔗 Redirecting to QuickBooks OAuth:', authUrl.toString());
+    // Generate authorization URL using the improved OAuth client
+    const authUrl = qbClient.getAuthorizationUrl();
+    
+    console.log('🔗 Redirecting to QuickBooks OAuth:', authUrl);
     
     // Redirect the user to QuickBooks for authorization
-    res.redirect(authUrl.toString());
+    res.redirect(authUrl);
     
   } catch (error) {
     console.error('❌ Error in QBO connect route:', error);
@@ -70,8 +198,10 @@ app.get('/api/qbo/callback', async (req, res) => {
     console.log('🏢 Realm ID:', realmId || 'none');
     console.log('🔒 State:', state || 'none');
 
-    // Exchange authorization code for access token
-    const tokenResponse = await exchangeCodeForToken(code, realmId);
+    const qbClient = new QBOAuthClient();
+    
+    // Exchange authorization code for access token using the improved OAuth client
+    const tokenResponse = await qbClient.exchangeCodeForToken(code, realmId);
     
     if (tokenResponse.success) {
       console.log('🎉 Successfully obtained access token');
@@ -100,63 +230,7 @@ app.get('/api/qbo/callback', async (req, res) => {
   }
 });
 
-async function exchangeCodeForToken(authorizationCode, realmId) {
-  try {
-    const clientId = process.env.QBO_CLIENT_ID;
-    const clientSecret = process.env.QBO_CLIENT_SECRET;
-    const redirectUri = process.env.QBO_REDIRECT_URI;
-    const qboEnv = process.env.QBO_ENV || 'sandbox';
-    
-    if (!clientId || !clientSecret || !redirectUri) {
-      throw new Error('Missing required environment variables for token exchange');
-    }
-
-    // Determine the token endpoint based on environment
-    const tokenEndpoint = qboEnv === 'sandbox'
-      ? 'https://sandbox-oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
-      : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
-
-    const tokenRequestBody = new URLSearchParams({
-      grant_type: 'authorization_code',
-      code: authorizationCode,
-      redirect_uri: redirectUri
-    });
-
-    console.log('🔄 Exchanging authorization code for access token...');
-    
-    const tokenResponse = await fetch(tokenEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`
-      },
-      body: tokenRequestBody.toString()
-    });
-
-    if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      console.error('❌ Token exchange failed:', tokenResponse.status, errorText);
-      throw new Error(`Token exchange failed: ${tokenResponse.status} ${errorText}`);
-    }
-
-    const tokenData = await tokenResponse.json();
-    
-    return {
-      success: true,
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token,
-      expiresIn: tokenData.expires_in,
-      tokenType: tokenData.token_type
-    };
-    
-  } catch (error) {
-    console.error('❌ Error in token exchange:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
-}
+// Token exchange function removed - now handled by QBOAuthClient
 
 // API endpoint for updating invoice status
 app.post('/update-invoice-status', async (req, res) => {
@@ -273,6 +347,73 @@ app.post('/remove-invoice', async (req, res) => {
   } catch (error) {
     console.error('Error removing invoice:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+// QuickBooks OAuth Test Route
+app.get('/api/qbo/test', (req, res) => {
+  try {
+    console.log('🔍 Testing OAuth client initialization...');
+    console.log('📋 Environment variables:');
+    console.log('  QBO_ENV:', process.env.QBO_ENV);
+    console.log('  QBO_CLIENT_ID:', process.env.QBO_CLIENT_ID ? '***' + process.env.QBO_CLIENT_ID.slice(-4) : 'NOT_SET');
+    console.log('  QBO_REDIRECT_URI:', process.env.QBO_REDIRECT_URI);
+    console.log('  QBO_SCOPES:', process.env.QBO_SCOPES);
+    
+    const qbClient = new QBOAuthClient();
+    
+    res.json({
+      message: 'QBO OAuth Client initialized successfully!',
+      timestamp: new Date().toISOString(),
+      environment: qbClient.environment,
+      clientId: qbClient.clientId ? '***' + qbClient.clientId.slice(-4) : 'NOT_SET',
+      redirectUri: qbClient.redirectUri || 'NOT_SET',
+      scopes: qbClient.scopes || 'NOT_SET',
+      hasValidTokens: qbClient.hasValidTokens()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error in QBO test route:', error);
+    res.status(500).json({ 
+      error: 'Failed to test OAuth client',
+      details: error.message,
+      stack: error.stack
+    });
+  }
+});
+
+// QuickBooks OAuth Refresh Route
+app.post('/api/qbo/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+
+    const qbClient = new QBOAuthClient();
+    
+    // Refresh access token using the improved OAuth client
+    const refreshResponse = await qbClient.refreshAccessToken(refreshToken);
+    
+    if (refreshResponse.success) {
+      res.json({
+        success: true,
+        message: 'Access token refreshed successfully',
+        accessToken: refreshResponse.accessToken ? '***' + refreshResponse.accessToken.slice(-4) : 'none',
+        expiresIn: refreshResponse.expiresIn
+      });
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to refresh access token',
+        details: refreshResponse.error 
+      });
+    }
+    
+  } catch (error) {
+    console.error('❌ Error in QBO refresh route:', error);
+    res.status(500).json({ error: 'Failed to refresh token' });
   }
 });
 
