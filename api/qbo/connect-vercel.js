@@ -49,26 +49,18 @@ export async function GET() {
 
     console.log('🔗 Generated QuickBooks OAuth URL:', authUrl.toString());
     console.log('🔒 State Token:', stateToken);
+    console.log('🔄 Redirecting browser to QuickBooks authorization...');
 
-    // Return the authorization URL for frontend to redirect
-    return new Response(
-      JSON.stringify({
-        success: true,
-        authUrl: authUrl.toString(),
-        state: stateToken,
-        environment: environment,
-        scopes: scopes
-      }),
-      { 
-        status: 200, 
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type'
-        } 
+    // Automatically redirect the browser to QuickBooks authorization
+    return new Response(null, {
+      status: 302, // Redirect status
+      headers: {
+        'Location': authUrl.toString(),
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
       }
-    );
+    });
 
   } catch (error) {
     console.error('❌ Error in QBO connect route:', error);
