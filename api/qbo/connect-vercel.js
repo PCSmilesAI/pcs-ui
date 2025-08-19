@@ -1,8 +1,6 @@
-import { OAuthClient } from 'intuit-oauth';
-
 /**
  * QuickBooks OAuth Connect - Vercel Serverless Function
- * Handles OAuth 2.0 authorization URL generation
+ * Handles OAuth 2.0 authorization URL generation without external package dependencies
  */
 export async function GET() {
   try {
@@ -33,31 +31,30 @@ export async function GET() {
       );
     }
 
-    // Initialize Intuit OAuth client
-    const oauthClient = new OAuthClient({
-      clientId: clientId,
-      clientSecret: clientSecret,
-      environment: environment,
-      redirectUri: redirectUri,
-    });
-
     // Generate state token for CSRF protection
     const stateToken = 'qbo_oauth_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-    // Build authorization URL using Intuit's OAuth client
-    const authUrl = oauthClient.authorizeUri({
-      scope: scopes,
-      state: stateToken
-    });
+    // Determine the base URL based on environment
+    const baseUrl = environment === 'sandbox' 
+      ? 'https://sandbox-accounts.platform.intuit.com'
+      : 'https://accounts.platform.intuit.com';
 
-    console.log('🔗 Generated QuickBooks OAuth URL:', authUrl);
+    // Build the OAuth authorization URL manually
+    const authUrl = new URL('/oauth2/v1/authorizations/request', baseUrl);
+    authUrl.searchParams.set('client_id', clientId);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('scope', scopes);
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+    authUrl.searchParams.set('state', stateToken);
+
+    console.log('🔗 Generated QuickBooks OAuth URL:', authUrl.toString());
     console.log('🔒 State Token:', stateToken);
 
     // Return the authorization URL for frontend to redirect
     return new Response(
       JSON.stringify({
         success: true,
-        authUrl: authUrl,
+        authUrl: authUrl.toString(),
         state: stateToken,
         environment: environment,
         scopes: scopes

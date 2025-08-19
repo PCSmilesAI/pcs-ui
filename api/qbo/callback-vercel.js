@@ -1,8 +1,6 @@
-import { OAuthClient } from 'intuit-oauth';
-
 /**
  * QuickBooks OAuth Callback - Vercel Serverless Function
- * Handles OAuth 2.0 callback and token exchange
+ * Handles OAuth 2.0 callback and token exchange without external package dependencies
  */
 export async function GET(request) {
   try {
@@ -44,49 +42,62 @@ export async function GET(request) {
       throw new Error('Missing required environment variables for token exchange');
     }
 
-    // Initialize Intuit OAuth client
-    const oauthClient = new OAuthClient({
-      clientId: clientId,
-      clientSecret: clientSecret,
-      environment: environment,
-      redirectUri: redirectUri,
-    });
-
     console.log('🔄 Exchanging authorization code for access token...');
 
-    // Exchange authorization code for access token
-    const tokenResponse = await oauthClient.createToken(code, realmId);
+    // Determine the token endpoint based on environment
+    const tokenEndpoint = environment === 'sandbox'
+      ? 'https://sandbox-oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
+      : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
 
-    if (tokenResponse.token) {
-      console.log('🎉 Successfully obtained access token');
-      console.log('🔑 Access Token:', tokenResponse.token.access_token ? '***' + tokenResponse.token.access_token.slice(-4) : 'none');
-      console.log('🔄 Refresh Token:', tokenResponse.token.refresh_token ? '***' + tokenResponse.token.refresh_token.slice(-4) : 'none');
+    // Exchange authorization code for access token using direct HTTP
+    const tokenRequestBody = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: redirectUri
+    });
 
-      // Return success response
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: 'OAuth flow completed successfully',
-          realmId: realmId,
-          accessTokenReceived: !!tokenResponse.token.access_token,
-          refreshTokenReceived: !!tokenResponse.token.refresh_token,
-          expiresIn: tokenResponse.token.expires_in,
-          tokenType: tokenResponse.token.token_type
-        }),
-        { 
-          status: 200, 
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-          } 
-        }
-      );
+    const tokenResponse = await fetch(tokenEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`
+      },
+      body: tokenRequestBody.toString()
+    });
 
-    } else {
-      throw new Error('No token received from QuickBooks');
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text();
+      console.error('❌ Token exchange failed:', tokenResponse.status, errorText);
+      throw new Error(`Token exchange failed: ${tokenResponse.status} ${errorText}`);
     }
+
+    const tokenData = await tokenResponse.json();
+    
+    console.log('🎉 Successfully obtained access token');
+    console.log('🔑 Access Token:', tokenData.access_token ? '***' + tokenData.access_token.slice(-4) : 'none');
+    console.log('🔄 Refresh Token:', tokenData.refresh_token ? '***' + tokenData.refresh_token.slice(-4) : 'none');
+
+    // Return success response
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: 'OAuth flow completed successfully',
+        realmId: realmId,
+        accessTokenReceived: !!tokenData.access_token,
+        refreshTokenReceived: !!tokenData.refresh_token,
+        expiresIn: tokenData.expires_in,
+        tokenType: tokenData.token_type
+      }),
+      { 
+        status: 200, 
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        } 
+      }
+    );
 
   } catch (error) {
     console.error('❌ Error in QBO callback route:', error);
