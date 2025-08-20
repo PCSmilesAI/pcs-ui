@@ -19,34 +19,6 @@
   ],
   "routes": [
     {
-      "src": "/api/webhooks/quickbooks",
-      "dest": "/api/webhooks/quickbooks.cjs"
-    },
-    {
-      "src": "/api/webhooks/test",
-      "dest": "/api/webhooks/test.cjs"
-    },
-    {
-      "src": "/api/qbo/complete-oauth",
-      "dest": "/api/qbo/complete-oauth.cjs"
-    },
-    {
-      "src": "/api/qbo/debug-env",
-      "dest": "/api/qbo/debug-env.cjs"
-    },
-    {
-      "src": "/api/qbo/test-simple",
-      "dest": "/api/qbo/test-simple.cjs"
-    },
-    {
-      "src": "/api/qbo/sync-categories",
-      "dest": "/api/qbo/sync-categories.cjs"
-    },
-    {
-      "src": "/api/qbo/send-invoice",
-      "dest": "/api/qbo/send-invoice.cjs"
-    },
-    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },

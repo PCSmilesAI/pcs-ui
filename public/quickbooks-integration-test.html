@@ -308,7 +308,7 @@
             status.innerHTML = '<div class="status info">🔄 Completing OAuth flow...</div>';
             
             try {
-                const response = await fetch('/api/qbo/complete-oauth', {
+                const response = await fetch('/api/qbo/complete-oauth.js', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ authorizationCode: authCode })
