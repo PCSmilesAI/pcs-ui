@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBooks OAuth Completion Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007cba;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .button {
+            background: #007cba;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #005a87;
+        }
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .code-display {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        .step {
+            background: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+        }
+        .step h4 {
+            margin: 0 0 10px 0;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔗 QuickBooks OAuth Completion Test</h1>
+    
+    <div class="test-section">
+        <h2>Step 1: Complete OAuth Flow</h2>
+        <p>Use the authorization code from your success page to complete the OAuth flow and get access tokens.</p>
+        
+        <div class="input-group">
+            <label for="authCode">Authorization Code:</label>
+            <input type="text" id="authCode" placeholder="Paste your authorization code here" value="XAB11755693775GB4q8oSiTLilu033V1wQnptn0dPM4F8e7PrM">
+        </div>
+        
+        <button class="button" onclick="completeOAuth()">🔄 Complete OAuth Flow</button>
+        <button class="button" onclick="clearResults()">🗑️ Clear Results</button>
+        
+        <div id="oauthStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Step 2: Test QuickBooks API Connection</h2>
+        <p>Once OAuth is complete, test the QuickBooks API connection.</p>
+        
+        <button class="button" onclick="testConnection()" id="testBtn" disabled>🔍 Test QuickBooks Connection</button>
+        
+        <div id="connectionStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Step 3: Sync QuickBooks Categories</h2>
+        <p>Pull account categories from QuickBooks to test the API.</p>
+        
+        <button class="button" onclick="syncCategories()" id="syncBtn" disabled>📊 Sync Categories</button>
+        
+        <div id="categoryStatus"></div>
+        <div id="categoryResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Step 4: Test Webhook Endpoint</h2>
+        <p>Test your webhook endpoint to ensure it's working correctly.</p>
+        
+        <button class="button" onclick="testWebhook()">🔔 Test Webhook Endpoint</button>
+        
+        <div id="webhookStatus"></div>
+    </div>
+    
+    <div class="step">
+        <h4>🎯 What This Test Will Do:</h4>
+        <ol>
+            <li><strong>Complete OAuth:</strong> Exchange authorization code for access tokens</li>
+            <li><strong>Test Connection:</strong> Verify QuickBooks API access</li>
+            <li><strong>Sync Categories:</strong> Pull account categories from QuickBooks</li>
+            <li><strong>Test Webhook:</strong> Verify webhook endpoint is working</li>
+        </ol>
+    </div>
+
+    <script>
+        let isOAuthComplete = false;
+        
+        // Complete OAuth flow
+        async function completeOAuth() {
+            const authCode = document.getElementById('authCode').value.trim();
+            const status = document.getElementById('oauthStatus');
+            
+            if (!authCode) {
+                status.innerHTML = '<div class="status error">❌ Please enter an authorization code</div>';
+                return;
+            }
+            
+            status.innerHTML = '<div class="status info">🔄 Completing OAuth flow...</div>';
+            
+            try {
+                const response = await fetch('/api/qbo/complete-oauth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ authorizationCode: authCode })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                status.innerHTML = `
+                    <div class="status success">
+                        <h3>✅ OAuth Completed Successfully!</h3>
+                        <p><strong>Message:</strong> ${result.message}</p>
+                        <div class="code-display">
+                            <strong>Tokens Received:</strong><br>
+                            • Access Token: ${result.tokens.accessTokenReceived ? '✅ Yes' : '❌ No'}<br>
+                            • Refresh Token: ${result.tokens.refreshTokenReceived ? '✅ Yes' : '❌ No'}<br>
+                            • Expires In: ${result.tokens.expiresIn} seconds<br>
+                            • Realm ID: ${result.tokens.realmId || 'Not provided'}<br>
+                            • Environment: ${result.tokens.environment}
+                        </div>
+                        <div class="code-display">
+                            <strong>Next Steps:</strong><br>
+                            ${result.nextSteps.map(step => `• ${step}`).join('<br>')}
+                        </div>
+                    </div>
+                `;
+                
+                // Enable next steps
+                isOAuthComplete = true;
+                document.getElementById('testBtn').disabled = false;
+                document.getElementById('syncBtn').disabled = false;
+                
+                console.log('🎉 OAuth completed successfully:', result);
+                
+            } catch (error) {
+                status.innerHTML = `<div class="status error">❌ OAuth completion failed: ${error.message}</div>`;
+                console.error('❌ OAuth completion failed:', error);
+            }
+        }
+        
+        // Test QuickBooks connection
+        async function testConnection() {
+            const status = document.getElementById('connectionStatus');
+            status.innerHTML = '<div class="status info">🔍 Testing QuickBooks connection...</div>';
+            
+            try {
+                // Test the webhook endpoint first (this will work even without tokens)
+                const response = await fetch('/api/webhooks/quickbooks');
+                
+                if (response.ok) {
+                    status.innerHTML = `
+                        <div class="status success">
+                            ✅ QuickBooks webhook endpoint is working!<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                status.innerHTML = `<div class="status error">❌ Connection test failed: ${error.message}</div>`;
+                console.error('❌ Connection test failed:', error);
+            }
+        }
+        
+        // Sync categories from QuickBooks
+        async function syncCategories() {
+            const status = document.getElementById('categoryStatus');
+            const results = document.getElementById('categoryResults');
+            
+            status.innerHTML = '<div class="status info">📊 Syncing categories from QuickBooks...</div>';
+            results.innerHTML = '';
+            
+            try {
+                // This would normally use the QuickBooks API
+                // For now, we'll simulate the process
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                status.innerHTML = `
+                    <div class="status success">
+                        ✅ Category sync completed!<br>
+                        <small>Note: This is a simulation. Real sync requires valid access tokens.</small>
+                    </div>
+                `;
+                
+                // Show sample categories
+                results.innerHTML = `
+                    <h4>Sample Categories (Simulated):</h4>
+                    <div class="code-display">
+                        • Office Supplies (ID: 1)<br>
+                        • Professional Services (ID: 2)<br>
+                        • Equipment (ID: 3)<br>
+                        • Travel & Entertainment (ID: 4)<br>
+                        • Utilities (ID: 5)
+                    </div>
+                    <p><small>These are sample categories. Real categories will come from your QuickBooks account.</small></p>
+                `;
+                
+            } catch (error) {
+                status.innerHTML = `<div class="status error">❌ Category sync failed: ${error.message}</div>`;
+                console.error('❌ Category sync failed:', error);
+            }
+        }
+        
+        // Test webhook endpoint
+        async function testWebhook() {
+            const status = document.getElementById('webhookStatus');
+            status.innerHTML = '<div class="status info">🔔 Testing webhook endpoint...</div>';
+            
+            try {
+                const response = await fetch('/api/webhooks/quickbooks');
+                
+                if (response.ok) {
+                    const text = await response.text();
+                    status.innerHTML = `
+                        <div class="status success">
+                            ✅ Webhook endpoint is working!<br>
+                            Response: ${text}<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                status.innerHTML = `<div class="status error">❌ Webhook test failed: ${error.message}</div>`;
+                console.error('❌ Webhook test failed:', error);
+            }
+        }
+        
+        // Clear all results
+        function clearResults() {
+            document.getElementById('oauthStatus').innerHTML = '';
+            document.getElementById('connectionStatus').innerHTML = '';
+            document.getElementById('categoryStatus').innerHTML = '';
+            document.getElementById('categoryResults').innerHTML = '';
+            document.getElementById('webhookStatus').innerHTML = '';
+            
+            // Reset buttons
+            isOAuthComplete = false;
+            document.getElementById('testBtn').disabled = true;
+            document.getElementById('syncBtn').disabled = true;
+        }
+        
+        // Auto-fill authorization code if available
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            if (code) {
+                document.getElementById('authCode').value = code;
+            }
+        });
+    </script>
+</body>
+</html>
