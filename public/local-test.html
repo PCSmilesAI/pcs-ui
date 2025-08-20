@@ -124,6 +124,14 @@
         <h2>🔑 QuickBooks API Tests</h2>
         
         <div class="endpoint">
+            <h3><span class="status pending" id="status-qbo-status"></span>QuickBooks Status</h3>
+            <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/status</code></p>
+            <p><strong>Expected:</strong> OAuth token status</p>
+            <button class="test-button" onclick="testEndpoint('qbo-status', 'http://localhost:3001/api/qbo/status')">Test Endpoint</button>
+            <div id="result-qbo-status" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="endpoint">
             <h3><span class="status pending" id="status-debug-env"></span>Debug Environment</h3>
             <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/debug-env</code></p>
             <p><strong>Expected:</strong> Environment variables status</p>
@@ -388,6 +396,7 @@
             const endpoints = [
                 { name: 'test', url: 'http://localhost:3001/api/test' },
                 { name: 'hello-world', url: 'http://localhost:3001/api/hello-world' },
+                { name: 'qbo-status', url: 'http://localhost:3001/api/qbo/status' },
                 { name: 'debug-env', url: 'http://localhost:3001/api/qbo/debug-env' },
                 { name: 'oauth-test', url: 'http://localhost:3001/api/qbo/test' },
                 { name: 'webhook-test', url: 'http://localhost:3001/api/webhooks/test' },

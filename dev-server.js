@@ -11,6 +11,9 @@ dotenv.config({ path: './env' });
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Global QuickBooks client instance to share tokens across requests
+let globalQBClient = null;
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -380,6 +383,9 @@ app.get('/api/qbo/callback', async (req, res) => {
     // Exchange authorization code for access token using the improved OAuth client
     const tokenResponse = await qbClient.exchangeCodeForToken(code, realmId);
     
+    // Store the client globally so other endpoints can access the tokens
+    globalQBClient = qbClient;
+    
     if (tokenResponse.success) {
       console.log('🎉 Successfully obtained access token');
       console.log('🔑 Access Token:', tokenResponse.accessToken ? '***' + tokenResponse.accessToken.slice(-4) : 'none');
@@ -687,6 +693,23 @@ app.post('/api/qbo/complete-oauth', async (req, res) => {
   }
 });
 
+// NEW: QuickBooks Status Endpoint
+app.get('/api/qbo/status', (req, res) => {
+  try {
+    const hasTokens = globalQBClient && globalQBClient.hasValidTokens();
+    const realmId = globalQBClient ? globalQBClient.tokens?.realmId : null;
+    
+    res.json({
+      hasValidTokens: hasTokens,
+      realmId: realmId,
+      message: hasTokens ? 'QuickBooks connected and ready' : 'No valid tokens. Please complete OAuth first.',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Status check failed', details: error.message });
+  }
+});
+
 // NEW: Debug Environment Endpoint
 app.get('/api/qbo/debug-env', (req, res) => {
   try {
@@ -726,13 +749,12 @@ app.get('/api/qbo/sync-categories', async (req, res) => {
     console.log('🔄 Syncing QuickBooks categories...');
     
     // Check if we have valid tokens
-    const qbClient = new QBOAuthClient();
-    if (!qbClient.hasValidTokens()) {
+    if (!globalQBClient || !globalQBClient.hasValidTokens()) {
       return res.status(401).json({ error: 'No valid QuickBooks tokens. Please complete OAuth first.' });
     }
     
     // Fetch accounts from QuickBooks
-    const accounts = await qbClient.getAccounts();
+    const accounts = await globalQBClient.getAccounts();
     
     res.json({
       success: true,
@@ -767,13 +789,12 @@ app.post('/api/qbo/send-invoice', async (req, res) => {
     console.log('📄 Sending invoice to QuickBooks...');
     
     // Check if we have valid tokens
-    const qbClient = new QBOAuthClient();
-    if (!qbClient.hasValidTokens()) {
+    if (!globalQBClient || !globalQBClient.hasValidTokens()) {
       return res.status(401).json({ error: 'No valid QuickBooks tokens. Please complete OAuth first.' });
     }
     
     // Create bill in QuickBooks
-    const bill = await qbClient.createBill(invoiceData);
+    const bill = await globalQBClient.createBill(invoiceData);
     
     res.json({
       success: true,
