@@ -15,6 +15,9 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // QuickBooks OAuth Client - Direct implementation for Express server
 class QBOAuthClient {
   constructor() {
@@ -571,6 +574,11 @@ app.get('/api/qbo/sync-categories', async (req, res) => {
       details: error.message
     });
   }
+});
+
+// NEW: Local Test Page Route
+app.get('/local-test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'local-test.html'));
 });
 
 // NEW: Send Invoice Endpoint
