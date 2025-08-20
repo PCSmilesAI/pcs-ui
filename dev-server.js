@@ -73,11 +73,8 @@ class QBOAuthClient {
       console.log('📋 Code:', authCode ? '***' + authCode.slice(-4) : 'none');
       console.log('🏢 Realm ID:', realmId || 'none');
 
-      // Exchange code for tokens using Intuit's OAuth client
-      const tokenResponse = await this.oauthClient.createToken({
-        code: authCode,
-        realmId: realmId
-      });
+      // Exchange code for tokens manually using HTTPS request
+      const tokenResponse = await this.exchangeCodeForTokenManually(authCode, realmId);
       
       if (tokenResponse.token) {
         // Store tokens
@@ -159,6 +156,69 @@ class QBOAuthClient {
 
   generateStateToken() {
     return 'qbo_oauth_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  async exchangeCodeForTokenManually(authCode, realmId) {
+    try {
+      const https = require('https');
+      
+      // Prepare the token request
+      const tokenRequestBody = `grant_type=authorization_code&code=${encodeURIComponent(authCode)}&redirect_uri=${encodeURIComponent(process.env.QBO_REDIRECT_URI)}`;
+      
+      const options = {
+        hostname: 'oauth.platform.intuit.com',
+        port: 443,
+        path: '/oauth2/v1/tokens/bearer',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${Buffer.from(process.env.QBO_CLIENT_ID + ':' + process.env.QBO_CLIENT_SECRET).toString('base64')}`,
+          'Accept': 'application/json'
+        }
+      };
+
+      return new Promise((resolve, reject) => {
+        const req = https.request(options, (res) => {
+          let data = '';
+          
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
+          
+          res.on('end', () => {
+            try {
+              const response = JSON.parse(data);
+              
+              if (response.access_token) {
+                resolve({
+                  token: {
+                    access_token: response.access_token,
+                    refresh_token: response.refresh_token,
+                    expires_in: response.expires_in,
+                    token_type: response.token_type,
+                    realmId: realmId
+                  }
+                });
+              } else {
+                reject(new Error('No access token in response: ' + data));
+              }
+            } catch (error) {
+              reject(new Error('Failed to parse response: ' + data));
+            }
+          });
+        });
+
+        req.on('error', (error) => {
+          reject(error);
+        });
+
+        req.write(tokenRequestBody);
+        req.end();
+      });
+      
+    } catch (error) {
+      throw error;
+    }
   }
 
   hasValidTokens() {
