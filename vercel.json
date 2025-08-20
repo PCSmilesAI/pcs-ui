@@ -33,8 +33,26 @@
       }
     },
     {
+      "src": "/api/qbo/complete-oauth",
+      "dest": "/api/qbo/complete-oauth.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
+    },
+    {
       "src": "/api/qbo/test",
       "dest": "/api/qbo/test.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
+    },
+    {
+      "src": "/api/webhooks/quickbooks",
+      "dest": "/api/webhooks/quickbooks.js",
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
