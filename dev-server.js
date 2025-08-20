@@ -224,6 +224,116 @@ class QBOAuthClient {
   hasValidTokens() {
     return !!(this.tokens && this.tokens.accessToken);
   }
+
+  async makeQuickBooksRequest(endpoint, method = 'GET', data = null) {
+    try {
+      if (!this.hasValidTokens()) {
+        throw new Error('No valid access token available');
+      }
+
+      const https = require('https');
+      
+      const options = {
+        hostname: 'sandbox-accounts.platform.intuit.com',
+        port: 443,
+        path: `/v3/company/${this.tokens.realmId}${endpoint}`,
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${this.tokens.accessToken}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      };
+
+      if (data) {
+        options.headers['Content-Length'] = Buffer.byteLength(JSON.stringify(data));
+      }
+
+      return new Promise((resolve, reject) => {
+        const req = https.request(options, (res) => {
+          let responseData = '';
+          
+          res.on('data', (chunk) => {
+            responseData += chunk;
+          });
+          
+          res.on('end', () => {
+            try {
+              const response = JSON.parse(responseData);
+              resolve(response);
+            } catch (error) {
+              reject(new Error('Failed to parse response: ' + responseData));
+            }
+          });
+        });
+
+        req.on('error', (error) => {
+          reject(error);
+        });
+
+        if (data) {
+          req.write(JSON.stringify(data));
+        }
+        req.end();
+      });
+      
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAccounts() {
+    try {
+      console.log('📊 Fetching QuickBooks accounts...');
+      const response = await this.makeQuickBooksRequest('/query?query=SELECT * FROM Account WHERE AccountType IN (\'Expense\', \'Other Current Liability\') MAXRESULTS 1000');
+      
+      if (response.QueryResponse && response.QueryResponse.Account) {
+        console.log(`✅ Found ${response.QueryResponse.Account.length} accounts`);
+        return response.QueryResponse.Account;
+      } else {
+        console.log('⚠️ No accounts found in response');
+        return [];
+      }
+    } catch (error) {
+      console.error('❌ Error fetching accounts:', error);
+      throw error;
+    }
+  }
+
+  async getVendors() {
+    try {
+      console.log('🏢 Fetching QuickBooks vendors...');
+      const response = await this.makeQuickBooksRequest('/query?query=SELECT * FROM Vendor MAXRESULTS 1000');
+      
+      if (response.QueryResponse && response.QueryResponse.Vendor) {
+        console.log(`✅ Found ${response.QueryResponse.Vendor.length} vendors`);
+        return response.QueryResponse.Vendor;
+      } else {
+        console.log('⚠️ No vendors found in response');
+        return [];
+      }
+    } catch (error) {
+      console.error('❌ Error fetching vendors:', error);
+      throw error;
+    }
+  }
+
+  async createBill(billData) {
+    try {
+      console.log('📄 Creating QuickBooks bill...');
+      const response = await this.makeQuickBooksRequest('/bill', 'POST', billData);
+      
+      if (response.Bill && response.Bill.Id) {
+        console.log(`✅ Bill created successfully with ID: ${response.Bill.Id}`);
+        return response.Bill;
+      } else {
+        throw new Error('No bill ID in response');
+      }
+    } catch (error) {
+      console.error('❌ Error creating bill:', error);
+      throw error;
+    }
+  }
 }
 
 // QuickBooks OAuth Connect Route
@@ -605,6 +715,77 @@ app.get('/api/qbo/debug-env', (req, res) => {
   }
 });
 
+// NEW: QuickBooks API Endpoints
+app.get('/api/qbo/sync-categories', async (req, res) => {
+  try {
+    console.log('🔄 Syncing QuickBooks categories...');
+    
+    // Check if we have valid tokens
+    const qbClient = new QBOAuthClient();
+    if (!qbClient.hasValidTokens()) {
+      return res.status(401).json({ error: 'No valid QuickBooks tokens. Please complete OAuth first.' });
+    }
+    
+    // Fetch accounts from QuickBooks
+    const accounts = await qbClient.getAccounts();
+    
+    res.json({
+      success: true,
+      message: 'Categories synced successfully',
+      categories: accounts.map(account => ({
+        id: account.Id,
+        name: account.Name,
+        type: account.AccountType,
+        description: account.Description || ''
+      })),
+      count: accounts.length,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Category sync error:', error);
+    res.status(500).json({
+      error: 'Category sync failed',
+      details: error.message
+    });
+  }
+});
+
+app.post('/api/qbo/send-invoice', async (req, res) => {
+  try {
+    const { invoiceData } = req.body;
+    
+    if (!invoiceData) {
+      return res.status(400).json({ error: 'Missing invoice data' });
+    }
+    
+    console.log('📄 Sending invoice to QuickBooks...');
+    
+    // Check if we have valid tokens
+    const qbClient = new QBOAuthClient();
+    if (!qbClient.hasValidTokens()) {
+      return res.status(401).json({ error: 'No valid QuickBooks tokens. Please complete OAuth first.' });
+    }
+    
+    // Create bill in QuickBooks
+    const bill = await qbClient.createBill(invoiceData);
+    
+    res.json({
+      success: true,
+      message: 'Invoice sent to QuickBooks successfully',
+      billId: bill.Id,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Send invoice error:', error);
+    res.status(500).json({
+      error: 'Failed to send invoice to QuickBooks',
+      details: error.message
+    });
+  }
+});
+
 // NEW: Simple Test Endpoint
 app.get('/api/test', (req, res) => {
   res.json({ ok: true, message: 'Local API server is working!', timestamp: new Date().toISOString() });
@@ -666,59 +847,9 @@ app.post('/api/webhooks/quickbooks', (req, res) => {
   res.status(200).send('OK');
 });
 
-// NEW: Sync Categories Endpoint
-app.get('/api/qbo/sync-categories', async (req, res) => {
-  try {
-    console.log('🔄 Syncing QuickBooks categories...');
-    
-    // For now, return a placeholder response
-    res.json({
-      message: 'Category sync endpoint working!',
-      timestamp: new Date().toISOString(),
-      note: 'This would fetch categories from QuickBooks in production'
-    });
-    
-  } catch (error) {
-    console.error('❌ Category sync error:', error);
-    res.status(500).json({
-      error: 'Category sync failed',
-      details: error.message
-    });
-  }
-});
-
 // NEW: Local Test Page Route
 app.get('/local-test', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'local-test.html'));
-});
-
-// NEW: Send Invoice Endpoint
-app.post('/api/qbo/send-invoice', async (req, res) => {
-  try {
-    const { invoiceData } = req.body;
-    
-    if (!invoiceData) {
-      return res.status(400).json({ error: 'Invoice data is required' });
-    }
-
-    console.log('📤 Sending invoice to QuickBooks...');
-    console.log('📋 Invoice data:', JSON.stringify(invoiceData, null, 2));
-    
-    // For now, return a placeholder response
-    res.json({
-      message: 'Invoice send endpoint working!',
-      timestamp: new Date().toISOString(),
-      invoiceReceived: true,
-      note: 'This would create a bill in QuickBooks in production'
-    });
-    
-  } catch (error) {
-    console.error('❌ Invoice send error:', error);
-    res.status(500).json({
-      error: 'Invoice send failed',
-      details: error.message
-    });
-  }
 });
 
 app.listen(PORT, () => {

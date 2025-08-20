@@ -146,6 +146,14 @@
             <button class="test-button" onclick="testEndpoint('sync-categories', 'http://localhost:3001/api/qbo/sync-categories')">Test Endpoint</button>
             <div id="result-sync-categories" class="result" style="display: none;"></div>
         </div>
+
+        <div class="endpoint">
+            <h3><span class="status pending" id="status-send-invoice"></span>Send Invoice</h3>
+            <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/send-invoice</code></p>
+            <p><strong>Expected:</strong> Invoice send response</p>
+            <button class="test-button" onclick="testSendInvoice()">Test Send Invoice</button>
+            <div id="result-send-invoice" class="result" style="display: none;"></div>
+        </div>
     </div>
 
     <div class="container">
@@ -292,6 +300,90 @@
             window.open('http://localhost:3001/api/qbo/connect', '_blank');
         }
 
+        function testSendInvoice() {
+            const statusElement = document.getElementById('status-send-invoice');
+            const resultElement = document.getElementById('result-send-invoice');
+            
+            // Update status to pending
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Testing send invoice...';
+
+            // Sample invoice data for testing
+            const testInvoiceData = {
+                vendor: 'Test Vendor',
+                amount: 150.00,
+                invoiceNumber: 'TEST-001',
+                dueDate: '2024-12-31',
+                lineItems: [
+                    {
+                        description: 'Test Service',
+                        amount: 150.00,
+                        accountId: '123'
+                    }
+                ]
+            };
+
+            console.log('🧪 Testing send invoice with data:', testInvoiceData);
+
+            // Test the endpoint
+            fetch('http://localhost:3001/api/qbo/send-invoice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    invoiceData: testInvoiceData
+                })
+            })
+            .then(response => {
+                console.log(`📡 Response for send invoice:`, response);
+                
+                const result = {
+                    url: 'http://localhost:3001/api/qbo/send-invoice',
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    timestamp: new Date().toISOString()
+                };
+
+                if (response.ok) {
+                    return response.text().then(text => {
+                        try {
+                            result.body = JSON.parse(text);
+                        } catch (e) {
+                            result.body = text;
+                        }
+                        return result;
+                    });
+                } else {
+                    result.error = `HTTP ${response.status}: ${response.statusText}`;
+                    return result;
+                }
+            })
+            .then(result => {
+                // Update status and result
+                if (result.error) {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = JSON.stringify(result, null, 2);
+                } else {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(result, null, 2);
+                }
+            })
+            .catch(error => {
+                console.error(`❌ Error testing send invoice:`, error);
+                
+                // Update status and result
+                statusElement.className = 'status error';
+                resultElement.className = 'result error';
+                resultElement.textContent = `Error: ${error.message}\n\nStack: ${error.stack}`;
+            });
+        }
+
         function testAllEndpoints() {
             const endpoints = [
                 { name: 'test', url: 'http://localhost:3001/api/test' },
@@ -299,7 +391,8 @@
                 { name: 'debug-env', url: 'http://localhost:3001/api/qbo/debug-env' },
                 { name: 'oauth-test', url: 'http://localhost:3001/api/qbo/test' },
                 { name: 'webhook-test', url: 'http://localhost:3001/api/webhooks/test' },
-                { name: 'webhook-quickbooks', url: 'http://localhost:3001/api/webhooks/quickbooks' }
+                { name: 'webhook-quickbooks', url: 'http://localhost:3001/api/webhooks/quickbooks' },
+                { name: 'sync-categories', url: 'http://localhost:3001/api/qbo/sync-categories' }
             ];
 
             endpoints.forEach(endpoint => {
