@@ -14,6 +14,43 @@ const PORT = process.env.PORT || 3001;
 // Global QuickBooks client instance to share tokens across requests
 let globalQBClient = null;
 
+// Simple file-based token storage to persist across server restarts
+const TOKEN_FILE = path.join(__dirname, 'qbo_tokens.json');
+
+function saveTokens(tokens) {
+  try {
+    fs.writeFileSync(TOKEN_FILE, JSON.stringify(tokens, null, 2));
+    console.log('💾 Tokens saved to file');
+  } catch (error) {
+    console.error('❌ Failed to save tokens:', error);
+  }
+}
+
+function loadTokens() {
+  try {
+    if (fs.existsSync(TOKEN_FILE)) {
+      const tokenData = JSON.parse(fs.readFileSync(TOKEN_FILE, 'utf8'));
+      console.log('📂 Tokens loaded from file');
+      return tokenData;
+    }
+  } catch (error) {
+    console.error('❌ Failed to load tokens:', error);
+  }
+  return null;
+}
+
+function restoreGlobalClient() {
+  const savedTokens = loadTokens();
+  if (savedTokens) {
+    const qbClient = new QBOAuthClient();
+    qbClient.tokens = savedTokens;
+    globalQBClient = qbClient;
+    console.log('🔄 Global client restored from saved tokens');
+    return true;
+  }
+  return false;
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -400,6 +437,9 @@ app.get('/api/qbo/callback', async (req, res) => {
     globalQBClient = qbClient;
     console.log('🌍 Global QB client set:', globalQBClient ? 'SUCCESS' : 'FAILED');
     console.log('🌍 Global client has tokens:', globalQBClient.hasValidTokens());
+    
+    // Save tokens to file for persistence
+    saveTokens(globalQBClient.tokens);
     
     if (tokenResponse.success) {
       console.log('🎉 Successfully obtained access token');
@@ -920,4 +960,11 @@ app.listen(PORT, () => {
   console.log(`🔗 QuickBooks OAuth: http://localhost:${PORT}/api/qbo/connect`);
   console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/test`);
   console.log(`🔍 Debug endpoint: http://localhost:${PORT}/api/qbo/debug-env`);
+  
+  // Try to restore global client from saved tokens
+  if (restoreGlobalClient()) {
+    console.log('✅ QuickBooks client restored from saved tokens');
+  } else {
+    console.log('⚠️ No saved tokens found - complete OAuth to connect');
+  }
 }); 
