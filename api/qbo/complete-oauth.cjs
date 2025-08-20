@@ -7,13 +7,13 @@ const https = require('https');
 
 module.exports = async (req, res) => {
   try {
+    console.log('🔄 Starting manual OAuth completion...');
+    
     // Only handle POST requests
     if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    console.log('🔄 Starting manual OAuth completion...');
-    
     // Get the request body
     const { authorizationCode } = req.body;
     
@@ -29,22 +29,27 @@ module.exports = async (req, res) => {
     const redirectUri = process.env.QBO_REDIRECT_URI;
     const environment = process.env.QBO_ENV || 'sandbox';
     
+    console.log('🔧 Environment check:', { 
+      clientId: !!clientId, 
+      clientSecret: !!clientSecret, 
+      redirectUri: !!redirectUri,
+      environment: environment
+    });
+    
     if (!clientId || !clientSecret || !redirectUri) {
-      console.error('❌ Missing environment variables:', { 
-        clientId: !!clientId, 
-        clientSecret: !!clientSecret, 
-        redirectUri: !!redirectUri 
+      console.error('❌ Missing environment variables');
+      return res.status(500).json({ 
+        error: 'Missing required environment variables',
+        details: 'QBO_CLIENT_ID, QBO_CLIENT_SECRET, or QBO_REDIRECT_URI not set'
       });
-      return res.status(500).json({ error: 'Missing required environment variables' });
     }
     
     console.log('🔧 Environment variables loaded successfully');
-    console.log('🌍 Environment:', environment);
     
     // Determine the token endpoint
     const tokenEndpoint = environment === 'sandbox'
-      ? 'https://sandbox-oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
-      : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
+      ? 'sandbox-oauth.platform.intuit.com'
+      : 'oauth.platform.intuit.com';
     
     console.log('🎯 Token endpoint:', tokenEndpoint);
     
@@ -52,17 +57,13 @@ module.exports = async (req, res) => {
     const credentials = clientId + ':' + clientSecret;
     const base64Credentials = Buffer.from(credentials).toString('base64');
     
-    // Prepare the token exchange request
-    const tokenRequestBody = new URLSearchParams({
-      grant_type: 'authorization_code',
-      code: authorizationCode,
-      redirect_uri: redirectUri
-    }).toString();
+    // Prepare the token exchange request body (simple string instead of URLSearchParams)
+    const tokenRequestBody = `grant_type=authorization_code&code=${encodeURIComponent(authorizationCode)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
     
     console.log('📤 Sending token exchange request...');
     
-    // Make the token exchange request using Node.js https
-    const tokenData = await makeHttpsRequest(tokenEndpoint, {
+    // Make the token exchange request
+    const tokenData = await makeHttpsRequest(tokenEndpoint, '/oauth2/v1/tokens/bearer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -73,24 +74,6 @@ module.exports = async (req, res) => {
     });
     
     console.log('✅ Token exchange successful!');
-    console.log('  - Access Token:', tokenData.access_token ? '***' + tokenData.access_token.slice(-4) : 'none');
-    console.log('  - Refresh Token:', tokenData.refresh_token ? '***' + tokenData.refresh_token.slice(-4) : 'none');
-    console.log('  - Expires In:', tokenData.expires_in, 'seconds');
-    console.log('  - Token Type:', tokenData.token_type);
-    
-    // Store tokens securely (in production, use a secure database)
-    // For now, we'll just log them and return success
-    const tokens = {
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token,
-      expiresIn: tokenData.expires_in,
-      tokenType: tokenData.token_type,
-      realmId: tokenData.realmId, // May be included in some responses
-      environment: environment
-    };
-    
-    // TODO: Store tokens securely in your database
-    console.log('💾 Tokens received and ready for storage');
     
     // Return success response
     const response = {
@@ -98,8 +81,8 @@ module.exports = async (req, res) => {
       tokens: {
         accessTokenReceived: !!tokenData.access_token,
         refreshTokenReceived: !!tokenData.refresh_token,
-        expiresIn: tokenData.expires_in,
-        tokenType: tokenData.token_type,
+        expiresIn: tokenData.expires_in || 0,
+        tokenType: tokenData.token_type || 'Bearer',
         realmId: tokenData.realmId || 'Not provided in response',
         environment: environment
       },
@@ -107,8 +90,7 @@ module.exports = async (req, res) => {
         'Access tokens have been received and are ready for use',
         'You can now make QuickBooks API calls',
         'Set up webhook subscriptions for real-time updates',
-        'Test the integration with sample API calls',
-        'Implement token refresh logic for production use'
+        'Test the integration with sample API calls'
       ]
     };
     
@@ -125,17 +107,19 @@ module.exports = async (req, res) => {
 };
 
 // Helper function to make HTTPS requests
-function makeHttpsRequest(url, options) {
+function makeHttpsRequest(hostname, path, options) {
   return new Promise((resolve, reject) => {
-    const urlObj = new URL(url);
+    console.log(`🌐 Making HTTPS request to: ${hostname}${path}`);
     
     const requestOptions = {
-      hostname: urlObj.hostname,
-      port: urlObj.port || 443,
-      path: urlObj.pathname + urlObj.search,
+      hostname: hostname,
+      port: 443,
+      path: path,
       method: options.method || 'GET',
       headers: options.headers || {}
     };
+    
+    console.log('📋 Request options:', JSON.stringify(requestOptions, null, 2));
     
     const req = https.request(requestOptions, (res) => {
       let data = '';
@@ -145,30 +129,24 @@ function makeHttpsRequest(url, options) {
       });
       
       res.on('end', () => {
-        console.log('📥 Token response received:');
+        console.log('📥 Response received:');
         console.log('  - Status:', res.statusCode);
-        console.log('  - Status Text:', res.statusMessage);
+        console.log('  - Headers:', res.headers);
+        console.log('  - Data length:', data.length);
         
         if (res.statusCode >= 200 && res.statusCode < 300) {
           try {
             const jsonData = JSON.parse(data);
+            console.log('✅ Response parsed successfully');
             resolve(jsonData);
           } catch (parseError) {
+            console.error('❌ Failed to parse JSON response:', parseError);
             reject(new Error(`Failed to parse response: ${parseError.message}`));
           }
         } else {
-          console.error('❌ Token exchange failed:', data);
-          
-          // Try to parse error details
-          let errorDetails = data;
-          try {
-            const errorJson = JSON.parse(data);
-            errorDetails = errorJson.error_description || errorJson.error || data;
-          } catch (e) {
-            console.log('Could not parse error as JSON, using raw text');
-          }
-          
-          reject(new Error(`Token exchange failed: ${errorDetails} (Status: ${res.statusCode})`));
+          console.error('❌ Request failed with status:', res.statusCode);
+          console.error('❌ Response data:', data);
+          reject(new Error(`Request failed with status ${res.statusCode}: ${data}`));
         }
       });
     });
@@ -179,6 +157,7 @@ function makeHttpsRequest(url, options) {
     });
     
     if (options.body) {
+      console.log('📤 Writing request body:', options.body);
       req.write(options.body);
     }
     
