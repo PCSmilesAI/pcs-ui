@@ -55,6 +55,10 @@
       "dest": "/public/quickbooks-integration-test.html"
     },
     {
+      "src": "/api-debug.html",
+      "dest": "/public/api-debug.html"
+    },
+    {
       "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
       "dest": "/$1"
     },
