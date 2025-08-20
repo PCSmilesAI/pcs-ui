@@ -74,7 +74,10 @@ class QBOAuthClient {
       console.log('🏢 Realm ID:', realmId || 'none');
 
       // Exchange code for tokens using Intuit's OAuth client
-      const tokenResponse = await this.oauthClient.createToken(authCode, realmId);
+      const tokenResponse = await this.oauthClient.createToken({
+        code: authCode,
+        realmId: realmId
+      });
       
       if (tokenResponse.token) {
         // Store tokens
