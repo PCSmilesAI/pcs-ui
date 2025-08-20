@@ -417,6 +417,198 @@ app.post('/api/qbo/refresh', async (req, res) => {
   }
 });
 
+// NEW: Complete OAuth Endpoint (for manual code exchange)
+app.post('/api/qbo/complete-oauth', async (req, res) => {
+  try {
+    const { authorizationCode } = req.body;
+    
+    if (!authorizationCode) {
+      return res.status(400).json({ error: 'Authorization code is required' });
+    }
+
+    console.log('🔄 Starting manual OAuth completion...');
+    console.log('📋 Code:', authorizationCode ? '***' + authorizationCode.slice(-4) : 'none');
+
+    const qbClient = new QBOAuthClient();
+    
+    // Exchange authorization code for access token
+    const tokenResponse = await qbClient.exchangeCodeForToken(authorizationCode);
+    
+    if (tokenResponse.success) {
+      console.log('🎉 OAuth completed successfully!');
+      res.status(200).json({
+        success: true,
+        message: 'OAuth completed successfully!',
+        accessToken: tokenResponse.accessToken,
+        refreshToken: tokenResponse.refreshToken,
+        realmId: tokenResponse.realmId,
+        expiresIn: tokenResponse.expiresIn,
+        tokenType: tokenResponse.tokenType
+      });
+    } else {
+      console.error('❌ OAuth completion failed:', tokenResponse.error);
+      res.status(500).json({
+        error: 'OAuth completion failed',
+        details: tokenResponse.error
+      });
+    }
+    
+  } catch (error) {
+    console.error('❌ OAuth completion error:', error);
+    res.status(500).json({
+      error: 'Internal server error during OAuth completion',
+      details: error.message
+    });
+  }
+});
+
+// NEW: Debug Environment Endpoint
+app.get('/api/qbo/debug-env', (req, res) => {
+  try {
+    console.log('🔍 Debug: Checking environment variables...');
+    
+    const envVars = {
+      QBO_CLIENT_ID: process.env.QBO_CLIENT_ID ? 'SET' : 'NOT SET',
+      QBO_CLIENT_SECRET: process.env.QBO_CLIENT_SECRET ? 'SET' : 'NOT SET',
+      QBO_REDIRECT_URI: process.env.QBO_REDIRECT_URI ? 'SET' : 'NOT SET',
+      QBO_ENV: process.env.QBO_ENV || 'NOT SET (defaults to sandbox)',
+      QBO_SCOPES: process.env.QBO_SCOPES || 'NOT SET',
+      NODE_ENV: process.env.NODE_ENV || 'NOT SET',
+      PORT: process.env.PORT || '3001 (default)'
+    };
+    
+    console.log('🔍 Environment variables status:', envVars);
+    
+    res.status(200).json({
+      message: 'Environment variables debug info',
+      environment: envVars,
+      timestamp: new Date().toISOString(),
+      note: 'This endpoint shows what environment variables are available to your server'
+    });
+    
+  } catch (error) {
+    console.error('❌ Debug endpoint error:', error);
+    res.status(500).json({
+      error: 'Debug endpoint failed',
+      details: error.message
+    });
+  }
+});
+
+// NEW: Simple Test Endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ ok: true, message: 'Local API server is working!', timestamp: new Date().toISOString() });
+});
+
+// NEW: Hello World Endpoint
+app.get('/api/hello-world', (req, res) => {
+  res.json({ message: 'Hello World!', timestamp: new Date().toISOString() });
+});
+
+// NEW: Test Simple Endpoint
+app.get('/api/test-simple', (req, res) => {
+  res.json({
+    message: 'Test simple endpoint working!',
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    url: req.url
+  });
+});
+
+// NEW: Hello Endpoint
+app.get('/api/hello', (req, res) => {
+  res.status(200).json({ message: 'API is working!', method: req.method });
+});
+
+// NEW: Webhook Test Endpoint
+app.get('/api/webhooks/test', (req, res) => {
+  console.log('🧪 Test webhook endpoint called');
+  console.log('🧪 Method:', req.method);
+  console.log('🧪 URL:', req.url);
+  
+  res.json({
+    message: 'Test webhook working!',
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    url: req.url
+  });
+});
+
+// NEW: QuickBooks Webhook Endpoint
+app.get('/api/webhooks/quickbooks', (req, res) => {
+  console.log('🔔 QuickBooks webhook endpoint called');
+  
+  if (req.method === 'GET') {
+    console.log('✅ GET request handled successfully');
+    res.status(200).send('QuickBooks Webhook Endpoint - Working!');
+  } else {
+    res.status(405).send('Method Not Allowed');
+  }
+});
+
+app.post('/api/webhooks/quickbooks', (req, res) => {
+  console.log('📋 Processing webhook payload...');
+  console.log('📋 Request body:', JSON.stringify(req.body, null, 2));
+  console.log('📋 Headers:', JSON.stringify(req.headers, null, 2));
+  
+  // For now, just acknowledge receipt
+  console.log('✅ Webhook received successfully');
+  res.status(200).send('OK');
+});
+
+// NEW: Sync Categories Endpoint
+app.get('/api/qbo/sync-categories', async (req, res) => {
+  try {
+    console.log('🔄 Syncing QuickBooks categories...');
+    
+    // For now, return a placeholder response
+    res.json({
+      message: 'Category sync endpoint working!',
+      timestamp: new Date().toISOString(),
+      note: 'This would fetch categories from QuickBooks in production'
+    });
+    
+  } catch (error) {
+    console.error('❌ Category sync error:', error);
+    res.status(500).json({
+      error: 'Category sync failed',
+      details: error.message
+    });
+  }
+});
+
+// NEW: Send Invoice Endpoint
+app.post('/api/qbo/send-invoice', async (req, res) => {
+  try {
+    const { invoiceData } = req.body;
+    
+    if (!invoiceData) {
+      return res.status(400).json({ error: 'Invoice data is required' });
+    }
+
+    console.log('📤 Sending invoice to QuickBooks...');
+    console.log('📋 Invoice data:', JSON.stringify(invoiceData, null, 2));
+    
+    // For now, return a placeholder response
+    res.json({
+      message: 'Invoice send endpoint working!',
+      timestamp: new Date().toISOString(),
+      invoiceReceived: true,
+      note: 'This would create a bill in QuickBooks in production'
+    });
+    
+  } catch (error) {
+    console.error('❌ Invoice send error:', error);
+    res.status(500).json({
+      error: 'Invoice send failed',
+      details: error.message
+    });
+  }
+});
+
 app.listen(PORT, () => {
-  console.log(`Development API server running on http://localhost:${PORT}`);
+  console.log(`🚀 Development API server running on http://localhost:${PORT}`);
+  console.log(`🔗 QuickBooks OAuth: http://localhost:${PORT}/api/qbo/connect`);
+  console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/test`);
+  console.log(`🔍 Debug endpoint: http://localhost:${PORT}/api/qbo/debug-env`);
 }); 
