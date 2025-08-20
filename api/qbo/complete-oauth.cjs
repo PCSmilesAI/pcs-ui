@@ -3,6 +3,8 @@
  * Manually exchanges authorization code for access tokens
  */
 
+const https = require('https');
+
 module.exports = async (req, res) => {
   try {
     // Only handle POST requests
@@ -28,6 +30,11 @@ module.exports = async (req, res) => {
     const environment = process.env.QBO_ENV || 'sandbox';
     
     if (!clientId || !clientSecret || !redirectUri) {
+      console.error('❌ Missing environment variables:', { 
+        clientId: !!clientId, 
+        clientSecret: !!clientSecret, 
+        redirectUri: !!redirectUri 
+      });
       return res.status(500).json({ error: 'Missing required environment variables' });
     }
     
@@ -43,63 +50,28 @@ module.exports = async (req, res) => {
     
     // Create base64 credentials
     const credentials = clientId + ':' + clientSecret;
-    let base64Credentials;
-    
-    // Handle base64 encoding for different environments
-    if (typeof btoa !== 'undefined') {
-      // Browser environment
-      base64Credentials = btoa(credentials);
-    } else {
-      // Node.js environment
-      base64Credentials = Buffer.from(credentials).toString('base64');
-    }
+    const base64Credentials = Buffer.from(credentials).toString('base64');
     
     // Prepare the token exchange request
     const tokenRequestBody = new URLSearchParams({
       grant_type: 'authorization_code',
       code: authorizationCode,
       redirect_uri: redirectUri
-    });
+    }).toString();
     
     console.log('📤 Sending token exchange request...');
     
-    // Make the token exchange request
-    const tokenResponse = await fetch(tokenEndpoint, {
+    // Make the token exchange request using Node.js https
+    const tokenData = await makeHttpsRequest(tokenEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': `Basic ${base64Credentials}`,
         'Accept': 'application/json'
       },
-      body: tokenRequestBody.toString()
+      body: tokenRequestBody
     });
     
-    console.log('📥 Token response received:');
-    console.log('  - Status:', tokenResponse.status);
-    console.log('  - Status Text:', tokenResponse.statusText);
-    
-    if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      console.error('❌ Token exchange failed:', errorText);
-      
-      // Try to parse error details
-      let errorDetails = errorText;
-      try {
-        const errorJson = JSON.parse(errorText);
-        errorDetails = errorJson.error_description || errorJson.error || errorText;
-      } catch (e) {
-        console.log('Could not parse error as JSON, using raw text');
-      }
-      
-      return res.status(400).json({ 
-        error: 'Token exchange failed',
-        details: errorDetails,
-        status: tokenResponse.status
-      });
-    }
-    
-    // Parse the successful response
-    const tokenData = await tokenResponse.json();
     console.log('✅ Token exchange successful!');
     console.log('  - Access Token:', tokenData.access_token ? '***' + tokenData.access_token.slice(-4) : 'none');
     console.log('  - Refresh Token:', tokenData.refresh_token ? '***' + tokenData.refresh_token.slice(-4) : 'none');
@@ -151,3 +123,65 @@ module.exports = async (req, res) => {
     });
   }
 };
+
+// Helper function to make HTTPS requests
+function makeHttpsRequest(url, options) {
+  return new Promise((resolve, reject) => {
+    const urlObj = new URL(url);
+    
+    const requestOptions = {
+      hostname: urlObj.hostname,
+      port: urlObj.port || 443,
+      path: urlObj.pathname + urlObj.search,
+      method: options.method || 'GET',
+      headers: options.headers || {}
+    };
+    
+    const req = https.request(requestOptions, (res) => {
+      let data = '';
+      
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      
+      res.on('end', () => {
+        console.log('📥 Token response received:');
+        console.log('  - Status:', res.statusCode);
+        console.log('  - Status Text:', res.statusMessage);
+        
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            const jsonData = JSON.parse(data);
+            resolve(jsonData);
+          } catch (parseError) {
+            reject(new Error(`Failed to parse response: ${parseError.message}`));
+          }
+        } else {
+          console.error('❌ Token exchange failed:', data);
+          
+          // Try to parse error details
+          let errorDetails = data;
+          try {
+            const errorJson = JSON.parse(data);
+            errorDetails = errorJson.error_description || errorJson.error || data;
+          } catch (e) {
+            console.log('Could not parse error as JSON, using raw text');
+          }
+          
+          reject(new Error(`Token exchange failed: ${errorDetails} (Status: ${res.statusCode})`));
+        }
+      });
+    });
+    
+    req.on('error', (error) => {
+      console.error('❌ Request error:', error);
+      reject(new Error(`Request failed: ${error.message}`));
+    });
+    
+    if (options.body) {
+      req.write(options.body);
+    }
+    
+    req.end();
+  });
+}
