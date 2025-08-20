@@ -1,8 +1,10 @@
 /**
  * QuickBooks OAuth Callback - Vercel Serverless Function
- * Handles OAuth 2.0 callback and token exchange without external package dependencies
+ * Simplified callback with extensive debugging
  */
 export async function GET(request) {
+  console.log('🚀 Callback function started');
+  
   try {
     // Get query parameters from URL
     const url = new URL(request.url);
@@ -10,26 +12,15 @@ export async function GET(request) {
     const state = url.searchParams.get('state');
     const realmId = url.searchParams.get('realmId');
 
-    if (!code) {
-      console.error('❌ No authorization code received from QuickBooks');
-      return new Response(
-        JSON.stringify({ error: 'No authorization code received' }),
-        { 
-          status: 400, 
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-          } 
-        }
-      );
-    }
+    console.log('📋 URL received:', request.url);
+    console.log('🔑 Code received:', code ? '***' + code.slice(-4) : 'none');
+    console.log('🏢 Realm ID received:', realmId || 'none');
+    console.log('🔒 State received:', state || 'none');
 
-    console.log('✅ Received authorization code from QuickBooks');
-    console.log('📋 Code:', code ? '***' + code.slice(-4) : 'none');
-    console.log('🏢 Realm ID:', realmId || 'none');
-    console.log('🔒 State:', state || 'none');
+    if (!code) {
+      console.error('❌ No authorization code received');
+      return createErrorPage('No authorization code received from QuickBooks');
+    }
 
     // Get environment variables
     const clientId = process.env.QBO_CLIENT_ID;
@@ -37,38 +28,49 @@ export async function GET(request) {
     const redirectUri = process.env.QBO_REDIRECT_URI;
     const environment = process.env.QBO_ENV || 'sandbox';
 
-    // Validate required environment variables
+    console.log('🔧 Environment variables loaded:');
+    console.log('  - Client ID:', clientId ? '***' + clientId.slice(-4) : 'MISSING');
+    console.log('  - Client Secret:', clientSecret ? '***' + clientSecret.slice(-4) : 'MISSING');
+    console.log('  - Redirect URI:', redirectUri || 'MISSING');
+    console.log('  - Environment:', environment);
+
+    // Validate environment variables
     if (!clientId || !clientSecret || !redirectUri) {
-      throw new Error('Missing required environment variables for token exchange');
+      const missing = [];
+      if (!clientId) missing.push('QBO_CLIENT_ID');
+      if (!clientSecret) missing.push('QBO_CLIENT_SECRET');
+      if (!redirectUri) missing.push('QBO_REDIRECT_URI');
+      
+      console.error('❌ Missing environment variables:', missing);
+      return createErrorPage(`Missing environment variables: ${missing.join(', ')}`);
     }
 
-    console.log('🔄 Exchanging authorization code for access token...');
-    console.log('🔑 Client ID:', clientId ? '***' + clientId.slice(-4) : 'none');
-    console.log('🔒 Client Secret:', clientSecret ? '***' + clientSecret.slice(-4) : 'none');
-    console.log('🔄 Redirect URI:', redirectUri);
-    console.log('🌍 Environment:', environment);
+    console.log('🔄 Starting token exchange...');
 
-    // Determine the token endpoint based on environment
+    // Create base64 credentials
+    const credentials = clientId + ':' + clientSecret;
+    const base64Credentials = btoa(credentials);
+    console.log('🔐 Base64 credentials created successfully');
+
+    // Determine token endpoint
     const tokenEndpoint = environment === 'sandbox'
       ? 'https://sandbox-oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
       : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
 
     console.log('🎯 Token endpoint:', tokenEndpoint);
 
-    // Create base64 encoded credentials (Vercel-compatible way)
-    const credentials = clientId + ':' + clientSecret;
-    const base64Credentials = btoa(credentials);
-
-    // Exchange authorization code for access token using direct HTTP
+    // Prepare request body
     const tokenRequestBody = new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
       redirect_uri: redirectUri
     });
 
-    console.log('📤 Sending token exchange request...');
-    console.log('📋 Request body:', tokenRequestBody.toString());
+    console.log('📤 Request body prepared:', tokenRequestBody.toString());
 
+    // Make the token exchange request
+    console.log('📡 Sending fetch request...');
+    
     const tokenResponse = await fetch(tokenEndpoint, {
       method: 'POST',
       headers: {
@@ -79,35 +81,50 @@ export async function GET(request) {
       body: tokenRequestBody.toString()
     });
 
-    console.log('📥 Token response status:', tokenResponse.status);
-    console.log('📥 Token response headers:', Object.fromEntries(tokenResponse.headers.entries()));
+    console.log('📥 Response received:');
+    console.log('  - Status:', tokenResponse.status);
+    console.log('  - Status Text:', tokenResponse.statusText);
+    console.log('  - Headers:', Object.fromEntries(tokenResponse.headers.entries()));
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
-      console.error('❌ Token exchange failed:', tokenResponse.status, errorText);
+      console.error('❌ Token exchange failed:', errorText);
       
-      // Try to parse error as JSON for better error details
+      // Try to parse error details
       let errorDetails = errorText;
       try {
         const errorJson = JSON.parse(errorText);
         errorDetails = errorJson.error_description || errorJson.error || errorText;
       } catch (e) {
-        // Keep original error text if not JSON
+        console.log('Could not parse error as JSON, using raw text');
       }
       
-      throw new Error(`Token exchange failed: ${tokenResponse.status} - ${errorDetails}`);
+      return createErrorPage(`Token exchange failed: ${tokenResponse.status} - ${errorDetails}`);
     }
 
+    // Parse successful response
     const tokenData = await tokenResponse.json();
-    
-    console.log('🎉 Successfully obtained access token');
-    console.log('🔑 Access Token:', tokenData.access_token ? '***' + tokenData.access_token.slice(-4) : 'none');
-    console.log('🔄 Refresh Token:', tokenData.refresh_token ? '***' + tokenData.refresh_token.slice(-4) : 'none');
-    console.log('⏰ Expires In:', tokenData.expires_in);
-    console.log('🏷️ Token Type:', tokenData.token_type);
+    console.log('🎉 Token exchange successful!');
+    console.log('  - Access Token:', tokenData.access_token ? '***' + tokenData.access_token.slice(-4) : 'none');
+    console.log('  - Refresh Token:', tokenData.refresh_token ? '***' + tokenData.refresh_token.slice(-4) : 'none');
+    console.log('  - Expires In:', tokenData.expires_in);
+    console.log('  - Token Type:', tokenData.token_type);
 
-    // Create a success page instead of JSON response
-    const successHtml = `
+    // Return success page
+    return createSuccessPage(environment, realmId, tokenData);
+
+  } catch (error) {
+    console.error('❌ Unexpected error in callback:', error);
+    console.error('Error stack:', error.stack);
+    
+    // Return detailed error page
+    return createErrorPage(`Unexpected error: ${error.message}`, error.stack);
+  }
+}
+
+// Helper function to create success page
+function createSuccessPage(environment, realmId, tokenData) {
+  const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -197,22 +214,20 @@ export async function GET(request) {
 </body>
 </html>`;
 
-    // Return success HTML page
-    return new Response(successHtml, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      }
-    });
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
+  });
+}
 
-  } catch (error) {
-    console.error('❌ Error in QBO callback route:', error);
-    
-    // Create an error page instead of JSON response
-    const errorHtml = `
+// Helper function to create error page
+function createErrorPage(message, details = '') {
+  const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -238,7 +253,7 @@ export async function GET(request) {
             border-radius: 1rem;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
         }
         .error-icon {
@@ -262,6 +277,8 @@ export async function GET(request) {
             text-align: left;
             font-family: monospace;
             font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
         }
         .retry-link {
             display: inline-block;
@@ -288,7 +305,8 @@ export async function GET(request) {
         
         <div class="error-details">
             <strong>Error Details:</strong><br>
-            ${error.message}
+            ${message}
+            ${details ? '<br><br><strong>Technical Details:</strong><br>' + details : ''}
         </div>
         
         <p>Please try again or contact support if the problem persists.</p>
@@ -304,16 +322,15 @@ export async function GET(request) {
 </body>
 </html>`;
 
-    return new Response(errorHtml, {
-      status: 500,
-      headers: {
-        'Content-Type': 'text/html',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      }
-    });
-  }
+  return new Response(html, {
+    status: 500,
+    headers: {
+      'Content-Type': 'text/html',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
+  });
 }
 
 // Handle OPTIONS request for CORS
