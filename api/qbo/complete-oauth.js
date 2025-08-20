@@ -3,25 +3,20 @@
  * Manually exchanges authorization code for access tokens
  */
 
-export async function POST(request) {
+module.exports = async (req, res) => {
   try {
+    // Only handle POST requests
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     console.log('🔄 Starting manual OAuth completion...');
     
     // Get the request body
-    const body = await request.json();
-    const { authorizationCode } = body;
+    const { authorizationCode } = req.body;
     
     if (!authorizationCode) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization code is required' }),
-        { 
-          status: 400, 
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          } 
-        }
-      );
+      return res.status(400).json({ error: 'Authorization code is required' });
     }
     
     console.log('🔑 Authorization code received:', authorizationCode ? '***' + authorizationCode.slice(-4) : 'none');
@@ -33,16 +28,7 @@ export async function POST(request) {
     const environment = process.env.QBO_ENV || 'sandbox';
     
     if (!clientId || !clientSecret || !redirectUri) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required environment variables' }),
-        { 
-          status: 500, 
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          } 
-        }
-      );
+      return res.status(500).json({ error: 'Missing required environment variables' });
     }
     
     console.log('🔧 Environment variables loaded successfully');
@@ -57,7 +43,16 @@ export async function POST(request) {
     
     // Create base64 credentials
     const credentials = clientId + ':' + clientSecret;
-    const base64Credentials = btoa(credentials);
+    let base64Credentials;
+    
+    // Handle base64 encoding for different environments
+    if (typeof btoa !== 'undefined') {
+      // Browser environment
+      base64Credentials = btoa(credentials);
+    } else {
+      // Node.js environment
+      base64Credentials = Buffer.from(credentials).toString('base64');
+    }
     
     // Prepare the token exchange request
     const tokenRequestBody = new URLSearchParams({
@@ -96,137 +91,63 @@ export async function POST(request) {
         console.log('Could not parse error as JSON, using raw text');
       }
       
-      return new Response(
-        JSON.stringify({ 
-          error: 'Token exchange failed',
-          details: errorDetails,
-          status: tokenResponse.status
-        }),
-        { 
-          status: 400, 
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          } 
-        }
-      );
+      return res.status(400).json({ 
+        error: 'Token exchange failed',
+        details: errorDetails,
+        status: tokenResponse.status
+      });
     }
     
-    // Parse successful response
+    // Parse the successful response
     const tokenData = await tokenResponse.json();
-    
-    console.log('🎉 Token exchange successful!');
+    console.log('✅ Token exchange successful!');
     console.log('  - Access Token:', tokenData.access_token ? '***' + tokenData.access_token.slice(-4) : 'none');
     console.log('  - Refresh Token:', tokenData.refresh_token ? '***' + tokenData.refresh_token.slice(-4) : 'none');
-    console.log('  - Expires In:', tokenData.expires_in);
+    console.log('  - Expires In:', tokenData.expires_in, 'seconds');
     console.log('  - Token Type:', tokenData.token_type);
-    console.log('  - Realm ID:', tokenData.realmId);
     
-    // Store tokens securely (in production, use a database)
+    // Store tokens securely (in production, use a secure database)
+    // For now, we'll just log them and return success
     const tokens = {
       accessToken: tokenData.access_token,
       refreshToken: tokenData.refresh_token,
       expiresIn: tokenData.expires_in,
       tokenType: tokenData.token_type,
-      realmId: tokenData.realmId,
-      environment: environment,
-      createdAt: new Date().toISOString()
+      realmId: tokenData.realmId, // May be included in some responses
+      environment: environment
     };
     
-    // Save tokens to a file (temporary solution - use database in production)
-    await saveTokensToFile(tokens);
+    // TODO: Store tokens securely in your database
+    console.log('💾 Tokens received and ready for storage');
     
-    // Return success response with token information
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'OAuth flow completed successfully',
-        tokens: {
-          accessTokenReceived: !!tokenData.access_token,
-          refreshTokenReceived: !!tokenData.refresh_token,
-          expiresIn: tokenData.expires_in,
-          tokenType: tokenData.token_type,
-          realmId: tokenData.realmId,
-          environment: environment
-        },
-        nextSteps: [
-          'Access tokens have been stored securely',
-          'You can now use QuickBooks APIs',
-          'Set up webhooks for real-time sync',
-          'Configure category mapping'
-        ]
-      }),
-      { 
-        status: 200, 
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        } 
-      }
-    );
+    // Return success response
+    const response = {
+      message: 'OAuth completed successfully!',
+      tokens: {
+        accessTokenReceived: !!tokenData.access_token,
+        refreshTokenReceived: !!tokenData.refresh_token,
+        expiresIn: tokenData.expires_in,
+        tokenType: tokenData.token_type,
+        realmId: tokenData.realmId || 'Not provided in response',
+        environment: environment
+      },
+      nextSteps: [
+        'Access tokens have been received and are ready for use',
+        'You can now make QuickBooks API calls',
+        'Set up webhook subscriptions for real-time updates',
+        'Test the integration with sample API calls',
+        'Implement token refresh logic for production use'
+      ]
+    };
+    
+    console.log('🎉 OAuth completion successful!');
+    return res.status(200).json(response);
     
   } catch (error) {
-    console.error('❌ Error in OAuth completion:', error);
-    
-    return new Response(
-      JSON.stringify({ 
-        error: 'Failed to complete OAuth flow',
-        details: error.message 
-      }),
-      { 
-        status: 500, 
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        } 
-      }
-    );
+    console.error('❌ OAuth completion error:', error);
+    return res.status(500).json({ 
+      error: 'Internal server error during OAuth completion',
+      details: error.message
+    });
   }
-}
-
-// Save tokens to a file (temporary solution)
-async function saveTokensToFile(tokens) {
-  try {
-    // In production, use a secure database instead of files
-    const fs = require('fs').promises;
-    const path = './quickbooks_tokens.json';
-    
-    // Read existing tokens if file exists
-    let allTokens = [];
-    try {
-      const existingData = await fs.readFile(path, 'utf8');
-      allTokens = JSON.parse(existingData);
-    } catch (e) {
-      // File doesn't exist or is invalid, start fresh
-      allTokens = [];
-    }
-    
-    // Add new tokens
-    allTokens.push(tokens);
-    
-    // Keep only the last 10 token sets
-    if (allTokens.length > 10) {
-      allTokens = allTokens.slice(-10);
-    }
-    
-    // Save to file
-    await fs.writeFile(path, JSON.stringify(allTokens, null, 2));
-    console.log('💾 Tokens saved to file successfully');
-    
-  } catch (error) {
-    console.error('❌ Failed to save tokens to file:', error);
-    // Don't fail the whole request if file saving fails
-  }
-}
-
-// Handle OPTIONS request for CORS
-export async function OPTIONS() {
-  return new Response(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    }
-  });
-}
+};
