@@ -374,7 +374,32 @@ class QBOAuthClient {
   async createBill(billData) {
     try {
       console.log('📄 Creating QuickBooks bill...');
-      const response = await this.makeQuickBooksRequest('/bill', 'POST', billData);
+      
+      // Format the bill data according to QuickBooks API requirements
+      const formattedBillData = {
+        Line: billData.lineItems.map(item => ({
+          DetailType: 'AccountBasedExpenseLineDetail',
+          Amount: item.amount,
+          AccountBasedExpenseLineDetail: {
+            AccountRef: {
+              value: item.accountId
+            }
+          }
+        })),
+        VendorRef: {
+          value: '1' // Default vendor ID - you'll want to make this dynamic
+        },
+        APAccountRef: {
+          value: '33' // Default AP account ID - you'll want to make this dynamic
+        },
+        TotalAmt: billData.amount,
+        DocNumber: billData.invoiceNumber,
+        TxnDate: billData.dueDate
+      };
+      
+      console.log('📄 Formatted bill data:', JSON.stringify(formattedBillData, null, 2));
+      
+      const response = await this.makeQuickBooksRequest('/bill', 'POST', formattedBillData);
       
       if (response.Bill && response.Bill.Id) {
         console.log(`✅ Bill created successfully with ID: ${response.Bill.Id}`);
@@ -773,8 +798,36 @@ app.get('/api/qbo/status', (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: 'Status check failed', details: error.message });
+    }
+});
+
+// NEW: QuickBooks API Test Endpoint
+app.get('/api/qbo/test-api', async (req, res) => {
+  try {
+    if (!globalQBClient || !globalQBClient.hasValidTokens()) {
+      return res.status(401).json({ error: 'No valid QuickBooks tokens. Please complete OAuth first.' });
+    }
+    
+    console.log('🧪 Testing QuickBooks API connection...');
+    
+    // Test a simple query to verify API connection
+    const response = await globalQBClient.makeQuickBooksRequest('/query?query=SELECT * FROM Account MAXRESULTS 1');
+    
+    res.json({
+      success: true,
+      message: 'QuickBooks API connection successful',
+      response: response,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ QuickBooks API test error:', error);
+    res.status(500).json({
+      error: 'QuickBooks API test failed',
+      details: error.message
+    });
   }
- });
+});
 
 // NEW: Debug Environment Endpoint
 app.get('/api/qbo/debug-env', (req, res) => {
