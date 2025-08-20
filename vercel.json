@@ -13,54 +13,15 @@
       "use": "@vercel/node"
     }
   ],
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "/api/$1"
-    },
-    {
-      "src": "/invoice_queue.json",
-      "dest": "/invoice_queue.json",
-      "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-        "Content-Type": "application/json"
-      }
-    },
-    {
-      "src": "/office_info.json",
-      "dest": "/office_info.json",
-      "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-        "Content-Type": "application/json"
-      }
-    },
-    {
-      "src": "/email_invoices/(.*)",
-      "dest": "/email_invoices/$1"
-    },
-    {
-      "src": "/output_jsons/(.*)",
-      "dest": "/output_jsons/$1"
-    },
-    {
-      "src": "/test-oauth-completion.html",
-      "dest": "/public/test-oauth-completion.html"
-    },
-    {
-      "src": "/quickbooks-integration-test.html",
-      "dest": "/public/quickbooks-integration-test.html"
-    },
-    {
-      "src": "/api-debug.html",
-      "dest": "/public/api-debug.html"
-    },
-    {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
-      "dest": "/$1"
     },
     {
       "src": "/(.*)",
