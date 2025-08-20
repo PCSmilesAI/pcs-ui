@@ -1,6 +1,6 @@
 /**
  * QuickBooks OAuth Connect - Vercel Serverless Function
- * Handles OAuth 2.0 authorization URL generation without external package dependencies
+ * Bulletproof OAuth 2.0 implementation with multiple fallback strategies
  */
 export async function GET() {
   try {
@@ -34,24 +34,25 @@ export async function GET() {
     // Generate state token for CSRF protection
     const stateToken = 'qbo_oauth_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-    // Determine the base URL based on environment
+    // Use the correct QuickBooks OAuth endpoint
+    // The previous endpoint was incorrect - this is the right one
     const baseUrl = environment === 'sandbox' 
-      ? 'https://sandbox-accounts.platform.intuit.com'
-      : 'https://accounts.platform.intuit.com';
+      ? 'https://appcenter.intuit.com'
+      : 'https://appcenter.intuit.com';
 
-    // Build the OAuth authorization URL manually
-    const authUrl = new URL('/oauth2/v1/authorizations/request', baseUrl);
+    // Build the OAuth authorization URL using the correct endpoint
+    const authUrl = new URL('/connect/oauth2', baseUrl);
     authUrl.searchParams.set('client_id', clientId);
+    authUrl.searchParams.set('redirect_uri', redirectUri);
     authUrl.searchParams.set('response_type', 'code');
     authUrl.searchParams.set('scope', scopes);
-    authUrl.searchParams.set('redirect_uri', redirectUri);
     authUrl.searchParams.set('state', stateToken);
 
     console.log('🔗 Generated QuickBooks OAuth URL:', authUrl.toString());
     console.log('🔒 State Token:', stateToken);
-    console.log('🔄 Creating HTML redirect page...');
+    console.log('🔄 Creating bulletproof redirect page...');
 
-    // Create an HTML page that automatically redirects to QuickBooks
+    // Create a bulletproof HTML page with multiple redirect strategies
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -78,6 +79,8 @@ export async function GET() {
             border-radius: 1rem;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
         }
         .spinner {
             width: 50px;
@@ -97,13 +100,34 @@ export async function GET() {
             font-size: 1.5rem;
         }
         p {
-            margin: 0;
+            margin: 0 0 1rem 0;
             opacity: 0.9;
+            line-height: 1.5;
         }
         .redirect-info {
             margin-top: 1rem;
             font-size: 0.9rem;
             opacity: 0.7;
+        }
+        .manual-link {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .manual-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .status {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            opacity: 0.6;
         }
     </style>
 </head>
@@ -112,31 +136,116 @@ export async function GET() {
         <div class="spinner"></div>
         <h1>Connecting to QuickBooks...</h1>
         <p>Please wait while we redirect you to QuickBooks authorization.</p>
+        <p>This may take a few moments as we establish the secure connection.</p>
+        
         <div class="redirect-info">
-            If you're not redirected automatically, 
-            <a href="${authUrl.toString()}" style="color: #fff; text-decoration: underline;">click here</a>
+            <a href="${authUrl.toString()}" class="manual-link">
+                🚀 Click here to connect manually
+            </a>
         </div>
+        
+        <div class="status" id="status">Initializing connection...</div>
     </div>
     
     <script>
-        // Automatically redirect to QuickBooks after a brief delay
-        setTimeout(() => {
-            console.log('🔄 Redirecting to QuickBooks OAuth...');
-            window.location.href = '${authUrl.toString()}';
-        }, 1500);
+        const authUrl = '${authUrl.toString()}';
+        const statusEl = document.getElementById('status');
         
-        // Fallback redirect if the main one fails
-        setTimeout(() => {
-            if (window.location.href !== '${authUrl.toString()}') {
-                console.log('🔄 Fallback redirect to QuickBooks OAuth...');
-                window.location.href = '${authUrl.toString()}';
+        // Strategy 1: Immediate redirect attempt
+        function attemptRedirect() {
+            statusEl.textContent = 'Attempting automatic redirect...';
+            try {
+                window.location.href = authUrl;
+            } catch (error) {
+                console.error('Redirect failed:', error);
+                statusEl.textContent = 'Automatic redirect failed, please use manual link above';
             }
-        }, 3000);
+        }
+        
+        // Strategy 2: Delayed redirect with user interaction
+        function delayedRedirect() {
+            statusEl.textContent = 'Preparing redirect...';
+            setTimeout(() => {
+                statusEl.textContent = 'Redirecting now...';
+                attemptRedirect();
+            }, 2000);
+        }
+        
+        // Strategy 3: Window.open fallback
+        function openInNewWindow() {
+            statusEl.textContent = 'Opening in new window...';
+            try {
+                const newWindow = window.open(authUrl, '_blank', 'width=800,height=600');
+                if (newWindow) {
+                    statusEl.textContent = 'Opened in new window - please complete authorization there';
+                } else {
+                    statusEl.textContent = 'Popup blocked - please use manual link above';
+                }
+            } catch (error) {
+                console.error('Window.open failed:', error);
+                statusEl.textContent = 'Failed to open new window - please use manual link above';
+            }
+        }
+        
+        // Strategy 4: Form submission fallback
+        function formRedirect() {
+            statusEl.textContent = 'Using form redirect...';
+            const form = document.createElement('form');
+            form.method = 'GET';
+            form.action = authUrl;
+            document.body.appendChild(form);
+            form.submit();
+        }
+        
+        // Execute all strategies with fallbacks
+        console.log('🚀 Starting bulletproof QuickBooks OAuth redirect...');
+        console.log('🔗 Target URL:', authUrl);
+        
+        // Try immediate redirect first
+        attemptRedirect();
+        
+        // If immediate redirect doesn't work, try delayed redirect
+        setTimeout(() => {
+            if (window.location.href !== authUrl) {
+                console.log('⏰ Delayed redirect attempt...');
+                delayedRedirect();
+            }
+        }, 1000);
+        
+        // If still not redirected, try window.open
+        setTimeout(() => {
+            if (window.location.href !== authUrl) {
+                console.log('🪟 Trying window.open fallback...');
+                openInNewWindow();
+            }
+        }, 4000);
+        
+        // Final fallback: form submission
+        setTimeout(() => {
+            if (window.location.href !== authUrl) {
+                console.log('📝 Using form submission fallback...');
+                formRedirect();
+            }
+        }, 6000);
+        
+        // Log any errors
+        window.addEventListener('error', (error) => {
+            console.error('❌ Page error:', error);
+            statusEl.textContent = 'Error occurred - please use manual link above';
+        });
+        
+        // Check if we're still on the same page after 10 seconds
+        setTimeout(() => {
+            if (window.location.href !== authUrl) {
+                statusEl.textContent = '⚠️ Automatic redirect failed - please use manual link above';
+                console.warn('⚠️ All automatic redirect strategies failed');
+            }
+        }, 10000);
     </script>
 </body>
 </html>`;
 
-    // Return the HTML page that will redirect the user
+    // Return the bulletproof HTML page
     return new Response(html, {
       status: 200,
       headers: {
