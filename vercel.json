@@ -27,6 +27,14 @@
       "dest": "/api/qbo/complete-oauth.cjs"
     },
     {
+      "src": "/api/qbo/debug-env",
+      "dest": "/api/qbo/debug-env.cjs"
+    },
+    {
+      "src": "/api/qbo/test-simple",
+      "dest": "/api/qbo/test-simple.cjs"
+    },
+    {
       "src": "/api/qbo/sync-categories",
       "dest": "/api/qbo/sync-categories.cjs"
     },
