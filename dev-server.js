@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const OAuthClient = require('intuit-oauth');
+const QuickBooks = require('quickbooks');
 
 // Load environment variables from env file
 dotenv.config({ path: './env' });
@@ -44,8 +45,22 @@ function restoreGlobalClient() {
   if (savedTokens) {
     const qbClient = new QBOAuthClient();
     qbClient.tokens = savedTokens;
+    
+    // Also restore the QuickBooks client
+    qbClient.qboClient = new QuickBooks(
+      qbClient.clientId,
+      qbClient.clientSecret,
+      savedTokens.accessToken,
+      false, // no debug
+      savedTokens.realmId,
+      qbClient.environment === 'sandbox', // sandbox flag
+      true, // enable logging
+      '2.0', // OAuth version
+      savedTokens.refreshToken
+    );
+    
     globalQBClient = qbClient;
-    console.log('🔄 Global client restored from saved tokens');
+    console.log('🔄 Global client and QuickBooks client restored from saved tokens');
     return true;
   }
   return false;
@@ -58,7 +73,7 @@ app.use(express.json());
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// QuickBooks OAuth Client - Direct implementation for Express server
+// QuickBooks OAuth Client - Using Official SDK
 class QBOAuthClient {
   constructor() {
     this.clientId = process.env.QBO_CLIENT_ID;
@@ -77,6 +92,9 @@ class QBOAuthClient {
     
     // Store tokens in memory (in production, use secure storage)
     this.tokens = null;
+    
+    // Initialize QuickBooks client when tokens are available
+    this.qboClient = null;
   }
 
   getAuthorizationUrl(stateToken = null) {
@@ -126,9 +144,23 @@ class QBOAuthClient {
           realmId: realmId
         };
 
+        // Initialize official QuickBooks client
+        this.qboClient = new QuickBooks(
+          this.clientId,
+          this.clientSecret,
+          this.tokens.accessToken,
+          false, // no debug
+          this.tokens.realmId,
+          this.environment === 'sandbox', // sandbox flag
+          true, // enable logging
+          '2.0', // OAuth version
+          this.tokens.refreshToken
+        );
+
         console.log('🎉 Successfully obtained access token');
         console.log('🔑 Access Token:', this.tokens.accessToken ? '***' + this.tokens.accessToken.slice(-4) : 'none');
         console.log('🔄 Refresh Token:', this.tokens.refreshToken ? '***' + this.tokens.refreshToken.slice(-4) : 'none');
+        console.log('🚀 Official QuickBooks client initialized');
 
         return {
           success: true,
@@ -265,90 +297,27 @@ class QBOAuthClient {
     return !!(this.tokens && this.tokens.accessToken);
   }
 
-  async makeQuickBooksRequest(endpoint, method = 'GET', data = null) {
-    try {
-      if (!this.hasValidTokens()) {
-        throw new Error('No valid access token available');
-      }
-
-      const https = require('https');
-      
-      const options = {
-        hostname: 'sandbox-accounts.platform.intuit.com',
-        port: 443,
-        path: `/v3/company/${this.tokens.realmId}${endpoint}`,
-        method: method,
-        headers: {
-          'Authorization': `Bearer ${this.tokens.accessToken}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      };
-
-      if (data) {
-        options.headers['Content-Length'] = Buffer.byteLength(JSON.stringify(data));
-      }
-
-      return new Promise((resolve, reject) => {
-        const req = https.request(options, (res) => {
-          let responseData = '';
-          
-          console.log(`📡 QuickBooks API Response Status: ${res.statusCode} ${res.statusMessage}`);
-          console.log(`📡 QuickBooks API Response Headers:`, res.headers);
-          
-          res.on('data', (chunk) => {
-            responseData += chunk;
-          });
-          
-          res.on('end', () => {
-            console.log(`📡 QuickBooks API Raw Response: "${responseData}"`);
-            
-            if (!responseData || responseData.trim() === '') {
-              reject(new Error('Empty response from QuickBooks API'));
-              return;
-            }
-            
-            try {
-              const response = JSON.parse(responseData);
-              resolve(response);
-            } catch (error) {
-              reject(new Error(`Failed to parse response: "${responseData}" - Error: ${error.message}`));
-            }
-          });
-        });
-
-        req.on('error', (error) => {
-          console.error('❌ QuickBooks API Request Error:', error);
-          reject(error);
-        });
-
-        if (data) {
-          const requestBody = JSON.stringify(data);
-          console.log(`📤 QuickBooks API Request Body: ${requestBody}`);
-          req.write(requestBody);
-        }
-        req.end();
-      });
-      
-    } catch (error) {
-      throw error;
-    }
-  }
+  // Official SDK handles all API requests - no custom HTTP needed!
 
   async getAccounts() {
     try {
-      console.log('📊 Fetching QuickBooks accounts...');
-      const response = await this.makeQuickBooksRequest('/query?query=SELECT * FROM Account WHERE AccountType IN (\'Expense\', \'Other Current Liability\') MAXRESULTS 1000');
+      console.log('📊 Fetching QuickBooks accounts using official SDK...');
       
-      if (response.QueryResponse && response.QueryResponse.Account) {
-        console.log(`✅ Found ${response.QueryResponse.Account.length} accounts`);
-        return response.QueryResponse.Account;
-      } else {
-        console.log('⚠️ No accounts found in response');
-        return [];
-      }
+      return new Promise((resolve, reject) => {
+        this.qboClient.findAccounts({
+          limit: 1000
+        }, (err, accounts) => {
+          if (err) {
+            console.error('❌ Error fetching accounts:', err);
+            reject(err);
+          } else {
+            console.log(`✅ Found ${accounts.length} accounts using official SDK`);
+            resolve(accounts);
+          }
+        });
+      });
     } catch (error) {
-      console.error('❌ Error fetching accounts:', error);
+      console.error('❌ Error in getAccounts:', error);
       throw error;
     }
   }
@@ -373,10 +342,10 @@ class QBOAuthClient {
 
   async createBill(billData) {
     try {
-      console.log('📄 Creating QuickBooks bill...');
+      console.log('📄 Creating QuickBooks bill using official SDK...');
       
-      // Format the bill data according to QuickBooks API requirements
-      const formattedBillData = {
+      // Format the bill data for official SDK
+      const billObj = {
         Line: billData.lineItems.map(item => ({
           DetailType: 'AccountBasedExpenseLineDetail',
           Amount: item.amount,
@@ -387,28 +356,31 @@ class QBOAuthClient {
           }
         })),
         VendorRef: {
-          value: '1' // Default vendor ID - you'll want to make this dynamic
+          value: '1' // Default vendor ID
         },
         APAccountRef: {
-          value: '33' // Default AP account ID - you'll want to make this dynamic
+          value: '33' // Default AP account ID
         },
         TotalAmt: billData.amount,
         DocNumber: billData.invoiceNumber,
         TxnDate: billData.dueDate
       };
       
-      console.log('📄 Formatted bill data:', JSON.stringify(formattedBillData, null, 2));
+      console.log('📄 Bill data for official SDK:', JSON.stringify(billObj, null, 2));
       
-      const response = await this.makeQuickBooksRequest('/bill', 'POST', formattedBillData);
-      
-      if (response.Bill && response.Bill.Id) {
-        console.log(`✅ Bill created successfully with ID: ${response.Bill.Id}`);
-        return response.Bill;
-      } else {
-        throw new Error('No bill ID in response');
-      }
+      return new Promise((resolve, reject) => {
+        this.qboClient.createBill(billObj, (err, bill) => {
+          if (err) {
+            console.error('❌ Error creating bill:', err);
+            reject(err);
+          } else {
+            console.log(`✅ Bill created successfully with ID: ${bill.Id} using official SDK`);
+            resolve(bill);
+          }
+        });
+      });
     } catch (error) {
-      console.error('❌ Error creating bill:', error);
+      console.error('❌ Error in createBill:', error);
       throw error;
     }
   }
