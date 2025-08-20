@@ -100,10 +100,7 @@
       "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
       "dest": "/$1"
     },
-    {
-      "src": "/test-oauth-completion.html",
-      "dest": "/test-oauth-completion.html"
-    },
+
     {
       "src": "/(.*)",
       "dest": "/index.html"
