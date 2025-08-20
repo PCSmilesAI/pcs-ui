@@ -304,8 +304,12 @@
             resultElement.className = 'result info';
             resultElement.textContent = 'Starting OAuth flow...\n\nThis will redirect you to QuickBooks for authorization.';
             
+            // Use the ngrok URL for OAuth since that's what QuickBooks expects
+            const ngrokUrl = 'https://ec0501ad1826.ngrok-free.app/api/qbo/connect';
+            console.log('🔗 Starting OAuth with ngrok URL:', ngrokUrl);
+            
             // Open OAuth URL in new window
-            window.open('http://localhost:3001/api/qbo/connect', '_blank');
+            window.open(ngrokUrl, '_blank');
         }
 
         function testSendInvoice() {

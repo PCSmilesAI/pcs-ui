@@ -896,7 +896,16 @@ app.post('/api/qbo/send-invoice', async (req, res) => {
 
 // NEW: Simple Test Endpoint
 app.get('/api/test', (req, res) => {
-  res.json({ ok: true, message: 'Local API server is working!', timestamp: new Date().toISOString() });
+  res.json({ 
+    ok: true, 
+    message: 'Local API server is working!', 
+    timestamp: new Date().toISOString(),
+    globalClientStatus: {
+      exists: !!globalQBClient,
+      hasTokens: globalQBClient ? globalQBClient.hasValidTokens() : false,
+      realmId: globalQBClient ? globalQBClient.tokens?.realmId : null
+    }
+  });
 });
 
 // NEW: Hello World Endpoint
