@@ -27,6 +27,14 @@
       "dest": "/api/qbo/complete-oauth.cjs"
     },
     {
+      "src": "/api/qbo/sync-categories",
+      "dest": "/api/qbo/sync-categories.cjs"
+    },
+    {
+      "src": "/api/qbo/send-invoice",
+      "dest": "/api/qbo/send-invoice.cjs"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },
