@@ -185,6 +185,11 @@ app.get('/api/qbo/connect', (req, res) => {
 // QuickBooks OAuth Callback Route
 app.get('/api/qbo/callback', async (req, res) => {
   try {
+    console.log('🔔 OAuth callback received!');
+    console.log('📋 Full URL:', req.url);
+    console.log('📋 Query params:', req.query);
+    console.log('📋 Headers:', req.headers);
+    
     const { code, state, realmId } = req.query;
     
     if (!code) {
@@ -227,6 +232,49 @@ app.get('/api/qbo/callback', async (req, res) => {
     console.error('❌ Error in QBO callback route:', error);
     res.status(500).json({ error: 'Failed to process OAuth callback' });
   }
+});
+
+// Catch-all OAuth callback route (in case QuickBooks redirects to a different path)
+app.get('/qbo/callback', async (req, res) => {
+  console.log('🔔 Alternative OAuth callback received at /qbo/callback');
+  console.log('📋 Full URL:', req.url);
+  console.log('📋 Query params:', req.query);
+  
+  // Redirect to the main callback route
+  res.redirect(`/api/qbo/callback?${new URLSearchParams(req.query).toString()}`);
+});
+
+// Root OAuth callback route (in case QuickBooks redirects to root)
+app.get('/callback', async (req, res) => {
+  console.log('🔔 Root OAuth callback received at /callback');
+  console.log('📋 Full URL:', req.url);
+  console.log('📋 Query params:', req.query);
+  
+  // Redirect to the main callback route
+  res.redirect(`/api/qbo/callback?${new URLSearchParams(req.query).toString()}`);
+});
+
+// Debug route to see what URL QuickBooks is actually redirecting to
+app.get('*', (req, res) => {
+  if (req.url.includes('code=') || req.url.includes('realmId=')) {
+    console.log('🔍 Potential OAuth callback detected at:', req.url);
+    console.log('📋 Query params:', req.query);
+    console.log('📋 Headers:', req.headers);
+    
+    // If it looks like an OAuth callback, redirect to the main callback route
+    if (req.query.code) {
+      return res.redirect(`/api/qbo/callback?${new URLSearchParams(req.query).toString()}`);
+    }
+  }
+  
+  // For all other routes, return a helpful message
+  res.json({
+    message: 'Route not found',
+    url: req.url,
+    method: req.method,
+    query: req.query,
+    note: 'If this looks like an OAuth callback, check the server logs for debugging info'
+  });
 });
 
 // Token exchange function removed - now handled by QBOAuthClient
