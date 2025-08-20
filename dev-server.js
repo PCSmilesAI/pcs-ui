@@ -256,26 +256,39 @@ class QBOAuthClient {
         const req = https.request(options, (res) => {
           let responseData = '';
           
+          console.log(`📡 QuickBooks API Response Status: ${res.statusCode} ${res.statusMessage}`);
+          console.log(`📡 QuickBooks API Response Headers:`, res.headers);
+          
           res.on('data', (chunk) => {
             responseData += chunk;
           });
           
           res.on('end', () => {
+            console.log(`📡 QuickBooks API Raw Response: "${responseData}"`);
+            
+            if (!responseData || responseData.trim() === '') {
+              reject(new Error('Empty response from QuickBooks API'));
+              return;
+            }
+            
             try {
               const response = JSON.parse(responseData);
               resolve(response);
             } catch (error) {
-              reject(new Error('Failed to parse response: ' + responseData));
+              reject(new Error(`Failed to parse response: "${responseData}" - Error: ${error.message}`));
             }
           });
         });
 
         req.on('error', (error) => {
+          console.error('❌ QuickBooks API Request Error:', error);
           reject(error);
         });
 
         if (data) {
-          req.write(JSON.stringify(data));
+          const requestBody = JSON.stringify(data);
+          console.log(`📤 QuickBooks API Request Body: ${requestBody}`);
+          req.write(requestBody);
         }
         req.end();
       });
@@ -805,10 +818,20 @@ app.post('/api/qbo/send-invoice', async (req, res) => {
     
   } catch (error) {
     console.error('❌ Send invoice error:', error);
-    res.status(500).json({
+    
+    // Provide more detailed error information
+    const errorResponse = {
       error: 'Failed to send invoice to QuickBooks',
-      details: error.message
-    });
+      details: error.message,
+      timestamp: new Date().toISOString()
+    };
+    
+    // If it's a parsing error, add additional context
+    if (error.message.includes('Failed to parse response')) {
+      errorResponse.suggestion = 'QuickBooks may have returned an empty or malformed response. Check server logs for details.';
+    }
+    
+    res.status(500).json(errorResponse);
   }
 });
 
