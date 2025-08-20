@@ -398,6 +398,8 @@ app.get('/api/qbo/callback', async (req, res) => {
     
     // Store the client globally so other endpoints can access the tokens
     globalQBClient = qbClient;
+    console.log('🌍 Global QB client set:', globalQBClient ? 'SUCCESS' : 'FAILED');
+    console.log('🌍 Global client has tokens:', globalQBClient.hasValidTokens());
     
     if (tokenResponse.success) {
       console.log('🎉 Successfully obtained access token');
@@ -709,6 +711,12 @@ app.post('/api/qbo/complete-oauth', async (req, res) => {
 // NEW: QuickBooks Status Endpoint
 app.get('/api/qbo/status', (req, res) => {
   try {
+    console.log('🔍 Status check - globalQBClient:', globalQBClient ? 'EXISTS' : 'NULL');
+    if (globalQBClient) {
+      console.log('🔍 Status check - tokens:', globalQBClient.tokens ? 'EXISTS' : 'NULL');
+      console.log('🔍 Status check - hasValidTokens:', globalQBClient.hasValidTokens());
+    }
+    
     const hasTokens = globalQBClient && globalQBClient.hasValidTokens();
     const realmId = globalQBClient ? globalQBClient.tokens?.realmId : null;
     
@@ -716,12 +724,17 @@ app.get('/api/qbo/status', (req, res) => {
       hasValidTokens: hasTokens,
       realmId: realmId,
       message: hasTokens ? 'QuickBooks connected and ready' : 'No valid tokens. Please complete OAuth first.',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      debug: {
+        globalClientExists: !!globalQBClient,
+        tokensExist: !!(globalQBClient && globalQBClient.tokens),
+        clientType: globalQBClient ? globalQBClient.constructor.name : 'null'
+      }
     });
   } catch (error) {
     res.status(500).json({ error: 'Status check failed', details: error.message });
   }
-});
+ });
 
 // NEW: Debug Environment Endpoint
 app.get('/api/qbo/debug-env', (req, res) => {
@@ -802,6 +815,12 @@ app.post('/api/qbo/send-invoice', async (req, res) => {
     console.log('📄 Sending invoice to QuickBooks...');
     
     // Check if we have valid tokens
+    console.log('📄 Send invoice - globalQBClient:', globalQBClient ? 'EXISTS' : 'NULL');
+    if (globalQBClient) {
+      console.log('📄 Send invoice - hasValidTokens:', globalQBClient.hasValidTokens());
+      console.log('📄 Send invoice - tokens:', globalQBClient.tokens ? 'EXISTS' : 'NULL');
+    }
+    
     if (!globalQBClient || !globalQBClient.hasValidTokens()) {
       return res.status(401).json({ error: 'No valid QuickBooks tokens. Please complete OAuth first.' });
     }
