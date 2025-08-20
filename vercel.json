@@ -71,6 +71,10 @@
       "dest": "/public/test-oauth-completion.html"
     },
     {
+      "src": "/quickbooks-integration-test.html",
+      "dest": "/public/quickbooks-integration-test.html"
+    },
+    {
       "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
       "dest": "/$1"
     },
