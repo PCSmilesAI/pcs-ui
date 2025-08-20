@@ -1,13 +1,9 @@
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import cors from 'cors';
-import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
-import OAuthClient from 'intuit-oauth';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const OAuthClient = require('intuit-oauth');
 
 // Load environment variables from env file
 dotenv.config({ path: './env' });
