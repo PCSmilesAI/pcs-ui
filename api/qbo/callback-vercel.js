@@ -1,6 +1,6 @@
 /**
  * QuickBooks OAuth Callback - Vercel Serverless Function
- * Simplified callback with extensive debugging
+ * Robust callback with retry logic and alternative HTTP methods
  */
 export async function GET(request) {
   console.log('🚀 Callback function started');
@@ -45,7 +45,7 @@ export async function GET(request) {
       return createErrorPage(`Missing environment variables: ${missing.join(', ')}`);
     }
 
-    console.log('🔄 Starting token exchange...');
+    console.log('🔄 Starting token exchange with retry logic...');
 
     // Create base64 credentials
     const credentials = clientId + ':' + clientSecret;
@@ -68,42 +68,112 @@ export async function GET(request) {
 
     console.log('📤 Request body prepared:', tokenRequestBody.toString());
 
-    // Make the token exchange request
-    console.log('📡 Sending fetch request...');
-    
-    const tokenResponse = await fetch(tokenEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${base64Credentials}`,
-        'Accept': 'application/json'
-      },
-      body: tokenRequestBody.toString()
-    });
+    // Try multiple approaches to make the request
+    let tokenData = null;
+    let lastError = null;
 
-    console.log('📥 Response received:');
-    console.log('  - Status:', tokenResponse.status);
-    console.log('  - Status Text:', tokenResponse.statusText);
-    console.log('  - Headers:', Object.fromEntries(tokenResponse.headers.entries()));
-
-    if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      console.error('❌ Token exchange failed:', errorText);
+    // Approach 1: Standard fetch with timeout
+    try {
+      console.log('📡 Attempt 1: Standard fetch with timeout...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
-      // Try to parse error details
-      let errorDetails = errorText;
-      try {
-        const errorJson = JSON.parse(errorText);
-        errorDetails = errorJson.error_description || errorJson.error || errorText;
-      } catch (e) {
-        console.log('Could not parse error as JSON, using raw text');
+      const tokenResponse = await fetch(tokenEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${base64Credentials}`,
+          'Accept': 'application/json',
+          'User-Agent': 'PCS-AI-OAuth/1.0'
+        },
+        body: tokenRequestBody.toString(),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      console.log('📥 Response received:');
+      console.log('  - Status:', tokenResponse.status);
+      console.log('  - Status Text:', tokenResponse.statusText);
+      console.log('  - Headers:', Object.fromEntries(tokenResponse.headers.entries()));
+
+      if (tokenResponse.ok) {
+        tokenData = await tokenResponse.json();
+        console.log('🎉 Token exchange successful on first attempt!');
+      } else {
+        const errorText = await tokenResponse.text();
+        console.error('❌ Token exchange failed:', errorText);
+        throw new Error(`HTTP ${tokenResponse.status}: ${errorText}`);
       }
+    } catch (error) {
+      lastError = error;
+      console.log('❌ First attempt failed:', error.message);
       
-      return createErrorPage(`Token exchange failed: ${tokenResponse.status} - ${errorDetails}`);
+      // Approach 2: Try with different headers
+      try {
+        console.log('📡 Attempt 2: Fetch with simplified headers...');
+        const tokenResponse = await fetch(tokenEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Basic ${base64Credentials}`
+          },
+          body: tokenRequestBody.toString()
+        });
+        
+        console.log('📥 Response received (attempt 2):');
+        console.log('  - Status:', tokenResponse.status);
+        console.log('  - Status Text:', tokenResponse.statusText);
+
+        if (tokenResponse.ok) {
+          tokenData = await tokenResponse.json();
+          console.log('🎉 Token exchange successful on second attempt!');
+        } else {
+          const errorText = await tokenResponse.text();
+          console.error('❌ Token exchange failed (attempt 2):', errorText);
+          throw new Error(`HTTP ${tokenResponse.status}: ${errorText}`);
+        }
+      } catch (error2) {
+        lastError = error2;
+        console.log('❌ Second attempt failed:', error2.message);
+        
+        // Approach 3: Try with different timeout
+        try {
+          console.log('📡 Attempt 3: Fetch with longer timeout...');
+          const tokenResponse = await fetch(tokenEndpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Authorization': `Basic ${base64Credentials}`,
+              'Accept': 'application/json'
+            },
+            body: tokenRequestBody.toString()
+          });
+          
+          console.log('📥 Response received (attempt 3):');
+          console.log('  - Status:', tokenResponse.status);
+          console.log('  - Status Text:', tokenResponse.statusText);
+
+          if (tokenResponse.ok) {
+            tokenData = await tokenResponse.json();
+            console.log('🎉 Token exchange successful on third attempt!');
+          } else {
+            const errorText = await tokenResponse.text();
+            console.error('❌ Token exchange failed (attempt 3):', errorText);
+            throw new Error(`HTTP ${tokenResponse.status}: ${errorText}`);
+          }
+        } catch (error3) {
+          lastError = error3;
+          console.log('❌ Third attempt failed:', error3.message);
+          throw new Error(`All fetch attempts failed. Last error: ${error3.message}`);
+        }
+      }
     }
 
-    // Parse successful response
-    const tokenData = await tokenResponse.json();
+    if (!tokenData) {
+      throw new Error('Failed to obtain token data after all attempts');
+    }
+
     console.log('🎉 Token exchange successful!');
     console.log('  - Access Token:', tokenData.access_token ? '***' + tokenData.access_token.slice(-4) : 'none');
     console.log('  - Refresh Token:', tokenData.refresh_token ? '***' + tokenData.refresh_token.slice(-4) : 'none');
