@@ -11,10 +11,6 @@
     {
       "src": "api/**/*.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "api/**/*.cjs",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
