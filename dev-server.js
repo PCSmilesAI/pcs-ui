@@ -427,6 +427,11 @@ app.get('/callback', async (req, res) => {
   res.redirect(`/api/qbo/callback?${new URLSearchParams(req.query).toString()}`);
 });
 
+// NEW: Local Test Page Route
+app.get('/local-test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'local-test.html'));
+});
+
 // Debug route to see what URL QuickBooks is actually redirecting to
 app.get('*', (req, res) => {
   if (req.url.includes('code=') || req.url.includes('realmId=')) {
@@ -845,11 +850,6 @@ app.post('/api/webhooks/quickbooks', (req, res) => {
   // For now, just acknowledge receipt
   console.log('✅ Webhook received successfully');
   res.status(200).send('OK');
-});
-
-// NEW: Local Test Page Route
-app.get('/local-test', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'local-test.html'));
 });
 
 app.listen(PORT, () => {
