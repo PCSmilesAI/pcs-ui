@@ -1,0 +1,351 @@
+# 🚀 PCS AI QuickBooks Integration - Kubernetes Deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pcs-ai-quickbooks
+  namespace: pcs-ai
+  labels:
+    app: pcs-ai-quickbooks
+    version: v1.0.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pcs-ai-quickbooks
+  template:
+    metadata:
+      labels:
+        app: pcs-ai-quickbooks
+        version: v1.0.0
+    spec:
+      serviceAccountName: pcs-ai-service-account
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+      - name: pcs-ai-quickbooks
+        image: pcs-ai-quickbooks:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3001
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        # Application
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3001"
+        - name: HOST
+          value: "0.0.0.0"
+        
+        # Security
+        - name: API_KEYS
+          valueFrom:
+            secretKeyRef:
+              name: pcs-ai-secrets
+              key: api-keys
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: pcs-ai-secrets
+              key: session-secret
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: pcs-ai-secrets
+              key: encryption-key
+        
+        # QuickBooks
+        - name: QBO_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: pcs-ai-secrets
+              key: qbo-client-id
+        - name: QBO_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: pcs-ai-secrets
+              key: qbo-client-secret
+        - name: QBO_ENVIRONMENT
+          value: "production"
+        
+        # Rate Limiting
+        - name: RATE_LIMIT_WINDOW_MS
+          value: "900000"
+        - name: RATE_LIMIT_MAX_REQUESTS
+          value: "100"
+        
+        # Performance
+        - name: MAX_CONCURRENT_REQUESTS
+          value: "100"
+        - name: REQUEST_TIMEOUT_MS
+          value: "30000"
+        - name: CIRCUIT_BREAKER_THRESHOLD
+          value: "5"
+        - name: CIRCUIT_BREAKER_TIMEOUT_MS
+          value: "60000"
+        
+        # Monitoring
+        - name: ENABLE_METRICS
+          value: "true"
+        - name: METRICS_PORT
+          value: "9090"
+        - name: HEALTH_CHECK_INTERVAL
+          value: "30000"
+        - name: ENABLE_PERFORMANCE_MONITORING
+          value: "true"
+        
+        # Logging
+        - name: LOG_LEVEL
+          value: "info"
+        - name: LOG_FORMAT
+          value: "json"
+        - name: ENABLE_CONSOLE_LOGGING
+          value: "true"
+        - name: ENABLE_FILE_LOGGING
+          value: "true"
+        
+        # Backup
+        - name: BACKUP_ENABLED
+          value: "true"
+        - name: BACKUP_INTERVAL_HOURS
+          value: "24"
+        - name: BACKUP_RETENTION_DAYS
+          value: "30"
+        
+        # Database
+        - name: DATABASE_URL
+          value: "postgresql://pcs_ai_user:$(DB_PASSWORD)@pcs-ai-postgres:5432/pcs_ai_qbo"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pcs-ai-secrets
+              key: db-password
+        
+        # Redis
+        - name: REDIS_URL
+          value: "redis://pcs-ai-redis:6379"
+        
+        # Error Reporting
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: pcs-ai-secrets
+              key: sentry-dsn
+        - name: ENABLE_ERROR_REPORTING
+          value: "true"
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+        - name: backups
+          mountPath: /app/backups
+        - name: pcs-ai-data
+          mountPath: /app/pcs_ai_data
+        - name: uploads
+          mountPath: /app/uploads
+        - name: qbo-tokens
+          mountPath: /app/qbo_tokens.json
+          subPath: qbo_tokens.json
+      
+      volumes:
+      - name: logs
+        persistentVolumeClaim:
+          claimName: pcs-ai-logs-pvc
+      - name: backups
+        persistentVolumeClaim:
+          claimName: pcs-ai-backups-pvc
+      - name: pcs-ai-data
+        persistentVolumeClaim:
+          claimName: pcs-ai-data-pvc
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: pcs-ai-uploads-pvc
+      - name: qbo-tokens
+        configMap:
+          name: pcs-ai-qbo-tokens
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pcs-ai-quickbooks-service
+  namespace: pcs-ai
+spec:
+  selector:
+    app: pcs-ai-quickbooks
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3001
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pcs-ai-quickbooks-ingress
+  namespace: pcs-ai
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "15m"
+spec:
+  tls:
+  - hosts:
+    - api.pcs-ai.com
+    secretName: pcs-ai-tls
+  rules:
+  - host: api.pcs-ai.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pcs-ai-quickbooks-service
+            port:
+              number: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pcs-ai-qbo-tokens
+  namespace: pcs-ai
+data:
+  qbo_tokens.json: |
+    {
+      "accessToken": "",
+      "refreshToken": "",
+      "realmId": "",
+      "tokenType": "bearer",
+      "expiresAt": null
+    }
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pcs-ai-secrets
+  namespace: pcs-ai
+type: Opaque
+data:
+  # Base64 encoded values (echo -n "your-value" | base64)
+  api-keys: bG9jYWwtZGV2LWtleS0xLGxvY2FsLWRldi1rZXktMg==
+  session-secret: bG9jYWwtZGV2LXNlc3Npb24tc2VjcmV0LWNoYW5nZS1pbi1wcm9kdWN0aW9u
+  encryption-key: bG9jYWwtZGV2LTMyLWNoYXItZW5jcnlwdGlvbi1rZXk=
+  qbo-client-id: eW91ci1wcm9kdWN0aW9uLWNsaWVudC1pZA==
+  qbo-client-secret: eW91ci1wcm9kdWN0aW9uLWNsaWVudC1zZWNyZXQ=
+  db-password: cGNzX2FpX3Bhc3N3b3Jk
+  sentry-dsn: eW91ci1zZW50cnktZHNu
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pcs-ai-logs-pvc
+  namespace: pcs-ai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pcs-ai-backups-pvc
+  namespace: pcs-ai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pcs-ai-data-pvc
+  namespace: pcs-ai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pcs-ai-uploads-pvc
+  namespace: pcs-ai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pcs-ai-service-account
+  namespace: pcs-ai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: pcs-ai
+  name: pcs-ai-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints", "persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pcs-ai-role-binding
+  namespace: pcs-ai
+subjects:
+- kind: ServiceAccount
+  name: pcs-ai-service-account
+  namespace: pcs-ai
+roleRef:
+  kind: Role
+  name: pcs-ai-role
+  apiGroup: rbac.authorization.k8s.io
