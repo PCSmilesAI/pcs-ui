@@ -1,0 +1,152 @@
+# 🐳 PCS AI QuickBooks Integration - Docker Compose
+
+version: '3.8'
+
+services:
+  # Main application
+  pcs-ai-qbo:
+    build: .
+    container_name: pcs-ai-quickbooks
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - HOST=0.0.0.0
+      # Security
+      - API_KEYS=local-dev-key-1,local-dev-key-2
+      - SESSION_SECRET=local-dev-session-secret-change-in-production
+      - ENCRYPTION_KEY=local-dev-32-char-encryption-key
+      # QuickBooks (use your actual values)
+      - QBO_CLIENT_ID=${QBO_CLIENT_ID}
+      - QBO_CLIENT_SECRET=${QBO_CLIENT_SECRET}
+      - QBO_ENVIRONMENT=sandbox
+      # Rate Limiting
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=100
+      # Performance
+      - MAX_CONCURRENT_REQUESTS=50
+      - REQUEST_TIMEOUT_MS=30000
+      - CIRCUIT_BREAKER_THRESHOLD=3
+      - CIRCUIT_BREAKER_TIMEOUT_MS=30000
+      # Monitoring
+      - ENABLE_METRICS=true
+      - METRICS_PORT=9090
+      - HEALTH_CHECK_INTERVAL=30000
+      - ENABLE_PERFORMANCE_MONITORING=true
+      # Logging
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - ENABLE_CONSOLE_LOGGING=true
+      - ENABLE_FILE_LOGGING=true
+      # Backup
+      - BACKUP_ENABLED=true
+      - BACKUP_INTERVAL_HOURS=24
+      - BACKUP_RETENTION_DAYS=7
+    volumes:
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+      - ./pcs_ai_data:/app/pcs_ai_data
+      - ./uploads:/app/uploads
+      - ./qbo_tokens.json:/app/qbo_tokens.json
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - pcs-ai-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: pcs-ai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - pcs-ai-network
+
+  # PostgreSQL for production database (optional)
+  postgres:
+    image: postgres:15-alpine
+    container_name: pcs-ai-postgres
+    environment:
+      - POSTGRES_DB=pcs_ai_qbo
+      - POSTGRES_USER=pcs_ai_user
+      - POSTGRES_PASSWORD=pcs_ai_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - pcs-ai-network
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: pcs-ai-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - pcs-ai-qbo
+    restart: unless-stopped
+    networks:
+      - pcs-ai-network
+
+  # Prometheus for metrics (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: pcs-ai-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - pcs-ai-network
+
+  # Grafana for dashboards (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: pcs-ai-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - pcs-ai-network
+
+volumes:
+  redis_data:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  pcs-ai-network:
+    driver: bridge

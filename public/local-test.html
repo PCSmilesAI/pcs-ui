@@ -162,25 +162,116 @@
             <button class="test-button" onclick="testSendInvoice()">Test Send Invoice</button>
             <div id="result-send-invoice" class="result" style="display: none;"></div>
         </div>
-    </div>
 
-    <div class="container">
-        <h2>🔔 Webhook Tests</h2>
-        
         <div class="endpoint">
-            <h3><span class="status pending" id="status-webhook-test"></span>Webhook Test</h3>
-            <p><strong>URL:</strong> <code>http://localhost:3001/api/webhooks/test</code></p>
-            <p><strong>Expected:</strong> Webhook test response</p>
-            <button class="test-button" onclick="testEndpoint('webhook-test', 'http://localhost:3001/api/webhooks/test')">Test Endpoint</button>
-            <div id="result-webhook-test" class="result" style="display: none;"></div>
+            <h3><span class="status pending" id="status-process-invoice"></span>PCS AI Process Invoice</h3>
+            <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/process-invoice</code></p>
+            <p><strong>Expected:</strong> PCS AI workflow integration test</p>
+            <button class="test-button" onclick="testProcessInvoice()">Test PCS AI Integration</button>
+            <div id="result-process-invoice" class="result" style="display: none;"></div>
         </div>
 
         <div class="endpoint">
-            <h3><span class="status pending" id="status-webhook-quickbooks"></span>QuickBooks Webhook</h3>
+            <h3><span class="status pending" id="status-pdf-attachment"></span>PDF Attachment Test</h3>
+            <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/test-pdf-attachment</code></p>
+            <p><strong>Expected:</strong> PDF attachment to QuickBooks bill</p>
+            <button class="test-button" onclick="testPDFAttachment()">Test PDF Attachment</button>
+            <div id="result-pdf-attachment" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🚀 PCS AI Workflow System Testing</h2>
+        
+        <h3><span class="status pending" id="status-pcs-ai-stats"></span>PCS AI Workflow Statistics</h3>
+        <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/pcs-ai/stats</code></p>
+        <button onclick="testPCSAIStats()">Get Workflow Stats</button>
+        <div id="result-pcs-ai-stats" class="result" style="display: none;"></div>
+
+        <h3><span class="status pending" id="status-pcs-ai-queue"></span>PCS AI Workflow Queue Status</h3>
+        <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/pcs-ai/queue</code></p>
+        <button onclick="testPCSAIQueue()">Get Queue Status</button>
+        <div id="result-pcs-ai-queue" class="result" style="display: none;"></div>
+
+        <h3><span class="status pending" id="status-pcs-ai-status"></span>PCS AI Workflow System Status</h3>
+        <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/pcs-ai/status</code></p>
+        <button onclick="testPCSAIStatus()">Get System Status</button>
+        <div id="result-pcs-ai-status" class="result" style="display: none;"></div>
+
+        <h3><span class="status pending" id="status-pcs-ai-add-queue"></span>Add Invoice to PCS AI Queue</h3>
+        <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/pcs-ai/queue</code></p>
+        <button onclick="testPCSAIAddToQueue()">Add Test Invoice to Queue</button>
+        <div id="result-pcs-ai-add-queue" class="result" style="display: none;"></div>
+
+        <h3><span class="status pending" id="status-approve-invoice"></span>Approve Invoice & Create QuickBooks Bill</h3>
+        <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/pcs-ai/approve-invoice/:invoiceId</code></p>
+        <p><strong>Expected:</strong> Approve invoice and automatically create QuickBooks bill</p>
+        <input type="text" id="invoice-id-approve" placeholder="Enter Invoice ID" style="margin: 5px;">
+        <input type="text" id="approved-by" placeholder="Approved By" style="margin: 5px;">
+        <button onclick="testApproveInvoice()">Approve Invoice</button>
+        <div id="result-approve-invoice" class="result" style="display: none;"></div>
+
+        <h3><span class="status pending" id="status-pcs-ai-process"></span>Process PCS AI Workflow Queue</h3>
+        <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/pcs-ai/process</code></p>
+        <button onclick="testPCSAIProcess()">Process Queue</button>
+        <div id="result-pcs-ai-process" class="result" style="display: none;"></div>
+
+        <h3><span class="status pending" id="status-mark-paid"></span>Mark Invoice as Paid</h3>
+        <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/pcs-ai/mark-invoice-paid/:invoiceId</code></p>
+        <p><strong>Expected:</strong> Mark invoice as paid and update QuickBooks bill status</p>
+        <input type="text" id="invoice-id-paid" placeholder="Enter Invoice ID" style="margin: 5px;">
+        <input type="text" id="paid-by" placeholder="Paid By" style="margin: 5px;">
+        <input type="text" id="payment-method" placeholder="Payment Method" style="margin: 5px;">
+        <input type="text" id="payment-reference" placeholder="Payment Reference" style="margin: 5px;">
+        <button onclick="testMarkInvoicePaid()">Mark as Paid</button>
+        <div id="result-mark-paid" class="result" style="display: none;"></div>
+
+        <h2>🔔 Enhanced Webhook Testing</h2>
+        
+        <h3><span class="status pending" id="status-webhook-test"></span>Test Webhook Endpoint</h3>
+        <p><strong>URL:</strong> <code>http://localhost:3001/api/webhooks/test</code></p>
+        <button onclick="testWebhook()">Test Webhook</button>
+        <div id="result-webhook-test" class="result" style="display: none;"></div>
+
+        <h3><span class="status pending" id="status-webhook-quickbooks"></span>QuickBooks Webhook Endpoint</h3>
+        <p><strong>URL:</strong> <code>http://localhost:3001/api/webhooks/quickbooks</code></p>
+        <p><em>This endpoint receives real-time updates from QuickBooks</em></p>
+        <div id="result-webhook-quickbooks" class="result" style="display: none;"></div>
+
+        <div class="endpoint">
+            <h3><span class="status pending" id="status-webhook-simulation"></span>Simulate QuickBooks Webhook</h3>
             <p><strong>URL:</strong> <code>http://localhost:3001/api/webhooks/quickbooks</code></p>
-            <p><strong>Expected:</strong> QuickBooks webhook response</p>
-            <button class="test-button" onclick="testEndpoint('webhook-quickbooks', 'http://localhost:3001/api/webhooks/quickbooks')">Test Endpoint</button>
-            <div id="result-webhook-quickbooks" class="result" style="display: none;"></div>
+            <p><strong>Expected:</strong> Simulate bill payment webhook event</p>
+            <button class="test-button" onclick="simulateQuickBooksWebhook()">Simulate Webhook</button>
+            <div id="result-webhook-simulation" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🛡️ QuickBooks API Compliance Testing</h2>
+        
+        <div class="endpoint">
+            <h3><span class="status pending" id="status-compliance"></span>Check Compliance Status</h3>
+            <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/compliance-status</code></p>
+            <p><strong>Expected:</strong> API compliance status and rate limiting info</p>
+            <button class="test-button" onclick="testComplianceStatus()">Check Compliance</button>
+            <div id="result-compliance" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="status pending" id="status-health"></span>Test Health Endpoint</h3>
+            <p><strong>URL:</strong> <code>http://localhost:3001/health</code></p>
+            <p><strong>Expected:</strong> Health status with QuickBooks circuit breaker info</p>
+            <button class="test-button" onclick="testHealthEndpoint()">Test Health</button>
+            <div id="result-health" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="status pending" id="status-rate-limit"></span>Test Rate Limiting</h3>
+            <p><strong>URL:</strong> <code>http://localhost:3001/api/qbo/test</code></p>
+            <p><strong>Expected:</strong> Test rate limiting by making multiple rapid requests</p>
+            <button class="test-button" onclick="testRateLimiting()">Test Rate Limits</button>
+            <div id="result-rate-limit" class="result" style="display: none;"></div>
         </div>
     </div>
 
@@ -324,15 +415,20 @@
 
             // Sample invoice data for testing
             const testInvoiceData = {
-                vendor: 'Test Vendor',
-                amount: 150.00,
-                invoiceNumber: 'TEST-001',
-                dueDate: '2024-12-31',
+                vendor: 'Henry Schein Dental',
+                amount: 250.00,
+                invoiceNumber: 'HS-2025-001',
+                dueDate: '2025-09-15',
                 lineItems: [
                     {
-                        description: 'Test Service',
+                        description: 'Dental Supplies - Composite Material',
                         amount: 150.00,
-                        accountId: '123'
+                        accountId: '20'  // "Supplies" (Expense)
+                    },
+                    {
+                        description: 'Dental Equipment Maintenance',
+                        amount: 100.00,
+                        accountId: '72'  // "Maintenance and Repair" (Expense)
                     }
                 ]
             };
@@ -396,6 +492,459 @@
             });
         }
 
+        function testProcessInvoice() {
+            const statusElement = document.getElementById('status-process-invoice');
+            const resultElement = document.getElementById('result-process-invoice');
+            
+            // Update status to pending
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Testing PCS AI Process Invoice...';
+
+            // Sample invoice data for testing
+            const testInvoiceData = {
+                vendor: 'Henry Schein Dental',
+                amount: 250.00,
+                invoiceNumber: 'HS-2025-001',
+                dueDate: '2025-09-15',
+                lineItems: [
+                    {
+                        description: 'Dental Supplies - Composite Material',
+                        amount: 150.00,
+                        accountId: '20'  // "Supplies" (Expense)
+                    },
+                    {
+                        description: 'Dental Equipment Maintenance',
+                        amount: 100.00,
+                        accountId: '72'  // "Maintenance and Repair" (Expense)
+                    }
+                ]
+            };
+
+            console.log('🧪 Testing PCS AI Process Invoice with data:', testInvoiceData);
+
+            // Test the endpoint
+            fetch('http://localhost:3001/api/qbo/process-invoice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    invoiceData: testInvoiceData
+                })
+            })
+            .then(response => {
+                console.log(`📡 Response for process invoice:`, response);
+                
+                const result = {
+                    url: 'http://localhost:3001/api/qbo/process-invoice',
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    timestamp: new Date().toISOString()
+                };
+
+                if (response.ok) {
+                    return response.text().then(text => {
+                        try {
+                            result.body = JSON.parse(text);
+                        } catch (e) {
+                            result.body = text;
+                        }
+                        return result;
+                    });
+                } else {
+                    result.error = `HTTP ${response.status}: ${response.statusText}`;
+                    return result;
+                }
+            })
+            .then(result => {
+                // Update status and result
+                if (result.error) {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = JSON.stringify(result, null, 2);
+                } else {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(result, null, 2);
+                }
+            })
+            .catch(error => {
+                console.error(`❌ Error testing process invoice:`, error);
+                
+                // Update status and result
+                statusElement.className = 'status error';
+                resultElement.className = 'result error';
+                resultElement.textContent = `Error: ${error.message}\n\nStack: ${error.stack}`;
+            });
+        }
+
+        function testPDFAttachment() {
+            const statusElement = document.getElementById('status-pdf-attachment');
+            const resultElement = document.getElementById('result-pdf-attachment');
+            
+            // Update status to pending
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Testing PDF Attachment...';
+
+            // Use a real PDF file from your sample invoices
+            const pdfPath = './sample_invoices_pcs/Henry_Schein/henry_invoice_1.pdf';
+            const billId = '153'; // Use the latest bill ID from your successful tests
+
+            console.log('🧪 Testing PDF Attachment with real file:', pdfPath);
+
+            // Test the PDF attachment endpoint
+            fetch('http://localhost:3001/api/qbo/test-pdf-attachment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    billId: billId,
+                    pdfPath: pdfPath
+                })
+            })
+            .then(response => {
+                console.log(`📡 Response for PDF attachment:`, response);
+                
+                const result = {
+                    url: 'http://localhost:3001/api/qbo/test-pdf-attachment',
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    timestamp: new Date().toISOString()
+                };
+
+                if (response.ok) {
+                    return response.text().then(text => {
+                        try {
+                            result.body = JSON.parse(text);
+                        } catch (e) {
+                            result.body = text;
+                        }
+                        return result;
+                    });
+                } else {
+                    result.error = `HTTP ${response.status}: ${response.statusText}`;
+                    return result;
+                }
+            })
+            .then(result => {
+                // Update status and result
+                if (result.error) {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = JSON.stringify(result, null, 2);
+                } else {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(result, null, 2);
+                }
+            })
+            .catch(error => {
+                console.error(`❌ Error testing PDF attachment:`, error);
+                
+                // Update status and result
+                statusElement.className = 'status error';
+                resultElement.className = 'result error';
+                resultElement.textContent = `Error: ${error.message}\n\nStack: ${error.stack}`;
+            });
+        }
+
+        function simulateQuickBooksWebhook() {
+            const statusElement = document.getElementById('status-webhook-simulation');
+            const resultElement = document.getElementById('result-webhook-simulation');
+            
+            // Update status to pending
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Simulating QuickBooks Webhook...';
+
+            // Sample webhook event data for testing
+            const testWebhookEvent = {
+                EventType: "BillPayment",
+                EventID: "1234567890123456789012345678901234567890123456789012345678901234",
+                EventTime: "2023-10-27T10:00:00Z",
+                EventTypeData: {
+                    BillPaymentEventData: {
+                        BillPaymentID: "1234567890123456789012345678901234567890123456789012345678901234",
+                        BillID: "1234567890123456789012345678901234567890123456789012345678901234",
+                        PaymentMethod: "CreditCard",
+                        TotalAmount: 100.00,
+                        Applied: [
+                            {
+                                AppliedToTxnID: "1234567890123456789012345678901234567890123456789012345678901234",
+                                AppliedToTxnLineID: 1,
+                                Amount: 100.00,
+                                AppliedObject: {
+                                    LineID: 1,
+                                    TxnID: "1234567890123456789012345678901234567890123456789012345678901234",
+                                    TxnType: "Bill",
+                                    TxnDate: "2023-10-27",
+                                    RefNumber: "INV-123",
+                                    Line: [
+                                        {
+                                            LineID: 1,
+                                            Amount: 100.00,
+                                            Description: "Payment for Invoice 123",
+                                            AccountRef: {
+                                                Value: "20", // "Cash" (Asset)
+                                                name: "Cash"
+                                            },
+                                            LineEx: {
+                                                ItemRef: {
+                                                    Value: "1000", // "Check" (Expense)
+                                                    name: "Check"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            };
+
+            console.log('🧪 Simulating QuickBooks Webhook with data:', testWebhookEvent);
+
+            // Test the endpoint
+            fetch('http://localhost:3001/api/webhooks/quickbooks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(testWebhookEvent)
+            })
+            .then(response => {
+                console.log(`📡 Response for webhook simulation:`, response);
+                
+                const result = {
+                    url: 'http://localhost:3001/api/webhooks/quickbooks',
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    timestamp: new Date().toISOString()
+                };
+
+                if (response.ok) {
+                    return response.text().then(text => {
+                        try {
+                            result.body = JSON.parse(text);
+                        } catch (e) {
+                            result.body = text;
+                        }
+                        return result;
+                    });
+                } else {
+                    result.error = `HTTP ${response.status}: ${response.statusText}`;
+                    return result;
+                }
+            })
+            .then(result => {
+                // Update status and result
+                if (result.error) {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = JSON.stringify(result, null, 2);
+                } else {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(result, null, 2);
+                }
+            })
+            .catch(error => {
+                console.error(`❌ Error simulating webhook:`, error);
+                
+                // Update status and result
+                statusElement.className = 'status error';
+                resultElement.className = 'result error';
+                resultElement.textContent = `Error: ${error.message}\n\nStack: ${error.stack}`;
+            });
+        }
+
+        // PCS AI Workflow System Testing Functions
+        function testPCSAIStats() {
+            const statusElement = document.getElementById('status-pcs-ai-stats');
+            const resultElement = document.getElementById('result-pcs-ai-stats');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Getting PCS AI workflow statistics...';
+
+            fetch('http://localhost:3001/api/qbo/pcs-ai/stats')
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        function testPCSAIQueue() {
+            const statusElement = document.getElementById('status-pcs-ai-queue');
+            const resultElement = document.getElementById('result-pcs-ai-queue');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Getting PCS AI workflow queue status...';
+
+            fetch('http://localhost:3001/api/qbo/pcs-ai/queue')
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        function testPCSAIStatus() {
+            const statusElement = document.getElementById('status-pcs-ai-status');
+            const resultElement = document.getElementById('result-pcs-ai-status');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Getting PCS AI workflow system status...';
+
+            fetch('http://localhost:3001/api/qbo/pcs-ai/status')
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        function testPCSAIAddToQueue() {
+            const statusElement = document.getElementById('status-pcs-ai-add-queue');
+            const resultElement = document.getElementById('result-pcs-ai-add-queue');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Adding test invoice to PCS AI workflow queue...';
+
+            const testInvoiceData = {
+                invoiceNumber: 'TEST-' + Date.now(),
+                vendor: 'Test Vendor',
+                totalAmount: 150.00,
+                dueDate: '2025-09-30',
+                lineItems: [
+                    {
+                        description: 'Test Dental Supplies',
+                        amount: 100.00
+                    },
+                    {
+                        description: 'Test Equipment Maintenance',
+                        amount: 50.00
+                    }
+                ],
+                pdfPath: './sample_invoices_pcs/Henry_Schein/henry_invoice_1.pdf',
+                extractedText: 'Sample extracted text from PCS AI',
+                confidence: 0.95,
+                processingMetadata: {
+                    source: 'test',
+                    version: '1.0'
+                }
+            };
+
+            fetch('http://localhost:3001/api/qbo/pcs-ai/queue', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    invoiceData: testInvoiceData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                statusElement.className = 'status success';
+                resultElement.className = 'result success';
+                resultElement.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                statusElement.className = 'status error';
+                resultElement.className = 'result error';
+                resultElement.textContent = `Error: ${error.message}`;
+            });
+        }
+
+        function testPCSAIProcess() {
+            const statusElement = document.getElementById('status-pcs-ai-process');
+            const resultElement = document.getElementById('result-pcs-ai-process');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Processing PCS AI workflow queue...';
+
+            fetch('http://localhost:3001/api/qbo/pcs-ai/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                statusElement.className = 'status success';
+                resultElement.className = 'result success';
+                resultElement.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                statusElement.className = 'status error';
+                resultElement.className = 'result error';
+                resultElement.textContent = `Error: ${error.message}`;
+            });
+        }
+
+        // Enhanced Webhook Testing Functions
+        function testWebhook() {
+            const statusElement = document.getElementById('status-webhook-test');
+            const resultElement = document.getElementById('result-webhook-test');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Testing webhook endpoint...';
+
+            fetch('http://localhost:3001/api/webhooks/test')
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
         function testAllEndpoints() {
             const endpoints = [
                 { name: 'test', url: 'http://localhost:3001/api/test' },
@@ -405,7 +954,10 @@
                 { name: 'oauth-test', url: 'http://localhost:3001/api/qbo/test' },
                 { name: 'webhook-test', url: 'http://localhost:3001/api/webhooks/test' },
                 { name: 'webhook-quickbooks', url: 'http://localhost:3001/api/webhooks/quickbooks' },
-                { name: 'sync-categories', url: 'http://localhost:3001/api/qbo/sync-categories' }
+                { name: 'sync-categories', url: 'http://localhost:3001/api/qbo/sync-categories' },
+                { name: 'send-invoice', url: 'http://localhost:3001/api/qbo/send-invoice' },
+                { name: 'process-invoice', url: 'http://localhost:3001/api/qbo/process-invoice' },
+                { name: 'pdf-attachment', url: 'http://localhost:3001/api/qbo/test-pdf-attachment' }
             ];
 
             endpoints.forEach(endpoint => {
@@ -426,6 +978,411 @@
             statuses.forEach(status => {
                 status.className = 'status pending';
             });
+        }
+
+        // Enhanced PCS AI QuickBooks Integration Testing Functions
+        function testCategories() {
+            const statusElement = document.getElementById('status-categories');
+            const resultElement = document.getElementById('result-categories');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Getting QuickBooks categories...';
+
+            fetch('http://localhost:3001/api/qbo/pcs-ai/categories')
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        function testSyncCategories() {
+            const statusElement = document.getElementById('status-sync-categories');
+            const resultElement = document.getElementById('result-sync-categories');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Syncing QuickBooks categories...';
+
+            fetch('http://localhost:3001/api/qbo/pcs-ai/sync-categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        function testSearchCategories() {
+            const statusElement = document.getElementById('status-search-categories');
+            const resultElement = document.getElementById('result-search-categories');
+            const searchQuery = document.getElementById('category-search').value;
+            
+            if (!searchQuery) {
+                resultElement.style.display = 'block';
+                resultElement.className = 'result error';
+                resultElement.textContent = 'Please enter a search term';
+                return;
+            }
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = `Searching for categories: ${searchQuery}...`;
+
+            fetch(`http://localhost:3001/api/qbo/pcs-ai/categories/search?query=${encodeURIComponent(searchQuery)}`)
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        function testEnhancedProcessing() {
+            const statusElement = document.getElementById('status-enhanced-processing');
+            const resultElement = document.getElementById('result-enhanced-processing');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Processing enhanced invoice with QuickBooks integration...';
+
+            const enhancedInvoiceData = {
+                invoiceData: {
+                    vendor: 'Henry Schein Dental',
+                    invoiceNumber: 'HS-ENHANCED-' + Date.now(),
+                    totalAmount: 350.00,
+                    dueDate: '2025-10-15'
+                },
+                vendorName: 'Henry Schein Dental',
+                invoiceNumber: 'HS-ENHANCED-' + Date.now(),
+                totalAmount: 350.00,
+                dueDate: '2025-10-15',
+                lineItems: [
+                    {
+                        description: 'Dental Composite Material',
+                        amount: 200.00,
+                        quantity: 2,
+                        unitPrice: 100.00
+                    },
+                    {
+                        description: 'Dental Equipment Maintenance',
+                        amount: 150.00,
+                        quantity: 1,
+                        unitPrice: 150.00
+                    }
+                ],
+                pdfPath: './sample_invoices_pcs/Henry_Schein/henry_invoice_1.pdf',
+                extractedText: 'Enhanced invoice processing with QuickBooks category mapping',
+                confidence: 0.95,
+                processingMetadata: {
+                    source: 'enhanced_test',
+                    version: '2.0',
+                    quickBooksIntegration: true
+                }
+            };
+
+            fetch('http://localhost:3001/api/qbo/pcs-ai/process-invoice-enhanced', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(enhancedInvoiceData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(data, null, 2);
+                    
+                    // Store the invoice ID for approval testing
+                    if (data.invoice && data.invoice.id) {
+                        document.getElementById('invoice-id-approve').value = data.invoice.id;
+                    }
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        function testApproveInvoice() {
+            const statusElement = document.getElementById('status-approve-invoice');
+            const resultElement = document.getElementById('result-approve-invoice');
+            const invoiceId = document.getElementById('invoice-id-approve').value;
+            const approvedBy = document.getElementById('approved-by').value;
+            
+            if (!invoiceId) {
+                resultElement.style.display = 'block';
+                resultElement.className = 'result error';
+                resultElement.textContent = 'Please enter an invoice ID to approve';
+                return;
+            }
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = `Approving invoice ${invoiceId} and creating QuickBooks bill...`;
+
+            fetch(`http://localhost:3001/api/qbo/pcs-ai/approve-invoice/${invoiceId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    approvedBy: approvedBy || 'Test User',
+                    notes: 'Approved via test interface'
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        function testGetInvoices() {
+            const statusElement = document.getElementById('status-get-invoices');
+            const resultElement = document.getElementById('result-get-invoices');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Getting PCS AI invoices...';
+
+            fetch('http://localhost:3001/api/qbo/pcs-ai/invoices')
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        function testApproveInvoice() {
+            const statusElement = document.getElementById('status-approve-invoice');
+            const resultElement = document.getElementById('result-approve-invoice');
+            const invoiceId = document.getElementById('invoice-id-approve').value;
+            const approvedBy = document.getElementById('approved-by').value;
+            
+            if (!invoiceId) {
+                resultElement.style.display = 'block';
+                resultElement.className = 'result error';
+                resultElement.textContent = 'Please enter an invoice ID to approve';
+                return;
+            }
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = `Approving invoice ${invoiceId} and creating QuickBooks bill...`;
+
+            fetch(`http://localhost:3001/api/qbo/pcs-ai/approve-invoice/${invoiceId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': '2c2774895ae438e86c71f7efe5ca9f5f326621c1df399f2d0a4fa7ed124724ba'
+                },
+                body: JSON.stringify({
+                    approvedBy: approvedBy || 'Test User',
+                    notes: 'Approved via test interface'
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        // QuickBooks API Compliance Testing Functions
+        function testComplianceStatus() {
+            const statusElement = document.getElementById('status-compliance');
+            const resultElement = document.getElementById('result-compliance');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Testing...';
+
+            fetch('http://localhost:3001/api/qbo/compliance-status')
+            .then(response => response.json())
+            .then(data => {
+                statusElement.className = 'status success';
+                resultElement.className = 'result success';
+                resultElement.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            })
+            .catch(error => {
+                statusElement.className = 'status error';
+                resultElement.className = 'result error';
+                resultElement.textContent = `Error: ${error.message}`;
+            });
+        }
+
+        function testHealthEndpoint() {
+            const statusElement = document.getElementById('status-health');
+            const resultElement = document.getElementById('result-health');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Testing...';
+
+            fetch('http://localhost:3001/health')
+            .then(response => response.json())
+            .then(data => {
+                statusElement.className = 'status success';
+                resultElement.className = 'result success';
+                resultElement.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            })
+            .catch(error => {
+                statusElement.className = 'status error';
+                resultElement.className = 'result error';
+                resultElement.textContent = `Error: ${error.message}`;
+            });
+        }
+
+        function testRateLimiting() {
+            const statusElement = document.getElementById('status-rate-limit');
+            const resultElement = document.getElementById('result-rate-limit');
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = 'Testing rate limiting with rapid requests...';
+
+            // Make 10 rapid requests to test rate limiting
+            let successCount = 0;
+            let rateLimitCount = 0;
+            let errorCount = 0;
+
+            const promises = Array.from({ length: 10 }, (_, i) => 
+                fetch('http://localhost:3001/api/qbo/test')
+                    .then(response => {
+                        if (response.status === 429) {
+                            rateLimitCount++;
+                            return { status: 'rate_limited', index: i };
+                        } else if (response.ok) {
+                            successCount++;
+                            return { status: 'success', index: i };
+                        } else {
+                            errorCount++;
+                            return { status: 'error', index: i };
+                        }
+                    })
+                    .catch(error => {
+                        errorCount++;
+                        return { status: 'error', index: i, error: error.message };
+                    })
+            );
+
+            Promise.all(promises)
+            .then(results => {
+                statusElement.className = 'status success';
+                resultElement.className = 'result success';
+                resultElement.innerHTML = `
+                    <h4>Rate Limiting Test Results:</h4>
+                    <p><strong>Total Requests:</strong> 10</p>
+                    <p><strong>Successful:</strong> ${successCount}</p>
+                    <p><strong>Rate Limited:</strong> ${rateLimitCount}</p>
+                    <p><strong>Errors:</strong> ${errorCount}</md></p>
+                    <p><strong>Rate Limiting Working:</strong> ${rateLimitCount > 0 ? '✅ YES' : '❌ NO'}</p>
+                `;
+            })
+            .catch(error => {
+                statusElement.className = 'status error';
+                resultElement.className = 'result error';
+                resultElement.textContent = `Error during rate limiting test: ${error.message}`;
+            });
+        }
+
+        // Mark Invoice as Paid Function
+        function testMarkInvoicePaid() {
+            const statusElement = document.getElementById('status-mark-paid');
+            const resultElement = document.getElementById('result-mark-paid');
+            const invoiceId = document.getElementById('invoice-id-paid').value;
+            const paidBy = document.getElementById('paid-by').value;
+            const paymentMethod = document.getElementById('payment-method').value;
+            const paymentReference = document.getElementById('payment-reference').value;
+            
+            if (!invoiceId) {
+                resultElement.style.display = 'block';
+                resultElement.className = 'result error';
+                resultElement.textContent = 'Please enter an invoice ID to mark as paid';
+                return;
+            }
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = `Marking invoice ${invoiceId} as paid...`;
+
+            fetch(`http://localhost:3001/api/qbo/pcs-ai/mark-invoice-paid/${invoiceId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': '2c2774895ae438e86c71f7efe5ca9f5f326621c1df399f2d0a4fa7ed124724ba'
+                },
+                body: JSON.stringify({
+                    paidBy: paidBy || 'Test User',
+                    paymentMethod: paymentMethod || 'Credit Card',
+                    paymentReference: paymentReference || 'REF-001'
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    statusElement.className = 'status success';
+                    resultElement.className = 'result success';
+                    resultElement.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
         }
     </script>
 </body>
