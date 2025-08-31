@@ -165,8 +165,63 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         });
       } catch (_) {}
       
+      // If invoice is being approved, create QuickBooks bill
+      let qbBillMessage = '';
+      if (newStatus === 'approved' && newApproved === true) {
+        try {
+          console.log('Creating QuickBooks bill for approved invoice...');
+          
+          // Prepare line items from invoice data
+          const lineItems = items.map(item => ({
+            description: item.name || 'Invoice Item',
+            amount: parseFloat(item.total?.replace('$', '') || item.unit?.replace('$', '') || 0),
+            quantity: parseFloat(item.qty || 1)
+          }));
+          
+          // If no line items from UI, create a single line item from invoice total
+          if (lineItems.length === 0) {
+            lineItems.push({
+              description: `Invoice ${invoice.invoice_number} - ${invoice.vendor}`,
+              amount: parseFloat(invoice.total || invoice.amount || 0),
+              quantity: 1
+            });
+          }
+
+          const billData = {
+            invoice_number: invoice.invoice_number,
+            vendorName: invoice.vendor,
+            lineItems: lineItems,
+            totalAmount: invoice.total || invoice.amount,
+            dueDate: invoice.due_date,
+            invoiceDate: invoice.invoice_date,
+            vendorQBOId: invoice.vendorQBOId // Optional, will use default if not provided
+          };
+
+          const qbResponse = await fetch('/api/create-qbo-bill', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(billData)
+          });
+
+          const qbResult = await qbResponse.json();
+          
+          if (qbResponse.ok) {
+            console.log('QuickBooks bill created successfully:', qbResult.billId);
+            qbBillMessage = ` QuickBooks bill created (ID: ${qbResult.billId}).`;
+          } else {
+            console.warn('QuickBooks bill creation failed:', qbResult.error);
+            qbBillMessage = ` Note: QuickBooks bill creation failed - ${qbResult.error}`;
+          }
+        } catch (qbError) {
+          console.error('Error creating QuickBooks bill:', qbError);
+          qbBillMessage = ' Note: QuickBooks integration unavailable.';
+        }
+      }
+      
       // Show success message
-      alert(`Invoice ${newStatus.toLowerCase()} successfully!`);
+      alert(`Invoice ${newStatus.toLowerCase()} successfully!${qbBillMessage}`);
       
       // Navigate back to refresh the list
       onBack();

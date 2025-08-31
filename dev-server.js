@@ -865,6 +865,95 @@ app.post('/update-invoice-status', async (req, res) => {
   }
 });
 
+// API endpoint for creating QuickBooks bill after invoice approval
+app.post('/api/create-qbo-bill', async (req, res) => {
+  try {
+    const { 
+      invoice_number, 
+      vendorName, 
+      lineItems, 
+      totalAmount, 
+      dueDate,
+      invoiceDate,
+      vendorQBOId,
+      ...otherInvoiceData 
+    } = req.body;
+
+    // Validate required fields
+    if (!invoice_number || !vendorName || !lineItems || !totalAmount) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        required: ['invoice_number', 'vendorName', 'lineItems', 'totalAmount']
+      });
+    }
+
+    console.log('📋 Creating QuickBooks bill for approved invoice:', {
+      invoice_number,
+      vendorName,
+      totalAmount,
+      lineItemsCount: lineItems.length
+    });
+
+    // Check if we have valid QuickBooks tokens
+    if (!globalQBClient || !globalQBClient.hasValidTokens()) {
+      return res.status(401).json({ 
+        error: 'No valid QuickBooks tokens. Please complete OAuth first.',
+        suggestion: 'Invoice approved locally, but QuickBooks integration is not available.'
+      });
+    }
+
+    // Prepare bill data for QuickBooks
+    const billData = {
+      Line: lineItems.map(item => ({
+        Amount: parseFloat(item.amount || item.total || 0),
+        Description: item.description || item.name || 'Invoice Item',
+        DetailType: 'AccountBasedExpenseLineDetail',
+        AccountBasedExpenseLineDetail: {
+          AccountRef: {
+            value: item.accountId || '20' // Default to Supplies account
+          }
+        }
+      })),
+      VendorRef: {
+        value: vendorQBOId || '33' // Use provided vendor ID or default
+      },
+      APAccountRef: {
+        value: '33' // Accounts Payable
+      },
+      TotalAmt: parseFloat(totalAmount),
+      DocNumber: invoice_number,
+      TxnDate: invoiceDate || new Date().toISOString().split('T')[0],
+      DueDate: dueDate || new Date().toISOString().split('T')[0],
+      Memo: `PCS AI Approved Invoice - ${vendorName} - ${invoice_number}`
+    };
+
+    // Create bill in QuickBooks
+    const bill = await globalQBClient.createBill(billData);
+    
+    console.log('✅ QuickBooks bill created successfully:', bill.Id);
+
+    res.json({
+      success: true,
+      message: 'QuickBooks bill created successfully',
+      billId: bill.Id,
+      invoice_number: invoice_number,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error creating QuickBooks bill:', error);
+    
+    // Return detailed error but don't fail the approval process
+    res.status(500).json({
+      error: 'Failed to create QuickBooks bill',
+      details: error.message,
+      invoice_number: req.body.invoice_number,
+      timestamp: new Date().toISOString(),
+      suggestion: 'Invoice was approved locally, but QuickBooks bill creation failed. You may need to create the bill manually in QuickBooks.'
+    });
+  }
+});
+
 // API endpoint for removing an invoice entirely and deleting related files
 app.post('/remove-invoice', async (req, res) => {
   try {
