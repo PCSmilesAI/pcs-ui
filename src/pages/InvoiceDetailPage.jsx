@@ -128,7 +128,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       
       // Try to save to the public directory (this will work if the file is writable)
       try {
-        const saveResponse = await fetch('/api/update-invoice-status', {
+        const saveResponse = await fetch('/update-invoice-status', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             vendorQBOId: invoice.vendorQBOId // Optional, will use default if not provided
           };
 
-          const qbResponse = await fetch('/api/create-qbo-bill', {
+          const qbResponse = await fetch('/create-qbo-bill', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

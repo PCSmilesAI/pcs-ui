@@ -226,6 +226,16 @@
         <button onclick="testMarkInvoicePaid()">Mark as Paid</button>
         <div id="result-mark-paid" class="result" style="display: none;"></div>
 
+        <h3><span class="status pending" id="status-create-qbo-bill"></span>Create QuickBooks Bill (New Integration)</h3>
+        <p><strong>URL:</strong> <code>http://localhost:3001/api/create-qbo-bill</code></p>
+        <p><strong>Expected:</strong> Create QuickBooks bill from invoice data (matches InvoiceDetailPage approval flow)</p>
+        <input type="text" id="qb-bill-invoice-number" placeholder="Invoice Number" style="margin: 5px;" value="TEST-001">
+        <input type="text" id="qb-bill-vendor" placeholder="Vendor Name" style="margin: 5px;" value="Test Vendor">
+        <input type="text" id="qb-bill-total" placeholder="Total Amount" style="margin: 5px;" value="150.00">
+        <input type="text" id="qb-bill-due-date" placeholder="Due Date (YYYY-MM-DD)" style="margin: 5px;" value="2024-12-31">
+        <button onclick="testCreateQBOBill()">Create QB Bill</button>
+        <div id="result-create-qbo-bill" class="result" style="display: none;"></div>
+
         <h2>🔔 Enhanced Webhook Testing</h2>
         
         <h3><span class="status pending" id="status-webhook-test"></span>Test Webhook Endpoint</h3>
@@ -1376,6 +1386,70 @@
                 .then(data => {
                     statusElement.className = 'status success';
                     resultElement.className = 'result success';
+                    resultElement.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                })
+                .catch(error => {
+                    statusElement.className = 'status error';
+                    resultElement.className = 'result error';
+                    resultElement.textContent = `Error: ${error.message}`;
+                });
+        }
+
+        // Create QuickBooks Bill Test Function
+        function testCreateQBOBill() {
+            const statusElement = document.getElementById('status-create-qbo-bill');
+            const resultElement = document.getElementById('result-create-qbo-bill');
+            const invoiceNumber = document.getElementById('qb-bill-invoice-number').value;
+            const vendorName = document.getElementById('qb-bill-vendor').value;
+            const totalAmount = document.getElementById('qb-bill-total').value;
+            const dueDate = document.getElementById('qb-bill-due-date').value;
+            
+            if (!invoiceNumber || !vendorName || !totalAmount) {
+                resultElement.style.display = 'block';
+                resultElement.className = 'result error';
+                resultElement.textContent = 'Please fill in invoice number, vendor name, and total amount';
+                return;
+            }
+            
+            statusElement.className = 'status pending';
+            resultElement.style.display = 'block';
+            resultElement.className = 'result info';
+            resultElement.textContent = `Creating QuickBooks bill for invoice ${invoiceNumber}...`;
+
+            // Create sample line items based on total amount
+            const lineItems = [
+                {
+                    description: `Invoice ${invoiceNumber} - ${vendorName}`,
+                    amount: parseFloat(totalAmount),
+                    quantity: 1
+                }
+            ];
+
+            const billData = {
+                invoice_number: invoiceNumber,
+                vendorName: vendorName,
+                lineItems: lineItems,
+                totalAmount: totalAmount,
+                dueDate: dueDate || new Date().toISOString().split('T')[0],
+                invoiceDate: new Date().toISOString().split('T')[0]
+            };
+
+            fetch('http://localhost:3001/api/create-qbo-bill', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(billData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        statusElement.className = 'status success';
+                        resultElement.className = 'result success';
+                    } else {
+                        statusElement.className = 'status error';
+                        resultElement.className = 'result error';
+                    }
                     resultElement.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
                 })
                 .catch(error => {
