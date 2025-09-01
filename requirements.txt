@@ -1,0 +1,5 @@
+fastapi>=0.112
+uvicorn[standard]>=0.29
+requests>=2.32
+python-dotenv>=1.0
+pydantic>=2.7

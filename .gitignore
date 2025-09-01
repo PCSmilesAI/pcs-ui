@@ -20,3 +20,4 @@ processed_invoices/
 
 # macOS
 .DS_Store
+.aider*
