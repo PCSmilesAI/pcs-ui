@@ -3,12 +3,9 @@
   "version": "0.0.0",
   "type": "commonjs",
   "scripts": {
-    "dev": "vite",
-    "dev:api": "node dev-server.js",
-    "build": "vite build",
-    "preview": "vite preview",
-    "start": "node dev-server.js",
-    "start:prod": "NODE_ENV=production node dev-server.js",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "security:audit": "npm audit --audit-level moderate",
@@ -26,6 +23,7 @@
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
     "intuit-oauth": "^4.2.0",
+    "next": "^14.0.0",
     "node-quickbooks": "^2.0.46",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -35,13 +33,10 @@
   "devDependencies": {
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
-    "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.55.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
-    "pm2": "^6.0.8",
-    "vite": "^5.0.8"
+    "pm2": "^6.0.8"
   },
   "engines": {
     "node": ">=18.0.0",
