@@ -1,7 +1,6 @@
 {
   "name": "pcs-ui",
   "version": "0.0.0",
-  "type": "commonjs",
   "scripts": {
     "dev": "next dev",
     "dev:api": "node dev-server.js",
