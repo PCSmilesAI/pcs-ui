@@ -1,6 +1,6 @@
-import { AuthProvider } from '../context/AuthContext.jsx';
-import RequireAuth from '../components/RequireAuth.jsx';
-import NavBar from '../components/NavBar.jsx';
+import { AuthProvider } from '../context/AuthContext';
+import RequireAuth from '../components/RequireAuth';
+import NavBar from '../components/NavBar';
 import '../index.css';
 
 export default function App({ Component, pageProps, router }) {
