@@ -6,8 +6,8 @@ export const oauth2 = new AuthorizationCode({
     secret: process.env.QBO_CLIENT_SECRET!,
   },
   auth: {
-    tokenHost: 'https://oauth.platform.intuit.com',
-    authorizePath: '/oauth2/v1/tokens/bearer',
+    tokenHost: 'https://appcenter.intuit.com',
+    authorizePath: '/connect/oauth2',
     tokenPath: '/oauth2/v1/tokens/bearer',
   },
 });

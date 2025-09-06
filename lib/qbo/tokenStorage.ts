@@ -1,0 +1,119 @@
+import { Database } from 'sqlite3';
+
+interface QBOTokens {
+  realmId: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+class TokenStorage {
+  private db: Database;
+
+  constructor() {
+    this.db = new Database('./pcs_ai_data/qbo_tokens.db');
+    this.initDatabase();
+  }
+
+  private initDatabase() {
+    const createTableSQL = `
+      CREATE TABLE IF NOT EXISTS qbo_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        realm_id TEXT UNIQUE NOT NULL,
+        access_token TEXT NOT NULL,
+        refresh_token TEXT NOT NULL,
+        expires_in INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+    
+    this.db.run(createTableSQL);
+  }
+
+  async saveTokens(tokens: QBOTokens): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        INSERT OR REPLACE INTO qbo_tokens 
+        (realm_id, access_token, refresh_token, expires_in, updated_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `;
+      
+      this.db.run(sql, [
+        tokens.realmId,
+        tokens.accessToken,
+        tokens.refreshToken,
+        tokens.expiresIn
+      ], (err) => {
+        if (err) {
+          console.error('Error saving QBO tokens:', err);
+          reject(err);
+        } else {
+          console.log('✅ QBO tokens saved successfully');
+          resolve();
+        }
+      });
+    });
+  }
+
+  async getTokens(realmId: string): Promise<QBOTokens | null> {
+    return new Promise((resolve, reject) => {
+      const sql = 'SELECT * FROM qbo_tokens WHERE realm_id = ?';
+      
+      this.db.get(sql, [realmId], (err, row: any) => {
+        if (err) {
+          console.error('Error getting QBO tokens:', err);
+          reject(err);
+        } else if (row) {
+          resolve({
+            realmId: row.realm_id,
+            accessToken: row.access_token,
+            refreshToken: row.refresh_token,
+            expiresIn: row.expires_in
+          });
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  async getAllTokens(): Promise<QBOTokens[]> {
+    return new Promise((resolve, reject) => {
+      const sql = 'SELECT * FROM qbo_tokens ORDER BY updated_at DESC';
+      
+      this.db.all(sql, [], (err, rows: any[]) => {
+        if (err) {
+          console.error('Error getting all QBO tokens:', err);
+          reject(err);
+        } else {
+          const tokens = rows.map(row => ({
+            realmId: row.realm_id,
+            accessToken: row.access_token,
+            refreshToken: row.refresh_token,
+            expiresIn: row.expires_in
+          }));
+          resolve(tokens);
+        }
+      });
+    });
+  }
+
+  async deleteTokens(realmId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const sql = 'DELETE FROM qbo_tokens WHERE realm_id = ?';
+      
+      this.db.run(sql, [realmId], (err) => {
+        if (err) {
+          console.error('Error deleting QBO tokens:', err);
+          reject(err);
+        } else {
+          console.log('✅ QBO tokens deleted successfully');
+          resolve();
+        }
+      });
+    });
+  }
+}
+
+export const tokenStorage = new TokenStorage();
