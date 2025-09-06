@@ -27,7 +27,6 @@ class TokenStorage {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `;
-    
     this.db.run(createTableSQL);
   }
 
@@ -38,7 +37,6 @@ class TokenStorage {
         (realm_id, access_token, refresh_token, expires_in, updated_at)
         VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
       `;
-      
       this.db.run(sql, [
         tokens.realmId,
         tokens.accessToken,
@@ -59,7 +57,6 @@ class TokenStorage {
   async getTokens(realmId: string): Promise<QBOTokens | null> {
     return new Promise((resolve, reject) => {
       const sql = 'SELECT * FROM qbo_tokens WHERE realm_id = ?';
-      
       this.db.get(sql, [realmId], (err, row: any) => {
         if (err) {
           console.error('Error getting QBO tokens:', err);
@@ -81,7 +78,6 @@ class TokenStorage {
   async getAllTokens(): Promise<QBOTokens[]> {
     return new Promise((resolve, reject) => {
       const sql = 'SELECT * FROM qbo_tokens ORDER BY updated_at DESC';
-      
       this.db.all(sql, [], (err, rows: any[]) => {
         if (err) {
           console.error('Error getting all QBO tokens:', err);
@@ -99,10 +95,30 @@ class TokenStorage {
     });
   }
 
+  async getLatestTokens(): Promise<QBOTokens | null> {
+    return new Promise((resolve, reject) => {
+      const sql = 'SELECT * FROM qbo_tokens ORDER BY updated_at DESC LIMIT 1';
+      this.db.get(sql, [], (err, row: any) => {
+        if (err) {
+          console.error('Error getting latest QBO tokens:', err);
+          reject(err);
+        } else if (row) {
+          resolve({
+            realmId: row.realm_id,
+            accessToken: row.access_token,
+            refreshToken: row.refresh_token,
+            expiresIn: row.expires_in
+          });
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+
   async deleteTokens(realmId: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const sql = 'DELETE FROM qbo_tokens WHERE realm_id = ?';
-      
       this.db.run(sql, [realmId], (err) => {
         if (err) {
           console.error('Error deleting QBO tokens:', err);
