@@ -165,8 +165,47 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         });
       } catch (_) {}
       
-      // Show success message
-      alert(`Invoice ${newStatus.toLowerCase()} successfully!`);
+      // If invoice is being approved, create QuickBooks bill
+      if (newStatus === 'approved' && newApproved === true) {
+        try {
+          console.log('🔄 Creating QuickBooks bill for approved invoice...');
+          
+          const billResponse = await fetch('/api/qbo/auto-create-bill', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              invoiceData: {
+                invoice_number: invoice.invoice_number,
+                vendor: invoice.vendor,
+                total: invoice.amount?.replace('$', '') || invoice.total,
+                invoice_date: invoice.invoice_date || invoice.invoiceDate,
+                due_date: invoice.due_date || invoice.dueDate,
+                pdf_path: invoice.pdf_path,
+                json_path: invoice.json_path,
+                line_items: invoice.line_items || []
+              }
+            })
+          });
+          
+          const billResult = await billResponse.json();
+          
+          if (billResult.success) {
+            console.log('✅ QuickBooks bill created successfully:', billResult.billId);
+            alert(`Invoice approved and QuickBooks bill created! Bill ID: ${billResult.billId}`);
+          } else {
+            console.warn('⚠️ Failed to create QuickBooks bill:', billResult.error);
+            alert(`Invoice approved, but failed to create QuickBooks bill: ${billResult.error}`);
+          }
+        } catch (billError) {
+          console.error('❌ Error creating QuickBooks bill:', billError);
+          alert(`Invoice approved, but failed to create QuickBooks bill: ${billError.message}`);
+        }
+      } else {
+        // Show success message for non-approval actions
+        alert(`Invoice ${newStatus.toLowerCase()} successfully!`);
+      }
       
       // Navigate back to refresh the list
       onBack();
