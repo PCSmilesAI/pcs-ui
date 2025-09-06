@@ -5,6 +5,7 @@ export interface QBOTokens {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
+  obtained_at?: number; // Optional: add this if you want to track token fetch time
 }
 
 class TokenStorage {
@@ -24,7 +25,8 @@ class TokenStorage {
         refresh_token TEXT NOT NULL,
         expires_in INTEGER NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        obtained_at INTEGER DEFAULT (strftime('%s','now'))
       )
     `;
     this.db.run(createTableSQL);
@@ -34,14 +36,16 @@ class TokenStorage {
     return new Promise((resolve, reject) => {
       const sql = `
         INSERT OR REPLACE INTO qbo_tokens 
-        (realm_id, access_token, refresh_token, expires_in, updated_at)
-        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+        (realm_id, access_token, refresh_token, expires_in, updated_at, obtained_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
       `;
+      const obtainedAt = tokens.obtained_at || Date.now();
       this.db.run(sql, [
         tokens.realmId,
         tokens.accessToken,
         tokens.refreshToken,
-        tokens.expiresIn
+        tokens.expiresIn,
+        obtainedAt
       ], (err) => {
         if (err) {
           console.error('Error saving QBO tokens:', err);
@@ -66,7 +70,8 @@ class TokenStorage {
             realmId: row.realm_id,
             accessToken: row.access_token,
             refreshToken: row.refresh_token,
-            expiresIn: row.expires_in
+            expiresIn: row.expires_in,
+            obtained_at: row.obtained_at
           });
         } else {
           resolve(null);
@@ -87,7 +92,8 @@ class TokenStorage {
             realmId: row.realm_id,
             accessToken: row.access_token,
             refreshToken: row.refresh_token,
-            expiresIn: row.expires_in
+            expiresIn: row.expires_in,
+            obtained_at: row.obtained_at
           }));
           resolve(tokens);
         }
@@ -107,13 +113,23 @@ class TokenStorage {
             realmId: row.realm_id,
             accessToken: row.access_token,
             refreshToken: row.refresh_token,
-            expiresIn: row.expires_in
+            expiresIn: row.expires_in,
+            obtained_at: row.obtained_at
           });
         } else {
           resolve(null);
         }
       });
     });
+  }
+
+  isTokenExpired(tokens: QBOTokens): boolean {
+    const { expiresIn } = tokens;
+    // Use obtained_at if present, otherwise fallback to Date.now() (will always be expired)
+    const obtainedAt = tokens.obtained_at || 0;
+    const expiryTime = obtainedAt + (expiresIn * 1000);
+    // Consider expired if within 2 minutes of expiry
+    return Date.now() > (expiryTime - 2 * 60 * 1000);
   }
 
   async deleteTokens(realmId: string): Promise<void> {
