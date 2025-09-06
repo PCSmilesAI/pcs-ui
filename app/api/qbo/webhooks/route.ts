@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 
-export const config = { api: { bodyParser: false } }; // ignored in App Router, but fine
+// REMOVE THIS LINE (deprecated and causes build failure):
+// export const config = { api: { bodyParser: false } };
 
 export async function POST(req: NextRequest) {
   const raw = Buffer.from(await req.arrayBuffer());
