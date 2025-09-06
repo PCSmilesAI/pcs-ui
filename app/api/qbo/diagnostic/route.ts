@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+type ConnectivityTestResult = {
+  name: string;
+  url: string;
+  status?: number;
+  statusText?: string;
+  headers?: { [k: string]: string };
+  success: boolean;
+  error?: string;
+};
+
 export async function GET(req: NextRequest) {
   try {
     const clientId = process.env.QBO_CLIENT_ID;
     const redirectUri = process.env.QBO_REDIRECT_URI;
-    
+
     if (!clientId || !redirectUri) {
       return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
     }
@@ -23,18 +33,18 @@ export async function GET(req: NextRequest) {
       },
       {
         name: 'OAuth Discovery (sandbox)',
-        url: 'https://sandbox-quickbooks.api.intuit.com/.well-known/openid_configuration',
+        url: 'https://sandbox-quickbooks.api.intuit.com/.well-known/openid_sandbox_configuration/',
         method: 'GET'
       },
       {
         name: 'OAuth Discovery (production)',
-        url: 'https://oauth.platform.intuit.com/.well-known/openid_configuration',
+        url: 'https://oauth.platform.intuit.com/.well-known/openid_configuration/',
         method: 'GET'
       }
     ];
 
-    const results = [];
-    
+    const results: ConnectivityTestResult[] = [];
+
     for (const test of connectivityTests) {
       try {
         const response = await fetch(test.url, {
@@ -44,7 +54,7 @@ export async function GET(req: NextRequest) {
             'User-Agent': 'PCS-AI-Test/1.0'
           }
         });
-        
+
         results.push({
           name: test.name,
           url: test.url,
@@ -71,7 +81,7 @@ export async function GET(req: NextRequest) {
         redirectUri,
         clientIdLength: clientId.length
       },
-      message: 'These tests will help identify if there are connectivity issues with QuickBooks'
+      message: 'These tests will help identify if there are connectivity issues with QuickBooks endpoints or OAuth discovery.'
     });
 
   } catch (error: any) {
