@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { loginUser } from '../utils/gist_user_store';
 
 /**
@@ -13,7 +13,7 @@ export default function LoginPage({ onLogin, onSwitchMode }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const navigate = useNavigate();
+  const router = useRouter();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -35,9 +35,9 @@ export default function LoginPage({ onLogin, onSwitchMode }) {
       if (onLogin) onLogin();
       // Navigate to account page
       try {
-        navigate('/account');
+        router.push('/account');
       } catch (_) {
-        // ignore navigate errors
+        // ignore router errors
       }
     } catch (err) {
       setError('An unexpected error occurred.');

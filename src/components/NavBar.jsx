@@ -4,7 +4,17 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 // Navigation bar implemented with inline styles. This component avoids
 // reliance on Tailwind so that styling always appears even when
 // Tailwind isn't processed. It exposes the same props as before.
-export default function NavBar({ currentPage, onChangePage, onToggleFilter, onSearch, onLogout }) {
+export default function NavBar({
+  currentPage,
+  onChangePage = () => { 
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('NavBar: onChangePage prop was not provided.');
+    }
+  },
+  onToggleFilter,
+  onSearch,
+  onLogout
+}) {
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -109,138 +119,167 @@ export default function NavBar({ currentPage, onChangePage, onToggleFilter, onSe
     marginRight: '24px',
     whiteSpace: 'nowrap',
   };
-  const iconButtonStyle = {
-    color: '#357ab2',
-    background: 'none',
-    border: 'none',
-    padding: '8px',
-    cursor: 'pointer',
-    fontSize: '16px',
-  };
-  const accountButtonStyle = {
-    ...iconButtonStyle,
-    width: '32px',
-    height: '32px',
-    border: '1px solid #357ab2',
-    borderRadius: '50%',
+  const tabContainerStyle = {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    flexGrow: 1,
+    marginLeft: '24px',
   };
-  const dropdownStyle = {
-    position: 'absolute',
-    right: 0,
-    marginTop: '4px',
-    width: '160px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #357ab2',
-    borderRadius: '8px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-    zIndex: 50,
-  };
-  const dropdownItemStyle = {
-    width: '100%',
-    textAlign: 'left',
-    padding: '8px 16px',
-    backgroundColor: 'transparent',
-    border: 'none',
-    fontSize: '14px',
+  const searchIconStyle = {
+    fontSize: '18px',
+    color: '#357ab2',
+    marginLeft: '16px',
     cursor: 'pointer',
   };
-  // Style for the search input when it is shown
-  const searchInputStyle = {
+  const filterIconStyle = {
+    fontSize: '18px',
+    color: '#357ab2',
+    marginLeft: '16px',
+    cursor: 'pointer',
+  };
+  const accountSectionStyle = {
+    position: 'relative',
+    marginLeft: '16px',
+    cursor: 'pointer',
+  };
+  const accountDropdownStyle = {
+    position: 'absolute',
+    right: 0,
+    top: '32px',
+    background: '#fff',
     border: '1px solid #357ab2',
-    borderRadius: '4px',
+    borderRadius: '8px',
+    boxShadow: '0 2px 8px rgba(53,122,178,0.08)',
+    zIndex: 10,
+    minWidth: '170px',
+    padding: '8px 0',
+  };
+  const dropdownItemStyle = {
+    padding: '8px 16px',
+    cursor: 'pointer',
+    color: '#357ab2',
+    fontSize: '14px',
+    fontWeight: 500,
+    background: 'none',
+    border: 'none',
+    textAlign: 'left',
+    width: '100%',
+  };
+  const searchInputStyle = {
     padding: '6px 12px',
+    borderRadius: '9999px',
+    border: '1px solid #357ab2',
     fontSize: '14px',
     marginLeft: '8px',
     outline: 'none',
-    width: '180px',
+  };
+
+  // Handle account dropdown click
+  const handleAccountClick = () => {
+    setIsAccountOpen((prev) => !prev);
+  };
+
+  // Handle search icon click
+  const handleSearchClick = () => {
+    setIsSearchOpen((prev) => !prev);
+  };
+
+  // Handle search input change
+  const handleSearchInputChange = (e) => {
+    setSearchValue(e.target.value);
+    if (onSearch) onSearch(e.target.value);
   };
 
   return (
-    <div style={containerStyle}>
+    <nav style={containerStyle}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <span style={titleStyle}>PCS AI Dashboard</span>
-        <nav style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={tabContainerStyle}>
           {tabs.map(renderTab)}
-        </nav>
+          {renderAllInvoicesButton()}
+        </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        {renderAllInvoicesButton()}
-        {/* Search icon toggles display of search input */}
-        <button
-          style={iconButtonStyle}
-          aria-label="Search"
-          onClick={() => setIsSearchOpen(!isSearchOpen)}
-        >
-          <i className="fas fa-search"></i>
-        </button>
+        {/* Search icon and search field */}
+        <span
+          className="fas fa-search"
+          style={searchIconStyle}
+          onClick={handleSearchClick}
+        />
         {isSearchOpen && (
           <input
             type="text"
-            placeholder="Search..."
-            value={searchValue}
-            onChange={(e) => {
-              const val = e.target.value;
-              setSearchValue(val);
-              // propagate search term to parent
-              if (onSearch) onSearch(val);
-            }}
-            onBlur={() => setIsSearchOpen(false)}
             style={searchInputStyle}
+            value={searchValue}
+            onChange={handleSearchInputChange}
+            autoFocus
+            placeholder="Search..."
           />
         )}
-        <button onClick={onToggleFilter} style={iconButtonStyle} aria-label="Filters">
-          <i className="fas fa-filter"></i>
-        </button>
-        <div style={{ position: 'relative' }} ref={dropdownRef}>
-          <button
-            onClick={() => setIsAccountOpen(!isAccountOpen)}
-            style={accountButtonStyle}
-            aria-label="Account"
-          >
-            <i className="fas fa-user"></i>
-          </button>
+        {/* Filter icon */}
+        <span
+          className="fas fa-filter"
+          style={filterIconStyle}
+          onClick={onToggleFilter}
+        />
+        {/* Account section */}
+        <div style={accountSectionStyle} ref={dropdownRef}>
+          <span
+            className="fas fa-user-circle"
+            style={{ fontSize: '22px', color: '#357ab2' }}
+            onClick={handleAccountClick}
+          />
           {isAccountOpen && (
-            <div style={dropdownStyle}>
-              {/* Account menu items and logout */}
-              {[
-                { label: 'Account', key: 'account' },
-                { label: 'Company Info', key: 'companyInfo' },
-                { label: 'Payout Account', key: 'payoutAccount' },
-                { label: 'Reports', key: 'reports' },
-              ].map(({ label, key }) => (
-                <button
-                  key={key}
-                  style={dropdownItemStyle}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f7fc')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  onClick={() => {
-                    setIsAccountOpen(false);
-                    if (onChangePage) onChangePage(key);
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-              {/* Logout option */}
-              <button
-                key="logout"
+            <div style={accountDropdownStyle}>
+              <div
                 style={dropdownItemStyle}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f7fc')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                 onClick={() => {
                   setIsAccountOpen(false);
-                  if (onLogout) onLogout();
+                  onChangePage('account');
+                }}
+              >
+                Account
+              </div>
+              <div
+                style={dropdownItemStyle}
+                onClick={() => {
+                  setIsAccountOpen(false);
+                  onChangePage('companyInfo');
+                }}
+              >
+                Company Info
+              </div>
+              <div
+                style={dropdownItemStyle}
+                onClick={() => {
+                  setIsAccountOpen(false);
+                  onChangePage('payoutAccount');
+                }}
+              >
+                Payout Account
+              </div>
+              <div
+                style={dropdownItemStyle}
+                onClick={() => {
+                  setIsAccountOpen(false);
+                  onChangePage('reports');
+                }}
+              >
+                Reports
+              </div>
+              <div
+                style={dropdownItemStyle}
+                onClick={() => {
+                  setIsAccountOpen(false);
+                  onLogout();
                 }}
               >
                 Log Out
-              </button>
+              </div>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }
