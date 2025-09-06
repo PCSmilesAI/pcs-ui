@@ -1,6 +1,6 @@
 import { Database } from 'sqlite3';
 
-interface QBOTokens {
+export interface QBOTokens {
   realmId: string;
   accessToken: string;
   refreshToken: string;
