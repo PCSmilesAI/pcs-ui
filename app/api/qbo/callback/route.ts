@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { oauth2 } from '@/lib/qbo/oauthClient';
+import { oauth2 } from '../../../../lib/qbo/oauthClient';
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
