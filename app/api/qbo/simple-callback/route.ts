@@ -1,26 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AuthorizationCode } from "simple-oauth2";
 import { promises as fs } from "fs";
 import path from "path";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
-
-const oauth2 = new AuthorizationCode({
-  client: { 
-    id: process.env.QBO_CLIENT_ID!, 
-    secret: process.env.QBO_CLIENT_SECRET! 
-  },
-  auth: {
-    tokenHost: "https://appcenter.intuit.com",
-    authorizePath: "/connect/oauth2",
-    tokenPath: "/oauth2/v1/tokens/bearer",
-  },
-  options: {
-    authorizationMethod: "body",
-    bodyFormat: "form"
-  }
-});
 
 async function saveTokens(realmId: string, token: any) {
   const dir = path.join(process.cwd(), "pcs_ai_data");
@@ -44,7 +27,7 @@ export async function GET(req: NextRequest) {
   const realmId = url.searchParams.get("realmId");
   const state = url.searchParams.get("state");
   
-  console.log('🔄 Test Callback received:', { code: !!code, realmId, state });
+  console.log('🔄 Simple Callback received:', { code: !!code, realmId, state });
   
   if (!code || !realmId) {
     return NextResponse.json({ 
@@ -59,22 +42,47 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const params: any = {
-      code,
-      redirect_uri: process.env.QBO_REDIRECT_URI!,
-      scope: process.env.QBO_SCOPES!,
-    };
+    // Direct HTTP request to QuickBooks token endpoint
+    const tokenUrl = 'https://appcenter.intuit.com/oauth2/v1/tokens/bearer';
+    const tokenData = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: process.env.QBO_REDIRECT_URI || 'https://www.pcsmilesai.com/api/qbo/simple-callback',
+      client_id: process.env.QBO_CLIENT_ID || '',
+      client_secret: process.env.QBO_CLIENT_SECRET || ''
+    });
 
-    console.log('🔄 Exchanging code for tokens...');
-    const result = await oauth2.getToken(params);
-    const token = result.token as any;
+    console.log('🔄 Making direct token request...');
+    const tokenResponse = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json'
+      },
+      body: tokenData.toString()
+    });
 
-    console.log('✅ Tokens received, saving...');
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text();
+      console.error('❌ Token request failed:', tokenResponse.status, errorText);
+      return NextResponse.json({ 
+        error: "Token request failed", 
+        status: tokenResponse.status,
+        response: errorText
+      }, { status: 500 });
+    }
+
+    const token = await tokenResponse.json();
+    console.log('✅ Tokens received:', { 
+      has_access_token: !!token.access_token,
+      has_refresh_token: !!token.refresh_token,
+      expires_in: token.expires_in
+    });
+
     await saveTokens(realmId, token);
     
     console.log('🎉 Successfully connected to QuickBooks!');
     console.log('📊 Realm ID:', realmId);
-    console.log('⏰ Token expires in:', token.expires_in, 'seconds');
 
     return NextResponse.json({
       success: true,
