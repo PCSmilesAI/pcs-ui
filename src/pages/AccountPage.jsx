@@ -4,15 +4,33 @@ import { useAuth } from '../context/AuthContext';
 
 export default function AccountPage() {
   const messageStyle = { color: '#357ab2', marginTop: '8px' };
-  const { user, logout } = useAuth();
+  const authContext = useAuth();
+  const { user, logout } = authContext || {};
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
 
+  // Guard clause for undefined user during static generation
+  if (!user) {
+    return (
+      <div style={{ padding: '40px' }}>
+        <h2 style={{ color: '#357ab2' }}>Account</h2>
+        <div style={{ color: '#666', textAlign: 'center', padding: '20px' }}>
+          Please log in to view your account information.
+        </div>
+      </div>
+    );
+  }
+
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
       setMessage('Passwords do not match.');
+      return;
+    }
+
+    if (!user?.email) {
+      setMessage('User not logged in.');
       return;
     }
 
@@ -40,8 +58,8 @@ export default function AccountPage() {
     <div style={{ padding: '40px' }}>
       <h2 style={{ color: '#357ab2' }}>Account</h2>
       <div style={{ marginBottom: '20px' }}>
-        <div><strong>Name:</strong> {user.name}</div>
-        <div><strong>Email:</strong> {user.email}</div>
+        <div><strong>Name:</strong> {user?.name || 'N/A'}</div>
+        <div><strong>Email:</strong> {user?.email || 'N/A'}</div>
         <div><strong>Access Level:</strong> Employee</div>
       </div>
 
