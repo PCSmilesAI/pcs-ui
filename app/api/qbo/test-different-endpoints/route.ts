@@ -36,7 +36,12 @@ export async function GET() {
     'https://sandbox-quickbooks.api.intuit.com/oauth2/v1/authorize'
   ];
 
-  const tests = [];
+  const tests: Array<{
+    redirect_uri: string;
+    endpoint: string;
+    url: string;
+    encoded_redirect_uri: string;
+  }> = [];
 
   redirectUris.forEach(redirectUri => {
     endpoints.forEach(endpoint => {
