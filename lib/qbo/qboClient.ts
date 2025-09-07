@@ -96,7 +96,7 @@ export class QBOClient {
         realmId: this.tokens.realmId,
         accessToken: token.access_token,
         refreshToken: token.refresh_token,
-        expiresAt: Math.floor(Date.now() / 1000) + token.expires_in - 60
+        expiresIn: token.expires_in
       };
 
       console.log('✅ QBO Token refreshed successfully');
