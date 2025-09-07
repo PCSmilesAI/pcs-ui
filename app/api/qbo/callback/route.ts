@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       console.log('⏰ Token expires in:', token.expires_in, 'seconds');
 
       // Redirect to success page or return success response
-      return NextResponse.redirect(new URL('/?qbo_connected=true', req.url), 302);
+      return NextResponse.redirect(new URL('/qbo-success', req.url), 302);
       
     } catch (error: any) {
       console.error('❌ QBO Callback Error:', error);
