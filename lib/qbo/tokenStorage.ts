@@ -39,7 +39,7 @@ class TokenStorage {
         (realm_id, access_token, refresh_token, expires_in, updated_at, obtained_at)
         VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
       `;
-      const obtainedAt = tokens.obtained_at || Date.now();
+      const obtainedAt = tokens.obtained_at || Math.floor(Date.now() / 1000);
       this.db.run(sql, [
         tokens.realmId,
         tokens.accessToken,
@@ -125,11 +125,16 @@ class TokenStorage {
 
   isTokenExpired(tokens: QBOTokens): boolean {
     const { expiresIn } = tokens;
-    // Use obtained_at if present, otherwise fallback to Date.now() (will always be expired)
+    // Use obtained_at if present, otherwise assume token is expired for safety
     const obtainedAt = tokens.obtained_at || 0;
-    const expiryTime = obtainedAt + (expiresIn * 1000);
+    if (obtainedAt === 0) {
+      console.warn('⚠️ No obtained_at timestamp found, considering token expired');
+      return true;
+    }
+    const expiryTime = obtainedAt + expiresIn;
+    const currentTime = Math.floor(Date.now() / 1000);
     // Consider expired if within 2 minutes of expiry
-    return Date.now() > (expiryTime - 2 * 60 * 1000);
+    return currentTime > (expiryTime - 120);
   }
 
   async deleteTokens(realmId: string): Promise<void> {
