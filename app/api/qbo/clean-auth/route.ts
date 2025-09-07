@@ -13,8 +13,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
     }
 
-    // Clean, simple OAuth URL without extra parameters
-    const authUrl = `https://appcenter.intuit.com/connect/oauth2?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&access_type=offline`;
+    // Clean, simple OAuth URL with required state parameter
+    const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const authUrl = `https://oauth.platform.intuit.com/oauth2/v1/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&access_type=offline&state=${state}`;
 
     console.log('🔄 Clean OAuth URL:', authUrl);
     console.log('📊 Client ID:', clientId.substring(0, 8) + '...');
