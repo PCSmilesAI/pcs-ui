@@ -12,17 +12,43 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
  * is available.
  */
 export default function InvoiceDetailPage({ invoice, onBack }) {
+  // Guard clause for undefined invoice during static generation
+  if (!invoice) {
+    return (
+      <div style={{ padding: '24px', textAlign: 'center' }}>
+        <h2>Invoice not found</h2>
+        <p>This invoice could not be loaded.</p>
+        {onBack && (
+          <button
+            onClick={onBack}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#357ab2',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              marginTop: '16px'
+            }}
+          >
+            Go Back
+          </button>
+        )}
+      </div>
+    );
+  }
+
   // State for editable fields. Payment amount can be modified by the
   // user. Other details and line items could be lifted into state
   // similarly; here we demonstrate for payment and details.
-  const [paymentAmount, setPaymentAmount] = useState(invoice.amount);
+  const [paymentAmount, setPaymentAmount] = useState(invoice?.amount || '');
   const [details, setDetails] = useState({
-    invoice: invoice.invoice,
-    vendor: invoice.vendor,
-    office: invoice.office,
-    category: invoice.category || 'Dental Lab',
-    invoice_date: invoice.invoice_date || '',
-    due_date: invoice.due_date || '',
+    invoice: invoice?.invoice || '',
+    vendor: invoice?.vendor || '',
+    office: invoice?.office || '',
+    category: invoice?.category || 'Dental Lab',
+    invoice_date: invoice?.invoice_date || '',
+    due_date: invoice?.due_date || '',
   });
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +57,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   // Load line items from JSON data
   useEffect(() => {
     async function loadLineItems() {
-      if (invoice.json_path) {
+      if (invoice?.json_path) {
         try {
           const response = await fetch(`/${invoice.json_path}`);
           if (response.ok) {
@@ -66,7 +92,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     }
 
     loadLineItems();
-  }, [invoice.json_path]);
+  }, [invoice?.json_path]);
 
   function handleDetailChange(field, value) {
     setDetails((prev) => ({ ...prev, [field]: value }));
@@ -82,11 +108,11 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
 
   // Function to handle PDF download
   function handleDownload() {
-    if (invoice.pdf_path) {
+    if (invoice?.pdf_path) {
       // Create a link element to trigger the download
       const link = document.createElement('a');
       link.href = `/${invoice.pdf_path}`;
-      link.download = `${invoice.invoice || invoice.invoice_number}_${invoice.vendor}.pdf`;
+      link.download = `${invoice?.invoice || invoice?.invoice_number || 'invoice'}_${invoice?.vendor || 'vendor'}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -100,7 +126,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     setProcessing(true);
     try {
       console.log('Attempting to update invoice:', {
-        invoice_number: invoice.invoice_number,
+        invoice_number: invoice?.invoice_number,
         status: newStatus,
         approved: newApproved
       });
@@ -115,7 +141,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       
       // Find and update the specific invoice
       const updatedQueue = queue.map(inv => {
-        if (inv.invoice_number === invoice.invoice_number) {
+        if (inv.invoice_number === invoice?.invoice_number) {
           return {
             ...inv,
             status: newStatus,
@@ -134,7 +160,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            invoice_number: invoice.invoice_number,
+            invoice_number: invoice?.invoice_number,
             status: newStatus,
             approved: newApproved
           })
@@ -150,7 +176,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       }
       
       // Update the invoice prop to reflect the new status immediately
-      const updatedInvoice = updatedQueue.find(inv => inv.invoice_number === invoice.invoice_number);
+      const updatedInvoice = updatedQueue.find(inv => inv.invoice_number === invoice?.invoice_number);
       if (updatedInvoice) {
         // Update the invoice object passed from parent
         Object.assign(invoice, updatedInvoice);
@@ -159,7 +185,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       // Persist client-side override so lists reflect the change immediately
       try {
         const { setOverride } = await import('../utils/status_overrides');
-        setOverride(invoice.invoice_number, {
+        setOverride(invoice?.invoice_number, {
           status: newStatus,
           ...(newApproved !== null ? { approved: newApproved } : {})
         });
@@ -177,14 +203,14 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             },
             body: JSON.stringify({
               invoiceData: {
-                invoice_number: invoice.invoice_number,
-                vendor: invoice.vendor,
-                total: invoice.amount?.replace('$', '') || invoice.total,
-                invoice_date: invoice.invoice_date || invoice.invoiceDate,
-                due_date: invoice.due_date || invoice.dueDate,
-                pdf_path: invoice.pdf_path,
-                json_path: invoice.json_path,
-                line_items: invoice.line_items || []
+                invoice_number: invoice?.invoice_number,
+                vendor: invoice?.vendor,
+                total: invoice?.amount?.replace('$', '') || invoice?.total,
+                invoice_date: invoice?.invoice_date || invoice?.invoiceDate,
+                due_date: invoice?.due_date || invoice?.dueDate,
+                pdf_path: invoice?.pdf_path,
+                json_path: invoice?.json_path,
+                line_items: invoice?.line_items || []
               }
             })
           });
@@ -256,9 +282,9 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            invoice_number: invoice.invoice_number,
-            json_path: invoice.json_path,
-            pdf_path: invoice.pdf_path,
+            invoice_number: invoice?.invoice_number,
+            json_path: invoice?.json_path,
+            pdf_path: invoice?.pdf_path,
           })
         });
         if (!resp.ok) throw new Error('API remove failed');
@@ -269,7 +295,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       // Ensure disappearance from all tabs via override
       try {
         const { setOverride } = await import('../utils/status_overrides');
-        setOverride(invoice.invoice_number, { status: 'removed', approved: false });
+        setOverride(invoice?.invoice_number, { status: 'removed', approved: false });
       } catch (_) {}
 
       alert('Invoice removed');
@@ -284,15 +310,15 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
 
   // Determine which buttons to show based on invoice status
   function getActionButtons() {
-    let status = invoice.status || 'new';
+    let status = invoice?.status || 'new';
     // If coming from Completed page and status is missing, treat as completed
-    if ((!invoice.status || invoice.status === 'new') && invoice._sourcePage === 'complete') {
+    if ((!invoice?.status || invoice?.status === 'new') && invoice?._sourcePage === 'complete') {
       status = 'completed';
     }
-    const approved = invoice.approved || false;
+    const approved = invoice?.approved || false;
 
     console.log('🔍 InvoiceDetailPage Debug:');
-    console.log('  - Invoice Number:', invoice.invoice_number);
+    console.log('  - Invoice Number:', invoice?.invoice_number);
     console.log('  - Status:', status);
     console.log('  - Approved:', approved);
     console.log('  - Full invoice object:', invoice);
@@ -430,9 +456,9 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             <i className="fas fa-arrow-left"></i>
           </button>
           <div style={summaryStyle}>
-            <span>{invoice.invoice || invoice.invoice_number}</span>
-            <span>{invoice.vendor}</span>
-            <span>{invoice.amount}</span>
+            <span>{invoice?.invoice || invoice?.invoice_number || 'N/A'}</span>
+            <span>{invoice?.vendor || 'N/A'}</span>
+            <span>{invoice?.amount || 'N/A'}</span>
           </div>
         </div>
         <button
@@ -502,7 +528,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                       }}
                     />
                   </td>
-                  <td style={cellStyle}>{invoice.status || 'New'}</td>
+                  <td style={cellStyle}>{invoice?.status || 'New'}</td>
                 </tr>
               </tbody>
             </table>
@@ -714,7 +740,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         </div>
         {/* Right column: PDF viewer */}
         <div style={rightColumnStyle}>
-          {invoice.pdf_path ? (
+          {invoice?.pdf_path ? (
             <iframe
               src={`/${invoice.pdf_path}`}
             style={{
