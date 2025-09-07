@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { oauth2 } from '../../../../lib/qbo/oauthClient';
 import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
