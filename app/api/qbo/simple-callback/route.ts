@@ -43,21 +43,29 @@ export async function GET(req: NextRequest) {
 
   try {
     // Direct HTTP request to QuickBooks token endpoint
-    const tokenUrl = 'https://appcenter.intuit.com/oauth2/v1/tokens/bearer';
+    const tokenUrl = 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
+    
+    // Create Basic Auth header
+    const clientId = process.env.QBO_CLIENT_ID || '';
+    const clientSecret = process.env.QBO_CLIENT_SECRET || '';
+    const authString = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    
     const tokenData = new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: process.env.QBO_REDIRECT_URI || 'https://www.pcsmilesai.com/api/qbo/simple-callback',
-      client_id: process.env.QBO_CLIENT_ID || '',
-      client_secret: process.env.QBO_CLIENT_SECRET || ''
+      redirect_uri: process.env.QBO_REDIRECT_URI || 'https://www.pcsmilesai.com/api/qbo/simple-callback'
     });
 
     console.log('🔄 Making direct token request...');
+    console.log('🔄 Token URL:', tokenUrl);
+    console.log('🔄 Client ID:', clientId.substring(0, 8) + '...');
+    
     const tokenResponse = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Authorization': `Basic ${authString}`
       },
       body: tokenData.toString()
     });
