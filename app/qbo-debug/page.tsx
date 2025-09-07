@@ -2,18 +2,36 @@
 
 import { useState, useEffect } from 'react';
 
+type DebugInfo = {
+  clientId: string;
+  redirectUri: string;
+  encodedRedirectUri: string;
+  message: string;
+  instructions: string[];
+};
+
 export default function QBODebugPage() {
-  const [debugInfo, setDebugInfo] = useState(null);
+  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchDebugInfo() {
       try {
         const response = await fetch('/api/qbo/debug-redirect');
-        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data: DebugInfo = await response.json();
         setDebugInfo(data);
       } catch (error) {
         console.error('Error fetching debug info:', error);
+        setDebugInfo({
+          clientId: 'Error loading',
+          redirectUri: 'Error loading',
+          encodedRedirectUri: 'Error loading',
+          message: 'Failed to load debug information',
+          instructions: ['Please check your environment variables and try again.']
+        });
       } finally {
         setLoading(false);
       }
@@ -37,6 +55,7 @@ export default function QBODebugPage() {
             <p><strong>Client ID:</strong> {debugInfo.clientId}</p>
             <p><strong>Redirect URI:</strong> <code style={{ backgroundColor: '#e0e0e0', padding: '2px 4px' }}>{debugInfo.redirectUri}</code></p>
             <p><strong>Encoded Redirect URI:</strong> <code style={{ backgroundColor: '#e0e0e0', padding: '2px 4px' }}>{debugInfo.encodedRedirectUri}</code></p>
+            {debugInfo.message && <p><strong>Message:</strong> {debugInfo.message}</p>}
           </div>
 
           <h2>Fix Instructions:</h2>
