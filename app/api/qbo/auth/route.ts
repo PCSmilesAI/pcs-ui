@@ -18,7 +18,7 @@ export async function GET() {
   const verifier = b64url(crypto.randomBytes(32));
   const challenge = b64url(crypto.createHash('sha256').update(verifier).digest());
 
-  const url = new URL('https://appcenter.intuit.com/connect/oauth2');
+  const url = new URL('https://oauth.platform.intuit.com/oauth2/v1/authorize');
   url.searchParams.set('client_id', QBO_CLIENT_ID);
   url.searchParams.set('response_type', 'code');
   url.searchParams.set('scope', QBO_SCOPES);
