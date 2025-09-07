@@ -15,7 +15,7 @@ export async function GET() {
   u.searchParams.set("client_id", QBO_CLIENT_ID ?? "");
   u.searchParams.set("response_type", "code");
   u.searchParams.set("scope", QBO_SCOPES ?? "");
-  u.searchParams.set("redirect_uri", "https://www.pcsmilesai.com/api/qbo/test-callback");
+  u.searchParams.set("redirect_uri", "https://www.pcsmilesai.com/api/qbo/simple-callback");
   u.searchParams.set("state", state);
   u.searchParams.set("access_type", "offline");
   
