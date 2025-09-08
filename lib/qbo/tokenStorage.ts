@@ -55,12 +55,27 @@ class TokenStorage {
         // Add missing columns
         if (!columnNames.includes('expires_in')) {
           console.log('Adding expires_in column...');
-          this.db.run("ALTER TABLE qbo_tokens ADD COLUMN expires_in INTEGER DEFAULT 3600");
+          this.db.run(
+            "ALTER TABLE qbo_tokens ADD COLUMN expires_in INTEGER DEFAULT 3600",
+            (alterErr) => {
+              // Ignore race conditions where another worker already added the column
+              if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
+                console.error('Failed adding expires_in column:', alterErr);
+              }
+            }
+          );
         }
         
         if (!columnNames.includes('obtained_at')) {
           console.log('Adding obtained_at column...');
-          this.db.run("ALTER TABLE qbo_tokens ADD COLUMN obtained_at INTEGER DEFAULT (strftime('%s','now'))");
+          this.db.run(
+            "ALTER TABLE qbo_tokens ADD COLUMN obtained_at INTEGER DEFAULT (strftime('%s','now'))",
+            (alterErr) => {
+              if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
+                console.error('Failed adding obtained_at column:', alterErr);
+              }
+            }
+          );
         }
       });
     });
