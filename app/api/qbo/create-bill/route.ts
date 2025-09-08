@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
           path.join(process.cwd(), pdfPath)
         ];
         
-        let pdfBuffer = null;
+        let pdfBuffer: Buffer | null = null;
         let fileName = '';
         
         for (const testPath of possiblePaths) {
