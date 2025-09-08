@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { saveTokens } from "../../../../lib/qbo/tokenStorage";
+import { saveTokens } from "../../../../lib/qbo/memoryStorage";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
