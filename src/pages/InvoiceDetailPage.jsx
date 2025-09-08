@@ -53,6 +53,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
   // Load line items from JSON data
   useEffect(() => {
@@ -70,6 +72,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                 qty: item.Quantity || '1',
                 unit: `$${item.unit_price || '0.00'}`,
                 total: `$${item.line_item_total || '0.00'}`,
+                category: item.quickbooks_category || 'Not categorized',
               }));
               setItems(transformedItems);
             } else {
@@ -104,6 +107,131 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
+  }
+
+  // Fetch QuickBooks categories
+  async function fetchCategories() {
+    setLoadingCategories(true);
+    try {
+      const response = await fetch('/api/qbo/categories');
+      const result = await response.json();
+      
+      if (result.success) {
+        setCategories(result.categories.dental);
+        console.log('✅ Categories loaded:', result.categories.dental.length);
+      } else {
+        console.error('❌ Failed to load categories:', result.error);
+        alert('Failed to load QuickBooks categories: ' + result.error);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching categories:', error);
+      alert('Error fetching categories: ' + error.message);
+    } finally {
+      setLoadingCategories(false);
+    }
+  }
+
+  // Apply intelligent categorization to line items
+  async function applyIntelligentCategorization() {
+    if (categories.length === 0) {
+      alert('Please fetch categories first');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const updatedItems = items.map(item => {
+        const description = item.name.toLowerCase();
+        let bestCategory = 'Not categorized';
+        let bestScore = 0;
+
+        // Find best matching category
+        categories.forEach(category => {
+          const categoryName = category.name.toLowerCase();
+          let score = 0;
+
+          // Check for keyword matches
+          if (description.includes('supply') || description.includes('material')) {
+            if (categoryName.includes('supply')) score += 3;
+          }
+          if (description.includes('equipment') || description.includes('machine')) {
+            if (categoryName.includes('equipment')) score += 3;
+          }
+          if (description.includes('lab') || description.includes('crown') || description.includes('bridge')) {
+            if (categoryName.includes('lab')) score += 3;
+          }
+          if (description.includes('cleaning') || description.includes('hygiene')) {
+            if (categoryName.includes('cleaning')) score += 3;
+          }
+          if (description.includes('filling') || description.includes('composite')) {
+            if (categoryName.includes('filling')) score += 3;
+          }
+          if (description.includes('x-ray') || description.includes('radiograph')) {
+            if (categoryName.includes('x-ray')) score += 3;
+          }
+
+          // Direct name matching
+          if (categoryName.includes(description.split(' ')[0])) score += 2;
+          if (description.includes(categoryName.split(' ')[0])) score += 2;
+
+          if (score > bestScore) {
+            bestScore = score;
+            bestCategory = category.name;
+          }
+        });
+
+        return {
+          ...item,
+          category: bestCategory
+        };
+      });
+
+      setItems(updatedItems);
+      console.log('✅ Intelligent categorization applied');
+      alert('Intelligent categorization applied to all line items');
+    } catch (error) {
+      console.error('❌ Error applying categorization:', error);
+      alert('Error applying categorization: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  // Save categories to invoice
+  async function saveCategories() {
+    setProcessing(true);
+    try {
+      const response = await fetch('/api/qbo/update-invoice-categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          invoiceNumber: invoice?.invoice_number,
+          lineItems: items.map((item, index) => ({
+            product_number: item.id,
+            name: item.name,
+            category: item.category,
+            index: index
+          }))
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ Categories saved to invoice');
+        alert('Categories saved to invoice successfully');
+      } else {
+        console.error('❌ Failed to save categories:', result.error);
+        alert('Failed to save categories: ' + result.error);
+      }
+    } catch (error) {
+      console.error('❌ Error saving categories:', error);
+      alert('Error saving categories: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
   }
 
   // Function to handle PDF download
@@ -219,7 +347,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
           
           if (billResult.success) {
             console.log('✅ QuickBooks bill created successfully:', billResult.billId);
-            alert(`Invoice approved and QuickBooks bill created! Bill ID: ${billResult.billId}`);
+            const pdfStatus = billResult.pdfAttached ? ' and PDF attached' : ' (PDF not attached)';
+            alert(`Invoice approved and QuickBooks bill created! Bill ID: ${billResult.billId}${pdfStatus}`);
           } else {
             console.warn('⚠️ Failed to create QuickBooks bill:', billResult.error);
             alert(`Invoice approved, but failed to create QuickBooks bill: ${billResult.error}`);
@@ -652,6 +781,60 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
           {/* Line Items section */}
           <div style={sectionStyle}>
             <h2 style={sectionTitleStyle}>Line Items</h2>
+            
+            {/* Category Management Buttons */}
+            <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                onClick={fetchCategories}
+                disabled={loadingCategories}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#357ab2',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: loadingCategories ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  opacity: loadingCategories ? 0.6 : 1
+                }}
+              >
+                {loadingCategories ? 'Loading...' : 'Fetch QuickBooks Categories'}
+              </button>
+              
+              <button
+                onClick={applyIntelligentCategorization}
+                disabled={processing || categories.length === 0}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: (processing || categories.length === 0) ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  opacity: (processing || categories.length === 0) ? 0.6 : 1
+                }}
+              >
+                {processing ? 'Processing...' : 'Auto-Categorize Items'}
+              </button>
+              
+              <button
+                onClick={saveCategories}
+                disabled={processing}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#ffc107',
+                  color: 'black',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: processing ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  opacity: processing ? 0.6 : 1
+                }}
+              >
+                {processing ? 'Saving...' : 'Save Categories'}
+              </button>
+            </div>
             {loading ? (
               <div style={{ textAlign: 'center', padding: '20px' }}>Loading line items...</div>
             ) : items.length > 0 ? (
@@ -662,6 +845,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                     <th style={cellHeaderStyle}>Qty</th>
                     <th style={cellHeaderStyle}>Unit</th>
                     <th style={cellHeaderStyle}>Total</th>
+                    <th style={cellHeaderStyle}>Category</th>
                 </tr>
               </thead>
               <tbody>
@@ -725,6 +909,22 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                             width: '80px',
                           textAlign: 'right',
                         }}
+                      />
+                    </td>
+                    <td style={cellStyle}>
+                      <input
+                        type="text"
+                        value={item.category}
+                          onChange={(e) => handleItemChange(index, 'category', e.target.value)}
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                            padding: '4px 8px',
+                          fontSize: '14px',
+                            width: '120px',
+                          textAlign: 'left',
+                        }}
+                        placeholder="QuickBooks category"
                       />
                     </td>
                   </tr>
