@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { qboClient, QBOBill } from '../../../../lib/qbo/qboClient';
+import { getLatestTokens } from '../../../../lib/qbo/memoryStorage';
 import fs from 'fs';
 import path from 'path';
 
@@ -90,6 +91,15 @@ export async function POST(req: NextRequest) {
 
     console.log('🔄 Creating QBO Bill for invoice:', invoiceNumber);
 
+    // Check if QuickBooks is connected
+    const tokens = await getLatestTokens();
+    if (!tokens) {
+      return NextResponse.json({
+        success: false,
+        error: 'QuickBooks not connected. Please connect to QuickBooks first.'
+      }, { status: 400 });
+    }
+
     // Initialize QBO client
     await qboClient.initialize();
 
@@ -106,10 +116,10 @@ export async function POST(req: NextRequest) {
     // Parse line items from invoice data
     const lineItems = invoiceData.line_items || [];
     const qboLines = lineItems.map((item: any, index: number) => {
-      const description = item.description || item.name || `Item ${index + 1}`;
-      const amount = parseFloat(item.amount || item.total || '0');
-      const quantity = parseFloat(item.quantity || '1');
-      const unitPrice = amount / quantity;
+      const description = item.product_name || item.description || item.name || `Item ${index + 1}`;
+      const amount = parseFloat(item.line_item_total || item.amount || item.total || '0');
+      const quantity = parseFloat(item.Quantity || item.quantity || '1');
+      const unitPrice = parseFloat(item.unit_price || (amount / quantity));
 
       // Categorize the line item
       const category = categorizeLineItem(description, amount);
@@ -153,19 +163,40 @@ export async function POST(req: NextRequest) {
     console.log('✅ QBO Bill created successfully:', createdBill.Id);
 
     // Handle PDF attachment if provided
-    if (pdfPath && fs.existsSync(pdfPath)) {
+    let pdfAttached = false;
+    if (pdfPath) {
       try {
-        const pdfBuffer = fs.readFileSync(pdfPath);
-        const fileName = path.basename(pdfPath);
+        // Try different possible paths for the PDF
+        const possiblePaths = [
+          pdfPath,
+          path.join(process.cwd(), 'public', pdfPath),
+          path.join(process.cwd(), pdfPath)
+        ];
         
-        await qboClient.uploadAttachment(
-          createdBill.Id!,
-          fileName,
-          pdfBuffer,
-          'application/pdf'
-        );
+        let pdfBuffer = null;
+        let fileName = '';
         
-        console.log('📎 PDF attachment added to bill');
+        for (const testPath of possiblePaths) {
+          if (fs.existsSync(testPath)) {
+            pdfBuffer = fs.readFileSync(testPath);
+            fileName = path.basename(testPath);
+            break;
+          }
+        }
+        
+        if (pdfBuffer) {
+          await qboClient.uploadAttachment(
+            createdBill.Id!,
+            fileName,
+            pdfBuffer,
+            'application/pdf'
+          );
+          
+          console.log('📎 PDF attachment added to bill');
+          pdfAttached = true;
+        } else {
+          console.warn('⚠️ PDF file not found at any of the expected paths:', possiblePaths);
+        }
       } catch (attachmentError) {
         console.warn('⚠️ Failed to attach PDF:', attachmentError);
         // Don't fail the entire operation for attachment issues
@@ -176,9 +207,10 @@ export async function POST(req: NextRequest) {
       success: true,
       billId: createdBill.Id,
       message: 'Bill created successfully in QuickBooks',
+      pdfAttached: pdfAttached,
       categories: lineItems.map((item: any, index: number) => ({
-        description: item.description || item.name || `Item ${index + 1}`,
-        category: categorizeLineItem(item.description || item.name || `Item ${index + 1}`, parseFloat(item.amount || item.total || '0'))
+        description: item.product_name || item.description || item.name || `Item ${index + 1}`,
+        category: categorizeLineItem(item.product_name || item.description || item.name || `Item ${index + 1}`, parseFloat(item.line_item_total || item.amount || item.total || '0'))
       }))
     });
 

@@ -1,4 +1,4 @@
-import { tokenStorage, QBOTokens } from './tokenStorage';
+import { getLatestTokens, isTokenExpired, saveTokens } from './memoryStorage';
 import { oauth2 } from './oauthClient';
 
 export interface QBOBill {
@@ -46,11 +46,19 @@ export interface QBOItem {
   };
 }
 
+export interface QBOTokens {
+  realmId: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  obtained_at?: number;
+}
+
 export class QBOClient {
   private tokens: QBOTokens | null = null;
 
   async initialize(): Promise<void> {
-    this.tokens = await tokenStorage.getLatestTokens();
+    this.tokens = await getLatestTokens();
     if (!this.tokens) {
       throw new Error('No QuickBooks tokens found. Please connect to QuickBooks first.');
     }
@@ -66,7 +74,7 @@ export class QBOClient {
     }
 
     // Check if token is expired
-    if (await tokenStorage.isTokenExpired(this.tokens)) {
+    if (isTokenExpired(this.tokens)) {
       console.log('🔄 QBO Token expired, refreshing...');
       await this.refreshToken();
     }
@@ -84,11 +92,11 @@ export class QBOClient {
       });
 
       // Update stored tokens
-      await tokenStorage.saveTokens({
-        realmId: this.tokens.realmId,
-        accessToken: token.access_token,
-        refreshToken: token.refresh_token,
-        expiresIn: token.expires_in
+      await saveTokens(this.tokens.realmId, {
+        access_token: token.access_token,
+        refresh_token: token.refresh_token,
+        expires_in: token.expires_in,
+        obtained_at: Date.now()
       });
 
       // Update current tokens
@@ -109,7 +117,7 @@ export class QBOClient {
   private async makeRequest(endpoint: string, method: string = 'GET', data?: any): Promise<any> {
     await this.ensureValidToken();
 
-    const url = `https://sandbox-quickbooks.api.intuit.com/v3/company/${this.tokens!.realmId}/${endpoint}`;
+    const url = `https://quickbooks.api.intuit.com/v3/company/${this.tokens!.realmId}/${endpoint}`;
     
     const headers = {
       'Authorization': `Bearer ${this.tokens!.accessToken}`,
