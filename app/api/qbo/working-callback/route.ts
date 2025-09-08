@@ -1,26 +1,9 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { saveTokens } from "@/lib/qbo/tokenStorage";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
-
-async function saveTokens(realmId: string, token: any) {
-  const dir = path.join(process.cwd(), "pcs_ai_data");
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(
-    path.join(dir, `qbo_tokens_${realmId}.json`),
-    JSON.stringify({
-      realmId,
-      access_token: token.access_token,
-      refresh_token: token.refresh_token ?? null,
-      expires_in: token.expires_in,
-      obtained_at: Date.now(),
-    }, null, 2),
-    "utf8"
-  );
-}
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -98,7 +81,12 @@ export async function GET(req: NextRequest) {
       expires_in: token.expires_in
     });
 
-    await saveTokens(realmId, token);
+    await saveTokens(realmId, {
+      access_token: token.access_token,
+      refresh_token: token.refresh_token,
+      expires_in: token.expires_in,
+      obtained_at: Date.now(),
+    });
     
     // Clear state cookies
     const jar = cookies();
