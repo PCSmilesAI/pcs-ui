@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { qboClient, QBOBill } from '../../../../lib/qbo/qboClient';
-import { getLatestTokens } from '../../../../lib/qbo/memoryStorage';
+import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
 import fs from 'fs';
 import path from 'path';
 
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
     console.log('🔄 Creating QBO Bill for invoice:', invoiceNumber);
 
     // Check if QuickBooks is connected
-    const tokens = await getLatestTokens();
+    const tokens = await tokenStorage.getLatestTokens();
     if (!tokens) {
       return NextResponse.json({
         success: false,
