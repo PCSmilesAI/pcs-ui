@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
     const tokenData = new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: process.env.QBO_REDIRECT_URI || 'https://www.pcsmilesai.com/api/qbo/working-callback'
+      redirect_uri: 'https://www.pcsmilesai.com/api/qbo/callback'
     });
 
     console.log('🔄 Making direct token request...');
