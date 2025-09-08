@@ -154,3 +154,31 @@ class TokenStorage {
 }
 
 export const tokenStorage = new TokenStorage();
+
+// Export standalone functions for easier use
+export async function saveTokens(realmId: string, tokens: {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  obtained_at: number;
+}): Promise<void> {
+  return tokenStorage.saveTokens({
+    realmId,
+    accessToken: tokens.access_token,
+    refreshToken: tokens.refresh_token,
+    expiresIn: tokens.expires_in,
+    obtained_at: tokens.obtained_at
+  });
+}
+
+export async function getTokens(realmId: string): Promise<QBOTokens | null> {
+  return tokenStorage.getTokens(realmId);
+}
+
+export async function getAllTokens(): Promise<QBOTokens[]> {
+  return tokenStorage.getAllTokens();
+}
+
+export async function getLatestTokens(): Promise<QBOTokens | null> {
+  return tokenStorage.getLatestTokens();
+}
