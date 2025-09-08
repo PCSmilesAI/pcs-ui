@@ -1,4 +1,4 @@
-import { getLatestTokens, isTokenExpired, saveTokens } from './memoryStorage';
+import { tokenStorage, QBOTokens } from './tokenStorage';
 import { oauth2 } from './oauthClient';
 
 export interface QBOBill {
@@ -46,19 +46,11 @@ export interface QBOItem {
   };
 }
 
-export interface QBOTokens {
-  realmId: string;
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  obtained_at?: number;
-}
-
 export class QBOClient {
   private tokens: QBOTokens | null = null;
 
   async initialize(): Promise<void> {
-    this.tokens = await getLatestTokens();
+    this.tokens = await tokenStorage.getLatestTokens();
     if (!this.tokens) {
       throw new Error('No QuickBooks tokens found. Please connect to QuickBooks first.');
     }
@@ -74,7 +66,7 @@ export class QBOClient {
     }
 
     // Check if token is expired
-    if (isTokenExpired(this.tokens)) {
+    if (await tokenStorage.isTokenExpired(this.tokens)) {
       console.log('🔄 QBO Token expired, refreshing...');
       await this.refreshToken();
     }
@@ -92,10 +84,11 @@ export class QBOClient {
       });
 
       // Update stored tokens
-      await saveTokens(this.tokens.realmId, {
-        access_token: token.access_token,
-        refresh_token: token.refresh_token,
-        expires_in: token.expires_in,
+      await tokenStorage.saveTokens({
+        realmId: this.tokens.realmId,
+        accessToken: token.access_token,
+        refreshToken: token.refresh_token,
+        expiresIn: token.expires_in,
         obtained_at: Date.now()
       });
 

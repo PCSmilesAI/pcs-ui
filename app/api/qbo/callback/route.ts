@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { saveTokens } from "../../../../lib/qbo/memoryStorage";
+import { tokenStorage } from "../../../../lib/qbo/tokenStorage";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -79,10 +79,11 @@ export async function GET(req: NextRequest) {
       expires_in: token.expires_in
     });
 
-    await saveTokens(realmId, {
-      access_token: token.access_token,
-      refresh_token: token.refresh_token,
-      expires_in: token.expires_in,
+    await tokenStorage.saveTokens({
+      realmId,
+      accessToken: token.access_token,
+      refreshToken: token.refresh_token,
+      expiresIn: token.expires_in,
       obtained_at: Date.now(),
     });
     

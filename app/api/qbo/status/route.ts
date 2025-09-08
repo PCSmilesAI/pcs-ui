@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllTokens } from '../../../../lib/qbo/memoryStorage';
+import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     console.log('🔄 QBO Status API called');
     
     // Get all stored tokens
-    const tokens = await getAllTokens();
+    const tokens = await tokenStorage.getAllTokens();
     
     return NextResponse.json({
       connected: tokens.length > 0,
