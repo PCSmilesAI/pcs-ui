@@ -64,6 +64,25 @@ export default function HomePage() {
             <p><strong>Status:</strong> {status?.connected ? '✅ Connected' : '❌ Not Connected'}</p>
             <p><strong>Message:</strong> {status?.message}</p>
             
+            {!status?.connected && (
+              <div style={{ marginTop: '16px' }}>
+                <a 
+                  href="/api/qbo/auth" 
+                  style={{
+                    display: 'inline-block',
+                    padding: '8px 16px',
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    textDecoration: 'none',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}
+                >
+                  🔗 Connect to QuickBooks
+                </a>
+              </div>
+            )}
+            
             {status?.tokens && status.tokens.length > 0 && (
               <div>
                 <h3>Connected Companies:</h3>
@@ -111,18 +130,30 @@ export default function HomePage() {
       </div>
 
       <div style={{ 
+        backgroundColor: '#f0fdf4', 
+        border: '1px solid #bbf7d0', 
+        padding: '20px', 
+        borderRadius: '8px',
+        marginBottom: '20px'
+      }}>
+        <h2>✅ Features Implemented</h2>
+        <ol>
+          <li>✅ <strong>Automatic Bill Creation</strong> - Invoices automatically create QuickBooks bills when approved</li>
+          <li>✅ <strong>Dental Category Mapping</strong> - Intelligent categorization of line items with UI controls</li>
+          <li>✅ <strong>PDF Attachment</strong> - Original invoice PDFs automatically attached to QuickBooks bills</li>
+        </ol>
+        <p><strong>Note:</strong> All features are live and ready to use in the invoice detail pages!</p>
+      </div>
+
+      <div style={{ 
         backgroundColor: '#fef3c7', 
         border: '1px solid #fbbf24', 
         padding: '20px', 
         borderRadius: '8px'
       }}>
-        <h2>Next Steps</h2>
-        <ol>
-          <li>Test the QuickBooks connection using the links above</li>
-          <li>Implement automatic bill creation when invoices are approved</li>
-          <li>Add dental category mapping to line items</li>
-          <li>Set up automatic PDF attachment to QuickBooks bills</li>
-        </ol>
+        <h2>⚠️ Current Limitation</h2>
+        <p><strong>Memory Storage:</strong> QuickBooks tokens are currently stored in memory and reset between serverless function invocations. This means you'll need to reconnect to QuickBooks each time the function restarts.</p>
+        <p><strong>Solution:</strong> For production, we should implement a persistent cloud database (PostgreSQL, MongoDB, etc.) to store tokens permanently.</p>
       </div>
     </div>
   );
