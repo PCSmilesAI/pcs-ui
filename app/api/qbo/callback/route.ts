@@ -14,6 +14,10 @@ const oauth2 = new AuthorizationCode({
     authorizePath: "/connect/oauth2",
     tokenPath: "/oauth2/v1/tokens/bearer",
   },
+  options: {
+    authorizationMethod: "body",
+    bodyFormat: "form"
+  }
 });
 
 async function saveTokens(realmId: string, token: any) {
