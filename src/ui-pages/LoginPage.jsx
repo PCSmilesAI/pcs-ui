@@ -32,9 +32,9 @@ export default function LoginPage() {
         'loggedInUser',
         JSON.stringify({ name, email: userEmail })
       );
-      // Navigate to account page
+      // Navigate to For Me page after login
       try {
-        router.push('/AccountPage');
+        router.push('/ForMePage');
       } catch (_) {
         // ignore router errors
       }
