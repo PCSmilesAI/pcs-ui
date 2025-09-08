@@ -22,7 +22,7 @@ export async function GET() {
   url.searchParams.set('client_id', QBO_CLIENT_ID);
   url.searchParams.set('response_type', 'code');
   url.searchParams.set('scope', QBO_SCOPES);
-  url.searchParams.set('redirect_uri', QBO_REDIRECT_URI);
+  url.searchParams.set('redirect_uri', 'https://www.pcsmilesai.com/api/qbo/working-callback');
   url.searchParams.set('state', state);
   url.searchParams.set('access_type', 'offline');
   url.searchParams.set('code_challenge', challenge);
