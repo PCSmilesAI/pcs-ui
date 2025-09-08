@@ -30,6 +30,40 @@ class TokenStorage {
       )
     `;
     this.db.run(createTableSQL);
+    
+    // Add migration to add missing columns if they don't exist
+    this.migrateDatabase();
+  }
+
+  private migrateDatabase() {
+    // Check if expires_in column exists, if not add it
+    this.db.get("PRAGMA table_info(qbo_tokens)", (err, row) => {
+      if (err) {
+        console.error('Error checking table schema:', err);
+        return;
+      }
+      
+      // Get all columns
+      this.db.all("PRAGMA table_info(qbo_tokens)", (err, columns: any[]) => {
+        if (err) {
+          console.error('Error getting table columns:', err);
+          return;
+        }
+        
+        const columnNames = columns.map(col => col.name);
+        
+        // Add missing columns
+        if (!columnNames.includes('expires_in')) {
+          console.log('Adding expires_in column...');
+          this.db.run("ALTER TABLE qbo_tokens ADD COLUMN expires_in INTEGER DEFAULT 3600");
+        }
+        
+        if (!columnNames.includes('obtained_at')) {
+          console.log('Adding obtained_at column...');
+          this.db.run("ALTER TABLE qbo_tokens ADD COLUMN obtained_at INTEGER DEFAULT (strftime('%s','now'))");
+        }
+      });
+    });
   }
 
   async saveTokens(tokens: QBOTokens): Promise<void> {
