@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { loginUser } from '../utils/gist_user_store';
 
@@ -8,7 +9,7 @@ import { loginUser } from '../utils/gist_user_store';
  * onLogin prop. A link is provided to switch to the signup
  * screen via onSwitchMode.
  */
-export default function LoginPage({ onLogin, onSwitchMode }) {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -31,11 +32,9 @@ export default function LoginPage({ onLogin, onSwitchMode }) {
         'loggedInUser',
         JSON.stringify({ name, email: userEmail })
       );
-      // Notify parent to update authentication state
-      if (onLogin) onLogin();
       // Navigate to account page
       try {
-        router.push('/account');
+        router.push('/AccountPage');
       } catch (_) {
         // ignore router errors
       }
@@ -96,7 +95,7 @@ export default function LoginPage({ onLogin, onSwitchMode }) {
       </form>
       <div style={{ marginTop: '12px' }}>
         <span style={{ marginRight: '4px' }}>No account?</span>
-        <span onClick={onSwitchMode} style={linkStyle}>Create one</span>
+        <Link href="/SignupPage" style={linkStyle}>Create one</Link>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { signupUser } from '../utils/gist_user_store';
 
@@ -9,7 +10,7 @@ import { signupUser } from '../utils/gist_user_store';
  * under the key `users`. The user is also persisted in
  * `loggedInUser` and the parent is notified on successful signup.
  */
-export default function SignupPage({ onSignup, onSwitchMode }) {
+export default function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -55,13 +56,9 @@ export default function SignupPage({ onSignup, onSwitchMode }) {
       // not persist the password.
       localStorage.setItem('loggedInUser', JSON.stringify({ name, email }));
 
-      // Notify the parent component that signup completed to update
-      // authentication state if needed.
-      if (onSignup) onSignup();
-
       // Navigate to the account page after successful signup.
       try {
-        router.push('/account');
+        router.push('/AccountPage');
       } catch (_) {
         // ignore router errors when router is not available
       }
@@ -139,7 +136,7 @@ export default function SignupPage({ onSignup, onSwitchMode }) {
       </form>
       <div style={{ marginTop: '12px' }}>
         <span style={{ marginRight: '4px' }}>Already have an account?</span>
-        <span onClick={onSwitchMode} style={linkStyle}>Back to login</span>
+        <Link href="/LoginPage" style={linkStyle}>Back to login</Link>
       </div>
     </div>
   );
