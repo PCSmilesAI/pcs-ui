@@ -55,6 +55,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   const [processing, setProcessing] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
+  const [lineCategories, setLineCategories] = useState({});
+  const [loadingLineCategories, setLoadingLineCategories] = useState(false);
 
   // Load line items from JSON data
   useEffect(() => {
@@ -96,6 +98,13 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
 
     loadLineItems();
   }, [invoice?.json_path]);
+
+  // Load line categories when component mounts or invoice changes
+  useEffect(() => {
+    if (invoice?.id || invoice?.invoice_number) {
+      loadLineCategories();
+    }
+  }, [invoice?.id, invoice?.invoice_number]);
 
   function handleDetailChange(field, value) {
     setDetails((prev) => ({ ...prev, [field]: value }));
@@ -149,6 +158,102 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     } finally {
       setLoadingCategories(false);
     }
+  }
+
+  // Load line categories for this invoice
+  async function loadLineCategories() {
+    if (!invoice?.id && !invoice?.invoice_number) return;
+    
+    setLoadingLineCategories(true);
+    try {
+      const invoiceId = invoice.id || invoice.invoice_number;
+      const response = await fetch(`/api/invoices/${invoiceId}/categories`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setLineCategories(data.lineCategories || {});
+        console.log('✅ Line categories loaded:', Object.keys(data.lineCategories || {}).length, 'assignments');
+      } else {
+        console.warn('Failed to load line categories:', response.status);
+        setLineCategories({});
+      }
+    } catch (error) {
+      console.error('❌ Error loading line categories:', error);
+      setLineCategories({});
+    } finally {
+      setLoadingLineCategories(false);
+    }
+  }
+
+  // Auto-categorize line items
+  async function autoCategorize() {
+    if (!invoice?.id && !invoice?.invoice_number) return;
+    
+    setLoadingLineCategories(true);
+    try {
+      const invoiceId = invoice.id || invoice.invoice_number;
+      const response = await fetch(`/api/invoices/${invoiceId}/auto-categorize`, {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Auto-categorization complete:', data.categorizedCount, 'of', data.lineCount, 'lines categorized');
+        
+        // Reload the categories to show the new assignments
+        await loadLineCategories();
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Auto-categorization failed:', errorData.detail || errorData.error);
+        alert(`Auto-categorization failed: ${errorData.detail || errorData.error}`);
+      }
+    } catch (error) {
+      console.error('❌ Error during auto-categorization:', error);
+      alert(`Auto-categorization failed: ${error.message}`);
+    } finally {
+      setLoadingLineCategories(false);
+    }
+  }
+
+  // Save line category changes
+  async function saveLineCategories() {
+    if (!invoice?.id && !invoice?.invoice_number) return;
+    
+    try {
+      const invoiceId = invoice.id || invoice.invoice_number;
+      const response = await fetch(`/api/invoices/${invoiceId}/categories`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ lineCategories })
+      });
+      
+      if (response.ok) {
+        console.log('✅ Line categories saved successfully');
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Failed to save line categories:', errorData.detail || errorData.error);
+        alert(`Failed to save categories: ${errorData.detail || errorData.error}`);
+      }
+    } catch (error) {
+      console.error('❌ Error saving line categories:', error);
+      alert(`Failed to save categories: ${error.message}`);
+    }
+  }
+
+  // Update a specific line category
+  function updateLineCategory(index, categoryId, categoryName) {
+    setLineCategories(prev => ({
+      ...prev,
+      [index]: {
+        categoryId,
+        categoryName,
+        confidence: 1.0,
+        source: 'manual',
+        updatedAt: new Date().toISOString()
+      }
+    }));
   }
 
   // Apply intelligent categorization to line items
@@ -822,7 +927,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
               </button>
               
               <button
-                onClick={applyIntelligentCategorization}
+                onClick={autoCategorize}
                 disabled={processing || categories.length === 0}
                 style={{
                   padding: '8px 16px',
@@ -835,11 +940,11 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                   opacity: (processing || categories.length === 0) ? 0.6 : 1
                 }}
               >
-                {processing ? 'Processing...' : 'Auto-Categorize Items'}
+                {loadingLineCategories ? 'Processing...' : 'Auto-Categorize Items'}
               </button>
               
               <button
-                onClick={saveCategories}
+                onClick={saveLineCategories}
                 disabled={processing}
                 style={{
                   padding: '8px 16px',
@@ -932,20 +1037,42 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                       />
                     </td>
                     <td style={cellStyle}>
-                      <input
-                        type="text"
-                        value={item.category}
-                          onChange={(e) => handleItemChange(index, 'category', e.target.value)}
+                      <select
+                        value={lineCategories[index]?.categoryId || ''}
+                        onChange={(e) => {
+                          const selectedCategory = categories.find(cat => cat.id === e.target.value);
+                          if (selectedCategory) {
+                            updateLineCategory(index, selectedCategory.id, selectedCategory.name);
+                          }
+                        }}
                         style={{
                           border: '1px solid #cbd5e0',
                           borderRadius: '4px',
-                            padding: '4px 8px',
+                          padding: '4px 8px',
                           fontSize: '14px',
-                            width: '120px',
-                          textAlign: 'left',
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          backgroundColor: lineCategories[index]?.source === 'vendor-default' ? '#f0f9ff' : 
+                                         lineCategories[index]?.source === 'keyword' ? '#f0fdf4' : 'white'
                         }}
-                        placeholder="QuickBooks category"
-                      />
+                      >
+                        <option value="">{lineCategories[index]?.categoryName || 'Not categorized'}</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                      {lineCategories[index] && (
+                        <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+                          {lineCategories[index].source === 'vendor-default' && '🎯 Vendor default'}
+                          {lineCategories[index].source === 'keyword' && '🔍 Auto-detected'}
+                          {lineCategories[index].source === 'manual' && '✏️ Manual'}
+                          {lineCategories[index].confidence > 0 && (
+                            <span> ({(lineCategories[index].confidence * 100).toFixed(0)}%)</span>
+                          )}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
