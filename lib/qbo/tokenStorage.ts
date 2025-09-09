@@ -77,6 +77,19 @@ class TokenStorage {
             }
           );
         }
+
+        // Add expires_at column if it doesn't exist
+        if (!columnNames.includes('expires_at')) {
+          console.log('Adding expires_at column...');
+          this.db.run(
+            "ALTER TABLE qbo_tokens ADD COLUMN expires_at INTEGER DEFAULT NULL",
+            (alterErr) => {
+              if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
+                console.error('Failed adding expires_at column:', alterErr);
+              }
+            }
+          );
+        }
       });
     });
   }
@@ -85,16 +98,18 @@ class TokenStorage {
     return new Promise((resolve, reject) => {
       const sql = `
         INSERT OR REPLACE INTO qbo_tokens 
-        (realm_id, access_token, refresh_token, expires_in, updated_at, obtained_at)
-        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
+        (realm_id, access_token, refresh_token, expires_in, updated_at, obtained_at, expires_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)
       `;
       const obtainedAt = tokens.obtained_at || Math.floor(Date.now() / 1000);
+      const expiresAt = obtainedAt + tokens.expiresIn;
       this.db.run(sql, [
         tokens.realmId,
         tokens.accessToken,
         tokens.refreshToken,
         tokens.expiresIn,
-        obtainedAt
+        obtainedAt,
+        expiresAt
       ], (err) => {
         if (err) {
           console.error('Error saving QBO tokens:', err);
