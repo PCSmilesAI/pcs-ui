@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStateAndDelete } from '../../../../lib/qbo/stateStore';
+import { verifyState } from '../../../../lib/qbo/stateJwt';
 import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
 
 // Force Node.js runtime for SQLite access
@@ -9,24 +9,42 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
-  const realmId = url.searchParams.get('realmId');
   const state = url.searchParams.get('state');
+  const realmId = url.searchParams.get('realmId');
   
-  console.log('🔄 Callback received:', { code: !!code, realmId, state });
-  
-  if (!code || !realmId || !state) {
+  console.log('[QBO][CALLBACK] incoming', {
+    got_code: !!code, 
+    got_state: !!state, 
+    state_len: state?.length,
+    realmId
+  });
+
+  if (!code || !state) {
     return NextResponse.json({ 
       error: 'Missing required parameters',
-      received: { code: !!code, realmId, state }
+      received: { code: !!code, state: !!state, realmId }
     }, { status: 400 });
   }
 
-  // Validate state from database
-  const stateData = await getStateAndDelete(state);
-  if (!stateData) {
-    console.log('❌ Invalid or expired state:', state);
+  const { QBO_STATE_SECRET, QBO_REDIRECT_URI, QBO_CLIENT_ID, QBO_CLIENT_SECRET } = process.env;
+  if (!QBO_STATE_SECRET || !QBO_REDIRECT_URI || !QBO_CLIENT_ID || !QBO_CLIENT_SECRET) {
+    return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
+  }
+
+  // Verify JWT state
+  const payload = verifyState(state, QBO_STATE_SECRET);
+  if (!payload) {
+    console.log('❌ Invalid or expired JWT state');
     return NextResponse.json({ 
-      error: 'Invalid or expired state'
+      error: 'Invalid state'
+    }, { status: 400 });
+  }
+
+  // Optional: enforce the same redirect URI we used when creating state
+  if (payload.redirect_uri !== QBO_REDIRECT_URI) {
+    console.log('❌ Redirect URI mismatch:', payload.redirect_uri, 'vs', QBO_REDIRECT_URI);
+    return NextResponse.json({ 
+      error: 'Redirect URI mismatch' 
     }, { status: 400 });
   }
 
@@ -34,15 +52,13 @@ export async function GET(req: NextRequest) {
     // Exchange code for tokens with PKCE
     const tokenUrl = 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
     
-    const clientId = process.env.QBO_CLIENT_ID || '';
-    const clientSecret = process.env.QBO_CLIENT_SECRET || '';
-    const authString = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const authString = Buffer.from(`${QBO_CLIENT_ID}:${QBO_CLIENT_SECRET}`).toString('base64');
     
     const tokenData = new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: process.env.QBO_REDIRECT_URI || 'https://www.pcsmilesai.com/api/qbo/callback',
-      code_verifier: stateData.code_verifier
+      redirect_uri: QBO_REDIRECT_URI,
+      code_verifier: payload.code_verifier
     });
 
     console.log('🔄 Exchanging code for tokens...');
@@ -75,7 +91,7 @@ export async function GET(req: NextRequest) {
 
     // Save tokens to database
     await tokenStorage.saveTokens({
-      realmId,
+      realmId: realmId || 'unknown',
       accessToken: token.access_token,
       refreshToken: token.refresh_token,
       expiresIn: token.expires_in,
@@ -85,7 +101,7 @@ export async function GET(req: NextRequest) {
     console.log('📊 Realm ID:', realmId);
 
     // Redirect back to the app
-    const baseUrl = process.env.QBO_REDIRECT_URI?.replace('/api/qbo/callback', '') || 'https://www.pcsmilesai.com';
+    const baseUrl = QBO_REDIRECT_URI.replace('/api/qbo/callback', '');
     return NextResponse.redirect(`${baseUrl}/?qbo_connected=true`, 302);
     
   } catch (e: any) {
