@@ -110,48 +110,42 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   }
 
   // Fetch QuickBooks categories with robust error handling
-  async function loadQboCategories() {
-    try {
-      const res = await fetch('/api/qbo/categories', { cache: 'no-store' });
-
-      // read as text first so we can show something even if JSON parse fails
-      const text = await res.text();
-      let data = {};
-      try { 
-        data = JSON.parse(text); 
-      } catch (e) {
-        console.error('❌ Failed to parse JSON response:', text);
-      }
-
-      if (!res.ok) {
-        const msg = data?.detail || data?.error || text || `HTTP ${res.status}`;
-        throw new Error(msg);
-      }
-
-      // accept either {categories: []} or legacy {success:true, categories:{dental:[]}}
-      let cats = data?.categories;
-      if (!cats && data?.success && data?.categories?.dental) cats = data.categories.dental;
-      if (!Array.isArray(cats)) cats = [];
-
-      return cats;
-    } catch (err) {
-      const msg = err?.message ?? 'Unknown error';
-      console.error('[QBO][categories] UI error:', err);
-      throw new Error(`Failed to load QuickBooks categories: ${msg}`);
+  async function fetchQboCategories() {
+    const res = await fetch('/api/qbo/categories', { cache: 'no-store' });
+    const text = await res.text();
+    let data = {};
+    try { 
+      data = JSON.parse(text); 
+    } catch (e) {
+      console.error('❌ Failed to parse JSON response:', text);
     }
+
+    if (!res.ok) {
+      throw new Error(data?.detail || data?.error || text || `HTTP ${res.status}`);
+    }
+    
+    const arr = Array.isArray(data?.categories) ? data.categories : [];
+    return { categories: arr, source: data?.source, reason: data?.reason };
   }
 
   // Fetch QuickBooks categories (wrapper for existing code)
   async function fetchCategories() {
     setLoadingCategories(true);
     try {
-      const categories = await loadQboCategories();
-      setCategories(categories);
-      console.log('✅ Categories loaded:', categories.length);
+      const result = await fetchQboCategories();
+      setCategories(result.categories);
+      console.log('✅ Categories loaded:', result.categories.length, 'from', result.source);
+      
+      // Show helpful message if no categories found
+      if (result.categories.length === 0) {
+        const message = result.reason || 'No expense accounts found in QuickBooks. Ask your accountant to set up Chart of Accounts.';
+        console.log('ℹ️', message);
+        // Don't show alert for empty results, just log it
+      }
     } catch (error) {
       console.error('❌ Error fetching categories:', error);
       // Show the actual error message instead of generic "undefined"
-      alert(error.message);
+      alert(`Failed to load QuickBooks categories: ${error.message}`);
     } finally {
       setLoadingCategories(false);
     }

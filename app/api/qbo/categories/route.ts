@@ -1,175 +1,225 @@
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+import 'server-only'
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
-import path from 'path';
-import fs from 'fs';
-import Database from 'better-sqlite3';
+import path from 'path'
+import fs from 'fs'
+import Database from 'better-sqlite3'
 
-type TokenRow = {
-  realm_id: string;
-  access_token: string;
-  refresh_token: string | null;
-  expires_at: number; // epoch seconds
-};
-
-const DB_PATH = path.resolve(process.cwd(), 'pcs_ai_data/qbo_tokens.db');
-
-function openDb() {
-  // Ensure folder exists
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  return new Database(DB_PATH);
+type Tokens = {
+  access_token: string
+  refresh_token: string
+  realm_id: string
+  expires_at: number // epoch ms (ms, not s)
+  token_type?: string
 }
 
-function getLatestTokens(): TokenRow | null {
-  const db = openDb();
+const DB_PATH = path.resolve(process.cwd(), 'pcs_ai_data/qbo_tokens.db')
+
+function openDb() {
+  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true })
+  return new Database(DB_PATH)
+}
+
+/* --------- wire these to your SQLite tokenStorage ---------- */
+async function getLatestTokens(): Promise<Tokens | null> {
+  const db = openDb()
   const row = db
     .prepare(
       'SELECT realm_id, access_token, refresh_token, expires_at FROM qbo_tokens ORDER BY updated_at DESC LIMIT 1'
     )
-    .get() as TokenRow | undefined;
-  db.close();
-  return row ?? null;
+    .get() as any
+  db.close()
+  
+  if (!row) return null
+  
+  return {
+    access_token: row.access_token,
+    refresh_token: row.refresh_token,
+    realm_id: row.realm_id,
+    expires_at: row.expires_at * 1000, // convert to ms
+    token_type: 'Bearer'
+  }
 }
 
-async function refreshIfNeeded(row: TokenRow): Promise<TokenRow> {
-  const now = Math.floor(Date.now() / 1000);
-  if (row.expires_at && row.expires_at > now + 60) {
-    return row; // still valid
-  }
-  if (!row.refresh_token) {
-    throw new Error('No refresh_token on file; please reconnect QuickBooks.');
-  }
+async function saveTokens(t: Tokens): Promise<void> {
+  const db = openDb()
+  db.prepare(
+    `INSERT OR REPLACE INTO qbo_tokens (realm_id, access_token, refresh_token, expires_at, updated_at)
+     VALUES (@realm_id, @access_token, @refresh_token, @expires_at, strftime('%s','now'))`
+  ).run({
+    realm_id: t.realm_id,
+    access_token: t.access_token,
+    refresh_token: t.refresh_token,
+    expires_at: Math.floor(t.expires_at / 1000), // convert to seconds
+  })
+  db.close()
+}
+/* ----------------------------------------------------------- */
 
-  const tokenResp = await fetch('https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer', {
+const INTUIT_TOKEN_URL = 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
+const QBO_BASE = 'https://quickbooks.api.intuit.com/v3/company'
+
+function j(body: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json', ...extraHeaders },
+  })
+}
+
+async function ensureAccessToken(tokens: Tokens): Promise<Tokens> {
+  const aboutToExpire = !tokens.expires_at || Date.now() > tokens.expires_at - 120_000
+  if (!aboutToExpire) return tokens
+
+  const params = new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: tokens.refresh_token,
+  })
+  const basic = Buffer.from(
+    `${process.env.QBO_CLIENT_ID}:${process.env.QBO_CLIENT_SECRET}`
+  ).toString('base64')
+
+  const r = await fetch(INTUIT_TOKEN_URL, {
     method: 'POST',
     headers: {
-      Authorization:
-        'Basic ' +
-        Buffer.from(`${process.env.QBO_CLIENT_ID!}:${process.env.QBO_CLIENT_SECRET!}`).toString(
-          'base64'
-        ),
+      Authorization: `Basic ${basic}`,
       'Content-Type': 'application/x-www-form-urlencoded',
       Accept: 'application/json',
     },
-    body: new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: row.refresh_token,
-    }),
-  });
+    body: params,
+  })
 
-  if (!tokenResp.ok) {
-    const detail = await tokenResp.text();
-    throw new Error(`Refresh failed: ${detail}`);
+  const text = await r.text()
+  let json: any = {}
+  try { json = JSON.parse(text) } catch {}
+
+  if (!r.ok) {
+    console.error('[QBO][refresh_failed]', r.status, text)
+    throw j({ error: 'refresh_failed', detail: json?.error_description || text }, 401)
   }
 
-  const tok = (await tokenResp.json()) as {
-    access_token: string;
-    refresh_token?: string;
-    expires_in?: number;
-  };
-
-  const updated: TokenRow = {
-    ...row,
-    access_token: tok.access_token,
-    refresh_token: tok.refresh_token ?? row.refresh_token,
-    expires_at: Math.floor(Date.now() / 1000) + (tok.expires_in ?? 3600),
-  };
-
-  const db = openDb();
-  db.prepare(
-    `INSERT OR REPLACE INTO qbo_tokens (realm_id, access_token, refresh_token, expires_in, expires_at, updated_at)
-     VALUES (@realm_id, @access_token, @refresh_token, @expires_in, @expires_at, strftime('%s','now'))`
-  ).run({
-    ...updated,
-    expires_in: tok.expires_in ?? 3600
-  });
-  db.close();
-
-  return updated;
+  const expiresInSec = Number(json.expires_in ?? 3600)
+  const updated: Tokens = {
+    access_token: json.access_token,
+    refresh_token: json.refresh_token ?? tokens.refresh_token,
+    realm_id: tokens.realm_id,
+    token_type: json.token_type ?? 'Bearer',
+    expires_at: Date.now() + expiresInSec * 1000,
+  }
+  await saveTokens(updated)
+  return updated
 }
 
-function qboBaseUrl(env = process.env.QBO_ENV || 'production') {
-  // Data API base is quickbooks.api.intuit.com for *both*; auth differs, but data is same host w/ realm switch
-  return 'https://quickbooks.api.intuit.com';
+async function qboQuery(tokens: Tokens, sql: string, minor = '65'): Promise<any> {
+  const url = `${QBO_BASE}/${tokens.realm_id}/query?query=${encodeURIComponent(sql)}&minorversion=${minor}`
+  const doFetch = async (accessToken: string) =>
+    fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/text',
+      },
+    })
+
+  let res = await doFetch(tokens.access_token)
+  if (res.status === 401) {
+    const t = await ensureAccessToken(tokens)
+    res = await doFetch(t.access_token)
+  }
+
+  const text = await res.text()
+  let data: any = {}
+  try { data = JSON.parse(text) } catch {}
+
+  if (!res.ok) {
+    console.error('[QBO][query_failed]', res.status, text.slice(0, 400))
+    throw j({ error: 'qbo_query_failed', status: res.status, detail: data?.Fault ?? text }, res.status)
+  }
+  return data
+}
+
+function mapAccounts(data: any) {
+  const list = data?.QueryResponse?.Account ?? []
+  return list.map((a: any) => ({
+    id: a.Id,
+    name: a.Name,
+    type: a.AccountType,
+    subtype: a.AccountSubType,
+  }))
 }
 
 export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const debug = url.searchParams.get('debug') === '1';
-  
   try {
-    const row = getLatestTokens();
-    if (!row) {
-      return Response.json({ error: 'QuickBooks not connected' }, { status: 401 });
-    }
-    if (!row.realm_id) {
-      return Response.json(
-        { error: 'No realm_id on file; reconnect and select a company.' },
-        { status: 400 }
-      );
+    const debug = new URL(req.url).searchParams.get('debug') === '1'
+
+    const tokens = await getLatestTokens()
+    if (!tokens?.realm_id) {
+      return j({ error: 'not_connected', detail: 'No realm_id/tokens found.' }, 401)
     }
 
-    const valid = await refreshIfNeeded(row);
+    const valid = await ensureAccessToken(tokens)
 
-    const qboUrl = new URL(
-      `/v3/company/${encodeURIComponent(row.realm_id)}/query`,
-      qboBaseUrl()
-    );
-    // QBO query for Item categories
-    qboUrl.searchParams.set('query', "select * from Item where Type = 'Category'");
-    qboUrl.searchParams.set('minorversion', '73'); // safe current minor
+    // 1) Preferred: AccountType filter (typical expense coding)
+    const sql1 = `
+      select Id, Name, AccountType, AccountSubType
+      from Account
+      where AccountType in ('Expense','Cost of Goods Sold','Other Expense')
+      order by Name
+    `.trim()
+    let data = await qboQuery(valid, sql1)
+    let categories = mapAccounts(data)
+    let source = 'Account(AccountType in Expense/COGS/Other Expense)'
+    let reason = ''
 
-    const resp = await fetch(qboUrl.toString(), {
-      headers: {
-        Authorization: `Bearer ${valid.access_token}`,
-        Accept: 'application/json',
-        'Content-Type': 'application/text', // QBO likes text/plain or application/text for queries
-      },
-      method: 'GET',
-    });
-
-    if (!resp.ok) {
-      const detail = await resp.text();
-      return Response.json({ error: 'QBO query failed', detail }, { status: 502 });
+    // 2) If empty, try Classification (some ledgers expose via Classification)
+    if (categories.length === 0) {
+      const sql2 = `
+        select Id, Name, AccountType, AccountSubType
+        from Account
+        where Classification = 'Expense'
+        order by Name
+      `.trim()
+      data = await qboQuery(valid, sql2)
+      categories = mapAccounts(data)
+      source = 'Account(Classification=Expense)'
     }
 
-    const data = (await resp.json()) as any;
-    const items = data?.QueryResponse?.Item || [];
-
-    // Normalize a compact list
-    const categories = items.map((it: any) => ({
-      id: it.Id,
-      name: it.Name,
-      parentRef: it.ParentRef?.value ?? null,
-      fullyQualifiedName: it.FullyQualifiedName ?? it.Name,
-    }));
-
-    const payload = { categories };
-    
-    if (debug) {
-      return new Response(JSON.stringify({ 
-        ok: true, 
-        payload, 
-        ts: Date.now(),
-        build: process.env.VERCEL_GIT_COMMIT_SHA ?? 'pm2',
-        realmId: row.realm_id,
-        hasAccessToken: !!valid.access_token
-      }), {
-        status: 200,
-        headers: {
-          'content-type': 'application/json',
-          'x-build': process.env.VERCEL_GIT_COMMIT_SHA ?? 'pm2',
-        },
-      });
+    // 3) If still empty, return ALL Accounts (so we can see something)
+    if (categories.length === 0) {
+      const sql3 = `
+        select Id, Name, AccountType, AccountSubType
+        from Account
+        order by Name
+      `.trim()
+      data = await qboQuery(valid, sql3)
+      categories = mapAccounts(data)
+      source = 'Account(all)'
+      reason = 'No expense-type accounts matched; showing all accounts.'
     }
-    
-    return Response.json(payload);
+
+    // 4) If really nothing, last resort—Item "Category" (diagnostic only)
+    if (categories.length === 0) {
+      const sql4 = `
+        select Id, Name, Type
+        from Item
+        where Type = 'Category'
+        order by Name
+      `.trim()
+      data = await qboQuery(valid, sql4)
+      const items = data?.QueryResponse?.Item ?? []
+      categories = items.map((i: any) => ({ id: i.Id, name: i.Name, type: 'ItemCategory' }))
+      source = 'Item(Type=Category)'
+      reason = 'No accounts returned; showing Item categories (not used for expense coding).'
+    }
+
+    const payload = { categories, source, reason }
+    return debug
+      ? j({ ok: true, payload, debug: { count: categories.length, ts: Date.now() } })
+      : j({ categories, source, reason }, 200, { 'x-qbo-count': String(categories.length) })
   } catch (err: any) {
-    // Surface root cause to logs and UI
-    console.error('[QBO][categories] error:', err?.stack || err);
-    return Response.json(
-      { error: 'QuickBooks connection failed. Please reconnect.', detail: String(err?.message || err) },
-      { status: 500 }
-    );
+    if (err instanceof Response) return err
+    const msg = err?.detail || err?.message || String(err)
+    console.error('[QBO][categories] fatal', msg)
+    return j({ error: 'internal_error', detail: msg }, 500)
   }
 }
