@@ -79,6 +79,10 @@ export async function GET(req: NextRequest) {
       expires_in: token.expires_in
     });
 
+    // Ensure database schema is up to date before saving tokens
+    console.log('🔄 Ensuring database schema is up to date...');
+    await tokenStorage.ensureSchema();
+
     await tokenStorage.saveTokens({
       realmId,
       accessToken: token.access_token,
