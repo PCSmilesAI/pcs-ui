@@ -37,7 +37,11 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
 
   // Load invoice data from the queue
   useEffect(() => {
-    checkQboStatus();
+    // Temporarily disable QBO status check to debug loading issue
+    // checkQboStatus();
+    setQboLoading(false);
+    setQboConnected(false);
+    
     const loadInvoices = async () => {
       try {
         console.log('🔄 ForMePage: Starting to load invoices...');
