@@ -100,6 +100,27 @@ class TokenStorage {
       });
     });
   }
+
+  async getLatestTokens(): Promise<QBOTokens | null> {
+    return new Promise((resolve, reject) => {
+      const sql = 'SELECT realm_id as realmId, access_token as accessToken, refresh_token as refreshToken, expires_in as expiresIn, expires_at as expiresAt FROM qbo_tokens ORDER BY updated_at DESC LIMIT 1';
+      this.db.get(sql, [], (err, row) => {
+        if (err) {
+          console.error('Error getting latest QBO tokens:', err);
+          reject(err);
+        } else {
+          resolve(row || null);
+        }
+      });
+    });
+  }
+
+  isTokenExpired(tokens: QBOTokens): boolean {
+    const { expiresAt } = tokens;
+    const currentTime = Math.floor(Date.now() / 1000);
+    // Consider expired if within 2 minutes of expiry
+    return currentTime > (expiresAt - 120);
+  }
 }
 
 export const tokenStorage = new TokenStorage();
