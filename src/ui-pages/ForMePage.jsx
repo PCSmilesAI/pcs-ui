@@ -45,12 +45,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     const loadInvoices = async () => {
       try {
         console.log('🔄 ForMePage: Starting to load invoices...');
-        console.log('🌐 ForMePage: Fetching from URL:', window.location.origin + '/invoice_queue.json');
         setLoading(true);
-        
-        // Test the URL first
-        const testUrl = window.location.origin + '/invoice_queue.json';
-        console.log('🔍 ForMePage: Testing URL:', testUrl);
         
         // Add cache-busting timestamp to force fresh request
         const timestamp = new Date().getTime();
