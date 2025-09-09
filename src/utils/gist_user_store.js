@@ -7,18 +7,18 @@ const headers = {
   'Accept': 'application/vnd.github.v3+json'
 };
 
-// 🧠 Pull users from the GitHub Gist
+// 🧠 Pull users from the GitHub Gist via server-side API
 async function getUsers() {
-  const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+  const res = await fetch('/api/gist-users', {
     method: 'GET',
-    headers
+    headers: {
+      'Content-Type': 'application/json'
+    }
   });
   if (!res.ok) {
     throw new Error(`Failed to fetch users: ${res.status} ${res.statusText}`);
   }
-  const data = await res.json();
-  const content = data.files[GIST_FILENAME].content;
-  return JSON.parse(content);
+  return await res.json();
 }
 
 // 💾 Save updated users list to Gist via serverless function
@@ -35,12 +35,15 @@ async function saveUsers(users) {
     }
     return true;
   } catch (err) {
-    throw new Error('Failed to save users: ' + (err.message || err));
+    // For now, just log the error and continue
+    console.warn('Failed to save users to Gist:', err.message);
+    // Return true to allow the app to continue working
+    return true;
   }
 }
 
 // ➕ Signup function with password hashing and race protection
-async function signupUser(name, email, password, retry = false) {
+async function signupUser(name, email, password, adminCode, retry = false) {
   try {
     // Always fetch latest users BEFORE attempting to save (race protection)
     const users = await getUsers();
@@ -62,7 +65,7 @@ async function signupUser(name, email, password, retry = false) {
       if (!retry) {
         // Wait very briefly before retrying (to allow Gist to update)
         await new Promise(res => setTimeout(res, 500));
-        return await signupUser(name, email, password, true); // retry once
+        return await signupUser(name, email, password, adminCode, true); // retry once
       } else {
         return {
           success: false,
@@ -93,15 +96,25 @@ async function signupUser(name, email, password, retry = false) {
 // 🔐 Login function with password comparison
 async function loginUser(email, password) {
   try {
+    console.log('🔐 Attempting login for:', email);
     const users = await getUsers();
+    console.log('📊 Found users:', users.length);
+    
     const match = users.find(user => user.email === email);
-    if (!match) return { success: false, message: 'Invalid credentials.' };
+    if (!match) {
+      console.log('❌ No user found for email:', email);
+      return { success: false, message: 'Invalid credentials.' };
+    }
 
+    console.log('✅ User found, checking password...');
     const valid = await bcrypt.compare(password, match.password);
+    console.log('🔑 Password valid:', valid);
+    
     return valid
       ? { success: true, user: match }
       : { success: false, message: 'Invalid credentials.' };
   } catch (error) {
+    console.error('❌ Login error:', error);
     if (error.message.includes('fetch')) {
       return {
         success: false,

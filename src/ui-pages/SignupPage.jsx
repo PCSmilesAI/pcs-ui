@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { signupUser } from '../utils/gist_user_store';
 
 /**
@@ -38,10 +38,9 @@ export default function SignupPage() {
     console.log('🚀 Starting signup process for:', email);
 
     // Call the remote signup function. This persists the user in
-    // the GitHub Gist via the serverless API. On failure it
-    // returns an error message.
+    // the local API. On failure it returns an error message.
     try {
-      const result = await signupUser(name, email, password);
+      const result = await signupUser(name, email, password, adminCode);
       console.log('📡 Signup result:', result);
 
       if (!result.success) {

@@ -1,4 +1,5 @@
 'use client';
-export { default } from '../../src/pages/ToBePaidPage.jsx';
-
-
+import ToBePaidPage from '../../src/ui-pages/ToBePaidPage.jsx';
+export default function Page(props: any) {
+  return <ToBePaidPage {...props} />;
+}

@@ -112,9 +112,10 @@ def process_attachments(msg):
                 log("⏩ Ignored: unknown or unparseable vendor")
 
 def move_to_processed(mail, uid):
+    # DON'T delete emails - just copy to Processed folder and mark as read
     mail.uid('COPY', uid, 'Processed')
-    mail.uid('STORE', uid, '+FLAGS', '(\\Deleted)')
-    mail.expunge()
+    mail.uid('STORE', uid, '+FLAGS', '(\\Seen)')  # Mark as read instead of deleted
+    # mail.expunge()  # Commented out to prevent deletion
 
 def check_inbox():
     log("📥 Checking inbox...")
