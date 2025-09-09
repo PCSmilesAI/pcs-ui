@@ -88,8 +88,7 @@ export class QBOClient {
         realmId: this.tokens.realmId,
         accessToken: token.access_token,
         refreshToken: token.refresh_token,
-        expiresIn: token.expires_in,
-        obtained_at: Date.now()
+        expiresIn: token.expires_in
       });
 
       // Update current tokens
