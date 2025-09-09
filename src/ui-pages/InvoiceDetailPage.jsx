@@ -121,11 +121,13 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         console.log('✅ Categories loaded:', result.categories.dental.length);
       } else {
         console.error('❌ Failed to load categories:', result.error);
-        alert('Failed to load QuickBooks categories: ' + result.error);
+        // Don't show alert, just log the error and continue
+        console.log('QuickBooks categories not available, continuing without them');
       }
     } catch (error) {
       console.error('❌ Error fetching categories:', error);
-      alert('Error fetching categories: ' + error.message);
+      // Don't show alert, just log the error and continue
+      console.log('QuickBooks categories not available, continuing without them');
     } finally {
       setLoadingCategories(false);
     }
