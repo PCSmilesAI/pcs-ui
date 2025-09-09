@@ -92,11 +92,15 @@ export class QBOClient {
       });
 
       // Update current tokens
+      const now = Math.floor(Date.now() / 1000);
+      const expiresAt = now + token.expires_in;
+      
       this.tokens = {
         realmId: this.tokens.realmId,
         accessToken: token.access_token,
         refreshToken: token.refresh_token,
-        expiresIn: token.expires_in
+        expiresIn: token.expires_in,
+        expiresAt
       };
 
       console.log('✅ QBO Token refreshed successfully');
