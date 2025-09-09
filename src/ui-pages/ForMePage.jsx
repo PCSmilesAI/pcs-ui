@@ -236,19 +236,17 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     <div style={wrapperStyle}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">For Me</h1>
-        <p className="text-gray-600 mt-2">
-          {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} awaiting approval
-        </p>
+        <p className="text-gray-600 mt-2">QuickBooks Connection Test</p>
       </div>
 
-      {/* QuickBooks Connection Status - Debug */}
+      {/* QuickBooks Connection Status - Always Show */}
       <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="w-3 h-3 rounded-full bg-red-500 mr-3"></div>
             <div>
-              <p className="text-red-800 font-medium">DEBUG: QuickBooks Status</p>
-              <p className="text-red-700 text-sm">Connected: {qboConnected ? 'Yes' : 'No'}, Loading: {qboLoading ? 'Yes' : 'No'}</p>
+              <p className="text-red-800 font-medium">QuickBooks Not Connected</p>
+              <p className="text-red-700 text-sm">Connect to QuickBooks to enable full functionality</p>
             </div>
           </div>
           <a
@@ -260,32 +258,10 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
         </div>
       </div>
 
-      {/* QuickBooks Connection Status */}
-      {!qboConnected && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-yellow-500 mr-3"></div>
-              <div>
-                <p className="text-yellow-800 font-medium">QuickBooks Not Connected</p>
-                <p className="text-yellow-700 text-sm">Connect to QuickBooks to enable full functionality</p>
-              </div>
-            </div>
-            <a
-              href="/api/qbo/auth"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-            >
-              Connect QuickBooks
-            </a>
-          </div>
-        </div>
-      )}
-
-      <InvoiceTable
-        columns={columns}
-        rows={filteredRows}
-        onRowClick={handleInvoiceRowClick}
-      />
+      <div className="text-gray-600">
+        <p>This is a test page to verify QuickBooks connection UI is working.</p>
+        <p>If you can see this text and the blue button above, the UI is working correctly.</p>
+      </div>
     </div>
   );
 }
