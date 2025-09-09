@@ -98,14 +98,16 @@ class TokenStorage {
     return new Promise((resolve, reject) => {
       // First, ensure the database schema is up to date
       this.ensureSchema().then(() => {
-        const sql = `
+        // Try the full schema first
+        const fullSql = `
           INSERT OR REPLACE INTO qbo_tokens 
           (realm_id, access_token, refresh_token, expires_in, updated_at, obtained_at, expires_at)
           VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)
         `;
         const obtainedAt = tokens.obtained_at || Math.floor(Date.now() / 1000);
         const expiresAt = obtainedAt + tokens.expiresIn;
-        this.db.run(sql, [
+        
+        this.db.run(fullSql, [
           tokens.realmId,
           tokens.accessToken,
           tokens.refreshToken,
@@ -113,7 +115,30 @@ class TokenStorage {
           obtainedAt,
           expiresAt
         ], (err) => {
-          if (err) {
+          if (err && err.message.includes('expires_at')) {
+            console.log('⚠️ expires_at column missing, trying fallback schema...');
+            // Fallback to basic schema without expires_at
+            const fallbackSql = `
+              INSERT OR REPLACE INTO qbo_tokens 
+              (realm_id, access_token, refresh_token, expires_in, updated_at, obtained_at)
+              VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
+            `;
+            this.db.run(fallbackSql, [
+              tokens.realmId,
+              tokens.accessToken,
+              tokens.refreshToken,
+              tokens.expiresIn,
+              obtainedAt
+            ], (fallbackErr) => {
+              if (fallbackErr) {
+                console.error('Error saving QBO tokens (fallback):', fallbackErr);
+                reject(fallbackErr);
+              } else {
+                console.log('✅ QBO tokens saved successfully (fallback schema)');
+                resolve();
+              }
+            });
+          } else if (err) {
             console.error('Error saving QBO tokens:', err);
             reject(err);
           } else {
