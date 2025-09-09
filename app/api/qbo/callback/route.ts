@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     const tokenData = new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: 'https://www.pcsmilesai.com/api/qbo/callback'
+      redirect_uri: process.env.QBO_REDIRECT_URI || 'https://pcsmilesai.com/api/qbo/callback'
     });
 
     console.log('🔄 Making direct token request...');
@@ -93,7 +93,8 @@ export async function GET(req: NextRequest) {
     console.log('🎉 Successfully connected to QuickBooks!');
     console.log('📊 Realm ID:', realmId);
 
-    return NextResponse.redirect("https://www.pcsmilesai.com/?qbo_connected=true", 302);
+    const baseUrl = process.env.QBO_REDIRECT_URI?.replace('/api/qbo/callback', '') || 'https://pcsmilesai.com';
+    return NextResponse.redirect(`${baseUrl}/?qbo_connected=true`, 302);
   } catch (e: any) {
     console.error('❌ OAuth error:', e);
     return NextResponse.json({ 
