@@ -1,4 +1,5 @@
 import { Database } from 'sqlite3';
+import path from 'path';
 
 export interface QBOTokens {
   realmId: string;
@@ -12,7 +13,9 @@ class TokenStorage {
   private db: Database;
 
   constructor() {
-    this.db = new Database('./pcs_ai_data/qbo_tokens.db');
+    const DB_PATH = path.resolve(process.cwd(), 'pcs_ai_data/qbo_tokens.db');
+    console.log('[QBO] Token DB path:', DB_PATH);
+    this.db = new Database(DB_PATH);
     this.initDatabase();
   }
 

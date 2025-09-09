@@ -1,66 +1,39 @@
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-import { tokenStorage } from "../../../../lib/qbo/tokenStorage";
+import { NextRequest, NextResponse } from 'next/server';
+import { getStateAndDelete } from '../../../../lib/qbo/stateStore';
+import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
 
-// Force dynamic rendering
+// Force Node.js runtime for SQLite access
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
-  const code = url.searchParams.get("code");
-  const realmId = url.searchParams.get("realmId");
-  const state = url.searchParams.get("state");
+  const code = url.searchParams.get('code');
+  const realmId = url.searchParams.get('realmId');
+  const state = url.searchParams.get('state');
   
   console.log('🔄 Callback received:', { code: !!code, realmId, state });
   
-  if (!code || !realmId) {
+  if (!code || !realmId || !state) {
     return NextResponse.json({ 
-      error: "Missing code or realmId",
-      received_params: {
-        code: !!code,
-        realmId,
-        state,
-        all_params: Object.fromEntries(url.searchParams.entries())
-      }
+      error: 'Missing required parameters',
+      received: { code: !!code, realmId, state }
     }, { status: 400 });
   }
 
-  // Validate state using request cookies
-  const cookieHeader = req.headers.get('cookie') || '';
-  const cookies = Object.fromEntries(
-    cookieHeader.split(';').map(c => {
-      const [name, value] = c.trim().split('=');
-      return [name, value];
-    })
-  );
-  
-  const savedState = cookies.qbo_state || '';
-  console.log('🔍 State validation:', { 
-    received: state, 
-    saved: savedState, 
-    match: state === savedState,
-    cookieHeader,
-    allCookies: cookies
-  });
-  
-  if (state !== savedState) {
-    console.log('❌ State validation failed:', { received: state, saved: savedState });
+  // Validate state from database
+  const stateData = await getStateAndDelete(state);
+  if (!stateData) {
+    console.log('❌ Invalid or expired state:', state);
     return NextResponse.json({ 
-      error: "Invalid state", 
-      debug: {
-        received: state,
-        saved: savedState,
-        cookieHeader,
-        allCookies: cookies
-      }
+      error: 'Invalid or expired state'
     }, { status: 400 });
   }
 
   try {
-    // Direct HTTP request to QuickBooks token endpoint
+    // Exchange code for tokens with PKCE
     const tokenUrl = 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
     
-    // Create Basic Auth header
     const clientId = process.env.QBO_CLIENT_ID || '';
     const clientSecret = process.env.QBO_CLIENT_SECRET || '';
     const authString = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
@@ -68,12 +41,11 @@ export async function GET(req: NextRequest) {
     const tokenData = new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: process.env.QBO_REDIRECT_URI || 'https://pcsmilesai.com/api/qbo/callback'
+      redirect_uri: process.env.QBO_REDIRECT_URI || 'https://www.pcsmilesai.com/api/qbo/callback',
+      code_verifier: stateData.code_verifier
     });
 
-    console.log('🔄 Making direct token request...');
-    console.log('🔄 Token URL:', tokenUrl);
-    console.log('🔄 Client ID:', clientId.substring(0, 8) + '...');
+    console.log('🔄 Exchanging code for tokens...');
     
     const tokenResponse = await fetch(tokenUrl, {
       method: 'POST',
@@ -87,11 +59,10 @@ export async function GET(req: NextRequest) {
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
-      console.error('❌ Token request failed:', tokenResponse.status, errorText);
+      console.error('❌ Token exchange failed:', tokenResponse.status, errorText);
       return NextResponse.json({ 
-        error: "Token request failed", 
-        status: tokenResponse.status,
-        response: errorText
+        error: 'Token exchange failed', 
+        detail: errorText
       }, { status: 500 });
     }
 
@@ -102,6 +73,7 @@ export async function GET(req: NextRequest) {
       expires_in: token.expires_in
     });
 
+    // Save tokens to database
     await tokenStorage.saveTokens({
       realmId,
       accessToken: token.access_token,
@@ -109,17 +81,17 @@ export async function GET(req: NextRequest) {
       expiresIn: token.expires_in,
     });
     
-    // Clear state cookies (handled by redirect)
-    
     console.log('🎉 Successfully connected to QuickBooks!');
     console.log('📊 Realm ID:', realmId);
 
-    const baseUrl = process.env.QBO_REDIRECT_URI?.replace('/api/qbo/callback', '') || 'https://pcsmilesai.com';
+    // Redirect back to the app
+    const baseUrl = process.env.QBO_REDIRECT_URI?.replace('/api/qbo/callback', '') || 'https://www.pcsmilesai.com';
     return NextResponse.redirect(`${baseUrl}/?qbo_connected=true`, 302);
+    
   } catch (e: any) {
     console.error('❌ OAuth error:', e);
     return NextResponse.json({ 
-      error: "OAuth error", 
+      error: 'OAuth error', 
       detail: e?.message || String(e),
       stack: e?.stack
     }, { status: 500 });
