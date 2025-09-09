@@ -64,7 +64,7 @@ class TokenStorage {
       this.db.get(
         'SELECT realm_id as realmId, access_token as accessToken, refresh_token as refreshToken, expires_in as expiresIn, expires_at as expiresAt FROM qbo_tokens WHERE realm_id = ?',
         [realmId],
-        (err, row) => {
+        (err, row: any) => {
           if (err) return reject(err);
           resolve(row || null);
         },
@@ -104,7 +104,7 @@ class TokenStorage {
   async getLatestTokens(): Promise<QBOTokens | null> {
     return new Promise((resolve, reject) => {
       const sql = 'SELECT realm_id as realmId, access_token as accessToken, refresh_token as refreshToken, expires_in as expiresIn, expires_at as expiresAt FROM qbo_tokens ORDER BY updated_at DESC LIMIT 1';
-      this.db.get(sql, [], (err, row) => {
+      this.db.get(sql, [], (err, row: any) => {
         if (err) {
           console.error('Error getting latest QBO tokens:', err);
           reject(err);
