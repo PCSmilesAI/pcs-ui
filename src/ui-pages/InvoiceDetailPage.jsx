@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { fetchQboCategories } from '../lib/categoriesClient';
 
 /**
  * Detail view for a single invoice. Displays high level summary
@@ -118,24 +119,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     });
   }
 
-  // Fetch QuickBooks categories with robust error handling
-  async function fetchQboCategories() {
-    const res = await fetch('/api/qbo/categories', { cache: 'no-store' });
-    const text = await res.text();
-    let data = {};
-    try { 
-      data = JSON.parse(text); 
-    } catch (e) {
-      console.error('❌ Failed to parse JSON response:', text);
-    }
-
-    if (!res.ok) {
-      throw new Error(data?.detail || data?.error || text || `HTTP ${res.status}`);
-    }
-    
-    const arr = Array.isArray(data?.categories) ? data.categories : [];
-    return { categories: arr, source: data?.source, reason: data?.reason };
-  }
+  // This function is now imported from categoriesClient.js
 
   // Fetch QuickBooks categories (wrapper for existing code)
   async function fetchCategories() {
