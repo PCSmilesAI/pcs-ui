@@ -109,34 +109,49 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     });
   }
 
-  // Fetch QuickBooks categories
-  async function fetchCategories() {
-    setLoadingCategories(true);
+  // Fetch QuickBooks categories with robust error handling
+  async function loadQboCategories() {
     try {
       const res = await fetch('/api/qbo/categories', { cache: 'no-store' });
-      const text = await res.text(); // read once
+
+      // read as text first so we can show something even if JSON parse fails
+      const text = await res.text();
       let data = {};
       try { 
         data = JSON.parse(text); 
       } catch (e) {
         console.error('❌ Failed to parse JSON response:', text);
       }
-      
+
       if (!res.ok) {
         const msg = data?.detail || data?.error || text || `HTTP ${res.status}`;
-        console.error('❌ Failed to load categories:', msg);
-        console.log('QuickBooks categories not available, continuing without them');
-        return;
+        throw new Error(msg);
       }
-      
-      // Handle the new API response format
-      const categories = data.categories || [];
+
+      // accept either {categories: []} or legacy {success:true, categories:{dental:[]}}
+      let cats = data?.categories;
+      if (!cats && data?.success && data?.categories?.dental) cats = data.categories.dental;
+      if (!Array.isArray(cats)) cats = [];
+
+      return cats;
+    } catch (err) {
+      const msg = err?.message ?? 'Unknown error';
+      console.error('[QBO][categories] UI error:', err);
+      throw new Error(`Failed to load QuickBooks categories: ${msg}`);
+    }
+  }
+
+  // Fetch QuickBooks categories (wrapper for existing code)
+  async function fetchCategories() {
+    setLoadingCategories(true);
+    try {
+      const categories = await loadQboCategories();
       setCategories(categories);
       console.log('✅ Categories loaded:', categories.length);
-      
     } catch (error) {
       console.error('❌ Error fetching categories:', error);
-      console.log('QuickBooks categories not available, continuing without them');
+      // Show the actual error message instead of generic "undefined"
+      alert(error.message);
     } finally {
       setLoadingCategories(false);
     }
