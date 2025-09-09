@@ -1,10 +1,29 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { signState } from '../../../../lib/qbo/stateJwt';
 
 // Force Node.js runtime for SQLite access
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+// JWT state helpers
+const b64url = (buf: Buffer | string) =>
+  Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+const unb64url = (s: string) =>
+  Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+
+function hmac(data: string, secret: string) {
+  return crypto.createHmac('sha256', secret).update(data).digest();
+}
+
+function signState(payload: any, secret: string) {
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const h = b64url(JSON.stringify(header));
+  const p = b64url(JSON.stringify(payload));
+  const toSign = `${h}.${p}`;
+  const sig = b64url(hmac(toSign, secret));
+  return `${toSign}.${sig}`;
+}
 
 function base64url(b: Buffer) {
   return b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');

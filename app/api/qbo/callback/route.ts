@@ -1,10 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyState } from '../../../../lib/qbo/stateJwt';
 import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
+import crypto from 'crypto';
 
 // Force Node.js runtime for SQLite access
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+// JWT state helpers
+const b64url = (buf: Buffer | string) =>
+  Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+const unb64url = (s: string) =>
+  Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+
+function hmac(data: string, secret: string) {
+  return crypto.createHmac('sha256', secret).update(data).digest();
+}
+
+function verifyState(token: string, secret: string): any | null {
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  const [h, p, s] = parts;
+  const expected = b64url(hmac(`${h}.${p}`, secret));
+  if (s !== expected) return null;
+  const payload = JSON.parse(unb64url(p).toString('utf8'));
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.exp < now) return null;
+  return payload;
+}
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);

@@ -113,20 +113,29 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   async function fetchCategories() {
     setLoadingCategories(true);
     try {
-      const response = await fetch('/api/qbo/categories');
-      const result = await response.json();
-      
-      if (result.success) {
-        setCategories(result.categories.dental);
-        console.log('✅ Categories loaded:', result.categories.dental.length);
-      } else {
-        console.error('❌ Failed to load categories:', result.error);
-        // Don't show alert, just log the error and continue
-        console.log('QuickBooks categories not available, continuing without them');
+      const res = await fetch('/api/qbo/categories', { cache: 'no-store' });
+      const text = await res.text(); // read once
+      let data = {};
+      try { 
+        data = JSON.parse(text); 
+      } catch (e) {
+        console.error('❌ Failed to parse JSON response:', text);
       }
+      
+      if (!res.ok) {
+        const msg = data?.detail || data?.error || text || `HTTP ${res.status}`;
+        console.error('❌ Failed to load categories:', msg);
+        console.log('QuickBooks categories not available, continuing without them');
+        return;
+      }
+      
+      // Handle the new API response format
+      const categories = data.categories || [];
+      setCategories(categories);
+      console.log('✅ Categories loaded:', categories.length);
+      
     } catch (error) {
       console.error('❌ Error fetching categories:', error);
-      // Don't show alert, just log the error and continue
       console.log('QuickBooks categories not available, continuing without them');
     } finally {
       setLoadingCategories(false);
