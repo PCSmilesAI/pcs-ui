@@ -96,28 +96,64 @@ class TokenStorage {
 
   async saveTokens(tokens: QBOTokens): Promise<void> {
     return new Promise((resolve, reject) => {
-      const sql = `
-        INSERT OR REPLACE INTO qbo_tokens 
-        (realm_id, access_token, refresh_token, expires_in, updated_at, obtained_at, expires_at)
-        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)
-      `;
-      const obtainedAt = tokens.obtained_at || Math.floor(Date.now() / 1000);
-      const expiresAt = obtainedAt + tokens.expiresIn;
-      this.db.run(sql, [
-        tokens.realmId,
-        tokens.accessToken,
-        tokens.refreshToken,
-        tokens.expiresIn,
-        obtainedAt,
-        expiresAt
-      ], (err) => {
+      // First, ensure the database schema is up to date
+      this.ensureSchema().then(() => {
+        const sql = `
+          INSERT OR REPLACE INTO qbo_tokens 
+          (realm_id, access_token, refresh_token, expires_in, updated_at, obtained_at, expires_at)
+          VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)
+        `;
+        const obtainedAt = tokens.obtained_at || Math.floor(Date.now() / 1000);
+        const expiresAt = obtainedAt + tokens.expiresIn;
+        this.db.run(sql, [
+          tokens.realmId,
+          tokens.accessToken,
+          tokens.refreshToken,
+          tokens.expiresIn,
+          obtainedAt,
+          expiresAt
+        ], (err) => {
+          if (err) {
+            console.error('Error saving QBO tokens:', err);
+            reject(err);
+          } else {
+            console.log('✅ QBO tokens saved successfully');
+            resolve();
+          }
+        });
+      }).catch(reject);
+    });
+  }
+
+  private async ensureSchema(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Check if expires_at column exists
+      this.db.all("PRAGMA table_info(qbo_tokens)", (err, columns: any[]) => {
         if (err) {
-          console.error('Error saving QBO tokens:', err);
+          console.error('Error checking table schema:', err);
           reject(err);
-        } else {
-          console.log('✅ QBO tokens saved successfully');
-          resolve();
+          return;
         }
+        
+        const columnNames = columns.map(col => col.name);
+        
+        // Add missing columns if they don't exist
+        const addColumn = (columnName: string, sql: string) => {
+          if (!columnNames.includes(columnName)) {
+            console.log(`Adding ${columnName} column...`);
+            this.db.run(sql, (alterErr) => {
+              if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
+                console.error(`Failed adding ${columnName} column:`, alterErr);
+              }
+            });
+          }
+        };
+
+        addColumn('expires_in', 'ALTER TABLE qbo_tokens ADD COLUMN expires_in INTEGER DEFAULT 3600');
+        addColumn('obtained_at', 'ALTER TABLE qbo_tokens ADD COLUMN obtained_at INTEGER DEFAULT (strftime(\'%s\',\'now\'))');
+        addColumn('expires_at', 'ALTER TABLE qbo_tokens ADD COLUMN expires_at INTEGER DEFAULT NULL');
+        
+        resolve();
       });
     });
   }
