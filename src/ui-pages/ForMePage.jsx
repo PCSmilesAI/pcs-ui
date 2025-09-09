@@ -11,14 +11,31 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [qboConnected, setQboConnected] = useState(false);
+  const [qboLoading, setQboLoading] = useState(true);
   const { handleInvoiceRowClick } = useInvoiceClick();
 
   // Debug logging
   console.log('🔍 ForMePage: handleInvoiceRowClick from context:', handleInvoiceRowClick);
   console.log('🔍 ForMePage: typeof handleInvoiceRowClick:', typeof handleInvoiceRowClick);
 
+  // Check QuickBooks connection status
+  const checkQboStatus = async () => {
+    try {
+      const response = await fetch('/api/qbo/status');
+      const data = await response.json();
+      setQboConnected(data.connected);
+    } catch (error) {
+      console.error('❌ Failed to check QuickBooks status:', error);
+      setQboConnected(false);
+    } finally {
+      setQboLoading(false);
+    }
+  };
+
   // Load invoice data from the queue
   useEffect(() => {
+    checkQboStatus();
     const loadInvoices = async () => {
       try {
         console.log('🔄 ForMePage: Starting to load invoices...');
@@ -221,6 +238,28 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
           {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} awaiting approval
         </p>
       </div>
+
+      {/* QuickBooks Connection Status */}
+      {!qboLoading && !qboConnected && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-3 h-3 rounded-full bg-yellow-500 mr-3"></div>
+              <div>
+                <p className="text-yellow-800 font-medium">QuickBooks Not Connected</p>
+                <p className="text-yellow-700 text-sm">Connect to QuickBooks to enable full functionality</p>
+              </div>
+            </div>
+            <a
+              href="/api/qbo/auth"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+            >
+              Connect QuickBooks
+            </a>
+          </div>
+        </div>
+      )}
+
       <InvoiceTable
         columns={columns}
         rows={filteredRows}
