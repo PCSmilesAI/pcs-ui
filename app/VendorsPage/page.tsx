@@ -1,4 +1,8 @@
 'use client';
-export { default } from '../../src/pages/VendorsPage.jsx';
+import VendorsPageImpl from '../../src/ui-pages/VendorsPage.jsx';
+
+export default function Page(props: any) {
+  return <VendorsPageImpl {...props} />;
+}
 
 

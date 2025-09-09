@@ -1,4 +1,8 @@
 'use client';
-export { default } from '../../src/pages/CompletePage.jsx';
+import CompletePageImpl from '../../src/ui-pages/CompletePage.jsx';
+
+export default function Page(props: any) {
+  return <CompletePageImpl {...props} />;
+}
 
 

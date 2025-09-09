@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
+import { useInvoiceClick } from '../context/InvoiceClickContext';
 
 /**
  * Page for the "For Me" view. Displays a table of invoices
  * assigned to the user that are NOT yet approved. Clicking on a row will open the detail
  * screen via the passed onRowClick handler.
  */
-export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }) {
+export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { handleInvoiceRowClick } = useInvoiceClick();
+
+  // Debug logging
+  console.log('🔍 ForMePage: handleInvoiceRowClick from context:', handleInvoiceRowClick);
+  console.log('🔍 ForMePage: typeof handleInvoiceRowClick:', typeof handleInvoiceRowClick);
 
   // Load invoice data from the queue
   useEffect(() => {
@@ -218,7 +224,7 @@ export default function ForMePage({ onRowClick, searchQuery = '', filters = {} }
       <InvoiceTable
         columns={columns}
         rows={filteredRows}
-        onRowClick={onRowClick}
+        onRowClick={handleInvoiceRowClick}
       />
     </div>
   );

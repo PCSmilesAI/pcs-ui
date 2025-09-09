@@ -1,4 +1,10 @@
 'use client';
-export { default } from '../../src/pages/LoginPage.jsx';
+import LoginPageImpl from '../../src/ui-pages/LoginPage.jsx';
+
+export const dynamic = 'force-dynamic';
+
+export default function Page(props: any) {
+  return <LoginPageImpl {...props} />;
+}
 
 

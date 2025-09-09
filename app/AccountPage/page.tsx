@@ -1,4 +1,8 @@
 'use client';
-export { default } from '../../src/pages/AccountPage.jsx';
+import AccountPageImpl from '../../src/ui-pages/AccountPage.jsx';
+
+export default function Page(props: any) {
+  return <AccountPageImpl {...props} />;
+}
 
 

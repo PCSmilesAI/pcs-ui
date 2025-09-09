@@ -1,4 +1,8 @@
 'use client';
-export { default } from '../../src/pages/PayoutAccountPage.jsx';
+import PayoutAccountPageImpl from '../../src/ui-pages/PayoutAccountPage.jsx';
+
+export default function Page(props: any) {
+  return <PayoutAccountPageImpl {...props} />;
+}
 
 

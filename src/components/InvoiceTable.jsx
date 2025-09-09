@@ -74,7 +74,15 @@ export default function InvoiceTable({ columns, rows, onRowClick }) {
           return (
             <tr
               key={rowIndex}
-              onClick={() => onRowClick && onRowClick(row)}
+              onClick={() => {
+                console.log('🔍 InvoiceTable: Row clicked:', row);
+                console.log('🔍 InvoiceTable: onRowClick function:', onRowClick);
+                if (onRowClick) {
+                  onRowClick(row);
+                } else {
+                  console.warn('⚠️ InvoiceTable: onRowClick is not defined');
+                }
+              }}
               onMouseEnter={() => setHoverIndex(rowIndex)}
               onMouseLeave={() => setHoverIndex(null)}
               style={{ backgroundColor, cursor: onRowClick ? 'pointer' : 'default' }}
