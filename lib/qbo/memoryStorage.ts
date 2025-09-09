@@ -4,9 +4,9 @@
 interface QBOTokens {
   realmId: string;
   accessToken: string;
-  refreshToken: string;
+  refreshToken: string | null;
   expiresIn: number;
-  obtained_at?: number;
+  expiresAt: number;
 }
 
 // In-memory storage (resets on each serverless function invocation)
@@ -16,16 +16,18 @@ export async function saveTokens(realmId: string, tokens: {
   access_token: string;
   refresh_token: string;
   expires_in: number;
-  obtained_at: number;
 }): Promise<void> {
   console.log('💾 Saving tokens to memory storage for realmId:', realmId);
+  
+  const now = Math.floor(Date.now() / 1000);
+  const expiresAt = now + tokens.expires_in;
   
   tokenStorage.set(realmId, {
     realmId,
     accessToken: tokens.access_token,
     refreshToken: tokens.refresh_token,
     expiresIn: tokens.expires_in,
-    obtained_at: tokens.obtained_at
+    expiresAt
   });
   
   console.log('✅ Tokens saved to memory storage');
@@ -55,14 +57,8 @@ export async function deleteTokens(realmId: string): Promise<void> {
 
 // Helper function to check if tokens are expired
 export function isTokenExpired(tokens: QBOTokens): boolean {
-  const { expiresIn } = tokens;
-  const obtainedAt = tokens.obtained_at || 0;
-  if (obtainedAt === 0) {
-    console.warn('⚠️ No obtained_at timestamp found, considering token expired');
-    return true;
-  }
-  const expiryTime = obtainedAt + expiresIn;
+  const { expiresAt } = tokens;
   const currentTime = Math.floor(Date.now() / 1000);
   // Consider expired if within 2 minutes of expiry
-  return currentTime > (expiryTime - 120);
+  return currentTime > (expiresAt - 120);
 }
