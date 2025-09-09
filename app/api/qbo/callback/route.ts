@@ -28,9 +28,23 @@ export async function GET(req: NextRequest) {
   // Validate state
   const jar = cookies();
   const savedState = jar.get("qbo_state")?.value || "";
+  console.log('🔍 State validation:', { 
+    received: state, 
+    saved: savedState, 
+    match: state === savedState,
+    allCookies: Object.fromEntries(jar.getAll().map(c => [c.name, c.value]))
+  });
+  
   if (state !== savedState) {
     console.log('❌ State validation failed:', { received: state, saved: savedState });
-    return NextResponse.json({ error: "Invalid state" }, { status: 400 });
+    return NextResponse.json({ 
+      error: "Invalid state", 
+      debug: {
+        received: state,
+        saved: savedState,
+        allCookies: Object.fromEntries(jar.getAll().map(c => [c.name, c.value]))
+      }
+    }, { status: 400 });
   }
 
   try {

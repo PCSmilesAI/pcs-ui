@@ -29,7 +29,19 @@ export async function GET() {
   url.searchParams.set('code_challenge_method', 'S256');
 
   const res = NextResponse.redirect(url.toString(), { status: 302 });
-  res.cookies.set('qbo_state', state, { httpOnly: true, secure: true, sameSite: 'lax', path: '/' });
-  res.cookies.set('qbo_verifier', verifier, { httpOnly: true, secure: true, sameSite: 'lax', path: '/' });
+  res.cookies.set('qbo_state', state, { 
+    httpOnly: true, 
+    secure: true, 
+    sameSite: 'lax', 
+    path: '/',
+    domain: '.pcsmilesai.com'  // Allow subdomain access
+  });
+  res.cookies.set('qbo_verifier', verifier, { 
+    httpOnly: true, 
+    secure: true, 
+    sameSite: 'lax', 
+    path: '/',
+    domain: '.pcsmilesai.com'  // Allow subdomain access
+  });
   return res;
 }
