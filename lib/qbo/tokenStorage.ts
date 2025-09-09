@@ -3,9 +3,9 @@ import { Database } from 'sqlite3';
 export interface QBOTokens {
   realmId: string;
   accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  obtained_at?: number; // Optional: add this if you want to track token fetch time
+  refreshToken: string | null;
+  expiresIn: number;       // seconds
+  expiresAt: number;       // epoch seconds
 }
 
 class TokenStorage {
@@ -13,289 +13,63 @@ class TokenStorage {
 
   constructor() {
     this.db = new Database('./pcs_ai_data/qbo_tokens.db');
-    // Initialize database asynchronously
-    this.initDatabase().catch(err => {
-      console.error('Failed to initialize database:', err);
+    this.initDatabase();
+  }
+
+  private initDatabase() {
+    this.db.serialize(() => {
+      this.db.run(`
+        CREATE TABLE IF NOT EXISTS qbo_tokens (
+          realm_id TEXT PRIMARY KEY,
+          access_token TEXT NOT NULL,
+          refresh_token TEXT,
+          expires_in INTEGER NOT NULL,
+          expires_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        )
+      `);
     });
   }
 
-  private async initDatabase() {
-    const createTableSQL = `
-      CREATE TABLE IF NOT EXISTS qbo_tokens (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        realm_id TEXT UNIQUE NOT NULL,
-        access_token TEXT NOT NULL,
-        refresh_token TEXT NOT NULL,
-        expires_in INTEGER NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        obtained_at INTEGER DEFAULT (strftime('%s','now'))
-      )
-    `;
-    
-    return new Promise<void>((resolve, reject) => {
-      this.db.run(createTableSQL, (err) => {
-        if (err) {
-          console.error('Error creating table:', err);
-          reject(err);
-          return;
-        }
-        
-        // Add migration to add missing columns if they don't exist
-        this.migrateDatabase().then(resolve).catch(reject);
-      });
-    });
-  }
+  saveTokens({ realmId, accessToken, refreshToken, expiresIn }: { realmId: string; accessToken: string; refreshToken?: string | null; expiresIn: number; }): Promise<void> {
+    const now = Math.floor(Date.now() / 1000);
+    const expires_at = now + Number(expiresIn || 3600);
+    const ref = refreshToken ?? null;
 
-  private migrateDatabase() {
-    return new Promise<void>((resolve, reject) => {
-      // Get all columns
-      this.db.all("PRAGMA table_info(qbo_tokens)", (err, columns: any[]) => {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        INSERT INTO qbo_tokens (realm_id, access_token, refresh_token, expires_in, expires_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(realm_id) DO UPDATE SET
+          access_token=excluded.access_token,
+          refresh_token=excluded.refresh_token,
+          expires_in=excluded.expires_in,
+          expires_at=excluded.expires_at,
+          updated_at=excluded.updated_at
+      `;
+      this.db.run(sql, [realmId, accessToken, ref, expiresIn, expires_at, now], (err) => {
         if (err) {
-          console.error('Error getting table columns:', err);
+          console.error('Error saving QBO tokens:', err);
           reject(err);
-          return;
-        }
-        
-        const columnNames = columns.map(col => col.name);
-        let pendingMigrations = 0;
-        let migrationErrors: any[] = [];
-        
-        const checkComplete = () => {
-          if (pendingMigrations === 0) {
-            if (migrationErrors.length > 0) {
-              console.warn('Some migrations had errors:', migrationErrors);
-            }
-            console.log('✅ Database migration completed');
-            resolve();
-          }
-        };
-        
-        // Add missing columns
-        if (!columnNames.includes('expires_in')) {
-          console.log('Adding expires_in column...');
-          pendingMigrations++;
-          this.db.run(
-            "ALTER TABLE qbo_tokens ADD COLUMN expires_in INTEGER DEFAULT 3600",
-            (alterErr) => {
-              pendingMigrations--;
-              if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
-                console.error('Failed adding expires_in column:', alterErr);
-                migrationErrors.push(alterErr);
-              }
-              checkComplete();
-            }
-          );
-        }
-        
-        if (!columnNames.includes('obtained_at')) {
-          console.log('Adding obtained_at column...');
-          pendingMigrations++;
-          this.db.run(
-            "ALTER TABLE qbo_tokens ADD COLUMN obtained_at INTEGER DEFAULT (strftime('%s','now'))",
-            (alterErr) => {
-              pendingMigrations--;
-              if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
-                console.error('Failed adding obtained_at column:', alterErr);
-                migrationErrors.push(alterErr);
-              }
-              checkComplete();
-            }
-          );
-        }
-
-        // Add expires_at column if it doesn't exist
-        if (!columnNames.includes('expires_at')) {
-          console.log('Adding expires_at column...');
-          pendingMigrations++;
-          this.db.run(
-            "ALTER TABLE qbo_tokens ADD COLUMN expires_at INTEGER DEFAULT NULL",
-            (alterErr) => {
-              pendingMigrations--;
-              if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
-                console.error('Failed adding expires_at column:', alterErr);
-                migrationErrors.push(alterErr);
-              }
-              checkComplete();
-            }
-          );
-        }
-        
-        // If no migrations needed, resolve immediately
-        if (pendingMigrations === 0) {
-          console.log('✅ Database schema is up to date');
+        } else {
+          console.log('✅ QBO tokens saved successfully');
           resolve();
         }
       });
     });
   }
 
-  async saveTokens(tokens: QBOTokens): Promise<void> {
+  getTokens(realmId: string): Promise<QBOTokens | null> {
     return new Promise((resolve, reject) => {
-      // First, ensure the database schema is up to date
-      this.ensureSchema().then(() => {
-        // Try the full schema first
-        const fullSql = `
-          INSERT OR REPLACE INTO qbo_tokens 
-          (realm_id, access_token, refresh_token, expires_in, updated_at, obtained_at, expires_at)
-          VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)
-        `;
-        const obtainedAt = tokens.obtained_at || Math.floor(Date.now() / 1000);
-        const expiresAt = obtainedAt + tokens.expiresIn;
-        
-        this.db.run(fullSql, [
-          tokens.realmId,
-          tokens.accessToken,
-          tokens.refreshToken,
-          tokens.expiresIn,
-          obtainedAt,
-          expiresAt
-        ], (err) => {
-          if (err && err.message.includes('expires_at')) {
-            console.log('⚠️ expires_at column missing, trying fallback schema...');
-            // Fallback to basic schema without expires_at
-            const fallbackSql = `
-              INSERT OR REPLACE INTO qbo_tokens 
-              (realm_id, access_token, refresh_token, expires_in, updated_at, obtained_at)
-              VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
-            `;
-            this.db.run(fallbackSql, [
-              tokens.realmId,
-              tokens.accessToken,
-              tokens.refreshToken,
-              tokens.expiresIn,
-              obtainedAt
-            ], (fallbackErr) => {
-              if (fallbackErr) {
-                console.error('Error saving QBO tokens (fallback):', fallbackErr);
-                reject(fallbackErr);
-              } else {
-                console.log('✅ QBO tokens saved successfully (fallback schema)');
-                resolve();
-              }
-            });
-          } else if (err) {
-            console.error('Error saving QBO tokens:', err);
-            reject(err);
-          } else {
-            console.log('✅ QBO tokens saved successfully');
-            resolve();
-          }
-        });
-      }).catch(reject);
+      this.db.get(
+        'SELECT realm_id as realmId, access_token as accessToken, refresh_token as refreshToken, expires_in as expiresIn, expires_at as expiresAt FROM qbo_tokens WHERE realm_id = ?',
+        [realmId],
+        (err, row) => {
+          if (err) return reject(err);
+          resolve(row || null);
+        },
+      );
     });
-  }
-
-  async ensureSchema(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Check if expires_at column exists
-      this.db.all("PRAGMA table_info(qbo_tokens)", (err, columns: any[]) => {
-        if (err) {
-          console.error('Error checking table schema:', err);
-          reject(err);
-          return;
-        }
-        
-        const columnNames = columns.map(col => col.name);
-        
-        // Add missing columns if they don't exist
-        const addColumn = (columnName: string, sql: string) => {
-          if (!columnNames.includes(columnName)) {
-            console.log(`Adding ${columnName} column...`);
-            this.db.run(sql, (alterErr) => {
-              if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
-                console.error(`Failed adding ${columnName} column:`, alterErr);
-              }
-            });
-          }
-        };
-
-        addColumn('expires_in', 'ALTER TABLE qbo_tokens ADD COLUMN expires_in INTEGER DEFAULT 3600');
-        addColumn('obtained_at', 'ALTER TABLE qbo_tokens ADD COLUMN obtained_at INTEGER DEFAULT (strftime(\'%s\',\'now\'))');
-        addColumn('expires_at', 'ALTER TABLE qbo_tokens ADD COLUMN expires_at INTEGER DEFAULT NULL');
-        
-        resolve();
-      });
-    });
-  }
-
-  async getTokens(realmId: string): Promise<QBOTokens | null> {
-    return new Promise((resolve, reject) => {
-      const sql = 'SELECT * FROM qbo_tokens WHERE realm_id = ?';
-      this.db.get(sql, [realmId], (err, row: any) => {
-        if (err) {
-          console.error('Error getting QBO tokens:', err);
-          reject(err);
-        } else if (row) {
-          resolve({
-            realmId: row.realm_id,
-            accessToken: row.access_token,
-            refreshToken: row.refresh_token,
-            expiresIn: row.expires_in,
-            obtained_at: row.obtained_at
-          });
-        } else {
-          resolve(null);
-        }
-      });
-    });
-  }
-
-  async getAllTokens(): Promise<QBOTokens[]> {
-    return new Promise((resolve, reject) => {
-      const sql = 'SELECT * FROM qbo_tokens ORDER BY updated_at DESC';
-      this.db.all(sql, [], (err, rows: any[]) => {
-        if (err) {
-          console.error('Error getting all QBO tokens:', err);
-          reject(err);
-        } else {
-          const tokens = rows.map(row => ({
-            realmId: row.realm_id,
-            accessToken: row.access_token,
-            refreshToken: row.refresh_token,
-            expiresIn: row.expires_in,
-            obtained_at: row.obtained_at
-          }));
-          resolve(tokens);
-        }
-      });
-    });
-  }
-
-  async getLatestTokens(): Promise<QBOTokens | null> {
-    return new Promise((resolve, reject) => {
-      const sql = 'SELECT * FROM qbo_tokens ORDER BY updated_at DESC LIMIT 1';
-      this.db.get(sql, [], (err, row: any) => {
-        if (err) {
-          console.error('Error getting latest QBO tokens:', err);
-          reject(err);
-        } else if (row) {
-          resolve({
-            realmId: row.realm_id,
-            accessToken: row.access_token,
-            refreshToken: row.refresh_token,
-            expiresIn: row.expires_in,
-            obtained_at: row.obtained_at
-          });
-        } else {
-          resolve(null);
-        }
-      });
-    });
-  }
-
-  isTokenExpired(tokens: QBOTokens): boolean {
-    const { expiresIn } = tokens;
-    // Use obtained_at if present, otherwise assume token is expired for safety
-    const obtainedAt = tokens.obtained_at || 0;
-    if (obtainedAt === 0) {
-      console.warn('⚠️ No obtained_at timestamp found, considering token expired');
-      return true;
-    }
-    const expiryTime = obtainedAt + expiresIn;
-    const currentTime = Math.floor(Date.now() / 1000);
-    // Consider expired if within 2 minutes of expiry
-    return currentTime > (expiryTime - 120);
   }
 
   async deleteTokens(realmId: string): Promise<void> {
@@ -312,34 +86,20 @@ class TokenStorage {
       });
     });
   }
+
+  async getAllTokens(): Promise<QBOTokens[]> {
+    return new Promise((resolve, reject) => {
+      const sql = 'SELECT realm_id as realmId, access_token as accessToken, refresh_token as refreshToken, expires_in as expiresIn, expires_at as expiresAt FROM qbo_tokens';
+      this.db.all(sql, [], (err, rows: any[]) => {
+        if (err) {
+          console.error('Error getting all QBO tokens:', err);
+          reject(err);
+        } else {
+          resolve(rows || []);
+        }
+      });
+    });
+  }
 }
 
 export const tokenStorage = new TokenStorage();
-
-// Export standalone functions for easier use
-export async function saveTokens(realmId: string, tokens: {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  obtained_at: number;
-}): Promise<void> {
-  return tokenStorage.saveTokens({
-    realmId,
-    accessToken: tokens.access_token,
-    refreshToken: tokens.refresh_token,
-    expiresIn: tokens.expires_in,
-    obtained_at: tokens.obtained_at
-  });
-}
-
-export async function getTokens(realmId: string): Promise<QBOTokens | null> {
-  return tokenStorage.getTokens(realmId);
-}
-
-export async function getAllTokens(): Promise<QBOTokens[]> {
-  return tokenStorage.getAllTokens();
-}
-
-export async function getLatestTokens(): Promise<QBOTokens | null> {
-  return tokenStorage.getLatestTokens();
-}
