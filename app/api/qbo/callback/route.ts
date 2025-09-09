@@ -93,7 +93,7 @@ export async function GET(req: NextRequest) {
     console.log('🎉 Successfully connected to QuickBooks!');
     console.log('📊 Realm ID:', realmId);
 
-    return NextResponse.redirect(new URL("/?qbo_connected=true", req.url), 302);
+    return NextResponse.redirect("https://www.pcsmilesai.com/?qbo_connected=true", 302);
   } catch (e: any) {
     console.error('❌ OAuth error:', e);
     return NextResponse.json({ 
