@@ -125,7 +125,7 @@ class TokenStorage {
     });
   }
 
-  private async ensureSchema(): Promise<void> {
+  async ensureSchema(): Promise<void> {
     return new Promise((resolve, reject) => {
       // Check if expires_at column exists
       this.db.all("PRAGMA table_info(qbo_tokens)", (err, columns: any[]) => {
