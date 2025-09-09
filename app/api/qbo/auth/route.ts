@@ -34,14 +34,16 @@ export async function GET() {
     secure: true, 
     sameSite: 'lax', 
     path: '/',
-    domain: '.pcsmilesai.com'  // Allow subdomain access
+    domain: '.pcsmilesai.com',  // Allow both www and non-www
+    maxAge: 600  // 10 minutes
   });
   res.cookies.set('qbo_verifier', verifier, { 
     httpOnly: true, 
     secure: true, 
     sameSite: 'lax', 
     path: '/',
-    domain: '.pcsmilesai.com'  // Allow subdomain access
+    domain: '.pcsmilesai.com',  // Allow both www and non-www
+    maxAge: 600  // 10 minutes
   });
   return res;
 }

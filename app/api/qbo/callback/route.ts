@@ -25,14 +25,22 @@ export async function GET(req: NextRequest) {
     }, { status: 400 });
   }
 
-  // Validate state
-  const jar = cookies();
-  const savedState = jar.get("qbo_state")?.value || "";
+  // Validate state using request cookies
+  const cookieHeader = req.headers.get('cookie') || '';
+  const cookies = Object.fromEntries(
+    cookieHeader.split(';').map(c => {
+      const [name, value] = c.trim().split('=');
+      return [name, value];
+    })
+  );
+  
+  const savedState = cookies.qbo_state || '';
   console.log('🔍 State validation:', { 
     received: state, 
     saved: savedState, 
     match: state === savedState,
-    allCookies: Object.fromEntries(jar.getAll().map(c => [c.name, c.value]))
+    cookieHeader,
+    allCookies: cookies
   });
   
   if (state !== savedState) {
@@ -42,7 +50,8 @@ export async function GET(req: NextRequest) {
       debug: {
         received: state,
         saved: savedState,
-        allCookies: Object.fromEntries(jar.getAll().map(c => [c.name, c.value]))
+        cookieHeader,
+        allCookies: cookies
       }
     }, { status: 400 });
   }
@@ -100,9 +109,7 @@ export async function GET(req: NextRequest) {
       expiresIn: token.expires_in,
     });
     
-    // Clear state cookies
-    jar.delete("qbo_state");
-    jar.delete("qbo_verifier");
+    // Clear state cookies (handled by redirect)
     
     console.log('🎉 Successfully connected to QuickBooks!');
     console.log('📊 Realm ID:', realmId);

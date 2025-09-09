@@ -1,52 +1,67 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { qboClient } from '../../../../lib/qbo/qboClient';
-import { getLatestTokens } from '../../../../lib/qbo/memoryStorage';
+import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
 
 export async function GET(req: NextRequest) {
   try {
     console.log('🔄 Fetching QuickBooks categories...');
 
-    // Check if QuickBooks is connected
-    const tokens = await getLatestTokens();
+    // Get the latest tokens from SQLite storage
+    const tokens = await tokenStorage.getLatestTokens();
     if (!tokens) {
+      console.log('❌ No tokens found in SQLite storage');
       return NextResponse.json({
         success: false,
         error: 'QuickBooks not connected. Please connect to QuickBooks first.'
       }, { status: 400 });
     }
 
-    // Initialize QBO client
-    await qboClient.initialize();
+    console.log('✅ Found tokens, realmId:', tokens.realmId);
 
-    // Test connection first
-    const isConnected = await qboClient.testConnection();
-    if (!isConnected) {
-      throw new Error('QuickBooks connection failed. Please reconnect.');
+    // Make direct API call to QuickBooks
+    const url = `https://quickbooks.api.intuit.com/v3/company/${tokens.realmId}/items?minorversion=65`;
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${tokens.accessToken}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      console.error('❌ QuickBooks API error:', response.status, await response.text());
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to fetch items from QuickBooks'
+      }, { status: 500 });
     }
 
-    // Get all items (categories) from QuickBooks
-    const allItems = await qboClient.getItems();
-    const dentalItems = await qboClient.getDentalItems();
+    const data = await response.json();
+    const items = data.QueryResponse?.Item || [];
 
-    console.log('📋 Found', allItems.length, 'total items and', dentalItems.length, 'dental items');
+    console.log('📋 Found', items.length, 'items from QuickBooks');
 
     return NextResponse.json({
       success: true,
       categories: {
-        all: allItems.map(item => ({
+        all: items.map(item => ({
           id: item.Id,
           name: item.Name,
           type: item.Type,
           accountRef: item.ExpenseAccountRef || item.IncomeAccountRef
         })),
-        dental: dentalItems.map(item => ({
+        dental: items.filter(item => 
+          item.Type === 'Service' && 
+          (item.Name.toLowerCase().includes('dental') || 
+           item.Name.toLowerCase().includes('supply') ||
+           item.Name.toLowerCase().includes('equipment'))
+        ).map(item => ({
           id: item.Id,
           name: item.Name,
           type: item.Type,
           accountRef: item.ExpenseAccountRef || item.IncomeAccountRef
         }))
       },
-      message: `Found ${allItems.length} total categories and ${dentalItems.length} dental-specific categories`
+      message: `Found ${items.length} total categories`
     });
 
   } catch (error: any) {
