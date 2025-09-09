@@ -13,10 +13,13 @@ class TokenStorage {
 
   constructor() {
     this.db = new Database('./pcs_ai_data/qbo_tokens.db');
-    this.initDatabase();
+    // Initialize database asynchronously
+    this.initDatabase().catch(err => {
+      console.error('Failed to initialize database:', err);
+    });
   }
 
-  private initDatabase() {
+  private async initDatabase() {
     const createTableSQL = `
       CREATE TABLE IF NOT EXISTS qbo_tokens (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,51 +32,74 @@ class TokenStorage {
         obtained_at INTEGER DEFAULT (strftime('%s','now'))
       )
     `;
-    this.db.run(createTableSQL);
     
-    // Add migration to add missing columns if they don't exist
-    this.migrateDatabase();
+    return new Promise<void>((resolve, reject) => {
+      this.db.run(createTableSQL, (err) => {
+        if (err) {
+          console.error('Error creating table:', err);
+          reject(err);
+          return;
+        }
+        
+        // Add migration to add missing columns if they don't exist
+        this.migrateDatabase().then(resolve).catch(reject);
+      });
+    });
   }
 
   private migrateDatabase() {
-    // Check if expires_in column exists, if not add it
-    this.db.get("PRAGMA table_info(qbo_tokens)", (err, row) => {
-      if (err) {
-        console.error('Error checking table schema:', err);
-        return;
-      }
-      
+    return new Promise<void>((resolve, reject) => {
       // Get all columns
       this.db.all("PRAGMA table_info(qbo_tokens)", (err, columns: any[]) => {
         if (err) {
           console.error('Error getting table columns:', err);
+          reject(err);
           return;
         }
         
         const columnNames = columns.map(col => col.name);
+        let pendingMigrations = 0;
+        let migrationErrors: any[] = [];
+        
+        const checkComplete = () => {
+          if (pendingMigrations === 0) {
+            if (migrationErrors.length > 0) {
+              console.warn('Some migrations had errors:', migrationErrors);
+            }
+            console.log('✅ Database migration completed');
+            resolve();
+          }
+        };
         
         // Add missing columns
         if (!columnNames.includes('expires_in')) {
           console.log('Adding expires_in column...');
+          pendingMigrations++;
           this.db.run(
             "ALTER TABLE qbo_tokens ADD COLUMN expires_in INTEGER DEFAULT 3600",
             (alterErr) => {
-              // Ignore race conditions where another worker already added the column
+              pendingMigrations--;
               if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
                 console.error('Failed adding expires_in column:', alterErr);
+                migrationErrors.push(alterErr);
               }
+              checkComplete();
             }
           );
         }
         
         if (!columnNames.includes('obtained_at')) {
           console.log('Adding obtained_at column...');
+          pendingMigrations++;
           this.db.run(
             "ALTER TABLE qbo_tokens ADD COLUMN obtained_at INTEGER DEFAULT (strftime('%s','now'))",
             (alterErr) => {
+              pendingMigrations--;
               if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
                 console.error('Failed adding obtained_at column:', alterErr);
+                migrationErrors.push(alterErr);
               }
+              checkComplete();
             }
           );
         }
@@ -81,14 +107,24 @@ class TokenStorage {
         // Add expires_at column if it doesn't exist
         if (!columnNames.includes('expires_at')) {
           console.log('Adding expires_at column...');
+          pendingMigrations++;
           this.db.run(
             "ALTER TABLE qbo_tokens ADD COLUMN expires_at INTEGER DEFAULT NULL",
             (alterErr) => {
+              pendingMigrations--;
               if (alterErr && !/duplicate column name/i.test(String(alterErr.message))) {
                 console.error('Failed adding expires_at column:', alterErr);
+                migrationErrors.push(alterErr);
               }
+              checkComplete();
             }
           );
+        }
+        
+        // If no migrations needed, resolve immediately
+        if (pendingMigrations === 0) {
+          console.log('✅ Database schema is up to date');
+          resolve();
         }
       });
     });
