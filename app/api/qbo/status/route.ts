@@ -1,30 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
 
-// Force dynamic rendering
+// Force Node.js runtime for SQLite access
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
     console.log('🔄 QBO Status API called');
     
-    // Get all stored tokens
-    const tokens = await tokenStorage.getAllTokens();
+    // Get latest tokens and check if they're valid
+    const tokens = await tokenStorage.getLatestTokens();
+    const now = Math.floor(Date.now() / 1000);
+    const isConnected = !!tokens?.accessToken && !!tokens?.realmId && (tokens.expiresAt ?? 0) > now;
     
     return NextResponse.json({
-      connected: tokens.length > 0,
-      message: tokens.length > 0 
-        ? `Connected to ${tokens.length} QuickBooks company(ies)` 
+      connected: isConnected,
+      message: isConnected 
+        ? `Connected to QuickBooks (${tokens.realmId})` 
         : 'Not connected to QuickBooks',
-      tokens: tokens.map(t => ({
-        realmId: t.realmId,
-        hasAccessToken: !!t.accessToken,
-        hasRefreshToken: !!t.refreshToken,
-        expiresIn: t.expiresIn
-      })),
+      realmId: tokens?.realmId ?? null,
+      tokens: tokens ? [{
+        realmId: tokens.realmId,
+        hasAccessToken: !!tokens.accessToken,
+        hasRefreshToken: !!tokens.refreshToken,
+        expiresIn: tokens.expiresIn,
+        expiresAt: tokens.expiresAt
+      }] : [],
       debug: {
         timestamp: new Date().toISOString(),
-        tokenCount: tokens.length
+        hasTokens: !!tokens,
+        isExpired: tokens ? (tokens.expiresAt ?? 0) <= now : true
       }
     });
 

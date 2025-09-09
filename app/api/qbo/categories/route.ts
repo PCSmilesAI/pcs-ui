@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
 
+// Force Node.js runtime for SQLite access
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     console.log('🔄 Fetching QuickBooks categories...');
