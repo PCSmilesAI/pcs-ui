@@ -93,7 +93,10 @@ function qboBaseUrl(env = process.env.QBO_ENV || 'production') {
   return 'https://quickbooks.api.intuit.com';
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const debug = url.searchParams.get('debug') === '1';
+  
   try {
     const row = getLatestTokens();
     if (!row) {
@@ -108,15 +111,15 @@ export async function GET() {
 
     const valid = await refreshIfNeeded(row);
 
-    const url = new URL(
+    const qboUrl = new URL(
       `/v3/company/${encodeURIComponent(row.realm_id)}/query`,
       qboBaseUrl()
     );
     // QBO query for Item categories
-    url.searchParams.set('query', "select * from Item where Type = 'Category'");
-    url.searchParams.set('minorversion', '73'); // safe current minor
+    qboUrl.searchParams.set('query', "select * from Item where Type = 'Category'");
+    qboUrl.searchParams.set('minorversion', '73'); // safe current minor
 
-    const resp = await fetch(url.toString(), {
+    const resp = await fetch(qboUrl.toString(), {
       headers: {
         Authorization: `Bearer ${valid.access_token}`,
         Accept: 'application/json',
@@ -141,7 +144,26 @@ export async function GET() {
       fullyQualifiedName: it.FullyQualifiedName ?? it.Name,
     }));
 
-    return Response.json({ categories });
+    const payload = { categories };
+    
+    if (debug) {
+      return new Response(JSON.stringify({ 
+        ok: true, 
+        payload, 
+        ts: Date.now(),
+        build: process.env.VERCEL_GIT_COMMIT_SHA ?? 'pm2',
+        realmId: row.realm_id,
+        hasAccessToken: !!valid.access_token
+      }), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+          'x-build': process.env.VERCEL_GIT_COMMIT_SHA ?? 'pm2',
+        },
+      });
+    }
+    
+    return Response.json(payload);
   } catch (err: any) {
     // Surface root cause to logs and UI
     console.error('[QBO][categories] error:', err?.stack || err);
