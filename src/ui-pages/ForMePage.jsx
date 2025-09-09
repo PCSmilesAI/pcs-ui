@@ -22,8 +22,10 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   // Check QuickBooks connection status
   const checkQboStatus = async () => {
     try {
+      console.log('🔍 ForMePage: Checking QuickBooks status...');
       const response = await fetch('/api/qbo/status');
       const data = await response.json();
+      console.log('🔍 ForMePage: QuickBooks status response:', data);
       setQboConnected(data.connected);
     } catch (error) {
       console.error('❌ Failed to check QuickBooks status:', error);
@@ -211,6 +213,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   });
 
   console.log('🎨 ForMePage: Rendering with', filteredRows.length, 'invoices, loading:', loading, 'error:', error);
+  console.log('🔍 ForMePage: QBO states - connected:', qboConnected, 'loading:', qboLoading);
 
   if (loading) {
     return (
