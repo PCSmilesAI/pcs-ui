@@ -9,13 +9,22 @@ export function InvoiceClickProvider({ children }) {
 
   const handleInvoiceRowClick = (invoice) => {
     console.log('🔍 InvoiceClickContext: Invoice clicked:', invoice);
-    console.log('🔍 InvoiceClickContext: Invoice number:', invoice?.invoice_number);
-    if (invoice?.invoice_number) {
-      const url = `/InvoiceDetailPage?invoice=${encodeURIComponent(invoice.invoice_number)}`;
+    
+    // Use invoice_number if it's not empty, otherwise use ID
+    const identifier = (invoice?.invoice_number && invoice.invoice_number.trim() !== '') ? invoice.invoice_number : invoice?.id;
+    
+    console.log('🔍 InvoiceClickContext: Using identifier:', {
+      invoice_number: invoice?.invoice_number,
+      id: invoice?.id,
+      using: identifier
+    });
+    
+    if (identifier) {
+      const url = `/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`;
       console.log('🔍 InvoiceClickContext: Navigating to:', url);
       router.push(url);
     } else {
-      console.warn('⚠️ InvoiceClickContext: No invoice_number found in clicked invoice');
+      console.warn('⚠️ InvoiceClickContext: No invoice_number or id found in clicked invoice:', invoice);
     }
   };
 
