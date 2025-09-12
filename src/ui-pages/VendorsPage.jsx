@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import VendorTable from '../components/VendorTable.jsx';
-import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
 /**
  * Page for the "Vendors" view. Displays a list of vendors with
  * payment method, outstanding amount and contact information.
  */
-export default function VendorsPage({ searchQuery = '', filters = {}, onVendorClick = () => {} }) {
+export default function VendorsPage({ searchQuery = '', filters = {}, onVendorClick }) {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,17 +16,22 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
       try {
         console.log('🔄 VendorsPage: Starting to load vendor data...');
         setLoading(true);
+        const response = await fetch('/invoice_queue.json');
+        console.log('📡 VendorsPage: Fetch response status:', response.status);
         
-        // Use the new fetch helper with high limit to get all invoices
-        const data = await fetchInvoiceQueue({ limit: 5000 });
+        if (!response.ok) {
+          throw new Error(`Failed to load invoices: ${response.status}`);
+        }
+        
+        const data = await response.json();
         console.log('📊 VendorsPage: Raw data received:', data.length, 'invoices');
         
         // Aggregate vendor data from invoices
         const vendorMap = new Map();
         
         data.forEach(invoice => {
-          const vendorName = invoice.vendor_name || invoice.vendor || 'Unknown';
-          const amount = parseFloat(invoice.invoice_total || invoice.total || '0.00');
+          const vendorName = invoice.vendor || 'Unknown';
+          const amount = parseFloat(invoice.total || '0.00');
           
           if (vendorMap.has(vendorName)) {
             const existing = vendorMap.get(vendorName);

@@ -21,12 +21,13 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
     const load = async () => {
       try {
         setLoading(true);
-        const resp = await fetch(`/api/invoice-queue?t=${Date.now()}`, {
+        const resp = await fetch(`/invoice_queue.json?t=${Date.now()}`, {
           method: 'GET',
           headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
         });
         if (!resp.ok) throw new Error(`Failed to load invoices: ${resp.status}`);
         let data = await resp.json();
+        // Status overrides removed - using direct API calls
         const filtered = (data || []).filter((inv) => (inv.vendor || 'Unknown') === vendor);
         const mapped = filtered.map((invoice) => ({
           invoice: invoice.invoice_number || 'Unknown',

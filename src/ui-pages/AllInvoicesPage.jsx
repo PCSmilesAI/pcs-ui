@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
-import { fetchInvoiceQueue } from '../lib/fetchQueue';
-import { useInvoiceClick } from '../context/InvoiceClickContext';
 
 /**
  * The All Invoices page aggregates every invoice into a single
@@ -11,13 +9,12 @@ import { useInvoiceClick } from '../context/InvoiceClickContext';
  * through ascending/descending/unsorted states. Sorting logic is
  * performed locally on the array of row objects.
  */
-export default function AllInvoicesPage({ onRowClick = undefined, isFilterOpen = false, searchQuery = '', filters = {} }) {
+export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery = '', filters = {} }) {
   // Local state for sorting configuration
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { handleInvoiceRowClick } = useInvoiceClick();
 
   // Load invoice data from the queue
   useEffect(() => {
@@ -26,17 +23,31 @@ export default function AllInvoicesPage({ onRowClick = undefined, isFilterOpen =
         console.log('🔄 AllInvoicesPage: Starting to load invoices...');
         setLoading(true);
         
-        // Use the new fetch helper with high limit to get all invoices
-        const data = await fetchInvoiceQueue({ limit: 5000 });
+        // Add cache-busting timestamp to force fresh request
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/invoice_queue.json?t=${timestamp}`, {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
+        console.log('📡 AllInvoicesPage: Fetch response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load invoices: ${response.status}`);
+        }
+        
+        let data = await response.json();
+        // Status overrides removed - using direct API calls
         console.log('📊 AllInvoicesPage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
         const transformedData = data.map(invoice => ({
           invoice: invoice.invoice_number || 'Unknown',
-          invoice_number: invoice.invoice_number,
-          vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-          amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-          office: invoice.office_location || invoice.clinic_id || 'Unknown',
+          vendor: invoice.vendor || 'Unknown',
+          amount: `$${invoice.total || '0.00'}`,
+          office: invoice.clinic_id || 'Unknown',
           status: invoice.status || 'New',
           category: invoice.category || 'Other',
           // Add additional fields for detail view
@@ -201,7 +212,7 @@ export default function AllInvoicesPage({ onRowClick = undefined, isFilterOpen =
       <InvoiceTable
         rows={sortedRows}
         columns={columns}
-        onRowClick={onRowClick || handleInvoiceRowClick}
+        onRowClick={onRowClick}
       />
     </div>
   );
