@@ -17,17 +17,14 @@ export default function ReportsPage() {
     const load = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/invoice-queue?t=${Date.now()}`, {
+        const response = await fetch(`/invoice_queue.json?t=${Date.now()}`, {
           method: 'GET',
           headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
         });
         if (!response.ok) throw new Error(`Failed to load invoices: ${response.status}`);
         let data = await response.json();
         // Apply client-side overrides (mirrors list pages)
-        try {
-          const { applyOverrides } = await import('../utils/status_overrides');
-          data = applyOverrides(data);
-        } catch (_) {}
+        // Status overrides removed - using direct API calls
 
         // Map to generic structure used by reports
         const mapped = (data || []).map((inv) => {

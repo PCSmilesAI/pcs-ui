@@ -59,50 +59,51 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   const [lineCategories, setLineCategories] = useState({});
   const [loadingLineCategories, setLoadingLineCategories] = useState(false);
 
-  // Load line items from invoice data (already available)
+  // Load line items from JSON data
   useEffect(() => {
-    if (invoice?.line_items && Array.isArray(invoice.line_items)) {
-      // Transform the line items to match the UI format
-      const transformedItems = invoice.line_items.map((item, index) => ({
-        id: item.product_number || `item-${index}`,
-        name: item.product_name || '',
-        qty: item.Quantity || '1',
-        unit: `$${item.unit_price || '0.00'}`,
-        total: `$${item.line_item_total || '0.00'}`,
-        category: item.quickbooks_category || 'Not categorized',
-      }));
-      setItems(transformedItems);
-      console.log('✅ Loaded', transformedItems.length, 'line items from invoice data');
-    } else {
-      // Fallback to empty array if no line items
-      setItems([]);
-      console.log('ℹ️ No line items found in invoice data');
-    }
-    setLoading(false);
-  }, [invoice?.line_items]);
-
-  // Automatically load categories and auto-categorize when component mounts
-  useEffect(() => {
-    if (invoice?.id || invoice?.invoice_number) {
-      // Load categories first, then auto-categorize
-      const initializeCategories = async () => {
+    async function loadLineItems() {
+      if (invoice?.json_path) {
         try {
-          // Load QBO categories
-          await fetchCategories();
-          
-          // Load existing line categories
-          await loadLineCategories();
-          
-          // If no line categories exist, auto-categorize
-          if (Object.keys(lineCategories).length === 0) {
-            await autoCategorize();
+          const response = await fetch(`/${invoice.json_path}`);
+          if (response.ok) {
+            const jsonData = await response.json();
+            if (jsonData.line_items && Array.isArray(jsonData.line_items)) {
+              // Transform the line items to match the UI format
+              const transformedItems = jsonData.line_items.map((item, index) => ({
+                id: item.product_number || `item-${index}`,
+                name: item.product_name || '',
+                qty: item.Quantity || '1',
+                unit: `$${item.unit_price || '0.00'}`,
+                total: `$${item.line_item_total || '0.00'}`,
+                category: item.quickbooks_category || 'Not categorized',
+              }));
+              setItems(transformedItems);
+            } else {
+              // Fallback to empty array if no line items
+              setItems([]);
+            }
+          } else {
+            console.warn('Failed to load JSON data for line items');
+            setItems([]);
           }
         } catch (error) {
-          console.error('Error initializing categories:', error);
+          console.error('Error loading line items:', error);
+          setItems([]);
         }
-      };
-      
-      initializeCategories();
+      } else {
+        // Fallback to empty array if no JSON path
+        setItems([]);
+      }
+      setLoading(false);
+    }
+
+    loadLineItems();
+  }, [invoice?.json_path]);
+
+  // Load line categories when component mounts or invoice changes
+  useEffect(() => {
+    if (invoice?.id || invoice?.invoice_number) {
+      loadLineCategories();
     }
   }, [invoice?.id, invoice?.invoice_number]);
 
@@ -368,7 +369,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       });
 
       // Load current queue
-      const response = await fetch('/api/invoice-queue');
+      const response = await fetch('/invoice_queue.json');
       if (!response.ok) {
         throw new Error('Failed to load invoice queue');
       }
@@ -418,7 +419,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         Object.assign(invoice, updatedInvoice);
       }
 
-      // Note: Client-side overrides removed - data now comes from API
+      // Status override functionality removed - using direct API calls
       
       // If invoice is being approved, create QuickBooks bill
       if (newStatus === 'approved' && newApproved === true) {
@@ -522,7 +523,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         // fall back to client-side only
       }
 
-      // Note: Client-side overrides removed - data now comes from API
+      // Status override functionality removed - using direct API calls
 
       alert('Invoice removed');
       onBack();
@@ -881,7 +882,56 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             
             {/* Category Management Buttons */}
             <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              {/* Categories are now automatically loaded and applied */}
+              <button
+                onClick={fetchCategories}
+                disabled={loadingCategories}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#357ab2',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: loadingCategories ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  opacity: loadingCategories ? 0.6 : 1
+                }}
+              >
+                {loadingCategories ? 'Loading...' : 'Fetch QuickBooks Categories'}
+              </button>
+              
+              <button
+                onClick={autoCategorize}
+                disabled={processing || categories.length === 0}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: (processing || categories.length === 0) ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  opacity: (processing || categories.length === 0) ? 0.6 : 1
+                }}
+              >
+                {loadingLineCategories ? 'Processing...' : 'Auto-Categorize Items'}
+              </button>
+              
+              <button
+                onClick={saveLineCategories}
+                disabled={processing}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#ffc107',
+                  color: 'black',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: processing ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  opacity: processing ? 0.6 : 1
+                }}
+              >
+                {processing ? 'Saving...' : 'Save Categories'}
+              </button>
             </div>
             {loading ? (
               <div style={{ textAlign: 'center', padding: '20px' }}>Loading line items...</div>
@@ -960,58 +1010,41 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
                       />
                     </td>
                     <td style={cellStyle}>
-                      {invoice?.status === 'approved' ? (
-                        // Show locked category when approved
-                        <div style={{
-                          padding: '8px 12px',
-                          backgroundColor: '#f8f9fa',
-                          border: '1px solid #dee2e6',
+                      <select
+                        value={lineCategories[index]?.categoryId || ''}
+                        onChange={(e) => {
+                          const selectedCategory = categories.find(cat => cat.id === e.target.value);
+                          if (selectedCategory) {
+                            updateLineCategory(index, selectedCategory.id, selectedCategory.name);
+                          }
+                        }}
+                        style={{
+                          border: '1px solid #cbd5e0',
                           borderRadius: '4px',
+                          padding: '4px 8px',
                           fontSize: '14px',
-                          color: '#495057'
-                        }}>
-                          {lineCategories[index]?.categoryName || 'Not categorized'}
-                        </div>
-                      ) : (
-                        // Show dropdown when not approved
-                        <>
-                          <select
-                            value={lineCategories[index]?.categoryId || ''}
-                            onChange={(e) => {
-                              const selectedCategory = categories.find(cat => cat.id === e.target.value);
-                              if (selectedCategory) {
-                                updateLineCategory(index, selectedCategory.id, selectedCategory.name);
-                              }
-                            }}
-                            style={{
-                              border: '1px solid #cbd5e0',
-                              borderRadius: '4px',
-                              padding: '4px 8px',
-                              fontSize: '14px',
-                              width: '100%',
-                              boxSizing: 'border-box',
-                              backgroundColor: lineCategories[index]?.source === 'vendor-default' ? '#f0f9ff' : 
-                                             lineCategories[index]?.source === 'keyword' ? '#f0fdf4' : 'white'
-                            }}
-                          >
-                            <option value="">{lineCategories[index]?.categoryName || 'Not categorized'}</option>
-                            {categories.map((category) => (
-                              <option key={category.id} value={category.id}>
-                                {category.name}
-                              </option>
-                            ))}
-                          </select>
-                          {lineCategories[index] && (
-                            <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
-                              {lineCategories[index].source === 'vendor-default' && '🎯 Vendor default'}
-                              {lineCategories[index].source === 'keyword' && '🔍 Auto-detected'}
-                              {lineCategories[index].source === 'manual' && '✏️ Manual'}
-                              {lineCategories[index].confidence > 0 && (
-                                <span> ({(lineCategories[index].confidence * 100).toFixed(0)}%)</span>
-                              )}
-                            </div>
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          backgroundColor: lineCategories[index]?.source === 'vendor-default' ? '#f0f9ff' : 
+                                         lineCategories[index]?.source === 'keyword' ? '#f0fdf4' : 'white'
+                        }}
+                      >
+                        <option value="">{lineCategories[index]?.categoryName || 'Not categorized'}</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                      {lineCategories[index] && (
+                        <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+                          {lineCategories[index].source === 'vendor-default' && '🎯 Vendor default'}
+                          {lineCategories[index].source === 'keyword' && '🔍 Auto-detected'}
+                          {lineCategories[index].source === 'manual' && '✏️ Manual'}
+                          {lineCategories[index].confidence > 0 && (
+                            <span> ({(lineCategories[index].confidence * 100).toFixed(0)}%)</span>
                           )}
-                        </>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -1019,11 +1052,8 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
               </tbody>
             </table>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-                <i className="fas fa-receipt" style={{ fontSize: '48px', marginBottom: '16px', color: '#ccc' }}></i>
-                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>No Line Items</h3>
-                <p style={{ margin: 0, fontSize: '14px' }}>This invoice doesn't have detailed line item information available.</p>
-                <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#999' }}>The AI parser may not have been able to extract line items from this invoice.</p>
+              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                No line items available
               </div>
             )}
           </div>
@@ -1032,7 +1062,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         <div style={rightColumnStyle}>
           {invoice?.pdf_path ? (
             <iframe
-              src={invoice.pdf_path.startsWith('/') ? invoice.pdf_path : `/${invoice.pdf_path}`}
+              src={`/${invoice.pdf_path}`}
             style={{
               width: '100%',
               height: '100%',
@@ -1042,14 +1072,9 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
               title="Invoice PDF"
             />
           ) : (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#666', border: '2px dashed #ddd', borderRadius: '8px' }}>
-              <i className="fas fa-file-pdf" style={{ fontSize: '48px', marginBottom: '16px', color: '#ccc' }}></i>
-              <h3 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>No PDF Available</h3>
-              <p style={{ margin: 0, fontSize: '14px' }}>The PDF for this invoice could not be found.</p>
-              {invoice?.source_file && (
-                <p style={{ margin: '8px 0 0 0', fontSize: '12px' }}>Source: {invoice.source_file}</p>
-              )}
-            </div>
+            <div style={{ textAlign: 'center', color: '#666' }}>
+              No PDF available
+          </div>
           )}
         </div>
       </div>
