@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { categorizeInvoiceLines } from '../../../../../lib/categorize'
+import { categorizeInvoiceLines } from '@/lib/categorize'
 import fs from 'fs'
 import path from 'path'
 

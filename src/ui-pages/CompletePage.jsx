@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
 /**
  * Page for the "Complete" view. Lists invoices that have been
  * paid or otherwise completed along with the date they were
  * completed. Rows are interactive.
  */
-export default function CompletePage({ onRowClick, searchQuery = '', filters = {} }) {
+export default function CompletePage({ onRowClick = () => {}, searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,19 +18,9 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
       try {
         console.log('🔄 CompletePage: Starting to load invoices...');
         setLoading(true);
-        const response = await fetch(`/invoice_queue.json?t=${Date.now()}`);
-        console.log('📡 CompletePage: Fetch response status:', response.status);
         
-        if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status}`);
-        }
-        
-        let data = await response.json();
-        // Apply client-side overrides (e.g., when Paid was clicked)
-        try {
-          const { applyOverrides } = await import('../utils/status_overrides');
-          data = applyOverrides(data);
-        } catch (_) {}
+        // Use the new fetch helper with high limit to get all invoices
+        const data = await fetchInvoiceQueue({ limit: 5000 });
         console.log('📊 CompletePage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
@@ -39,9 +30,9 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
           .map(invoice => ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
-            vendor: invoice.vendor || 'Unknown',
-            amount: `$${invoice.total || '0.00'}`,
-            office: invoice.clinic_id || 'Unknown',
+            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
+            office: invoice.office_location || invoice.clinic_id || 'Unknown',
             dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',

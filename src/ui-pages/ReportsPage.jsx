@@ -17,7 +17,7 @@ export default function ReportsPage() {
     const load = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/invoice_queue.json?t=${Date.now()}`, {
+        const response = await fetch(`/api/invoice-queue?t=${Date.now()}`, {
           method: 'GET',
           headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
         });

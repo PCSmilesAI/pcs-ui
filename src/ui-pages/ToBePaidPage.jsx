@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
 /**
  * Page for the "To Be Paid" view. Shows invoices that have been
  * approved and are awaiting payment. Row clicks propagate to
  * the parent via onRowClick.
  */
-export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {} }) {
+export default function ToBePaidPage({ onRowClick = () => {}, searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,36 +17,10 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     const loadInvoices = async () => {
       try {
         console.log('🔄 ToBePaidPage: Starting to load invoices...');
-        console.log('🌐 ToBePaidPage: Fetching from URL:', window.location.origin + '/invoice_queue.json');
         setLoading(true);
         
-        // Test the URL first
-        const testUrl = window.location.origin + '/invoice_queue.json';
-        console.log('🔍 ToBePaidPage: Testing URL:', testUrl);
-        
-        // Add cache-busting timestamp to force fresh request
-        const timestamp = new Date().getTime();
-        const response = await fetch(`/invoice_queue.json?t=${timestamp}`, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-        console.log('📡 ToBePaidPage: Fetch response status:', response.status);
-        console.log('📡 ToBePaidPage: Fetch response ok:', response.ok);
-        console.log('📡 ToBePaidPage: Fetch response headers:', Object.fromEntries(response.headers.entries()));
-        
-        if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status} - ${response.statusText}`);
-        }
-        
-        let data = await response.json();
-        // Apply client-side overrides so tab movement is immediate even if API cannot persist
-        try {
-          const { applyOverrides } = await import('../utils/status_overrides');
-          data = applyOverrides(data);
-        } catch (_) {}
+        // Use the new fetch helper with high limit to get all invoices
+        const data = await fetchInvoiceQueue({ limit: 5000 });
         console.log('📊 ToBePaidPage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
@@ -59,9 +34,9 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           .map(invoice => ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number, // needed by detail view
-            vendor: invoice.vendor || 'Unknown',
-            amount: `$${invoice.total || '0.00'}`,
-            office: invoice.clinic_id || 'Unknown',
+            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
+            office: invoice.office_location || invoice.clinic_id || 'Unknown',
             dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
@@ -96,7 +71,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         console.error('❌ ToBePaidPage: Error details:', {
           message: err.message,
           stack: err.stack,
-          url: window.location.origin + '/invoice_queue.json'
+          url: window.location.origin + '/api/invoice-queue'
         });
         setError(err.message);
         // Fallback to empty array if loading fails

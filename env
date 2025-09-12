@@ -9,3 +9,4 @@ QBO_SCOPES=com.intuit.quickbooks.accounting
 QBO_REDIRECT_URI=https://pcsmilesai.com/api/qbo/callback
 QBO_WEBHOOK_VERIFIER=your_production_webhook_verifier
 ENCRYPTION_KEY=jrisnRISn74kanditHEPAND2947386HSNSOUR84ier85ne9v
+DEV_LOGIN_BYPASS=true

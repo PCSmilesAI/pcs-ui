@@ -22,8 +22,8 @@ tar -czf pcs-ui-deployment.tar.gz \
   --exclude=node_modules \
   --exclude=.git \
   --exclude=.next \
-  --exclude=pcs_ai_data \
   --exclude=*.log \
+  --exclude=pcs_ai_data/invoice_queue_backup_*.json \
   .
 
 echo "📤 Uploading to droplet..."
