@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
 /**
  * Page for the "For Me" view. Displays a table of invoices
@@ -11,80 +12,35 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [qboConnected, setQboConnected] = useState(false);
-  const [qboLoading, setQboLoading] = useState(true);
   const { handleInvoiceRowClick } = useInvoiceClick();
-
-  // Debug logging
-  console.log('🔍 ForMePage: handleInvoiceRowClick from context:', handleInvoiceRowClick);
-  console.log('🔍 ForMePage: typeof handleInvoiceRowClick:', typeof handleInvoiceRowClick);
-
-  // Check QuickBooks connection status
-  const checkQboStatus = async () => {
-    try {
-      console.log('🔍 ForMePage: Checking QuickBooks status...');
-      const response = await fetch('/api/qbo/status');
-      const data = await response.json();
-      console.log('🔍 ForMePage: QuickBooks status response:', data);
-      setQboConnected(data.connected);
-    } catch (error) {
-      console.error('❌ Failed to check QuickBooks status:', error);
-      setQboConnected(false);
-    } finally {
-      setQboLoading(false);
-    }
-  };
 
   // Load invoice data from the queue
   useEffect(() => {
-    // Temporarily disable QBO status check to debug loading issue
-    // checkQboStatus();
-    setQboLoading(false);
-    setQboConnected(false);
-    
     const loadInvoices = async () => {
       try {
         console.log('🔄 ForMePage: Starting to load invoices...');
         setLoading(true);
         
-        // Add cache-busting timestamp to force fresh request
-        const timestamp = new Date().getTime();
-        const fetchUrl = `/invoice_queue.json?t=${timestamp}`;
-        console.log('🔍 ForMePage: Fetching from URL:', fetchUrl);
-        
-        const response = await fetch(fetchUrl, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-        console.log('📡 ForMePage: Fetch response status:', response.status);
-        console.log('📡 ForMePage: Fetch response ok:', response.ok);
-        console.log('📡 ForMePage: Fetch response headers:', Object.fromEntries(response.headers.entries()));
-        
-        if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status} - ${response.statusText}`);
-        }
-        let data = await response.json();
-        // Apply client-side overrides so queues reflect immediate actions
-        // Status overrides removed - using direct API calls
+        // Use the new fetch helper with high limit to get all invoices
+        const data = await fetchInvoiceQueue({ limit: 5000 });
         console.log('📊 ForMePage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
         // Filter for invoices that are NOT approved (status: 'new' or 'uploaded', approved: false)
         const transformedData = data
           .filter(invoice => {
-            const isNotApproved = !invoice.approved && (invoice.status === 'new' || invoice.status === 'uploaded');
+            const statusLc = String(invoice.status || '').toLowerCase();
+            const isNewish = ['new', 'uploaded', 'pending'].includes(statusLc);
+            const isNotApproved = !invoice.approved && isNewish;
             console.log(`📋 Invoice ${invoice.invoice_number}: status=${invoice.status}, approved=${invoice.approved}, showing=${isNotApproved}`);
             return isNotApproved;
           })
           .map(invoice => ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number, // needed by detail view
-            vendor: invoice.vendor || 'Unknown',
-            amount: `$${invoice.total || '0.00'}`,
-            office: invoice.clinic_id || 'Unknown',
+            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
+            office: invoice.office_location || invoice.clinic_id || 'Unknown',
             dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
@@ -132,16 +88,6 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
 
     loadInvoices();
   }, []);
-
-  const columns = [
-    { key: 'invoice', label: 'Invoice' },
-    { key: 'vendor', label: 'Vendor' },
-    { key: 'amount', label: 'Amount', align: 'right' },
-    { key: 'office', label: 'Office' },
-    { key: 'invoiceDate', label: 'Invoice Date' },
-    { key: 'dueDate', label: 'Due Date' },
-    { key: 'category', label: 'Category' },
-  ];
 
   // Apply search and filter criteria. If searchQuery is non-empty,
   // include only rows where any column contains the query
@@ -209,7 +155,6 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   });
 
   console.log('🎨 ForMePage: Rendering with', filteredRows.length, 'invoices, loading:', loading, 'error:', error);
-  console.log('🔍 ForMePage: QBO states - connected:', qboConnected, 'loading:', qboLoading);
 
   if (loading) {
     return (
@@ -227,38 +172,31 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     );
   }
 
+  const columns = [
+    { key: 'invoice', label: 'Invoice' },
+    { key: 'vendor', label: 'Vendor' },
+    { key: 'amount', label: 'Amount', align: 'right' },
+    { key: 'office', label: 'Office' },
+    { key: 'invoiceDate', label: 'Invoice Date' },
+    { key: 'dueDate', label: 'Due Date' },
+    { key: 'category', label: 'Category' },
+  ];
+
   const wrapperStyle = { padding: '24px' };
 
   return (
     <div style={wrapperStyle}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">For Me</h1>
-        <p className="text-gray-600 mt-2">QuickBooks Connection Test</p>
+        <p className="text-gray-600 mt-2">
+          {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} assigned to you
+        </p>
       </div>
-
-      {/* QuickBooks Connection Status - Always Show */}
-      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-red-500 mr-3"></div>
-            <div>
-              <p className="text-red-800 font-medium">QuickBooks Not Connected</p>
-              <p className="text-red-700 text-sm">Connect to QuickBooks to enable full functionality</p>
-            </div>
-          </div>
-          <a
-            href="/api/qbo/auth"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-          >
-            Connect QuickBooks
-          </a>
-        </div>
-      </div>
-
-      <div className="text-gray-600">
-        <p>This is a test page to verify QuickBooks connection UI is working.</p>
-        <p>If you can see this text and the blue button above, the UI is working correctly.</p>
-      </div>
+      <InvoiceTable
+        rows={filteredRows}
+        columns={columns}
+        onRowClick={handleInvoiceRowClick}
+      />
     </div>
   );
 }
