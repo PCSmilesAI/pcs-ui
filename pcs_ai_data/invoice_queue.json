@@ -1,5 +1,94 @@
 [
   {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_1",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.215941",
+    "source_file": "email_68_20250911_154357_Scan_2025_09_11_08_27_19_236_aeff4158.json",
+    "pdf_path": "/email_invoices/email_68_20250911_154357_Scan_2025_09_11_08_27_19_236_aeff4158.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46597163",
+    "invoice_date": "09/09/25",
+    "due_date": "10/09/25",
+    "invoice_total": "264.95",
+    "office_location": "Milwaukie",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "570-2249",
+        "product_name": "16OZ/BT Acclean Chlorhexidine Rinse Mint",
+        "Quantity": "10",
+        "unit_price": "3.26",
+        "line_item_total": "32.60"
+      },
+      {
+        "product_number": "107-1889",
+        "product_name": "200/BX Nada Pumice Paste Medium Grit",
+        "Quantity": "1",
+        "unit_price": "47.59",
+        "line_item_total": "47.59"
+      },
+      {
+        "product_number": "900-1890",
+        "product_name": "100/BX Standard Needles 27Ga Long Plastic Hub",
+        "Quantity": "1",
+        "unit_price": "11.12",
+        "line_item_total": "11.12"
+      },
+      {
+        "product_number": "107-8441",
+        "product_name": "50/BX Polybite Tray Posterior",
+        "Quantity": "1",
+        "unit_price": "15.55",
+        "line_item_total": "15.55"
+      },
+      {
+        "product_number": "712-0164",
+        "product_name": "36/BX GUM Go-Betweens Proxabrush Ultra Tight",
+        "Quantity": "1",
+        "unit_price": "24.32",
+        "line_item_total": "24.32"
+      },
+      {
+        "product_number": "712-0154",
+        "product_name": "36/BX GUM Go-Betweens Proxabrush Tight",
+        "Quantity": "1",
+        "unit_price": "24.32",
+        "line_item_total": "24.32"
+      },
+      {
+        "product_number": "145-8785",
+        "product_name": "100/BG Ivory Releaf Leaves Refill",
+        "Quantity": "1",
+        "unit_price": "78.64",
+        "line_item_total": "78.64"
+      },
+      {
+        "product_number": "712-0155",
+        "product_name": "36/BX GUM Go-Betweens Proxabrush Moderate",
+        "Quantity": "1",
+        "unit_price": "24.32",
+        "line_item_total": "24.32"
+      }
+    ],
+    "id": "inv_2",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.216008",
+    "source_file": "henryschein_4434143_20250910_31253796_14597339597.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250910_31253796_14597339597.pdf"
+  },
+  {
     "vendor": "Henry schein",
     "invoice_number": "",
     "invoice_date": "",
@@ -7,21 +96,13 @@
     "invoice_total": "",
     "office_location": "",
     "vendor_name": "Henry Schein",
-    "line_items": [
-      {
-        "product_number": "407-985417",
-        "product_name": ".Ordered By: Wendy D/MB 9/3/2025",
-        "Quantity": "392875",
-        "unit_price": "50.000ea",
-        "line_item_total": "250.00"
-      }
-    ],
-    "id": "inv_142",
+    "line_items": [],
+    "id": "inv_3",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.859516",
-    "source_file": "email_3_20250911_154058_I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357_af254e04.json",
-    "pdf_path": "/email_invoices/email_3_20250911_154058_I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357_af254e04.pdf"
+    "created_at": "2025-09-12T14:53:08.216052",
+    "source_file": "V6360946 - 78004.json",
+    "pdf_path": "/email_invoices/V6360946 - 78004.pdf"
   },
   {
     "invoice_number": "44134561",
@@ -39,10 +120,10 @@
         "line_item_total": "90.00"
       }
     ],
-    "id": "inv_2",
+    "id": "inv_4",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.829917",
+    "created_at": "2025-09-12T14:53:08.216217",
     "source_file": "corrected_output.json",
     "pdf_path": "/email_invoices/email_11_20250911_154112_henryschein_4434143_20250909_31249878_14594621910_f0b12b93.pdf"
   },
@@ -104,12 +185,27 @@
         "line_item_total": "42.49"
       }
     ],
-    "id": "inv_3",
+    "id": "inv_5",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.831107",
+    "created_at": "2025-09-12T14:53:08.217638",
     "source_file": "Patterson  Invoice # 3038216492.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_6",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.218597",
+    "source_file": "email_2_20250805_230044_V6015761_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230044_V6015761_-78004.pdf"
   },
   {
     "vendor": "tc dental laboratory, inc.",
@@ -127,10 +223,10 @@
         "line_item_total": "267.00"
       }
     ],
-    "id": "inv_5",
+    "id": "inv_7",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.832026",
+    "created_at": "2025-09-12T14:53:08.218740",
     "source_file": "tc_invoice_1.json",
     "pdf_path": null
   },
@@ -151,10 +247,10 @@
         "line_item_total": "64.78"
       }
     ],
-    "id": "inv_6",
+    "id": "inv_8",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.833061",
+    "created_at": "2025-09-12T14:53:08.220011",
     "source_file": "email_5_20250805_232223_henryschein_4434143_20250719_31082503_14485030066.json",
     "pdf_path": "/email_invoices/email_5_20250805_232223_henryschein_4434143_20250719_31082503_14485030066.pdf"
   },
@@ -167,12 +263,28 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_7",
+    "id": "inv_9",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.833102",
+    "created_at": "2025-09-12T14:53:08.220255",
     "source_file": "email_5_20250911_154102_Patterson  Invoice # 3038840482_15acccd5.json",
     "pdf_path": "/email_invoices/email_5_20250911_154102_Patterson  Invoice # 3038840482_15acccd5.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_10",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.220513",
+    "source_file": "email_21_20250911_154146_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082819_79ca414e.json",
+    "pdf_path": "/email_invoices/email_21_20250911_154146_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082819_79ca414e.pdf"
   },
   {
     "invoice_number": "44134561",
@@ -191,12 +303,114 @@
       }
     ],
     "due_date": "08/15/2025",
-    "id": "inv_9",
+    "id": "inv_11",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.833286",
+    "created_at": "2025-09-12T14:53:08.220660",
     "source_file": "email_9_20250805_232214_Invoice_20250716_0001.json",
     "pdf_path": "/email_invoices/email_9_20250805_232214_Invoice_20250716_0001.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_12",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.220798",
+    "source_file": "email_2_20250805_232229_V6145664_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232229_V6145664_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_13",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.220933",
+    "source_file": "email_19_20250911_154135_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082907_cecf996b.json",
+    "pdf_path": "/email_invoices/email_19_20250911_154135_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082907_cecf996b.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_14",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.220968",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082957.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082957.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44048990",
+    "invoice_date": "07/18/25",
+    "due_date": "08/17/25",
+    "invoice_total": "17.03",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "141-8937",
+        "product_name": "2/PK FlexiProp Medium Medium",
+        "Quantity": "1",
+        "unit_price": "17.03",
+        "line_item_total": "17.03"
+      }
+    ],
+    "id": "inv_15",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.221010",
+    "source_file": "henryschein_4434143_20250720_31085143_14487143784.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250720_31085143_14487143784.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_16",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.221142",
+    "source_file": "email_2_20250805_231845_V6360946_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231845_V6360946_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_17",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.221360",
+    "source_file": "email_22_20250911_154152_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082755_55ff79fb.json",
+    "pdf_path": "/email_invoices/email_22_20250911_154152_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082755_55ff79fb.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -250,10 +464,10 @@
         "line_item_total": "311.52"
       }
     ],
-    "id": "inv_14",
+    "id": "inv_18",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.833808",
+    "created_at": "2025-09-12T14:53:08.221509",
     "source_file": "email_3_20250805_230042_henryschein_4434143_20250718_31080183_14484025460.json",
     "pdf_path": "/email_invoices/email_3_20250805_230042_henryschein_4434143_20250718_31080183_14484025460.pdf"
   },
@@ -274,10 +488,10 @@
         "line_item_total": "13.43"
       }
     ],
-    "id": "inv_15",
+    "id": "inv_19",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.834008",
+    "created_at": "2025-09-12T14:53:08.221690",
     "source_file": "email_11_20250805_232210_henryschein_4434143_20250725_31102443_14497454388.json",
     "pdf_path": "/email_invoices/email_11_20250805_232210_henryschein_4434143_20250725_31102443_14497454388.pdf"
   },
@@ -298,12 +512,28 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_16",
+    "id": "inv_20",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.834065",
+    "created_at": "2025-09-12T14:53:08.221926",
     "source_file": "email_61_20250911_154350_Patterson  Invoice # 3038925922_d39a776f.json",
     "pdf_path": "/email_invoices/email_61_20250911_154350_Patterson  Invoice # 3038925922_d39a776f.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_21",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.221965",
+    "source_file": "invoice_1092025-130814.json",
+    "pdf_path": "/email_invoices/invoice_1092025-130814.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -343,10 +573,10 @@
         "line_item_total": "38.00"
       }
     ],
-    "id": "inv_17",
+    "id": "inv_22",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.834223",
+    "created_at": "2025-09-12T14:53:08.222113",
     "source_file": "epic_invoice_7_parsed.json",
     "pdf_path": null
   },
@@ -359,12 +589,44 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_18",
+    "id": "inv_23",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.834668",
+    "created_at": "2025-09-12T14:53:08.223009",
     "source_file": "email_53_20250911_154330_Patterson  Invoice # 3038889973_358ef60e.json",
     "pdf_path": "/email_invoices/email_53_20250911_154330_Patterson  Invoice # 3038889973_358ef60e.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_24",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.223050",
+    "source_file": "V6145664 - 78004.json",
+    "pdf_path": "/email_invoices/V6145664 - 78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_25",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.223081",
+    "source_file": "tc dental.json",
+    "pdf_path": "/email_invoices/tc dental.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -382,12 +644,59 @@
         "line_item_total": "170.99"
       }
     ],
-    "id": "inv_19",
+    "id": "inv_26",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.834870",
+    "created_at": "2025-09-12T14:53:08.223224",
     "source_file": "Patterson  Invoice # 3038197656.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_27",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.224133",
+    "source_file": "email_2_20250805_230046_V6273090_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230046_V6273090_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_28",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.224347",
+    "source_file": "email_59_20250911_154346_Invoice-QDSNFCRE-0004_8da87f6a.json",
+    "pdf_path": "/email_invoices/email_59_20250911_154346_Invoice-QDSNFCRE-0004_8da87f6a.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_29",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.224545",
+    "source_file": "email_26_20250911_154214_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083655_68149839.json",
+    "pdf_path": "/email_invoices/email_26_20250911_154214_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083655_68149839.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -490,10 +799,10 @@
         "line_item_total": "26.19"
       }
     ],
-    "id": "inv_23",
+    "id": "inv_30",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.835937",
+    "created_at": "2025-09-12T14:53:08.224662",
     "source_file": "email_10_20250805_231253_henryschein_4434143_20250725_31102443_14497454391.json",
     "pdf_path": "/email_invoices/email_10_20250805_231253_henryschein_4434143_20250725_31102443_14497454391.pdf"
   },
@@ -501,94 +810,107 @@
     "vendor": "Henry schein",
     "invoice_number": "43912059",
     "invoice_date": "07/10/25",
-    "total": "396.87",
+    "due_date": "08/09/25",
+    "invoice_total": "396.87",
     "office_location": "Riddle",
     "vendor_name": "Henry Schein",
     "line_items": [
       {
         "product_number": "492-0054",
-        "product_name": "ICX Water Treatment Tablets 0.7 Ltr Btl",
+        "product_name": "50/BX ICX Water Treatment Tablets 0.7 Ltr Btl",
         "Quantity": "1",
         "unit_price": "39.59",
         "line_item_total": "39.59"
       },
       {
         "product_number": "777-2324",
-        "product_name": "Filtek One Bulk Fill A1",
+        "product_name": "20/PK Filtek One Bulk Fill A1",
         "Quantity": "1",
         "unit_price": "94.46",
         "line_item_total": "94.46"
       },
       {
         "product_number": "112-7321",
-        "product_name": "Essentials 300 PF Nitrile X-Small",
-        "Quantity": "2",
+        "product_name": "300/BX Essentials",
+        "Quantity": "300",
         "unit_price": "11.59",
         "line_item_total": "23.18"
       },
       {
         "product_number": "300-0496",
-        "product_name": "Strata-G Wedge Refill Blue Small",
+        "product_name": "100/PK Strata-G Wedge Refill Blue Small",
         "Quantity": "1",
         "unit_price": "63.19",
         "line_item_total": "63.19"
       },
       {
         "product_number": "543-3743",
-        "product_name": "Whole Mouth Clean Bundle",
+        "product_name": "72/BX Whole Mouth Clean Bundle",
         "Quantity": "2",
         "unit_price": "59.76",
         "line_item_total": "119.52"
       },
       {
-        "product_number": "543-0304",
-        "product_name": "Colgate 360 Deep Clean TB X-Compact",
-        "Quantity": "24",
-        "unit_price": "0.00",
-        "line_item_total": "0.00"
-      },
-      {
-        "product_number": "543-0307",
-        "product_name": "Contract Total TP 61044324 .88oz",
-        "Quantity": "6",
-        "unit_price": "0.00",
-        "line_item_total": "0.00"
-      },
-      {
-        "product_number": "543-0252",
-        "product_name": "Colgate Floss Mint 3yd",
-        "Quantity": "2",
-        "unit_price": "0.00",
-        "line_item_total": "0.00"
-      },
-      {
-        "product_number": "543-0285",
-        "product_name": "Contract Colgate Paper Bags Sample",
-        "Quantity": "2",
-        "unit_price": "0.00",
-        "line_item_total": "0.00"
-      },
-      {
         "product_number": "145-8601",
-        "product_name": "Colgate Minecraft Toothbrush Kids 5+",
+        "product_name": "6/BX Colgate Minecraft Toothbrush Kids 5+",
         "Quantity": "2",
         "unit_price": "9.99",
         "line_item_total": "19.98"
       },
       {
         "product_number": "640-8482",
-        "product_name": "CaviWipes Towelettes XLarge",
+        "product_name": "65/CN CaviWipes Towelettes XLarge",
         "Quantity": "2",
         "unit_price": "15.23",
         "line_item_total": "30.46"
       }
     ],
-    "id": "inv_124",
+    "id": "inv_31",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.855071",
-    "source_file": "henry_schein_invoice_43912059.json",
+    "created_at": "2025-09-12T14:53:08.224812",
+    "source_file": "henry_invoice_1.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "407-985417",
+        "product_name": ".Ordered By: Wendy D/MB 9/3/2025",
+        "Quantity": "392875",
+        "unit_price": "50.000ea",
+        "line_item_total": "250.00"
+      }
+    ],
+    "id": "inv_32",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.226072",
+    "source_file": "I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357.json",
+    "pdf_path": "/email_invoices/I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_33",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.226100",
+    "source_file": "V6230412 - 78004.json",
+    "pdf_path": "/email_invoices/V6230412 - 78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -607,12 +929,131 @@
         "line_item_total": "28.63"
       }
     ],
-    "id": "inv_25",
+    "id": "inv_34",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.837032",
+    "created_at": "2025-09-12T14:53:08.226352",
     "source_file": "email_44_20250911_154259_henryschein_4434143_20250910_31253796_14597339594_672bd979.json",
     "pdf_path": "/email_invoices/email_44_20250911_154259_henryschein_4434143_20250910_31253796_14597339594_672bd979.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_35",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.226381",
+    "source_file": "304500120691_0450004311513_20250531.json",
+    "pdf_path": "/email_invoices/304500120691_0450004311513_20250531.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46561093",
+    "invoice_date": "09/08/25",
+    "due_date": "10/08/25",
+    "invoice_total": "107.88",
+    "office_location": "Ridgefield",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "133-7442",
+        "product_name": "50/BX CitriSil Waterline Cleaner Blue",
+        "Quantity": "2",
+        "unit_price": "41.88",
+        "line_item_total": "83.76"
+      }
+    ],
+    "id": "inv_36",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.226408",
+    "source_file": "henryschein_4434143_20250909_31249878_14594621910.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250909_31249878_14594621910.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_37",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.226531",
+    "source_file": "email_2_20250805_230045_V63202641_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230045_V63202641_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_38",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.226562",
+    "source_file": "V6186388 - 78004.json",
+    "pdf_path": "/email_invoices/V6186388 - 78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_39",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.226589",
+    "source_file": "Sales Invoice - PS-INV177040.json",
+    "pdf_path": "/email_invoices/Sales Invoice - PS-INV177040.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_40",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.226796",
+    "source_file": "email_17_20250911_154124_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083020_b86459f1.json",
+    "pdf_path": "/email_invoices/email_17_20250911_154124_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083020_b86459f1.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_41",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.226985",
+    "source_file": "email_15_20250911_154116_Invoice #1c092f42358f_f2d020d3.json",
+    "pdf_path": "/email_invoices/email_15_20250911_154116_Invoice #1c092f42358f_f2d020d3.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -631,12 +1072,28 @@
         "line_item_total": "17.03"
       }
     ],
-    "id": "inv_29",
+    "id": "inv_42",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.837384",
+    "created_at": "2025-09-12T14:53:08.227085",
     "source_file": "email_7_20250805_230037_henryschein_4434143_20250720_31085143_14487143784.json",
     "pdf_path": "/email_invoices/email_7_20250805_230037_henryschein_4434143_20250720_31085143_14487143784.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_43",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.227301",
+    "source_file": "email_33_20250911_154233_img20250909_12155837_05251854.json",
+    "pdf_path": "/email_invoices/email_33_20250911_154233_img20250909_12155837_05251854.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -654,12 +1111,213 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_31",
+    "id": "inv_44",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.837585",
+    "created_at": "2025-09-12T14:53:08.227414",
     "source_file": "sample_test_invoice.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "62072596",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_45",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.228202",
+    "source_file": "Patterson  Invoice # 3038889973.json",
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038889973.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44507826",
+    "invoice_date": "07/24/25",
+    "invoice_total": "359.47",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "112-4856",
+        "product_name": "200/BX Self Seal Sterilization Pouch 2.75x9",
+        "Quantity": "4",
+        "unit_price": "7.58",
+        "line_item_total": "30.32"
+      },
+      {
+        "product_number": "112-4857",
+        "product_name": "200/BX Self Seal Sterilization Pouch 3.5x5.25",
+        "Quantity": "2",
+        "unit_price": "6.32",
+        "line_item_total": "12.64"
+      },
+      {
+        "product_number": "112-4853",
+        "product_name": "200/BX Self Seal Sterilization Pouch 3.5x9",
+        "Quantity": "3",
+        "unit_price": "8.08",
+        "line_item_total": "24.24"
+      },
+      {
+        "product_number": "112-4863",
+        "product_name": "200/BX Self Seal Sterilization Pouch 4.25x11",
+        "Quantity": "3",
+        "unit_price": "11.15",
+        "line_item_total": "33.45"
+      },
+      {
+        "product_number": "112-4854",
+        "product_name": "200/BX Self Seal Sterilization Pouch 5.25x10",
+        "Quantity": "3",
+        "unit_price": "10.73",
+        "line_item_total": "32.19"
+      },
+      {
+        "product_number": "570-1933",
+        "product_name": "225/BX Dental Chair Barrier Sleeve 24\"Lx27.5\"W",
+        "Quantity": "1",
+        "unit_price": "19.18",
+        "line_item_total": "19.18"
+      },
+      {
+        "product_number": "112-4599",
+        "product_name": "36/PK Matrix Bands Tofflemire #2 .002",
+        "Quantity": "1",
+        "unit_price": "5.30",
+        "line_item_total": "5.30"
+      },
+      {
+        "product_number": "543-3435",
+        "product_name": "72/BX Sensitivity Bundle",
+        "Quantity": "1",
+        "unit_price": "48.24",
+        "line_item_total": "48.24"
+      },
+      {
+        "product_number": "900-4565",
+        "product_name": "12/PK Impression Trays #3 Med/U Perforated",
+        "Quantity": "2",
+        "unit_price": "4.80",
+        "line_item_total": "9.60"
+      },
+      {
+        "product_number": "100-9224",
+        "product_name": "12/BX Articulating Paper Combination Red/Blue",
+        "Quantity": "2",
+        "unit_price": "3.54",
+        "line_item_total": "7.08"
+      },
+      {
+        "product_number": "570-3250",
+        "product_name": "EA Digital Sensor Holder Arm Bitewing",
+        "Quantity": "4",
+        "unit_price": "19.59",
+        "line_item_total": "78.36"
+      },
+      {
+        "product_number": "170-0631",
+        "product_name": "25/PK Bulk EZ Tips Refill",
+        "Quantity": "19",
+        "unit_price": "26.19",
+        "line_item_total": "26.19"
+      },
+      {
+        "product_number": "170-0578",
+        "product_name": "25/PK Bulk EZ Tips Refill",
+        "Quantity": "17",
+        "unit_price": "26.19",
+        "line_item_total": "26.19"
+      }
+    ],
+    "id": "inv_46",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.228361",
+    "source_file": "email_10_20250805_232212_henryschein_4434143_20250725_31102443_14497454391.json",
+    "pdf_path": "/email_invoices/email_10_20250805_232212_henryschein_4434143_20250725_31102443_14497454391.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44007187",
+    "invoice_date": "07/18/25",
+    "due_date": "08/17/25",
+    "invoice_total": "64.78",
+    "office_location": "Lebanon",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "107-5076",
+        "product_name": "EA Burnisher DE Ball 25-26",
+        "Quantity": "2",
+        "unit_price": "32.39",
+        "line_item_total": "64.78"
+      }
+    ],
+    "id": "inv_47",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.228389",
+    "source_file": "henryschein_4434143_20250719_31082503_14485030066.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250719_31082503_14485030066.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44048990",
+    "invoice_date": "07/18/25",
+    "invoice_total": "17.03",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "141-8937",
+        "product_name": "2/PK FlexiProp Medium Medium",
+        "Quantity": "1",
+        "unit_price": "17.03",
+        "line_item_total": "17.03"
+      }
+    ],
+    "id": "inv_48",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.228506",
+    "source_file": "email_7_20250805_231401_henryschein_4434143_20250720_31085143_14487143784.json",
+    "pdf_path": "/email_invoices/email_7_20250805_231401_henryschein_4434143_20250720_31085143_14487143784.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_49",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.228687",
+    "source_file": "email_2_20250805_232048_V6186388_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232048_V6186388_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_50",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.228714",
+    "source_file": "henry schein.json",
+    "pdf_path": "/email_invoices/henry schein.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -678,12 +1336,74 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_35",
+    "id": "inv_51",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.838662",
+    "created_at": "2025-09-12T14:53:08.229049",
     "source_file": "email_64_20250911_154351_Patterson  Invoice # 3038926613_2080f445.json",
     "pdf_path": "/email_invoices/email_64_20250911_154351_Patterson  Invoice # 3038926613_2080f445.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_52",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.229189",
+    "source_file": "henry_schein_invoice_.json",
+    "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_53",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.229221",
+    "source_file": "henryschein_4434143_20250720_31085178_14486986364.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250720_31085178_14486986364.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_54",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.229247",
+    "source_file": "V63202641 - 78004.json",
+    "pdf_path": "/email_invoices/V63202641 - 78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_55",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.229367",
+    "source_file": "email_2_20250805_230045_V6360946_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230045_V6360946_-_78004.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -708,12 +1428,28 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_38",
+    "id": "inv_56",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.839010",
+    "created_at": "2025-09-12T14:53:08.229508",
     "source_file": "Patterson Dental.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_57",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.230300",
+    "source_file": "Credit Note CN-20266 (1).json",
+    "pdf_path": "/email_invoices/Credit Note CN-20266 (1).pdf"
   },
   {
     "vendor": "Henry schein",
@@ -732,12 +1468,44 @@
         "line_item_total": "2.000"
       }
     ],
-    "id": "inv_39",
+    "id": "inv_58",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.839564",
+    "created_at": "2025-09-12T14:53:08.230576",
     "source_file": "email_55_20250911_154336_Patterson  Invoice # 3038897968_8402ae87.json",
     "pdf_path": "/email_invoices/email_55_20250911_154336_Patterson  Invoice # 3038897968_8402ae87.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_59",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.230607",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082844.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082844.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_60",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.230815",
+    "source_file": "email_9_20250911_154109_Credit Note CN-20266 (1)_b062d090.json",
+    "pdf_path": "/email_invoices/email_9_20250911_154109_Credit Note CN-20266 (1)_b062d090.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -755,10 +1523,10 @@
         "line_item_total": "352.50"
       }
     ],
-    "id": "inv_41",
+    "id": "inv_61",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.839774",
+    "created_at": "2025-09-12T14:53:08.230945",
     "source_file": "Patterson  Invoice # 3038072963.json",
     "pdf_path": null
   },
@@ -779,12 +1547,27 @@
         "line_item_total": "59.00"
       }
     ],
-    "id": "inv_42",
+    "id": "inv_62",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.840441",
+    "created_at": "2025-09-12T14:53:08.231866",
     "source_file": "epic_invoice_11_parsed.json",
     "pdf_path": "/email_invoices/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_63",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.232157",
+    "source_file": "email_2_20250805_231814_V6015761_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231814_V6015761_-78004.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -803,12 +1586,123 @@
         "line_item_total": "153.00"
       }
     ],
-    "id": "inv_44",
+    "id": "inv_64",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.840796",
+    "created_at": "2025-09-12T14:53:08.232271",
     "source_file": "epic_invoice_2_parsed.json",
     "pdf_path": null
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_65",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.233080",
+    "source_file": "email_25_20250911_154208_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082630_f8caf287.json",
+    "pdf_path": "/email_invoices/email_25_20250911_154208_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082630_f8caf287.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_66",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.233108",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "9/11/2025",
+    "id": "inv_67",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.233135",
+    "source_file": "Scan_2025_09_11_08_27_37_550.json",
+    "pdf_path": "/email_invoices/Scan_2025_09_11_08_27_37_550.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_68",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.233256",
+    "source_file": "email_52_20250911_154325_henry schein_2592989e.json",
+    "pdf_path": "/email_invoices/email_52_20250911_154325_henry schein_2592989e.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_69",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.233352",
+    "source_file": "email_2_20250805_231916_V63202641_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231916_V63202641_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_70",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.233464",
+    "source_file": "email_23_20250911_154157_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082722_769cd654.json",
+    "pdf_path": "/email_invoices/email_23_20250911_154157_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082722_769cd654.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_71",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.233588",
+    "source_file": "email_10_20250911_154110_Credit Note CN-20265 (1)_2b7e56d1.json",
+    "pdf_path": "/email_invoices/email_10_20250911_154110_Credit Note CN-20265 (1)_2b7e56d1.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -876,10 +1770,10 @@
         "line_item_total": "24.32"
       }
     ],
-    "id": "inv_50",
+    "id": "inv_72",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.841489",
+    "created_at": "2025-09-12T14:53:08.233770",
     "source_file": "email_46_20250911_154300_henryschein_4434143_20250910_31253796_14597339597_0a2ab93e.json",
     "pdf_path": "/email_invoices/email_46_20250911_154300_henryschein_4434143_20250910_31253796_14597339597_0a2ab93e.pdf"
   },
@@ -907,12 +1801,178 @@
         "line_item_total": "38.00"
       }
     ],
-    "id": "inv_51",
+    "id": "inv_73",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.841617",
+    "created_at": "2025-09-12T14:53:08.233880",
     "source_file": "epic_invoice_1_parsed.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44007187",
+    "invoice_date": "07/18/25",
+    "invoice_total": "64.78",
+    "office_location": "Lebanon",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "107-5076",
+        "product_name": "EA Burnisher DE Ball 25-26",
+        "Quantity": "2",
+        "unit_price": "32.39",
+        "line_item_total": "64.78"
+      }
+    ],
+    "id": "inv_74",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.234512",
+    "source_file": "email_5_20250805_231505_henryschein_4434143_20250719_31082503_14485030066.json",
+    "pdf_path": "/email_invoices/email_5_20250805_231505_henryschein_4434143_20250719_31082503_14485030066.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_75",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.234628",
+    "source_file": "email_34_20250911_154238_Receipt_b1451d0a.json",
+    "pdf_path": "/email_invoices/email_34_20250911_154238_Receipt_b1451d0a.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44557050",
+    "invoice_date": "07/24/25",
+    "due_date": "08/23/25",
+    "invoice_total": "28.92",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "107-6371",
+        "product_name": "EA Sodium Hypochlorite 6% 16oz/Bt",
+        "Quantity": "1",
+        "unit_price": "13.43",
+        "line_item_total": "13.43"
+      }
+    ],
+    "id": "inv_76",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.234745",
+    "source_file": "henry_invoice_7.json",
+    "pdf_path": "/email_invoices/email_12_20250911_154114_henryschein_4434143_20250909_31249878_14594621916_8ca28925.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_77",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.235965",
+    "source_file": "Scan_2025_09_11_08_39_14_325.json",
+    "pdf_path": "/email_invoices/Scan_2025_09_11_08_39_14_325.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_78",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.236114",
+    "source_file": "email_2_20250805_230043_V6145664_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230043_V6145664_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_79",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.236314",
+    "source_file": "email_74_20250911_154422_invoice-13970-638931909850717798_aaccc5cb.json",
+    "pdf_path": "/email_invoices/email_74_20250911_154422_invoice-13970-638931909850717798_aaccc5cb.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46397101",
+    "invoice_date": "09/08/25",
+    "due_date": "10/08/25",
+    "invoice_total": "59.83",
+    "office_location": "Roseburg",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "707-2812",
+        "product_name": "200/BX D-Lish Prophy Paste Coarse Assorted",
+        "Quantity": "1",
+        "unit_price": "59.83",
+        "line_item_total": "59.83"
+      }
+    ],
+    "id": "inv_80",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.236341",
+    "source_file": "henryschein_4434143_20250909_31249878_14594621916.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250909_31249878_14594621916.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_81",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.236369",
+    "source_file": "Invoice_082512346_from_TRUSTWORKZ_INC.json",
+    "pdf_path": "/email_invoices/Invoice_082512346_from_TRUSTWORKZ_INC.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_82",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.236507",
+    "source_file": "email_47_20250911_154302_water_invoice.14636642_081925.2025-08-19_77c77604.json",
+    "pdf_path": "/email_invoices/email_47_20250911_154302_water_invoice.14636642_081925.2025-08-19_77c77604.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -931,12 +1991,43 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_58",
+    "id": "inv_83",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.843251",
+    "created_at": "2025-09-12T14:53:08.236829",
     "source_file": "email_65_20250911_154351_Patterson  Invoice # 3038926844_a3e30724.json",
     "pdf_path": "/email_invoices/email_65_20250911_154351_Patterson  Invoice # 3038926844_a3e30724.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_84",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.236963",
+    "source_file": "email_69_20250911_154402_Scan_2025_09_11_08_39_14_325_2a4967f6.json",
+    "pdf_path": "/email_invoices/email_69_20250911_154402_Scan_2025_09_11_08_39_14_325_2a4967f6.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_85",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.237081",
+    "source_file": "email_6_20250805_232221_henryschein_4434143_20250720_31085178_14486986364.json",
+    "pdf_path": "/email_invoices/email_6_20250805_232221_henryschein_4434143_20250720_31085178_14486986364.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -955,12 +2046,27 @@
         "line_item_total": "28.63"
       }
     ],
-    "id": "inv_61",
+    "id": "inv_86",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.843434",
+    "created_at": "2025-09-12T14:53:08.237180",
     "source_file": "email_43_20250911_154258_henryschein_4434143_20250910_31253796_14597339595_e19a2b86.json",
     "pdf_path": "/email_invoices/email_43_20250911_154258_henryschein_4434143_20250910_31253796_14597339595_e19a2b86.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_87",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.237229",
+    "source_file": "email_2_20250805_231743_V6060603_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231743_V6060603_-78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -979,12 +2085,83 @@
         "line_item_total": "59.83"
       }
     ],
-    "id": "inv_63",
+    "id": "inv_88",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.843504",
+    "created_at": "2025-09-12T14:53:08.237414",
     "source_file": "email_13_20250911_154115_henryschein_4434143_20250909_31249878_14594621914_f990131a.json",
     "pdf_path": "/email_invoices/email_13_20250911_154115_henryschein_4434143_20250909_31249878_14594621914_f990131a.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_89",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.237513",
+    "source_file": "email_6_20250805_231433_henryschein_4434143_20250720_31085178_14486986364.json",
+    "pdf_path": "/email_invoices/email_6_20250805_231433_henryschein_4434143_20250720_31085178_14486986364.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_90",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.237648",
+    "source_file": "email_73_20250911_154420_Invoice 1282639_8eca40f6.json",
+    "pdf_path": "/email_invoices/email_73_20250911_154420_Invoice 1282639_8eca40f6.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_91",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.237839",
+    "source_file": "email_6_20250911_154105__79U0Y2T9L_6012586f.json",
+    "pdf_path": "/email_invoices/email_6_20250911_154105__79U0Y2T9L_6012586f.pdf"
+  },
+  {
+    "vendor": "patterson_dental",
+    "invoice_number": "3037868803",
+    "invoice_date": "2025-07-11",
+    "due_date": "08/10/2025",
+    "total": "281.79",
+    "office_location": "Vancouver",
+    "vendor_name": "Patterson Dental",
+    "line_items": [
+      {
+        "product_number": "73179157",
+        "product_name": "SPRT CLINICAL MONTHLY",
+        "Quantity": "1.000",
+        "unit_price": "259.00",
+        "line_item_total": "259.00"
+      }
+    ],
+    "id": "inv_92",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.237954",
+    "source_file": "patterson_invoice_2.json",
+    "pdf_path": null
   },
   {
     "vendor": "Epic Dental Lab",
@@ -1003,12 +2180,113 @@
         "line_item_total": "232.00"
       }
     ],
-    "id": "inv_68",
+    "id": "inv_93",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.844446",
+    "created_at": "2025-09-12T14:53:08.238853",
     "source_file": "epic_invoice_8_parsed.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "62072426",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_94",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.239523",
+    "source_file": "Patterson  Invoice # 3038840482.json",
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038840482.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "62072828",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_95",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.239562",
+    "source_file": "Patterson  Invoice # 3038963782.json",
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038963782.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_96",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.239726",
+    "source_file": "email_2_20250805_230044_V6060603_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230044_V6060603_-78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_97",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.239846",
+    "source_file": "email_2_20250805_231642_V6145664_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231642_V6145664_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44007187",
+    "invoice_date": "07/18/25",
+    "invoice_total": "64.78",
+    "office_location": "Lebanon",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "107-5076",
+        "product_name": "EA Burnisher DE Ball 25-26",
+        "Quantity": "2",
+        "unit_price": "32.39",
+        "line_item_total": "64.78"
+      }
+    ],
+    "id": "inv_98",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.239906",
+    "source_file": "email_5_20250805_230039_henryschein_4434143_20250719_31082503_14485030066.json",
+    "pdf_path": "/email_invoices/email_5_20250805_230039_henryschein_4434143_20250719_31082503_14485030066.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_99",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.240029",
+    "source_file": "email_4_20250911_154100_Inv_75629_from_Dental_Medical_Staffing_Inc._5522892_15528_41231a59.json",
+    "pdf_path": "/email_invoices/email_4_20250911_154100_Inv_75629_from_Dental_Medical_Staffing_Inc._5522892_15528_41231a59.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1019,10 +2297,10 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_73",
+    "id": "inv_100",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.845178",
+    "created_at": "2025-09-12T14:53:08.240217",
     "source_file": "email_2_20250911_154055_56008564_cdb12005.json",
     "pdf_path": "/email_invoices/email_2_20250911_154055_56008564_cdb12005.pdf"
   },
@@ -1050,12 +2328,43 @@
       }
     ],
     "due_date": "09/30/2025",
-    "id": "inv_74",
+    "id": "inv_101",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.845209",
+    "created_at": "2025-09-12T14:53:08.240330",
     "source_file": "5237.json",
     "pdf_path": "/email_invoices/email_27_20250911_154224_Invoices_5237_7278c26f.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_102",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.240556",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083655.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083655.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_103",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.240640",
+    "source_file": "email_2_20250805_232231_V6015761_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232231_V6015761_-78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1065,10 +2374,10 @@
     "office_location": "UNKNOWN",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_76",
+    "id": "inv_104",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.845494",
+    "created_at": "2025-09-12T14:53:08.240806",
     "source_file": "henry_schein_invoice_unknown.json",
     "pdf_path": null
   },
@@ -1096,12 +2405,60 @@
       }
     ],
     "due_date": "09/30/2025",
-    "id": "inv_77",
+    "id": "inv_105",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.845527",
+    "created_at": "2025-09-12T14:53:08.240948",
     "source_file": "5236.json",
     "pdf_path": "/email_invoices/email_28_20250911_154224_Invoices_5236_43212d95.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_106",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.241331",
+    "source_file": "email_20_20250911_154140_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082844_b90f2ac7.json",
+    "pdf_path": "/email_invoices/email_20_20250911_154140_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082844_b90f2ac7.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "62072596",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_107",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.241366",
+    "source_file": "Patterson  Invoice # 3038897967.json",
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038897967.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_108",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.241399",
+    "source_file": "V6529148.json",
+    "pdf_path": "/email_invoices/V6529148.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1120,12 +2477,43 @@
         "line_item_total": "83.76"
       }
     ],
-    "id": "inv_79",
+    "id": "inv_109",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.845699",
+    "created_at": "2025-09-12T14:53:08.241523",
     "source_file": "email_11_20250911_154112_henryschein_4434143_20250909_31249878_14594621910_f0b12b93.json",
     "pdf_path": "/email_invoices/email_11_20250911_154112_henryschein_4434143_20250909_31249878_14594621910_f0b12b93.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_110",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.241577",
+    "source_file": "email_2_20250805_232231_V6360946_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232231_V6360946_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_111",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.241607",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082907.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082907.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1158,12 +2546,170 @@
         "line_item_total": "41.88"
       }
     ],
-    "id": "inv_81",
+    "id": "inv_112",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.845771",
+    "created_at": "2025-09-12T14:53:08.241731",
     "source_file": "email_45_20250911_154259_henryschein_4434143_20250910_31253796_14597339598_34771940.json",
     "pdf_path": "/email_invoices/email_45_20250911_154259_henryschein_4434143_20250910_31253796_14597339598_34771940.pdf"
+  },
+  {
+    "vendor": "patterson_dental",
+    "invoice_number": "3036332425",
+    "invoice_date": "2025-04-11",
+    "due_date": "05/11/2025",
+    "total": "362.60",
+    "office_location": "Ridgefield",
+    "vendor_name": "Patterson Dental",
+    "line_items": [
+      {
+        "product_number": "73179157",
+        "product_name": "SPRT CLINICAL MONTHLY",
+        "Quantity": "1.000",
+        "unit_price": "259.00",
+        "line_item_total": "259.00"
+      },
+      {
+        "product_number": "73179157",
+        "product_name": "SPRT CLINICAL MONTHLY",
+        "Quantity": "1.000",
+        "unit_price": "259.00",
+        "line_item_total": "259.00"
+      }
+    ],
+    "id": "inv_113",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.241907",
+    "source_file": "patterson_invoice_3.json",
+    "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44213044",
+    "invoice_date": "07/17/25",
+    "invoice_total": "750.82",
+    "office_location": "Salem",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "900-7428",
+        "product_name": "5/PK Maxima Diamond FG KS2-SC",
+        "Quantity": "3",
+        "unit_price": "29.80",
+        "line_item_total": "89.40"
+      },
+      {
+        "product_number": "570-1510",
+        "product_name": "EA Lead-Free Steam Indicator Tape 3/4\"x60L\"",
+        "Quantity": "3",
+        "unit_price": "7.12",
+        "line_item_total": "21.36"
+      },
+      {
+        "product_number": "100-6188",
+        "product_name": "144/PK Prophy Cups Webbed Screw Type Hard White",
+        "Quantity": "3",
+        "unit_price": "18.98",
+        "line_item_total": "56.94"
+      },
+      {
+        "product_number": "100-8502",
+        "product_name": "5/PK Surgical Bur FG",
+        "Quantity": "557",
+        "unit_price": "10.49",
+        "line_item_total": "31.47"
+      },
+      {
+        "product_number": "131-3943",
+        "product_name": "3.4OZ/BT Prevident",
+        "Quantity": "5000",
+        "unit_price": "6.49",
+        "line_item_total": "233.64"
+      },
+      {
+        "product_number": "543-0219",
+        "product_name": "3.4OZ/BT PreviDent",
+        "Quantity": "5000",
+        "unit_price": "6.49",
+        "line_item_total": "311.52"
+      }
+    ],
+    "id": "inv_114",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.242868",
+    "source_file": "email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.json",
+    "pdf_path": "/email_invoices/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_115",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.243003",
+    "source_file": "email_2_20250805_230044_V6102702_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230044_V6102702_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44048990",
+    "invoice_date": "07/18/25",
+    "invoice_total": "17.03",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "141-8937",
+        "product_name": "2/PK FlexiProp Medium Medium",
+        "Quantity": "1",
+        "unit_price": "17.03",
+        "line_item_total": "17.03"
+      }
+    ],
+    "id": "inv_116",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.243111",
+    "source_file": "email_7_20250805_232220_henryschein_4434143_20250720_31085143_14487143784.json",
+    "pdf_path": "/email_invoices/email_7_20250805_232220_henryschein_4434143_20250720_31085143_14487143784.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_117",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.243330",
+    "source_file": "email_49_20250911_154308_tc dental_648bbe67.json",
+    "pdf_path": "/email_invoices/email_49_20250911_154308_tc dental_648bbe67.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_118",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.243431",
+    "source_file": "email_2_20250805_232230_V6060603_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232230_V6060603_-78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1357,12 +2903,44 @@
         "line_item_total": "69.59"
       }
     ],
-    "id": "inv_88",
+    "id": "inv_119",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.846996",
+    "created_at": "2025-09-12T14:53:08.243566",
     "source_file": "email_42_20250911_154257_henryschein_4434143_20250910_31253796_14597339599_b8942009.json",
     "pdf_path": "/email_invoices/email_42_20250911_154257_henryschein_4434143_20250910_31253796_14597339599_b8942009.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_120",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.243596",
+    "source_file": "Darby_Invoice_5572651.json",
+    "pdf_path": "/email_invoices/Darby_Invoice_5572651.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_121",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.243623",
+    "source_file": "Invoice-QDSNFCRE-0004.json",
+    "pdf_path": "/email_invoices/Invoice-QDSNFCRE-0004.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -1381,12 +2959,413 @@
         "line_item_total": "225.00"
       }
     ],
-    "id": "inv_89",
+    "id": "inv_122",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.847222",
+    "created_at": "2025-09-12T14:53:08.243865",
     "source_file": "epic_invoice_4_parsed.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_123",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.244673",
+    "source_file": "email_32_20250911_154231_Invoice_NEA3947271_a0d44480.json",
+    "pdf_path": "/email_invoices/email_32_20250911_154231_Invoice_NEA3947271_a0d44480.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_124",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.244737",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082819.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082819.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_125",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.244777",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170835.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170835.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_126",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.245015",
+    "source_file": "email_71_20250911_154415_304500120691_0450004311513_20250531_a0fe1385.json",
+    "pdf_path": "/email_invoices/email_71_20250911_154415_304500120691_0450004311513_20250531_a0fe1385.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_127",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.245214",
+    "source_file": "email_35_20250911_154239_Invoice 464_db82f6ef.json",
+    "pdf_path": "/email_invoices/email_35_20250911_154239_Invoice 464_db82f6ef.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_128",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.245245",
+    "source_file": "patterson.json",
+    "pdf_path": "/email_invoices/patterson.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44213044",
+    "invoice_date": "07/17/25",
+    "invoice_total": "750.82",
+    "office_location": "Salem",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "900-7428",
+        "product_name": "5/PK Maxima Diamond FG KS2-SC",
+        "Quantity": "3",
+        "unit_price": "29.80",
+        "line_item_total": "89.40"
+      },
+      {
+        "product_number": "570-1510",
+        "product_name": "EA Lead-Free Steam Indicator Tape 3/4\"x60L\"",
+        "Quantity": "3",
+        "unit_price": "7.12",
+        "line_item_total": "21.36"
+      },
+      {
+        "product_number": "100-6188",
+        "product_name": "144/PK Prophy Cups Webbed Screw Type Hard White",
+        "Quantity": "3",
+        "unit_price": "18.98",
+        "line_item_total": "56.94"
+      },
+      {
+        "product_number": "100-8502",
+        "product_name": "5/PK Surgical Bur FG",
+        "Quantity": "557",
+        "unit_price": "10.49",
+        "line_item_total": "31.47"
+      },
+      {
+        "product_number": "131-3943",
+        "product_name": "3.4OZ/BT Prevident",
+        "Quantity": "5000",
+        "unit_price": "6.49",
+        "line_item_total": "233.64"
+      },
+      {
+        "product_number": "543-0219",
+        "product_name": "3.4OZ/BT PreviDent",
+        "Quantity": "5000",
+        "unit_price": "6.49",
+        "line_item_total": "311.52"
+      }
+    ],
+    "id": "inv_129",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.245303",
+    "source_file": "email_3_20250805_232227_henryschein_4434143_20250718_31080183_14484025460.json",
+    "pdf_path": "/email_invoices/email_3_20250805_232227_henryschein_4434143_20250718_31080183_14484025460.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44213044",
+    "invoice_date": "07/17/25",
+    "due_date": "08/16/25",
+    "invoice_total": "750.82",
+    "office_location": "Salem",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "900-7428",
+        "product_name": "5/PK Maxima Diamond FG KS2-SC",
+        "Quantity": "3",
+        "unit_price": "29.80",
+        "line_item_total": "89.40"
+      },
+      {
+        "product_number": "570-1510",
+        "product_name": "EA Lead-Free Steam Indicator Tape 3/4\"x60L\"",
+        "Quantity": "3",
+        "unit_price": "7.12",
+        "line_item_total": "21.36"
+      },
+      {
+        "product_number": "100-6188",
+        "product_name": "144/PK Prophy Cups Webbed Screw Type Hard White",
+        "Quantity": "3",
+        "unit_price": "18.98",
+        "line_item_total": "56.94"
+      },
+      {
+        "product_number": "100-8502",
+        "product_name": "5/PK Surgical Bur FG",
+        "Quantity": "557",
+        "unit_price": "10.49",
+        "line_item_total": "31.47"
+      },
+      {
+        "product_number": "131-3943",
+        "product_name": "3.4OZ/BT Prevident",
+        "Quantity": "5000",
+        "unit_price": "6.49",
+        "line_item_total": "233.64"
+      },
+      {
+        "product_number": "543-0219",
+        "product_name": "3.4OZ/BT PreviDent",
+        "Quantity": "5000",
+        "unit_price": "6.49",
+        "line_item_total": "311.52"
+      }
+    ],
+    "id": "inv_130",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.245428",
+    "source_file": "henry_invoice_6.json",
+    "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44507826",
+    "invoice_date": "07/24/25",
+    "due_date": "08/23/25",
+    "invoice_total": "359.47",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "112-4856",
+        "product_name": "200/BX Self Seal Sterilization Pouch 2.75x9",
+        "Quantity": "4",
+        "unit_price": "7.58",
+        "line_item_total": "30.32"
+      },
+      {
+        "product_number": "112-4857",
+        "product_name": "200/BX Self Seal Sterilization Pouch 3.5x5.25",
+        "Quantity": "2",
+        "unit_price": "6.32",
+        "line_item_total": "12.64"
+      },
+      {
+        "product_number": "112-4853",
+        "product_name": "200/BX Self Seal Sterilization Pouch 3.5x9",
+        "Quantity": "3",
+        "unit_price": "8.08",
+        "line_item_total": "24.24"
+      },
+      {
+        "product_number": "112-4863",
+        "product_name": "200/BX Self Seal Sterilization Pouch 4.25x11",
+        "Quantity": "3",
+        "unit_price": "11.15",
+        "line_item_total": "33.45"
+      },
+      {
+        "product_number": "112-4854",
+        "product_name": "200/BX Self Seal Sterilization Pouch 5.25x10",
+        "Quantity": "3",
+        "unit_price": "10.73",
+        "line_item_total": "32.19"
+      },
+      {
+        "product_number": "570-1933",
+        "product_name": "225/BX Dental Chair Barrier Sleeve 24\"Lx27.5\"W",
+        "Quantity": "1",
+        "unit_price": "19.18",
+        "line_item_total": "19.18"
+      },
+      {
+        "product_number": "112-4599",
+        "product_name": "36/PK Matrix Bands Tofflemire #2 .002",
+        "Quantity": "1",
+        "unit_price": "5.30",
+        "line_item_total": "5.30"
+      },
+      {
+        "product_number": "543-3435",
+        "product_name": "72/BX Sensitivity Bundle",
+        "Quantity": "1",
+        "unit_price": "48.24",
+        "line_item_total": "48.24"
+      },
+      {
+        "product_number": "900-4565",
+        "product_name": "12/PK Impression Trays #3 Med/U Perforated",
+        "Quantity": "2",
+        "unit_price": "4.80",
+        "line_item_total": "9.60"
+      },
+      {
+        "product_number": "100-9224",
+        "product_name": "12/BX Articulating Paper Combination Red/Blue",
+        "Quantity": "2",
+        "unit_price": "3.54",
+        "line_item_total": "7.08"
+      },
+      {
+        "product_number": "570-3250",
+        "product_name": "EA Digital Sensor Holder Arm Bitewing",
+        "Quantity": "4",
+        "unit_price": "19.59",
+        "line_item_total": "78.36"
+      },
+      {
+        "product_number": "170-0631",
+        "product_name": "25/PK Bulk EZ Tips Refill",
+        "Quantity": "19",
+        "unit_price": "26.19",
+        "line_item_total": "26.19"
+      },
+      {
+        "product_number": "170-0578",
+        "product_name": "25/PK Bulk EZ Tips Refill",
+        "Quantity": "17",
+        "unit_price": "26.19",
+        "line_item_total": "26.19"
+      }
+    ],
+    "id": "inv_131",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.246850",
+    "source_file": "henryschein_4434143_20250725_31102443_14497454391.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250725_31102443_14497454391.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_132",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.247109",
+    "source_file": "email_38_20250911_154247_Darby_Invoice_5572473_f849f327.json",
+    "pdf_path": "/email_invoices/email_38_20250911_154247_Darby_Invoice_5572473_f849f327.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_133",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.247253",
+    "source_file": "email_18_20250911_154129_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082957_95b352a7.json",
+    "pdf_path": "/email_invoices/email_18_20250911_154129_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082957_95b352a7.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_134",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.247398",
+    "source_file": "email_56_20250911_154339_V6529148_8df5afae.json",
+    "pdf_path": "/email_invoices/email_56_20250911_154339_V6529148_8df5afae.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "62072596",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_135",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.247460",
+    "source_file": "email_54_20250911_154333_Patterson  Invoice # 3038897967_6870df27.json",
+    "pdf_path": "/email_invoices/email_54_20250911_154333_Patterson  Invoice # 3038897967_6870df27.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_136",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.247511",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-171030.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-171030.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -1405,11 +3384,920 @@
         "line_item_total": "51.00"
       }
     ],
-    "id": "inv_99",
+    "id": "inv_137",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.848921",
+    "created_at": "2025-09-12T14:53:08.247660",
     "source_file": "epic_invoice_3_parsed.json",
+    "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "62072581",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "043-6816",
+        "product_name": "POUCH STER 3.5 X",
+        "Quantity": "9",
+        "unit_price": "2.000",
+        "line_item_total": "2.000"
+      }
+    ],
+    "id": "inv_138",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.248352",
+    "source_file": "Patterson  Invoice # 3038897968.json",
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038897968.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_139",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.248391",
+    "source_file": "Invoice 27170.json",
+    "pdf_path": "/email_invoices/Invoice 27170.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_140",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.248663",
+    "source_file": "email_1_20250911_154049_ColumbiaSmiles12855_14a67f54.json",
+    "pdf_path": "/email_invoices/email_1_20250911_154049_ColumbiaSmiles12855_14a67f54.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_141",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.248736",
+    "source_file": "Credit Note CN-20265 (1).json",
+    "pdf_path": "/email_invoices/Credit Note CN-20265 (1).pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_142",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.248879",
+    "source_file": "email_51_20250911_154318_patterson_3ff4e698.json",
+    "pdf_path": "/email_invoices/email_51_20250911_154318_patterson_3ff4e698.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46397099",
+    "invoice_date": "09/08/25",
+    "due_date": "10/08/25",
+    "invoice_total": "59.83",
+    "office_location": "Roseburg",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "707-2812",
+        "product_name": "200/BX D-Lish Prophy Paste Coarse Assorted",
+        "Quantity": "1",
+        "unit_price": "59.83",
+        "line_item_total": "59.83"
+      }
+    ],
+    "id": "inv_143",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.248915",
+    "source_file": "henryschein_4434143_20250909_31249878_14594621914.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250909_31249878_14594621914.pdf"
+  },
+  {
+    "invoice_number": "44134561",
+    "invoice_date": "07/16/25",
+    "invoice_total": "93.37",
+    "office_location": "Lebanon",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "543-0219",
+        "product_name": "3.40Z/BT PreviDent 5000 Booster",
+        "Quantity": "12",
+        "unit_price": "6.49",
+        "line_item_total": "77.88"
+      }
+    ],
+    "due_date": "08/15/2025",
+    "id": "inv_144",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.248947",
+    "source_file": "Invoice_20250716_0001.json",
+    "pdf_path": "/email_invoices/Invoice_20250716_0001.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44250801",
+    "invoice_date": "07/18/25",
+    "due_date": "08/17/25",
+    "invoice_total": "329.17",
+    "office_location": "Roseburg",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "378-0191",
+        "product_name": "60/PK Premier Retraction Caps Assorted",
+        "Quantity": "1",
+        "unit_price": "23.59",
+        "line_item_total": "23.59"
+      },
+      {
+        "product_number": "127-0122",
+        "product_name": "100/BX Pinnacle Sensor Sheath Dexis Platinum",
+        "Quantity": "2",
+        "unit_price": "19.91",
+        "line_item_total": "39.82"
+      },
+      {
+        "product_number": "161-4901",
+        "product_name": "12/PK Endogel Microdose Tube 1mL/Tb",
+        "Quantity": "1",
+        "unit_price": "21.82",
+        "line_item_total": "21.82"
+      },
+      {
+        "product_number": "378-0190",
+        "product_name": "60/PK Premier Retraction Caps Large Size",
+        "Quantity": "5",
+        "unit_price": "26.35",
+        "line_item_total": "26.35"
+      },
+      {
+        "product_number": "900-7449",
+        "product_name": "500/CA Dri-Gard CSR Wrap 20\"x20\"",
+        "Quantity": "1",
+        "unit_price": "117.59",
+        "line_item_total": "117.59"
+      },
+      {
+        "product_number": "153-0372",
+        "product_name": "100/BG Halyard CSR Wrap 15\" x 15\"",
+        "Quantity": "3",
+        "unit_price": "8.56",
+        "line_item_total": "25.68"
+      },
+      {
+        "product_number": "468-1629",
+        "product_name": "60/PK EdgeOne R Gutta Percha R25",
+        "Quantity": "1",
+        "unit_price": "13.61",
+        "line_item_total": "13.61"
+      },
+      {
+        "product_number": "468-1587",
+        "product_name": "3/PK EdgeOne Blaze Utopia R25 21MM R25 - 21mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      },
+      {
+        "product_number": "468-1588",
+        "product_name": "3/PK EdgeOne Blaze Utopia R25 25MM R25 - 25mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      }
+    ],
+    "id": "inv_145",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.249088",
+    "source_file": "henry_invoice_5.json",
+    "pdf_path": "/email_invoices/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_146",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.249540",
+    "source_file": "email_2_20250805_232017_V6230412_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232017_V6230412_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_147",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.249573",
+    "source_file": "Darby_Invoice_5572473.json",
+    "pdf_path": "/email_invoices/Darby_Invoice_5572473.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46589354",
+    "invoice_date": "09/08/25",
+    "due_date": "10/08/25",
+    "invoice_total": "289.80",
+    "office_location": "Lebanon",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "570-0177",
+        "product_name": "250X2/BX Ibuprofen Tablets Pouch 200mg",
+        "Quantity": "1",
+        "unit_price": "42.79",
+        "line_item_total": "42.79"
+      },
+      {
+        "product_number": "333-3382",
+        "product_name": "EA Coe-Soft Professional Package",
+        "Quantity": "1",
+        "unit_price": "158.37",
+        "line_item_total": "158.37"
+      },
+      {
+        "product_number": "900-1281",
+        "product_name": "EA MaxiTemp HP C&B Kit 4:1 A2",
+        "Quantity": "1",
+        "unit_price": "82.15",
+        "line_item_total": "82.15"
+      }
+    ],
+    "id": "inv_148",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.249705",
+    "source_file": "email_14_20250911_154116_henryschein_4434143_20250909_31249878_14594621913_3a8d31fc.json",
+    "pdf_path": "/email_invoices/email_14_20250911_154116_henryschein_4434143_20250909_31249878_14594621913_3a8d31fc.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44557050",
+    "invoice_date": "07/24/25",
+    "invoice_total": "28.92",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "107-6371",
+        "product_name": "EA Sodium Hypochlorite 6% 16oz/Bt",
+        "Quantity": "1",
+        "unit_price": "13.43",
+        "line_item_total": "13.43"
+      }
+    ],
+    "id": "inv_149",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.249762",
+    "source_file": "email_11_20250805_231221_henryschein_4434143_20250725_31102443_14497454388.json",
+    "pdf_path": "/email_invoices/email_11_20250805_231221_henryschein_4434143_20250725_31102443_14497454388.pdf"
+  },
+  {
+    "vendor": "Epic Dental Lab",
+    "invoice_number": "4793",
+    "invoice_date": "05/16/2025",
+    "due_date": "06/15/2025",
+    "total": "353.00",
+    "office_location": "Roseburg",
+    "vendor_name": "Epic Dental Lab",
+    "line_items": [
+      {
+        "product_number": "Set LRPD",
+        "product_name": "Set LRPD for try-in",
+        "Quantity": "1.00",
+        "unit_price": "120.00",
+        "line_item_total": "120.00"
+      },
+      {
+        "product_number": "Set-up FUD",
+        "product_name": "Set-up wax try in of FUD",
+        "Quantity": "1.00",
+        "unit_price": "120.00",
+        "line_item_total": "120.00"
+      },
+      {
+        "product_number": "Set of premium teeth",
+        "product_name": "Set of premium teeth",
+        "Quantity": "1.00",
+        "unit_price": "75.00",
+        "line_item_total": "75.00"
+      },
+      {
+        "product_number": "Teeth LRPD",
+        "product_name": "Teeth LRPD",
+        "Quantity": "1.00",
+        "unit_price": "38.00",
+        "line_item_total": "38.00"
+      }
+    ],
+    "id": "inv_150",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.249900",
+    "source_file": "epic_invoice_10_parsed.json",
+    "pdf_path": null
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_151",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.250614",
+    "source_file": "email_16_20250911_154119_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083050_bbb35a67.json",
+    "pdf_path": "/email_invoices/email_16_20250911_154119_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083050_bbb35a67.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_152",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.250645",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-160154.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-160154.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44250801",
+    "invoice_date": "07/18/25",
+    "due_date": "08/17/25",
+    "invoice_total": "329.17",
+    "office_location": "Roseburg",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "378-0191",
+        "product_name": "60/PK Premier Retraction Caps Assorted",
+        "Quantity": "1",
+        "unit_price": "23.59",
+        "line_item_total": "23.59"
+      },
+      {
+        "product_number": "127-0122",
+        "product_name": "100/BX Pinnacle Sensor Sheath Dexis Platinum",
+        "Quantity": "2",
+        "unit_price": "19.91",
+        "line_item_total": "39.82"
+      },
+      {
+        "product_number": "161-4901",
+        "product_name": "12/PK Endogel Microdose Tube 1mL/Tb",
+        "Quantity": "1",
+        "unit_price": "21.82",
+        "line_item_total": "21.82"
+      },
+      {
+        "product_number": "378-0190",
+        "product_name": "60/PK Premier Retraction Caps Large Size",
+        "Quantity": "5",
+        "unit_price": "26.35",
+        "line_item_total": "26.35"
+      },
+      {
+        "product_number": "900-7449",
+        "product_name": "500/CA Dri-Gard CSR Wrap 20\"x20\"",
+        "Quantity": "1",
+        "unit_price": "117.59",
+        "line_item_total": "117.59"
+      },
+      {
+        "product_number": "153-0372",
+        "product_name": "100/BG Halyard CSR Wrap 15\" x 15\"",
+        "Quantity": "3",
+        "unit_price": "8.56",
+        "line_item_total": "25.68"
+      },
+      {
+        "product_number": "468-1629",
+        "product_name": "60/PK EdgeOne R Gutta Percha R25",
+        "Quantity": "1",
+        "unit_price": "13.61",
+        "line_item_total": "13.61"
+      },
+      {
+        "product_number": "468-1587",
+        "product_name": "3/PK EdgeOne Blaze Utopia R25 21MM R25 - 21mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      },
+      {
+        "product_number": "468-1588",
+        "product_name": "3/PK EdgeOne Blaze Utopia R25 25MM R25 - 25mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      }
+    ],
+    "id": "inv_153",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.250775",
+    "source_file": "email_4_20250805_231537_henryschein_4434143_20250718_31082051_14484727803.json",
+    "pdf_path": "/email_invoices/email_4_20250805_231537_henryschein_4434143_20250718_31082051_14484727803.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_154",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.250805",
+    "source_file": "Invoice_NEA3947271.json",
+    "pdf_path": "/email_invoices/Invoice_NEA3947271.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_155",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.250833",
+    "source_file": "V6015761 -78004.json",
+    "pdf_path": "/email_invoices/V6015761 -78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46729401",
+    "invoice_date": "09/11/25",
+    "due_date": "10/11/25",
+    "invoice_total": "496.94",
+    "office_location": "Salem",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "147-9331",
+        "product_name": "6/BG ReLeaf Short Hose Kit",
+        "Quantity": "2",
+        "unit_price": "25.43",
+        "line_item_total": "50.86"
+      },
+      {
+        "product_number": "190-0154",
+        "product_name": "EA Lumibrite Chairside Whitening Kit",
+        "Quantity": "3",
+        "unit_price": "57.59",
+        "line_item_total": "172.77"
+      },
+      {
+        "product_number": "900-6542",
+        "product_name": "100/BX Disposable Toothbrush w/Paste",
+        "Quantity": "3",
+        "unit_price": "11.06",
+        "line_item_total": "33.18"
+      },
+      {
+        "product_number": "543-0219",
+        "product_name": "3.4OZ/BT PreviDent",
+        "Quantity": "5000",
+        "unit_price": "6.49",
+        "line_item_total": "233.64"
+      }
+    ],
+    "id": "inv_156",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.250862",
+    "source_file": "henryschein_4434143_20250912_31261900_14602917150.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250912_31261900_14602917150.pdf"
+  },
+  {
+    "vendor": "patterson_dental",
+    "invoice_number": "3038926445",
+    "invoice_date": "2025-09-11",
+    "due_date": "10/11/2025",
+    "total": "259.00",
+    "office_location": "Riddle",
+    "vendor_name": "Patterson Dental",
+    "line_items": [
+      {
+        "product_number": "73179157",
+        "product_name": "SPRT CLINICAL MONTHLY",
+        "Quantity": "1.000",
+        "unit_price": "259.00",
+        "line_item_total": "259.00"
+      }
+    ],
+    "id": "inv_157",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.250913",
+    "source_file": "email_63_20250911_154351_Patterson  Invoice # 3038926445_14e33919.json",
+    "pdf_path": "/email_invoices/email_63_20250911_154351_Patterson  Invoice # 3038926445_14e33919.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_158",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.250952",
+    "source_file": "invoice-13970-638931909850717798.json",
+    "pdf_path": "/email_invoices/invoice-13970-638931909850717798.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_159",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.251080",
+    "source_file": "email_2_20250805_231946_V6273090_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231946_V6273090_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_160",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.251109",
+    "source_file": "Crest & Oral-B Professional Invoice.json",
+    "pdf_path": "/email_invoices/Crest & Oral-B Professional Invoice.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_161",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.251231",
+    "source_file": "email_2_20250805_230046_V6186388_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230046_V6186388_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_162",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.251349",
+    "source_file": "email_2_20250805_230046_V6230412_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230046_V6230412_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44557050",
+    "invoice_date": "07/24/25",
+    "due_date": "08/23/25",
+    "invoice_total": "28.92",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "107-6371",
+        "product_name": "EA Sodium Hypochlorite 6% 16oz/Bt",
+        "Quantity": "1",
+        "unit_price": "13.43",
+        "line_item_total": "13.43"
+      }
+    ],
+    "id": "inv_163",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.251377",
+    "source_file": "henryschein_4434143_20250725_31102443_14497454388.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250725_31102443_14497454388.pdf"
+  },
+  {
+    "invoice_number": "44134561",
+    "invoice_date": "07/16/25",
+    "invoice_total": "93.37",
+    "office_location": "Lebanon",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "543-0219",
+        "product_name": "3.40Z/BT PreviDent 5000 Booster",
+        "Quantity": "12",
+        "unit_price": "6.49",
+        "line_item_total": "77.88"
+      }
+    ],
+    "id": "inv_164",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.251501",
+    "source_file": "email_9_20250805_231325_Invoice_20250716_0001.json",
+    "pdf_path": "/email_invoices/email_9_20250805_231325_Invoice_20250716_0001.pdf"
+  },
+  {
+    "invoice_number": "44134561",
+    "invoice_date": "07/16/25",
+    "invoice_total": "93.37",
+    "office_location": "Lebanon",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "543-0219",
+        "product_name": "3.40Z/BT PreviDent 5000 Booster",
+        "Quantity": "12",
+        "unit_price": "6.49",
+        "line_item_total": "77.88"
+      }
+    ],
+    "id": "inv_165",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.251625",
+    "source_file": "original_output.json",
+    "pdf_path": "/email_invoices/Invoice_20250716_0001.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_166",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.252211",
+    "source_file": "V6273090 - 78004.json",
+    "pdf_path": "/email_invoices/V6273090 - 78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "62072527",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_167",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.252239",
+    "source_file": "Patterson  Invoice # 3038872509.json",
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038872509.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_168",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.252274",
+    "source_file": "Med Pro Inv.json",
+    "pdf_path": "/email_invoices/Med Pro Inv.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44507826",
+    "invoice_date": "07/24/25",
+    "due_date": "08/23/25",
+    "invoice_total": "359.47",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "112-4856",
+        "product_name": "200/BX Self Seal Sterilization Pouch 2.75x9",
+        "Quantity": "4",
+        "unit_price": "7.58",
+        "line_item_total": "30.32"
+      },
+      {
+        "product_number": "112-4857",
+        "product_name": "200/BX Self Seal Sterilization Pouch 3.5x5.25",
+        "Quantity": "2",
+        "unit_price": "6.32",
+        "line_item_total": "12.64"
+      },
+      {
+        "product_number": "112-4853",
+        "product_name": "200/BX Self Seal Sterilization Pouch 3.5x9",
+        "Quantity": "3",
+        "unit_price": "8.08",
+        "line_item_total": "24.24"
+      },
+      {
+        "product_number": "112-4863",
+        "product_name": "200/BX Self Seal Sterilization Pouch 4.25x11",
+        "Quantity": "3",
+        "unit_price": "11.15",
+        "line_item_total": "33.45"
+      },
+      {
+        "product_number": "112-4854",
+        "product_name": "200/BX Self Seal Sterilization Pouch 5.25x10",
+        "Quantity": "3",
+        "unit_price": "10.73",
+        "line_item_total": "32.19"
+      },
+      {
+        "product_number": "570-1933",
+        "product_name": "225/BX Dental Chair Barrier Sleeve 24\"Lx27.5\"W",
+        "Quantity": "1",
+        "unit_price": "19.18",
+        "line_item_total": "19.18"
+      },
+      {
+        "product_number": "112-4599",
+        "product_name": "36/PK Matrix Bands Tofflemire #2 .002",
+        "Quantity": "1",
+        "unit_price": "5.30",
+        "line_item_total": "5.30"
+      },
+      {
+        "product_number": "543-3435",
+        "product_name": "72/BX Sensitivity Bundle",
+        "Quantity": "1",
+        "unit_price": "48.24",
+        "line_item_total": "48.24"
+      },
+      {
+        "product_number": "900-4565",
+        "product_name": "12/PK Impression Trays #3 Med/U Perforated",
+        "Quantity": "2",
+        "unit_price": "4.80",
+        "line_item_total": "9.60"
+      },
+      {
+        "product_number": "100-9224",
+        "product_name": "12/BX Articulating Paper Combination Red/Blue",
+        "Quantity": "2",
+        "unit_price": "3.54",
+        "line_item_total": "7.08"
+      },
+      {
+        "product_number": "570-3250",
+        "product_name": "EA Digital Sensor Holder Arm Bitewing",
+        "Quantity": "4",
+        "unit_price": "19.59",
+        "line_item_total": "78.36"
+      },
+      {
+        "product_number": "170-0631",
+        "product_name": "25/PK Bulk EZ Tips Refill",
+        "Quantity": "19",
+        "unit_price": "26.19",
+        "line_item_total": "26.19"
+      },
+      {
+        "product_number": "170-0578",
+        "product_name": "25/PK Bulk EZ Tips Refill",
+        "Quantity": "17",
+        "unit_price": "26.19",
+        "line_item_total": "26.19"
+      }
+    ],
+    "id": "inv_169",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.252411",
+    "source_file": "henry_invoice_8.json",
+    "pdf_path": null
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_170",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.253647",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083050.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083050.pdf"
+  },
+  {
+    "vendor": "patterson_dental",
+    "invoice_number": "3037868506",
+    "invoice_date": "2025-07-11",
+    "due_date": "08/10/2025",
+    "total": "259.00",
+    "office_location": "Riddle",
+    "vendor_name": "Patterson Dental",
+    "line_items": [
+      {
+        "product_number": "73179157",
+        "product_name": "SPRT CLINICAL MONTHLY",
+        "Quantity": "1.000",
+        "unit_price": "259.00",
+        "line_item_total": "259.00"
+      }
+    ],
+    "id": "inv_171",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.253818",
+    "source_file": "patterson_invoice_1.json",
     "pdf_path": null
   },
   {
@@ -1485,143 +4373,90 @@
         "line_item_total": "27.11"
       }
     ],
-    "id": "inv_108",
+    "id": "inv_172",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.850751",
-    "source_file": "email_4_20250805_231537_henryschein_4434143_20250718_31082051_14484727803.json",
-    "pdf_path": "/email_invoices/email_4_20250805_231537_henryschein_4434143_20250718_31082051_14484727803.pdf"
+    "created_at": "2025-09-12T14:53:08.254637",
+    "source_file": "henryschein_4434143_20250718_31082051_14484727803.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250718_31082051_14484727803.pdf"
   },
   {
     "vendor": "Henry schein",
-    "invoice_number": "46589354",
-    "invoice_date": "09/08/25",
-    "due_date": "10/08/25",
-    "invoice_total": "289.80",
-    "office_location": "Lebanon",
+    "invoice_number": "62072784",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [
       {
-        "product_number": "570-0177",
-        "product_name": "250X2/BX Ibuprofen Tablets Pouch 200mg",
-        "Quantity": "1",
-        "unit_price": "42.79",
-        "line_item_total": "42.79"
-      },
-      {
-        "product_number": "333-3382",
-        "product_name": "EA Coe-Soft Professional Package",
-        "Quantity": "1",
-        "unit_price": "158.37",
-        "line_item_total": "158.37"
-      },
-      {
-        "product_number": "900-1281",
-        "product_name": "EA MaxiTemp HP C&B Kit 4:1 A2",
-        "Quantity": "1",
-        "unit_price": "82.15",
-        "line_item_total": "82.15"
+        "product_number": "040-6306",
+        "product_name": "MIRROR CONE SOCKET",
+        "Quantity": "4",
+        "unit_price": "2.000",
+        "line_item_total": "2.000"
       }
     ],
-    "id": "inv_104",
+    "id": "inv_173",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.849885",
-    "source_file": "email_14_20250911_154116_henryschein_4434143_20250909_31249878_14594621913_3a8d31fc.json",
-    "pdf_path": "/email_invoices/email_14_20250911_154116_henryschein_4434143_20250909_31249878_14594621913_3a8d31fc.pdf"
+    "created_at": "2025-09-12T14:53:08.254673",
+    "source_file": "Patterson  Invoice # 3038963781.json",
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038963781.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
-    "invoice_number": "4793",
-    "invoice_date": "05/16/2025",
-    "due_date": "06/15/2025",
-    "total": "353.00",
-    "office_location": "Roseburg",
+    "invoice_number": "5371",
+    "invoice_date": "07/20/2025",
+    "total": "0.00",
+    "office_location": "Riddle",
     "vendor_name": "Epic Dental Lab",
-    "line_items": [
-      {
-        "product_number": "Set LRPD",
-        "product_name": "Set LRPD for try-in",
-        "Quantity": "1.00",
-        "unit_price": "120.00",
-        "line_item_total": "120.00"
-      },
-      {
-        "product_number": "Set-up FUD",
-        "product_name": "Set-up wax try in of FUD",
-        "Quantity": "1.00",
-        "unit_price": "120.00",
-        "line_item_total": "120.00"
-      },
-      {
-        "product_number": "Set of premium teeth",
-        "product_name": "Set of premium teeth",
-        "Quantity": "1.00",
-        "unit_price": "75.00",
-        "line_item_total": "75.00"
-      },
-      {
-        "product_number": "Teeth LRPD",
-        "product_name": "Teeth LRPD",
-        "Quantity": "1.00",
-        "unit_price": "38.00",
-        "line_item_total": "38.00"
-      }
-    ],
-    "id": "inv_106",
+    "line_items": [],
+    "id": "inv_174",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.850037",
-    "source_file": "epic_invoice_10_parsed.json",
-    "pdf_path": null
+    "created_at": "2025-09-12T14:53:08.254831",
+    "source_file": "5371.json",
+    "pdf_path": "/email_invoices/email_6_20250805_230038_henryschein_4434143_20250720_31085178_14486986364.pdf"
   },
   {
-    "vendor": "patterson_dental",
-    "invoice_number": "3038926445",
-    "invoice_date": "2025-09-11",
-    "due_date": "10/11/2025",
-    "total": "259.00",
-    "office_location": "Riddle",
-    "vendor_name": "Patterson Dental",
+    "vendor": "Henry schein",
+    "invoice_number": "46766357",
+    "invoice_date": "09/11/25",
+    "due_date": "10/11/25",
+    "invoice_total": "248.26",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
     "line_items": [
       {
-        "product_number": "73179157",
-        "product_name": "SPRT CLINICAL MONTHLY",
-        "Quantity": "1.000",
-        "unit_price": "259.00",
-        "line_item_total": "259.00"
+        "product_number": "177-0037",
+        "product_name": "EA Amalgam Bucket",
+        "Quantity": "5",
+        "unit_price": "241.77",
+        "line_item_total": "241.77"
       }
     ],
-    "id": "inv_109",
+    "id": "inv_175",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.850788",
-    "source_file": "email_63_20250911_154351_Patterson  Invoice # 3038926445_14e33919.json",
-    "pdf_path": "/email_invoices/email_63_20250911_154351_Patterson  Invoice # 3038926445_14e33919.pdf"
+    "created_at": "2025-09-12T14:53:08.255231",
+    "source_file": "henryschein_4434143_20250911_31259810_14600935136.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250911_31259810_14600935136.pdf"
   },
   {
-    "vendor": "patterson_dental",
-    "invoice_number": "3037868506",
-    "invoice_date": "2025-07-11",
-    "due_date": "08/10/2025",
-    "total": "259.00",
-    "office_location": "Riddle",
-    "vendor_name": "Patterson Dental",
-    "line_items": [
-      {
-        "product_number": "73179157",
-        "product_name": "SPRT CLINICAL MONTHLY",
-        "Quantity": "1.000",
-        "unit_price": "259.00",
-        "line_item_total": "259.00"
-      }
-    ],
-    "id": "inv_116",
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_176",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.852890",
-    "source_file": "patterson_invoice_1.json",
-    "pdf_path": null
+    "created_at": "2025-09-12T14:53:08.255286",
+    "source_file": "email_2_20250805_232234_V6230412_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232234_V6230412_-_78004.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -1654,12 +4489,28 @@
         "line_item_total": "30.00"
       }
     ],
-    "id": "inv_119",
+    "id": "inv_177",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.853862",
+    "created_at": "2025-09-12T14:53:08.255412",
     "source_file": "epic_invoice_6_parsed.json",
     "pdf_path": "/email_invoices/email_6_20250805_230038_henryschein_4434143_20250720_31085178_14486986364.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_178",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.255919",
+    "source_file": "email_57_20250911_154342_Darby_Invoice_5572651_a501195a.json",
+    "pdf_path": "/email_invoices/email_57_20250911_154342_Darby_Invoice_5572651_a501195a.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -1677,12 +4528,209 @@
         "line_item_total": "71.00"
       }
     ],
-    "id": "inv_121",
+    "id": "inv_179",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.854269",
+    "created_at": "2025-09-12T14:53:08.256029",
     "source_file": "Patterson  Invoice # 3038198528.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44557050",
+    "invoice_date": "07/24/25",
+    "due_date": "08/23/25",
+    "invoice_total": "28.92",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "107-6371",
+        "product_name": "EA Sodium Hypochlorite 6% 16oz/Bt",
+        "Quantity": "1",
+        "unit_price": "13.43",
+        "line_item_total": "13.43"
+      }
+    ],
+    "id": "inv_180",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.256906",
+    "source_file": "email_11_20250805_230030_henryschein_4434143_20250725_31102443_14497454388.json",
+    "pdf_path": "/email_invoices/email_11_20250805_230030_henryschein_4434143_20250725_31102443_14497454388.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_181",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.256938",
+    "source_file": "ColumbiaSmiles12855.json",
+    "pdf_path": "/email_invoices/ColumbiaSmiles12855.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_182",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.256966",
+    "source_file": "INVOICE_031516_from_Physician's Resource.json",
+    "pdf_path": "/email_invoices/INVOICE_031516_from_Physician's Resource.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_183",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.257084",
+    "source_file": "email_41_20250911_154254_Med Pro Inv_3865262b.json",
+    "pdf_path": "/email_invoices/email_41_20250911_154254_Med Pro Inv_3865262b.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_184",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.257112",
+    "source_file": "Invoice #1c092f42358f.json",
+    "pdf_path": "/email_invoices/Invoice #1c092f42358f.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "43912059",
+    "invoice_date": "07/10/25",
+    "total": "396.87",
+    "office_location": "Riddle",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "492-0054",
+        "product_name": "ICX Water Treatment Tablets 0.7 Ltr Btl",
+        "Quantity": "1",
+        "unit_price": "39.59",
+        "line_item_total": "39.59"
+      },
+      {
+        "product_number": "777-2324",
+        "product_name": "Filtek One Bulk Fill A1",
+        "Quantity": "1",
+        "unit_price": "94.46",
+        "line_item_total": "94.46"
+      },
+      {
+        "product_number": "112-7321",
+        "product_name": "Essentials 300 PF Nitrile X-Small",
+        "Quantity": "2",
+        "unit_price": "11.59",
+        "line_item_total": "23.18"
+      },
+      {
+        "product_number": "300-0496",
+        "product_name": "Strata-G Wedge Refill Blue Small",
+        "Quantity": "1",
+        "unit_price": "63.19",
+        "line_item_total": "63.19"
+      },
+      {
+        "product_number": "543-3743",
+        "product_name": "Whole Mouth Clean Bundle",
+        "Quantity": "2",
+        "unit_price": "59.76",
+        "line_item_total": "119.52"
+      },
+      {
+        "product_number": "543-0304",
+        "product_name": "Colgate 360 Deep Clean TB X-Compact",
+        "Quantity": "24",
+        "unit_price": "0.00",
+        "line_item_total": "0.00"
+      },
+      {
+        "product_number": "543-0307",
+        "product_name": "Contract Total TP 61044324 .88oz",
+        "Quantity": "6",
+        "unit_price": "0.00",
+        "line_item_total": "0.00"
+      },
+      {
+        "product_number": "543-0252",
+        "product_name": "Colgate Floss Mint 3yd",
+        "Quantity": "2",
+        "unit_price": "0.00",
+        "line_item_total": "0.00"
+      },
+      {
+        "product_number": "543-0285",
+        "product_name": "Contract Colgate Paper Bags Sample",
+        "Quantity": "2",
+        "unit_price": "0.00",
+        "line_item_total": "0.00"
+      },
+      {
+        "product_number": "145-8601",
+        "product_name": "Colgate Minecraft Toothbrush Kids 5+",
+        "Quantity": "2",
+        "unit_price": "9.99",
+        "line_item_total": "19.98"
+      },
+      {
+        "product_number": "640-8482",
+        "product_name": "CaviWipes Towelettes XLarge",
+        "Quantity": "2",
+        "unit_price": "15.23",
+        "line_item_total": "30.46"
+      }
+    ],
+    "id": "inv_185",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.257246",
+    "source_file": "henry_schein_invoice_43912059.json",
+    "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_186",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.258193",
+    "source_file": "Invoice 464.json",
+    "pdf_path": "/email_invoices/Invoice 464.pdf"
   },
   {
     "vendor": "exodus_dental_solutions",
@@ -1729,12 +4777,43 @@
       }
     ],
     "due_date": "07/14/2025",
-    "id": "inv_125",
+    "id": "inv_187",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.855738",
+    "created_at": "2025-09-12T14:53:08.258362",
     "source_file": "4307.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_188",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.258978",
+    "source_file": "email_2_20250805_232234_V6186388_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232234_V6186388_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_189",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.259008",
+    "source_file": "_79U0Y2T9L.json",
+    "pdf_path": "/email_invoices/_79U0Y2T9L.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1745,10 +4824,10 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_127",
+    "id": "inv_190",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.856186",
+    "created_at": "2025-09-12T14:53:08.259118",
     "source_file": "email_39_20250911_154250_Patterson  Invoice # 3038872509_84915bd7.json",
     "pdf_path": "/email_invoices/email_39_20250911_154250_Patterson  Invoice # 3038872509_84915bd7.pdf"
   },
@@ -1769,12 +4848,123 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_128",
+    "id": "inv_191",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.856218",
+    "created_at": "2025-09-12T14:53:08.259175",
     "source_file": "email_66_20250911_154352_Patterson  Invoice # 3038927334_ea93c766.json",
     "pdf_path": "/email_invoices/email_66_20250911_154352_Patterson  Invoice # 3038927334_ea93c766.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_192",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.259339",
+    "source_file": "email_50_20250911_154316_INVOICE_031516_from_Physician's Resource_2e088326.json",
+    "pdf_path": "/email_invoices/email_50_20250911_154316_INVOICE_031516_from_Physician's Resource_2e088326.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_193",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.259368",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-122945.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-122945.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_194",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.259394",
+    "source_file": "Darby_Invoice_5571812.json",
+    "pdf_path": "/email_invoices/Darby_Invoice_5571812.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_195",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.259420",
+    "source_file": "img20250909_12155837.json",
+    "pdf_path": "/email_invoices/img20250909_12155837.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_196",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.259539",
+    "source_file": "email_2_20250805_232229_V6102702_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232229_V6102702_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_197",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.259566",
+    "source_file": "Receipt-2509-5794.json",
+    "pdf_path": "/email_invoices/Receipt-2509-5794.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_198",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.259592",
+    "source_file": "Scan_2025_09_11_08_27_19_236.json",
+    "pdf_path": "/email_invoices/Scan_2025_09_11_08_27_19_236.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -1800,12 +4990,60 @@
         "line_item_total": "51.00"
       }
     ],
-    "id": "inv_131",
+    "id": "inv_199",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.856483",
+    "created_at": "2025-09-12T14:53:08.259722",
     "source_file": "epic_invoice_5_parsed.json",
     "pdf_path": null
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_200",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.260305",
+    "source_file": "Scan_2025_09_11_08_38_34_838.json",
+    "pdf_path": "/email_invoices/Scan_2025_09_11_08_38_34_838.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_201",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.260334",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-171145.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-171145.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_202",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.260482",
+    "source_file": "email_70_20250911_154406_Scan_2025_09_11_08_38_34_838_e2108fd7.json",
+    "pdf_path": "/email_invoices/email_70_20250911_154406_Scan_2025_09_11_08_38_34_838_e2108fd7.pdf"
   },
   {
     "vendor": "tc dental laboratory, inc.",
@@ -1823,12 +5061,115 @@
         "line_item_total": "178.00"
       }
     ],
-    "id": "inv_133",
+    "id": "inv_203",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.857054",
+    "created_at": "2025-09-12T14:53:08.260598",
     "source_file": "tc_invoice_3.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46596758",
+    "invoice_date": "09/09/25",
+    "due_date": "10/09/25",
+    "invoice_total": "31.12",
+    "office_location": "Ridgefield",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "147-1746",
+        "product_name": "250/CA Aspirator Tips 1/8\"x6.25\" White",
+        "Quantity": "1",
+        "unit_price": "28.63",
+        "line_item_total": "28.63"
+      }
+    ],
+    "id": "inv_204",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.261523",
+    "source_file": "henryschein_4434143_20250910_31253796_14597339595.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250910_31253796_14597339595.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_205",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.261583",
+    "source_file": "email_2_20250805_232232_V63202641_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232232_V63202641_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_206",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.261617",
+    "source_file": "V6102702 - 78004.json",
+    "pdf_path": "/email_invoices/V6102702 - 78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_207",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.261644",
+    "source_file": "V6060603 -78004.json",
+    "pdf_path": "/email_invoices/V6060603 -78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_208",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.261672",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170723.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170723.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_209",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.261699",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083020.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083020.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1847,12 +5188,44 @@
         "line_item_total": "59.83"
       }
     ],
-    "id": "inv_135",
+    "id": "inv_210",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.857753",
+    "created_at": "2025-09-12T14:53:08.261829",
     "source_file": "email_12_20250911_154114_henryschein_4434143_20250909_31249878_14594621916_8ca28925.json",
     "pdf_path": "/email_invoices/email_12_20250911_154114_henryschein_4434143_20250909_31249878_14594621916_8ca28925.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_211",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.261866",
+    "source_file": "Invoice 1282639.json",
+    "pdf_path": "/email_invoices/Invoice 1282639.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_212",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.261915",
+    "source_file": "email_72_20250911_154417_304500120691_0450004323231_20250630_51da3879.json",
+    "pdf_path": "/email_invoices/email_72_20250911_154417_304500120691_0450004323231_20250630_51da3879.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -2052,12 +5425,443 @@
         "line_item_total": "79.00"
       }
     ],
-    "id": "inv_137",
+    "id": "inv_213",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.857954",
+    "created_at": "2025-09-12T14:53:08.262063",
     "source_file": "PCS invoices.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_214",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.263012",
+    "source_file": "email_2_20250805_232233_V6273090_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232233_V6273090_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44213044",
+    "invoice_date": "07/17/25",
+    "due_date": "08/16/25",
+    "invoice_total": "750.82",
+    "office_location": "Salem",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "900-7428",
+        "product_name": "5/PK Maxima Diamond FG KS2-SC",
+        "Quantity": "3",
+        "unit_price": "29.80",
+        "line_item_total": "89.40"
+      },
+      {
+        "product_number": "570-1510",
+        "product_name": "EA Lead-Free Steam Indicator Tape 3/4\"x60L\"",
+        "Quantity": "3",
+        "unit_price": "7.12",
+        "line_item_total": "21.36"
+      },
+      {
+        "product_number": "100-6188",
+        "product_name": "144/PK Prophy Cups Webbed Screw Type Hard White",
+        "Quantity": "3",
+        "unit_price": "18.98",
+        "line_item_total": "56.94"
+      },
+      {
+        "product_number": "100-8502",
+        "product_name": "5/PK Surgical Bur FG",
+        "Quantity": "557",
+        "unit_price": "10.49",
+        "line_item_total": "31.47"
+      },
+      {
+        "product_number": "131-3943",
+        "product_name": "3.4OZ/BT Prevident",
+        "Quantity": "5000",
+        "unit_price": "6.49",
+        "line_item_total": "233.64"
+      },
+      {
+        "product_number": "543-0219",
+        "product_name": "3.4OZ/BT PreviDent",
+        "Quantity": "5000",
+        "unit_price": "6.49",
+        "line_item_total": "311.52"
+      }
+    ],
+    "id": "inv_215",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.263045",
+    "source_file": "henryschein_4434143_20250718_31080183_14484025460.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250718_31080183_14484025460.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44007187",
+    "invoice_date": "07/18/25",
+    "due_date": "08/17/25",
+    "invoice_total": "64.78",
+    "office_location": "Lebanon",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "107-5076",
+        "product_name": "EA Burnisher DE Ball 25-26",
+        "Quantity": "2",
+        "unit_price": "32.39",
+        "line_item_total": "64.78"
+      }
+    ],
+    "id": "inv_216",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.263173",
+    "source_file": "henry_invoice_3.json",
+    "pdf_path": "/email_invoices/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_217",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.263796",
+    "source_file": "email_8_20250911_154107_Invoice_082512346_from_TRUSTWORKZ_INC_8b22c3e9.json",
+    "pdf_path": "/email_invoices/email_8_20250911_154107_Invoice_082512346_from_TRUSTWORKZ_INC_8b22c3e9.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46631524",
+    "invoice_date": "09/09/25",
+    "due_date": "10/09/25",
+    "invoice_total": "721.22",
+    "office_location": "Roseburg",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "161-4901",
+        "product_name": "12/PK Endogel Microdose Tube 1mL/Tb",
+        "Quantity": "1",
+        "unit_price": "21.82",
+        "line_item_total": "21.82"
+      },
+      {
+        "product_number": "900-1892",
+        "product_name": "100/BX Standard Needles 30Ga Short Plastic Hub",
+        "Quantity": "1",
+        "unit_price": "11.12",
+        "line_item_total": "11.12"
+      },
+      {
+        "product_number": "107-0546",
+        "product_name": "35/BX Polybite Tray Quadrant",
+        "Quantity": "1",
+        "unit_price": "15.55",
+        "line_item_total": "15.55"
+      },
+      {
+        "product_number": "112-7254",
+        "product_name": "12/BX Maxima Suture PTFE FS-2 19mm 3-0 18\"",
+        "Quantity": "1",
+        "unit_price": "84.46",
+        "line_item_total": "84.46"
+      },
+      {
+        "product_number": "712-4416",
+        "product_name": "12/PK End Tuft Toothbrush Tapered",
+        "Quantity": "2",
+        "unit_price": "11.05",
+        "line_item_total": "22.10"
+      },
+      {
+        "product_number": "114-5308",
+        "product_name": "EA Dexis Platinum Holder Post Yellow",
+        "Quantity": "4",
+        "unit_price": "20.20",
+        "line_item_total": "80.80"
+      },
+      {
+        "product_number": "465-1205",
+        "product_name": "50/BX Lidocaine 2% w/EPI 1.7 mL INJ 1:100 Red",
+        "Quantity": "1",
+        "unit_price": "34.56",
+        "line_item_total": "34.56"
+      },
+      {
+        "product_number": "712-0164",
+        "product_name": "36/BX GUM Go-Betweens Proxabrush Ultra Tight",
+        "Quantity": "1",
+        "unit_price": "24.32",
+        "line_item_total": "24.32"
+      },
+      {
+        "product_number": "712-0154",
+        "product_name": "36/BX GUM Go-Betweens Proxabrush Tight",
+        "Quantity": "1",
+        "unit_price": "24.32",
+        "line_item_total": "24.32"
+      },
+      {
+        "product_number": "712-0155",
+        "product_name": "36/BX GUM Go-Betweens Proxabrush Moderate",
+        "Quantity": "1",
+        "unit_price": "24.32",
+        "line_item_total": "24.32"
+      },
+      {
+        "product_number": "195-1020",
+        "product_name": "EA Beautifil Flow Plus F00 A2",
+        "Quantity": "2",
+        "unit_price": "32.20",
+        "line_item_total": "64.40"
+      },
+      {
+        "product_number": "543-6467",
+        "product_name": "50/BX Peroxyl Packets Alcohol Free 10mL",
+        "Quantity": "1",
+        "unit_price": "29.39",
+        "line_item_total": "29.39"
+      },
+      {
+        "product_number": "468-1704",
+        "product_name": "100/PK EdgeOne Fire Paper Points PRI Primary",
+        "Quantity": "1",
+        "unit_price": "8.37",
+        "line_item_total": "8.37"
+      },
+      {
+        "product_number": "468-1594",
+        "product_name": "3/PK EdgeOne Blaze Utopia R45 25MM R45 - 25mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      },
+      {
+        "product_number": "468-1588",
+        "product_name": "3/PK EdgeOne Blaze Utopia R25 25MM R25 - 25mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      },
+      {
+        "product_number": "468-1593",
+        "product_name": "3/PK EdgeOne Blaze Utopia R45 21MM R45 - 21mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      },
+      {
+        "product_number": "468-1587",
+        "product_name": "3/PK EdgeOne Blaze Utopia R25 21MM R25 - 21mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      },
+      {
+        "product_number": "468-1585",
+        "product_name": "3/PK EdgeOne Blaze Utopia R20 25MM R20 - 25mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      },
+      {
+        "product_number": "468-0476",
+        "product_name": "6/PK Edge SSteel K-File 25mm #20",
+        "Quantity": "2",
+        "unit_price": "5.39",
+        "line_item_total": "10.78"
+      },
+      {
+        "product_number": "468-0473",
+        "product_name": "6/PK Edge SSteel K-File 25mm #15",
+        "Quantity": "2",
+        "unit_price": "5.39",
+        "line_item_total": "10.78"
+      },
+      {
+        "product_number": "468-0470",
+        "product_name": "6/PK Edge SSteel K-File 25mm #10",
+        "Quantity": "2",
+        "unit_price": "5.39",
+        "line_item_total": "10.78"
+      },
+      {
+        "product_number": "468-0478",
+        "product_name": "6/PK Edge SSteel K-File 21mm #25",
+        "Quantity": "1",
+        "unit_price": "5.39",
+        "line_item_total": "5.39"
+      },
+      {
+        "product_number": "468-0475",
+        "product_name": "6/PK Edge SSteel K-File 21mm #20",
+        "Quantity": "1",
+        "unit_price": "5.39",
+        "line_item_total": "5.39"
+      },
+      {
+        "product_number": "468-0480",
+        "product_name": "6/PK Edge SSteel K-File 31mm #25",
+        "Quantity": "1",
+        "unit_price": "5.39",
+        "line_item_total": "5.39"
+      },
+      {
+        "product_number": "107-1190",
+        "product_name": "50/BX Polybite Tray Sideless",
+        "Quantity": "1",
+        "unit_price": "15.55",
+        "line_item_total": "15.55"
+      },
+      {
+        "product_number": "136-4694",
+        "product_name": "100/PK OK-Sonic Ultrasonic Monitor",
+        "Quantity": "1",
+        "unit_price": "69.59",
+        "line_item_total": "69.59"
+      }
+    ],
+    "id": "inv_218",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.263948",
+    "source_file": "henryschein_4434143_20250910_31253796_14597339599.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250910_31253796_14597339599.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46637782",
+    "invoice_date": "09/09/25",
+    "due_date": "10/09/25",
+    "invoice_total": "150.45",
+    "office_location": "Eugene",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "150-0077",
+        "product_name": "18OZ/EA Avant Hand Sanitizer 18oz Foam",
+        "Quantity": "7",
+        "unit_price": "10.79",
+        "line_item_total": "75.53"
+      },
+      {
+        "product_number": "195-0590",
+        "product_name": "12/BX Brownie FG Mini Point",
+        "Quantity": "1",
+        "unit_price": "26.55",
+        "line_item_total": "26.55"
+      },
+      {
+        "product_number": "133-7442",
+        "product_name": "50/BX CitriSil Waterline Cleaner Blue",
+        "Quantity": "1",
+        "unit_price": "41.88",
+        "line_item_total": "41.88"
+      }
+    ],
+    "id": "inv_219",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.263978",
+    "source_file": "henryschein_4434143_20250910_31253796_14597339598.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250910_31253796_14597339598.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_220",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.264009",
+    "source_file": "Inv_75629_from_Dental_Medical_Staffing_Inc._5522892_15528.json",
+    "pdf_path": "/email_invoices/Inv_75629_from_Dental_Medical_Staffing_Inc._5522892_15528.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_221",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.264169",
+    "source_file": "email_31_20250911_154229_Sales Invoice - PS-INV177040_ef2ea3c0.json",
+    "pdf_path": "/email_invoices/email_31_20250911_154229_Sales Invoice - PS-INV177040_ef2ea3c0.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "407-985417",
+        "product_name": ".Ordered By: Wendy D/MB 9/3/2025",
+        "Quantity": "392875",
+        "unit_price": "50.000ea",
+        "line_item_total": "250.00"
+      }
+    ],
+    "id": "inv_222",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.264291",
+    "source_file": "email_3_20250911_154058_I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357_af254e04.json",
+    "pdf_path": "/email_invoices/email_3_20250911_154058_I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357_af254e04.pdf"
+  },
+  {
+    "invoice_number": "44134561",
+    "invoice_date": "07/16/25",
+    "invoice_total": "93.37",
+    "office_location": "Lebanon",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "543-0219",
+        "product_name": "3.40Z/BT PreviDent 5000 Booster",
+        "Quantity": "12",
+        "unit_price": "6.49",
+        "line_item_total": "77.88"
+      }
+    ],
+    "due_date": "08/15/2025",
+    "id": "inv_223",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.264418",
+    "source_file": "henry_invoice_2.json",
+    "pdf_path": "/email_invoices/Invoice_20250716_0001.pdf"
   },
   {
     "vendor": "exodus_dental_solutions",
@@ -2083,12 +5887,240 @@
       }
     ],
     "due_date": "09/27/2025",
-    "id": "inv_144",
+    "id": "inv_224",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.859958",
+    "created_at": "2025-09-12T14:53:08.264826",
     "source_file": "5195.json",
     "pdf_path": "/email_invoices/email_30_20250911_154228_Invoices_5195_1c565825.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_225",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.265059",
+    "source_file": "email_60_20250911_154348_Receipt-2509-5794_4756a3d1.json",
+    "pdf_path": "/email_invoices/email_60_20250911_154348_Receipt-2509-5794_4756a3d1.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_226",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.265094",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082722.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082722.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46589354",
+    "invoice_date": "09/08/25",
+    "due_date": "10/08/25",
+    "invoice_total": "289.80",
+    "office_location": "Lebanon",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "570-0177",
+        "product_name": "250X2/BX Ibuprofen Tablets Pouch 200mg",
+        "Quantity": "1",
+        "unit_price": "42.79",
+        "line_item_total": "42.79"
+      },
+      {
+        "product_number": "333-3382",
+        "product_name": "EA Coe-Soft Professional Package",
+        "Quantity": "1",
+        "unit_price": "158.37",
+        "line_item_total": "158.37"
+      },
+      {
+        "product_number": "900-1281",
+        "product_name": "EA MaxiTemp HP C&B Kit 4:1 A2",
+        "Quantity": "1",
+        "unit_price": "82.15",
+        "line_item_total": "82.15"
+      }
+    ],
+    "id": "inv_227",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.265124",
+    "source_file": "henryschein_4434143_20250909_31249878_14594621913.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250909_31249878_14594621913.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "44250801",
+    "invoice_date": "07/18/25",
+    "invoice_total": "329.17",
+    "office_location": "Roseburg",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "378-0191",
+        "product_name": "60/PK Premier Retraction Caps Assorted",
+        "Quantity": "1",
+        "unit_price": "23.59",
+        "line_item_total": "23.59"
+      },
+      {
+        "product_number": "127-0122",
+        "product_name": "100/BX Pinnacle Sensor Sheath Dexis Platinum",
+        "Quantity": "2",
+        "unit_price": "19.91",
+        "line_item_total": "39.82"
+      },
+      {
+        "product_number": "161-4901",
+        "product_name": "12/PK Endogel Microdose Tube 1mL/Tb",
+        "Quantity": "1",
+        "unit_price": "21.82",
+        "line_item_total": "21.82"
+      },
+      {
+        "product_number": "378-0190",
+        "product_name": "60/PK Premier Retraction Caps Large Size",
+        "Quantity": "5",
+        "unit_price": "26.35",
+        "line_item_total": "26.35"
+      },
+      {
+        "product_number": "900-7449",
+        "product_name": "500/CA Dri-Gard CSR Wrap 20\"x20\"",
+        "Quantity": "1",
+        "unit_price": "117.59",
+        "line_item_total": "117.59"
+      },
+      {
+        "product_number": "153-0372",
+        "product_name": "100/BG Halyard CSR Wrap 15\" x 15\"",
+        "Quantity": "3",
+        "unit_price": "8.56",
+        "line_item_total": "25.68"
+      },
+      {
+        "product_number": "468-1629",
+        "product_name": "60/PK EdgeOne R Gutta Percha R25",
+        "Quantity": "1",
+        "unit_price": "13.61",
+        "line_item_total": "13.61"
+      },
+      {
+        "product_number": "468-1587",
+        "product_name": "3/PK EdgeOne Blaze Utopia R25 21MM R25 - 21mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      },
+      {
+        "product_number": "468-1588",
+        "product_name": "3/PK EdgeOne Blaze Utopia R25 25MM R25 - 25mm",
+        "Quantity": "1",
+        "unit_price": "27.11",
+        "line_item_total": "27.11"
+      }
+    ],
+    "id": "inv_228",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.265182",
+    "source_file": "email_4_20250805_232225_henryschein_4434143_20250718_31082051_14484727803.json",
+    "pdf_path": "/email_invoices/email_4_20250805_232225_henryschein_4434143_20250718_31082051_14484727803.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "50653643",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_229",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.265214",
+    "source_file": "56008564.json",
+    "pdf_path": "/email_invoices/56008564.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_230",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.265337",
+    "source_file": "email_2_20250805_231713_V6102702_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231713_V6102702_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_231",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.265366",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082630.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082630.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_232",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.265393",
+    "source_file": "304500120691_0450004323231_20250630.json",
+    "pdf_path": "/email_invoices/304500120691_0450004323231_20250630.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "9/11/2025",
+    "id": "inv_233",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.265438",
+    "source_file": "email_67_20250911_154352_Scan_2025_09_11_08_27_37_550_0ffec07a.json",
+    "pdf_path": "/email_invoices/email_67_20250911_154352_Scan_2025_09_11_08_27_37_550_0ffec07a.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -2107,12 +6139,52 @@
         "line_item_total": "195.00"
       }
     ],
-    "id": "inv_149",
+    "id": "inv_234",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.860427",
+    "created_at": "2025-09-12T14:53:08.265550",
     "source_file": "epic_invoice_9_parsed.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "46596662",
+    "invoice_date": "09/09/25",
+    "due_date": "10/09/25",
+    "invoice_total": "31.12",
+    "office_location": "Ridgefield",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "147-1747",
+        "product_name": "250/CA Aspirator Tips 1/4\"x6.25\" Green",
+        "Quantity": "1",
+        "unit_price": "28.63",
+        "line_item_total": "28.63"
+      }
+    ],
+    "id": "inv_235",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.266129",
+    "source_file": "henryschein_4434143_20250910_31253796_14597339594.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250910_31253796_14597339594.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_236",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.266158",
+    "source_file": "water_invoice.14636642_081925.2025-08-19.json",
+    "pdf_path": "/email_invoices/water_invoice.14636642_081925.2025-08-19.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -2131,10 +6203,10 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_150",
+    "id": "inv_237",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.860835",
+    "created_at": "2025-09-12T14:53:08.266212",
     "source_file": "email_62_20250911_154350_Patterson  Invoice # 3038926240_b2c41aba.json",
     "pdf_path": "/email_invoices/email_62_20250911_154350_Patterson  Invoice # 3038926240_b2c41aba.pdf"
   },
@@ -2154,11 +6226,163 @@
         "line_item_total": "445.00"
       }
     ],
-    "id": "inv_151",
+    "id": "inv_238",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-11T15:44:53.860993",
+    "created_at": "2025-09-12T14:53:08.266325",
     "source_file": "tc_invoice_2.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_239",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.267280",
+    "source_file": "email_36_20250911_154241_invoice_1092025-130814_043ed509.json",
+    "pdf_path": "/email_invoices/email_36_20250911_154241_invoice_1092025-130814_043ed509.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_240",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.267335",
+    "source_file": "email_29_20250911_154225_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-122945_aa6bb264.json",
+    "pdf_path": "/email_invoices/email_29_20250911_154225_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-122945_aa6bb264.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_241",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.267370",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170647.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170647.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_242",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.267427",
+    "source_file": "email_37_20250911_154243_Darby_Invoice_5571812_cb7aff97.json",
+    "pdf_path": "/email_invoices/email_37_20250911_154243_Darby_Invoice_5571812_cb7aff97.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_243",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.267462",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082755.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082755.pdf"
+  },
+  {
+    "invoice_number": "44134561",
+    "invoice_date": "07/16/25",
+    "invoice_total": "93.37",
+    "office_location": "Lebanon",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [
+      {
+        "product_number": "543-0219",
+        "product_name": "3.40Z/BT PreviDent 5000 Booster",
+        "Quantity": "12",
+        "unit_price": "6.49",
+        "line_item_total": "77.88"
+      }
+    ],
+    "due_date": "08/15/2025",
+    "id": "inv_244",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.267589",
+    "source_file": "email_9_20250805_230033_Invoice_20250716_0001.json",
+    "pdf_path": "/email_invoices/email_9_20250805_230033_Invoice_20250716_0001.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_245",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.267618",
+    "source_file": "Receipt.json",
+    "pdf_path": "/email_invoices/Receipt.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_246",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.267747",
+    "source_file": "email_48_20250911_154305_Receipt_cb290553.json",
+    "pdf_path": "/email_invoices/email_48_20250911_154305_Receipt_cb290553.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_247",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-12T14:53:08.267888",
+    "source_file": "email_24_20250911_154202_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700_ca42f236.json",
+    "pdf_path": "/email_invoices/email_24_20250911_154202_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700_ca42f236.pdf"
   }
 ]
