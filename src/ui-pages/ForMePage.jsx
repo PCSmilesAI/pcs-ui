@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
 /**
  * Page for the "For Me" view. Displays a table of invoices
@@ -47,47 +48,27 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
         console.log('🔄 ForMePage: Starting to load invoices...');
         setLoading(true);
         
-        // Add cache-busting timestamp to force fresh request
-        const timestamp = new Date().getTime();
-        const fetchUrl = `/invoice_queue.json?t=${timestamp}`;
-        console.log('🔍 ForMePage: Fetching from URL:', fetchUrl);
-        
-        const response = await fetch(fetchUrl, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-        console.log('📡 ForMePage: Fetch response status:', response.status);
-        console.log('📡 ForMePage: Fetch response ok:', response.ok);
-        console.log('📡 ForMePage: Fetch response headers:', Object.fromEntries(response.headers.entries()));
-        
-        if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status} - ${response.statusText}`);
-        }
-        let data = await response.json();
-        // Apply client-side overrides so queues reflect immediate actions
-        try {
-          const { applyOverrides } = await import('../utils/status_overrides');
-          data = applyOverrides(data);
-        } catch (_) {}
+        // Use the new fetch helper with high limit to get all invoices
+        const data = await fetchInvoiceQueue({ limit: 5000 });
         console.log('📊 ForMePage: Raw data received:', data.length, 'invoices');
         
         // Transform the queue data to match the expected format
-        // Filter for invoices that are NOT approved (status: 'new' or 'uploaded', approved: false)
+        // Filter for invoices that are NOT approved and are in a new/pending state
         const transformedData = data
           .filter(invoice => {
-            const isNotApproved = !invoice.approved && (invoice.status === 'new' || invoice.status === 'uploaded');
-            console.log(`📋 Invoice ${invoice.invoice_number}: status=${invoice.status}, approved=${invoice.approved}, showing=${isNotApproved}`);
-            return isNotApproved;
+            const statusLc = String(invoice.status || '').toLowerCase();
+            const isNewish = ['new', 'uploaded', 'pending'].includes(statusLc);
+            const show = !invoice.approved && isNewish;
+            console.log(`📋 Invoice ${invoice.invoice_number}: status=${statusLc}, approved=${invoice.approved}, showing=${show}`);
+            return show;
           })
           .map(invoice => ({
-            invoice: invoice.invoice_number || 'Unknown',
+            invoice: invoice.invoice_number || invoice.id || 'Unknown',
             invoice_number: invoice.invoice_number, // needed by detail view
-            vendor: invoice.vendor || 'Unknown',
-            amount: `$${invoice.total || '0.00'}`,
-            office: invoice.clinic_id || 'Unknown',
+            id: invoice.id, // needed for click handling when invoice_number is empty
+            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
+            office: invoice.office_location || invoice.clinic_id || 'Unknown',
             dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
@@ -108,6 +89,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
             due_date: invoice.due_date,
             json_path: invoice.json_path,
             pdf_path: invoice.pdf_path,
+            line_items: invoice.line_items || [],
             timestamp: invoice.timestamp,
             assigned_to: invoice.assigned_to,
             approved: invoice.approved,
@@ -122,7 +104,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
         console.error('❌ ForMePage: Error details:', {
           message: err.message,
           stack: err.stack,
-          url: window.location.origin + '/invoice_queue.json'
+          url: window.location.origin + '/api/invoice-queue'
         });
         setError(err.message);
         // Fallback to empty array if loading fails
@@ -236,32 +218,15 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     <div style={wrapperStyle}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">For Me</h1>
-        <p className="text-gray-600 mt-2">QuickBooks Connection Test</p>
+        <p className="text-gray-600 mt-2">
+          {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} assigned to you
+        </p>
       </div>
-
-      {/* QuickBooks Connection Status - Always Show */}
-      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-red-500 mr-3"></div>
-            <div>
-              <p className="text-red-800 font-medium">QuickBooks Not Connected</p>
-              <p className="text-red-700 text-sm">Connect to QuickBooks to enable full functionality</p>
-            </div>
-          </div>
-          <a
-            href="/api/qbo/auth"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-          >
-            Connect QuickBooks
-          </a>
-        </div>
-      </div>
-
-      <div className="text-gray-600">
-        <p>This is a test page to verify QuickBooks connection UI is working.</p>
-        <p>If you can see this text and the blue button above, the UI is working correctly.</p>
-      </div>
+      <InvoiceTable
+        rows={filteredRows}
+        columns={columns}
+        onRowClick={handleInvoiceRowClick}
+      />
     </div>
   );
 }

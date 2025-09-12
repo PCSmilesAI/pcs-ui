@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice Debug Test</title>
+</head>
+<body>
+    <h1>Invoice Debug Test</h1>
+    <div id="result">Loading...</div>
+
+    <script>
+        async function testInvoiceLoad() {
+            try {
+                console.log('Testing fetchInvoiceQueue...');
+                
+                // Test API directly first
+                const apiResponse = await fetch('/api/invoice-queue?search=44134561', {
+                    cache: 'no-store'
+                });
+                const apiData = await apiResponse.json();
+                
+                console.log('API Response:', apiData);
+                document.getElementById('result').innerHTML = `
+                    <h3>API Test Results:</h3>
+                    <p>API Status: ${apiData.ok ? 'OK' : 'ERROR'}</p>
+                    <p>Invoice Count: ${apiData.count}</p>
+                    <p>First Invoice: ${JSON.stringify(apiData.invoices?.[0], null, 2)}</p>
+                `;
+                
+                // Test search logic
+                const invoiceNumber = '44134561';
+                const queue = apiData.invoices || [];
+                
+                console.log('Looking for invoice:', invoiceNumber);
+                console.log('Queue length:', queue.length);
+                
+                // Exact match
+                let found = queue.find(inv => inv.invoice_number === invoiceNumber);
+                if (found) {
+                    console.log('✅ Found by exact match:', found);
+                    document.getElementById('result').innerHTML += `<p style="color: green">✅ Found by exact match: ${found.vendor_name}</p>`;
+                    return;
+                }
+                
+                // Case insensitive
+                found = queue.find(inv => 
+                    inv.invoice_number && 
+                    inv.invoice_number.toLowerCase() === invoiceNumber.toLowerCase()
+                );
+                if (found) {
+                    console.log('✅ Found by case-insensitive match:', found);
+                    document.getElementById('result').innerHTML += `<p style="color: green">✅ Found by case-insensitive match: ${found.vendor_name}</p>`;
+                    return;
+                }
+                
+                // By ID
+                found = queue.find(inv => inv.id === invoiceNumber);
+                if (found) {
+                    console.log('✅ Found by ID match:', found);
+                    document.getElementById('result').innerHTML += `<p style="color: green">✅ Found by ID match: ${found.vendor_name}</p>`;
+                    return;
+                }
+                
+                console.log('❌ Invoice not found');
+                document.getElementById('result').innerHTML += `<p style="color: red">❌ Invoice not found</p>`;
+                
+                // Show what we do have
+                document.getElementById('result').innerHTML += `
+                    <h4>Available invoices (first 3):</h4>
+                    <pre>${JSON.stringify(queue.slice(0, 3).map(inv => ({
+                        id: inv.id,
+                        invoice_number: inv.invoice_number,
+                        vendor: inv.vendor_name || inv.vendor
+                    })), null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Run test when page loads
+        testInvoiceLoad();
+    </script>
+</body>
+</html>

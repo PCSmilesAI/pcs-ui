@@ -1,9 +1,8 @@
 'use client';
+
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import InvoiceDetailPageImpl from '../../src/ui-pages/InvoiceDetailPage.jsx';
-
-export const dynamic = 'force-dynamic';
 
 function InvoiceDetailContent() {
   const searchParams = useSearchParams();
@@ -22,22 +21,78 @@ function InvoiceDetailContent() {
         }
 
         // Load the invoice queue to find the specific invoice
-        const response = await fetch('/invoice_queue.json');
-        if (!response.ok) {
-          throw new Error('Failed to load invoice queue');
-        }
+        const { fetchInvoiceQueue } = await import('../../src/lib/fetchQueue');
+        const queue = await fetchInvoiceQueue({ limit: 5000 });
         
-        const queue = await response.json();
-        const foundInvoice = queue.find(inv => inv.invoice_number === invoiceNumber);
+        // Enhanced lookup: try multiple matching strategies
+        const findInvoice = (searchTerm: string) => {
+          console.log('🔍 Looking for invoice:', searchTerm);
+          console.log('🔍 Available invoices:', queue.slice(0, 3).map(inv => ({
+            invoice_number: inv.invoice_number,
+            vendor: inv.vendor,
+            hasId: !!inv.id
+          })));
+          
+          // First try exact match on invoice_number
+          let found = queue.find(inv => inv.invoice_number === searchTerm);
+          if (found) {
+            console.log('✅ Found by exact invoice_number match');
+            return found;
+          }
+          
+          // Try case-insensitive match on invoice_number
+          found = queue.find(inv => 
+            inv.invoice_number && 
+            inv.invoice_number.toLowerCase() === searchTerm.toLowerCase()
+          );
+          if (found) {
+            console.log('✅ Found by case-insensitive invoice_number match');
+            return found;
+          }
+          
+          // Try match by id only if it exists
+          if (searchTerm) {
+            found = queue.find(inv => inv.id === searchTerm);
+            if (found) {
+              console.log('✅ Found by id match');
+              return found;
+            }
+          }
+          
+          // Try partial match on invoice_number (for cases with prefixes/suffixes)
+          found = queue.find(inv => 
+            inv.invoice_number && 
+            (inv.invoice_number.includes(searchTerm) || searchTerm.includes(inv.invoice_number))
+          );
+          if (found) {
+            console.log('✅ Found by partial invoice_number match');
+            return found;
+          }
+          
+          console.log('❌ No invoice found for:', searchTerm);
+          return null;
+        };
+        
+        const foundInvoice = findInvoice(invoiceNumber);
         
         if (foundInvoice) {
+          console.log('✅ Invoice found:', {
+            searchTerm: invoiceNumber,
+            foundId: foundInvoice.id || 'none',
+            foundInvoiceNumber: foundInvoice.invoice_number,
+            vendor: foundInvoice.vendor || foundInvoice.vendor_name,
+            total: foundInvoice.total || foundInvoice.invoice_total,
+            office: foundInvoice.clinic_id || foundInvoice.office_location
+          });
+          
           // Transform the invoice data to match the expected format
           const transformedInvoice = {
+            id: foundInvoice.id || foundInvoice.invoice_number, // fallback to invoice_number if no id
             invoice: foundInvoice.invoice_number || 'Unknown',
             invoice_number: foundInvoice.invoice_number,
-            vendor: foundInvoice.vendor || 'Unknown',
-            amount: `$${foundInvoice.total || '0.00'}`,
-            office: foundInvoice.clinic_id || 'Unknown',
+            vendor: foundInvoice.vendor || foundInvoice.vendor_name || 'Unknown',
+            amount: `$${foundInvoice.total || foundInvoice.invoice_total || '0.00'}`,
+            office: foundInvoice.clinic_id || foundInvoice.office_location || 'Unknown',
             dueDate: foundInvoice.due_date ? new Date(foundInvoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
@@ -57,11 +112,19 @@ function InvoiceDetailContent() {
             assigned_to: foundInvoice.assigned_to,
             approved: foundInvoice.approved,
             status: foundInvoice.status,
-            total: foundInvoice.total
+            total: foundInvoice.total || foundInvoice.invoice_total
           };
           setInvoice(transformedInvoice);
         } else {
-          console.error('Invoice not found:', invoiceNumber);
+          console.error('❌ Invoice not found:', {
+            searchTerm: invoiceNumber,
+            availableInvoices: queue.slice(0, 5).map(inv => ({
+              id: inv.id || 'none',
+              invoice_number: inv.invoice_number,
+              vendor: inv.vendor || inv.vendor_name
+            })),
+            totalInvoices: queue.length
+          });
         }
       } catch (error) {
         console.error('Error loading invoice:', error);

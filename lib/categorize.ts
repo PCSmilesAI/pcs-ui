@@ -148,10 +148,27 @@ function findCategoryByName(nameLike: string, categories: QboCategory[]): QboCat
 export function categorizeInvoiceLines(
   lines: InvoiceLine[], 
   vendor: string, 
-  categories: QboCategory[]
+  categories: QboCategory[],
+  historicalCategorizer?: any
 ): Array<CategorySuggestion & { index: number }> {
-  return lines.map((line, index) => ({
-    index,
-    ...suggestCategory({ ...line, vendor }, categories)
-  }));
+  return lines.map((line, index) => {
+    // First try historical data if available
+    if (historicalCategorizer) {
+      const historicalSuggestion = historicalCategorizer.suggestCategoryFromHistory(
+        line, vendor, categories
+      )
+      if (historicalSuggestion) {
+        return {
+          index,
+          ...historicalSuggestion
+        }
+      }
+    }
+
+    // Fall back to keyword-based categorization
+    return {
+      index,
+      ...suggestCategory({ ...line, vendor }, categories)
+    }
+  });
 }
