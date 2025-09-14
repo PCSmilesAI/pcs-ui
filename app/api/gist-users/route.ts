@@ -18,11 +18,23 @@ function buildHeaders(): Record<string, string> {
 }
 
 async function fetchUsersFromGist(): Promise<unknown> {
-  const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+  // First attempt: with headers (possibly including token)
+  let res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
     method: 'GET',
     headers: buildHeaders(),
     cache: 'no-store'
   });
+
+  // If unauthorized (bad token), retry without Authorization header
+  if (res.status === 401 || res.status === 403) {
+    const h: Record<string, string> = { 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'pcs-ui-nextjs' };
+    res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      method: 'GET',
+      headers: h,
+      cache: 'no-store'
+    });
+  }
+
   if (!res.ok) {
     throw new Error(`Failed to fetch gist: ${res.status} ${res.statusText}`);
   }
