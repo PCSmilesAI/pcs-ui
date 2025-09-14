@@ -47,11 +47,17 @@ ssh $DROPLET_USER@$DROPLET_IP << 'EOF'
     npm install -g pm2
   fi
   
-  # Create/clean app directory to avoid stale files
+  # Create app directory (do NOT wipe to preserve old Next chunks for open tabs)
   mkdir -p /var/www/pcs-ui
-  rm -rf /var/www/pcs-ui/*
   cd /var/www/pcs-ui
   
+  # Preserve existing Next chunks to avoid stale-tab 404s
+  TS=$(date +%Y%m%d-%H%M%S)
+  if [ -d .next/static/chunks ]; then
+    mkdir -p /var/www/pcs-ui/.next_static_archive/$TS
+    cp -a .next/static/chunks/. /var/www/pcs-ui/.next_static_archive/$TS/ || true
+  fi
+
   # Extract deployment package (fresh contents only)
   tar -xzf /tmp/pcs-ui-deployment.tar.gz
   
@@ -78,6 +84,11 @@ ENVEOF
   
   # Build the application
   npm run build
+
+  # After build, restore archived chunks alongside new ones
+  if [ -d /var/www/pcs-ui/.next_static_archive/$TS ]; then
+    rsync -a --ignore-existing /var/www/pcs-ui/.next_static_archive/$TS/ .next/static/chunks/ || true
+  fi
   
   # Create PM2 ecosystem file
   cat > ecosystem.config.js << 'PM2EOF'

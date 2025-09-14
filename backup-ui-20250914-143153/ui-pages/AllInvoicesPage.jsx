@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
@@ -12,48 +11,51 @@ import { fetchInvoiceQueue } from '../lib/fetchQueue';
  * performed locally on the array of row objects.
  */
 export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery = '', filters = {} }) {
-  const spApi = useSearchParams();
-  const spQuery = (spApi.get('search') || '').trim().toLowerCase();
-  const spFilters = {
-    vendor: spApi.get('vendor') || undefined,
-    office: spApi.get('office') || undefined,
-    category: spApi.get('category') || undefined,
-    minAmount: spApi.get('minAmount') || undefined,
-    maxAmount: spApi.get('maxAmount') || undefined,
-    dueWithin: spApi.get('dueWithin') || undefined,
-  };
   // Local state for sorting configuration
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load invoice data from the queue (live API, no cache)
+  // Load invoice data from the queue
   useEffect(() => {
     const loadInvoices = async () => {
       try {
-        console.log('🔄 AllInvoicesPage: Fetching from /api/invoice-queue...');
+        console.log('🔄 AllInvoicesPage: Starting to load invoices...');
         setLoading(true);
+        
         const data = await fetchInvoiceQueue({ limit: 5000 });
-        console.log('📊 AllInvoicesPage: API returned', data.length, 'invoices');
-
-        const transformedData = data.map((invoice) => ({
-          invoice: invoice.invoice_number || 'Unknown',
-          vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-          amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-          office: invoice.office_location || invoice.clinic_id || 'Unknown',
-          status: invoice.status || 'New',
-          category: invoice.category || 'Other',
-          // pass-through fields for detail view
-          invoice_date: invoice.invoice_date,
-          due_date: invoice.due_date,
-          json_path: invoice.json_path,
-          pdf_path: invoice.pdf_path,
-          timestamp: invoice.timestamp,
-          assigned_to: invoice.assigned_to,
-          approved: invoice.approved
+        console.log('📊 AllInvoicesPage: Raw data received:', data?.length || 0, 'invoices');
+        
+        // Debug: Log TC Dental invoices specifically
+        const tcDentalInvoices = data?.filter(inv => inv.vendor_name === 'TC Dental') || [];
+        console.log('🦷 TC Dental invoices found:', tcDentalInvoices.length, tcDentalInvoices.map(inv => ({ invoice_number: inv.invoice_number, id: inv.id })));
+        
+        // Ensure data is an array before processing
+        const safeData = Array.isArray(data) ? data : [];
+        
+        const transformedData = safeData.map(invoice => ({
+          invoice: invoice?.invoice_number || 'Unknown',
+          invoice_number: invoice?.invoice_number,
+          id: invoice?.id, // Add ID for click context fallback
+          vendor: invoice?.vendor_name || invoice?.vendor || 'Unknown',
+          amount: `$${invoice?.total || invoice?.invoice_total || '0.00'}`,
+          office: invoice?.office_location || invoice?.clinic_id || 'Unknown',
+          status: invoice?.status || 'New',
+          category: invoice?.category || 'Other',
+          invoice_date: invoice?.invoice_date,
+          due_date: invoice?.due_date,
+          json_path: invoice?.json_path,
+          pdf_path: invoice?.pdf_path,
+          timestamp: invoice?.timestamp,
+          assigned_to: invoice?.assigned_to,
+          approved: invoice?.approved,
+          line_items: invoice?.line_items || [] // Add line items for detail view
         }));
-
+        
+        console.log('✅ AllInvoicesPage: Data transformed successfully:', transformedData.length, 'invoices');
+        console.log('🔍 AllInvoicesPage: First 5 invoices:', transformedData.slice(0, 5).map(inv => ({ invoice: inv.invoice, vendor: inv.vendor, amount: inv.amount })));
+        console.log('🦷 AllInvoicesPage: TC Dental count in transformed data:', transformedData.filter(inv => inv.vendor === 'TC Dental').length);
         setInvoices(transformedData);
         setError(null);
       } catch (err) {
@@ -64,8 +66,9 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
         setLoading(false);
       }
     };
+
     loadInvoices();
-  }, []);
+  }, [searchQuery, filters]);
 
   // Column definitions. Align right for the amount column.
   const columns = [
@@ -97,48 +100,27 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
 
   // Apply search and filters first, then sort. Filtered data is derived
   // from the original unsorted array using the criteria passed in.
-  const effectiveQuery = (spQuery || searchQuery || '').trim().toLowerCase();
-  const effectiveFilters = { ...filters, ...Object.fromEntries(Object.entries(spFilters).filter(([_,v]) => v !== undefined)) };
-  const filteredData = useMemo(() => invoices.filter((row) => {
-    const query = effectiveQuery;
+  const filteredData = invoices.filter((row) => {
+    const query = searchQuery.trim().toLowerCase();
     if (query) {
       const matches = Object.values(row).some((val) =>
         String(val).toLowerCase().includes(query)
       );
       if (!matches) return false;
     }
-    const f = effectiveFilters;
-    if (f.vendor && row.vendor !== f.vendor) return false;
-    if (f.office && row.office !== f.office) return false;
-    if (f.category && row.category !== f.category) return false;
+    // vendor filter
+    if (filters.vendor && row.vendor !== filters.vendor) return false;
+    // office filter
+    if (filters.office && row.office !== filters.office) return false;
+    // status filter (not in filters currently, but category can map to status?)
+    if (filters.category && row.status !== filters.category) return false;
     // amount filter
-    const amt = parseFloat(String(row.amount).replace(/[^0-9.]/g, ''));
-    if (f.minAmount && !isNaN(parseFloat(f.minAmount)) && amt < parseFloat(f.minAmount)) return false;
-    if (f.maxAmount && !isNaN(parseFloat(f.maxAmount)) && amt > parseFloat(f.maxAmount)) return false;
-    // dueWithin support using invoice_date if present
-    if (f.dueWithin) {
-      const days = parseInt(f.dueWithin);
-      if (!isNaN(days)) {
-        const parseMDY = (s) => {
-          if (!s || s === 'N/A') return null;
-          const parts = s.includes('/') ? s.split('/') : s.split('-');
-          if (parts.length !== 3) return null;
-          const [m, d, y] = parts;
-          const yyyy = y.length === 2 ? `20${y}` : y;
-          const dt = new Date(`${yyyy}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-          return isNaN(dt.getTime()) ? null : dt;
-        };
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const date = parseMDY(row.invoiceDate) || parseMDY(row.dueDate);
-        if (!date) return false;
-        date.setHours(0, 0, 0, 0);
-        const daysDiff = Math.ceil((date.getTime() - today.getTime()) / (1000 * 3600 * 24));
-        if (daysDiff < 0 || daysDiff > days) return false;
-      }
-    }
+    const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
+    if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;
+    if (filters.maxAmount && amt > parseFloat(filters.maxAmount)) return false;
+    // dueStart/dueEnd apply? There is no due date column; skip
     return true;
-  }), [invoices, effectiveQuery, filters]);
+  });
 
   // Derive a sorted version of the filtered data based on the current
   // sorting configuration. When no sorting is active return
