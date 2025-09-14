@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 const GIST_ID = '24025555424dd200727b06d461cffdc9';
 const GIST_FILENAME = 'users.json';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const RAW_FALLBACK_URL = `https://gist.githubusercontent.com/PCSmilesAI/${GIST_ID}/raw/${GIST_FILENAME}`;
 
 function buildHeaders(): Record<string, string> {
   const h: Record<string, string> = {
@@ -67,8 +68,23 @@ async function fetchUsersFromGist(): Promise<unknown> {
 
 export async function GET() {
   try {
-    const users = await fetchUsersFromGist();
-    return NextResponse.json(users);
+    try {
+      const users = await fetchUsersFromGist();
+      return NextResponse.json(users);
+    } catch (primaryErr: any) {
+      // Final fallback: hit the stable raw URL without API auth
+      const rawRes = await fetch(RAW_FALLBACK_URL, {
+        method: 'GET',
+        headers: { 'User-Agent': 'pcs-ui-nextjs' },
+        cache: 'no-store'
+      });
+      if (!rawRes.ok) {
+        throw primaryErr; // bubble original
+      }
+      const text = await rawRes.text();
+      const users = JSON.parse(text);
+      return NextResponse.json(users);
+    }
   } catch (error: any) {
     console.error('Error fetching users from Gist:', error);
     return NextResponse.json(
