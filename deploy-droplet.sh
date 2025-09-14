@@ -24,6 +24,9 @@ tar -czf pcs-ui-deployment.tar.gz \
   --exclude=node_modules \
   --exclude=.git \
   --exclude=.next \
+  --exclude='pcs-ui sep13 copy' \
+  --exclude='backup-ui-*' \
+  --exclude='.next_static_archive' \
   --exclude=pcs_ai_data \
   --exclude=*.log \
   .
