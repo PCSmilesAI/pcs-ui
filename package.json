@@ -6,7 +6,7 @@
     "dev:api": "node dev-server.js",
     "build": "next build",
     "preview": "next start",
-    "start": "node dev-server.js",
+    "start": "next start",
     "start:prod": "NODE_ENV=production node dev-server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",

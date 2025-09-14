@@ -8,8 +8,14 @@ export async function fetchInvoiceQueue(
   for (const [k, v] of Object.entries(params)) usp.set(k, String(v))
 
   // IMPORTANT: client-side fetch with no cache
-  const res = await fetch(`/api/invoice-queue?${usp.toString()}`, {
+  const timestamp = new Date().getTime()
+  const url = `/api/invoice-queue?${usp.toString()}&_t=${timestamp}`
+  const res = await fetch(url, {
     cache: 'no-store',
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
+    }
   })
 
   const text = await res.text()

@@ -1,0 +1,26 @@
+{
+  "vendor": "tc dental laboratory, inc.",
+  "vendor_name": "TC Dental",
+  "invoice_number": "260-490",
+  "invoice_date": "",
+  "due_date": "",
+  "total": "94.00",
+  "office_location": "Salem",
+  "patient_name": "Kare",
+  "doctor_name": "Gra",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "D2740 Full Zirconia Crown Posterior",
+      "Quantity": "1.00",
+      "unit_price": "94.00",
+      "line_item_total": "94.00"
+    }
+  ],
+  "source_page": 2,
+  "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+  "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
+  "id": "tc_260-490_2",
+  "clinic_id": "Salem",
+  "invoice_total": "94.00"
+}

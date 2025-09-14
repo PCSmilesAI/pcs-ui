@@ -12,7 +12,7 @@ import { fetchQboCategories } from '../lib/categoriesClient';
  * that the layout and colours appear even if no CSS preprocessor
  * is available.
  */
-export default function InvoiceDetailPage({ invoice, onBack }) {
+export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext }) {
   // Guard clause for undefined invoice during static generation
   if (!invoice) {
     return (
@@ -348,7 +348,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     if (invoice?.pdf_path) {
       // Create a link element to trigger the download
       const link = document.createElement('a');
-      link.href = `/${invoice.pdf_path}`;
+      link.href = invoice.pdf_path.startsWith('/api/') ? invoice.pdf_path : `/${invoice.pdf_path}`;
       link.download = `${invoice?.invoice || invoice?.invoice_number || 'invoice'}_${invoice?.vendor || 'vendor'}.pdf`;
       document.body.appendChild(link);
       link.click();
@@ -484,8 +484,59 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     updateInvoiceStatus('rejected', false);
   }
 
-  function handleRepair() {
-    updateInvoiceStatus('repair', false);
+  async function handleRepair() {
+    try {
+      console.log('🔧 Starting repair process...');
+      
+      // Create corrected data from current form state
+      const correctedData = {
+        invoice_number: details.invoice,
+        vendor: details.vendor,
+        vendor_name: details.vendor,
+        total: paymentAmount.replace('$', '').replace(',', ''),
+        invoice_total: paymentAmount.replace('$', '').replace(',', ''),
+        office_location: details.office,
+        clinic_id: details.office,
+        category: details.category,
+        invoice_date: details.invoice_date,
+        due_date: details.due_date,
+        line_items: items,
+        status: 'repair',
+        approved: false,
+        timestamp: new Date().toISOString(),
+        pdf_path: invoice.pdf_path,
+        json_path: invoice.json_path,
+        id: invoice.id
+      };
+
+      // Call repair API to log the training data
+      const repairResponse = await fetch('/api/repair-invoice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          invoice_number: invoice.invoice_number,
+          original_data: invoice,
+          corrected_data: correctedData,
+          pdf_path: invoice.pdf_path,
+          vendor_name: invoice.vendor_name || invoice.vendor
+        })
+      });
+
+      if (!repairResponse.ok) {
+        throw new Error('Failed to log repair data');
+      }
+
+      console.log('✅ Repair data logged successfully');
+      
+      // Update the invoice status
+      await updateInvoiceStatus('repair', false);
+      
+    } catch (error) {
+      console.error('❌ Error during repair process:', error);
+      alert(`Error logging repair data: ${error.message}`);
+    }
   }
 
   function handlePaid() {
@@ -681,6 +732,34 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             }}
           >
             <i className="fas fa-arrow-left"></i>
+          </button>
+          <button
+            onClick={onPrevious}
+            disabled={!canGoPrevious}
+            aria-label="Previous Invoice"
+            style={{
+              color: canGoPrevious ? '#357ab2' : '#ccc',
+              background: 'none',
+              border: 'none',
+              fontSize: '20px',
+              cursor: canGoPrevious ? 'pointer' : 'not-allowed',
+            }}
+          >
+            <i className="fas fa-chevron-left"></i>
+          </button>
+          <button
+            onClick={onNext}
+            disabled={!canGoNext}
+            aria-label="Next Invoice"
+            style={{
+              color: canGoNext ? '#357ab2' : '#ccc',
+              background: 'none',
+              border: 'none',
+              fontSize: '20px',
+              cursor: canGoNext ? 'pointer' : 'not-allowed',
+            }}
+          >
+            <i className="fas fa-chevron-right"></i>
           </button>
           <div style={summaryStyle}>
             <span>{invoice?.invoice || invoice?.invoice_number || 'N/A'}</span>
@@ -1062,7 +1141,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         <div style={rightColumnStyle}>
           {invoice?.pdf_path ? (
             <iframe
-              src={`/${invoice.pdf_path}`}
+              src={invoice.pdf_path.startsWith('/api/') ? invoice.pdf_path : `/${invoice.pdf_path}`}
             style={{
               width: '100%',
               height: '100%',

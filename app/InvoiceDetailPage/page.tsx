@@ -10,6 +10,8 @@ function InvoiceDetailContent() {
   const router = useRouter();
   const [invoice, setInvoice] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [invoiceQueue, setInvoiceQueue] = useState<any[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
 
   useEffect(() => {
     const loadInvoice = async () => {
@@ -22,22 +24,39 @@ function InvoiceDetailContent() {
         }
 
         // Load the invoice queue to find the specific invoice
-        const response = await fetch('/invoice_queue.json');
+        const response = await fetch('/api/invoice-queue?limit=5000');
         if (!response.ok) {
           throw new Error('Failed to load invoice queue');
         }
         
-        const queue = await response.json();
-        const foundInvoice = queue.find(inv => inv.invoice_number === invoiceNumber);
+        const data = await response.json();
+        const queue = data.invoices || [];
+        
+        // Try to find by invoice_number first, then by id
+        let foundInvoice = queue.find(inv => inv.invoice_number === invoiceNumber);
+        let currentIndex = -1;
         
         if (foundInvoice) {
+          currentIndex = queue.findIndex(inv => inv.invoice_number === invoiceNumber);
+        } else {
+          foundInvoice = queue.find(inv => inv.id === invoiceNumber);
+          if (foundInvoice) {
+            currentIndex = queue.findIndex(inv => inv.id === invoiceNumber);
+          }
+        }
+        
+        if (foundInvoice) {
+          // Set the queue and current index for navigation
+          setInvoiceQueue(queue);
+          setCurrentIndex(currentIndex);
+          
           // Transform the invoice data to match the expected format
           const transformedInvoice = {
             invoice: foundInvoice.invoice_number || 'Unknown',
             invoice_number: foundInvoice.invoice_number,
-            vendor: foundInvoice.vendor || 'Unknown',
-            amount: `$${foundInvoice.total || '0.00'}`,
-            office: foundInvoice.clinic_id || 'Unknown',
+            vendor: foundInvoice.vendor_name || foundInvoice.vendor || 'Unknown',
+            amount: `$${foundInvoice.invoice_total || foundInvoice.total || '0.00'}`,
+            office: foundInvoice.office_location || foundInvoice.clinic_id || 'Unknown',
             dueDate: foundInvoice.due_date ? new Date(foundInvoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
@@ -77,6 +96,22 @@ function InvoiceDetailContent() {
     router.back();
   };
 
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      const prevInvoice = invoiceQueue[currentIndex - 1];
+      const identifier = prevInvoice.invoice_number || prevInvoice.id;
+      router.push(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentIndex < invoiceQueue.length - 1) {
+      const nextInvoice = invoiceQueue[currentIndex + 1];
+      const identifier = nextInvoice.invoice_number || nextInvoice.id;
+      router.push(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
@@ -85,7 +120,16 @@ function InvoiceDetailContent() {
     );
   }
 
-  return <InvoiceDetailPageImpl invoice={invoice} onBack={handleBack} />;
+  return (
+    <InvoiceDetailPageImpl 
+      invoice={invoice} 
+      onBack={handleBack}
+      onPrevious={handlePrevious}
+      onNext={handleNext}
+      canGoPrevious={currentIndex > 0}
+      canGoNext={currentIndex < invoiceQueue.length - 1}
+    />
+  );
 }
 
 export default function Page() {

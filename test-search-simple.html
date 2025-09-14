@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Test - Simple</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-box { border: 1px solid #ccc; padding: 20px; margin: 10px 0; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>Search Functionality Test</h1>
+    
+    <div class="test-box">
+        <h3>Test 1: Basic Page Load</h3>
+        <p>✅ If you can see this page, the basic setup is working.</p>
+    </div>
+    
+    <div class="test-box">
+        <h3>Test 2: Search Input</h3>
+        <p>Go to: <a href="http://localhost:3000/ForMePage" target="_blank">http://localhost:3000/ForMePage</a></p>
+        <p>You should see a search input with placeholder "Search invoices, vendors, amounts..."</p>
+    </div>
+    
+    <div class="test-box">
+        <h3>Test 3: Search Functionality</h3>
+        <p>1. Type "Henry" in the search box</p>
+        <p>2. The URL should change to: <code>http://localhost:3000/ForMePage?search=Henry</code></p>
+        <p>3. The invoice list should filter to show only Henry Schein invoices</p>
+    </div>
+    
+    <div class="test-box">
+        <h3>Test 4: API Data</h3>
+        <p>API endpoint: <a href="http://localhost:3000/api/invoice-queue" target="_blank">http://localhost:3000/api/invoice-queue</a></p>
+        <p>This should return JSON data with 117 invoices</p>
+    </div>
+    
+    <div class="test-box">
+        <h3>Debug Information</h3>
+        <p>Open browser console (F12) to see debug logs:</p>
+        <ul>
+            <li>🔍 ForMePage mounted - q= [search query] invoices= [count]</li>
+            <li>🔍 ForMePage: Starting to load invoices...</li>
+            <li>🔍 ForMePage: Loaded [count] invoices</li>
+            <li>🔍 ForMePage: Filtering with q= [query] invoices= [count]</li>
+        </ul>
+    </div>
+</body>
+</html>
