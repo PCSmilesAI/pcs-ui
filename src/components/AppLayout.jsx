@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import NavBar from './NavBar';
 import { InvoiceClickProvider } from '../context/InvoiceClickContext';
 
-export default function AppLayout({ children }) {
+function AppLayoutContent({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState('');
@@ -57,7 +57,8 @@ export default function AppLayout({ children }) {
   };
 
   const handleSearch = (query) => {
-    console.log('Search query:', query);
+    console.log('🔍 AppLayout: Search query received:', query);
+    // Search is now handled by URL parameters, no need to manage state here
   };
 
   const handleLogout = () => {
@@ -93,8 +94,23 @@ export default function AppLayout({ children }) {
         
         <main style={{ flex: 1, padding: isAuthPage ? '0' : '20px' }}>
           {children}
+          {/* Debug test button */}
+          {process.env.NODE_ENV === 'development' && (
+            <div style={{ position: 'fixed', bottom: '10px', left: '10px', background: 'rgba(0,0,0,0.8)', color: 'white', padding: '10px', fontSize: '12px', zIndex: 9999 }}>
+              <button onClick={() => updateSearch('test')} style={{ marginRight: '10px', padding: '5px' }}>Test Search</button>
+              <button onClick={() => updateSearch('')} style={{ padding: '5px' }}>Clear Search</button>
+            </div>
+          )}
         </main>
       </div>
+    </InvoiceClickProvider>
+  );
+}
+
+export default function AppLayout({ children }) {
+  return (
+    <InvoiceClickProvider>
+      <AppLayoutContent>{children}</AppLayoutContent>
     </InvoiceClickProvider>
   );
 }

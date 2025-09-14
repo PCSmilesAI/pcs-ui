@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
 /**
  * The All Invoices page aggregates every invoice into a single
@@ -23,82 +24,51 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
         console.log('🔄 AllInvoicesPage: Starting to load invoices...');
         setLoading(true);
         
-        // Add cache-busting timestamp to force fresh request
-        const timestamp = new Date().getTime();
-        const response = await fetch(`/invoice_queue.json?t=${timestamp}`, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-        console.log('📡 AllInvoicesPage: Fetch response status:', response.status);
+        const data = await fetchInvoiceQueue({ limit: 5000 });
+        console.log('📊 AllInvoicesPage: Raw data received:', data?.length || 0, 'invoices');
         
-        if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status}`);
-        }
+        // Debug: Log TC Dental invoices specifically
+        const tcDentalInvoices = data?.filter(inv => inv.vendor_name === 'TC Dental') || [];
+        console.log('🦷 TC Dental invoices found:', tcDentalInvoices.length, tcDentalInvoices.map(inv => ({ invoice_number: inv.invoice_number, id: inv.id })));
         
-        let data = await response.json();
-        // Status overrides removed - using direct API calls
-        console.log('📊 AllInvoicesPage: Raw data received:', data.length, 'invoices');
+        // Ensure data is an array before processing
+        const safeData = Array.isArray(data) ? data : [];
         
-        // Transform the queue data to match the expected format
-        const transformedData = data.map(invoice => ({
-          invoice: invoice.invoice_number || 'Unknown',
-          vendor: invoice.vendor || 'Unknown',
-          amount: `$${invoice.total || '0.00'}`,
-          office: invoice.clinic_id || 'Unknown',
-          status: invoice.status || 'New',
-          category: invoice.category || 'Other',
-          // Add additional fields for detail view
-          invoice_date: invoice.invoice_date,
-          due_date: invoice.due_date,
-          json_path: invoice.json_path,
-          pdf_path: invoice.pdf_path,
-          timestamp: invoice.timestamp,
-          assigned_to: invoice.assigned_to,
-          approved: invoice.approved
+        const transformedData = safeData.map(invoice => ({
+          invoice: invoice?.invoice_number || 'Unknown',
+          invoice_number: invoice?.invoice_number,
+          id: invoice?.id, // Add ID for click context fallback
+          vendor: invoice?.vendor_name || invoice?.vendor || 'Unknown',
+          amount: `$${invoice?.total || invoice?.invoice_total || '0.00'}`,
+          office: invoice?.office_location || invoice?.clinic_id || 'Unknown',
+          status: invoice?.status || 'New',
+          category: invoice?.category || 'Other',
+          invoice_date: invoice?.invoice_date,
+          due_date: invoice?.due_date,
+          json_path: invoice?.json_path,
+          pdf_path: invoice?.pdf_path,
+          timestamp: invoice?.timestamp,
+          assigned_to: invoice?.assigned_to,
+          approved: invoice?.approved,
+          line_items: invoice?.line_items || [] // Add line items for detail view
         }));
         
         console.log('✅ AllInvoicesPage: Data transformed successfully:', transformedData.length, 'invoices');
+        console.log('🔍 AllInvoicesPage: First 5 invoices:', transformedData.slice(0, 5).map(inv => ({ invoice: inv.invoice, vendor: inv.vendor, amount: inv.amount })));
+        console.log('🦷 AllInvoicesPage: TC Dental count in transformed data:', transformedData.filter(inv => inv.vendor === 'TC Dental').length);
         setInvoices(transformedData);
         setError(null);
       } catch (err) {
         console.error('❌ AllInvoicesPage: Error loading invoices:', err);
         setError(err.message);
-        // Fallback to static data if loading fails
-        console.log('🔄 AllInvoicesPage: Using fallback data...');
-        setInvoices([
-          {
-            invoice: 'IN761993',
-            vendor: 'Artisan Dental',
-            amount: '$1,265.40',
-            office: 'Roseburg',
-            status: 'To Be Paid',
-          },
-          {
-            invoice: '4307',
-            vendor: 'Exodus Dental Solutions',
-            amount: '$1,349.08',
-            office: 'Lebanon',
-            status: 'Approval',
-          },
-          {
-            invoice: '44250801',
-            vendor: 'Henry Schein',
-            amount: '$1,622.47',
-            office: 'Eugene',
-            status: 'Complete',
-          },
-        ]);
+        setInvoices([]);
       } finally {
-        console.log('🏁 AllInvoicesPage: Loading complete');
         setLoading(false);
       }
     };
 
     loadInvoices();
-  }, []);
+  }, [searchQuery, filters]);
 
   // Column definitions. Align right for the amount column.
   const columns = [

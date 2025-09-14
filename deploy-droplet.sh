@@ -1,4 +1,5 @@
 #!/bin/bash
+#!/bin/bash
 
 # PCS UI Deployment Script for Digital Ocean Droplet
 # IP: 159.65.181.148
@@ -18,12 +19,13 @@ echo "  Domain: $DOMAIN"
 
 # Create deployment package
 echo "📦 Creating deployment package..."
+rm -f pcs-ui-deployment.tar.gz
 tar -czf pcs-ui-deployment.tar.gz \
   --exclude=node_modules \
   --exclude=.git \
   --exclude=.next \
+  --exclude=pcs_ai_data \
   --exclude=*.log \
-  --exclude=pcs_ai_data/invoice_queue_backup_*.json \
   .
 
 echo "📤 Uploading to droplet..."
@@ -45,11 +47,12 @@ ssh $DROPLET_USER@$DROPLET_IP << 'EOF'
     npm install -g pm2
   fi
   
-  # Create app directory
+  # Create/clean app directory to avoid stale files
   mkdir -p /var/www/pcs-ui
+  rm -rf /var/www/pcs-ui/*
   cd /var/www/pcs-ui
   
-  # Extract deployment package
+  # Extract deployment package (fresh contents only)
   tar -xzf /tmp/pcs-ui-deployment.tar.gz
   
   # Install dependencies
@@ -81,7 +84,7 @@ ENVEOF
 module.exports = {
   apps: [{
     name: 'pcs-ui',
-    script: 'npm',
+    script: 'node_modules/.bin/next',
     args: 'start',
     cwd: '/var/www/pcs-ui',
     instances: 1,
@@ -96,8 +99,8 @@ module.exports = {
 };
 PM2EOF
 
-  # Start with PM2
-  pm2 start ecosystem.config.js
+  # Start with PM2 (serve Next.js server)
+  pm2 start ecosystem.config.js --update-env
   pm2 save
   pm2 startup
   
