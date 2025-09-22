@@ -1,4 +1,5 @@
 #!/bin/bash
+#!/bin/bash
 
 # PCS UI Deployment Script for Digital Ocean Droplet
 # IP: 159.65.181.148
@@ -18,12 +19,16 @@ echo "  Domain: $DOMAIN"
 
 # Create deployment package
 echo "📦 Creating deployment package..."
+rm -f pcs-ui-deployment.tar.gz
 tar -czf pcs-ui-deployment.tar.gz \
   --exclude=node_modules \
   --exclude=.git \
   --exclude=.next \
+  --exclude='pcs-ui sep13 copy' \
+  --exclude='backup-ui-*' \
+  --exclude='.next_static_archive' \
+  --exclude=pcs_ai_data \
   --exclude=*.log \
-  --exclude=pcs_ai_data/invoice_queue_backup_*.json \
   .
 
 echo "📤 Uploading to droplet..."
@@ -45,12 +50,23 @@ ssh $DROPLET_USER@$DROPLET_IP << 'EOF'
     npm install -g pm2
   fi
   
-  # Create app directory
+  # Create app directory (do NOT wipe to preserve old Next chunks for open tabs)
   mkdir -p /var/www/pcs-ui
   cd /var/www/pcs-ui
   
-  # Extract deployment package
+  # Preserve existing Next chunks to avoid stale-tab 404s
+  TS=$(date +%Y%m%d-%H%M%S)
+  if [ -d .next/static/chunks ]; then
+    mkdir -p /var/www/pcs-ui/.next_static_archive/$TS
+    cp -a .next/static/chunks/. /var/www/pcs-ui/.next_static_archive/$TS/ || true
+  fi
+
+  # Extract deployment package (fresh contents only)
   tar -xzf /tmp/pcs-ui-deployment.tar.gz
+  
+  # Ensure any local backup folders are not part of the build context
+  rm -rf "/var/www/pcs-ui/pcs-ui sep13 copy" || true
+  rm -rf /var/www/pcs-ui/backup-ui-* || true
   
   # Install dependencies
   npm install
@@ -75,13 +91,18 @@ ENVEOF
   
   # Build the application
   npm run build
+
+  # After build, restore archived chunks alongside new ones
+  if [ -d /var/www/pcs-ui/.next_static_archive/$TS ]; then
+    rsync -a --ignore-existing /var/www/pcs-ui/.next_static_archive/$TS/ .next/static/chunks/ || true
+  fi
   
   # Create PM2 ecosystem file
   cat > ecosystem.config.js << 'PM2EOF'
 module.exports = {
   apps: [{
     name: 'pcs-ui',
-    script: 'npm',
+    script: 'node_modules/.bin/next',
     args: 'start',
     cwd: '/var/www/pcs-ui',
     instances: 1,
@@ -96,8 +117,8 @@ module.exports = {
 };
 PM2EOF
 
-  # Start with PM2
-  pm2 start ecosystem.config.js
+  # Start with PM2 (serve Next.js server)
+  pm2 start ecosystem.config.js --update-env
   pm2 save
   pm2 startup
   
@@ -115,12 +136,41 @@ ssh $DROPLET_USER@$DROPLET_IP << 'EOF'
   
   # Create Nginx configuration
   cat > /etc/nginx/sites-available/pcs-ui << 'NGINXEOF'
+# Canonicalize host: redirect www -> apex
 server {
     listen 80;
-    server_name pcsmilesai.com www.pcsmilesai.com;
-    
+    server_name www.pcsmilesai.com;
+    return 301 https://pcsmilesai.com$request_uri;
+}
+
+server {
+    listen 80;
+    server_name pcsmilesai.com;
+
+    # Defensive: rewrite bad path /next/... -> /_next/...
+    location ^~ /next/ {
+        return 301 /_$uri$is_args$args;
+    }
+
+    # Static Next assets: long-lived, immutable
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    # APIs: never cache
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        add_header Cache-Control "no-store";
+    }
+
+    # Everything else (HTML): no-store
     location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -129,6 +179,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+        add_header Cache-Control "no-store";
     }
 }
 NGINXEOF

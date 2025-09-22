@@ -1,0 +1,26 @@
+{
+  "vendor": "tc dental laboratory, inc.",
+  "vendor_name": "TC Dental",
+  "invoice_number": "260-489",
+  "invoice_date": "",
+  "due_date": "",
+  "total": "188.00",
+  "office_location": "Salem",
+  "patient_name": "Kayla Wohl Pauiler Doctor Name: Gra",
+  "doctor_name": "Gra",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "D2740 Full Zirconia Crown Posterior",
+      "Quantity": "2.00",
+      "unit_price": "94.00",
+      "line_item_total": "188.00"
+    }
+  ],
+  "source_page": 3,
+  "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+  "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
+  "id": "tc_260-489_3",
+  "clinic_id": "Salem",
+  "invoice_total": "188.00"
+}

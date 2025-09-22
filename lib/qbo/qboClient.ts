@@ -1,5 +1,4 @@
 import { tokenStorage, QBOTokens } from './tokenStorage';
-import { oauth2 } from './oauthClient';
 
 export interface QBOBill {
   Id?: string;
@@ -8,20 +7,27 @@ export interface QBOBill {
   DueDate?: string;
   VendorRef: {
     value: string;
-    name: string;
+    name?: string;
   };
+  APAccountRef?: {
+    value: string;
+    name?: string;
+  };
+  PrivateNote?: string;
+  Memo?: string;
   Line: Array<{
     Id?: string;
     LineNum?: number;
     Amount: number;
+    Description?: string;
     DetailType: 'ItemBasedExpenseLineDetail';
     ItemBasedExpenseLineDetail: {
       ItemRef: {
         value: string;
-        name: string;
+        name?: string;
       };
-      Qty: number;
-      UnitPrice: number;
+      Qty?: number;
+      UnitPrice?: number;
     };
   }>;
   AttachRef?: Array<{
@@ -50,9 +56,17 @@ export class QBOClient {
   private tokens: QBOTokens | null = null;
 
   async initialize(): Promise<void> {
-    this.tokens = await tokenStorage.getLatestTokens();
+    if (!this.tokens) {
+      this.tokens = await tokenStorage.getLatestTokens();
+    }
+
     if (!this.tokens) {
       throw new Error('No QuickBooks tokens found. Please connect to QuickBooks first.');
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+      const { tokenRefreshService } = await import('./tokenRefreshService');
+      tokenRefreshService.start();
     }
   }
 
@@ -65,48 +79,71 @@ export class QBOClient {
       throw new Error('No QuickBooks tokens available');
     }
 
-    // Check if token is expired
-    if (await tokenStorage.isTokenExpired(this.tokens)) {
-      console.log('🔄 QBO Token expired, refreshing...');
+    const now = Math.floor(Date.now() / 1000);
+    const expiresSoon = now >= (this.tokens.expiresAt - 300);
+
+    if (expiresSoon) {
+      console.log('🔄 QBO token expiring soon, refreshing…');
       await this.refreshToken();
     }
   }
 
   private async refreshToken(): Promise<void> {
-    if (!this.tokens) {
-      throw new Error('No tokens available to refresh');
+    if (!this.tokens?.refreshToken) {
+      throw new Error('No refresh token available for QuickBooks');
     }
 
     try {
-      const { token } = await oauth2.getToken({
+      const params = new URLSearchParams({
+        grant_type: 'refresh_token',
         refresh_token: this.tokens.refreshToken,
-        grant_type: 'refresh_token'
       });
 
-      // Update stored tokens
+      const credentials = Buffer.from(
+        `${process.env.QBO_CLIENT_ID}:${process.env.QBO_CLIENT_SECRET}`,
+      ).toString('base64');
+
+      const response = await fetch('https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer', {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${credentials}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
+        },
+        body: params,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Token refresh failed:', response.status, errorText);
+        throw new Error(`Token refresh failed: ${response.status} - ${errorText}`);
+      }
+
+      const payload = await response.json();
+      const now = Math.floor(Date.now() / 1000);
+      const expiresIn = payload.expires_in ?? 3600;
+      const expiresAt = now + expiresIn;
+
       await tokenStorage.saveTokens({
         realmId: this.tokens.realmId,
-        accessToken: token.access_token,
-        refreshToken: token.refresh_token,
-        expiresIn: token.expires_in
+        accessToken: payload.access_token,
+        refreshToken: payload.refresh_token || this.tokens.refreshToken,
+        expiresIn,
       });
 
-      // Update current tokens
-      const now = Math.floor(Date.now() / 1000);
-      const expiresAt = now + token.expires_in;
-      
       this.tokens = {
         realmId: this.tokens.realmId,
-        accessToken: token.access_token,
-        refreshToken: token.refresh_token,
-        expiresIn: token.expires_in,
-        expiresAt
+        accessToken: payload.access_token,
+        refreshToken: payload.refresh_token || this.tokens.refreshToken,
+        expiresIn,
+        expiresAt,
       };
 
-      console.log('✅ QBO Token refreshed successfully');
-    } catch (error) {
+      console.log('✅ QBO token refreshed successfully.');
+    } catch (error: any) {
       console.error('❌ Failed to refresh QBO token:', error);
-      throw new Error('Failed to refresh QuickBooks token. Please reconnect.');
+      this.tokens = null;
+      throw new Error(`Failed to refresh QuickBooks token: ${error.message}. Please reconnect at /api/qbo/auth`);
     }
   }
 
@@ -114,11 +151,11 @@ export class QBOClient {
     await this.ensureValidToken();
 
     const url = `https://quickbooks.api.intuit.com/v3/company/${this.tokens!.realmId}/${endpoint}`;
-    
-    const headers = {
-      'Authorization': `Bearer ${this.tokens!.accessToken}`,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
+
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${this.tokens!.accessToken}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
     };
 
     const options: RequestInit = {
@@ -130,66 +167,143 @@ export class QBOClient {
       options.body = JSON.stringify(data);
     }
 
-    try {
-      const response = await fetch(url, options);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`QBO API Error (${response.status}):`, errorText);
-        throw new Error(`QBO API Error: ${response.status} - ${errorText}`);
-      }
+    let response = await fetch(url, options);
 
-      return await response.json();
-    } catch (error) {
-      console.error('QBO API Request failed:', error);
-      throw error;
+    if (response.status === 401) {
+      try {
+        console.warn('QBO 401 received — attempting token refresh and retry...');
+        await this.refreshToken();
+        headers.Authorization = `Bearer ${this.tokens!.accessToken}`;
+        response = await fetch(url, options);
+      } catch (refreshError) {
+        console.error('QBO token refresh failed:', refreshError);
+      }
     }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`QBO API Error (${response.status}):`, errorText);
+      throw new Error(`QBO API Error: ${response.status} - ${errorText}`);
+    }
+
+    return response.json();
   }
 
-  // Get all items (for category mapping)
+  private escapeQueryValue(value: string): string {
+    return value.replace(/'/g, "\\'");
+  }
+
+  private async query<T = any>(sql: string, minorVersion = '65'): Promise<T> {
+    const encoded = encodeURIComponent(sql);
+    return this.makeRequest(`query?query=${encoded}&minorversion=${minorVersion}`, 'GET');
+  }
+
   async getItems(): Promise<QBOItem[]> {
-    const response = await this.makeRequest('items?minorversion=65');
+    const response = await this.query<{ QueryResponse?: { Item?: QBOItem[] } }>(
+      'select Id, Name, Type, IncomeAccountRef, ExpenseAccountRef from Item'
+    );
     return response.QueryResponse?.Item || [];
   }
 
-  // Get dental-specific items/categories
   async getDentalItems(): Promise<QBOItem[]> {
     const items = await this.getItems();
-    return items.filter(item => 
-      item.Type === 'Service' && 
-      (item.Name.toLowerCase().includes('dental') || 
-       item.Name.toLowerCase().includes('supply') ||
-       item.Name.toLowerCase().includes('equipment') ||
-       item.Name.toLowerCase().includes('lab') ||
-       item.Name.toLowerCase().includes('crown') ||
-       item.Name.toLowerCase().includes('filling') ||
-       item.Name.toLowerCase().includes('cleaning') ||
-       item.Name.toLowerCase().includes('x-ray') ||
-       item.Name.toLowerCase().includes('orthodontic'))
-    );
+    return items.filter((item) => {
+      if (item.Type !== 'Service') return false;
+      const name = typeof item.Name === 'string' ? item.Name.toLowerCase() : '';
+      if (!name) return false;
+
+      return (
+        name.includes('dental') ||
+        name.includes('supply') ||
+        name.includes('equipment') ||
+        name.includes('lab') ||
+        name.includes('crown') ||
+        name.includes('filling') ||
+        name.includes('cleaning') ||
+        name.includes('x-ray') ||
+        name.includes('orthodontic')
+      );
+    });
   }
 
-  // Create a new bill
+  async findVendorByName(name: string): Promise<any | null> {
+    if (!name) return null;
+    const safe = this.escapeQueryValue(name);
+    const response = await this.query(`select * from Vendor where DisplayName = '${safe}'`);
+    return response.QueryResponse?.Vendor?.[0] || null;
+  }
+
+  async createVendor(name: string): Promise<any> {
+    const payload = {
+      DisplayName: name,
+      CompanyName: name,
+    };
+
+    const response = await this.makeRequest('vendor?minorversion=65', 'POST', payload);
+    return response.Vendor;
+  }
+
+  async ensureVendor(name: string): Promise<any> {
+    const existing = await this.findVendorByName(name);
+    if (existing) return existing;
+    return this.createVendor(name);
+  }
+
+  async getAccountsPayableAccount(): Promise<any | null> {
+    const query = "select * from Account where AccountType = 'Accounts Payable'";
+    const response = await this.query(query);
+    return response.QueryResponse?.Account?.[0] || null;
+  }
+
   async createBill(bill: QBOBill): Promise<any> {
-    const response = await this.makeRequest('purchases', 'POST', bill);
-    return response.PurchaseResponse?.Purchase?.[0];
+    const response = await this.makeRequest('bill?minorversion=70', 'POST', bill);
+    return response?.Bill || response;
   }
 
-  // Upload attachment to a bill
   async uploadAttachment(billId: string, fileName: string, fileContent: Buffer, mimeType: string): Promise<any> {
-    // This would require the Attachments API
-    // For now, we'll return a placeholder
-    console.log(`📎 Would upload attachment ${fileName} to bill ${billId}`);
-    return { success: true, message: 'Attachment upload not yet implemented' };
+    await this.ensureValidToken();
+
+    const url = `https://quickbooks.api.intuit.com/v3/company/${this.tokens!.realmId}/upload?minorversion=65`;
+
+    const formData = new FormData();
+    const metadata = {
+      AttachableRef: [
+        {
+          EntityRef: {
+            value: billId,
+            type: 'Bill',
+          },
+        },
+      ],
+      FileName: fileName,
+    };
+
+    formData.append('file_metadata_01', new Blob([JSON.stringify(metadata)], { type: 'application/json' }), 'metadata.json');
+    formData.append('file_content_01', new Blob([fileContent], { type: mimeType }), fileName);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.tokens!.accessToken}`,
+        Accept: 'application/json',
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`QBO Attachment Error (${response.status}):`, errorText);
+      throw new Error(`QBO Attachment Error: ${response.status} - ${errorText}`);
+    }
+
+    return response.json();
   }
 
-  // Get company info
   async getCompanyInfo(): Promise<any> {
     const response = await this.makeRequest('companyinfo/1?minorversion=65');
     return response.QueryResponse?.CompanyInfo?.[0];
   }
 
-  // Test connection
   async testConnection(): Promise<boolean> {
     try {
       await this.getCompanyInfo();
@@ -199,7 +313,76 @@ export class QBOClient {
       return false;
     }
   }
+
+  async findVendor(vendorName: string): Promise<{ id: string; name: string }> {
+    try {
+      console.log(`🔍 Looking up existing vendor: ${vendorName}`);
+      const response = await this.query("SELECT Id, Name FROM Vendor WHERE Active = true");
+      const vendors = response.QueryResponse?.Vendor || [];
+
+      let vendor = vendors.find((v: any) => v.Name === vendorName);
+      if (!vendor) {
+        vendor = vendors.find((v: any) => v.Name.toLowerCase() === vendorName.toLowerCase());
+      }
+      if (!vendor) {
+        vendor = vendors.find((v: any) =>
+          v.Name.toLowerCase().includes(vendorName.toLowerCase()) ||
+          vendorName.toLowerCase().includes(v.Name.toLowerCase())
+        );
+      }
+
+      if (vendor) {
+        console.log(`✅ Found vendor: ${vendor.Name} (ID: ${vendor.Id})`);
+        return { id: vendor.Id, name: vendor.Name };
+      }
+
+      console.log('📋 Available vendors:', vendors.map((v: any) => v.Name).slice(0, 20));
+      throw new Error(`Vendor "${vendorName}" not found in QuickBooks.`);
+    } catch (error) {
+      console.error('❌ Error finding vendor:', error);
+      throw error;
+    }
+  }
+
+  async getAPAccount(): Promise<{ id: string; name: string } | null> {
+    try {
+      const response = await this.query("SELECT Id, Name, AccountType FROM Account WHERE Active = true");
+      const accounts = response.QueryResponse?.Account || [];
+      const apAccount = accounts.find((acc: any) => acc.AccountType === 'Accounts Payable');
+
+      if (apAccount) {
+        return { id: apAccount.Id, name: apAccount.Name };
+      }
+
+      console.error('❌ No Accounts Payable account found');
+      return null;
+    } catch (error) {
+      console.error('❌ Error getting AP account:', error);
+      return null;
+    }
+  }
+
+  async getExpenseAccounts(): Promise<Array<{ id: string; name: string; type: string }>> {
+    try {
+      const response = await this.query("SELECT Id, Name, AccountType, AccountSubType FROM Account WHERE Active = true");
+      const accounts = response.QueryResponse?.Account || [];
+
+      const expenseAccounts = accounts.filter((acc: any) =>
+        acc.AccountType === 'Expense' ||
+        acc.AccountType === 'Cost of Goods Sold' ||
+        acc.AccountType === 'Other Expense'
+      );
+
+      return expenseAccounts.map((account: any) => ({
+        id: account.Id,
+        name: account.Name,
+        type: account.AccountType,
+      }));
+    } catch (error) {
+      console.error('❌ Error getting expense accounts:', error);
+      return [];
+    }
+  }
 }
 
-// Export singleton instance
 export const qboClient = new QBOClient();

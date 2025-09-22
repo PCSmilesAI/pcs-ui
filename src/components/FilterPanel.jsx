@@ -13,10 +13,6 @@ import React from 'react';
  *  - onClose: function() called when the overlay is clicked
  */
 export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
-  // Only render when open. We use inline styles for the overlay and
-  // panel so that the presentation is independent of any CSS build.
-  if (!isOpen) return null;
-
   // Local state for each filter field. These are tracked so that
   // we can return the selected values when the user clicks Apply.
   const [vendor, setVendor] = React.useState('');
@@ -25,6 +21,10 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
   const [office, setOffice] = React.useState('');
   const [dueWithin, setDueWithin] = React.useState('');
   const [category, setCategory] = React.useState('');
+
+  // Only render when open. We use inline styles for the overlay and
+  // panel so that the presentation is independent of any CSS build.
+  if (!isOpen) return null;
   // Base styles
   const overlayStyle = {
     position: 'fixed',

@@ -15,7 +15,7 @@ EMAIL_INVOICES_PATH = os.path.join(os.path.dirname(__file__), "email_invoices")
 LOG_PATH = os.path.join(os.path.dirname(__file__), "ui_upload.log")
 
 # UI Configuration (adjust as needed)
-UI_BASE_URL = "http://localhost:5173"  # Vite dev server
+UI_BASE_URL = "http://localhost:3000"  # Next.js dev server
 API_ENDPOINT = "/api/invoices"
 
 def log(msg):

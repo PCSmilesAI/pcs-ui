@@ -93,7 +93,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
           return new Date(yy, m, d);
         }
         const dt = new Date(r.dueDate);
-        return isNaN(dt.getTime()) ? now : dt;
+        return isNaN(dt.getTime()) ? new Date() : dt;
       })(),
     })),
     [rows]

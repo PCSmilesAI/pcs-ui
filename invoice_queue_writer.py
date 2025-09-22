@@ -34,6 +34,25 @@ def save_invoice_queue(queue):
     with open(INVOICE_QUEUE_PATH, 'w') as f:
         json.dump(queue, f, indent=2)
 
+def find_corresponding_pdf(json_filename):
+    """Find the PDF file that corresponds to a JSON file"""
+    # Remove .json extension
+    base_name = json_filename.replace('.json', '')
+    
+    # First try exact match
+    exact_pdf = os.path.join(EMAIL_INVOICES_PATH, base_name + '.pdf')
+    if os.path.exists(exact_pdf):
+        return exact_pdf
+    
+    # If no exact match, look for PDFs that contain the base name
+    # This handles cases where the JSON and PDF have different prefixes/suffixes
+    for pdf_file in os.listdir(EMAIL_INVOICES_PATH):
+        if pdf_file.endswith('.pdf') and base_name in pdf_file:
+            return os.path.join(EMAIL_INVOICES_PATH, pdf_file)
+    
+    # If still no match, return the expected path (for debugging)
+    return os.path.join(EMAIL_INVOICES_PATH, base_name + '.pdf')
+
 def detect_vendor_from_filename(filename):
     """Detect vendor from filename"""
     filename_lower = filename.lower()
@@ -73,10 +92,9 @@ def add_invoice_to_queue(json_file_path):
         elif vendor.lower() == 'epic dental lab':
             vendor = 'Epic Dental Lab'
         
-        # Create PDF path
+        # Find the correct PDF path
         json_filename = os.path.basename(json_file_path)
-        pdf_filename = json_filename.replace('.json', '.pdf')
-        pdf_path = os.path.join(EMAIL_INVOICES_PATH, pdf_filename)
+        pdf_path = find_corresponding_pdf(json_filename)
         
         # Create queue entry
         queue_entry = {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { fetchQboCategories } from '../lib/categoriesClient';
 
@@ -12,8 +12,10 @@ import { fetchQboCategories } from '../lib/categoriesClient';
  * that the layout and colours appear even if no CSS preprocessor
  * is available.
  */
-export default function InvoiceDetailPage({ invoice, onBack }) {
-  // Guard clause for undefined invoice during static generation
+export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext }) {
+  const invoiceIdentifier = invoice?.id || invoice?.invoice_number || null;
+  const invoiceJsonPath = invoice?.json_path || null;
+
   if (!invoice) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
@@ -42,9 +44,9 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   // State for editable fields. Payment amount can be modified by the
   // user. Other details and line items could be lifted into state
   // similarly; here we demonstrate for payment and details.
-  const [paymentAmount, setPaymentAmount] = useState(invoice?.amount || '');
+  const [paymentAmount, setPaymentAmount] = useState(invoice?.amount || invoice?.total || '');
   const [details, setDetails] = useState({
-    invoice: invoice?.invoice || '',
+    invoice: invoice?.invoice || invoice?.invoice_number || '',
     vendor: invoice?.vendor || '',
     office: invoice?.office || '',
     category: invoice?.category || 'Dental Lab',
@@ -59,53 +61,130 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   const [lineCategories, setLineCategories] = useState({});
   const [loadingLineCategories, setLoadingLineCategories] = useState(false);
 
+  useEffect(() => {
+    setPaymentAmount(invoice?.amount || invoice?.total || '');
+    setDetails({
+      invoice: invoice?.invoice || invoice?.invoice_number || '',
+      vendor: invoice?.vendor || '',
+      office: invoice?.office || '',
+      category: invoice?.category || 'Dental Lab',
+      invoice_date: invoice?.invoice_date || '',
+      due_date: invoice?.due_date || '',
+    });
+  }, [invoice]);
+
   // Load line items from JSON data
   useEffect(() => {
+    let isActive = true;
+
     async function loadLineItems() {
-      if (invoice?.json_path) {
-        try {
-          const response = await fetch(`/${invoice.json_path}`);
-          if (response.ok) {
-            const jsonData = await response.json();
-            if (jsonData.line_items && Array.isArray(jsonData.line_items)) {
-              // Transform the line items to match the UI format
-              const transformedItems = jsonData.line_items.map((item, index) => ({
-                id: item.product_number || `item-${index}`,
-                name: item.product_name || '',
-                qty: item.Quantity || '1',
-                unit: `$${item.unit_price || '0.00'}`,
-                total: `$${item.line_item_total || '0.00'}`,
-                category: item.quickbooks_category || 'Not categorized',
-              }));
+      if (!invoiceJsonPath) {
+        if (isActive) {
+          setItems([]);
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch(`/${invoiceJsonPath}`);
+        if (response.ok) {
+          const jsonData = await response.json();
+          if (Array.isArray(jsonData.line_items)) {
+            const transformedItems = jsonData.line_items.map((item, index) => ({
+              id: item.product_number || `item-${index}`,
+              name: item.product_name || '',
+              qty: item.Quantity || '1',
+              unit: `$${item.unit_price || '0.00'}`,
+              total: `$${item.line_item_total || '0.00'}`,
+              category: item.quickbooks_category || 'Not categorized',
+            }));
+            if (isActive) {
               setItems(transformedItems);
-            } else {
-              // Fallback to empty array if no line items
-              setItems([]);
             }
-          } else {
-            console.warn('Failed to load JSON data for line items');
+          } else if (isActive) {
             setItems([]);
           }
-        } catch (error) {
+        } else if (isActive) {
+          console.warn('Failed to load JSON data for line items');
+          setItems([]);
+        }
+      } catch (error) {
+        if (isActive) {
           console.error('Error loading line items:', error);
           setItems([]);
         }
-      } else {
-        // Fallback to empty array if no JSON path
-        setItems([]);
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
     }
 
     loadLineItems();
-  }, [invoice?.json_path]);
+
+    return () => {
+      isActive = false;
+    };
+  }, [invoiceJsonPath]);
+
+  const loadLineCategories = useCallback(async () => {
+    if (!invoiceIdentifier) {
+      setLineCategories({});
+      return;
+    }
+
+    setLoadingLineCategories(true);
+    try {
+      const response = await fetch(`/api/invoices/${invoiceIdentifier}/categories`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setLineCategories(data.lineCategories || {});
+        console.log('✅ Line categories loaded:', Object.keys(data.lineCategories || {}).length, 'assignments');
+      } else {
+        console.warn('Failed to load line categories:', response.status);
+        setLineCategories({});
+      }
+    } catch (error) {
+      console.error('❌ Error loading line categories:', error);
+      setLineCategories({});
+    } finally {
+      setLoadingLineCategories(false);
+    }
+  }, [invoiceIdentifier]);
 
   // Load line categories when component mounts or invoice changes
   useEffect(() => {
-    if (invoice?.id || invoice?.invoice_number) {
+    if (invoiceIdentifier) {
       loadLineCategories();
     }
-  }, [invoice?.id, invoice?.invoice_number]);
+  }, [invoiceIdentifier, loadLineCategories]);
+
+  if (!invoice) {
+    return (
+      <div style={{ padding: '24px', textAlign: 'center' }}>
+        <h2>Invoice not found</h2>
+        <p>This invoice could not be loaded.</p>
+        {onBack && (
+          <button
+            onClick={onBack}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#357ab2',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              marginTop: '16px',
+            }}
+          >
+            Go Back
+          </button>
+        )}
+      </div>
+    );
+  }
 
   function handleDetailChange(field, value) {
     setDetails((prev) => ({ ...prev, [field]: value }));
@@ -145,38 +224,13 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
   }
 
   // Load line categories for this invoice
-  async function loadLineCategories() {
-    if (!invoice?.id && !invoice?.invoice_number) return;
-    
-    setLoadingLineCategories(true);
-    try {
-      const invoiceId = invoice.id || invoice.invoice_number;
-      const response = await fetch(`/api/invoices/${invoiceId}/categories`);
-      
-      if (response.ok) {
-        const data = await response.json();
-        setLineCategories(data.lineCategories || {});
-        console.log('✅ Line categories loaded:', Object.keys(data.lineCategories || {}).length, 'assignments');
-      } else {
-        console.warn('Failed to load line categories:', response.status);
-        setLineCategories({});
-      }
-    } catch (error) {
-      console.error('❌ Error loading line categories:', error);
-      setLineCategories({});
-    } finally {
-      setLoadingLineCategories(false);
-    }
-  }
-
   // Auto-categorize line items
   async function autoCategorize() {
-    if (!invoice?.id && !invoice?.invoice_number) return;
-    
+    if (!invoiceIdentifier) return;
+
     setLoadingLineCategories(true);
     try {
-      const invoiceId = invoice.id || invoice.invoice_number;
-      const response = await fetch(`/api/invoices/${invoiceId}/auto-categorize`, {
+      const response = await fetch(`/api/invoices/${invoiceIdentifier}/auto-categorize`, {
         method: 'POST'
       });
       
@@ -201,11 +255,10 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
 
   // Save line category changes
   async function saveLineCategories() {
-    if (!invoice?.id && !invoice?.invoice_number) return;
-    
+    if (!invoiceIdentifier) return;
+
     try {
-      const invoiceId = invoice.id || invoice.invoice_number;
-      const response = await fetch(`/api/invoices/${invoiceId}/categories`, {
+      const response = await fetch(`/api/invoices/${invoiceIdentifier}/categories`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -240,115 +293,12 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     }));
   }
 
-  // Apply intelligent categorization to line items
-  async function applyIntelligentCategorization() {
-    if (categories.length === 0) {
-      alert('Please fetch categories first');
-      return;
-    }
-
-    setProcessing(true);
-    try {
-      const updatedItems = items.map(item => {
-        const description = item.name.toLowerCase();
-        let bestCategory = 'Not categorized';
-        let bestScore = 0;
-
-        // Find best matching category
-        categories.forEach(category => {
-          const categoryName = category.name.toLowerCase();
-          let score = 0;
-
-          // Check for keyword matches
-          if (description.includes('supply') || description.includes('material')) {
-            if (categoryName.includes('supply')) score += 3;
-          }
-          if (description.includes('equipment') || description.includes('machine')) {
-            if (categoryName.includes('equipment')) score += 3;
-          }
-          if (description.includes('lab') || description.includes('crown') || description.includes('bridge')) {
-            if (categoryName.includes('lab')) score += 3;
-          }
-          if (description.includes('cleaning') || description.includes('hygiene')) {
-            if (categoryName.includes('cleaning')) score += 3;
-          }
-          if (description.includes('filling') || description.includes('composite')) {
-            if (categoryName.includes('filling')) score += 3;
-          }
-          if (description.includes('x-ray') || description.includes('radiograph')) {
-            if (categoryName.includes('x-ray')) score += 3;
-          }
-
-          // Direct name matching
-          if (categoryName.includes(description.split(' ')[0])) score += 2;
-          if (description.includes(categoryName.split(' ')[0])) score += 2;
-
-          if (score > bestScore) {
-            bestScore = score;
-            bestCategory = category.name;
-          }
-        });
-
-        return {
-          ...item,
-          category: bestCategory
-        };
-      });
-
-      setItems(updatedItems);
-      console.log('✅ Intelligent categorization applied');
-      alert('Intelligent categorization applied to all line items');
-    } catch (error) {
-      console.error('❌ Error applying categorization:', error);
-      alert('Error applying categorization: ' + error.message);
-    } finally {
-      setProcessing(false);
-    }
-  }
-
-  // Save categories to invoice
-  async function saveCategories() {
-    setProcessing(true);
-    try {
-      const response = await fetch('/api/qbo/update-invoice-categories', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          invoiceNumber: invoice?.invoice_number,
-          lineItems: items.map((item, index) => ({
-            product_number: item.id,
-            name: item.name,
-            category: item.category,
-            index: index
-          }))
-        })
-      });
-
-      const result = await response.json();
-      
-      if (result.success) {
-        console.log('✅ Categories saved to invoice');
-        alert('Categories saved to invoice successfully');
-      } else {
-        console.error('❌ Failed to save categories:', result.error);
-        alert('Failed to save categories: ' + result.error);
-      }
-    } catch (error) {
-      console.error('❌ Error saving categories:', error);
-      alert('Error saving categories: ' + error.message);
-    } finally {
-      setProcessing(false);
-    }
-  }
-
   // Function to handle PDF download
   function handleDownload() {
     if (invoice?.pdf_path) {
       // Create a link element to trigger the download
       const link = document.createElement('a');
-      link.href = `/${invoice.pdf_path}`;
+      link.href = invoice.pdf_path.startsWith('/api/') ? invoice.pdf_path : `/${invoice.pdf_path}`;
       link.download = `${invoice?.invoice || invoice?.invoice_number || 'invoice'}_${invoice?.vendor || 'vendor'}.pdf`;
       document.body.appendChild(link);
       link.click();
@@ -420,13 +370,28 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
       }
 
       // Status override functionality removed - using direct API calls
-      
+
       // If invoice is being approved, create QuickBooks bill
       if (newStatus === 'approved' && newApproved === true) {
         try {
           console.log('🔄 Creating QuickBooks bill for approved invoice...');
           
-          const billResponse = await fetch('/api/qbo/auto-create-bill', {
+          const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+          // Check QBO connection first to avoid noisy errors
+          const statusUrl = `${baseUrl}/api/qbo/status?ts=${Date.now()}`;
+          const statusRes = await fetch(statusUrl, { cache: 'no-store' });
+          const statusJson = await statusRes.json().catch(() => ({ connected: false }));
+
+          if (!statusRes.ok) {
+            console.warn('⚠️ QuickBooks status check returned non-OK response:', statusRes.status, statusJson);
+          }
+
+          if (!statusJson.connected) {
+            alert('Invoice approved. QuickBooks not connected — please connect QuickBooks first.');
+            onBack();
+            return;
+          }
+          const billResponse = await fetch(`${baseUrl}/api/qbo/auto-create-bill`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -484,22 +449,63 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
     updateInvoiceStatus('rejected', false);
   }
 
-  function handleRepair() {
-    updateInvoiceStatus('repair', false);
+  async function handleRepair() {
+    try {
+      console.log('🔧 Starting repair process...');
+      
+      // Create corrected data from current form state
+      const correctedData = {
+        invoice_number: details.invoice,
+        vendor: details.vendor,
+        vendor_name: details.vendor,
+        total: paymentAmount.replace('$', '').replace(',', ''),
+        invoice_total: paymentAmount.replace('$', '').replace(',', ''),
+        office_location: details.office,
+        clinic_id: details.office,
+        category: details.category,
+        invoice_date: details.invoice_date,
+        due_date: details.due_date,
+        line_items: items,
+        status: 'repair',
+        approved: false,
+        timestamp: new Date().toISOString(),
+        pdf_path: invoice.pdf_path,
+        json_path: invoice.json_path,
+        id: invoice.id
+      };
+
+      // Call repair API to log the training data
+      const repairResponse = await fetch('/api/repair-invoice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          invoice_number: invoice.invoice_number,
+          original_data: invoice,
+          corrected_data: correctedData,
+          pdf_path: invoice.pdf_path,
+          vendor_name: invoice.vendor_name || invoice.vendor
+        })
+      });
+
+      if (!repairResponse.ok) {
+        throw new Error('Failed to log repair data');
+      }
+
+      console.log('✅ Repair data logged successfully');
+      
+      // Update the invoice status
+      await updateInvoiceStatus('repair', false);
+      
+    } catch (error) {
+      console.error('❌ Error during repair process:', error);
+      alert(`Error logging repair data: ${error.message}`);
+    }
   }
 
   function handlePaid() {
     updateInvoiceStatus('completed', true);
-  }
-
-  function handleRemove() {
-    if (invoice.status === 'completed') {
-      handleRemoveCompletely();
-      return;
-    }
-    if (confirm('Are you sure you want to remove this invoice from the system?')) {
-      updateInvoiceStatus('removed', false);
-    }
   }
 
   // Strong remove for completed invoices: delete from queue + delete files
@@ -681,6 +687,34 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
             }}
           >
             <i className="fas fa-arrow-left"></i>
+          </button>
+          <button
+            onClick={onPrevious}
+            disabled={!canGoPrevious}
+            aria-label="Previous Invoice"
+            style={{
+              color: canGoPrevious ? '#357ab2' : '#ccc',
+              background: 'none',
+              border: 'none',
+              fontSize: '20px',
+              cursor: canGoPrevious ? 'pointer' : 'not-allowed',
+            }}
+          >
+            <i className="fas fa-chevron-left"></i>
+          </button>
+          <button
+            onClick={onNext}
+            disabled={!canGoNext}
+            aria-label="Next Invoice"
+            style={{
+              color: canGoNext ? '#357ab2' : '#ccc',
+              background: 'none',
+              border: 'none',
+              fontSize: '20px',
+              cursor: canGoNext ? 'pointer' : 'not-allowed',
+            }}
+          >
+            <i className="fas fa-chevron-right"></i>
           </button>
           <div style={summaryStyle}>
             <span>{invoice?.invoice || invoice?.invoice_number || 'N/A'}</span>
@@ -1062,7 +1096,7 @@ export default function InvoiceDetailPage({ invoice, onBack }) {
         <div style={rightColumnStyle}>
           {invoice?.pdf_path ? (
             <iframe
-              src={`/${invoice.pdf_path}`}
+              src={invoice.pdf_path.startsWith('/api/') ? invoice.pdf_path : `/${invoice.pdf_path}`}
             style={{
               width: '100%',
               height: '100%',

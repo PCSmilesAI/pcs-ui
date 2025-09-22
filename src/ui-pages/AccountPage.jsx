@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function AccountPage() {
@@ -61,6 +61,22 @@ export default function AccountPage() {
         <div><strong>Name:</strong> {user?.name || 'N/A'}</div>
         <div><strong>Email:</strong> {user?.email || 'N/A'}</div>
         <div><strong>Access Level:</strong> Employee</div>
+        {logout && (
+          <button
+            onClick={logout}
+            style={{
+              marginTop: '12px',
+              padding: '8px 16px',
+              backgroundColor: '#e53e3e',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            Log Out
+          </button>
+        )}
       </div>
 
       <div>

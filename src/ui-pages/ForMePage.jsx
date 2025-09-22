@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
-/**
- * Page for the "For Me" view. Displays a table of invoices
- * assigned to the user that are NOT yet approved. Clicking on a row will open the detail
- * screen via the passed onRowClick handler.
- */
 export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,118 +11,96 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [qboConnected, setQboConnected] = useState(false);
   const [qboLoading, setQboLoading] = useState(true);
   const { handleInvoiceRowClick } = useInvoiceClick();
+  const searchParams = useSearchParams();
 
-  // Debug logging
-  console.log('🔍 ForMePage: handleInvoiceRowClick from context:', handleInvoiceRowClick);
-  console.log('🔍 ForMePage: typeof handleInvoiceRowClick:', typeof handleInvoiceRowClick);
+  const spQuery = useMemo(() => (searchParams.get('search') || '').trim().toLowerCase(), [searchParams]);
+  const spFilters = useMemo(() => ({
+    vendor: searchParams.get('vendor') || undefined,
+    office: searchParams.get('office') || undefined,
+    category: searchParams.get('category') || undefined,
+    minAmount: searchParams.get('minAmount') || undefined,
+    maxAmount: searchParams.get('maxAmount') || undefined,
+    dueWithin: searchParams.get('dueWithin') || undefined,
+  }), [searchParams]);
 
-  // Check QuickBooks connection status
-  const checkQboStatus = async () => {
+  const effectiveQuery = useMemo(() => (spQuery || searchQuery || '').trim().toLowerCase(), [spQuery, searchQuery]);
+  const effectiveFilters = useMemo(() => ({
+    ...filters,
+    ...Object.fromEntries(
+      Object.entries(spFilters).filter(([, value]) => value !== undefined && value !== null && value !== ''),
+    ),
+  }), [filters, spFilters]);
+
+  const checkQboStatus = useCallback(async () => {
     try {
-      console.log('🔍 ForMePage: Checking QuickBooks status...');
       const response = await fetch('/api/qbo/status');
       const data = await response.json();
-      console.log('🔍 ForMePage: QuickBooks status response:', data);
-      setQboConnected(data.connected);
-    } catch (error) {
-      console.error('❌ Failed to check QuickBooks status:', error);
+      setQboConnected(!!data.connected);
+    } catch (statusError) {
+      console.error('❌ Failed to check QuickBooks status:', statusError);
       setQboConnected(false);
     } finally {
       setQboLoading(false);
     }
-  };
+  }, []);
 
-  // Load invoice data from the queue
   useEffect(() => {
-    // Temporarily disable QBO status check to debug loading issue
-    // checkQboStatus();
-    setQboLoading(false);
-    setQboConnected(false);
-    
+    checkQboStatus();
+  }, [checkQboStatus]);
+
+  useEffect(() => {
     const loadInvoices = async () => {
       try {
-        console.log('🔄 ForMePage: Starting to load invoices...');
         setLoading(true);
-        
-        // Add cache-busting timestamp to force fresh request
-        const timestamp = new Date().getTime();
-        const fetchUrl = `/invoice_queue.json?t=${timestamp}`;
-        console.log('🔍 ForMePage: Fetching from URL:', fetchUrl);
-        
-        const response = await fetch(fetchUrl, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-        console.log('📡 ForMePage: Fetch response status:', response.status);
-        console.log('📡 ForMePage: Fetch response ok:', response.ok);
-        console.log('📡 ForMePage: Fetch response headers:', Object.fromEntries(response.headers.entries()));
-        
-        if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status} - ${response.statusText}`);
-        }
-        let data = await response.json();
-        // Apply client-side overrides so queues reflect immediate actions
-        // Status overrides removed - using direct API calls
-        console.log('📊 ForMePage: Raw data received:', data.length, 'invoices');
-        
-        // Transform the queue data to match the expected format
-        // Filter for invoices that are NOT approved (status: 'new' or 'uploaded', approved: false)
-        const transformedData = data
-          .filter(invoice => {
-            const isNotApproved = !invoice.approved && (invoice.status === 'new' || invoice.status === 'uploaded');
-            console.log(`📋 Invoice ${invoice.invoice_number}: status=${invoice.status}, approved=${invoice.approved}, showing=${isNotApproved}`);
-            return isNotApproved;
+        const data = await fetchInvoiceQueue({ limit: 5000 });
+
+        const transformed = data
+          .filter((invoice) => {
+            const status = invoice.status;
+            const approved = invoice.approved;
+            const isNotApproved = approved !== true;
+            const isNotApprovedStatus = status !== 'approved';
+            return isNotApproved && isNotApprovedStatus;
           })
-          .map(invoice => ({
-            invoice: invoice.invoice_number || 'Unknown',
-            invoice_number: invoice.invoice_number, // needed by detail view
-            vendor: invoice.vendor || 'Unknown',
-            amount: `$${invoice.total || '0.00'}`,
-            office: invoice.clinic_id || 'Unknown',
-            dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
-              month: 'numeric',
-              day: 'numeric',
-              year: '2-digit'
-            }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
-              month: 'numeric',
-              day: 'numeric',
-              year: '2-digit'
-            }) : 'N/A'),
-            invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
-              month: 'numeric',
-              day: 'numeric',
-              year: '2-digit'
-            }) : 'N/A',
-            category: invoice.category || 'Other',
-            // Add additional fields for detail view
-            invoice_date: invoice.invoice_date,
-            due_date: invoice.due_date,
-            json_path: invoice.json_path,
-            pdf_path: invoice.pdf_path,
-            timestamp: invoice.timestamp,
-            assigned_to: invoice.assigned_to,
-            approved: invoice.approved,
-            status: invoice.status
-          }));
-        
-        console.log('✅ ForMePage: Data transformed successfully:', transformedData.length, 'unapproved invoices');
-        setInvoices(transformedData);
+          .map((invoice) => {
+            const vendorName = invoice.vendor_name || invoice.vendor || 'Unknown';
+            const rawInvoiceDate = invoice.invoice_date || null;
+            const rawDueDate = invoice.due_date || null;
+            const formatDate = (dateString) => {
+              if (!dateString) return 'N/A';
+              const parsed = new Date(dateString);
+              if (Number.isNaN(parsed.getTime())) return 'N/A';
+              return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+            };
+
+            return {
+              invoice: invoice.invoice_number || 'Unknown',
+              invoice_number: invoice.invoice_number,
+              vendor: vendorName,
+              amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
+              office: invoice.office_location || invoice.clinic_id || 'Unknown',
+              dueDate: formatDate(rawDueDate || rawInvoiceDate),
+              invoiceDate: formatDate(rawInvoiceDate),
+              category: invoice.category || 'Other',
+              invoice_date: rawInvoiceDate,
+              due_date: rawDueDate,
+              json_path: invoice.json_path,
+              pdf_path: invoice.pdf_path,
+              timestamp: invoice.timestamp,
+              assigned_to: invoice.assigned_to,
+              approved: invoice.approved,
+              status: invoice.status,
+              line_items: invoice.line_items || [],
+            };
+          });
+
+        setInvoices(transformed);
         setError(null);
-      } catch (err) {
-        console.error('❌ ForMePage: Error loading invoices:', err);
-        console.error('❌ ForMePage: Error details:', {
-          message: err.message,
-          stack: err.stack,
-          url: window.location.origin + '/invoice_queue.json'
-        });
-        setError(err.message);
-        // Fallback to empty array if loading fails
+      } catch (loadError) {
+        console.error('❌ ForMePage: Error loading invoices:', loadError);
+        setError(loadError?.message ?? 'Failed to load invoices');
         setInvoices([]);
       } finally {
-        console.log('🏁 ForMePage: Loading complete');
         setLoading(false);
       }
     };
@@ -133,83 +108,52 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     loadInvoices();
   }, []);
 
-  const columns = [
-    { key: 'invoice', label: 'Invoice' },
-    { key: 'vendor', label: 'Vendor' },
-    { key: 'amount', label: 'Amount', align: 'right' },
-    { key: 'office', label: 'Office' },
-    { key: 'invoiceDate', label: 'Invoice Date' },
-    { key: 'dueDate', label: 'Due Date' },
-    { key: 'category', label: 'Category' },
-  ];
+  const filteredRows = useMemo(() => {
+    const query = effectiveQuery;
+    const filterConfig = effectiveFilters;
 
-  // Apply search and filter criteria. If searchQuery is non-empty,
-  // include only rows where any column contains the query
-  const filteredRows = invoices.filter((row) => {
-    try {
-      // Text search across all string fields
-      const query = searchQuery.trim().toLowerCase();
-      if (query) {
-        const matches = Object.values(row).some((val) =>
-          String(val).toLowerCase().includes(query)
-        );
-        if (!matches) return false;
-      }
-      // Vendor filter
-      if (filters.vendor && row.vendor !== filters.vendor) return false;
-      // Office filter
-      if (filters.office && row.office !== filters.office) return false;
-      // Category filter
-      if (filters.category && row.category !== filters.category) return false;
-      // Amount filters (strip $ and commas)
-      const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
-      if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;
-      if (filters.maxAmount && amt > parseFloat(filters.maxAmount)) return false;
-      // Due Within filter
-      if (filters.dueWithin) {
-        const days = parseInt(filters.dueWithin);
-        if (!isNaN(days)) {
-          // Only process if dueDate is not 'N/A' and has valid format
-          if (row.dueDate && row.dueDate !== 'N/A' && row.dueDate.includes('-')) {
-            try {
-              const today = new Date();
-              today.setHours(0, 0, 0, 0); // Reset time to start of day
-              
-              // Convert row.dueDate (M-D-YY) to Date
-              const [m, d, y] = row.dueDate.split('-');
-              if (m && d && y) {
-                const dueDate = new Date(`20${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`);
-                if (!isNaN(dueDate.getTime())) {
-                  dueDate.setHours(0, 0, 0, 0); // Reset time to start of day
-                  
-                  // Calculate days difference
-                  const timeDiff = dueDate.getTime() - today.getTime();
-                  const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                  
-                  // Filter: due date must be within the specified days AND not past due
-                  if (daysDiff < 0 || daysDiff > days) return false;
-                }
-              }
-            } catch (error) {
-              console.warn('⚠️ Error parsing due date for dueWithin filter:', row.dueDate, error);
-              // If date parsing fails, skip this filter for this row
-            }
-          } else {
-            // If dueDate is 'N/A' or invalid, exclude from dueWithin filter
-            return false;
+    const parseAmount = (value) => Number.parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
+    const parseDate = (value) => {
+      if (!value || value === 'N/A') return null;
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    return invoices.filter((row) => {
+      try {
+        if (query) {
+          const matches = Object.values(row).some((val) => String(val).toLowerCase().includes(query));
+          if (!matches) return false;
+        }
+
+        if (filterConfig.vendor && row.vendor !== filterConfig.vendor) return false;
+        if (filterConfig.office && row.office !== filterConfig.office) return false;
+        if (filterConfig.category && row.category !== filterConfig.category) return false;
+
+        const amount = parseAmount(String(row.amount));
+        if (filterConfig.minAmount && amount < Number(filterConfig.minAmount)) return false;
+        if (filterConfig.maxAmount && amount > Number(filterConfig.maxAmount)) return false;
+
+        if (filterConfig.dueWithin) {
+          const days = Number.parseInt(String(filterConfig.dueWithin), 10);
+          if (!Number.isNaN(days)) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dueDate = parseDate(row.due_date || row.invoice_date) || parseDate(row.dueDate) || parseDate(row.invoiceDate);
+            if (!dueDate) return false;
+            dueDate.setHours(0, 0, 0, 0);
+            const daysDiff = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+            if (daysDiff < 0 || daysDiff > days) return false;
           }
         }
-      }
-      return true;
-    } catch (error) {
-      console.error('❌ Error in filter function for row:', row, error);
-      // If there's an error in filtering, include the row to prevent complete failure
-      return true;
-    }
-  });
 
-  console.log('🎨 ForMePage: Rendering with', filteredRows.length, 'invoices, loading:', loading, 'error:', error);
-  console.log('🔍 ForMePage: QBO states - connected:', qboConnected, 'loading:', qboLoading);
+        return true;
+      } catch (filterError) {
+        console.error('❌ Error applying filters for row:', row, filterError);
+        return true;
+      }
+    });
+  }, [invoices, effectiveQuery, effectiveFilters]);
 
   if (loading) {
     return (
@@ -227,38 +171,69 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     );
   }
 
-  const wrapperStyle = { padding: '24px' };
+  const columns = [
+    { key: 'invoice', label: 'Invoice' },
+    { key: 'vendor', label: 'Vendor' },
+    { key: 'amount', label: 'Amount', align: 'right' },
+    { key: 'office', label: 'Office' },
+    { key: 'invoiceDate', label: 'Invoice Date' },
+    { key: 'dueDate', label: 'Due Date' },
+    { key: 'category', label: 'Category' },
+  ];
 
   return (
-    <div style={wrapperStyle}>
+    <div style={{ padding: '24px' }}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">For Me</h1>
-        <p className="text-gray-600 mt-2">QuickBooks Connection Test</p>
+        <p className="text-gray-600 mt-2">
+          {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} assigned to you
+        </p>
       </div>
 
-      {/* QuickBooks Connection Status - Always Show */}
-      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+      <div
+        className={`mb-6 p-4 border rounded-lg ${
+          qboConnected ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+        }`}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-red-500 mr-3"></div>
+            <div
+              className={`w-3 h-3 rounded-full mr-3 ${qboConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            />
             <div>
-              <p className="text-red-800 font-medium">QuickBooks Not Connected</p>
-              <p className="text-red-700 text-sm">Connect to QuickBooks to enable full functionality</p>
+              <p className={`${qboConnected ? 'text-green-800' : 'text-red-800'} font-medium`}>
+                {qboConnected ? 'QuickBooks Connected' : 'QuickBooks Not Connected'}
+              </p>
+              <p className={`${qboConnected ? 'text-green-700' : 'text-red-700'} text-sm`}>
+                {qboConnected
+                  ? 'Connection established successfully.'
+                  : 'Connect to QuickBooks to enable full functionality.'}
+              </p>
             </div>
           </div>
-          <a
-            href="/api/qbo/auth"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-          >
-            Connect QuickBooks
-          </a>
+          {!qboConnected && (
+            <a
+              href="/api/qbo/auth"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+            >
+              Connect QuickBooks
+            </a>
+          )}
+        </div>
+        <div className="mt-2 text-sm text-gray-600">
+          {qboLoading
+            ? 'Checking QuickBooks connection...'
+            : qboConnected
+              ? 'Your QuickBooks connection is active. You can proceed with invoice approvals.'
+              : 'QuickBooks is currently disconnected. Connect your account to enable automated billing.'}
         </div>
       </div>
 
-      <div className="text-gray-600">
-        <p>This is a test page to verify QuickBooks connection UI is working.</p>
-        <p>If you can see this text and the blue button above, the UI is working correctly.</p>
-      </div>
+      <InvoiceTable
+        rows={filteredRows}
+        columns={columns}
+        onRowClick={handleInvoiceRowClick}
+      />
     </div>
   );
 }

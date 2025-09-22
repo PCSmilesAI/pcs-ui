@@ -1,0 +1,32 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "46637782",
+  "invoice_date": "09/09/25",
+  "due_date": "10/09/25",
+  "invoice_total": "150.45",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "150-0077",
+      "product_name": "18OZ/EA Avant Hand Sanitizer 18oz Foam",
+      "Quantity": "7",
+      "unit_price": "10.79",
+      "line_item_total": "75.53"
+    },
+    {
+      "product_number": "195-0590",
+      "product_name": "12/BX Brownie FG Mini Point",
+      "Quantity": "1",
+      "unit_price": "26.55",
+      "line_item_total": "26.55"
+    },
+    {
+      "product_number": "133-7442",
+      "product_name": "50/BX CitriSil Waterline Cleaner Blue",
+      "Quantity": "1",
+      "unit_price": "41.88",
+      "line_item_total": "41.88"
+    }
+  ]
+}

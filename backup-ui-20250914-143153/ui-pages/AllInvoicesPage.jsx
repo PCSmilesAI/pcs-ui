@@ -1,0 +1,189 @@
+import React, { useState, useEffect } from 'react';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import InvoiceTable from '../components/InvoiceTable.jsx';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
+
+/**
+ * The All Invoices page aggregates every invoice into a single
+ * list. Columns are sortable; when the filter panel is open the
+ * sort icons become visible and clicking on a header cycles
+ * through ascending/descending/unsorted states. Sorting logic is
+ * performed locally on the array of row objects.
+ */
+export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery = '', filters = {} }) {
+  // Local state for sorting configuration
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load invoice data from the queue
+  useEffect(() => {
+    const loadInvoices = async () => {
+      try {
+        console.log('🔄 AllInvoicesPage: Starting to load invoices...');
+        setLoading(true);
+        
+        const data = await fetchInvoiceQueue({ limit: 5000 });
+        console.log('📊 AllInvoicesPage: Raw data received:', data?.length || 0, 'invoices');
+        
+        // Debug: Log TC Dental invoices specifically
+        const tcDentalInvoices = data?.filter(inv => inv.vendor_name === 'TC Dental') || [];
+        console.log('🦷 TC Dental invoices found:', tcDentalInvoices.length, tcDentalInvoices.map(inv => ({ invoice_number: inv.invoice_number, id: inv.id })));
+        
+        // Ensure data is an array before processing
+        const safeData = Array.isArray(data) ? data : [];
+        
+        const transformedData = safeData.map(invoice => ({
+          invoice: invoice?.invoice_number || 'Unknown',
+          invoice_number: invoice?.invoice_number,
+          id: invoice?.id, // Add ID for click context fallback
+          vendor: invoice?.vendor_name || invoice?.vendor || 'Unknown',
+          amount: `$${invoice?.total || invoice?.invoice_total || '0.00'}`,
+          office: invoice?.office_location || invoice?.clinic_id || 'Unknown',
+          status: invoice?.status || 'New',
+          category: invoice?.category || 'Other',
+          invoice_date: invoice?.invoice_date,
+          due_date: invoice?.due_date,
+          json_path: invoice?.json_path,
+          pdf_path: invoice?.pdf_path,
+          timestamp: invoice?.timestamp,
+          assigned_to: invoice?.assigned_to,
+          approved: invoice?.approved,
+          line_items: invoice?.line_items || [] // Add line items for detail view
+        }));
+        
+        console.log('✅ AllInvoicesPage: Data transformed successfully:', transformedData.length, 'invoices');
+        console.log('🔍 AllInvoicesPage: First 5 invoices:', transformedData.slice(0, 5).map(inv => ({ invoice: inv.invoice, vendor: inv.vendor, amount: inv.amount })));
+        console.log('🦷 AllInvoicesPage: TC Dental count in transformed data:', transformedData.filter(inv => inv.vendor === 'TC Dental').length);
+        setInvoices(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error('❌ AllInvoicesPage: Error loading invoices:', err);
+        setError(err.message);
+        setInvoices([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInvoices();
+  }, [searchQuery, filters]);
+
+  // Column definitions. Align right for the amount column.
+  const columns = [
+    { key: 'invoice', label: 'Invoice' },
+    { key: 'vendor', label: 'Vendor' },
+    { key: 'amount', label: 'Amount', align: 'right' },
+    { key: 'office', label: 'Office' },
+    { key: 'category', label: 'Category' },
+    { key: 'status', label: 'Status' },
+  ];
+
+  /**
+   * Sorting comparator used when a column is active. It strips
+   * non‑numeric characters for the amount column so numeric
+   * comparisons work as expected.
+   */
+  function compare(a, b, key, direction) {
+    let valA = a[key];
+    let valB = b[key];
+    // Remove dollar sign and commas for numeric comparison
+    if (key === 'amount') {
+      valA = parseFloat(valA.replace(/[^0-9.]/g, ''));
+      valB = parseFloat(valB.replace(/[^0-9.]/g, ''));
+    }
+    if (valA < valB) return direction === 'asc' ? -1 : 1;
+    if (valA > valB) return direction === 'asc' ? 1 : -1;
+    return 0;
+  }
+
+  // Apply search and filters first, then sort. Filtered data is derived
+  // from the original unsorted array using the criteria passed in.
+  const filteredData = invoices.filter((row) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      const matches = Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(query)
+      );
+      if (!matches) return false;
+    }
+    // vendor filter
+    if (filters.vendor && row.vendor !== filters.vendor) return false;
+    // office filter
+    if (filters.office && row.office !== filters.office) return false;
+    // status filter (not in filters currently, but category can map to status?)
+    if (filters.category && row.status !== filters.category) return false;
+    // amount filter
+    const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
+    if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;
+    if (filters.maxAmount && amt > parseFloat(filters.maxAmount)) return false;
+    // dueStart/dueEnd apply? There is no due date column; skip
+    return true;
+  });
+
+  // Derive a sorted version of the filtered data based on the current
+  // sorting configuration. When no sorting is active return
+  // the original ordering.
+  const sortedRows = React.useMemo(() => {
+    const base = filteredData;
+    if (!sortConfig.key || !sortConfig.direction) return base;
+    const sorted = [...base].sort((a, b) =>
+      compare(a, b, sortConfig.key, sortConfig.direction)
+    );
+    return sorted;
+  }, [filteredData, sortConfig]);
+
+  /**
+   * Handle column header clicks to cycle through sort states.
+   * The sort state is maintained in local state and applied
+   * to the filtered data.
+   */
+  function handleSort(key) {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    } else if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      // Clear sorting
+      setSortConfig({ key: null, direction: null });
+      return;
+    }
+    setSortConfig({ key, direction });
+  }
+
+  console.log('🎨 AllInvoicesPage: Rendering with', sortedRows.length, 'invoices, loading:', loading, 'error:', error);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-gray-600">Loading invoices...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-red-600">Error loading invoices: {error}</div>
+      </div>
+    );
+  }
+
+  const wrapperStyle = { padding: '24px' };
+
+  return (
+    <div style={wrapperStyle}>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">All Invoices</h1>
+        <p className="text-gray-600 mt-2">
+          {sortedRows.length} invoice{sortedRows.length !== 1 ? 's' : ''} found
+        </p>
+      </div>
+      <InvoiceTable
+        rows={sortedRows}
+        columns={columns}
+        onRowClick={onRowClick}
+      />
+    </div>
+  );
+}
