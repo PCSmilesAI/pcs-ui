@@ -287,6 +287,8 @@ function applyAccountMappings(
 export async function createBillFromInvoice(options: BillCreationOptions): Promise<BillCreationResult> {
   const { invoiceData } = options;
 
+  let bill: QBOBill | null = null;
+
   try {
     await qboClient.initialize();
 
@@ -338,7 +340,7 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
     });
     const qboLines = applyAccountMappings(initialLines, expenseAccounts, preferredAccount);
 
-    const bill: QBOBill = {
+    bill = {
       DocNumber: invoiceNumber,
       TxnDate: invoiceDate || formatDate(new Date().toISOString())!,
       DueDate: dueDate,
@@ -359,16 +361,11 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
     });
 
     const apAccount = await qboClient.getAccountsPayableAccount();
-    if (apAccount?.Id) {
+    if (apAccount?.Id && bill) {
       bill.APAccountRef = {
         value: apAccount.Id,
         name: apAccount.Name
       };
-    }
-
-    // Optionally set TxnClassRef at the Bill level if preferredClassId is available
-    if (preferredClassId) {
-      (bill as any).TxnClassRef = { value: preferredClassId };
     }
 
     const createdBill = await qboClient.createBill(bill);
@@ -397,7 +394,15 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       categories
     };
   } catch (error: any) {
-    console.error('❌ createBillFromInvoice failed:', error);
+    console.error('❌ createBillFromInvoice failed:', error?.response?.status, error?.response?.statusText);
+    console.error('❌ createBillFromInvoice payload:', JSON.stringify({
+      vendor: options.vendorName || invoiceData.vendor || invoiceData.vendor_name,
+      invoiceNumber: options.invoiceNumber || invoiceData.invoice_number || invoiceData.invoiceNumber,
+      billPreview: bill,
+    }, null, 2));
+    if (error?.Fault) {
+      console.error('❌ QBO Fault detail:', JSON.stringify(error.Fault, null, 2));
+    }
     return {
       success: false,
       error: error?.message || 'Failed to create QuickBooks bill'
