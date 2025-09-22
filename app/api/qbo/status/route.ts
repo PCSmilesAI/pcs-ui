@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       connected: isConnected,
       message: isConnected 
-        ? `Connected to QuickBooks (${tokens.realmId})` 
+        ? `Connected to QuickBooks (${tokens?.realmId ?? 'unknown'})` 
         : 'Not connected to QuickBooks',
       realmId: tokens?.realmId ?? null,
       tokens: tokens ? [{
