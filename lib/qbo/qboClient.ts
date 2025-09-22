@@ -260,7 +260,7 @@ export class QBOClient {
     return response?.Bill || response;
   }
 
-  async uploadAttachment(billId: string, fileName: string, fileContent: Buffer, mimeType: string): Promise<any> {
+  async uploadAttachment(billId: string, fileName: string, fileContent: ArrayBuffer | Uint8Array | Buffer, mimeType: string): Promise<any> {
     await this.ensureValidToken();
 
     const url = `https://quickbooks.api.intuit.com/v3/company/${this.tokens!.realmId}/upload?minorversion=65`;
@@ -279,7 +279,13 @@ export class QBOClient {
     };
 
     formData.append('file_metadata_01', new Blob([JSON.stringify(metadata)], { type: 'application/json' }), 'metadata.json');
-    formData.append('file_content_01', new Blob([fileContent], { type: mimeType }), fileName);
+    const bytes: Uint8Array =
+      fileContent instanceof ArrayBuffer
+        ? new Uint8Array(fileContent)
+        : fileContent instanceof Uint8Array
+          ? fileContent
+          : new Uint8Array((fileContent as Buffer).buffer, (fileContent as Buffer).byteOffset, (fileContent as Buffer).byteLength);
+    formData.append('file_content_01', new Blob([bytes], { type: mimeType }), fileName);
 
     const response = await fetch(url, {
       method: 'POST',
