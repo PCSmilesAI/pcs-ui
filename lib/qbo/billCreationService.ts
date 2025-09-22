@@ -268,20 +268,35 @@ function ensureLineItems(
   return { qboLines, categories };
 }
 
-function applyItemMappings(qboLines: LineWithHint[], availableItems: QBOItem[]): QBOBill['Line'] {
+function applyItemMappings(
+  qboLines: LineWithHint[],
+  availableItems: QBOItem[],
+  fallbackItem: QBOItem
+): QBOBill['Line'] {
   return qboLines.map((line) => {
     if (!line?.ItemBasedExpenseLineDetail) return line;
 
     const { __categoryHint, ...rest } = line;
-    const fallback = availableItems[0];
+    const fallback = fallbackItem;
     let matchedItem = fallback;
 
     if (__categoryHint) {
       const targetName = __categoryHint.qboItemName.toLowerCase();
       matchedItem =
-        availableItems.find(item => item.Name.toLowerCase().includes(targetName)) ||
-        availableItems.find(item => item.Name.toLowerCase().includes(__categoryHint.category.toLowerCase())) ||
+        availableItems.find(
+          (item) =>
+            item.Name.toLowerCase().includes(targetName) && item?.ExpenseAccountRef?.value
+        ) ||
+        availableItems.find(
+          (item) =>
+            item.Name.toLowerCase().includes(__categoryHint.category.toLowerCase()) &&
+            item?.ExpenseAccountRef?.value
+        ) ||
         fallback;
+    }
+
+    if (!matchedItem?.ExpenseAccountRef?.value) {
+      matchedItem = fallback;
     }
 
     return {
@@ -332,10 +347,17 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       throw new Error('No QuickBooks items available for mapping. Please ensure items exist in QuickBooks.');
     }
 
-    const defaultItem = availableItems[0];
+    const defaultItem =
+      availableItems.find((item) => item?.ExpenseAccountRef?.value) || availableItems[0];
+
+    if (!defaultItem?.ExpenseAccountRef?.value) {
+      throw new Error(
+        'QuickBooks items do not have expense accounts configured. Edit an item in QuickBooks, enable "I purchase this product/service" and assign an expense account.'
+      );
+    }
 
     const { qboLines: initialLines, categories } = ensureLineItems(lineItems, totalAmount, defaultItem);
-    const qboLines = applyItemMappings(initialLines, availableItems);
+    const qboLines = applyItemMappings(initialLines, availableItems, defaultItem);
 
     const bill: QBOBill = {
       DocNumber: invoiceNumber,
