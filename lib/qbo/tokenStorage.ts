@@ -80,6 +80,12 @@ type JsonTokenPayload = RawTokenRow & {
   realmId?: string;
   expiresAt?: number | string | null;
   expiresIn?: number | string | null;
+  // Legacy/alternate casing keys we might see in JSON files
+  RealmId?: string;
+  realmID?: string;
+  access_token?: string;
+  refresh_token?: string | null;
+  expires_at?: number | string | null;
   tokens?: JsonTokenPayload[];
 };
 
