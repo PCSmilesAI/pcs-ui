@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { autoBillService } from '../../../../lib/qbo/autoBillService';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const { invoiceData } = await req.json();
@@ -21,14 +24,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         billId: result.billId,
+        pdfAttached: result.pdfAttached ?? false,
+        categories: result.categories ?? [],
         message: 'Bill created successfully in QuickBooks'
       });
-    } else {
-      return NextResponse.json({
-        success: false,
-        error: result.error || 'Failed to create bill'
-      }, { status: 500 });
     }
+
+    return NextResponse.json({
+      success: false,
+      error: result.error || 'Failed to create bill'
+    }, { status: 500 });
 
   } catch (error: any) {
     console.error('❌ Auto-create bill error:', error);

@@ -69,19 +69,6 @@ export default function AppLayout({ children }) {
     router.push('/LoginPage');
   };
 
-  // Handle invoice row clicks - navigate to invoice detail page
-  const handleInvoiceRowClick = (invoice) => {
-    console.log('🔍 AppLayout: Invoice clicked:', invoice);
-    console.log('🔍 AppLayout: Invoice number:', invoice?.invoice_number);
-    if (invoice?.invoice_number) {
-      const url = `/InvoiceDetailPage?invoice=${encodeURIComponent(invoice.invoice_number)}`;
-      console.log('🔍 AppLayout: Navigating to:', url);
-      router.push(url);
-    } else {
-      console.warn('⚠️ AppLayout: No invoice_number found in clicked invoice');
-    }
-  };
-
   return (
     <InvoiceClickProvider>
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>

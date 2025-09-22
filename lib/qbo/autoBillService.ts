@@ -1,8 +1,8 @@
-import { qboClient } from './qboClient';
 import fs from 'fs';
-import path from 'path';
+import { qboClient } from './qboClient';
+import { createBillFromInvoice, InvoiceData as BillInvoiceData } from './billCreationService';
 
-export interface InvoiceData {
+export type InvoiceData = BillInvoiceData & {
   invoice_number: string;
   vendor: string;
   total: string;
@@ -10,13 +10,23 @@ export interface InvoiceData {
   due_date?: string;
   pdf_path: string;
   json_path: string;
-  line_items?: Array<{
-    description?: string;
-    name?: string;
-    amount?: string;
-    total?: string;
-    quantity?: string;
-  }>;
+};
+
+function parseAmount(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) return undefined;
+    const parsed = Number.parseFloat(trimmed.replace(/[^0-9.-]/g, ''));
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  return undefined;
 }
 
 export class AutoBillService {
@@ -25,6 +35,8 @@ export class AutoBillService {
   async processApprovedInvoice(invoiceData: InvoiceData): Promise<{
     success: boolean;
     billId?: string;
+    pdfAttached?: boolean;
+    categories?: Array<{ description: string; category: string }>;
     error?: string;
   }> {
     if (this.isProcessing) {
@@ -39,52 +51,74 @@ export class AutoBillService {
     try {
       console.log('🔄 AutoBillService: Processing approved invoice:', invoiceData.invoice_number);
 
-      // Load detailed invoice data from JSON if available
-      let detailedData = invoiceData;
+      let detailedData: BillInvoiceData = { ...invoiceData };
+
       if (invoiceData.json_path && fs.existsSync(invoiceData.json_path)) {
         try {
           const jsonData = JSON.parse(fs.readFileSync(invoiceData.json_path, 'utf8'));
-          detailedData = { ...invoiceData, ...jsonData };
+          detailedData = { ...detailedData, ...jsonData };
         } catch (error) {
           console.warn('⚠️ Could not load detailed JSON data:', error);
         }
       }
 
-      // Prepare the request data
-      const requestData = {
-        invoiceData: detailedData,
-        pdfPath: invoiceData.pdf_path,
-        vendorName: invoiceData.vendor,
-        invoiceNumber: invoiceData.invoice_number,
-        totalAmount: parseFloat(invoiceData.total),
-        invoiceDate: this.formatDate(invoiceData.invoice_date),
-        dueDate: invoiceData.due_date ? this.formatDate(invoiceData.due_date) : undefined
+      detailedData = {
+        ...detailedData,
+        invoice_number: invoiceData.invoice_number || detailedData.invoice_number,
+        invoiceNumber: invoiceData.invoice_number || detailedData.invoiceNumber,
+        vendor: invoiceData.vendor || detailedData.vendor,
+        vendorName: invoiceData.vendor || detailedData.vendorName,
+        pdf_path: invoiceData.pdf_path || detailedData.pdf_path,
+        pdfPath: invoiceData.pdf_path || detailedData.pdfPath,
+        invoice_date: invoiceData.invoice_date || detailedData.invoice_date,
+        invoiceDate: invoiceData.invoice_date || detailedData.invoiceDate,
+        due_date: invoiceData.due_date ?? detailedData.due_date,
+        dueDate: invoiceData.due_date ?? detailedData.dueDate,
+        total: invoiceData.total || detailedData.total,
+        amount: invoiceData.total || detailedData.amount,
+        totalAmount: invoiceData.total || detailedData.totalAmount,
+        line_items: detailedData.line_items || detailedData.lineItems || invoiceData.line_items || []
       };
 
-      // Call the create-bill API
-      const response = await fetch('/api/qbo/create-bill', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
-      });
+      const options = {
+        invoiceData: detailedData,
+        vendorName: invoiceData.vendor || detailedData.vendor || detailedData.vendorName,
+        invoiceNumber: invoiceData.invoice_number || detailedData.invoice_number || detailedData.invoiceNumber,
+        invoiceDate: invoiceData.invoice_date || detailedData.invoice_date || detailedData.invoiceDate,
+        dueDate: invoiceData.due_date ?? detailedData.due_date ?? detailedData.dueDate,
+        pdfPath: invoiceData.pdf_path || detailedData.pdf_path || detailedData.pdfPath,
+      } as {
+        invoiceData: BillInvoiceData;
+        vendorName?: string;
+        invoiceNumber?: string;
+        invoiceDate?: string;
+        dueDate?: string;
+        pdfPath?: string;
+        totalAmount?: number;
+      };
 
-      const result = await response.json();
+      const parsedAmount = parseAmount(invoiceData.total);
+      if (typeof parsedAmount === 'number') {
+        options.totalAmount = parsedAmount;
+      }
+
+      const result = await createBillFromInvoice(options);
 
       if (result.success) {
         console.log('✅ AutoBillService: Bill created successfully:', result.billId);
         return {
           success: true,
-          billId: result.billId
-        };
-      } else {
-        console.error('❌ AutoBillService: Failed to create bill:', result.error);
-        return {
-          success: false,
-          error: result.error
+          billId: result.billId,
+          pdfAttached: result.pdfAttached,
+          categories: result.categories
         };
       }
+
+      console.error('❌ AutoBillService: Failed to create bill:', result.error);
+      return {
+        success: false,
+        error: result.error
+      };
 
     } catch (error: any) {
       console.error('❌ AutoBillService: Error processing invoice:', error);
@@ -94,16 +128,6 @@ export class AutoBillService {
       };
     } finally {
       this.isProcessing = false;
-    }
-  }
-
-  private formatDate(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      return date.toISOString().split('T')[0]; // YYYY-MM-DD format
-    } catch (error) {
-      console.warn('⚠️ Invalid date format:', dateString);
-      return new Date().toISOString().split('T')[0];
     }
   }
 

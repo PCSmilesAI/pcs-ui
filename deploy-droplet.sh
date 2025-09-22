@@ -64,6 +64,10 @@ ssh $DROPLET_USER@$DROPLET_IP << 'EOF'
   # Extract deployment package (fresh contents only)
   tar -xzf /tmp/pcs-ui-deployment.tar.gz
   
+  # Ensure any local backup folders are not part of the build context
+  rm -rf "/var/www/pcs-ui/pcs-ui sep13 copy" || true
+  rm -rf /var/www/pcs-ui/backup-ui-* || true
+  
   # Install dependencies
   npm install
   
@@ -132,12 +136,41 @@ ssh $DROPLET_USER@$DROPLET_IP << 'EOF'
   
   # Create Nginx configuration
   cat > /etc/nginx/sites-available/pcs-ui << 'NGINXEOF'
+# Canonicalize host: redirect www -> apex
 server {
     listen 80;
-    server_name pcsmilesai.com www.pcsmilesai.com;
-    
+    server_name www.pcsmilesai.com;
+    return 301 https://pcsmilesai.com$request_uri;
+}
+
+server {
+    listen 80;
+    server_name pcsmilesai.com;
+
+    # Defensive: rewrite bad path /next/... -> /_next/...
+    location ^~ /next/ {
+        return 301 /_$uri$is_args$args;
+    }
+
+    # Static Next assets: long-lived, immutable
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    # APIs: never cache
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        add_header Cache-Control "no-store";
+    }
+
+    # Everything else (HTML): no-store
     location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -146,6 +179,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+        add_header Cache-Control "no-store";
     }
 }
 NGINXEOF

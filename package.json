@@ -9,7 +9,7 @@
     "start": "next start",
     "start:prod": "NODE_ENV=production node dev-server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "node ./node_modules/eslint/bin/eslint.js . --report-unused-disable-directives --max-warnings 0",
     "security:audit": "npm audit --audit-level moderate",
     "security:fix": "npm audit fix",
     "backup": "node -e \"require('./dev-server.js').pcsAIDatabase.backupData()\"",

@@ -1,224 +1,97 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { qboClient, QBOBill } from '../../../../lib/qbo/qboClient';
 import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
-import fs from 'fs';
-import path from 'path';
+import { createBillFromInvoice, InvoiceData as ServiceInvoiceData } from '../../../../lib/qbo/billCreationService';
 
-// Dental category mapping based on common dental terms
-const DENTAL_CATEGORY_MAPPING = {
-  // Supplies
-  'supplies': ['supply', 'supplies', 'material', 'materials', 'consumable'],
-  'dental_supplies': ['dental', 'tooth', 'teeth', 'oral', 'mouth'],
-  'instruments': ['instrument', 'tool', 'drill', 'scalpel', 'probe'],
-  'disposables': ['disposable', 'glove', 'mask', 'gauze', 'cotton'],
-  
-  // Equipment
-  'equipment': ['equipment', 'machine', 'device', 'unit', 'system'],
-  'xray_equipment': ['x-ray', 'xray', 'radiograph', 'imaging'],
-  'dental_chairs': ['chair', 'seat', 'unit'],
-  
-  // Lab work
-  'lab_work': ['lab', 'laboratory', 'crown', 'bridge', 'implant', 'denture'],
-  'crowns': ['crown', 'cap', 'restoration'],
-  'bridges': ['bridge', 'fixed'],
-  'dentures': ['denture', 'partial', 'complete'],
-  
-  // Services
-  'cleaning': ['cleaning', 'prophylaxis', 'hygiene', 'scaling'],
-  'filling': ['filling', 'composite', 'amalgam', 'restoration'],
-  'extraction': ['extraction', 'removal', 'surgery'],
-  'orthodontic': ['orthodontic', 'braces', 'aligner', 'retainer'],
-  
-  // Medications
-  'anesthesia': ['anesthesia', 'numbing', 'lidocaine', 'novocaine'],
-  'medication': ['medication', 'drug', 'prescription', 'antibiotic']
-};
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
-function categorizeLineItem(description: string, amount: number): string {
-  const desc = description.toLowerCase();
-  
-  // Find the best matching category
-  for (const [category, keywords] of Object.entries(DENTAL_CATEGORY_MAPPING)) {
-    if (keywords.some(keyword => desc.includes(keyword))) {
-      return category;
+function parseAmount(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number.parseFloat(value.replace(/[^0-9.-]/g, ''));
+    if (Number.isFinite(parsed)) {
+      return parsed;
     }
   }
-  
-  // Default categorization based on amount
-  if (amount > 1000) return 'equipment';
-  if (amount > 100) return 'lab_work';
-  if (amount > 10) return 'dental_supplies';
-  return 'supplies';
-}
-
-function mapToQBOItem(category: string): string {
-  // Map our categories to QBO item names
-  const categoryMap: { [key: string]: string } = {
-    'supplies': 'Dental Supplies',
-    'dental_supplies': 'Dental Supplies',
-    'instruments': 'Dental Instruments',
-    'disposables': 'Disposable Items',
-    'equipment': 'Dental Equipment',
-    'xray_equipment': 'X-Ray Equipment',
-    'dental_chairs': 'Dental Chairs',
-    'lab_work': 'Lab Work',
-    'crowns': 'Crowns',
-    'bridges': 'Bridges',
-    'dentures': 'Dentures',
-    'cleaning': 'Cleaning Services',
-    'filling': 'Filling Materials',
-    'extraction': 'Extraction Services',
-    'orthodontic': 'Orthodontic Services',
-    'anesthesia': 'Anesthesia',
-    'medication': 'Medications'
-  };
-  
-  return categoryMap[category] || 'Dental Supplies';
+  return undefined;
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { 
-      invoiceData, 
-      pdfPath, 
-      vendorName, 
-      invoiceNumber, 
-      totalAmount, 
-      invoiceDate, 
-      dueDate 
-    } = body;
+    const {
+      invoiceData,
+      vendorName,
+      invoiceNumber,
+      invoiceDate,
+      dueDate,
+      pdfPath,
+      totalAmount,
+    } = body || {};
 
-    console.log('🔄 Creating QBO Bill for invoice:', invoiceNumber);
+    if (!invoiceData) {
+      return NextResponse.json({
+        success: false,
+        error: 'Invoice data is required',
+      }, { status: 400 });
+    }
 
-    // Check if QuickBooks is connected
     const tokens = await tokenStorage.getLatestTokens();
     if (!tokens) {
       return NextResponse.json({
         success: false,
-        error: 'QuickBooks not connected. Please connect to QuickBooks first.'
+        error: 'QuickBooks not connected. Please connect to QuickBooks first.',
       }, { status: 400 });
     }
 
-    // Initialize QBO client
-    await qboClient.initialize();
-
-    // Test connection first
-    const isConnected = await qboClient.testConnection();
-    if (!isConnected) {
-      throw new Error('QuickBooks connection failed. Please reconnect.');
-    }
-
-    // Get available items for category mapping
-    const dentalItems = await qboClient.getDentalItems();
-    console.log('📋 Found', dentalItems.length, 'dental items in QBO');
-
-    // Parse line items from invoice data
-    const lineItems = invoiceData.line_items || [];
-    const qboLines = lineItems.map((item: any, index: number) => {
-      const description = item.product_name || item.description || item.name || `Item ${index + 1}`;
-      const amount = parseFloat(item.line_item_total || item.amount || item.total || '0');
-      const quantity = parseFloat(item.Quantity || item.quantity || '1');
-      const unitPrice = parseFloat(item.unit_price || (amount / quantity));
-
-      // Categorize the line item
-      const category = categorizeLineItem(description, amount);
-      const qboItemName = mapToQBOItem(category);
-
-      // Find matching QBO item or use default
-      const matchingItem = dentalItems.find(item => 
-        item.Name.toLowerCase().includes(qboItemName.toLowerCase())
-      );
-
-      return {
-        Id: (index + 1).toString(),
-        LineNum: index + 1,
-        Amount: amount,
-        DetailType: 'ItemBasedExpenseLineDetail',
-        ItemBasedExpenseLineDetail: {
-          ItemRef: {
-            value: matchingItem?.Id || '1', // Default to first item if no match
-            name: matchingItem?.Name || qboItemName
-          },
-          Qty: quantity,
-          UnitPrice: unitPrice
-        }
-      };
-    });
-
-    // Create the bill
-    const bill: QBOBill = {
-      DocNumber: invoiceNumber,
-      TxnDate: invoiceDate,
-      DueDate: dueDate,
-      VendorRef: {
-        value: '1', // You'll need to map vendor names to QBO vendor IDs
-        name: vendorName
-      },
-      Line: qboLines
+    const mergedInvoiceData: ServiceInvoiceData = {
+      ...invoiceData,
+      invoice_number: invoiceData.invoice_number ?? invoiceNumber,
+      invoiceNumber: invoiceData.invoiceNumber ?? invoiceNumber,
+      vendor: invoiceData.vendor ?? invoiceData.vendor_name ?? vendorName,
+      vendorName: invoiceData.vendorName ?? vendorName,
+      pdf_path: invoiceData.pdf_path ?? pdfPath,
+      pdfPath: invoiceData.pdfPath ?? pdfPath,
+      invoice_date: invoiceData.invoice_date ?? invoiceDate,
+      invoiceDate: invoiceData.invoiceDate ?? invoiceDate,
+      due_date: invoiceData.due_date ?? dueDate,
+      dueDate: invoiceData.dueDate ?? dueDate,
     };
 
-    // Create the bill in QuickBooks
-    const createdBill = await qboClient.createBill(bill);
-    console.log('✅ QBO Bill created successfully:', createdBill.Id);
+    const amount = parseAmount(totalAmount ?? invoiceData.total ?? invoiceData.amount ?? invoiceData.totalAmount);
 
-    // Handle PDF attachment if provided
-    let pdfAttached = false;
-    if (pdfPath) {
-      try {
-        // Try different possible paths for the PDF
-        const possiblePaths = [
-          pdfPath,
-          path.join(process.cwd(), 'public', pdfPath),
-          path.join(process.cwd(), pdfPath)
-        ];
-        
-        let pdfBuffer: Buffer | null = null;
-        let fileName = '';
-        
-        for (const testPath of possiblePaths) {
-          if (fs.existsSync(testPath)) {
-            pdfBuffer = fs.readFileSync(testPath);
-            fileName = path.basename(testPath);
-            break;
-          }
-        }
-        
-        if (pdfBuffer) {
-          await qboClient.uploadAttachment(
-            createdBill.Id!,
-            fileName,
-            pdfBuffer,
-            'application/pdf'
-          );
-          
-          console.log('📎 PDF attachment added to bill');
-          pdfAttached = true;
-        } else {
-          console.warn('⚠️ PDF file not found at any of the expected paths:', possiblePaths);
-        }
-      } catch (attachmentError) {
-        console.warn('⚠️ Failed to attach PDF:', attachmentError);
-        // Don't fail the entire operation for attachment issues
-      }
+    const result = await createBillFromInvoice({
+      invoiceData: mergedInvoiceData,
+      vendorName: vendorName || invoiceData.vendor || invoiceData.vendorName,
+      invoiceNumber: invoiceNumber || invoiceData.invoice_number || invoiceData.invoiceNumber,
+      invoiceDate: invoiceDate || invoiceData.invoice_date || invoiceData.invoiceDate,
+      dueDate: dueDate || invoiceData.due_date || invoiceData.dueDate,
+      pdfPath: pdfPath || invoiceData.pdf_path || invoiceData.pdfPath,
+      totalAmount: typeof amount === 'number' ? amount : undefined,
+    });
+
+    if (result.success) {
+      return NextResponse.json({
+        success: true,
+        billId: result.billId,
+        pdfAttached: result.pdfAttached ?? false,
+        categories: result.categories ?? [],
+        message: 'Bill created successfully in QuickBooks',
+      });
     }
 
     return NextResponse.json({
-      success: true,
-      billId: createdBill.Id,
-      message: 'Bill created successfully in QuickBooks',
-      pdfAttached: pdfAttached,
-      categories: lineItems.map((item: any, index: number) => ({
-        description: item.product_name || item.description || item.name || `Item ${index + 1}`,
-        category: categorizeLineItem(item.product_name || item.description || item.name || `Item ${index + 1}`, parseFloat(item.line_item_total || item.amount || item.total || '0'))
-      }))
-    });
+      success: false,
+      error: result.error || 'Failed to create bill',
+    }, { status: 500 });
 
   } catch (error: any) {
     console.error('❌ Error creating QBO Bill:', error);
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to create bill in QuickBooks'
+      error: error?.message || 'Failed to create bill in QuickBooks',
     }, { status: 500 });
   }
 }
