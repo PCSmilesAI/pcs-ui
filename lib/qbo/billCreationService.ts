@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { qboClient, QBOBill, QBOItem } from './qboClient';
+import { getVendorMapping } from './vendorMappings';
 
 export interface InvoiceLineItem {
   product_name?: string;
@@ -207,8 +208,6 @@ function ensureAccountLines(
     return {
       qboLines: [
         {
-          Id: '1',
-          LineNum: 1,
           Amount: amount,
           Description: description,
           DetailType: 'AccountBasedExpenseLineDetail',
@@ -235,7 +234,6 @@ function ensureAccountLines(
     categories.push({ description, category });
 
     const line: ExpenseLine = {
-      Id: (index + 1).toString(),
       LineNum: index + 1,
       Amount: amount,
       Description: description,
@@ -314,17 +312,31 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
     }
 
     const expenseAccounts = await qboClient.getExpenseAccounts();
+    const classes = await qboClient.getClasses();
     if (!expenseAccounts || expenseAccounts.length === 0) {
       throw new Error('No expense accounts found in QuickBooks. Please set up your chart of accounts.');
     }
 
     const fallbackAccount = expenseAccounts[0];
 
+    // Apply vendor mapping preferences
+    const mapping = getVendorMapping(vendorName);
+    let preferredAccount = fallbackAccount;
+    let preferredClassId: string | undefined;
+    if (mapping?.defaultAccount) {
+      const match = expenseAccounts.find((a) => a.name.toLowerCase() === mapping.defaultAccount!.toLowerCase());
+      if (match) preferredAccount = match;
+    }
+    if (mapping?.defaultClass) {
+      const classMatch = classes.find((c) => c.name.toLowerCase() === mapping.defaultClass!.toLowerCase());
+      if (classMatch) preferredClassId = classMatch.id;
+    }
+
     const { qboLines: initialLines, categories } = ensureAccountLines(lineItems, totalAmount, {
-      id: fallbackAccount.id,
-      name: fallbackAccount.name,
+      id: preferredAccount.id,
+      name: preferredAccount.name,
     });
-    const qboLines = applyAccountMappings(initialLines, expenseAccounts, fallbackAccount);
+    const qboLines = applyAccountMappings(initialLines, expenseAccounts, preferredAccount);
 
     const bill: QBOBill = {
       DocNumber: invoiceNumber,
@@ -338,12 +350,25 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       Memo: `PCS AI Approved Invoice - ${vendorName}${invoiceNumber ? ` - ${invoiceNumber}` : ''}`
     };
 
+    console.log('[QBO][CREATE_BILL] payload preview', {
+      vendor: vendorName,
+      invoiceNumber,
+      lineCount: bill.Line.length,
+      accountsUsed: bill.Line.map((line) => line.AccountBasedExpenseLineDetail?.AccountRef?.value),
+      totalAmount,
+    });
+
     const apAccount = await qboClient.getAccountsPayableAccount();
     if (apAccount?.Id) {
       bill.APAccountRef = {
         value: apAccount.Id,
         name: apAccount.Name
       };
+    }
+
+    // Optionally set TxnClassRef at the Bill level if preferredClassId is available
+    if (preferredClassId) {
+      (bill as any).TxnClassRef = { value: preferredClassId };
     }
 
     const createdBill = await qboClient.createBill(bill);

@@ -20,14 +20,12 @@ export interface QBOBill {
     LineNum?: number;
     Amount: number;
     Description?: string;
-    DetailType: 'ItemBasedExpenseLineDetail';
-    ItemBasedExpenseLineDetail: {
-      ItemRef: {
+    DetailType: 'AccountBasedExpenseLineDetail';
+    AccountBasedExpenseLineDetail: {
+      AccountRef: {
         value: string;
         name?: string;
       };
-      Qty?: number;
-      UnitPrice?: number;
     };
   }>;
   AttachRef?: Array<{
@@ -374,7 +372,7 @@ export class QBOClient {
 
   async getExpenseAccounts(): Promise<Array<{ id: string; name: string; type: string }>> {
     try {
-      const response = await this.query("SELECT Id, Name, AccountType, AccountSubType FROM Account WHERE Active = true");
+      const response = await this.query("SELECT Id, Name, AccountType, AccountSubType, FullyQualifiedName FROM Account WHERE Active = true");
       const accounts = response.QueryResponse?.Account || [];
 
       const expenseAccounts = accounts.filter((acc: any) =>
@@ -385,11 +383,22 @@ export class QBOClient {
 
       return expenseAccounts.map((account: any) => ({
         id: account.Id,
-        name: account.Name,
+        name: account.FullyQualifiedName || account.Name,
         type: account.AccountType,
       }));
     } catch (error) {
       console.error('❌ Error getting expense accounts:', error);
+      return [];
+    }
+  }
+
+  async getClasses(): Promise<Array<{ id: string; name: string }>> {
+    try {
+      const response = await this.query("SELECT Id, Name, FullyQualifiedName FROM Class WHERE Active = true");
+      const classes = response.QueryResponse?.Class || [];
+      return (classes || []).map((c: any) => ({ id: c.Id, name: c.FullyQualifiedName || c.Name }));
+    } catch (error) {
+      console.error('❌ Error getting classes:', error);
       return [];
     }
   }
