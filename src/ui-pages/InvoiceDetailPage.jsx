@@ -380,13 +380,27 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           // Check QBO connection first to avoid noisy errors
           const statusUrl = `${baseUrl}/api/qbo/status?ts=${Date.now()}`;
           const statusRes = await fetch(statusUrl, { cache: 'no-store' });
-          const statusJson = await statusRes.json().catch(() => ({ connected: false }));
-
-          if (!statusRes.ok) {
-            console.warn('⚠️ QuickBooks status check returned non-OK response:', statusRes.status, statusJson);
+          const statusText = await statusRes.text();
+          let statusJson = null;
+          try {
+            statusJson = statusText ? JSON.parse(statusText) : null;
+          } catch (parseErr) {
+            console.error('❌ Failed to parse QuickBooks status JSON:', parseErr, { statusText });
           }
 
-          if (!statusJson.connected) {
+          const isConnected = !!statusJson?.connected;
+
+          if (!statusRes.ok || !isConnected) {
+            console.warn('⚠️ QuickBooks status check issue:', {
+              status: statusRes.status,
+              ok: statusRes.ok,
+              isConnected,
+              statusJson,
+              statusText,
+            });
+          }
+
+          if (!isConnected) {
             alert('Invoice approved. QuickBooks not connected — please connect QuickBooks first.');
             onBack();
             return;
