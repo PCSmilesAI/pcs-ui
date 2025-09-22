@@ -172,19 +172,22 @@ class TokenStorage {
 
   constructor() {
     const hasEncryptionKey = typeof process.env.ENCRYPTION_KEY === 'string' && process.env.ENCRYPTION_KEY.length > 0;
+    const preferLegacy = String(process.env.USE_LEGACY_QBO_TOKEN_MANAGER).toLowerCase() === 'true';
 
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
-      const legacyModule = require('../../database');
-      if (legacyModule?.tokenManager && hasEncryptionKey) {
-        this.legacyManager = legacyModule.tokenManager;
-        this.useLegacyManager = true;
-        console.log('[QBO] Using encrypted legacy token manager for QuickBooks tokens');
-      } else if (legacyModule?.tokenManager && !hasEncryptionKey) {
-        console.warn('[QBO] Legacy token manager detected but ENCRYPTION_KEY is missing. Falling back to direct SQLite storage.');
+    if (preferLegacy && hasEncryptionKey) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
+        const legacyModule = require('../../database');
+        if (legacyModule?.tokenManager) {
+          this.legacyManager = legacyModule.tokenManager;
+          this.useLegacyManager = true;
+          console.log('[QBO] Using encrypted legacy token manager for QuickBooks tokens');
+        } else {
+          console.warn('[QBO] Legacy token manager requested but not available. Falling back to SQLite storage.');
+        }
+      } catch (error) {
+        console.warn('[QBO] Legacy token manager requested but failed to load. Falling back to SQLite storage.');
       }
-    } catch (error) {
-      console.warn('[QBO] Legacy token manager not available. Falling back to direct SQLite storage.');
     }
 
     if (!this.useLegacyManager) {
