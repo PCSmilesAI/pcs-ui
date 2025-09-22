@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 // Navigation bar implemented with inline styles. This component avoids
@@ -15,6 +16,10 @@ export default function NavBar({
   onSearch,
   onLogout
 }) {
+  // Minimal logic-only additions to keep UI identical
+  const router = useRouter();
+  const pathname = usePathname();
+  const sp = useSearchParams();
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -189,6 +194,24 @@ export default function NavBar({
     setSearchValue(e.target.value);
     if (onSearch) onSearch(e.target.value);
   };
+
+  // Keep local searchValue in sync with URL when navigating back/forward
+  useEffect(() => {
+    const initial = sp.get('search') || '';
+    setSearchValue(initial);
+    // Do not auto-open input; respect UI toggle
+  }, [sp]);
+
+  // Debounce URL updates when typing
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const params = new URLSearchParams(sp.toString());
+      if (searchValue) params.set('search', searchValue);
+      else params.delete('search');
+      router.replace(`${pathname}?${params.toString()}`);
+    }, 250);
+    return () => clearTimeout(id);
+  }, [searchValue, pathname, sp, router]);
 
   return (
     <nav style={containerStyle}>

@@ -1,0 +1,18 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "46766357",
+  "invoice_date": "09/11/25",
+  "due_date": "10/11/25",
+  "invoice_total": "248.26",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "177-0037",
+      "product_name": "EA Amalgam Bucket",
+      "Quantity": "5",
+      "unit_price": "241.77",
+      "line_item_total": "241.77"
+    }
+  ]
+}

@@ -35,10 +35,38 @@ function genPkce() {
   return { code_verifier, code_challenge };
 }
 
-export async function GET() {
-  const { QBO_CLIENT_ID, QBO_REDIRECT_URI, QBO_SCOPES, QBO_STATE_SECRET } = process.env;
-  if (!QBO_CLIENT_ID || !QBO_REDIRECT_URI || !QBO_SCOPES || !QBO_STATE_SECRET) {
-    return NextResponse.json({ error: 'Missing required environment variables' }, { status: 500 });
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const debug = url.searchParams.get('debug') === '1' || url.searchParams.get('debug') === 'true';
+  const {
+    QBO_CLIENT_ID,
+    QBO_REDIRECT_URI,
+    QBO_SCOPES = 'com.intuit.quickbooks.accounting',
+    QBO_STATE_SECRET
+  } = process.env as Record<string, string | undefined>;
+
+  const missing: string[] = [];
+  if (!QBO_CLIENT_ID) missing.push('QBO_CLIENT_ID');
+  if (!QBO_REDIRECT_URI) missing.push('QBO_REDIRECT_URI');
+  if (!QBO_STATE_SECRET) missing.push('QBO_STATE_SECRET');
+  if (!QBO_SCOPES) missing.push('QBO_SCOPES');
+
+  if (debug) {
+    return NextResponse.json({
+      ok: missing.length === 0,
+      missing,
+      present: {
+        QBO_CLIENT_ID: !!QBO_CLIENT_ID,
+        QBO_REDIRECT_URI: !!QBO_REDIRECT_URI,
+        QBO_SCOPES: !!QBO_SCOPES,
+        QBO_STATE_SECRET: !!QBO_STATE_SECRET,
+      }
+    });
+  }
+
+  if (missing.length) {
+    console.error('[QBO][AUTH] Missing env', missing);
+    return NextResponse.json({ error: 'Missing required environment variables', missing }, { status: 500 });
   }
 
   const { code_verifier, code_challenge } = genPkce();
@@ -52,19 +80,16 @@ export async function GET() {
     redirect_uri: QBO_REDIRECT_URI,
   };
 
-  const state = signState(payload, QBO_STATE_SECRET);
+  const state = signState(payload, QBO_STATE_SECRET as string);
 
-  console.log('[QBO][AUTH] redirecting to Intuit', {
-    redirect_uri: QBO_REDIRECT_URI,
-    state_len: state.length
-  });
+  console.log('[QBO][AUTH] redirecting to Intuit', { redirect_uri: QBO_REDIRECT_URI, scopes: QBO_SCOPES, has_state_secret: !!QBO_STATE_SECRET });
 
   // Intuit login endpoint – use AppCenter for interactive auth
   const authUrl = new URL('https://appcenter.intuit.com/connect/oauth2');
-  authUrl.searchParams.set('client_id', QBO_CLIENT_ID);
+  authUrl.searchParams.set('client_id', QBO_CLIENT_ID as string);
   authUrl.searchParams.set('response_type', 'code');
-  authUrl.searchParams.set('scope', QBO_SCOPES);
-  authUrl.searchParams.set('redirect_uri', QBO_REDIRECT_URI);
+  authUrl.searchParams.set('scope', QBO_SCOPES as string);
+  authUrl.searchParams.set('redirect_uri', QBO_REDIRECT_URI as string);
   authUrl.searchParams.set('state', state);
   authUrl.searchParams.set('access_type', 'offline');
   authUrl.searchParams.set('code_challenge', code_challenge);

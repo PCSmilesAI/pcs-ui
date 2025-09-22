@@ -1,0 +1,18 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "",
+  "invoice_date": "",
+  "due_date": "",
+  "invoice_total": "",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "407-985417",
+      "product_name": ".Ordered By: Wendy D/MB 9/3/2025",
+      "Quantity": "392875",
+      "unit_price": "50.000ea",
+      "line_item_total": "250.00"
+    }
+  ]
+}

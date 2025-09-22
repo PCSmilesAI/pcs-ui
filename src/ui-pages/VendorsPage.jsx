@@ -1,72 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import VendorTable from '../components/VendorTable.jsx';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
 /**
  * Page for the "Vendors" view. Displays a list of vendors with
  * payment method, outstanding amount and contact information.
  */
 export default function VendorsPage({ searchQuery = '', filters = {}, onVendorClick }) {
+  const router = useRouter();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const spApi = useSearchParams();
+  const spQuery = (spApi.get('search') || '').trim().toLowerCase();
+  const spFilters = {
+    vendor: spApi.get('vendor') || undefined,
+    minAmount: spApi.get('minAmount') || undefined,
+    maxAmount: spApi.get('maxAmount') || undefined,
+  };
 
-  // Load and aggregate vendor data from invoices
+  // Load and aggregate vendor data from live All Invoices source
   useEffect(() => {
     const loadVendors = async () => {
       try {
-        console.log('🔄 VendorsPage: Starting to load vendor data...');
+        console.log('🔄 VendorsPage: Fetching invoices from /api/invoice-queue...');
         setLoading(true);
-        const response = await fetch('/invoice_queue.json');
-        console.log('📡 VendorsPage: Fetch response status:', response.status);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('📊 VendorsPage: Raw data received:', data.length, 'invoices');
-        
-        // Aggregate vendor data from invoices
+        const data = await fetchInvoiceQueue({ limit: 5000 });
+        console.log('📊 VendorsPage: API returned', data.length, 'invoices');
+
         const vendorMap = new Map();
-        
-        data.forEach(invoice => {
-          const vendorName = invoice.vendor || 'Unknown';
-          const amount = parseFloat(invoice.total || '0.00');
-          
+        data.forEach((invoice) => {
+          const vendorName = invoice.vendor_name || invoice.vendor || 'Unknown';
+          const amountNum = parseFloat(String(invoice.invoice_total ?? invoice.total ?? '0')); 
+
           if (vendorMap.has(vendorName)) {
             const existing = vendorMap.get(vendorName);
-            existing.amount += amount;
+            existing.amount += (isNaN(amountNum) ? 0 : amountNum);
             existing.invoiceCount += 1;
           } else {
             vendorMap.set(vendorName, {
               name: vendorName,
-              method: 'ACH', // Default payment method
-              amount: amount,
-              contact: 'Contact via invoice', // Default contact
-              invoiceCount: 1
+              method: 'ACH',
+              amount: isNaN(amountNum) ? 0 : amountNum,
+              contact: 'Contact via invoice',
+              invoiceCount: 1,
             });
           }
         });
-        
-        // Convert to array and format amounts
-        const transformedData = Array.from(vendorMap.values()).map(vendor => ({
-          name: vendor.name,
-          method: vendor.method,
-          amount: `$${vendor.amount.toFixed(2)}`,
-          contact: vendor.contact,
-          invoiceCount: vendor.invoiceCount
+
+        const transformedData = Array.from(vendorMap.values()).map((v) => ({
+          name: v.name,
+          method: v.method,
+          amount: `$${v.amount.toFixed(2)}`,
+          contact: v.contact,
+          invoiceCount: v.invoiceCount,
         }));
-        
-        console.log('✅ VendorsPage: Vendor data aggregated successfully:', transformedData.length, 'vendors');
+
         setVendors(transformedData);
         setError(null);
       } catch (err) {
         console.error('❌ VendorsPage: Error loading vendor data:', err);
         setError(err.message);
-        // Fallback to empty array if loading fails
         setVendors([]);
       } finally {
-        console.log('🏁 VendorsPage: Loading complete');
         setLoading(false);
       }
     };
@@ -76,24 +73,25 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
 
   const wrapperStyle = { padding: '24px' };
 
-  // Filter rows by search and filters
-  const filteredRows = vendors.filter((row) => {
-    const query = searchQuery.trim().toLowerCase();
+  // Filter rows by search and filters (merge URL filters too)
+  const effectiveQuery = (spQuery || searchQuery || '').trim().toLowerCase();
+  const effectiveFilters = { ...filters, ...Object.fromEntries(Object.entries(spFilters).filter(([_, v]) => v !== undefined)) };
+  const filteredRows = useMemo(() => vendors.filter((row) => {
+    const query = effectiveQuery;
     if (query) {
       const matches = Object.values(row).some((val) =>
         String(val).toLowerCase().includes(query)
       );
       if (!matches) return false;
     }
-    // vendor filter (row.name)
-    if (filters.vendor && row.name !== filters.vendor) return false;
-    // amount filters
-    const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
-    if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;
-    if (filters.maxAmount && amt > parseFloat(filters.maxAmount)) return false;
+    const f = effectiveFilters;
+    if (f.vendor && row.name !== f.vendor) return false;
+    const amt = parseFloat(String(row.amount).replace(/[^0-9.]/g, ''));
+    if (f.minAmount && !isNaN(parseFloat(f.minAmount)) && amt < parseFloat(f.minAmount)) return false;
+    if (f.maxAmount && !isNaN(parseFloat(f.maxAmount)) && amt > parseFloat(f.maxAmount)) return false;
     // office filter not available on vendors list
     return true;
-  });
+  }), [vendors, effectiveQuery, filters]);
 
   console.log('🎨 VendorsPage: Rendering with', filteredRows.length, 'vendors, loading:', loading, 'error:', error);
 
@@ -124,7 +122,11 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
       <VendorTable
         rows={filteredRows}
         onRowClick={(row) => {
-          if (onVendorClick) onVendorClick(row);
+          try {
+            const name = row?.name || '';
+            if (onVendorClick) onVendorClick(row);
+            if (name) router.push(`/VendorDetailPage?vendor=${encodeURIComponent(name)}`);
+          } catch (_) {}
         }}
       />
     </div>

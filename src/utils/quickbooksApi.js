@@ -251,8 +251,7 @@ class QuickBooksAPI {
         throw new Error(`Failed to download PDF: ${pdfResponse.status}`);
       }
       
-      const pdfBuffer = await pdfResponse.arrayBuffer();
-      const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdfBuffer)));
+      await pdfResponse.arrayBuffer();
 
       // Create attachment data
       const attachmentData = {

@@ -1,14 +1,18 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import NavBar from './NavBar';
 import { InvoiceClickProvider } from '../context/InvoiceClickContext';
+import FilterPanel from './FilterPanel.jsx'
 
 export default function AppLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
+  const sp = useSearchParams();
   const [currentPage, setCurrentPage] = useState('');
   // QBO connection logic removed since QBO is already connected
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({});
 
   useEffect(() => {
     const path = pathname.split('/')[1] || 'ForMePage';
@@ -53,7 +57,7 @@ export default function AppLayout({ children }) {
   };
 
   const handleToggleFilter = () => {
-    console.log('Toggle Filter clicked');
+    setIsFilterOpen((v) => !v);
   };
 
   const handleSearch = (query) => {
@@ -63,19 +67,6 @@ export default function AppLayout({ children }) {
   const handleLogout = () => {
     console.log('Logout clicked');
     router.push('/LoginPage');
-  };
-
-  // Handle invoice row clicks - navigate to invoice detail page
-  const handleInvoiceRowClick = (invoice) => {
-    console.log('🔍 AppLayout: Invoice clicked:', invoice);
-    console.log('🔍 AppLayout: Invoice number:', invoice?.invoice_number);
-    if (invoice?.invoice_number) {
-      const url = `/InvoiceDetailPage?invoice=${encodeURIComponent(invoice.invoice_number)}`;
-      console.log('🔍 AppLayout: Navigating to:', url);
-      router.push(url);
-    } else {
-      console.warn('⚠️ AppLayout: No invoice_number found in clicked invoice');
-    }
   };
 
   return (
@@ -90,9 +81,28 @@ export default function AppLayout({ children }) {
             onLogout={handleLogout}
           />
         )}
-        
+        {!isAuthPage && (
+          <FilterPanel
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+            onApplyFilters={(criteria) => {
+              setFilters(criteria || {});
+              setIsFilterOpen(false);
+              try {
+                // Mirror filters into the URL so pages can read them reliably
+                const params = new URLSearchParams(sp.toString());
+                const keys = ['vendor','office','category','minAmount','maxAmount','dueWithin'];
+                keys.forEach((k) => {
+                  const v = (criteria && criteria[k]) ? String(criteria[k]).trim() : '';
+                  if (v) params.set(k, v); else params.delete(k);
+                });
+                router.replace(`${pathname}?${params.toString()}`);
+              } catch (_) {}
+            }}
+          />
+        )}
         <main style={{ flex: 1, padding: isAuthPage ? '0' : '20px' }}>
-          {children}
+          {React.isValidElement(children) ? React.cloneElement(children, { filters }) : children}
         </main>
       </div>
     </InvoiceClickProvider>

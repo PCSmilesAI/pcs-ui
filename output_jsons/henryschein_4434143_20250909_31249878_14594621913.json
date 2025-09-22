@@ -1,0 +1,32 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "46589354",
+  "invoice_date": "09/08/25",
+  "due_date": "10/08/25",
+  "invoice_total": "289.80",
+  "office_location": "Lebanon",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "570-0177",
+      "product_name": "250X2/BX Ibuprofen Tablets Pouch 200mg",
+      "Quantity": "1",
+      "unit_price": "42.79",
+      "line_item_total": "42.79"
+    },
+    {
+      "product_number": "333-3382",
+      "product_name": "EA Coe-Soft Professional Package",
+      "Quantity": "1",
+      "unit_price": "158.37",
+      "line_item_total": "158.37"
+    },
+    {
+      "product_number": "900-1281",
+      "product_name": "EA MaxiTemp HP C&B Kit 4:1 A2",
+      "Quantity": "1",
+      "unit_price": "82.15",
+      "line_item_total": "82.15"
+    }
+  ]
+}

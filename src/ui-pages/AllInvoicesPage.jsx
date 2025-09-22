@@ -1,98 +1,66 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
-/**
- * The All Invoices page aggregates every invoice into a single
- * list. Columns are sortable; when the filter panel is open the
- * sort icons become visible and clicking on a header cycles
- * through ascending/descending/unsorted states. Sorting logic is
- * performed locally on the array of row objects.
- */
-export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery = '', filters = {} }) {
-  // Local state for sorting configuration
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
+  const searchParams = useSearchParams();
+  const spQuery = (searchParams.get('search') || '').trim().toLowerCase();
+  const spFilters = {
+    vendor: searchParams.get('vendor') || undefined,
+    office: searchParams.get('office') || undefined,
+    category: searchParams.get('category') || undefined,
+    minAmount: searchParams.get('minAmount') || undefined,
+    maxAmount: searchParams.get('maxAmount') || undefined,
+    dueWithin: searchParams.get('dueWithin') || undefined,
+  };
+
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load invoice data from the queue
   useEffect(() => {
     const loadInvoices = async () => {
       try {
-        console.log('🔄 AllInvoicesPage: Starting to load invoices...');
         setLoading(true);
-        
-        // Add cache-busting timestamp to force fresh request
-        const timestamp = new Date().getTime();
-        const response = await fetch(`/invoice_queue.json?t=${timestamp}`, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
+        const data = await fetchInvoiceQueue({ limit: 5000 });
+
+        const transformed = data.map((invoice) => {
+          const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            const parsed = new Date(dateString);
+            if (Number.isNaN(parsed.getTime())) return 'N/A';
+            return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+          };
+
+          return {
+            invoice: invoice.invoice_number || 'Unknown',
+            invoice_number: invoice.invoice_number,
+            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
+            office: invoice.office_location || invoice.clinic_id || 'Unknown',
+            status: invoice.status || 'New',
+            category: invoice.category || 'Other',
+            invoiceDate: formatDate(invoice.invoice_date || null),
+            dueDate: formatDate(invoice.due_date || invoice.invoice_date || null),
+            invoice_date: invoice.invoice_date,
+            due_date: invoice.due_date,
+            json_path: invoice.json_path,
+            pdf_path: invoice.pdf_path,
+            timestamp: invoice.timestamp,
+            assigned_to: invoice.assigned_to,
+            approved: invoice.approved,
+          };
         });
-        console.log('📡 AllInvoicesPage: Fetch response status:', response.status);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status}`);
-        }
-        
-        let data = await response.json();
-        // Status overrides removed - using direct API calls
-        console.log('📊 AllInvoicesPage: Raw data received:', data.length, 'invoices');
-        
-        // Transform the queue data to match the expected format
-        const transformedData = data.map(invoice => ({
-          invoice: invoice.invoice_number || 'Unknown',
-          vendor: invoice.vendor || 'Unknown',
-          amount: `$${invoice.total || '0.00'}`,
-          office: invoice.clinic_id || 'Unknown',
-          status: invoice.status || 'New',
-          category: invoice.category || 'Other',
-          // Add additional fields for detail view
-          invoice_date: invoice.invoice_date,
-          due_date: invoice.due_date,
-          json_path: invoice.json_path,
-          pdf_path: invoice.pdf_path,
-          timestamp: invoice.timestamp,
-          assigned_to: invoice.assigned_to,
-          approved: invoice.approved
-        }));
-        
-        console.log('✅ AllInvoicesPage: Data transformed successfully:', transformedData.length, 'invoices');
-        setInvoices(transformedData);
+
+        setInvoices(transformed);
         setError(null);
-      } catch (err) {
-        console.error('❌ AllInvoicesPage: Error loading invoices:', err);
-        setError(err.message);
-        // Fallback to static data if loading fails
-        console.log('🔄 AllInvoicesPage: Using fallback data...');
-        setInvoices([
-          {
-            invoice: 'IN761993',
-            vendor: 'Artisan Dental',
-            amount: '$1,265.40',
-            office: 'Roseburg',
-            status: 'To Be Paid',
-          },
-          {
-            invoice: '4307',
-            vendor: 'Exodus Dental Solutions',
-            amount: '$1,349.08',
-            office: 'Lebanon',
-            status: 'Approval',
-          },
-          {
-            invoice: '44250801',
-            vendor: 'Henry Schein',
-            amount: '$1,622.47',
-            office: 'Eugene',
-            status: 'Complete',
-          },
-        ]);
+      } catch (loadError) {
+        console.error('❌ AllInvoicesPage: Error loading invoices:', loadError);
+        setError(loadError?.message || 'Failed to load invoices');
+        setInvoices([]);
       } finally {
-        console.log('🏁 AllInvoicesPage: Loading complete');
         setLoading(false);
       }
     };
@@ -100,7 +68,6 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
     loadInvoices();
   }, []);
 
-  // Column definitions. Align right for the amount column.
   const columns = [
     { key: 'invoice', label: 'Invoice' },
     { key: 'vendor', label: 'Vendor' },
@@ -110,78 +77,52 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
     { key: 'status', label: 'Status' },
   ];
 
-  /**
-   * Sorting comparator used when a column is active. It strips
-   * non‑numeric characters for the amount column so numeric
-   * comparisons work as expected.
-   */
-  function compare(a, b, key, direction) {
-    let valA = a[key];
-    let valB = b[key];
-    // Remove dollar sign and commas for numeric comparison
-    if (key === 'amount') {
-      valA = parseFloat(valA.replace(/[^0-9.]/g, ''));
-      valB = parseFloat(valB.replace(/[^0-9.]/g, ''));
-    }
-    if (valA < valB) return direction === 'asc' ? -1 : 1;
-    if (valA > valB) return direction === 'asc' ? 1 : -1;
-    return 0;
-  }
+  const effectiveQuery = (spQuery || searchQuery || '').trim().toLowerCase();
+  const effectiveFilters = { ...filters, ...Object.fromEntries(Object.entries(spFilters).filter(([, value]) => value !== undefined && value !== null && value !== '')) };
 
-  // Apply search and filters first, then sort. Filtered data is derived
-  // from the original unsorted array using the criteria passed in.
-  const filteredData = invoices.filter((row) => {
-    const query = searchQuery.trim().toLowerCase();
-    if (query) {
-      const matches = Object.values(row).some((val) =>
-        String(val).toLowerCase().includes(query)
-      );
-      if (!matches) return false;
-    }
-    // vendor filter
-    if (filters.vendor && row.vendor !== filters.vendor) return false;
-    // office filter
-    if (filters.office && row.office !== filters.office) return false;
-    // status filter (not in filters currently, but category can map to status?)
-    if (filters.category && row.status !== filters.category) return false;
-    // amount filter
-    const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
-    if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;
-    if (filters.maxAmount && amt > parseFloat(filters.maxAmount)) return false;
-    // dueStart/dueEnd apply? There is no due date column; skip
-    return true;
-  });
+  const filteredData = useMemo(() => {
+    const parseAmount = (value) => Number.parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
+    const parseDate = (value) => {
+      if (!value || value === 'N/A') return null;
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
 
-  // Derive a sorted version of the filtered data based on the current
-  // sorting configuration. When no sorting is active return
-  // the original ordering.
-  const sortedRows = React.useMemo(() => {
-    const base = filteredData;
-    if (!sortConfig.key || !sortConfig.direction) return base;
-    const sorted = [...base].sort((a, b) =>
-      compare(a, b, sortConfig.key, sortConfig.direction)
-    );
-    return sorted;
-  }, [filteredData, sortConfig]);
+    return invoices.filter((row) => {
+      try {
+        if (effectiveQuery) {
+          const matches = Object.values(row).some((val) => String(val).toLowerCase().includes(effectiveQuery));
+          if (!matches) return false;
+        }
 
-  /**
-   * Handle column header clicks to cycle through sort states.
-   * The sort state is maintained in local state and applied
-   * to the filtered data.
-   */
-  function handleSort(key) {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    } else if (sortConfig.key === key && sortConfig.direction === 'desc') {
-      // Clear sorting
-      setSortConfig({ key: null, direction: null });
-      return;
-    }
-    setSortConfig({ key, direction });
-  }
+        if (effectiveFilters.vendor && row.vendor !== effectiveFilters.vendor) return false;
+        if (effectiveFilters.office && row.office !== effectiveFilters.office) return false;
+        if (effectiveFilters.category && row.category !== effectiveFilters.category) return false;
 
-  console.log('🎨 AllInvoicesPage: Rendering with', sortedRows.length, 'invoices, loading:', loading, 'error:', error);
+        const amount = parseAmount(row.amount);
+        if (effectiveFilters.minAmount && amount < Number(effectiveFilters.minAmount)) return false;
+        if (effectiveFilters.maxAmount && amount > Number(effectiveFilters.maxAmount)) return false;
+
+        if (effectiveFilters.dueWithin) {
+          const days = Number.parseInt(String(effectiveFilters.dueWithin), 10);
+          if (!Number.isNaN(days)) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dueDate = parseDate(row.due_date || row.invoice_date) || parseDate(row.dueDate) || parseDate(row.invoiceDate);
+            if (!dueDate) return false;
+            dueDate.setHours(0, 0, 0, 0);
+            const daysDiff = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+            if (daysDiff < 0 || daysDiff > days) return false;
+          }
+        }
+
+        return true;
+      } catch (filterError) {
+        console.error('❌ Error applying filters for row:', row, filterError);
+        return true;
+      }
+    });
+  }, [invoices, effectiveQuery, effectiveFilters]);
 
   if (loading) {
     return (
@@ -199,18 +140,16 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
     );
   }
 
-  const wrapperStyle = { padding: '24px' };
-
   return (
-    <div style={wrapperStyle}>
+    <div style={{ padding: '24px' }}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">All Invoices</h1>
         <p className="text-gray-600 mt-2">
-          {sortedRows.length} invoice{sortedRows.length !== 1 ? 's' : ''} found
+          {filteredData.length} invoice{filteredData.length !== 1 ? 's' : ''} found
         </p>
       </div>
       <InvoiceTable
-        rows={sortedRows}
+        rows={filteredData}
         columns={columns}
         onRowClick={onRowClick}
       />

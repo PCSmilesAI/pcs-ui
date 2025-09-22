@@ -1,0 +1,18 @@
+{
+  "vendor": "tc dental laboratory, inc.",
+  "vendor_name": "TC Dental",
+  "invoice_number": "260-599",
+  "invoice_date": "",
+  "due_date": "",
+  "total": "0.00",
+  "office_location": "Salem",
+  "patient_name": "Elisa Warde",
+  "doctor_name": "Rosaly",
+  "line_items": [],
+  "source_page": 7,
+  "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+  "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
+  "id": "tc_260-599_7",
+  "clinic_id": "Salem",
+  "invoice_total": "0.00"
+}
