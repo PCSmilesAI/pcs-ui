@@ -2,13 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { qboClient, QBOBill, QBOItem } from './qboClient';
 
-type LineWithHint = QBOBill['Line'][number] & {
-  __categoryHint?: {
-    category: string;
-    qboItemName: string;
-  };
-};
-
 export interface InvoiceLineItem {
   product_name?: string;
   description?: string;
@@ -194,16 +187,22 @@ function resolvePdfFile(pdfPath?: string): { buffer: Buffer; fileName: string } 
   return null;
 }
 
-function ensureLineItems(
+type ExpenseLine = QBOBill['Line'][number] & {
+  __categoryHint?: {
+    category: string;
+  };
+};
+
+function ensureAccountLines(
   lineItems: InvoiceLineItem[] | undefined,
   totalAmount: number,
-  fallbackItem: QBOItem
-): { qboLines: LineWithHint[]; categories: Array<{ description: string; category: string }> } {
+  fallbackAccount: { id: string; name: string }
+): { qboLines: ExpenseLine[]; categories: Array<{ description: string; category: string }> } {
   const categories: Array<{ description: string; category: string }> = [];
 
   if (!lineItems || lineItems.length === 0) {
     const amount = Number.isFinite(totalAmount) && totalAmount > 0 ? totalAmount : 0;
-    const description = fallbackItem?.Name || 'Dental Supplies';
+    const description = fallbackAccount?.name || 'Invoice expense';
     categories.push({ description, category: 'dental_supplies' });
     return {
       qboLines: [
@@ -212,54 +211,42 @@ function ensureLineItems(
           LineNum: 1,
           Amount: amount,
           Description: description,
-          DetailType: 'ItemBasedExpenseLineDetail',
-          ItemBasedExpenseLineDetail: {
-            ItemRef: {
-              value: fallbackItem?.Id || '1',
-              name: fallbackItem?.Name || 'Dental Supplies'
+          DetailType: 'AccountBasedExpenseLineDetail',
+          AccountBasedExpenseLineDetail: {
+            AccountRef: {
+              value: fallbackAccount.id,
+              name: fallbackAccount.name,
             },
-            Qty: 1,
-            UnitPrice: amount
-          }
-        }
+          },
+        },
       ],
-      categories
+      categories,
     };
   }
 
   const qboLines = lineItems.map((item, index) => {
     const description = item.product_name || item.description || item.name || `Item ${index + 1}`;
-    const amount = sanitizeAmount(item.line_item_total ?? item.amount ?? item.total, totalAmount / Math.max(lineItems.length, 1));
-    const quantityRaw = item.Quantity ?? item.quantity;
-    const quantity = sanitizeAmount(quantityRaw, 1) || 1;
-    let unitPrice = sanitizeAmount(item.unit_price ?? item.UnitPrice, amount / (quantity || 1));
-    if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
-      unitPrice = quantity ? amount / quantity : amount;
-    }
-    if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
-      unitPrice = amount;
-    }
+    const amount = sanitizeAmount(
+      item.line_item_total ?? item.amount ?? item.total,
+      totalAmount / Math.max(lineItems.length, 1)
+    );
 
     const category = categorizeLineItem(description, amount);
-    const qboItemName = mapToQBOItem(category);
-
     categories.push({ description, category });
 
-    const line: LineWithHint = {
+    const line: ExpenseLine = {
       Id: (index + 1).toString(),
       LineNum: index + 1,
       Amount: amount,
       Description: description,
-      DetailType: 'ItemBasedExpenseLineDetail',
-      ItemBasedExpenseLineDetail: {
-        ItemRef: {
-          value: fallbackItem.Id,
-          name: fallbackItem.Name
+      DetailType: 'AccountBasedExpenseLineDetail',
+      AccountBasedExpenseLineDetail: {
+        AccountRef: {
+          value: fallbackAccount.id,
+          name: fallbackAccount.name,
         },
-        Qty: quantity,
-        UnitPrice: unitPrice
       },
-      __categoryHint: { category, qboItemName }
+      __categoryHint: { category },
     };
 
     return line;
@@ -268,46 +255,33 @@ function ensureLineItems(
   return { qboLines, categories };
 }
 
-function applyItemMappings(
-  qboLines: LineWithHint[],
-  availableItems: QBOItem[],
-  fallbackItem: QBOItem
+function applyAccountMappings(
+  qboLines: ExpenseLine[],
+  availableAccounts: Array<{ id: string; name: string; type: string }>,
+  fallbackAccount: { id: string; name: string }
 ): QBOBill['Line'] {
   return qboLines.map((line) => {
-    if (!line?.ItemBasedExpenseLineDetail) return line;
+    if (!line?.AccountBasedExpenseLineDetail) return line;
 
     const { __categoryHint, ...rest } = line;
-    const fallback = fallbackItem;
-    let matchedItem = fallback;
+    let matchedAccount = fallbackAccount;
 
     if (__categoryHint) {
-      const targetName = __categoryHint.qboItemName.toLowerCase();
-      matchedItem =
-        availableItems.find(
-          (item) =>
-            item.Name.toLowerCase().includes(targetName) && item?.ExpenseAccountRef?.value
-        ) ||
-        availableItems.find(
-          (item) =>
-            item.Name.toLowerCase().includes(__categoryHint.category.toLowerCase()) &&
-            item?.ExpenseAccountRef?.value
-        ) ||
-        fallback;
-    }
-
-    if (!matchedItem?.ExpenseAccountRef?.value) {
-      matchedItem = fallback;
+      const target = __categoryHint.category.toLowerCase();
+      matchedAccount =
+        availableAccounts.find((account) => account.name.toLowerCase().includes(target)) ||
+        fallbackAccount;
     }
 
     return {
       ...rest,
-      ItemBasedExpenseLineDetail: {
-        ...rest.ItemBasedExpenseLineDetail,
-        ItemRef: {
-          value: matchedItem?.Id || rest.ItemBasedExpenseLineDetail.ItemRef.value,
-          name: matchedItem?.Name || rest.ItemBasedExpenseLineDetail.ItemRef.name
-        }
-      }
+      AccountBasedExpenseLineDetail: {
+        ...rest.AccountBasedExpenseLineDetail,
+        AccountRef: {
+          value: matchedAccount.id,
+          name: matchedAccount.name,
+        },
+      },
     };
   });
 }
@@ -339,25 +313,18 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       throw new Error(`Unable to locate or create vendor '${vendorName}' in QuickBooks`);
     }
 
-    let availableItems = await qboClient.getDentalItems();
-    if (!availableItems || availableItems.length === 0) {
-      availableItems = await qboClient.getItems();
-    }
-    if (!availableItems || availableItems.length === 0) {
-      throw new Error('No QuickBooks items available for mapping. Please ensure items exist in QuickBooks.');
+    const expenseAccounts = await qboClient.getExpenseAccounts();
+    if (!expenseAccounts || expenseAccounts.length === 0) {
+      throw new Error('No expense accounts found in QuickBooks. Please set up your chart of accounts.');
     }
 
-    const defaultItem =
-      availableItems.find((item) => item?.ExpenseAccountRef?.value) || availableItems[0];
+    const fallbackAccount = expenseAccounts[0];
 
-    if (!defaultItem?.ExpenseAccountRef?.value) {
-      throw new Error(
-        'QuickBooks items do not have expense accounts configured. Edit an item in QuickBooks, enable "I purchase this product/service" and assign an expense account.'
-      );
-    }
-
-    const { qboLines: initialLines, categories } = ensureLineItems(lineItems, totalAmount, defaultItem);
-    const qboLines = applyItemMappings(initialLines, availableItems, defaultItem);
+    const { qboLines: initialLines, categories } = ensureAccountLines(lineItems, totalAmount, {
+      id: fallbackAccount.id,
+      name: fallbackAccount.name,
+    });
+    const qboLines = applyAccountMappings(initialLines, expenseAccounts, fallbackAccount);
 
     const bill: QBOBill = {
       DocNumber: invoiceNumber,
