@@ -285,7 +285,11 @@ export class QBOClient {
         : fileContent instanceof Uint8Array
           ? fileContent
           : new Uint8Array((fileContent as Buffer).buffer, (fileContent as Buffer).byteOffset, (fileContent as Buffer).byteLength);
-    formData.append('file_content_01', new Blob([bytes], { type: mimeType }), fileName);
+    const arrayBuffer: ArrayBuffer =
+      bytes.byteOffset === 0 && bytes.byteLength === bytes.buffer.byteLength
+        ? (bytes.buffer as ArrayBuffer)
+        : (bytes.buffer as ArrayBuffer).slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+    formData.append('file_content_01', new Blob([arrayBuffer], { type: mimeType }), fileName);
 
     const response = await fetch(url, {
       method: 'POST',
