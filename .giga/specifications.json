@@ -1,0 +1,22 @@
+[
+  {
+    "fileName": "main-overview.mdc",
+    "description": "Complete system overview documenting the invoice processing pipeline architecture, key components, and system integration points with QuickBooks"
+  },
+  {
+    "fileName": "invoice-processing-algorithms.mdc",
+    "description": "Detailed documentation of the vendor-specific invoice parsing algorithms, categorization logic, and due date extraction mechanisms used across different dental suppliers"
+  },
+  {
+    "fileName": "data-models-and-flow.mdc",
+    "description": "Documentation of the invoice queue data model, state transitions, and data flow between components from email ingestion through QuickBooks bill creation"
+  },
+  {
+    "fileName": "quickbooks-integration.mdc",
+    "description": "Technical details of the QuickBooks OAuth implementation, token management, bill creation process and PDF attachment workflow"
+  },
+  {
+    "fileName": "dental-categorization-engine.mdc",
+    "description": "Documentation of the dental industry-specific categorization engine including terminology matching, confidence scoring, and vendor-specific override rules"
+  }
+]

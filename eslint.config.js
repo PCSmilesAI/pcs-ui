@@ -1,29 +1,63 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
+const js = require('@eslint/js');
+const globals = require('globals');
+const reactHooks = require('eslint-plugin-react-hooks');
+const reactRefresh = require('eslint-plugin-react-refresh');
 
-export default defineConfig([
-  globalIgnores(['dist']),
+const refreshConfig = (reactRefresh && reactRefresh.configs && reactRefresh.configs.vite) || { rules: {}, plugins: {} };
+const reactHookConfig = reactHooks.configs['recommended-latest'] || { rules: {} };
+
+module.exports = [
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      '.next',
+      'coverage',
+      'build',
+      'processed_invoices/**',
+      'pcs_ai_data/**',
+      'public/**',
+      '**/*.py',
+      'repair_loop/**',
+      'output_jsons/**',
+      'sample_invoices_pcs/**',
+      'converted/**',
+    ],
+  },
   {
     files: ['**/*.{js,jsx}'],
-    extends: [
-      js.configs.recommended,
-      reactHooks.configs['recommended-latest'],
-      // reactRefresh.configs.vite, // Removed Vite-specific config
-    ],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
       parserOptions: {
         ecmaVersion: 'latest',
-        ecmaFeatures: { jsx: true },
-        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
       },
     },
+    plugins: {
+      ...(refreshConfig.plugins || {}),
+      'react-hooks': reactHooks,
+    },
     rules: {
+      ...js.configs.recommended.rules,
+      ...(reactHookConfig.rules || {}),
+      ...(refreshConfig.rules || {}),
+      'react-refresh/only-export-components': 'off',
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
-])
+  {
+    files: ['**/tailwind.config.js'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'script',
+      globals: globals.node,
+    },
+  },
+];

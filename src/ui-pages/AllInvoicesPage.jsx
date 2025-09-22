@@ -4,70 +4,70 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
-/**
- * The All Invoices page aggregates every invoice into a single
- * list. Columns are sortable; when the filter panel is open the
- * sort icons become visible and clicking on a header cycles
- * through ascending/descending/unsorted states. Sorting logic is
- * performed locally on the array of row objects.
- */
-export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery = '', filters = {} }) {
-  const spApi = useSearchParams();
-  const spQuery = (spApi.get('search') || '').trim().toLowerCase();
+export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
+  const searchParams = useSearchParams();
+  const spQuery = (searchParams.get('search') || '').trim().toLowerCase();
   const spFilters = {
-    vendor: spApi.get('vendor') || undefined,
-    office: spApi.get('office') || undefined,
-    category: spApi.get('category') || undefined,
-    minAmount: spApi.get('minAmount') || undefined,
-    maxAmount: spApi.get('maxAmount') || undefined,
-    dueWithin: spApi.get('dueWithin') || undefined,
+    vendor: searchParams.get('vendor') || undefined,
+    office: searchParams.get('office') || undefined,
+    category: searchParams.get('category') || undefined,
+    minAmount: searchParams.get('minAmount') || undefined,
+    maxAmount: searchParams.get('maxAmount') || undefined,
+    dueWithin: searchParams.get('dueWithin') || undefined,
   };
-  // Local state for sorting configuration
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load invoice data from the queue (live API, no cache)
   useEffect(() => {
     const loadInvoices = async () => {
       try {
-        console.log('🔄 AllInvoicesPage: Fetching from /api/invoice-queue...');
         setLoading(true);
         const data = await fetchInvoiceQueue({ limit: 5000 });
-        console.log('📊 AllInvoicesPage: API returned', data.length, 'invoices');
 
-        const transformedData = data.map((invoice) => ({
-          invoice: invoice.invoice_number || 'Unknown',
-          vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-          amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-          office: invoice.office_location || invoice.clinic_id || 'Unknown',
-          status: invoice.status || 'New',
-          category: invoice.category || 'Other',
-          // pass-through fields for detail view
-          invoice_date: invoice.invoice_date,
-          due_date: invoice.due_date,
-          json_path: invoice.json_path,
-          pdf_path: invoice.pdf_path,
-          timestamp: invoice.timestamp,
-          assigned_to: invoice.assigned_to,
-          approved: invoice.approved
-        }));
+        const transformed = data.map((invoice) => {
+          const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            const parsed = new Date(dateString);
+            if (Number.isNaN(parsed.getTime())) return 'N/A';
+            return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+          };
 
-        setInvoices(transformedData);
+          return {
+            invoice: invoice.invoice_number || 'Unknown',
+            invoice_number: invoice.invoice_number,
+            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
+            office: invoice.office_location || invoice.clinic_id || 'Unknown',
+            status: invoice.status || 'New',
+            category: invoice.category || 'Other',
+            invoiceDate: formatDate(invoice.invoice_date || null),
+            dueDate: formatDate(invoice.due_date || invoice.invoice_date || null),
+            invoice_date: invoice.invoice_date,
+            due_date: invoice.due_date,
+            json_path: invoice.json_path,
+            pdf_path: invoice.pdf_path,
+            timestamp: invoice.timestamp,
+            assigned_to: invoice.assigned_to,
+            approved: invoice.approved,
+          };
+        });
+
+        setInvoices(transformed);
         setError(null);
-      } catch (err) {
-        console.error('❌ AllInvoicesPage: Error loading invoices:', err);
-        setError(err.message);
+      } catch (loadError) {
+        console.error('❌ AllInvoicesPage: Error loading invoices:', loadError);
+        setError(loadError?.message || 'Failed to load invoices');
         setInvoices([]);
       } finally {
         setLoading(false);
       }
     };
+
     loadInvoices();
   }, []);
 
-  // Column definitions. Align right for the amount column.
   const columns = [
     { key: 'invoice', label: 'Invoice' },
     { key: 'vendor', label: 'Vendor' },
@@ -77,99 +77,52 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
     { key: 'status', label: 'Status' },
   ];
 
-  /**
-   * Sorting comparator used when a column is active. It strips
-   * non‑numeric characters for the amount column so numeric
-   * comparisons work as expected.
-   */
-  function compare(a, b, key, direction) {
-    let valA = a[key];
-    let valB = b[key];
-    // Remove dollar sign and commas for numeric comparison
-    if (key === 'amount') {
-      valA = parseFloat(valA.replace(/[^0-9.]/g, ''));
-      valB = parseFloat(valB.replace(/[^0-9.]/g, ''));
-    }
-    if (valA < valB) return direction === 'asc' ? -1 : 1;
-    if (valA > valB) return direction === 'asc' ? 1 : -1;
-    return 0;
-  }
-
-  // Apply search and filters first, then sort. Filtered data is derived
-  // from the original unsorted array using the criteria passed in.
   const effectiveQuery = (spQuery || searchQuery || '').trim().toLowerCase();
-  const effectiveFilters = { ...filters, ...Object.fromEntries(Object.entries(spFilters).filter(([_,v]) => v !== undefined)) };
-  const filteredData = useMemo(() => invoices.filter((row) => {
-    const query = effectiveQuery;
-    if (query) {
-      const matches = Object.values(row).some((val) =>
-        String(val).toLowerCase().includes(query)
-      );
-      if (!matches) return false;
-    }
-    const f = effectiveFilters;
-    if (f.vendor && row.vendor !== f.vendor) return false;
-    if (f.office && row.office !== f.office) return false;
-    if (f.category && row.category !== f.category) return false;
-    // amount filter
-    const amt = parseFloat(String(row.amount).replace(/[^0-9.]/g, ''));
-    if (f.minAmount && !isNaN(parseFloat(f.minAmount)) && amt < parseFloat(f.minAmount)) return false;
-    if (f.maxAmount && !isNaN(parseFloat(f.maxAmount)) && amt > parseFloat(f.maxAmount)) return false;
-    // dueWithin support using invoice_date if present
-    if (f.dueWithin) {
-      const days = parseInt(f.dueWithin);
-      if (!isNaN(days)) {
-        const parseMDY = (s) => {
-          if (!s || s === 'N/A') return null;
-          const parts = s.includes('/') ? s.split('/') : s.split('-');
-          if (parts.length !== 3) return null;
-          const [m, d, y] = parts;
-          const yyyy = y.length === 2 ? `20${y}` : y;
-          const dt = new Date(`${yyyy}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
-          return isNaN(dt.getTime()) ? null : dt;
-        };
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const date = parseMDY(row.invoiceDate) || parseMDY(row.dueDate);
-        if (!date) return false;
-        date.setHours(0, 0, 0, 0);
-        const daysDiff = Math.ceil((date.getTime() - today.getTime()) / (1000 * 3600 * 24));
-        if (daysDiff < 0 || daysDiff > days) return false;
+  const effectiveFilters = { ...filters, ...Object.fromEntries(Object.entries(spFilters).filter(([, value]) => value !== undefined && value !== null && value !== '')) };
+
+  const filteredData = useMemo(() => {
+    const parseAmount = (value) => Number.parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
+    const parseDate = (value) => {
+      if (!value || value === 'N/A') return null;
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    return invoices.filter((row) => {
+      try {
+        if (effectiveQuery) {
+          const matches = Object.values(row).some((val) => String(val).toLowerCase().includes(effectiveQuery));
+          if (!matches) return false;
+        }
+
+        if (effectiveFilters.vendor && row.vendor !== effectiveFilters.vendor) return false;
+        if (effectiveFilters.office && row.office !== effectiveFilters.office) return false;
+        if (effectiveFilters.category && row.category !== effectiveFilters.category) return false;
+
+        const amount = parseAmount(row.amount);
+        if (effectiveFilters.minAmount && amount < Number(effectiveFilters.minAmount)) return false;
+        if (effectiveFilters.maxAmount && amount > Number(effectiveFilters.maxAmount)) return false;
+
+        if (effectiveFilters.dueWithin) {
+          const days = Number.parseInt(String(effectiveFilters.dueWithin), 10);
+          if (!Number.isNaN(days)) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dueDate = parseDate(row.due_date || row.invoice_date) || parseDate(row.dueDate) || parseDate(row.invoiceDate);
+            if (!dueDate) return false;
+            dueDate.setHours(0, 0, 0, 0);
+            const daysDiff = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+            if (daysDiff < 0 || daysDiff > days) return false;
+          }
+        }
+
+        return true;
+      } catch (filterError) {
+        console.error('❌ Error applying filters for row:', row, filterError);
+        return true;
       }
-    }
-    return true;
-  }), [invoices, effectiveQuery, filters]);
-
-  // Derive a sorted version of the filtered data based on the current
-  // sorting configuration. When no sorting is active return
-  // the original ordering.
-  const sortedRows = React.useMemo(() => {
-    const base = filteredData;
-    if (!sortConfig.key || !sortConfig.direction) return base;
-    const sorted = [...base].sort((a, b) =>
-      compare(a, b, sortConfig.key, sortConfig.direction)
-    );
-    return sorted;
-  }, [filteredData, sortConfig]);
-
-  /**
-   * Handle column header clicks to cycle through sort states.
-   * The sort state is maintained in local state and applied
-   * to the filtered data.
-   */
-  function handleSort(key) {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    } else if (sortConfig.key === key && sortConfig.direction === 'desc') {
-      // Clear sorting
-      setSortConfig({ key: null, direction: null });
-      return;
-    }
-    setSortConfig({ key, direction });
-  }
-
-  console.log('🎨 AllInvoicesPage: Rendering with', sortedRows.length, 'invoices, loading:', loading, 'error:', error);
+    });
+  }, [invoices, effectiveQuery, effectiveFilters]);
 
   if (loading) {
     return (
@@ -187,18 +140,16 @@ export default function AllInvoicesPage({ onRowClick, isFilterOpen, searchQuery 
     );
   }
 
-  const wrapperStyle = { padding: '24px' };
-
   return (
-    <div style={wrapperStyle}>
+    <div style={{ padding: '24px' }}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">All Invoices</h1>
         <p className="text-gray-600 mt-2">
-          {sortedRows.length} invoice{sortedRows.length !== 1 ? 's' : ''} found
+          {filteredData.length} invoice{filteredData.length !== 1 ? 's' : ''} found
         </p>
       </div>
       <InvoiceTable
-        rows={sortedRows}
+        rows={filteredData}
         columns={columns}
         onRowClick={onRowClick}
       />

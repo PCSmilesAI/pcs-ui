@@ -3,10 +3,6 @@ import bcrypt from 'bcryptjs';
 const GIST_ID = '24025555424dd200727b06d461cffdc9';
 const GIST_FILENAME = 'users.json';
 
-const headers = {
-  'Accept': 'application/vnd.github.v3+json'
-};
-
 // 🧠 Pull users from the GitHub Gist via server-side API
 async function getUsers() {
   const res = await fetch('/api/gist-users', {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import quickbooksAPI from '../utils/quickbooksApi';
 
 /**
@@ -8,23 +8,34 @@ import quickbooksAPI from '../utils/quickbooksApi';
 const QuickBooksIntegration = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [syncStatus, setSyncStatus] = useState('idle');
 
-  // Check connection status on component mount
-  useEffect(() => {
-    checkConnectionStatus();
+  // Check if QuickBooks is connected
+  const loadQuickBooksData = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      // Load account categories
+      const accountCategories = await quickbooksAPI.getAccountCategories();
+      setCategories(accountCategories);
+
+      console.log(`✅ Loaded ${accountCategories.length} QuickBooks categories`);
+    } catch (error) {
+      console.error('❌ Failed to load QuickBooks data:', error);
+      setError('Failed to load QuickBooks data');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Check if QuickBooks is connected
-  const checkConnectionStatus = async () => {
+  const checkConnectionStatus = useCallback(async () => {
     try {
       setLoading(true);
       const isValid = await quickbooksAPI.validateToken();
       setIsConnected(isValid);
-      
+
       if (isValid) {
         // Load initial data
         await loadQuickBooksData();
@@ -35,25 +46,12 @@ const QuickBooksIntegration = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loadQuickBooksData]);
 
-  // Load QuickBooks data (categories, vendors)
-  const loadQuickBooksData = async () => {
-    try {
-      setLoading(true);
-      
-      // Load account categories
-      const accountCategories = await quickbooksAPI.getAccountCategories();
-      setCategories(accountCategories);
-      
-      console.log(`✅ Loaded ${accountCategories.length} QuickBooks categories`);
-    } catch (error) {
-      console.error('❌ Failed to load QuickBooks data:', error);
-      setError('Failed to load QuickBooks data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Check connection status on component mount
+  useEffect(() => {
+    checkConnectionStatus();
+  }, [checkConnectionStatus]);
 
   // Sync categories from QuickBooks to PCS AI
   const syncCategories = async () => {
@@ -109,126 +107,6 @@ const QuickBooksIntegration = () => {
     } catch (error) {
       console.error('❌ Failed to save categories to PCS AI:', error);
       // Don't fail the whole sync if saving fails
-    }
-  };
-
-  // Apply QuickBooks categories to an invoice
-  const applyCategoriesToInvoice = async (invoiceData) => {
-    try {
-      console.log('📊 Applying QuickBooks categories to invoice...');
-      
-      const updatedLineItems = invoiceData.lineItems.map(item => {
-        // Try to find a matching category
-        const matchingCategory = categories.find(cat => 
-          cat.name.toLowerCase().includes(item.description.toLowerCase()) ||
-          item.description.toLowerCase().includes(cat.name.toLowerCase())
-        );
-
-        return {
-          ...item,
-          quickbooksCategoryId: matchingCategory?.id || null,
-          quickbooksCategoryName: matchingCategory?.name || 'Uncategorized'
-        };
-      });
-
-      const updatedInvoice = {
-        ...invoiceData,
-        lineItems: updatedLineItems,
-        categoriesApplied: true,
-        lastCategorySync: new Date().toISOString()
-      };
-
-      console.log('✅ Categories applied to invoice');
-      return updatedInvoice;
-    } catch (error) {
-      console.error('❌ Failed to apply categories to invoice:', error);
-      throw error;
-    }
-  };
-
-  // Send invoice to QuickBooks
-  const sendInvoiceToQuickBooks = async (invoiceData) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('📤 Sending invoice to QuickBooks...');
-      
-      // First apply categories if not already done
-      let processedInvoice = invoiceData;
-      if (!invoiceData.categoriesApplied) {
-        processedInvoice = await applyCategoriesToInvoice(invoiceData);
-      }
-      
-      // Create bill in QuickBooks
-      const bill = await quickbooksAPI.createBill(processedInvoice);
-      
-      console.log(`✅ Invoice sent to QuickBooks successfully! Bill ID: ${bill.Id}`);
-      
-      // Update PCS AI with QuickBooks reference
-      await updateInvoiceWithQuickBooksRef(invoiceData.id, bill.Id);
-      
-      return bill;
-    } catch (error) {
-      console.error('❌ Failed to send invoice to QuickBooks:', error);
-      setError('Failed to send invoice to QuickBooks: ' + error.message);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Update invoice with QuickBooks reference
-  const updateInvoiceWithQuickBooksRef = async (invoiceId, quickbooksBillId) => {
-    try {
-      // This would update your PCS AI database
-      // Implementation depends on your data storage setup
-      console.log(`🔄 Updating invoice ${invoiceId} with QuickBooks reference: ${quickbooksBillId}`);
-      
-      // Example: Update invoice_queue.json
-      // You can implement this based on your current data structure
-      
-    } catch (error) {
-      console.error('❌ Failed to update invoice with QuickBooks reference:', error);
-      // Don't fail the whole process if this update fails
-    }
-  };
-
-  // Manual OAuth completion
-  const completeOAuth = async (authorizationCode) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('🔄 Completing OAuth flow...');
-      
-      const response = await fetch('/api/qbo/complete-oauth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ authorizationCode })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'OAuth completion failed');
-      }
-
-      const result = await response.json();
-      console.log('✅ OAuth completed successfully:', result);
-      
-      // Set connection status
-      setIsConnected(true);
-      
-      // Load QuickBooks data
-      await loadQuickBooksData();
-      
-      return result;
-    } catch (error) {
-      console.error('❌ OAuth completion failed:', error);
-      setError('OAuth completion failed: ' + error.message);
-      throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
