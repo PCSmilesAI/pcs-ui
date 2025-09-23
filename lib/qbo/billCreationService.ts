@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { qboClient, QBOBill, QBOItem } from './qboClient';
-import { getVendorMapping } from './vendorMappings';
+import { qboClient, QBOBill } from './qboClient';
+import { pickMappingForVendor } from './vendorMappings';
+import { resolveAccountByFullName, resolveClassByFullName } from './qboLookup';
 
 export interface InvoiceLineItem {
   product_name?: string;
@@ -46,6 +47,7 @@ export interface BillCreationOptions {
   dueDate?: string;
   pdfPath?: string;
   totalAmount?: number;
+  dryRun?: boolean;
 }
 
 export interface BillCreationResult {
@@ -89,30 +91,6 @@ function categorizeLineItem(description: string, amount: number): string {
   if (amount > 100) return 'lab_work';
   if (amount > 10) return 'dental_supplies';
   return 'supplies';
-}
-
-function mapToQBOItem(category: string): string {
-  const categoryMap: Record<string, string> = {
-    supplies: 'Dental Supplies',
-    dental_supplies: 'Dental Supplies',
-    instruments: 'Dental Instruments',
-    disposables: 'Disposable Items',
-    equipment: 'Dental Equipment',
-    xray_equipment: 'X-Ray Equipment',
-    dental_chairs: 'Dental Chairs',
-    lab_work: 'Lab Work',
-    crowns: 'Crowns',
-    bridges: 'Bridges',
-    dentures: 'Dentures',
-    cleaning: 'Cleaning Services',
-    filling: 'Filling Materials',
-    extraction: 'Extraction Services',
-    orthodontic: 'Orthodontic Services',
-    anesthesia: 'Anesthesia',
-    medication: 'Medications'
-  };
-
-  return categoryMap[category] || 'Dental Supplies';
 }
 
 function sanitizeAmount(value: unknown, fallback = 0): number {
@@ -204,7 +182,6 @@ function ensureAccountLines(
   if (!lineItems || lineItems.length === 0) {
     const amount = Number.isFinite(totalAmount) && totalAmount > 0 ? totalAmount : 0;
     const description = fallbackAccount?.name || 'Invoice expense';
-    const description = fallbackAccount?.name || 'Invoice expense';
     categories.push({ description, category: 'dental_supplies' });
     return {
       qboLines: [
@@ -257,7 +234,9 @@ function ensureAccountLines(
 function applyAccountMappings(
   qboLines: ExpenseLine[],
   availableAccounts: Array<{ id: string; name: string; type: string }>,
-  fallbackAccount: { id: string; name: string }
+  fallbackAccount: { id: string; name: string },
+  overrideAccount?: { id: string; name: string },
+  overrideClassId?: string
 ): QBOBill['Line'] {
   return qboLines.map((line) => {
     if (!line?.AccountBasedExpenseLineDetail) return line;
@@ -272,15 +251,23 @@ function applyAccountMappings(
         fallbackAccount;
     }
 
+    const finalAccount = overrideAccount || matchedAccount;
+
+    const detail: QBOBill['Line'][number]['AccountBasedExpenseLineDetail'] = {
+      ...rest.AccountBasedExpenseLineDetail,
+      AccountRef: {
+        value: finalAccount.id,
+        name: finalAccount.name,
+      },
+    };
+
+    if (overrideClassId) {
+      detail.ClassRef = { value: overrideClassId };
+    }
+
     return {
       ...rest,
-      AccountBasedExpenseLineDetail: {
-        ...rest.AccountBasedExpenseLineDetail,
-        AccountRef: {
-          value: matchedAccount.id,
-          name: matchedAccount.name,
-        },
-      },
+      AccountBasedExpenseLineDetail: detail,
     };
   });
 }
@@ -313,31 +300,83 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
     }
 
     const expenseAccounts = await qboClient.getExpenseAccounts();
-    const classes = await qboClient.getClasses();
     if (!expenseAccounts || expenseAccounts.length === 0) {
       throw new Error('No expense accounts found in QuickBooks. Please set up your chart of accounts.');
     }
 
     const fallbackAccount = expenseAccounts[0];
 
-    // Apply vendor mapping preferences
-    const mapping = getVendorMapping(vendorName);
+    const autoClassifyEnabled = String(process.env.PCS_QBO_AUTO_CLASSIFY || '').toLowerCase() === '1' ||
+      String(process.env.PCS_QBO_AUTO_CLASSIFY || '').toLowerCase() === 'true';
+
+    let overrideAccount: { id: string; name: string; type: string } | undefined;
+    let overrideClassId: string | undefined;
     let preferredAccount = fallbackAccount;
-    let preferredClassId: string | undefined;
-    if (mapping?.defaultAccount) {
-      const match = expenseAccounts.find((a) => a.name.toLowerCase() === mapping.defaultAccount!.toLowerCase());
-      if (match) preferredAccount = match;
-    }
-    if (mapping?.defaultClass) {
-      const classMatch = classes.find((c) => c.name.toLowerCase() === mapping.defaultClass!.toLowerCase());
-      if (classMatch) preferredClassId = classMatch.id;
+    let strategy = autoClassifyEnabled ? 'json-history' : 'disabled';
+    let mappingVendor: string | undefined;
+    let chosenAccountPath: string | undefined;
+    let chosenClassPath: string | undefined;
+
+    if (autoClassifyEnabled) {
+      try {
+        const historyMapping = await pickMappingForVendor(vendorName);
+        if (historyMapping?.accountPath || historyMapping?.classPath) {
+          mappingVendor = historyMapping.matchedVendor;
+          chosenAccountPath = historyMapping.accountPath;
+          chosenClassPath = historyMapping.classPath;
+
+          const [resolvedAccount, resolvedClass] = await Promise.all([
+            historyMapping.accountPath ? resolveAccountByFullName(historyMapping.accountPath) : undefined,
+            historyMapping.classPath ? resolveClassByFullName(historyMapping.classPath) : undefined,
+          ]);
+
+          if (resolvedAccount) {
+            overrideAccount = {
+              id: resolvedAccount.id,
+              name: resolvedAccount.fullName,
+              type: resolvedAccount.type || 'Expense',
+            };
+            preferredAccount = overrideAccount;
+          } else if (historyMapping.accountPath) {
+            console.warn('[QBO][CLASSIFY] Account path could not be resolved', {
+              vendor: vendorName,
+              accountPath: historyMapping.accountPath,
+            });
+          }
+
+          if (resolvedClass) {
+            overrideClassId = resolvedClass.id;
+          } else if (historyMapping.classPath) {
+            console.warn('[QBO][CLASSIFY] Class path could not be resolved', {
+              vendor: vendorName,
+              classPath: historyMapping.classPath,
+            });
+          }
+        } else {
+          strategy = 'history-missing';
+        }
+      } catch (error) {
+        strategy = 'history-error';
+        console.warn('[QBO][CLASSIFY] Failed to load vendor history mapping', { vendor: vendorName, error });
+      }
     }
 
     const { qboLines: initialLines, categories } = ensureAccountLines(lineItems, totalAmount, {
       id: preferredAccount.id,
       name: preferredAccount.name,
     });
-    const qboLines = applyAccountMappings(initialLines, expenseAccounts, preferredAccount);
+    const qboLines = applyAccountMappings(initialLines, expenseAccounts, preferredAccount, overrideAccount, overrideClassId);
+
+    console.log('[QBO][CLASSIFY]', {
+      vendor: vendorName,
+      strategy,
+      mappingVendor: mappingVendor || null,
+      chosenAccount: chosenAccountPath || null,
+      chosenClass: chosenClassPath || null,
+      resolvedAccountId: overrideAccount?.id || preferredAccount?.id,
+      resolvedClassId: overrideClassId || null,
+      dryRun: !!options.dryRun,
+    });
 
     const memoText = 'PCS AI Approved Invoice';
 
@@ -361,6 +400,23 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       accountsUsed: bill.Line.map((line) => line.AccountBasedExpenseLineDetail?.AccountRef?.value),
       totalAmount,
     });
+
+    if (options.dryRun) {
+      console.log('[QBO][DRY_RUN] QuickBooks bill payload', {
+        vendor: vendorName,
+        invoiceNumber,
+        lines: bill.Line.length,
+        accounts: bill.Line.map((line) => line.AccountBasedExpenseLineDetail?.AccountRef?.value),
+        classRefs: bill.Line.map((line) => line.AccountBasedExpenseLineDetail?.ClassRef?.value || null),
+      });
+
+      return {
+        success: true,
+        billId: undefined,
+        pdfAttached: false,
+        categories,
+      };
+    }
 
     const apAccount = await qboClient.getAccountsPayableAccount();
     if (apAccount?.Id && bill) {
