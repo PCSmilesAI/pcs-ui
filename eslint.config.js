@@ -25,6 +25,13 @@ module.exports = [
     ],
   },
   {
+    files: [
+      'app/**/*.{js,jsx}',
+      'lib/**/*.{js,jsx}',
+      'src/**/*.{js,jsx}',
+    ],
+  },
+  {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
       ecmaVersion: 'latest',

@@ -37,6 +37,9 @@ export async function POST(req: NextRequest) {
         error: 'Invoice data is required',
       }, { status: 400 });
     }
+        error: 'Invoice data is required'
+      }, { status: 400 });
+    }
 
     const tokens = await tokenStorage.getLatestTokens();
     if (!tokens) {
@@ -61,7 +64,7 @@ export async function POST(req: NextRequest) {
     };
 
     const amount = parseAmount(totalAmount ?? invoiceData.total ?? invoiceData.amount ?? invoiceData.totalAmount);
-
+ 
     const result = await createBillFromInvoice({
       invoiceData: mergedInvoiceData,
       vendorName: vendorName || invoiceData.vendor || invoiceData.vendorName,
@@ -70,6 +73,7 @@ export async function POST(req: NextRequest) {
       dueDate: dueDate || invoiceData.due_date || invoiceData.dueDate,
       pdfPath: pdfPath || invoiceData.pdf_path || invoiceData.pdfPath,
       totalAmount: typeof amount === 'number' ? amount : undefined,
+ 
     });
 
     if (result.success) {

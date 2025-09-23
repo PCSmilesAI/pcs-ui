@@ -30,7 +30,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
       Object.entries(spFilters).filter(([, value]) => value !== undefined && value !== null && value !== ''),
     ),
   }), [filters, spFilters]);
-
+  // Check QuickBooks connection status
   const checkQboStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/qbo/status');
@@ -43,12 +43,12 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
       setQboLoading(false);
     }
   }, []);
-
   useEffect(() => {
     checkQboStatus();
   }, [checkQboStatus]);
 
   useEffect(() => {
+    checkQboStatus();
     const loadInvoices = async () => {
       try {
         setLoading(true);
@@ -106,7 +106,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     };
 
     loadInvoices();
-  }, []);
+  }, [checkQboStatus]);
 
   const filteredRows = useMemo(() => {
     const query = effectiveQuery;
