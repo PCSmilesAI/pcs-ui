@@ -205,6 +205,8 @@ export class QBOClient {
     return response.QueryResponse?.Item || [];
   }
 
+  // getAllAccounts is defined later with richer typing
+
   async getDentalItems(): Promise<QBOItem[]> {
     const items = await this.getItems();
     return items.filter((item) => {
@@ -394,11 +396,35 @@ export class QBOClient {
     }
   }
 
-  async getClasses(): Promise<Array<{ id: string; name: string }>> {
+  async getAllAccounts(): Promise<Array<{ id: string; name: string; fullName: string; type: string; subType?: string }>> {
+    try {
+      const response = await this.query(
+        'SELECT Id, Name, AccountType, AccountSubType, FullyQualifiedName FROM Account WHERE Active = true'
+      );
+      const accounts = response.QueryResponse?.Account || [];
+
+      return accounts.map((account: any) => ({
+        id: account.Id,
+        name: account.Name,
+        fullName: account.FullyQualifiedName || account.Name,
+        type: account.AccountType,
+        subType: account.AccountSubType,
+      }));
+    } catch (error) {
+      console.error('❌ Error getting all accounts:', error);
+      return [];
+    }
+  }
+
+  async getClasses(): Promise<Array<{ id: string; name: string; fullName: string }>> {
     try {
       const response = await this.query("SELECT Id, Name, FullyQualifiedName FROM Class WHERE Active = true");
       const classes = response.QueryResponse?.Class || [];
-      return (classes || []).map((c: any) => ({ id: c.Id, name: c.FullyQualifiedName || c.Name }));
+      return (classes || []).map((c: any) => ({
+        id: c.Id,
+        name: c.Name,
+        fullName: c.FullyQualifiedName || c.Name,
+      }));
     } catch (error) {
       console.error('❌ Error getting classes:', error);
       return [];
