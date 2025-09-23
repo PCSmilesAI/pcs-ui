@@ -61,27 +61,49 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         return;
       }
 
+      const trySetFromJson = (jsonData) => {
+        if (Array.isArray(jsonData?.line_items)) {
+          const transformedItems = jsonData.line_items.map((item, index) => ({
+            id: item.product_number || `item-${index}`,
+            name: item.product_name || '',
+            qty: item.Quantity || '1',
+            unit: `$${item.unit_price || '0.00'}`,
+            total: `$${item.line_item_total || '0.00'}`,
+            category: item.quickbooks_category || 'Not categorized',
+          }));
+          setItems(transformedItems);
+          return true;
+        }
+        return false;
+      };
+
       try {
-        const response = await fetch(`/${invoiceJsonPath}`);
+        // First attempt: direct fetch using the provided path
+        const directUrl = invoiceJsonPath.startsWith('/') ? invoiceJsonPath : `/${invoiceJsonPath}`;
+        let response = await fetch(directUrl, { cache: 'no-store' });
         if (response.ok) {
           const jsonData = await response.json();
-          if (Array.isArray(jsonData.line_items)) {
-            const transformedItems = jsonData.line_items.map((item, index) => ({
-              id: item.product_number || `item-${index}`,
-              name: item.product_name || '',
-              qty: item.Quantity || '1',
-              unit: `$${item.unit_price || '0.00'}`,
-              total: `$${item.line_item_total || '0.00'}`,
-              category: item.quickbooks_category || 'Not categorized',
-            }));
-            if (isActive) {
-              setItems(transformedItems);
-            }
-          } else if (isActive) {
-            setItems([]);
+          if (isActive && trySetFromJson(jsonData)) {
+            setLoading(false);
+            return;
           }
-        } else if (isActive) {
-          console.warn('Failed to load JSON data for line items');
+        }
+
+        // Fallback: use safe API route to serve from output_jsons
+        // This allows loading JSONs that aren't in /public
+        const encoded = invoiceJsonPath.replace(/^\/?output_jsons\/?/, '');
+        const apiUrl = `/output_jsons/${encoded}`;
+        response = await fetch(apiUrl, { cache: 'no-store' });
+        if (response.ok) {
+          const jsonData = await response.json();
+          if (isActive && trySetFromJson(jsonData)) {
+            setLoading(false);
+            return;
+          }
+        }
+
+        if (isActive) {
+          console.warn('Failed to load JSON data for line items from both direct and API routes');
           setItems([]);
         }
       } catch (error) {
