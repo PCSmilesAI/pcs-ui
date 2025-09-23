@@ -11,7 +11,6 @@ export type InvoiceData = BillInvoiceData & {
   pdf_path: string;
   json_path: string;
 };
-
 function parseAmount(value: unknown): number | undefined {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value;
@@ -50,9 +49,7 @@ export class AutoBillService {
 
     try {
       console.log('🔄 AutoBillService: Processing approved invoice:', invoiceData.invoice_number);
-
       let detailedData: BillInvoiceData = { ...invoiceData };
-
       if (invoiceData.json_path && fs.existsSync(invoiceData.json_path)) {
         try {
           const jsonData = JSON.parse(fs.readFileSync(invoiceData.json_path, 'utf8'));
@@ -103,7 +100,6 @@ export class AutoBillService {
       }
 
       const result = await createBillFromInvoice(options);
-
       if (result.success) {
         console.log('✅ AutoBillService: Bill created successfully:', result.billId);
         return {

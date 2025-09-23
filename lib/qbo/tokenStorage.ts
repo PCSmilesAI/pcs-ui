@@ -159,6 +159,153 @@ function loadLegacyJsonTokens(preferredPath: string | null): { tokens: QBOTokens
   return { tokens: [], path: preferredPath ?? null };
 }
 
+const LEGACY_JSON_CANDIDATES = [
+  path.resolve(process.cwd(), 'pcs_ai_data/qbo_tokens.json'),
+  path.resolve(process.cwd(), 'qbo_tokens.json'),
+  path.resolve(process.cwd(), '.secrets/qbo_tokens.json'),
+];
+
+type RawTokenRow = {
+  realm_id?: string;
+  realmId?: string;
+  access_token?: string;
+  accessToken?: string;
+  refresh_token?: string | null;
+  refreshToken?: string | null;
+  expires_in?: number | string | null;
+  expiresIn?: number | string | null;
+  expires_at?: number | string | null;
+  expiresAt?: number | string | null;
+};
+
+function toNumber(value: unknown): number | null {
+  if (typeof value === 'number' && !Number.isNaN(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number(value);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  return null;
+}
+
+function normalizeRow(row: RawTokenRow | null | undefined): QBOTokens | null {
+  if (!row) return null;
+
+  const realmId = row.realmId ?? row.realm_id;
+  const accessToken = row.accessToken ?? row.access_token;
+  if (!realmId || !accessToken) return null;
+
+  const refreshToken = row.refreshToken ?? row.refresh_token ?? null;
+  const expiresInRaw = toNumber(row.expiresIn ?? row.expires_in);
+  const expiresAtRaw = toNumber(row.expiresAt ?? row.expires_at);
+
+  const now = Math.floor(Date.now() / 1000);
+
+  let expiresAt = expiresAtRaw ?? null;
+  if (expiresAt !== null && expiresAt > 1e12) {
+    // Legacy values stored as milliseconds
+    expiresAt = Math.floor(expiresAt / 1000);
+  }
+  if (expiresAt === null) {
+    const inferredExpiresIn = expiresInRaw ?? 3600;
+    expiresAt = now + inferredExpiresIn;
+  }
+
+  const expiresIn = expiresInRaw ?? Math.max(0, expiresAt - now);
+
+  return {
+    realmId,
+    accessToken,
+    refreshToken,
+    expiresIn,
+    expiresAt,
+  };
+}
+
+type JsonTokenPayload = RawTokenRow & {
+  accessToken?: string;
+  refreshToken?: string | null;
+  realmId?: string;
+  expiresAt?: number | string | null;
+  expiresIn?: number | string | null;
+  tokens?: JsonTokenPayload[];
+};
+
+function extractJsonTokens(payload: JsonTokenPayload | JsonTokenPayload[] | null | undefined): QBOTokens[] {
+  if (!payload) return [];
+
+  const entries: JsonTokenPayload[] = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload.tokens)
+      ? payload.tokens
+      : [payload];
+
+  return entries
+    .map((entry) => {
+      const row: RawTokenRow = {
+        realmId: entry.realmId ?? entry.RealmId ?? entry.realmID,
+        realm_id: entry.realm_id,
+        accessToken: entry.accessToken,
+        access_token: entry.access_token,
+        refreshToken: entry.refreshToken,
+        refresh_token: entry.refresh_token,
+        expiresAt: (entry.expiresAt as number | string | null | undefined) ?? entry.expires_at,
+        expires_at: entry.expires_at,
+        expiresIn: entry.expiresIn,
+        expires_in: entry.expires_in,
+      };
+
+      const normalized = normalizeRow(row);
+      if (normalized) {
+        return normalized;
+      }
+
+      const fallbackRow: RawTokenRow = {
+        realmId: row.realmId ?? row.realm_id,
+        access_token: row.accessToken ?? row.access_token,
+        refresh_token: row.refreshToken ?? row.refresh_token,
+        expires_at: row.expiresAt ?? row.expires_at,
+        expires_in: row.expiresIn ?? row.expires_in,
+      };
+
+      return normalizeRow(fallbackRow);
+    })
+    .filter((token): token is QBOTokens => token !== null);
+}
+
+function loadLegacyJsonTokens(preferredPath: string | null): { tokens: QBOTokens[]; path: string | null } {
+  const tried = new Set<string>();
+  const orderedCandidates = preferredPath
+    ? [preferredPath, ...LEGACY_JSON_CANDIDATES.filter((candidate) => candidate !== preferredPath)]
+    : LEGACY_JSON_CANDIDATES;
+
+  for (const candidate of orderedCandidates) {
+    if (tried.has(candidate)) continue;
+    tried.add(candidate);
+
+    try {
+      if (!fs.existsSync(candidate)) continue;
+      const raw = fs.readFileSync(candidate, 'utf8');
+      if (!raw.trim()) continue;
+
+      const parsed = JSON.parse(raw) as JsonTokenPayload | JsonTokenPayload[];
+      const tokens = extractJsonTokens(parsed);
+      if (tokens.length > 0) {
+        return { tokens, path: candidate };
+      }
+    } catch (error) {
+      console.warn(`[QBO] Failed to read legacy QuickBooks token file at ${candidate}:`, error);
+    }
+  }
+
+  return { tokens: [], path: preferredPath ?? null };
+}
+
 class TokenStorage {
   private db: Database | null = null;
 
@@ -350,7 +497,6 @@ class TokenStorage {
           expires_at = excluded.expires_at,
           updated_at = excluded.updated_at
       `;
-
       db.run(sql, [realmId, accessToken, refresh, expiresInSeconds, expiresAt, now, now], (err) => {
         if (err) {
           console.error('Error saving QBO tokens:', err);

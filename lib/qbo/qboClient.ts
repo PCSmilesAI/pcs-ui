@@ -16,7 +16,6 @@ export interface QBOBill {
   PrivateNote?: string;
   Memo?: string;
   Line: Array<{
-    Id?: string;
     LineNum?: number;
     Amount: number;
     Description?: string;
@@ -25,6 +24,9 @@ export interface QBOBill {
       AccountRef: {
         value: string;
         name?: string;
+      };
+      ClassRef?: {
+        value: string;
       };
     };
   }>;

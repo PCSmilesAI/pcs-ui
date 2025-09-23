@@ -204,6 +204,7 @@ function ensureAccountLines(
   if (!lineItems || lineItems.length === 0) {
     const amount = Number.isFinite(totalAmount) && totalAmount > 0 ? totalAmount : 0;
     const description = fallbackAccount?.name || 'Invoice expense';
+    const description = fallbackAccount?.name || 'Invoice expense';
     categories.push({ description, category: 'dental_supplies' });
     return {
       qboLines: [
@@ -286,9 +287,7 @@ function applyAccountMappings(
 
 export async function createBillFromInvoice(options: BillCreationOptions): Promise<BillCreationResult> {
   const { invoiceData } = options;
-
   let bill: QBOBill | null = null;
-
   try {
     await qboClient.initialize();
 
@@ -340,6 +339,8 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
     });
     const qboLines = applyAccountMappings(initialLines, expenseAccounts, preferredAccount);
 
+    const memoText = 'PCS AI Approved Invoice';
+
     bill = {
       DocNumber: invoiceNumber,
       TxnDate: invoiceDate || formatDate(new Date().toISOString())!,
@@ -349,7 +350,8 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
         name: vendor.DisplayName || vendorName
       },
       Line: qboLines,
-      Memo: `PCS AI Approved Invoice - ${vendorName}${invoiceNumber ? ` - ${invoiceNumber}` : ''}`
+      Memo: memoText,
+      PrivateNote: memoText,
     };
 
     console.log('[QBO][CREATE_BILL] payload preview', {

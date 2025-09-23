@@ -16,31 +16,6 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const invoiceIdentifier = invoice?.id || invoice?.invoice_number || null;
   const invoiceJsonPath = invoice?.json_path || null;
 
-  if (!invoice) {
-    return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
-        <h2>Invoice not found</h2>
-        <p>This invoice could not be loaded.</p>
-        {onBack && (
-          <button
-            onClick={onBack}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#357ab2',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              marginTop: '16px'
-            }}
-          >
-            Go Back
-          </button>
-        )}
-      </div>
-    );
-  }
-
   // State for editable fields. Payment amount can be modified by the
   // user. Other details and line items could be lifted into state
   // similarly; here we demonstrate for payment and details.
