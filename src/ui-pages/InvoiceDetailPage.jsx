@@ -90,9 +90,13 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         }
 
         // Fallback: use safe API route to serve from output_jsons
-        // This allows loading JSONs that aren't in /public
-        const encoded = invoiceJsonPath.replace(/^\/?output_jsons\/?/, '');
-        const apiUrl = `/output_jsons/${encoded}`;
+        // Derive a relative path under output_jsons even if json_path is absolute
+        const marker = '/output_jsons/';
+        const idx = invoiceJsonPath.indexOf(marker);
+        const rel = idx >= 0
+          ? invoiceJsonPath.slice(idx + marker.length)
+          : invoiceJsonPath.replace(/^\/?output_jsons\/?/, '');
+        const apiUrl = `/output_jsons/${rel}`;
         response = await fetch(apiUrl, { cache: 'no-store' });
         if (response.ok) {
           const jsonData = await response.json();
