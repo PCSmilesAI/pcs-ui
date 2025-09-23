@@ -228,6 +228,34 @@ function ensureAccountLines(
     return line;
   });
 
+  // Reconcile to the provided totalAmount. If line item totals do not
+  // add up to the invoice total (common when shipping/tax/fees are
+  // outside the parsed lines), add a single balancing line so the
+  // bill Total equals the invoice total shown in PCS AI.
+  try {
+    const sum = qboLines.reduce((acc, l) => acc + (Number(l.Amount) || 0), 0);
+    const diff = Number.isFinite(totalAmount) ? Number((totalAmount - sum).toFixed(2)) : 0;
+    if (Math.abs(diff) >= 0.01) {
+      const description = diff > 0 ? 'Other charges (shipping/tax/fees)' : 'Adjustment to match total';
+      categories.push({ description, category: 'adjustment' });
+      qboLines.push({
+        LineNum: qboLines.length + 1,
+        Amount: diff,
+        Description: description,
+        DetailType: 'AccountBasedExpenseLineDetail',
+        AccountBasedExpenseLineDetail: {
+          AccountRef: {
+            value: fallbackAccount.id,
+            name: fallbackAccount.name,
+          },
+        },
+        __categoryHint: { category: 'adjustment' },
+      } as ExpenseLine);
+    }
+  } catch (_) {
+    // If anything goes wrong, skip reconciliation silently.
+  }
+
   return { qboLines, categories };
 }
 
