@@ -352,7 +352,18 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     if (invoice?.pdf_path) {
       // Create a link element to trigger the download
       const link = document.createElement('a');
-      link.href = invoice.pdf_path.startsWith('/api/') ? invoice.pdf_path : `/${invoice.pdf_path}`;
+      link.href = (() => {
+        const p = invoice.pdf_path;
+        if (!p) return '';
+        if (p.startsWith('http://') || p.startsWith('https://')) return p;
+        if (p.startsWith('/api/pdf/')) return p;
+        if (p.startsWith('/email_invoices/')) {
+          const filename = p.split('/').pop();
+          return `/api/pdf/${filename}`;
+        }
+        if (p.startsWith('/')) return p; // already absolute root path
+        return `/${p}`;
+      })();
       link.download = `${invoice?.invoice || invoice?.invoice_number || 'invoice'}_${invoice?.vendor || 'vendor'}.pdf`;
       document.body.appendChild(link);
       link.click();
@@ -1164,7 +1175,18 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         <div style={rightColumnStyle}>
           {invoice?.pdf_path ? (
             <iframe
-              src={invoice.pdf_path.startsWith('/api/') ? invoice.pdf_path : `/${invoice.pdf_path}`}
+              src={(function() {
+                const p = invoice.pdf_path;
+                if (!p) return '';
+                if (p.startsWith('http://') || p.startsWith('https://')) return p;
+                if (p.startsWith('/api/pdf/')) return p;
+                if (p.startsWith('/email_invoices/')) {
+                  const filename = p.split('/').pop();
+                  return `/api/pdf/${filename}`;
+                }
+                if (p.startsWith('/')) return p;
+                return `/${p}`;
+              })()}
             style={{
               width: '100%',
               height: '100%',
