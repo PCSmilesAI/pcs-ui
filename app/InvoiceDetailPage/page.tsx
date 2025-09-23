@@ -72,11 +72,13 @@ function InvoiceDetailContent() {
             due_date: foundInvoice.due_date,
             json_path: foundInvoice.json_path,
             pdf_path: foundInvoice.pdf_path,
+            source_file: foundInvoice.source_file,
             timestamp: foundInvoice.timestamp,
             assigned_to: foundInvoice.assigned_to,
             approved: foundInvoice.approved,
             status: foundInvoice.status,
-            total: foundInvoice.total
+            total: foundInvoice.total,
+            line_items: Array.isArray(foundInvoice.line_items) ? foundInvoice.line_items : []
           };
           setInvoice(transformedInvoice);
         } else {
