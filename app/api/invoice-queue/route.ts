@@ -1,47 +1,24 @@
-import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-import { NextRequest } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
+import { dedupeInvoices, getExistingQueueFiles, saveQueueFiles } from '../../../lib/queue/invoiceQueue'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    // Try multiple possible file locations
-    const possiblePaths = [
-      path.join(process.cwd(), 'pcs_ai_data', 'invoice_queue.json'),
-      path.join(process.cwd(), 'invoice_queue.json'),
-      path.join(process.cwd(), 'public', 'invoice_queue.json')
-    ]
-    
-    let filePath: string | null = null
-    let data: any[] = []
-    
-    // Find the first existing file
-    for (const possiblePath of possiblePaths) {
-      if (fs.existsSync(possiblePath)) {
-        filePath = possiblePath
-        console.log(`📂 Using invoice queue from: ${filePath}`)
-        break
-      }
-    }
-    
-    if (!filePath) {
-      console.error('❌ Invoice queue not found in any of these locations:', possiblePaths)
+    const queueFiles = getExistingQueueFiles()
+    if (queueFiles.length === 0) {
+      console.error('❌ Invoice queue not found in any known location')
       return NextResponse.json({ error: 'Invoice queue not found' }, { status: 404 })
     }
-    
-    const rawData = fs.readFileSync(filePath, 'utf8')
-    const parsedData = JSON.parse(rawData)
-    
-    // Handle both array and object formats
-    if (Array.isArray(parsedData)) {
-      data = parsedData
-    } else if (parsedData.invoices && Array.isArray(parsedData.invoices)) {
-      data = parsedData.invoices
-    } else {
-      console.warn('⚠️ Unexpected invoice queue format:', typeof parsedData)
-      data = []
+
+    const primary = queueFiles[0]
+    let data = primary.invoices
+
+    const { invoices: deduped, duplicatesRemoved } = dedupeInvoices(data)
+    if (duplicatesRemoved > 0) {
+      console.log(`🧹 Removed ${duplicatesRemoved} duplicate invoices from queue`)
+      saveQueueFiles(queueFiles, deduped)
+      data = deduped
     }
     
     // Parse query parameters
@@ -56,7 +33,7 @@ export async function GET(request: NextRequest) {
     if (debug) {
       console.log('🔍 Debug info:', {
         totalInvoices: data.length,
-        filePath,
+        filePath: primary.filePath,
         queryParams: { limit, offset, search, status, vendor },
         sampleInvoices: data.slice(0, 2).map(inv => ({
           id: inv.id,

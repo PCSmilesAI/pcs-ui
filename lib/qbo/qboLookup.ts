@@ -14,6 +14,12 @@ interface ClassLookupResult {
   fullName: string;
 }
 
+interface LocationLookupResult {
+  id: string;
+  name: string;
+  fullName: string;
+}
+
 const CACHE_TTL_MS = 60 * 60 * 1000; // 60 minutes
 
 const DISALLOWED_ACCOUNT_TYPES = new Set([
@@ -45,6 +51,11 @@ let accountCache: {
 let classCache: {
   expiresAt: number;
   map: Map<string, ClassLookupResult>;
+} | null = null;
+
+let locationCache: {
+  expiresAt: number;
+  map: Map<string, LocationLookupResult>;
 } | null = null;
 
 function normalizeKey(value: string): string {
@@ -119,6 +130,39 @@ async function ensureClassCache(): Promise<typeof classCache> {
   return classCache;
 }
 
+async function ensureLocationCache(): Promise<typeof locationCache> {
+  if (locationCache && Date.now() < locationCache.expiresAt) {
+    return locationCache;
+  }
+
+  await qboClient.initialize();
+  const locations = await qboClient.getLocations();
+
+  const map = new Map<string, LocationLookupResult>();
+  for (const item of locations) {
+    const entry: LocationLookupResult = {
+      id: item.id,
+      name: item.name,
+      fullName: item.fullName || item.name,
+    };
+
+    const keys = new Set<string>();
+    keys.add(normalizeKey(entry.fullName));
+    keys.add(normalizeKey(entry.name));
+
+    for (const key of keys) {
+      map.set(key, entry);
+    }
+  }
+
+  locationCache = {
+    expiresAt: Date.now() + CACHE_TTL_MS,
+    map,
+  };
+
+  return locationCache;
+}
+
 export async function resolveAccountByFullName(
   accountPath?: string
 ): Promise<AccountLookupResult | undefined> {
@@ -173,7 +217,27 @@ export async function resolveClassByFullName(
   return match;
 }
 
+export async function resolveLocationByName(
+  locationName?: string
+): Promise<LocationLookupResult | undefined> {
+  if (!locationName || !locationName.trim()) {
+    return undefined;
+  }
+
+  const cache = await ensureLocationCache();
+  const normalized = normalizeKey(locationName);
+  const match = cache?.map.get(normalized);
+
+  if (!match) {
+    console.warn('[QBO][LOOKUP] Location not found for name:', locationName);
+    return undefined;
+  }
+
+  return match;
+}
+
 export function clearLookupCaches(): void {
   accountCache = null;
   classCache = null;
+  locationCache = null;
 }
