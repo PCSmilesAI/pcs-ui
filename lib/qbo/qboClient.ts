@@ -30,6 +30,10 @@ export interface QBOBill {
       };
     };
   }>;
+  DepartmentRef?: {
+    value: string;
+    name?: string;
+  };
   AttachRef?: Array<{
     EntityRef: {
       value: string;
@@ -427,6 +431,21 @@ export class QBOClient {
       }));
     } catch (error) {
       console.error('❌ Error getting classes:', error);
+      return [];
+    }
+  }
+
+  async getLocations(): Promise<Array<{ id: string; name: string; fullName: string }>> {
+    try {
+      const response = await this.query("SELECT Id, Name, FullyQualifiedName FROM Department WHERE Active = true");
+      const departments = response.QueryResponse?.Department || [];
+      return (departments || []).map((dept: any) => ({
+        id: dept.Id,
+        name: dept.Name,
+        fullName: dept.FullyQualifiedName || dept.Name,
+      }));
+    } catch (error) {
+      console.error('❌ Error getting locations (Department):', error);
       return [];
     }
   }

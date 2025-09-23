@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { qboClient, QBOBill } from './qboClient';
 import { pickMappingForVendor } from './vendorMappings';
-import { resolveAccountByFullName, resolveClassByFullName } from './qboLookup';
+import { resolveAccountByFullName, resolveClassByFullName, resolveLocationByName } from './qboLookup';
 
 export interface InvoiceLineItem {
   product_name?: string;
@@ -389,6 +389,30 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       }
     }
 
+    const officeName =
+      invoiceData.office ||
+      invoiceData.office_location ||
+      invoiceData.officeLocation ||
+      invoiceData.location ||
+      invoiceData.Office ||
+      detailedData.office ||
+      detailedData.office_location ||
+      detailedData.officeLocation ||
+      null;
+
+    let locationId: string | undefined;
+    if (officeName) {
+      const resolvedLocation = await resolveLocationByName(String(officeName));
+      if (resolvedLocation) {
+        locationId = resolvedLocation.id;
+      } else {
+        console.warn('[QBO][CLASSIFY] Location not found in QuickBooks', {
+          vendor: vendorName,
+          office: officeName,
+        });
+      }
+    }
+
     const { qboLines: initialLines, categories } = ensureAccountLines(lineItems, totalAmount, {
       id: preferredAccount.id,
       name: preferredAccount.name,
@@ -403,6 +427,8 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       chosenClass: chosenClassPath || null,
       resolvedAccountId: overrideAccount?.id || preferredAccount?.id,
       resolvedClassId: overrideClassId || null,
+      locationName: officeName || null,
+      resolvedLocationId: locationId || null,
       dryRun: !!options.dryRun,
     });
 
@@ -420,6 +446,10 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       Memo: memoText,
       PrivateNote: memoText,
     };
+
+    if (locationId) {
+      bill.DepartmentRef = { value: locationId };
+    }
 
     console.log('[QBO][CREATE_BILL] payload preview', {
       vendor: vendorName,
