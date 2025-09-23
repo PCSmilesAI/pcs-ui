@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const { invoiceData } = await req.json();
+    const dryRun = req.nextUrl.searchParams.get('dryRun') === 'true';
 
     if (!invoiceData) {
       return NextResponse.json({
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
     console.log('🔄 Auto-create bill request for invoice:', invoiceData.invoice_number);
 
     // Process the approved invoice
-    const result = await autoBillService.processApprovedInvoice(invoiceData);
+    const result = await autoBillService.processApprovedInvoice(invoiceData, { dryRun });
 
     if (result.success) {
       return NextResponse.json({
@@ -26,7 +27,8 @@ export async function POST(req: NextRequest) {
         billId: result.billId,
         pdfAttached: result.pdfAttached ?? false,
         categories: result.categories ?? [],
-        message: 'Bill created successfully in QuickBooks'
+        dryRun,
+        message: dryRun ? 'Dry run successful – no bill created' : 'Bill created successfully in QuickBooks'
       });
     }
 

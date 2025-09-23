@@ -31,7 +31,10 @@ function parseAmount(value: unknown): number | undefined {
 export class AutoBillService {
   private isProcessing = false;
 
-  async processApprovedInvoice(invoiceData: InvoiceData): Promise<{
+  async processApprovedInvoice(
+    invoiceData: InvoiceData,
+    meta: { dryRun?: boolean } = {}
+  ): Promise<{
     success: boolean;
     billId?: string;
     pdfAttached?: boolean;
@@ -77,36 +80,24 @@ export class AutoBillService {
         line_items: detailedData.line_items || detailedData.lineItems || invoiceData.line_items || []
       };
 
-      const options = {
+      const parsedAmount = parseAmount(invoiceData.total);
+      const result = await createBillFromInvoice({
         invoiceData: detailedData,
         vendorName: invoiceData.vendor || detailedData.vendor || detailedData.vendorName,
         invoiceNumber: invoiceData.invoice_number || detailedData.invoice_number || detailedData.invoiceNumber,
         invoiceDate: invoiceData.invoice_date || detailedData.invoice_date || detailedData.invoiceDate,
         dueDate: invoiceData.due_date ?? detailedData.due_date ?? detailedData.dueDate,
         pdfPath: invoiceData.pdf_path || detailedData.pdf_path || detailedData.pdfPath,
-      } as {
-        invoiceData: BillInvoiceData;
-        vendorName?: string;
-        invoiceNumber?: string;
-        invoiceDate?: string;
-        dueDate?: string;
-        pdfPath?: string;
-        totalAmount?: number;
-      };
-
-      const parsedAmount = parseAmount(invoiceData.total);
-      if (typeof parsedAmount === 'number') {
-        options.totalAmount = parsedAmount;
-      }
-
-      const result = await createBillFromInvoice(options);
+        totalAmount: typeof parsedAmount === 'number' ? parsedAmount : undefined,
+        dryRun: meta.dryRun,
+      });
       if (result.success) {
         console.log('✅ AutoBillService: Bill created successfully:', result.billId);
         return {
           success: true,
           billId: result.billId,
           pdfAttached: result.pdfAttached,
-          categories: result.categories
+          categories: result.categories,
         };
       }
 

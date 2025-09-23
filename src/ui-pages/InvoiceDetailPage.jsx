@@ -15,6 +15,7 @@ import { fetchQboCategories } from '../lib/categoriesClient';
 export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext }) {
   const invoiceIdentifier = invoice?.id || invoice?.invoice_number || null;
   const invoiceJsonPath = invoice?.json_path || null;
+  const invoiceSourceFile = invoice?.source_file || null;
 
   // State for editable fields. Payment amount can be modified by the
   // user. Other details and line items could be lifted into state
@@ -53,9 +54,22 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     let isActive = true;
 
     async function loadLineItems() {
-      if (!invoiceJsonPath) {
+      if (!invoiceJsonPath && !invoiceSourceFile) {
         if (isActive) {
-          setItems([]);
+          console.log('🧭 Line item load: no json_path or source_file; using embedded line_items if available');
+          if (Array.isArray(invoice?.line_items) && invoice.line_items.length > 0) {
+            const transformedItems = invoice.line_items.map((item, index) => ({
+              id: item.product_number || `item-${index}`,
+              name: item.product_name || '',
+              qty: item.Quantity || '1',
+              unit: `$${item.unit_price || '0.00'}`,
+              total: `$${item.line_item_total || '0.00'}`,
+              category: item.quickbooks_category || 'Not categorized',
+            }));
+            setItems(transformedItems);
+          } else {
+            setItems([]);
+          }
           setLoading(false);
         }
         return;
@@ -78,37 +92,76 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       };
 
       try {
+        console.log('🧭 Line item load start', {
+          invoice_number: invoice?.invoice_number,
+          invoiceJsonPath,
+          invoiceSourceFile
+        });
         // First attempt: direct fetch using the provided path
-        const directUrl = invoiceJsonPath.startsWith('/') ? invoiceJsonPath : `/${invoiceJsonPath}`;
-        let response = await fetch(directUrl, { cache: 'no-store' });
-        if (response.ok) {
-          const jsonData = await response.json();
-          if (isActive && trySetFromJson(jsonData)) {
-            setLoading(false);
-            return;
+        const directUrl = invoiceJsonPath
+          ? (invoiceJsonPath.startsWith('/') ? invoiceJsonPath : `/${invoiceJsonPath}`)
+          : null;
+        let response = null;
+        if (directUrl) {
+          console.log('🌐 Fetch (direct)', directUrl);
+          response = await fetch(directUrl, { cache: 'no-store' });
+          console.log('🌐 Fetch (direct) status', response.status);
+          if (response.ok) {
+            const jsonData = await response.json();
+            if (isActive && trySetFromJson(jsonData)) {
+              setLoading(false);
+              return;
+            }
           }
         }
 
         // Fallback: use safe API route to serve from output_jsons
-        // Derive a relative path under output_jsons even if json_path is absolute
+        // Prefer json_path; if missing, derive from source_file
         const marker = '/output_jsons/';
-        const idx = invoiceJsonPath.indexOf(marker);
-        const rel = idx >= 0
-          ? invoiceJsonPath.slice(idx + marker.length)
-          : invoiceJsonPath.replace(/^\/?output_jsons\/?/, '');
-        const apiUrl = `/output_jsons/${rel}`;
-        response = await fetch(apiUrl, { cache: 'no-store' });
-        if (response.ok) {
-          const jsonData = await response.json();
-          if (isActive && trySetFromJson(jsonData)) {
-            setLoading(false);
-            return;
+        let rel = '';
+        if (invoiceJsonPath) {
+          const idx = invoiceJsonPath.indexOf(marker);
+          rel = idx >= 0
+            ? invoiceJsonPath.slice(idx + marker.length)
+            : invoiceJsonPath.replace(/^\/?output_jsons\/?/, '');
+        } else if (invoiceSourceFile) {
+          rel = invoiceSourceFile.replace(/^\//, '');
+        }
+        if (rel) {
+          const apiUrl = `/output_jsons/${rel}`;
+          console.log('🌐 Fetch (fallback /output_jsons)', apiUrl);
+          response = await fetch(apiUrl, { cache: 'no-store' });
+          console.log('🌐 Fetch (fallback) status', response.status);
+          if (response.ok) {
+            const jsonData = await response.json();
+            if (isActive && trySetFromJson(jsonData)) {
+              setLoading(false);
+              return;
+            }
           }
         }
 
         if (isActive) {
-          console.warn('Failed to load JSON data for line items from both direct and API routes');
-          setItems([]);
+          console.warn('Failed to load JSON data for line items from both direct and API routes', {
+            invoice_number: invoice?.invoice_number,
+            invoiceJsonPath,
+            invoiceSourceFile
+          });
+          // Final fallback: use embedded line_items from the invoice object if present
+          if (Array.isArray(invoice?.line_items) && invoice.line_items.length > 0) {
+            console.log('🧩 Using embedded invoice.line_items as fallback');
+            const transformedItems = invoice.line_items.map((item, index) => ({
+              id: item.product_number || `item-${index}`,
+              name: item.product_name || '',
+              qty: item.Quantity || '1',
+              unit: `$${item.unit_price || '0.00'}`,
+              total: `$${item.line_item_total || '0.00'}`,
+              category: item.quickbooks_category || 'Not categorized',
+            }));
+            setItems(transformedItems);
+          } else {
+            setItems([]);
+          }
         }
       } catch (error) {
         if (isActive) {
@@ -127,7 +180,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     return () => {
       isActive = false;
     };
-  }, [invoiceJsonPath]);
+  }, [invoiceJsonPath, invoiceSourceFile]);
 
   const loadLineCategories = useCallback(async () => {
     if (!invoiceIdentifier) {
