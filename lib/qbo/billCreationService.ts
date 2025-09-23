@@ -395,9 +395,6 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       invoiceData.officeLocation ||
       invoiceData.location ||
       invoiceData.Office ||
-      detailedData.office ||
-      detailedData.office_location ||
-      detailedData.officeLocation ||
       null;
 
     let locationId: string | undefined;
