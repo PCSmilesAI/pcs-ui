@@ -353,8 +353,19 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
           chosenAccountPath = historyMapping.accountPath;
           chosenClassPath = historyMapping.classPath;
 
+          const accountPathToUse = historyMapping.accountPath && isValidAccountPath(historyMapping.accountPath)
+            ? historyMapping.accountPath
+            : undefined;
+
+          if (historyMapping.accountPath && !accountPathToUse) {
+            console.warn('[QBO][CLASSIFY] Account path not in chart of accounts list', {
+              vendor: vendorName,
+              accountPath: historyMapping.accountPath,
+            });
+          }
+
           const [resolvedAccount, resolvedClass] = await Promise.all([
-            historyMapping.accountPath ? resolveAccountByFullName(historyMapping.accountPath) : undefined,
+            accountPathToUse ? resolveAccountByFullName(accountPathToUse) : undefined,
             historyMapping.classPath ? resolveClassByFullName(historyMapping.classPath) : undefined,
           ]);
 
@@ -365,10 +376,10 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
               type: resolvedAccount.type || 'Expense',
             };
             preferredAccount = overrideAccount;
-          } else if (historyMapping.accountPath) {
+          } else if (accountPathToUse) {
             console.warn('[QBO][CLASSIFY] Account path could not be resolved', {
               vendor: vendorName,
-              accountPath: historyMapping.accountPath,
+              accountPath: accountPathToUse,
             });
           }
 
