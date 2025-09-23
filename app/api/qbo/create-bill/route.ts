@@ -37,9 +37,6 @@ export async function POST(req: NextRequest) {
         error: 'Invoice data is required',
       }, { status: 400 });
     }
-        error: 'Invoice data is required'
-      }, { status: 400 });
-    }
 
     const tokens = await tokenStorage.getLatestTokens();
     if (!tokens) {

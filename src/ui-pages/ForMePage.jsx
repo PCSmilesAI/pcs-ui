@@ -85,6 +85,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
               invoice_date: rawInvoiceDate,
               due_date: rawDueDate,
               json_path: invoice.json_path,
+              source_file: invoice.source_file,
               pdf_path: invoice.pdf_path,
               timestamp: invoice.timestamp,
               assigned_to: invoice.assigned_to,

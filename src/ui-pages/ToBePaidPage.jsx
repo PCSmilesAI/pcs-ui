@@ -54,11 +54,13 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             invoice_date: invoice.invoice_date,
             due_date: invoice.due_date,
             json_path: invoice.json_path,
+            source_file: invoice.source_file,
             pdf_path: invoice.pdf_path,
             timestamp: invoice.timestamp,
             assigned_to: invoice.assigned_to,
             approved: invoice.approved,
-            status: invoice.status
+            status: invoice.status,
+            line_items: invoice.line_items || [],
           }));
         
         console.log('✅ ToBePaidPage: Data transformed successfully:', transformedData.length, 'approved invoices');
