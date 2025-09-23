@@ -3,6 +3,7 @@ import path from 'path';
 import { qboClient, QBOBill } from './qboClient';
 import { pickMappingForVendor } from './vendorMappings';
 import { resolveAccountByFullName, resolveClassByFullName, resolveLocationByName } from './qboLookup';
+import { isValidAccountPath } from './chartOfAccounts';
 
 export interface InvoiceLineItem {
   product_name?: string;
