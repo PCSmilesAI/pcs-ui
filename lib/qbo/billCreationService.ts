@@ -381,7 +381,7 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
 
           chosenClassPath = classPathToUse;
 
-          let resolvedAccount = undefined;
+          let resolvedAccount: any = undefined;
           let selectedAccountPath: string | undefined;
           for (const candidate of accountCandidates) {
             if (!candidate) continue;
