@@ -279,7 +279,7 @@ export class QBOClient {
     };
 
     formData.append('file_metadata_01', new Blob([JSON.stringify(metadata)], { type: 'application/json' }), 'metadata.json');
-    formData.append('file_content_01', new Blob([fileContent], { type: mimeType }), fileName);
+    formData.append('file_content_01', new Blob([new Uint8Array(fileContent as any)], { type: mimeType }), fileName);
 
     const response = await fetch(url, {
       method: 'POST',
