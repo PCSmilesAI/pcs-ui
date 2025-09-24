@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { isValidAccountPath } from './chartOfAccounts';
 
 export type VendorMappingEntry = {
   defaultAccount: string | null;
@@ -141,7 +142,13 @@ async function loadVendorHistory(force = false): Promise<VendorHistoryMap> {
 
 export async function pickMappingForVendor(
   vendorName: string
-): Promise<{ classPath?: string; accountPath?: string; matchedVendor?: string }> {
+): Promise<{
+  classPath?: string;
+  accountPath?: string;
+  matchedVendor?: string;
+  classCandidates: string[];
+  accountCandidates: string[];
+}> {
   if (!vendorName) return {};
 
   const history = await loadVendorHistory();
@@ -170,14 +177,34 @@ export async function pickMappingForVendor(
   }
 
   const entry = history[matchedKey] || {};
-  const firstClass = entry.Classes?.[0]?.trim();
-  const firstCategory = entry.Categories?.[0]?.trim();
+
+  const classes = Array.isArray(entry.Classes)
+    ? entry.Classes.map((c) => (typeof c === 'string' ? c.trim() : '')).filter((c) => c)
+    : [];
+
+  const categories = Array.isArray(entry.Categories)
+    ? entry.Categories.map((c) => (typeof c === 'string' ? c.trim() : '')).filter((c) => c)
+    : [];
+
+  let accountPath: string | undefined;
+  for (const candidate of categories) {
+    if (isValidAccountPath(candidate)) {
+      accountPath = candidate;
+      break;
+    }
+  }
+
+  if (!accountPath && categories.length > 0) {
+    accountPath = categories[0];
+  }
+
+  const classPath = classes.length > 0 ? classes[0] : undefined;
 
   return {
-    classPath: firstClass || undefined,
-    accountPath: firstCategory || undefined,
+    classPath,
+    accountPath,
     matchedVendor: matchedKey,
+    classCandidates: classes,
+    accountCandidates: categories,
   };
 }
-
-
