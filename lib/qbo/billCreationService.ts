@@ -328,6 +328,20 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       throw new Error(`Unable to locate or create vendor '${vendorName}' in QuickBooks`);
     }
 
+    const rawOfficeName =
+      invoiceData.office ||
+      invoiceData.office_location ||
+      invoiceData.officeLocation ||
+      invoiceData.location ||
+      invoiceData.Office ||
+      detailedData.office ||
+      detailedData.office_location ||
+      detailedData.officeLocation ||
+      detailedData.location ||
+      null;
+
+    const officeName = rawOfficeName ? String(rawOfficeName).trim() : undefined;
+
     const expenseAccounts = await qboClient.getExpenseAccounts();
     if (!expenseAccounts || expenseAccounts.length === 0) {
       throw new Error('No expense accounts found in QuickBooks. Please set up your chart of accounts.');
@@ -349,26 +363,57 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
     if (autoClassifyEnabled) {
       try {
         const historyMapping = await pickMappingForVendor(vendorName);
+        const accountCandidates = historyMapping?.accountCandidates || [];
+        const classCandidates = historyMapping?.classCandidates || [];
+
         if (historyMapping?.accountPath || historyMapping?.classPath) {
           mappingVendor = historyMapping.matchedVendor;
           chosenAccountPath = historyMapping.accountPath;
-          chosenClassPath = historyMapping.classPath;
+          let classPathToUse = historyMapping.classPath;
 
-          const accountPathToUse = historyMapping.accountPath && isValidAccountPath(historyMapping.accountPath)
-            ? historyMapping.accountPath
-            : undefined;
+          if (classPathToUse && classPathToUse.trim().toLowerCase() === 'location') {
+            if (officeName) {
+              classPathToUse = `General-${officeName}`;
+            } else {
+              console.warn('[QBO][CLASSIFY] Class mapping requested location but invoice office missing', {
+                vendor: vendorName,
+                invoiceNumber,
+              });
+              classPathToUse = undefined;
+            }
+          }
 
-          if (historyMapping.accountPath && !accountPathToUse) {
+          chosenClassPath = classPathToUse;
+
+          let resolvedAccount = undefined;
+          let selectedAccountPath: string | undefined;
+          for (const candidate of accountCandidates) {
+            if (!candidate) continue;
+            if (!isValidAccountPath(candidate)) {
+              continue;
+            }
+            const lookup = await resolveAccountByFullName(candidate);
+            if (!lookup) {
+              continue;
+            }
+            resolvedAccount = lookup;
+            selectedAccountPath = candidate;
+            break;
+          }
+
+          if (!resolvedAccount && historyMapping.accountPath && isValidAccountPath(historyMapping.accountPath)) {
+            resolvedAccount = await resolveAccountByFullName(historyMapping.accountPath);
+            selectedAccountPath = historyMapping.accountPath;
+          }
+
+          if (historyMapping.accountPath && !selectedAccountPath) {
             console.warn('[QBO][CLASSIFY] Account path not in chart of accounts list', {
               vendor: vendorName,
               accountPath: historyMapping.accountPath,
             });
           }
 
-          const [resolvedAccount, resolvedClass] = await Promise.all([
-            accountPathToUse ? resolveAccountByFullName(accountPathToUse) : undefined,
-            historyMapping.classPath ? resolveClassByFullName(historyMapping.classPath) : undefined,
-          ]);
+          const resolvedClass = classPathToUse ? await resolveClassByFullName(classPathToUse) : undefined;
 
           if (resolvedAccount) {
             overrideAccount = {
@@ -377,19 +422,20 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
               type: resolvedAccount.type || 'Expense',
             };
             preferredAccount = overrideAccount;
-          } else if (accountPathToUse) {
+            chosenAccountPath = selectedAccountPath || chosenAccountPath;
+          } else if (selectedAccountPath) {
             console.warn('[QBO][CLASSIFY] Account path could not be resolved', {
               vendor: vendorName,
-              accountPath: accountPathToUse,
+              accountPath: selectedAccountPath,
             });
           }
 
           if (resolvedClass) {
             overrideClassId = resolvedClass.id;
-          } else if (historyMapping.classPath) {
+          } else if (classPathToUse) {
             console.warn('[QBO][CLASSIFY] Class path could not be resolved', {
               vendor: vendorName,
-              classPath: historyMapping.classPath,
+              classPath: classPathToUse,
             });
           }
         } else {
@@ -401,17 +447,9 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       }
     }
 
-    const officeName =
-      invoiceData.office ||
-      invoiceData.office_location ||
-      invoiceData.officeLocation ||
-      invoiceData.location ||
-      invoiceData.Office ||
-      null;
-
     let locationId: string | undefined;
     if (officeName) {
-      const resolvedLocation = await resolveLocationByName(String(officeName));
+      const resolvedLocation = await resolveLocationByName(officeName);
       if (resolvedLocation) {
         locationId = resolvedLocation.id;
       } else {
