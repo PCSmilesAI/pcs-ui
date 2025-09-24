@@ -30,6 +30,7 @@ function parseAmount(value: unknown): number | undefined {
 
 export class AutoBillService {
   private isProcessing = false;
+  private processingStart = 0;
 
   async processApprovedInvoice(
     invoiceData: InvoiceData,
@@ -41,14 +42,22 @@ export class AutoBillService {
     categories?: Array<{ description: string; category: string }>;
     error?: string;
   }> {
+    const now = Date.now();
     if (this.isProcessing) {
-      return {
-        success: false,
-        error: 'Another invoice is being processed'
-      };
+      const elapsed = now - this.processingStart;
+      if (elapsed < 120_000) {
+        return {
+          success: false,
+          error: 'Another invoice is being processed'
+        };
+      }
+
+      console.warn('⚠️ AutoBillService: previous processing still marked active after', elapsed, 'ms. Resetting lock.');
+      this.isProcessing = false;
     }
 
     this.isProcessing = true;
+    this.processingStart = now;
 
     try {
       console.log('🔄 AutoBillService: Processing approved invoice:', invoiceData.invoice_number);
@@ -115,6 +124,7 @@ export class AutoBillService {
       };
     } finally {
       this.isProcessing = false;
+      this.processingStart = 0;
     }
   }
 
