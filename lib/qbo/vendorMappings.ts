@@ -149,11 +149,11 @@ export async function pickMappingForVendor(
   classCandidates: string[];
   accountCandidates: string[];
 }> {
-  if (!vendorName) return {};
+  if (!vendorName) return { classCandidates: [], accountCandidates: [] };
 
   const history = await loadVendorHistory();
   if (!history || Object.keys(history).length === 0) {
-    return {};
+    return { classCandidates: [], accountCandidates: [] };
   }
 
   const normalized = normalizeVendorName(vendorName);
@@ -173,7 +173,7 @@ export async function pickMappingForVendor(
   }
 
   if (!matchedKey) {
-    return {};
+    return { classCandidates: [], accountCandidates: [] };
   }
 
   const entry = history[matchedKey] || {};
