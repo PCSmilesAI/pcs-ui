@@ -334,10 +334,6 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       invoiceData.officeLocation ||
       invoiceData.location ||
       invoiceData.Office ||
-      detailedData.office ||
-      detailedData.office_location ||
-      detailedData.officeLocation ||
-      detailedData.location ||
       null;
 
     const officeName = rawOfficeName ? String(rawOfficeName).trim() : undefined;
