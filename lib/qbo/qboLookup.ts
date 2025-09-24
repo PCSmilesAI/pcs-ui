@@ -59,7 +59,12 @@ let locationCache: {
 } | null = null;
 
 function normalizeKey(value: string): string {
-  return value.trim().toLowerCase();
+  return value
+    .normalize('NFKC')
+    .replace(/\s*[-–—]\s*/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
 }
 
 async function ensureAccountCache(): Promise<typeof accountCache> {
@@ -226,7 +231,32 @@ export async function resolveLocationByName(
 
   const cache = await ensureLocationCache();
   const normalized = normalizeKey(locationName);
-  const match = cache?.map.get(normalized);
+  let match = cache?.map.get(normalized);
+
+  if (!match) {
+    const variants = [
+      `general-${locationName}`,
+      `general ${locationName}`,
+      `general-${locationName}`.replace(/\s+/g, ''),
+      `general ${locationName}`.replace(/\s+/g, ' '),
+    ];
+    for (const variant of variants) {
+      const candidate = cache?.map.get(normalizeKey(variant));
+      if (candidate) {
+        match = candidate;
+        break;
+      }
+    }
+  }
+
+  if (!match) {
+    const fallback = Array.from(cache?.map.values() || []).find((entry) =>
+      entry.fullName.toLowerCase().includes(normalized) || normalized.includes(entry.fullName.toLowerCase())
+    );
+    if (fallback) {
+      match = fallback;
+    }
+  }
 
   if (!match) {
     console.warn('[QBO][LOOKUP] Location not found for name:', locationName);

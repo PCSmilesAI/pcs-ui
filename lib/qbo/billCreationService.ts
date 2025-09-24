@@ -335,8 +335,8 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
 
     const fallbackAccount = expenseAccounts[0];
 
-    const autoClassifyEnabled = String(process.env.PCS_QBO_AUTO_CLASSIFY || '').toLowerCase() === '1' ||
-      String(process.env.PCS_QBO_AUTO_CLASSIFY || '').toLowerCase() === 'true';
+    const classifyEnv = process.env.PCS_QBO_AUTO_CLASSIFY;
+    const autoClassifyEnabled = classifyEnv === undefined || ['1', 'true', 'on', 'yes'].includes(classifyEnv.toLowerCase());
 
     let overrideAccount: { id: string; name: string; type: string } | undefined;
     let overrideClassId: string | undefined;
