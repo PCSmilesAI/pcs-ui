@@ -25,11 +25,18 @@ type CachedHistory = {
   map: VendorHistoryMap;
 };
 
+type ClassOverrideCache = {
+  mtimeMs: number | null;
+  map: Record<string, string[]>;
+};
+
 let cachedMappings: VendorMappings | null = null;
 let cachedMtimeMs: number | null = null;
 
 let cachedHistory: CachedHistory | null = null;
 let historyLoadPromise: Promise<VendorHistoryMap> | null = null;
+
+let classOverrideCache: ClassOverrideCache | null = null;
 
 function getMappingsPath(): string {
   return path.resolve(process.cwd(), 'pcs_ai_data', 'qbo_vendor_mappings.json');
@@ -41,6 +48,14 @@ function getHistoryPath(): string {
     return preferred;
   }
   return path.resolve(process.cwd(), 'vendor_class_category_map.json');
+}
+
+function getClassOverridePath(): string {
+  const preferred = path.resolve(process.cwd(), 'pcs_ai_data', 'vendor_class_mapping.json');
+  if (fs.existsSync(preferred)) {
+    return preferred;
+  }
+  return path.resolve(process.cwd(), 'vendor_class_mapping.json');
 }
 
 export function loadVendorMappings(force = false): VendorMappings {
@@ -156,29 +171,14 @@ export async function pickMappingForVendor(
     return { classCandidates: [], accountCandidates: [] };
   }
 
-  const normalized = normalizeVendorName(vendorName);
-
-  let matchedKey: string | undefined;
-
-  if (history[vendorName]) {
-    matchedKey = vendorName;
-  } else {
-    matchedKey = Object.keys(history).find((key) => normalizeVendorName(key) === normalized);
-  }
-
-  if (!matchedKey) {
-    matchedKey = Object.keys(history).find((key) =>
-      normalizeVendorName(key).includes(normalized) || normalized.includes(normalizeVendorName(key))
-    );
-  }
-
+  const matchedKey = findVendorKey(vendorName, history);
   if (!matchedKey) {
     return { classCandidates: [], accountCandidates: [] };
   }
 
   const entry = history[matchedKey] || {};
 
-  const classes = Array.isArray(entry.Classes)
+  let classes = Array.isArray(entry.Classes)
     ? entry.Classes.map((c) => (typeof c === 'string' ? c.trim() : '')).filter((c) => c)
     : [];
 
@@ -198,6 +198,18 @@ export async function pickMappingForVendor(
     accountPath = categories[0];
   }
 
+  const classOverrides = loadClassOverrides();
+  let overrideKey = findVendorKey(vendorName, classOverrides);
+  if (!overrideKey && classOverrides[matchedKey]) {
+    overrideKey = matchedKey;
+  }
+  if (overrideKey) {
+    const overrideClasses = classOverrides[overrideKey];
+    if (overrideClasses && overrideClasses.length > 0) {
+      classes = overrideClasses.map((value) => (typeof value === 'string' ? value.trim() : '')).filter((value) => value);
+    }
+  }
+
   const classPath = classes.length > 0 ? classes[0] : undefined;
 
   return {
@@ -207,4 +219,58 @@ export async function pickMappingForVendor(
     classCandidates: classes,
     accountCandidates: categories,
   };
+}
+
+function findVendorKey(vendorName: string, map: Record<string, any>): string | undefined {
+  if (!vendorName || !map || Object.keys(map).length === 0) return undefined;
+
+  if (map[vendorName]) return vendorName;
+
+  const normalized = normalizeVendorName(vendorName);
+  const exactInsensitive = Object.keys(map).find((key) => normalizeVendorName(key) === normalized);
+  if (exactInsensitive) return exactInsensitive;
+
+  const partial = Object.keys(map).find((key) =>
+    normalizeVendorName(key).includes(normalized) || normalized.includes(normalizeVendorName(key))
+  );
+
+  return partial;
+}
+
+function loadClassOverrides(): Record<string, string[]> {
+  const filePath = getClassOverridePath();
+
+  try {
+    const stat = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
+    const mtimeMs = stat ? stat.mtimeMs : null;
+
+    if (classOverrideCache && classOverrideCache.mtimeMs === mtimeMs) {
+      return classOverrideCache.map;
+    }
+
+    if (!fs.existsSync(filePath)) {
+      classOverrideCache = { map: {}, mtimeMs: null };
+      return classOverrideCache.map;
+    }
+
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const parsed = JSON.parse(raw) as Record<string, string[]>;
+    const normalised: Record<string, string[]> = {};
+    for (const [vendor, classes] of Object.entries(parsed || {})) {
+      if (!Array.isArray(classes)) continue;
+      normalised[vendor] = classes
+        .map((value) => (typeof value === 'string' ? value.trim() : ''))
+        .filter((value) => value.length > 0);
+    }
+
+    classOverrideCache = {
+      map: normalised,
+      mtimeMs,
+    };
+    return normalised;
+  } catch (error) {
+    console.warn('[QBO] Failed to load vendor_class_mapping.json:', error);
+    classOverrideCache = classOverrideCache || { map: {}, mtimeMs: null };
+    return classOverrideCache.map;
+  }
 }
