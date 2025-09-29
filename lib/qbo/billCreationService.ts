@@ -114,6 +114,22 @@ function sanitizeAmount(value: unknown, fallback = 0): number {
   return fallback;
 }
 
+function toGeneralClassForOffice(office?: string): string | undefined {
+  if (!office) return undefined;
+  const raw = String(office).trim();
+  if (!raw) return undefined;
+  // Normalization: collapse spaces, title-case words
+  const normalized = raw
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    // PCS-specific correction: Milwaukee -> Milwaukie
+    .replace(/\bmilwaukee\b/g, 'milwaukie')
+    .replace(/\bgp\b/g, 'grants pass');
+  const title = normalized.replace(/\b\w/g, (c) => c.toUpperCase());
+  const trimmed = title.replace(/^General[-\s]*/i, '');
+  return `General-${trimmed}`;
+}
+
 function parseDateInput(raw: string | undefined | null): Date | null {
   if (!raw) return null;
   const trimmed = raw.trim();
@@ -374,7 +390,7 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
 
           if (classPathToUse && classPathToUse.trim().toLowerCase() === 'location') {
             if (officeName) {
-              classPathToUse = `General-${officeName}`;
+              classPathToUse = toGeneralClassForOffice(officeName);
             } else {
               console.warn('[QBO][CLASSIFY] Class mapping requested location but invoice office missing', {
                 vendor: vendorName,
@@ -388,8 +404,8 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
           // This complements the explicit 'location' directive above and helps when JSON lists
           // multiple General-* options (e.g., different offices) without using the 'location' keyword.
           if (!classPathToUse && Array.isArray(classCandidates) && classCandidates.length > 0 && officeName) {
-            const desired = `General-${String(officeName).trim().replace(/\s+/g, ' ')}`;
-            const desiredKey = desired.replace(/\s+/g, '').toLowerCase();
+            const desired = toGeneralClassForOffice(officeName);
+            const desiredKey = (desired || '').replace(/\s+/g, '').toLowerCase();
             const match = classCandidates.find((c) =>
               typeof c === 'string' && c.replace(/\s+/g, '').toLowerCase() === desiredKey
             );
