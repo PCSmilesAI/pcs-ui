@@ -49,6 +49,67 @@ export async function POST(req: NextRequest) {
 // Test connection endpoint
 export async function GET(req: NextRequest) {
   try {
+    const url = req.nextUrl;
+    const dryRun = url.searchParams.get('dryRun') === 'true';
+    const id = url.searchParams.get('id');
+
+    // If an invoice id is provided, perform a dry-run (or real run) using
+    // the invoice data loaded from the consolidated queue on disk.
+    if (id) {
+      try {
+        // Attempt to load from multiple known locations
+        const paths = [
+          'pcs_ai_data/invoice_queue.json',
+          'public/invoice_queue.json',
+          'invoice_queue.json',
+        ];
+
+        let queue: any[] | null = null;
+        for (const p of paths) {
+          try {
+            // dynamic import of fs to avoid edge bundling issues
+            const { readFileSync, existsSync } = await import('fs');
+            if (existsSync(p)) {
+              const raw = readFileSync(p, 'utf8');
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                queue = parsed;
+              } else if (Array.isArray(parsed?.invoices)) {
+                queue = parsed.invoices;
+              }
+              if (queue) break;
+            }
+          } catch (_) {
+            // continue to next path
+          }
+        }
+
+        if (!queue || queue.length === 0) {
+          return NextResponse.json({ ok: false, error: 'Invoice queue not found' }, { status: 404 });
+        }
+
+        const invoice = queue.find((inv) =>
+          String(inv?.invoice_number || inv?.invoice || '').trim() === String(id).trim()
+        );
+
+        if (!invoice) {
+          return NextResponse.json({ ok: false, error: 'Invoice not found' }, { status: 404 });
+        }
+
+        console.log('🔄 Auto-create bill request for invoice:', id);
+
+        const result = await autoBillService.processApprovedInvoice(invoice as any, { dryRun });
+        if (result.success) {
+          return NextResponse.json({ ok: true, dryRun, ...result });
+        }
+        return NextResponse.json({ ok: false, dryRun, error: result.error || 'Failed to create bill' }, { status: 500 });
+      } catch (error: any) {
+        console.error('❌ Dry-run by id failed:', error);
+        return NextResponse.json({ ok: false, error: error?.message || 'Dry-run failed' }, { status: 500 });
+      }
+    }
+
+    // Default: simple connectivity probe
     const isConnected = await autoBillService.testConnection();
     const categories = await autoBillService.getDentalCategories();
 
