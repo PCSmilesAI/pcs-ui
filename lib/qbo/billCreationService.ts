@@ -379,6 +379,25 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
             }
           }
 
+          // Prefer a General-<Office> class from the vendor's class candidates when available.
+          // This complements the explicit 'location' directive above and helps when JSON lists
+          // multiple General-* options (e.g., different offices) without using the 'location' keyword.
+          if (!classPathToUse && Array.isArray(classCandidates) && classCandidates.length > 0 && officeName) {
+            const desired = `General-${String(officeName).trim().replace(/\s+/g, ' ')}`;
+            const desiredKey = desired.replace(/\s+/g, '').toLowerCase();
+            const match = classCandidates.find((c) =>
+              typeof c === 'string' && c.replace(/\s+/g, '').toLowerCase() === desiredKey
+            );
+            if (match) {
+              classPathToUse = match;
+              console.log('[QBO][CLASSIFY] Selected office-matching class from candidates', {
+                vendor: vendorName,
+                office: officeName,
+                classSelected: classPathToUse,
+              });
+            }
+          }
+
           chosenClassPath = classPathToUse;
 
           let resolvedAccount: any = undefined;
