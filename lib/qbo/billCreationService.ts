@@ -56,6 +56,11 @@ export interface BillCreationResult {
   billId?: string;
   pdfAttached?: boolean;
   categories?: Array<{ description: string; category: string }>;
+  // Dry-run preview fields (only populated when options.dryRun === true)
+  lineCount?: number;
+  vendor?: string;
+  accounts?: Array<string | null>;
+  classRefs?: Array<string | null>;
   error?: string;
 }
 
@@ -522,12 +527,15 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
     });
 
     if (options.dryRun) {
-      console.log('[QBO][DRY_RUN] QuickBooks bill payload', {
+      const accounts = bill.Line.map((line) => line.AccountBasedExpenseLineDetail?.AccountRef?.value || null);
+      const classRefs = bill.Line.map((line) => line.AccountBasedExpenseLineDetail?.ClassRef?.value || null);
+
+      console.log('[QBO][BUILD][DRYRUN]', {
         vendor: vendorName,
         invoiceNumber,
         lines: bill.Line.length,
-        accounts: bill.Line.map((line) => line.AccountBasedExpenseLineDetail?.AccountRef?.value),
-        classRefs: bill.Line.map((line) => line.AccountBasedExpenseLineDetail?.ClassRef?.value || null),
+        accounts,
+        classRefs,
       });
 
       return {
@@ -535,6 +543,10 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
         billId: undefined,
         pdfAttached: false,
         categories,
+        lineCount: bill.Line.length,
+        vendor: vendorName,
+        accounts,
+        classRefs,
       };
     }
 
