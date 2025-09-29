@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pickMappingForVendor } from '../../../../lib/qbo/vendorMappings';
 import { resolveClassByFullName } from '../../../../lib/qbo/qboLookup';
-import { NextRequest, NextResponse } from 'next/server';
 
 function toGeneralClassForOffice(office?: string): string | undefined {
   if (!office) return undefined;
