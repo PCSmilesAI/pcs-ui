@@ -107,6 +107,10 @@ export class AutoBillService {
           billId: result.billId,
           pdfAttached: result.pdfAttached,
           categories: result.categories,
+          lineCount: result.lineCount,
+          vendor: result.vendor ?? (invoiceData.vendor || detailedData.vendor),
+          accounts: result.accounts,
+          classRefs: result.classRefs,
         };
       }
 
