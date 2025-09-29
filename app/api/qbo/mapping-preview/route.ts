@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pickMappingForVendor } from '../../../../lib/qbo/vendorMappings';
-import { resolveClassByFullName } from '../../../../lib/qbo/qboLookup';
+import { resolveAccountByFullName, resolveClassByFullName } from '../../../../lib/qbo/qboLookup';
 
 function toGeneralClassForOffice(office?: string): string | undefined {
   if (!office) return undefined;
@@ -15,7 +15,6 @@ function toGeneralClassForOffice(office?: string): string | undefined {
   const trimmed = title.replace(/^General[-\s]*/i, '');
   return `General-${trimmed}`;
 }
-import { resolveAccountByFullName, resolveClassByFullName } from '../../../../lib/qbo/qboLookup';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
