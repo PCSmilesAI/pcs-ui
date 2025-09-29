@@ -40,6 +40,11 @@ export class AutoBillService {
     billId?: string;
     pdfAttached?: boolean;
     categories?: Array<{ description: string; category: string }>;
+    // Enriched dry-run preview fields
+    lineCount?: number;
+    vendor?: string | null;
+    accounts?: Array<string | null>;
+    classRefs?: Array<string | null>;
     error?: string;
   }> {
     const now = Date.now();
