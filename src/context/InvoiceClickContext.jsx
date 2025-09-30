@@ -20,7 +20,8 @@ export function InvoiceClickProvider({ children }) {
     });
     
     if (identifier) {
-      const url = `/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`;
+      const from = typeof window !== 'undefined' ? `${window.location.pathname}${window.location.search}` : '';
+      const url = `/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}${from ? `&from=${encodeURIComponent(from)}` : ''}`;
       console.log('🔍 InvoiceClickContext: Navigating to:', url);
       router.push(url);
     } else {

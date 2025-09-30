@@ -95,15 +95,22 @@ function InvoiceDetailContent() {
   }, [searchParams]);
 
   const handleBack = () => {
-    router.back();
+    const from = searchParams.get('from');
+    if (from) {
+      // Always go back to originating list (explicit target)
+      router.replace(from);
+    } else {
+      router.back();
+    }
   };
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
       const prevInvoice = invoiceQueue[currentIndex - 1];
       const identifier = prevInvoice.invoice_number || prevInvoice.id;
-      // Replace current history entry so back arrow returns to list immediately
-      router.replace(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`);
+      const from = searchParams.get('from');
+      // Replace current history entry and preserve the original list target
+      router.replace(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}${from ? `&from=${encodeURIComponent(from)}` : ''}`);
     }
   };
 
@@ -111,8 +118,9 @@ function InvoiceDetailContent() {
     if (currentIndex < invoiceQueue.length - 1) {
       const nextInvoice = invoiceQueue[currentIndex + 1];
       const identifier = nextInvoice.invoice_number || nextInvoice.id;
-      // Replace current history entry so back arrow returns to list immediately
-      router.replace(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`);
+      const from = searchParams.get('from');
+      // Replace current history entry and preserve the original list target
+      router.replace(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}${from ? `&from=${encodeURIComponent(from)}` : ''}`);
     }
   };
 
