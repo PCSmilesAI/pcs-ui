@@ -102,7 +102,8 @@ function InvoiceDetailContent() {
     if (currentIndex > 0) {
       const prevInvoice = invoiceQueue[currentIndex - 1];
       const identifier = prevInvoice.invoice_number || prevInvoice.id;
-      router.push(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`);
+      // Replace current history entry so back arrow returns to list immediately
+      router.replace(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`);
     }
   };
 
@@ -110,7 +111,8 @@ function InvoiceDetailContent() {
     if (currentIndex < invoiceQueue.length - 1) {
       const nextInvoice = invoiceQueue[currentIndex + 1];
       const identifier = nextInvoice.invoice_number || nextInvoice.id;
-      router.push(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`);
+      // Replace current history entry so back arrow returns to list immediately
+      router.replace(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`);
     }
   };
 
