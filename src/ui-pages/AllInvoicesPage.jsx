@@ -3,9 +3,12 @@ import { useSearchParams } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
+import { useInvoiceClick } from '../context/InvoiceClickContext';
 
 export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
   const searchParams = useSearchParams();
+  const { handleInvoiceRowClick } = useInvoiceClick();
+  const rowClickHandler = onRowClick || handleInvoiceRowClick;
   const spQuery = (searchParams.get('search') || '').trim().toLowerCase();
   const spFilters = {
     vendor: searchParams.get('vendor') || undefined,
@@ -151,7 +154,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
       <InvoiceTable
         rows={filteredData}
         columns={columns}
-        onRowClick={onRowClick}
+        onRowClick={rowClickHandler}
       />
     </div>
   );
