@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
+import { useInvoiceClick } from '../context/InvoiceClickContext';
 
 /**
  * Page for the "Complete" view. Lists invoices that have been
@@ -10,6 +11,8 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { handleInvoiceRowClick } = useInvoiceClick();
+  const rowClickHandler = onRowClick || handleInvoiceRowClick;
 
   // Load invoice data from the queue
   useEffect(() => {
@@ -144,7 +147,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
       <InvoiceTable
         columns={columns}
         rows={filteredRows}
-        onRowClick={onRowClick}
+        onRowClick={rowClickHandler}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
+import { useInvoiceClick } from '../context/InvoiceClickContext';
 
 /**
  * Page for the "To Be Paid" view. Shows invoices that have been
@@ -11,6 +12,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { handleInvoiceRowClick } = useInvoiceClick();
+  const rowClickHandler = onRowClick || handleInvoiceRowClick;
 
   // Load invoice data from the queue (live API)
   useEffect(() => {
@@ -180,7 +183,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} approved and awaiting payment
         </p>
       </div>
-      <InvoiceTable columns={columns} rows={filteredRows} onRowClick={onRowClick} />
+      <InvoiceTable columns={columns} rows={filteredRows} onRowClick={rowClickHandler} />
     </div>
   );
 }
