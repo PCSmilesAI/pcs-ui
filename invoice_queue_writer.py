@@ -11,7 +11,7 @@ from datetime import datetime
 
 # Configuration
 OUTPUT_JSONS_PATH = os.path.join(os.path.dirname(__file__), "output_jsons")
-INVOICE_QUEUE_PATH = os.path.join(os.path.dirname(__file__), "invoice_queue.json")
+INVOICE_QUEUE_PATH = os.path.join(os.path.dirname(__file__), "pcs_ai_data", "invoice_queue.json")
 EMAIL_INVOICES_PATH = os.path.join(os.path.dirname(__file__), "email_invoices")
 LOG_PATH = os.path.join(os.path.dirname(__file__), "queue_writer.log")
 
