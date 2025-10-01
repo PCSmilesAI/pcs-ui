@@ -108,9 +108,29 @@ def main():
         print(vendor)
         sys.exit(0)
     
-    # If no vendor detected, exit with error
-    print("unknown", file=sys.stderr)
-    sys.exit(1)
+    # If no vendor detected, run general parser fallback
+    general_parser = os.path.join(PARSER_FOLDER, 'general_invoice_parser.py')
+    if os.path.exists(general_parser):
+        try:
+            result = subprocess.run(
+                ["python3", general_parser, filepath],
+                capture_output=True,
+                text=True,
+                timeout=90
+            )
+            if result.returncode == 0:
+                # Print a synthetic vendor label for downstream logging
+                print("general")
+                sys.exit(0)
+            else:
+                print(result.stderr or "unknown", file=sys.stderr)
+                sys.exit(1)
+        except Exception:
+            print("unknown", file=sys.stderr)
+            sys.exit(1)
+    else:
+        print("unknown", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
