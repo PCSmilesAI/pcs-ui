@@ -4,6 +4,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import AchBadge from '../components/AchBadge.jsx';
 
 export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
   const searchParams = useSearchParams();
@@ -20,6 +21,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
   };
 
   const [invoices, setInvoices] = useState([]);
+  const [vendorStatus, setVendorStatus] = useState(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -71,6 +73,17 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
     loadInvoices();
   }, []);
 
+  useEffect(() => {
+    const norm = (s='') => s.trim().replace(/\s+/g,' ').toLowerCase();
+    fetch('/api/vendors/status')
+      .then(r => r.json())
+      .then(j => {
+        const m = new Map(Object.entries(j.vendors || {}).map(([k,v]) => [norm(k), v.ach_status || 'missing']));
+        setVendorStatus(m);
+      })
+      .catch(() => setVendorStatus(new Map()));
+  }, []);
+
   const columns = [
     { key: 'invoice', label: 'Invoice' },
     { key: 'vendor', label: 'Vendor' },
@@ -119,13 +132,19 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           }
         }
 
+        const achFilter = (effectiveFilters.achStatus || '').toLowerCase();
+        if (achFilter && achFilter !== 'all') {
+          const norm = (s='') => s.trim().replace(/\s+/g,' ').toLowerCase();
+          const s = vendorStatus.get(norm(row.vendor)) || 'missing';
+          if (s !== achFilter) return false;
+        }
         return true;
       } catch (filterError) {
         console.error('❌ Error applying filters for row:', row, filterError);
         return true;
       }
     });
-  }, [invoices, effectiveQuery, effectiveFilters]);
+  }, [invoices, effectiveQuery, effectiveFilters, vendorStatus]);
 
   if (loading) {
     return (
@@ -152,7 +171,19 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
         </p>
       </div>
       <InvoiceTable
-        rows={filteredData}
+        rows={filteredData.map((r) => {
+          const norm = (s='') => s.trim().replace(/\s+/g,' ').toLowerCase();
+          const ach = vendorStatus.get(norm(r.vendor)) || 'missing';
+          return {
+            ...r,
+            vendor: (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <span>{r.vendor}</span>
+                <AchBadge status={ach} />
+              </span>
+            ),
+          };
+        })}
         columns={columns}
         onRowClick={rowClickHandler}
       />
