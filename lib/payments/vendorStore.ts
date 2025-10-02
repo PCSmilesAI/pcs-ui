@@ -8,7 +8,7 @@ export interface VendorEntry {
   ach_status?: AchStatus;
   aliases?: string[];
 }
-export interface VendorMap { vendors: Record<string, VendorEntry>; }
+export interface VendorMap { vendors: Record<string, VendorEntry>; version?: number; }
 
 const FILE_NAME = 'vendor_stripe_map.json';
 const DEFAULT_MAP: VendorMap = { vendors: {} };
@@ -26,13 +26,27 @@ async function writeJson(file: string, data: VendorMap) {
   const dir = path.dirname(file);
   await fsp.mkdir(dir, { recursive: true });
   const tmp = `${file}.tmp`;
-  await fsp.writeFile(tmp, JSON.stringify(data, null, 2));
-  await fsp.rename(tmp, file);
+  const payload = { ...data, version: (data.version ?? 0) + 1 };
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      await fsp.writeFile(tmp, JSON.stringify(payload, null, 2));
+      await fsp.rename(tmp, file);
+      // eslint-disable-next-line no-console
+      console.log('[VENDOR][STORE] saved', { file, version: payload.version, count: Object.keys(payload.vendors).length });
+      return;
+    } catch (e: any) {
+      if (attempt === 1) throw e;
+      await new Promise((res) => setTimeout(res, 150));
+    }
+  }
 }
 
 export async function loadMap(): Promise<VendorMap> {
   const file = pathTo(FILE_NAME);
-  return readJson(file);
+  const map = await readJson(file);
+  // eslint-disable-next-line no-console
+  console.log('[VENDOR][STORE] loaded', { file, version: map.version ?? 0, count: Object.keys(map.vendors).length });
+  return map;
 }
 
 export async function saveMap(map: VendorMap): Promise<void> {
@@ -84,6 +98,10 @@ export async function setByAccountId(acctId: string, patch: Partial<VendorEntry>
   }
   if (updated.length > 0) await saveMap(m);
   return updated;
+}
+
+export function getMapPath(): string {
+  return pathTo(FILE_NAME);
 }
 
 

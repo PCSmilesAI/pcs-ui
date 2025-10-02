@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getVendors } from '@/lib/payments/vendorStore';
+import { getVendors, getMapPath, loadMap } from '@/lib/payments/vendorStore';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const vendors = await getVendors();
-  return NextResponse.json({ vendors }, { status: 200 });
+  const map = await loadMap();
+  const path = getMapPath();
+  return NextResponse.json({ vendors, version: map.version ?? 0, path }, { status: 200 });
 }
 
 
