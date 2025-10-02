@@ -2,15 +2,18 @@
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { stripe as stripeServer } from '@/lib/stripe/server';
 import { loadVendorMap, saveVendorMap } from '@/lib/payments/vendorStripeStore';
 
 // Ensure Node.js runtime and no static caching for webhooks
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Use the same Stripe instance you already configure in lib/stripe/server
-const stripe: Stripe = stripeServer as unknown as Stripe;
+// Instantiate Stripe at request time to avoid build-time env coupling
+function getStripe(): Stripe | null {
+  const secret = process.env.STRIPE_SECRET_KEY;
+  if (!secret) return null;
+  return new Stripe(secret, { apiVersion: '2024-06-20' });
+}
 
 function json(status: number, body: unknown) {
   return new NextResponse(JSON.stringify(body), {
@@ -38,7 +41,12 @@ export async function POST(request: Request) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    const client = getStripe();
+    if (!client) {
+      console.error('[STRIPE][WEBHOOK] Missing STRIPE_SECRET_KEY at runtime');
+      return json(500, { ok: false, error: 'stripe not configured' });
+    }
+    event = client.webhooks.constructEvent(rawBody, signature, webhookSecret);
   } catch (err: any) {
     console.error('[STRIPE][WEBHOOK] Signature verification failed:', err?.message);
     return json(400, { ok: false, error: `invalid signature: ${err?.message || 'unknown'}` });
