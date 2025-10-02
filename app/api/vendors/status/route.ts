@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server';
-import { readVendorPayments } from '@/lib/payments/vendorPayments';
+import { loadVendorMap } from '@/lib/payments/vendorStripeStore';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  try {
-    const data = await readVendorPayments();
-    return NextResponse.json({ vendors: data.vendors }, { status: 200 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || 'error' }, { status: 500 });
-  }
+  const { map, path } = await loadVendorMap();
+  // eslint-disable-next-line no-console
+  console.log('[VENDOR_STATUS] GET', { path, count: Object.keys(map.vendors).length });
+  return NextResponse.json(map, { status: 200 });
 }
 
 
