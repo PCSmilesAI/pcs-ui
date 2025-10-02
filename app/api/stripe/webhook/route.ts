@@ -2,7 +2,7 @@
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { loadVendorMap, saveVendorMap } from '@/lib/payments/vendorStripeStore';
+import { setByAccountId } from '@/lib/payments/vendorStore';
 
 // Ensure Node.js runtime and no static caching for webhooks
 export const runtime = 'nodejs';
@@ -56,13 +56,8 @@ export async function POST(request: Request) {
   console.log('[STRIPE][WEBHOOK] received', { id: event.id, type: event.type });
 
   // Try to derive the connected account ID (for Connect)
-  // Priority: event.account (Connect), then Stripe-Account header, then object if it's an Account
-  const headerAccount = hdrs.get('stripe-account') || undefined;
   const obj: any = (event.data && (event.data as any).object) || {};
-  const accountId: string | undefined =
-    (event as any).account ||
-    headerAccount ||
-    (obj?.object === 'account' ? obj.id : undefined);
+  const accountId: string | undefined = (event as any).account || (obj?.object === 'account' ? obj.id : undefined);
 
   // If we can derive ACH status from the object (for account.* events), do so.
   // Otherwise, you can expand this to fetch the account with stripe.accounts.retrieve(accountId)
@@ -113,22 +108,8 @@ export async function POST(request: Request) {
         //           : (transfersActive2 || externalCount2 > 0) ? 'pending'
         //           : 'missing';
 
-        const { map } = await loadVendorMap();
-        let touched = 0;
-        for (const [vendorName, entry] of Object.entries(map.vendors)) {
-          if (entry.stripeAccountId === accountId) {
-            entry.ach_status = achStatus;
-            touched += 1;
-          }
-        }
-        if (touched > 0) await saveVendorMap(map);
-
-        console.log('[STRIPE][WEBHOOK] updated ACH status', {
-          accountId,
-          ach: achStatus,
-          touched,
-          type: event.type,
-        });
+        const updated = await setByAccountId(accountId, { ach_status: achStatus });
+        console.log('[STRIPE][WEBHOOK]', event.type, { acct: accountId, ach_status: achStatus, updated });
         break;
       }
 
