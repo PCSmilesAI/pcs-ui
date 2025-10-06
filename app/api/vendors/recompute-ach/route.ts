@@ -24,7 +24,9 @@ export async function POST() {
       if (!entry.stripeAccountId) continue;
       try {
         const acct = await stripe.accounts.retrieve(entry.stripeAccountId);
-        const count = (acct.external_accounts?.total_count as number) || 0;
+        const count = (typeof (acct as any)?.external_accounts?.total_count === 'number')
+          ? (acct as any).external_accounts.total_count
+          : 0;
         const active = (acct.capabilities as any)?.transfers === 'active';
         const ach: 'complete' | 'pending' | 'missing' = active && count > 0 ? 'complete' : (active || count > 0) ? 'pending' : 'missing';
         if (entry.ach_status !== ach) {
