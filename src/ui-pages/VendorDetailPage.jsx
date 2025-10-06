@@ -206,9 +206,37 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
 
       {/* ACH status and bank details */}
       <div style={achPanel}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
           <div style={{ fontWeight: 600, color: '#357ab2', fontSize: 16 }}>ACH Enrollment</div>
           <ACHBadge status={achInfo?.ach_status} />
+          <div style={{ flex: 1 }} />
+          <button
+            onClick={async () => {
+              try {
+                const resp = await fetch(`/api/vendors/ach-info?vendor=${encodeURIComponent(vendor)}&t=${Date.now()}`, { cache: 'no-store' });
+                const data = await resp.json();
+                setAchInfo(data || {});
+              } catch (_) {}
+            }}
+            style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #357ab2', color: '#357ab2', background: '#fff', cursor: 'pointer' }}
+          >
+            Refresh ACH Status
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                const resp = await fetch('/api/vendors/onboard-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vendor }) });
+                const data = await resp.json();
+                if (data?.ok && data?.url) window.open(data.url, '_blank');
+                else alert(`Failed to create onboarding link: ${data?.error || 'Unknown error'}`);
+              } catch (e) {
+                alert('Failed to create onboarding link');
+              }
+            }}
+            style={{ marginLeft: 8, padding: '6px 10px', borderRadius: 8, border: '1px solid #357ab2', color: '#fff', background: '#357ab2', cursor: 'pointer' }}
+          >
+            Onboard / Update ACH
+          </button>
         </div>
         <div style={achGrid}>
           <div style={infoItem}>
@@ -234,5 +262,3 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
     </div>
   );
 }
-
-

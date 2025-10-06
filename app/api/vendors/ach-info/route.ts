@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { loadVendorMap, findVendorKey } from '@/lib/payments/vendorStore';
+import { loadMap, findVendorKey } from '@/lib/payments/vendorStore';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     const vendorParam = (url.searchParams.get('vendor') || '').trim();
     const explicitAcct = (url.searchParams.get('accountId') || '').trim();
 
-    const { map } = await loadVendorMap();
+    const map = await loadMap();
 
     let vendorName: string | undefined;
     let stripeAccountId: string | undefined = explicitAcct || undefined;

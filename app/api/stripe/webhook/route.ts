@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { setByAccountId } from '@/lib/payments/vendorStore';
+import { wasSeen, recordEventId } from '@/lib/stripe/eventLog';
 
 // Ensure Node.js runtime and no static caching for webhooks
 export const runtime = 'nodejs';
@@ -52,7 +53,12 @@ export async function POST(request: Request) {
     return json(400, { ok: false, error: `invalid signature: ${err?.message || 'unknown'}` });
   }
 
-  // Minimal log to confirm receipt
+  // Idempotency guard
+  if (await wasSeen(event.id)) {
+    console.log('[STRIPE][WEBHOOK] duplicate ignored', { id: event.id, type: event.type });
+    return json(200, { ok: true, duplicate: true });
+  }
+  await recordEventId(event.id);
   console.log('[STRIPE][WEBHOOK] received', { id: event.id, type: event.type });
 
   // Try to derive the connected account ID (for Connect)
