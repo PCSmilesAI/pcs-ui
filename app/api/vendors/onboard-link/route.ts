@@ -25,12 +25,20 @@ export async function POST(req: NextRequest) {
 
     if (!accountId) {
       const map = await loadMap();
-      const key = findVendorKey(map, vendorParam);
-      if (!key) return json(404, { ok: false, error: 'vendor not found' });
+      // Try to find an existing vendor key by name or alias
+      let key = findVendorKey(map, vendorParam) || vendorParam;
+      // If the vendor doesn't exist in the map yet, initialize an empty entry
+      if (vendorParam && !map.vendors[key]) {
+        await setVendorStatus(key, {});
+      }
       accountId = map.vendors[key]?.stripeAccountId;
       if (!accountId) {
-        // if no account, create a Custom account placeholder
-        const acct = await stripe.accounts.create({ type: 'custom', country: 'US', capabilities: { transfers: { requested: true } } });
+        // If no account, create a Custom Connect account and persist it
+        const acct = await stripe.accounts.create({
+          type: 'custom',
+          country: 'US',
+          capabilities: { transfers: { requested: true } },
+        });
         accountId = acct.id;
         await setVendorStatus(key, { stripeAccountId: accountId, ach_status: 'pending' });
       }
