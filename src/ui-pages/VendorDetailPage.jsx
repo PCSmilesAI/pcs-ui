@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
+import ACHBadge from '../ui/ach/ACHBadge';
 
 export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [achInfo, setAchInfo] = useState({ ok: false, ach_status: 'missing', bank: null, address: null });
   
   // Basic vendor directory (extend with real data as available)
   const VENDOR_INFO = {
@@ -75,6 +77,23 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
       }
     };
     load();
+  }, [vendor]);
+
+  // Load vendor ACH info for banner/details panel
+  useEffect(() => {
+    let active = true;
+    async function fetchAch() {
+      try {
+        const resp = await fetch(`/api/vendors/ach-info?vendor=${encodeURIComponent(vendor)}&t=${Date.now()}`, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`Failed to load ACH info: ${resp.status}`);
+        const data = await resp.json();
+        if (active) setAchInfo(data || {});
+      } catch (_) {
+        if (active) setAchInfo({ ok: false, ach_status: 'missing', bank: null, address: null });
+      }
+    }
+    if (vendor) fetchAch();
+    return () => { active = false; };
   }, [vendor]);
 
   // Metrics
@@ -150,6 +169,8 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
     marginBottom: 16,
   };
   const infoItem = { border: '1px solid #357ab2', borderRadius: 8, padding: 12, background: '#fff' };
+  const achPanel = { border: '1px solid #357ab2', borderRadius: 12, padding: 16, background: '#fff', marginBottom: 16 };
+  const achGrid = { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 };
 
   return (
     <div style={wrapperStyle}>
@@ -182,6 +203,33 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
         <div style={infoItem}><strong>Mailing Address:</strong><div>{(VENDOR_INFO[vendor] || {}).address || 'N/A'}</div></div>
         <div style={infoItem}><strong>Primary Contact:</strong><div>{(VENDOR_INFO[vendor] || {}).primaryContact || 'N/A'}</div></div>
       </div>
+
+      {/* ACH status and bank details */}
+      <div style={achPanel}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+          <div style={{ fontWeight: 600, color: '#357ab2', fontSize: 16 }}>ACH Enrollment</div>
+          <ACHBadge status={achInfo?.ach_status} />
+        </div>
+        <div style={achGrid}>
+          <div style={infoItem}>
+            <strong>Bank</strong>
+            <div>{achInfo?.bank?.bank_name || 'N/A'}</div>
+          </div>
+          <div style={infoItem}>
+            <strong>Account</strong>
+            <div>{achInfo?.bank?.account_masked || 'N/A'}</div>
+          </div>
+          <div style={infoItem}>
+            <strong>Routing</strong>
+            <div>{achInfo?.bank?.routing_masked || 'N/A'}</div>
+          </div>
+          <div style={infoItem}>
+            <strong>Address</strong>
+            <div>{achInfo?.address || 'N/A'}</div>
+          </div>
+        </div>
+      </div>
+
       <InvoiceTable columns={columns} rows={rows} onRowClick={onRowClick} />
     </div>
   );
