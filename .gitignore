@@ -26,3 +26,4 @@ processed_invoices/
 .DS_Store
 .aider*
 *.tar.gz
+env

@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:api": "node dev-server.js",
+    "prebuild": "bash ./scripts/prebuild-metadata.sh",
     "build": "next build",
     "preview": "next start",
     "start": "next start",

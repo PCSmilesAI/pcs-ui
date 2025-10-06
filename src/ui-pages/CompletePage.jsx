@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
 
