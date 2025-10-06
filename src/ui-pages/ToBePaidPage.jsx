@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
@@ -14,6 +14,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const [error, setError] = useState(null);
   const { handleInvoiceRowClick } = useInvoiceClick();
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
+  
 
   // Load invoice data from the queue (live API)
   useEffect(() => {

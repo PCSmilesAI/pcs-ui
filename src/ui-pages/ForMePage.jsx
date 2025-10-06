@@ -147,7 +147,6 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
             if (daysDiff < 0 || daysDiff > days) return false;
           }
         }
-
         return true;
       } catch (filterError) {
         console.error('❌ Error applying filters for row:', row, filterError);

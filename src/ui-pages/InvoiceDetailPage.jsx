@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { fetchQboCategories } from '../lib/categoriesClient';
+import ACHBadge from '../ui/ach/ACHBadge';
+import { useVendorAchMap } from '../ui/ach/useVendorAch';
 
 /**
  * Detail view for a single invoice. Displays high level summary
@@ -36,6 +38,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [lineCategories, setLineCategories] = useState({});
   const [loadingLineCategories, setLoadingLineCategories] = useState(false);
+  const { getStatusForVendor } = useVendorAchMap();
 
   useEffect(() => {
     setPaymentAmount(invoice?.amount || invoice?.total || '');
@@ -797,7 +800,10 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           </button>
           <div style={summaryStyle}>
             <span>{invoice?.invoice || invoice?.invoice_number || 'N/A'}</span>
-            <span>{invoice?.vendor || 'N/A'}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span>{invoice?.vendor || 'N/A'}</span>
+              <ACHBadge status={getStatusForVendor(invoice?.vendor)} />
+            </span>
             <span>{invoice?.amount || 'N/A'}</span>
           </div>
         </div>
