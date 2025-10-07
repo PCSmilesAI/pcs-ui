@@ -224,18 +224,27 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
           </button>
           <button
             onClick={async () => {
+              const email = prompt('Enter vendor email to send onboarding link');
+              if (!email) return;
               try {
-                const resp = await fetch('/api/vendors/onboard-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vendor }) });
+                const resp = await fetch('/api/vendors/email-onboard-link', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ vendor, email })
+                });
                 const data = await resp.json();
-                if (data?.ok && data?.url) window.open(data.url, '_blank');
-                else alert(`Failed to create onboarding link: ${data?.error || 'Unknown error'}`);
+                if (resp.ok && data?.ok) {
+                  alert(data.sent ? 'Onboarding email sent.' : `Email not configured on server. Copy this link and email manually: ${data.url}`);
+                } else {
+                  alert(`Failed to send onboarding email: ${data?.error || 'Unknown error'}`);
+                }
               } catch (e) {
-                alert('Failed to create onboarding link');
+                alert('Failed to send onboarding email');
               }
             }}
             style={{ marginLeft: 8, padding: '6px 10px', borderRadius: 8, border: '1px solid #357ab2', color: '#fff', background: '#357ab2', cursor: 'pointer' }}
           >
-            Onboard / Update ACH
+            Email ACH Onboarding
           </button>
         </div>
         <div style={achGrid}>
@@ -255,32 +264,6 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
             <strong>Address</strong>
             <div>{achInfo?.address || 'N/A'}</div>
           </div>
-        </div>
-        <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button
-            onClick={async () => {
-              const email = prompt('Enter vendor email to send onboarding link');
-              if (!email) return;
-              try {
-                const resp = await fetch('/api/vendors/email-onboard-link', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ vendor, email })
-                });
-                const data = await resp.json();
-                if (resp.ok && data?.ok) {
-                  alert(data.sent ? 'Onboarding email sent.' : `Email not configured on server. Copy this link and email manually: ${data.url}`);
-                } else {
-                  alert(`Failed to send onboarding email: ${data?.error || 'Unknown error'}`);
-                }
-              } catch (e) {
-                alert('Failed to send onboarding email');
-              }
-            }}
-            style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #357ab2', color: '#357ab2', background: '#fff', cursor: 'pointer' }}
-          >
-            Email ACH Onboarding
-          </button>
         </div>
       </div>
 
