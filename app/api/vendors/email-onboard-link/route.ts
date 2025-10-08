@@ -78,12 +78,17 @@ export async function POST(req: NextRequest) {
 
     const { url, accountId: finalAccountId } = await ensureStripeAccountAndLink(req, vendor, accountId);
 
-    const host = process.env.SMTP_HOST || '';
-    const user = process.env.SMTP_USER || '';
-    const pass = process.env.SMTP_PASS || '';
-    const port = Number(process.env.SMTP_PORT || 587);
-    const secure = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true';
-    const from = process.env.PCS_FROM_EMAIL || 'no-reply@pcsmilesai.com';
+    const inferredHostFromImap = (() => {
+      const imap = process.env.EMAIL_IMAP_SERVER || '';
+      if (/secureserver\.net$/i.test(imap)) return 'smtp.secureserver.net';
+      return '';
+    })();
+    const host = process.env.SMTP_HOST || process.env.EMAIL_SMTP_SERVER || inferredHostFromImap || '';
+    const user = process.env.SMTP_USER || process.env.EMAIL_USER || '';
+    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS || '';
+    const port = Number(process.env.SMTP_PORT || process.env.EMAIL_SMTP_PORT || 587);
+    const secure = String((process.env.SMTP_SECURE ?? process.env.EMAIL_SMTP_SECURE) || '').toLowerCase() === 'true';
+    const from = process.env.PCS_FROM_EMAIL || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'no-reply@pcsmilesai.com';
 
     if (!host || !user || !pass) {
       console.error('[EMAIL_ONBOARD_LINK] Missing SMTP env; returning link for manual sending');
