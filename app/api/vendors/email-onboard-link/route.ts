@@ -123,7 +123,8 @@ export async function POST(req: NextRequest) {
             },
           ],
         });
-        const ok = req?.body?.Messages?.[0]?.Status === 'success';
+        const body: any = (req as any)?.body || {};
+        const ok = body?.Messages?.[0]?.Status === 'success';
         if (ok) return json(200, { ok: true, sent: true, vendor, email, accountId: finalAccountId, url, provider: 'mailjet' });
         console.warn('[EMAIL_ONBOARD_LINK][Mailjet] Non-success response', req?.body);
       } catch (e: any) {
