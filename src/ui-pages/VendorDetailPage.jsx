@@ -233,12 +233,29 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
                   body: JSON.stringify({ vendor, email })
                 });
                 const data = await resp.json();
+                const proxy = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_EMAIL_PROXY_URL)
+                  || (typeof window !== 'undefined' ? window.localStorage.getItem('EMAIL_PROXY_URL') : null);
+
+                async function tryProxySend(link) {
+                  if (!proxy || !link) return false;
+                  try {
+                    const p = await fetch(proxy, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: email, vendor, url: link }) });
+                    const pj = await p.json().catch(() => ({}));
+                    if (p.ok && (pj?.ok || pj?.sent)) { alert('Onboarding email sent.'); return true; }
+                  } catch (_) {}
+                  return false;
+                }
+
                 if (resp.ok && data?.ok) {
-                  alert(data.sent ? 'Onboarding email sent.' : `Email not configured on server. Copy this link and email manually: ${data.url}`);
+                  if (data.sent) { alert('Onboarding email sent.'); return; }
+                  // ok but not sent (server returned link). Try proxy if available
+                  const link = data?.url || '';
+                  const sentViaProxy = await tryProxySend(link);
+                  if (!sentViaProxy) {
+                    alert(`Email not configured on server. Copy this link and email manually: ${link || 'unavailable'}`);
+                  }
                 } else {
-                  // Fallback: try client-side proxy if configured
-                  const proxy = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_EMAIL_PROXY_URL)
-                    || (typeof window !== 'undefined' ? window.localStorage.getItem('EMAIL_PROXY_URL') : null);
+                  // Server failed; attempt to create onboarding link and send via proxy
                   let link = data?.url;
                   if (!link) {
                     try {
@@ -247,17 +264,8 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
                       if (mkd?.ok && mkd?.url) link = mkd.url;
                     } catch (_) {}
                   }
-                  if (proxy && link) {
-                    try {
-                      const p = await fetch(proxy, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: email, vendor, url: link }) });
-                      const pj = await p.json().catch(() => ({}));
-                      if (p.ok && (pj?.ok || pj?.sent)) {
-                        alert('Onboarding email sent (proxy).');
-                        return;
-                      }
-                    } catch (_) {}
-                  }
-                  alert(`Failed to send onboarding email: ${data?.error || 'Unknown error'}`);
+                  const sentViaProxy = await tryProxySend(link);
+                  if (!sentViaProxy) alert(`Failed to send onboarding email: ${data?.error || 'Unknown error'}`);
                 }
               } catch (e) {
                 alert('Failed to send onboarding email');
