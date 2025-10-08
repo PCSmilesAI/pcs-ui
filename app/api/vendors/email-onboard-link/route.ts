@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import nodemailer from 'nodemailer';
+import Mailjet from 'node-mailjet';
 import { loadMap, findVendorKey, setVendorStatus } from '@/lib/payments/vendorStore';
 
 export const runtime = 'nodejs';
@@ -89,6 +90,34 @@ export async function POST(req: NextRequest) {
     const port = Number(process.env.SMTP_PORT || process.env.EMAIL_SMTP_PORT || 587);
     const secure = String((process.env.SMTP_SECURE ?? process.env.EMAIL_SMTP_SECURE) || '').toLowerCase() === 'true';
     const from = process.env.PCS_FROM_EMAIL || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'no-reply@pcsmilesai.com';
+
+    const mjKey = process.env.MAILJET_API_KEY || '';
+    const mjSecret = process.env.MAILJET_API_SECRET || '';
+
+    // Prefer Mailjet HTTP API if keys provided (no SMTP ports required)
+    if (mjKey && mjSecret) {
+      try {
+        const mj = Mailjet.apiConnect(mjKey, mjSecret);
+        const fromEmail = process.env.PCS_FROM_EMAIL || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'no-reply@pcsmilesai.com';
+        const fromName = process.env.PCS_FROM_NAME || 'PCS AI';
+        const req = await mj.post('send', { version: 'v3.1' }).request({
+          Messages: [
+            {
+              From: { Email: fromEmail, Name: fromName },
+              To: [{ Email: email }],
+              Subject: `ACH Onboarding for ${vendor}`,
+              TextPart: text,
+              HTMLPart: html,
+            },
+          ],
+        });
+        const ok = req?.body?.Messages?.[0]?.Status === 'success';
+        if (ok) return json(200, { ok: true, sent: true, vendor, email, accountId: finalAccountId, url, provider: 'mailjet' });
+        console.warn('[EMAIL_ONBOARD_LINK][Mailjet] Non-success response', req?.body);
+      } catch (e: any) {
+        console.error('[EMAIL_ONBOARD_LINK][Mailjet] Error', e?.message || e);
+      }
+    }
 
     if (!host || !user || !pass) {
       console.error('[EMAIL_ONBOARD_LINK] Missing SMTP env; returning link for manual sending');

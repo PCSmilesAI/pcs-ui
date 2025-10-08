@@ -36,7 +36,8 @@
     "simple-oauth2": "^5.1.0",
     "sqlite3": "^5.1.7",
     "stripe": "^16.6.0",
-    "nodemailer": "^6.9.11"
+    "nodemailer": "^6.9.11",
+    "node-mailjet": "^6.0.6"
   },
   "devDependencies": {
     "@types/node": "24.3.1",
