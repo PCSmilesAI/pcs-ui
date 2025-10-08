@@ -158,12 +158,15 @@ export async function POST(req: NextRequest) {
     const text = baseText;
     const html = baseHtml;
 
-    // Try multiple SMTP configs (primary then common GoDaddy variants)
-    const attempts = [
-      { host, port, secure },
-      { host: host || 'smtpout.secureserver.net', port: 465, secure: true },
-      { host: host || 'smtpout.secureserver.net', port: 587, secure: false },
-      { host: host || 'smtp.secureserver.net', port: 587, secure: false },
+    // Try multiple SMTP configs (primary, GoDaddy variants, then Mailjet 2525)
+    type Attempt = { host: string; port: number; secure: boolean; authUser?: string; authPass?: string };
+    const attempts: Attempt[] = [
+      { host, port, secure, authUser: user, authPass: pass },
+      { host: host || 'smtpout.secureserver.net', port: 465, secure: true, authUser: user, authPass: pass },
+      { host: host || 'smtpout.secureserver.net', port: 587, secure: false, authUser: user, authPass: pass },
+      { host: host || 'smtp.secureserver.net', port: 587, secure: false, authUser: user, authPass: pass },
+      // Mailjet SMTP fallback on 2525 (commonly open when 465/587 are blocked)
+      { host: 'in-v3.mailjet.com', port: 2525, secure: false, authUser: process.env.MAILJET_API_KEY || user, authPass: process.env.MAILJET_API_SECRET || pass },
     ];
     let lastErr: any = null;
     for (const cfg of attempts) {
@@ -173,7 +176,7 @@ export async function POST(req: NextRequest) {
           host: cfg.host,
           port: cfg.port,
           secure: cfg.secure,
-          auth: { user, pass },
+          auth: { user: cfg.authUser || user, pass: cfg.authPass || pass },
           connectionTimeout: 10000,
           greetingTimeout: 8000,
           socketTimeout: 15000,
