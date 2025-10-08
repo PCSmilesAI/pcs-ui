@@ -91,6 +91,18 @@ export async function POST(req: NextRequest) {
     const secure = String((process.env.SMTP_SECURE ?? process.env.EMAIL_SMTP_SECURE) || '').toLowerCase() === 'true';
     const from = process.env.PCS_FROM_EMAIL || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'no-reply@pcsmilesai.com';
 
+    // Prepare email content used by both Mailjet and SMTP
+    const subject = `ACH Onboarding for ${vendor}`;
+    const text = `Hello,\n\nPlease complete ACH onboarding for ${vendor} using the secure link below:\n\n${url}\n\nThis link is provided by PCS AI via Stripe. If you did not expect this email, please contact support.`;
+    const html = `
+      <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;">
+        <p>Hello,</p>
+        <p>Please complete ACH onboarding for <strong>${vendor}</strong> using the secure link below:</p>
+        <p><a href="${url}" target="_blank" rel="noopener noreferrer">Complete ACH Onboarding</a></p>
+        <p style="color:#6b7280;font-size:12px;">This link is provided by PCS AI via Stripe.</p>
+      </div>
+    `;
+
     const mjKey = process.env.MAILJET_API_KEY || '';
     const mjSecret = process.env.MAILJET_API_SECRET || '';
 
@@ -105,7 +117,7 @@ export async function POST(req: NextRequest) {
             {
               From: { Email: fromEmail, Name: fromName },
               To: [{ Email: email }],
-              Subject: `ACH Onboarding for ${vendor}`,
+              Subject: subject,
               TextPart: text,
               HTMLPart: html,
             },
