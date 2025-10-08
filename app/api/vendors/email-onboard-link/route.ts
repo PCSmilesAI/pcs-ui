@@ -108,27 +108,44 @@ export async function POST(req: NextRequest) {
 
     // Prefer Mailjet HTTP API if keys provided (no SMTP ports required)
     if (mjKey && mjSecret) {
-      try {
-        const mj = Mailjet.apiConnect(mjKey, mjSecret);
-        const fromEmail = process.env.PCS_FROM_EMAIL || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'no-reply@pcsmilesai.com';
-        const fromName = process.env.PCS_FROM_NAME || 'PCS AI';
-        const req = await mj.post('send', { version: 'v3.1' }).request({
-          Messages: [
-            {
-              From: { Email: fromEmail, Name: fromName },
-              To: [{ Email: email }],
-              Subject: baseSubject,
-              TextPart: baseText,
-              HTMLPart: baseHtml,
-            },
-          ],
-        });
-        const body: any = (req as any)?.body || {};
-        const ok = body?.Messages?.[0]?.Status === 'success';
-        if (ok) return json(200, { ok: true, sent: true, vendor, email, accountId: finalAccountId, url, provider: 'mailjet' });
-        console.warn('[EMAIL_ONBOARD_LINK][Mailjet] Non-success response', req?.body);
-      } catch (e: any) {
-        console.error('[EMAIL_ONBOARD_LINK][Mailjet] Error', e?.message || e);
+      const fromEmail = process.env.PCS_FROM_EMAIL || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'no-reply@pcsmilesai.com';
+      const fromName = process.env.PCS_FROM_NAME || 'PCS AI';
+
+      async function tryMailjet(host: string): Promise<boolean> {
+        try {
+          const mj = Mailjet.apiConnect(mjKey, mjSecret, {
+            config: { host },
+            options: { timeout: 10000 },
+          } as any);
+          const req = await mj.post('send', { version: 'v3.1' }).request({
+            Messages: [
+              {
+                From: { Email: fromEmail, Name: fromName },
+                To: [{ Email: email }],
+                Subject: baseSubject,
+                TextPart: baseText,
+                HTMLPart: baseHtml,
+              },
+            ],
+          });
+          const body: any = (req as any)?.body || {};
+          const ok = body?.Messages?.[0]?.Status === 'success';
+          if (!ok) console.warn('[EMAIL_ONBOARD_LINK][Mailjet] Non-success response', body);
+          return !!ok;
+        } catch (e: any) {
+          console.error('[EMAIL_ONBOARD_LINK][Mailjet] Error', host, e?.message || e);
+          return false;
+        }
+      }
+
+      const prefHost = (process.env.MAILJET_API_URL?.trim()) || ((process.env.MAILJET_REGION || '').toLowerCase() === 'eu' ? 'api.eu.mailjet.com' : 'api.mailjet.com');
+      const hosts = Array.from(new Set([prefHost, 'api.mailjet.com', 'api.eu.mailjet.com']));
+
+      for (let i = 0; i < hosts.length; i++) {
+        const ok = await tryMailjet(hosts[i]);
+        if (ok) return json(200, { ok: true, sent: true, vendor, email, accountId: finalAccountId, url, provider: 'mailjet', host: hosts[i] });
+        // brief backoff before next attempt
+        await new Promise((r) => setTimeout(r, 400));
       }
     }
 
