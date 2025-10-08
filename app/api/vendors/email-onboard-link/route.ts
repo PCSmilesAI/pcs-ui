@@ -79,6 +79,31 @@ export async function POST(req: NextRequest) {
 
     const { url, accountId: finalAccountId } = await ensureStripeAccountAndLink(req, vendor, accountId);
 
+    // Prefer a server-side email proxy (Vercel) to bypass browser CORS and any SMTP egress limits
+    const proxyUrlFromBody: string = (body.proxyUrl || body.emailProxyUrl || '').trim();
+    const proxyUrl = (proxyUrlFromBody || process.env.EMAIL_PROXY_URL || process.env.NEXT_PUBLIC_EMAIL_PROXY_URL || '').trim();
+    if (proxyUrl) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 10000);
+        const resp = await fetch(proxyUrl, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ to: email, vendor, url }),
+          signal: controller.signal,
+        });
+        clearTimeout(timer);
+        const data = await resp.json().catch(() => ({} as any));
+        const ok = resp.ok && !!(data as any)?.ok;
+        if (ok) {
+          return json(200, { ok: true, sent: true, vendor, email, accountId: finalAccountId, url, provider: 'proxy', proxyUrl });
+        }
+        console.warn('[EMAIL_ONBOARD_LINK][Proxy] Non-success response', resp.status, data);
+      } catch (e: any) {
+        console.warn('[EMAIL_ONBOARD_LINK][Proxy] Error', e?.message || e);
+      }
+    }
+
     const inferredHostFromImap = (() => {
       const imap = process.env.EMAIL_IMAP_SERVER || '';
       if (/secureserver\.net$/i.test(imap)) return 'smtp.secureserver.net';
