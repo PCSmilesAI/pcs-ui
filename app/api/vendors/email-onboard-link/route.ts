@@ -149,8 +149,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (!host || !user || !pass) {
-      console.error('[EMAIL_ONBOARD_LINK] Missing SMTP env; returning link for manual sending');
+    const hasSmtpEnv = !!(host && user && pass);
+    if (!hasSmtpEnv && !(process.env.MAILJET_API_KEY && process.env.MAILJET_API_SECRET)) {
+      console.error('[EMAIL_ONBOARD_LINK] Missing SMTP and Mailjet creds; returning link for manual sending');
       return json(200, { ok: true, sent: false, vendor, email, accountId: finalAccountId, url });
     }
 
@@ -160,14 +161,19 @@ export async function POST(req: NextRequest) {
 
     // Try multiple SMTP configs (primary, GoDaddy variants, then Mailjet 2525)
     type Attempt = { host: string; port: number; secure: boolean; authUser?: string; authPass?: string };
-    const attempts: Attempt[] = [
-      { host, port, secure, authUser: user, authPass: pass },
-      { host: host || 'smtpout.secureserver.net', port: 465, secure: true, authUser: user, authPass: pass },
-      { host: host || 'smtpout.secureserver.net', port: 587, secure: false, authUser: user, authPass: pass },
-      { host: host || 'smtp.secureserver.net', port: 587, secure: false, authUser: user, authPass: pass },
-      // Mailjet SMTP fallback on 2525 (commonly open when 465/587 are blocked)
-      { host: 'in-v3.mailjet.com', port: 2525, secure: false, authUser: process.env.MAILJET_API_KEY || user, authPass: process.env.MAILJET_API_SECRET || pass },
-    ];
+    const attempts: Attempt[] = [];
+    if (hasSmtpEnv) {
+      attempts.push(
+        { host, port, secure, authUser: user, authPass: pass },
+        { host: host || 'smtpout.secureserver.net', port: 465, secure: true, authUser: user, authPass: pass },
+        { host: host || 'smtpout.secureserver.net', port: 587, secure: false, authUser: user, authPass: pass },
+        { host: host || 'smtp.secureserver.net', port: 587, secure: false, authUser: user, authPass: pass },
+      );
+    }
+    // Mailjet SMTP fallback on 2525 (open on this server)
+    if (process.env.MAILJET_API_KEY && process.env.MAILJET_API_SECRET) {
+      attempts.push({ host: 'in-v3.mailjet.com', port: 2525, secure: false, authUser: process.env.MAILJET_API_KEY, authPass: process.env.MAILJET_API_SECRET });
+    }
     let lastErr: any = null;
     for (const cfg of attempts) {
       try {
