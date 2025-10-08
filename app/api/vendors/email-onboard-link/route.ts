@@ -95,8 +95,6 @@ export async function POST(req: NextRequest) {
       return json(200, { ok: true, sent: false, vendor, email, accountId: finalAccountId, url });
     }
 
-    const transporter = nodemailer.createTransport({ host, port, secure, auth: { user, pass } });
-
     const subject = `ACH Onboarding for ${vendor}`;
     const text = `Hello,
 
@@ -115,9 +113,36 @@ This link is provided by PCS AI via Stripe. If you did not expect this email, pl
       </div>
     `;
 
-    await transporter.sendMail({ from, to: email, subject, text, html });
-
-    return json(200, { ok: true, sent: true, vendor, email, accountId: finalAccountId, url });
+    // Try multiple SMTP configs (primary then common GoDaddy variants)
+    const attempts = [
+      { host, port, secure },
+      { host: host || 'smtpout.secureserver.net', port: 465, secure: true },
+      { host: host || 'smtpout.secureserver.net', port: 587, secure: false },
+      { host: host || 'smtp.secureserver.net', port: 587, secure: false },
+    ];
+    let lastErr: any = null;
+    for (const cfg of attempts) {
+      try {
+        if (!cfg.host) continue;
+        const tx = nodemailer.createTransport({
+          host: cfg.host,
+          port: cfg.port,
+          secure: cfg.secure,
+          auth: { user, pass },
+          connectionTimeout: 10000,
+          greetingTimeout: 8000,
+          socketTimeout: 15000,
+        });
+        await tx.verify().catch(() => undefined);
+        await tx.sendMail({ from, to: email, subject, text, html });
+        return json(200, { ok: true, sent: true, vendor, email, accountId: finalAccountId, url, smtp: cfg });
+      } catch (e: any) {
+        lastErr = e;
+        console.warn('[EMAIL_ONBOARD_LINK] SMTP send failed', cfg, e?.message || e);
+      }
+    }
+    console.error('[EMAIL_ONBOARD_LINK] All SMTP attempts failed', lastErr?.message || lastErr);
+    return json(500, { ok: false, error: lastErr?.message || 'email send failed', url });
   } catch (err: any) {
     console.error('[EMAIL_ONBOARD_LINK] Error:', err?.message || err);
     return json(500, { ok: false, error: err?.message || 'unknown error' });
