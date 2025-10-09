@@ -17,6 +17,60 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
   const { getStatusForVendor } = useVendorAchMap();
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
+  
+  async function reloadList() {
+    try {
+      setLoading(true);
+      const data = await fetchInvoiceQueue({ limit: 5000 });
+      const transformedData = data
+        .filter(invoice => (invoice.approved === true) && (invoice.status === 'approved'))
+        .map(invoice => ({
+          invoice: invoice.invoice_number || 'Unknown',
+          invoice_number: invoice.invoice_number,
+          vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+          amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
+          office: invoice.office_location || invoice.clinic_id || 'Unknown',
+          dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A'),
+          invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
+          displayStatus: 'Pending Payment',
+          invoice_date: invoice.invoice_date,
+          due_date: invoice.due_date,
+          json_path: invoice.json_path,
+          source_file: invoice.source_file,
+          pdf_path: invoice.pdf_path,
+          timestamp: invoice.timestamp,
+          assigned_to: invoice.assigned_to,
+          approved: invoice.approved,
+          status: invoice.status,
+          line_items: invoice.line_items || [],
+        }));
+      setInvoices(transformedData);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      setInvoices([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function bulkUpdate(status, approvedVal) {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
+    await Promise.all(
+      selectedRows.map((r) =>
+        fetch('/api/update-invoice-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ invoice_number: r.invoice_number, status, approved: approvedVal }),
+        }).catch(() => null)
+      )
+    );
+    setSelectedIds(new Set());
+    await reloadList();
+  }
   
 
   // Load invoice data from the queue (live API)
@@ -196,16 +250,16 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
       {selectedIds.size > 0 && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
           <button
-            onClick={() => alert('Paid selected (bulk) — wire to same paid action as details')}
+            onClick={() => bulkUpdate('completed', true)}
             style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
           >
-            Pay
+            Paid
           </button>
           <button
-            onClick={() => alert('Remove selected (bulk) — wire to same remove as details')}
+            onClick={() => bulkUpdate('rejected', false)}
             style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
           >
-            Remove
+            Reject
           </button>
         </div>
       )}
@@ -215,7 +269,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         onRowClick={rowClickHandler}
         selectable
         selectedIds={selectedIds}
-        getRowId={(r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`}
+        getRowId={getRowId}
         onToggleRow={(id, row, checked) => {
           setSelectedIds((prev) => {
             const next = new Set(prev);

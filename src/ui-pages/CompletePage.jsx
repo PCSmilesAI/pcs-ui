@@ -14,6 +14,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
   const { handleInvoiceRowClick } = useInvoiceClick();
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
 
   // Load invoice data from the queue
   useEffect(() => {
@@ -75,6 +76,57 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
 
     loadInvoices();
   }, []);
+
+  async function reloadList() {
+    try {
+      setLoading(true);
+      const response = await fetch(`/invoice_queue.json?t=${Date.now()}`);
+      if (!response.ok) throw new Error(`Failed to load invoices: ${response.status}`);
+      let data = await response.json();
+      const transformedData = data
+        .filter(invoice => invoice.status === 'completed')
+        .map(invoice => ({
+          invoice: invoice.invoice_number || 'Unknown',
+          invoice_number: invoice.invoice_number,
+          vendor: invoice.vendor || 'Unknown',
+          amount: `$${invoice.total || '0.00'}`,
+          office: invoice.clinic_id || 'Unknown',
+          dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
+          invoice_date: invoice.invoice_date,
+          due_date: invoice.due_date,
+          json_path: invoice.json_path,
+          pdf_path: invoice.pdf_path,
+          timestamp: invoice.timestamp,
+          assigned_to: invoice.assigned_to,
+          approved: invoice.approved,
+          status: invoice.status
+        }));
+      setInvoices(transformedData);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      setInvoices([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function bulkRemove() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
+    await Promise.all(
+      selectedRows.map((r) =>
+        fetch('/api/update-invoice-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ invoice_number: r.invoice_number, status: 'removed', approved: false }),
+        }).catch(() => null)
+      )
+    );
+    setSelectedIds(new Set());
+    await reloadList();
+  }
 
   const columns = [
     { key: 'invoice', label: 'Invoice' },
@@ -148,7 +200,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
       {selectedIds.size > 0 && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
           <button
-            onClick={() => alert('Remove selected (bulk) — wire to same remove as details')}
+            onClick={bulkRemove}
             style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
           >
             Remove
@@ -161,7 +213,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
         onRowClick={rowClickHandler}
         selectable
         selectedIds={selectedIds}
-        getRowId={(r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`}
+        getRowId={getRowId}
         onToggleRow={(id, row, checked) => {
           setSelectedIds((prev) => {
             const next = new Set(prev);
