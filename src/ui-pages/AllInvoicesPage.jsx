@@ -10,6 +10,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
   const searchParams = useSearchParams();
   const { handleInvoiceRowClick } = useInvoiceClick();
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
+  const [selectedIds, setSelectedIds] = useState(new Set());
   const spQuery = (searchParams.get('search') || '').trim().toLowerCase();
   const spFilters = {
     vendor: searchParams.get('vendor') || undefined,
@@ -159,7 +160,40 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           {filteredData.length} invoice{filteredData.length !== 1 ? 's' : ''} found
         </p>
       </div>
-      <InvoiceTable rows={filteredData} columns={columns} onRowClick={rowClickHandler} />
+      {selectedIds.size > 0 && (
+        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <button
+            onClick={() => alert('Remove selected (bulk) — wire to same remove as details for completed')}
+            style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
+          >
+            Remove
+          </button>
+        </div>
+      )}
+      <InvoiceTable
+        rows={filteredData}
+        columns={columns}
+        onRowClick={rowClickHandler}
+        selectable
+        selectedIds={selectedIds}
+        getRowId={(r) => r.invoice_number || r.invoice}
+        onToggleRow={(id, row, checked) => {
+          setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (checked) next.add(id); else next.delete(id);
+            return next;
+          });
+        }}
+        onToggleAll={(_allSelected, ids) => {
+          setSelectedIds((prev) => {
+            const next = new Set(prev);
+            const currentlyAllSelected = ids.every((id) => next.has(id));
+            if (currentlyAllSelected) ids.forEach((id) => next.delete(id));
+            else ids.forEach((id) => next.add(id));
+            return next;
+          });
+        }}
+      />
     </div>
   );
 }

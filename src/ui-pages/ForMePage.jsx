@@ -12,6 +12,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [qboConnected, setQboConnected] = useState(false);
   const [qboLoading, setQboLoading] = useState(true);
   const { handleInvoiceRowClick } = useInvoiceClick();
+  const [selectedIds, setSelectedIds] = useState(new Set());
   const searchParams = useSearchParams();
   const { getStatusForVendor } = useVendorAchMap();
 
@@ -199,6 +200,23 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
         </p>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <button
+            onClick={() => alert('Approve selected (bulk) — wire to same action as invoice details')}
+            style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
+          >
+            Approve
+          </button>
+          <button
+            onClick={() => alert('Reject selected (bulk) — wire to same action as invoice details')}
+            style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
+          >
+            Reject
+          </button>
+        </div>
+      )}
+
       <div
         className={`mb-6 p-4 border rounded-lg ${
           qboConnected ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
@@ -242,6 +260,28 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
         rows={filteredRows}
         columns={columns}
         onRowClick={handleInvoiceRowClick}
+        selectable
+        selectedIds={selectedIds}
+        getRowId={(r) => r.invoice_number || r.invoice}
+        onToggleRow={(id, row, checked) => {
+          setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (checked) next.add(id); else next.delete(id);
+            return next;
+          });
+        }}
+        onToggleAll={(_allSelected, ids) => {
+          setSelectedIds((prev) => {
+            const next = new Set(prev);
+            const currentlyAllSelected = ids.every((id) => next.has(id));
+            if (currentlyAllSelected) {
+              ids.forEach((id) => next.delete(id));
+            } else {
+              ids.forEach((id) => next.add(id));
+            }
+            return next;
+          });
+        }}
       />
     </div>
   );
