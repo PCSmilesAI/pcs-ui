@@ -11,6 +11,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
   const { handleInvoiceRowClick } = useInvoiceClick();
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
   const spQuery = (searchParams.get('search') || '').trim().toLowerCase();
   const spFilters = {
     vendor: searchParams.get('vendor') || undefined,
@@ -74,6 +75,63 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
 
     loadInvoices();
   }, []);
+
+  async function reloadList() {
+    try {
+      setLoading(true);
+      const data = await fetchInvoiceQueue({ limit: 5000 });
+      const transformed = data.map((invoice) => {
+        const formatDate = (dateString) => {
+          if (!dateString) return 'N/A';
+          const parsed = new Date(dateString);
+          if (Number.isNaN(parsed.getTime())) return 'N/A';
+          return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+        };
+        return {
+          invoice: invoice.invoice_number || 'Unknown',
+          invoice_number: invoice.invoice_number,
+          vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+          amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
+          office: invoice.office_location || invoice.clinic_id || 'Unknown',
+          status: invoice.status || 'New',
+          category: invoice.category || 'Other',
+          invoiceDate: formatDate(invoice.invoice_date || null),
+          dueDate: formatDate(invoice.due_date || invoice.invoice_date || null),
+          invoice_date: invoice.invoice_date,
+          due_date: invoice.due_date,
+          json_path: invoice.json_path,
+          pdf_path: invoice.pdf_path,
+          timestamp: invoice.timestamp,
+          assigned_to: invoice.assigned_to,
+          approved: invoice.approved,
+        };
+      });
+      setInvoices(transformed);
+      setError(null);
+    } catch (e) {
+      setError(e?.message || 'Failed to load invoices');
+      setInvoices([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function bulkRemove() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const selectedRows = filteredData.filter((r, i) => ids.includes(getRowId(r, i)));
+    await Promise.all(
+      selectedRows.map((r) =>
+        fetch('/api/update-invoice-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ invoice_number: r.invoice_number, status: 'removed', approved: false }),
+        }).catch(() => null)
+      )
+    );
+    setSelectedIds(new Set());
+    await reloadList();
+  }
 
   const columns = [
     { key: 'invoice', label: 'Invoice' },
@@ -163,7 +221,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
       {selectedIds.size > 0 && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
           <button
-            onClick={() => alert('Remove selected (bulk) — wire to same remove as details for completed')}
+            onClick={bulkRemove}
             style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
           >
             Remove
@@ -176,7 +234,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
         onRowClick={rowClickHandler}
         selectable
         selectedIds={selectedIds}
-        getRowId={(r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`}
+        getRowId={getRowId}
         onToggleRow={(id, row, checked) => {
           setSelectedIds((prev) => {
             const next = new Set(prev);
