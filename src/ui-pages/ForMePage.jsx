@@ -13,6 +13,70 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [qboLoading, setQboLoading] = useState(true);
   const { handleInvoiceRowClick } = useInvoiceClick();
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
+
+  async function reloadList() {
+    try {
+      const data = await fetchInvoiceQueue({ limit: 5000 });
+      const transformed = data
+        .filter((invoice) => {
+          const status = invoice.status;
+          const approved = invoice.approved;
+          const isNotApproved = approved !== true;
+          const isNotApprovedStatus = status !== 'approved';
+          return isNotApproved && isNotApprovedStatus;
+        })
+        .map((invoice) => {
+          const vendorName = invoice.vendor_name || invoice.vendor || 'Unknown';
+          const rawInvoiceDate = invoice.invoice_date || null;
+          const rawDueDate = invoice.due_date || null;
+          const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            const parsed = new Date(dateString);
+            if (Number.isNaN(parsed.getTime())) return 'N/A';
+            return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+          };
+          return {
+            invoice: invoice.invoice_number || 'Unknown',
+            invoice_number: invoice.invoice_number,
+            vendor: vendorName,
+            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
+            office: invoice.office_location || invoice.clinic_id || 'Unknown',
+            dueDate: formatDate(rawDueDate || rawInvoiceDate),
+            invoiceDate: formatDate(rawInvoiceDate),
+            category: invoice.category || 'Other',
+            invoice_date: rawInvoiceDate,
+            due_date: rawDueDate,
+            json_path: invoice.json_path,
+            source_file: invoice.source_file,
+            pdf_path: invoice.pdf_path,
+            timestamp: invoice.timestamp,
+            assigned_to: invoice.assigned_to,
+            approved: invoice.approved,
+            status: invoice.status,
+            line_items: invoice.line_items || [],
+          };
+        });
+      setInvoices(transformed);
+    } catch (_) {}
+  }
+
+  async function bulkUpdate(status, approvedVal) {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
+    await Promise.all(
+      selectedRows.map((r) =>
+        fetch('/api/update-invoice-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ invoice_number: r.invoice_number, status, approved: approvedVal }),
+        }).catch(() => null)
+      )
+    );
+    setSelectedIds(new Set());
+    await reloadList();
+  }
   const searchParams = useSearchParams();
   const { getStatusForVendor } = useVendorAchMap();
 
@@ -203,13 +267,13 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
       {selectedIds.size > 0 && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
           <button
-            onClick={() => alert('Approve selected (bulk) — wire to same action as invoice details')}
+            onClick={() => bulkUpdate('approved', true)}
             style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
           >
             Approve
           </button>
           <button
-            onClick={() => alert('Reject selected (bulk) — wire to same action as invoice details')}
+            onClick={() => bulkUpdate('rejected', false)}
             style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
           >
             Reject
@@ -262,7 +326,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
         onRowClick={handleInvoiceRowClick}
         selectable
         selectedIds={selectedIds}
-        getRowId={(r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`}
+        getRowId={getRowId}
         onToggleRow={(id, row, checked) => {
           setSelectedIds((prev) => {
             const next = new Set(prev);
