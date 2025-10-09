@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import nodemailer from 'nodemailer';
 import Mailjet from 'node-mailjet';
+import https from 'https';
 import { loadMap, findVendorKey, setVendorStatus } from '@/lib/payments/vendorStore';
 
 export const runtime = 'nodejs';
@@ -10,13 +11,136 @@ export const dynamic = 'force-dynamic';
 function json(status: number, body: unknown) {
   return new NextResponse(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
+    headers: {
+      'content-type': 'application/json',
+      'cache-control': 'no-store',
+      // CORS for browser callers when needed
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'POST,OPTIONS',
+      'access-control-allow-headers': 'Content-Type',
+    },
+  });
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'access-control-allow-origin': '*',
+      'access-control-allow-methods': 'POST,OPTIONS',
+      'access-control-allow-headers': 'Content-Type',
+    },
   });
 }
 
 function isValidEmail(address: string | undefined | null) {
   if (!address) return false;
   return /.+@.+\..+/.test(address);
+}
+
+function maskEmail(address: string): string {
+  try {
+    const [local, domain] = String(address || '').split('@');
+    if (!domain) return '***';
+    if (!local) return `***@${domain}`;
+    const first = local.substring(0, 1);
+    return `${first}${'*'.repeat(Math.max(1, local.length - 1))}@${domain}`;
+  } catch {
+    return '***';
+  }
+}
+
+async function sendViaProxyFetch(proxyUrl: string, payload: any, debugInfo: any) {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+    console.log('[EMAIL_ONBOARD_LINK][Proxy] START fetch', { url: proxyUrl });
+    const resp = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    const text = await resp.text();
+    debugInfo.method = 'fetch';
+    debugInfo.status = resp.status;
+    debugInfo.snippet = text.slice(0, 180);
+    if (!resp.ok) {
+      console.warn('[EMAIL_ONBOARD_LINK][Proxy] Non-success response (fetch)', resp.status, debugInfo.snippet);
+      return { ok: false };
+    }
+    let data: any = {};
+    try { data = JSON.parse(text); } catch {}
+    const ok = !!data?.ok;
+    return { ok };
+  } catch (e: any) {
+    debugInfo.method = 'fetch';
+    debugInfo.error = e?.name ? `${e.name}: ${e.message || e}` : (e?.message || String(e));
+    console.warn('[EMAIL_ONBOARD_LINK][Proxy] Error (fetch)', debugInfo.error);
+    return { ok: false };
+  }
+}
+
+async function sendViaProxyHttps(proxyUrl: string, payload: any, debugInfo: any) {
+  return await new Promise<{ ok: boolean }>((resolve) => {
+    try {
+      const urlObj = new URL(proxyUrl);
+      const bodyStr = JSON.stringify(payload);
+      const options: https.RequestOptions = {
+        method: 'POST',
+        hostname: urlObj.hostname,
+        port: urlObj.port || 443,
+        path: urlObj.pathname + (urlObj.search || ''),
+        headers: {
+          'content-type': 'application/json',
+          'content-length': Buffer.byteLength(bodyStr),
+        },
+        timeout: 6000,
+      };
+
+      console.log('[EMAIL_ONBOARD_LINK][Proxy] START https', { host: options.hostname, path: options.path });
+      const req = https.request(options, (res) => {
+        const chunks: Buffer[] = [];
+        res.on('data', (d) => chunks.push(d));
+        res.on('end', () => {
+          const txt = Buffer.concat(chunks).toString('utf8');
+          debugInfo.method = 'https';
+          debugInfo.status = res.statusCode || 0;
+          debugInfo.snippet = txt.slice(0, 180);
+          if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+            console.warn('[EMAIL_ONBOARD_LINK][Proxy] Non-success response (https)', res.statusCode, debugInfo.snippet);
+            resolve({ ok: false });
+            return;
+          }
+          let data: any = {};
+          try { data = JSON.parse(txt); } catch {}
+          const ok = !!data?.ok;
+          resolve({ ok });
+        });
+      });
+      req.on('timeout', () => {
+        debugInfo.method = 'https';
+        debugInfo.error = 'timeout';
+        console.warn('[EMAIL_ONBOARD_LINK][Proxy] Error (https) timeout');
+        req.destroy(new Error('timeout'));
+        resolve({ ok: false });
+      });
+      req.on('error', (err) => {
+        debugInfo.method = 'https';
+        debugInfo.error = err?.message || String(err);
+        console.warn('[EMAIL_ONBOARD_LINK][Proxy] Error (https)', debugInfo.error);
+        resolve({ ok: false });
+      });
+      req.write(bodyStr);
+      req.end();
+    } catch (e: any) {
+      debugInfo.method = 'https';
+      debugInfo.error = e?.message || String(e);
+      console.warn('[EMAIL_ONBOARD_LINK][Proxy] Error (https setup)', debugInfo.error);
+      resolve({ ok: false });
+    }
+  });
 }
 
 async function ensureStripeAccountAndLink(req: NextRequest, vendorParam: string, accountId?: string) {
@@ -69,6 +193,7 @@ async function ensureStripeAccountAndLink(req: NextRequest, vendorParam: string,
 
 export async function POST(req: NextRequest) {
   try {
+    const debugFlag = req.nextUrl?.searchParams?.get('debug') === 'true';
     const body = await req.json().catch(() => ({}));
     const vendor: string = (body.vendor || '').trim();
     const email: string = (body.email || '').trim();
@@ -82,26 +207,29 @@ export async function POST(req: NextRequest) {
     // Prefer a server-side email proxy (Vercel) to bypass browser CORS and any SMTP egress limits
     const proxyUrlFromBody: string = (body.proxyUrl || body.emailProxyUrl || '').trim();
     const proxyUrl = (proxyUrlFromBody || process.env.EMAIL_PROXY_URL || process.env.NEXT_PUBLIC_EMAIL_PROXY_URL || '').trim();
+    const debugInfo: any = { triedProxy: false };
     if (proxyUrl) {
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 10000);
-        const resp = await fetch(proxyUrl, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ to: email, vendor, url }),
-          signal: controller.signal,
-        });
-        clearTimeout(timer);
-        const data = await resp.json().catch(() => ({} as any));
-        const ok = resp.ok && !!(data as any)?.ok;
-        if (ok) {
-          return json(200, { ok: true, sent: true, vendor, email, accountId: finalAccountId, url, provider: 'proxy', proxyUrl });
-        }
-        console.warn('[EMAIL_ONBOARD_LINK][Proxy] Non-success response', resp.status, data);
-      } catch (e: any) {
-        console.warn('[EMAIL_ONBOARD_LINK][Proxy] Error', e?.message || e);
+      debugInfo.triedProxy = true;
+      debugInfo.proxyUrlUsed = proxyUrl;
+      const payload = { to: email, vendor, url };
+      const maskedTo = maskEmail(email);
+      console.log('[EMAIL_ONBOARD_LINK][Proxy] Attempt', { vendor, to: maskedTo, proxyUrl });
+      let result = await sendViaProxyFetch(proxyUrl, payload, debugInfo);
+      if (!result.ok) {
+        // Retry via https
+        result = await sendViaProxyHttps(proxyUrl, payload, debugInfo);
       }
+      if (result.ok) {
+        const resBody: any = { ok: true, sent: true, vendor, email, accountId: finalAccountId, url, delivery: debugInfo.method === 'https' ? 'https' : 'proxy', provider: 'proxy', proxyUrl };
+        if (debugFlag) resBody.debug = { triedProxy: true, proxyUrlUsed: proxyUrl, method: debugInfo.method, status: debugInfo.status };
+        return json(200, resBody);
+      }
+      console.warn('[EMAIL_ONBOARD_LINK][Proxy] Both attempts failed', { status: debugInfo.status, method: debugInfo.method, snippet: debugInfo.snippet });
+      if (debugFlag) {
+        // Return manual link with debug info
+        return json(200, { ok: true, sent: false, vendor, email, accountId: finalAccountId, url, debug: { triedProxy: true, proxyUrlUsed: proxyUrl, method: debugInfo.method, status: debugInfo.status, snippet: debugInfo.snippet } });
+      }
+      // fall through to legacy SMTP/Mailjet flow
     }
 
     const inferredHostFromImap = (() => {
