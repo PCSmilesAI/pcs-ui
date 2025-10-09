@@ -4,6 +4,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { useVendorAchMap } from '../ui/ach/useVendorAch';
 
 export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
   const searchParams = useSearchParams();
@@ -17,11 +18,13 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
     minAmount: searchParams.get('minAmount') || undefined,
     maxAmount: searchParams.get('maxAmount') || undefined,
     dueWithin: searchParams.get('dueWithin') || undefined,
+    ach: searchParams.get('ach') || undefined,
   };
 
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { getStatusForVendor } = useVendorAchMap();
 
   useEffect(() => {
     const loadInvoices = async () => {
@@ -101,6 +104,12 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
         if (effectiveFilters.vendor && row.vendor !== effectiveFilters.vendor) return false;
         if (effectiveFilters.office && row.office !== effectiveFilters.office) return false;
         if (effectiveFilters.category && row.category !== effectiveFilters.category) return false;
+
+        // Vendor ACH Status filter
+        if (effectiveFilters.ach) {
+          const status = (getStatusForVendor(row.vendor) || '').toLowerCase();
+          if (status !== String(effectiveFilters.ach).toLowerCase()) return false;
+        }
 
         const amount = parseAmount(row.amount);
         if (effectiveFilters.minAmount && amount < Number(effectiveFilters.minAmount)) return false;

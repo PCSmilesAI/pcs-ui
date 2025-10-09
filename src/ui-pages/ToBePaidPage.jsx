@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { useVendorAchMap } from '../ui/ach/useVendorAch';
 
 /**
  * Page for the "To Be Paid" view. Shows invoices that have been
@@ -14,6 +15,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const [error, setError] = useState(null);
   const { handleInvoiceRowClick } = useInvoiceClick();
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
+  const { getStatusForVendor } = useVendorAchMap();
   
 
   // Load invoice data from the queue (live API)
@@ -115,6 +117,12 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
       const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
       if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;
       if (filters.maxAmount && amt > parseFloat(filters.maxAmount)) return false;
+      // Vendor ACH Status filter (if provided)
+      if (filters.ach) {
+        const status = (getStatusForVendor(row.vendor) || '').toLowerCase();
+        if (status !== String(filters.ach).toLowerCase()) return false;
+      }
+
       // Due Within filter
       if (filters.dueWithin) {
         const days = parseInt(filters.dueWithin);
