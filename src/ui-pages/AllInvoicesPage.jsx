@@ -176,7 +176,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
         onRowClick={rowClickHandler}
         selectable
         selectedIds={selectedIds}
-        getRowId={(r) => r.invoice_number || r.invoice}
+        getRowId={(r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`}
         onToggleRow={(id, row, checked) => {
           setSelectedIds((prev) => {
             const next = new Set(prev);

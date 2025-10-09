@@ -48,12 +48,20 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
     color: '#1f1f1f',
   };
 
-  const getId = (row) => {
-    if (typeof getRowId === 'function') return getRowId(row);
-    return row.invoice_number || row.invoice || row.id || String(Math.random());
+  const getId = (row, index) => {
+    if (typeof getRowId === 'function') return getRowId(row, index);
+    // Robust defaults to avoid collisions when values like "Unknown" repeat
+    return (
+      row.invoice_number ||
+      row.json_path ||
+      row.pdf_path ||
+      row.source_file ||
+      row.id ||
+      `${row.invoice || 'row'}_${index}`
+    );
   };
 
-  const allVisibleIds = selectable ? rows.map((r) => getId(r)) : [];
+  const allVisibleIds = selectable ? rows.map((r, i) => getId(r, i)) : [];
   const allSelected = selectable && allVisibleIds.length > 0 && allVisibleIds.every((id) => (selectedIds instanceof Set ? selectedIds.has(id) : (selectedIds || []).includes(id)));
 
   return (
@@ -93,7 +101,7 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
           // Background colour for hover effect
           const backgroundColor =
             hoverIndex === rowIndex ? '#f0f7fc' : '#ffffff';
-          const rowId = getId(row);
+          const rowId = getId(row, rowIndex);
           const isChecked = selectable && (selectedIds instanceof Set ? selectedIds.has(rowId) : (selectedIds || []).includes(rowId));
           return (
             <tr
