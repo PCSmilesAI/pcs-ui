@@ -3,6 +3,7 @@ import { useSearchParams } from 'next/navigation';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
+import { useVendorAchMap } from '../ui/ach/useVendorAch';
 
 export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
@@ -12,6 +13,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [qboLoading, setQboLoading] = useState(true);
   const { handleInvoiceRowClick } = useInvoiceClick();
   const searchParams = useSearchParams();
+  const { getStatusForVendor } = useVendorAchMap();
 
   const spQuery = useMemo(() => (searchParams.get('search') || '').trim().toLowerCase(), [searchParams]);
   const spFilters = useMemo(() => ({
@@ -21,6 +23,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     minAmount: searchParams.get('minAmount') || undefined,
     maxAmount: searchParams.get('maxAmount') || undefined,
     dueWithin: searchParams.get('dueWithin') || undefined,
+    ach: searchParams.get('ach') || undefined,
   }), [searchParams]);
 
   const effectiveQuery = useMemo(() => (spQuery || searchQuery || '').trim().toLowerCase(), [spQuery, searchQuery]);
@@ -130,6 +133,12 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
         if (filterConfig.vendor && row.vendor !== filterConfig.vendor) return false;
         if (filterConfig.office && row.office !== filterConfig.office) return false;
         if (filterConfig.category && row.category !== filterConfig.category) return false;
+
+        // Vendor ACH Status filter
+        if (filterConfig.ach) {
+          const status = (getStatusForVendor(row.vendor) || '').toLowerCase();
+          if (status !== String(filterConfig.ach).toLowerCase()) return false;
+        }
 
         const amount = parseAmount(String(row.amount));
         if (filterConfig.minAmount && amount < Number(filterConfig.minAmount)) return false;

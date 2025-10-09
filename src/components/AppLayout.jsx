@@ -91,7 +91,7 @@ export default function AppLayout({ children }) {
               try {
                 // Mirror filters into the URL so pages can read them reliably
                 const params = new URLSearchParams(sp.toString());
-                const keys = ['vendor','office','category','minAmount','maxAmount','dueWithin'];
+                const keys = ['vendor','office','category','minAmount','maxAmount','dueWithin','ach'];
                 keys.forEach((k) => {
                   const v = (criteria && criteria[k]) ? String(criteria[k]).trim() : '';
                   if (v) params.set(k, v); else params.delete(k);
