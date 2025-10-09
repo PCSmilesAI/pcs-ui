@@ -16,6 +16,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const { handleInvoiceRowClick } = useInvoiceClick();
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
   const { getStatusForVendor } = useVendorAchMap();
+  const [selectedIds, setSelectedIds] = useState(new Set());
   
 
   // Load invoice data from the queue (live API)
@@ -192,7 +193,46 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} approved and awaiting payment
         </p>
       </div>
-      <InvoiceTable columns={columns} rows={filteredRows} onRowClick={rowClickHandler} />
+      {selectedIds.size > 0 && (
+        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <button
+            onClick={() => alert('Paid selected (bulk) — wire to same paid action as details')}
+            style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
+          >
+            Pay
+          </button>
+          <button
+            onClick={() => alert('Remove selected (bulk) — wire to same remove as details')}
+            style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
+          >
+            Remove
+          </button>
+        </div>
+      )}
+      <InvoiceTable
+        columns={columns}
+        rows={filteredRows}
+        onRowClick={rowClickHandler}
+        selectable
+        selectedIds={selectedIds}
+        getRowId={(r) => r.invoice_number || r.invoice}
+        onToggleRow={(id, row, checked) => {
+          setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (checked) next.add(id); else next.delete(id);
+            return next;
+          });
+        }}
+        onToggleAll={(_allSelected, ids) => {
+          setSelectedIds((prev) => {
+            const next = new Set(prev);
+            const currentlyAllSelected = ids.every((id) => next.has(id));
+            if (currentlyAllSelected) ids.forEach((id) => next.delete(id));
+            else ids.forEach((id) => next.add(id));
+            return next;
+          });
+        }}
+      />
     </div>
   );
 }
