@@ -27,7 +27,9 @@ export default function AppLayout({ children }) {
       'AccountPage': 'account',
       'CompanyInfoPage': 'companyInfo',
       'PayoutAccountPage': 'payoutAccount',
-      'ReportsPage': 'reports'
+      'ReportsPage': 'reports',
+      'RolesPage': 'roles',
+      'roles': 'roles'
     };
     
     setCurrentPage(pageMapping[path] || 'forMe');
@@ -49,7 +51,8 @@ export default function AppLayout({ children }) {
       'account': 'AccountPage',
       'companyInfo': 'CompanyInfoPage',
       'payoutAccount': 'PayoutAccountPage',
-      'reports': 'ReportsPage'
+      'reports': 'ReportsPage',
+      'roles': 'roles'
     };
     
     const urlPath = urlMapping[pageKey] || 'ForMePage';
@@ -97,7 +100,9 @@ export default function AppLayout({ children }) {
                   if (v) params.set(k, v); else params.delete(k);
                 });
                 router.replace(`${pathname}?${params.toString()}`);
-              } catch (_) {}
+              } catch (applyError) {
+                console.error('Failed to mirror filter parameters in URL:', applyError);
+              }
             }}
           />
         )}
