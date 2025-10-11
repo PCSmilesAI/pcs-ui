@@ -1,15 +1,10 @@
-'use client';
-import { Suspense } from 'react';
-import RolesPageImpl from '../../src/ui-pages/RolesPage.jsx';
-
 export const dynamic = 'force-dynamic';
-
-export default function Page(props: any) {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <RolesPageImpl {...props} />
-    </Suspense>
-  );
+export default function Page() {
+  // Alias /roles to the existing /RolesPage to avoid case-sensitive 404s
+  if (typeof window !== 'undefined') {
+    window.location.replace('/RolesPage');
+  }
+  return null;
 }
 
 
