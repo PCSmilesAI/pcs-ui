@@ -1,6 +1,7 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { useSearchParams } from 'next/navigation';
 
 /**
  * Page for the "Complete" view. Lists invoices that have been
@@ -16,34 +17,32 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
 
-  // Load invoice data from the queue
+  async function fetchVisibleInvoices() {
+    const params = new URLSearchParams({ limit: '5000', status: 'paid' });
+    const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Failed to load invoices (HTTP ${res.status})`);
+    const payload = await res.json();
+    if (!payload?.ok) throw new Error(payload?.error || 'Failed to load invoices');
+    return Array.isArray(payload.invoices) ? payload.invoices : [];
+  }
+
+  // Load invoice data from the visible API
   useEffect(() => {
     const loadInvoices = async () => {
       try {
-        console.log('🔄 CompletePage: Starting to load invoices...');
+        console.log('🔄 CompletePage: Loading invoices from /api/invoices/visible ...');
         setLoading(true);
-        const response = await fetch(`/invoice_queue.json?t=${Date.now()}`);
-        console.log('📡 CompletePage: Fetch response status:', response.status);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to load invoices: ${response.status}`);
-        }
-        
-        let data = await response.json();
-        // Apply client-side overrides (e.g., when Paid was clicked)
-        // Status overrides removed - using direct API calls
+        const data = await fetchVisibleInvoices();
         console.log('📊 CompletePage: Raw data received:', data.length, 'invoices');
-        
-        // Transform the queue data to match the expected format
-        // Filter for invoices that are "completed" (have been paid)
+
         const transformedData = data
-          .filter(invoice => invoice.status === 'completed')
-          .map(invoice => ({
+          .filter((invoice) => ['paid', 'completed'].includes(String(invoice.status || '').toLowerCase()))
+          .map((invoice) => ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
-            vendor: invoice.vendor || 'Unknown',
-            amount: `$${invoice.total || '0.00'}`,
-            office: invoice.clinic_id || 'Unknown',
+            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+            office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
             dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
@@ -80,17 +79,15 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
   async function reloadList() {
     try {
       setLoading(true);
-      const response = await fetch(`/invoice_queue.json?t=${Date.now()}`);
-      if (!response.ok) throw new Error(`Failed to load invoices: ${response.status}`);
-      let data = await response.json();
+      const data = await fetchVisibleInvoices();
       const transformedData = data
-        .filter(invoice => invoice.status === 'completed')
-        .map(invoice => ({
+        .filter((invoice) => ['paid', 'completed'].includes(String(invoice.status || '').toLowerCase()))
+        .map((invoice) => ({
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
-          vendor: invoice.vendor || 'Unknown',
-          amount: `$${invoice.total || '0.00'}`,
-          office: invoice.clinic_id || 'Unknown',
+          vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+          amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+          office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
           dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
           invoice_date: invoice.invoice_date,
           due_date: invoice.due_date,
@@ -115,15 +112,13 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
-    await Promise.all(
-      selectedRows.map((r) =>
-        fetch('/api/update-invoice-status', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ invoice_number: r.invoice_number, status: 'removed', approved: false }),
-        }).catch(() => null)
-      )
-    );
+    for (const r of selectedRows) {
+      await fetch('/api/invoices/transition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: r.invoice_number || r.invoice, action: 'reject', reason: 'Removed from Complete page' }),
+      }).catch(() => null);
+    }
     setSelectedIds(new Set());
     await reloadList();
   }

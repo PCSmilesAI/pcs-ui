@@ -5,10 +5,14 @@ module.exports = {
     instances: 1, // Changed from 'max' to 1 to avoid port conflicts
     exec_mode: 'cluster',
     env: {
-      NODE_ENV: 'development'
+      NODE_ENV: 'development',
+      PCS_ENV: 'development',
+      PCS_DATA_DIR: './pcs_ui_data'
     },
     env_production: {
       NODE_ENV: 'production',
+      PCS_ENV: 'production',
+      PCS_DATA_DIR: '/var/www/pcs-ui-data',
       PORT: 3001,
       HOST: '0.0.0.0',
       // Security Settings

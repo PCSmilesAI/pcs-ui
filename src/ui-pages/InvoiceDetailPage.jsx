@@ -3,6 +3,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import { fetchQboCategories } from '../lib/categoriesClient';
 import ACHBadge from '../ui/ach/ACHBadge';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
+import Toast from '../components/Toast.jsx';
 
 /**
  * Detail view for a single invoice. Displays high level summary
@@ -38,7 +39,78 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [lineCategories, setLineCategories] = useState({});
   const [loadingLineCategories, setLoadingLineCategories] = useState(false);
+  const [toast, setToast] = useState(null);
   const { getStatusForVendor } = useVendorAchMap();
+  const showToast = useCallback((message, variant = 'info') => {
+    setToast({ message, variant, at: Date.now() });
+  }, []);
+  const dismissToast = useCallback(() => setToast(null), []);
+  const STATUS_META = {
+    incoming: { label: 'Incoming', fg: '#1d4ed8', bg: '#e0f2fe', border: '#60a5fa' },
+    categorized: { label: 'Categorized', fg: '#0369a1', bg: '#e0f2fe', border: '#38bdf8' },
+    awaiting_office_approval: {
+      label: 'Awaiting Office Approval',
+      fg: '#b45309',
+      bg: '#fef3c7',
+      border: '#f59e0b',
+    },
+    awaiting_admin_approval: {
+      label: 'Awaiting Admin Approval',
+      fg: '#6b21a8',
+      bg: '#f3e8ff',
+      border: '#c084fc',
+    },
+    to_be_paid: { label: 'Ready to Pay', fg: '#047857', bg: '#d1fae5', border: '#34d399' },
+    paid: { label: 'Paid', fg: '#065f46', bg: '#d1fae5', border: '#34d399' },
+    rejected: { label: 'Rejected', fg: '#b91c1c', bg: '#fee2e2', border: '#f87171' },
+    repair: { label: 'Needs Repair', fg: '#92400e', bg: '#fef3c7', border: '#fbbf24' },
+  };
+  const statusValue = (invoice?.status || 'incoming').toLowerCase();
+  const statusMeta =
+    STATUS_META[statusValue] ||
+    {
+      label: statusValue ? statusValue.replace(/_/g, ' ') : 'Unknown',
+      fg: '#1f2937',
+      bg: '#e5e7eb',
+      border: '#cbd5f5',
+    };
+  const approvals =
+    invoice?.approvals && typeof invoice.approvals === 'object' ? invoice.approvals : {};
+  const approvalStages = [
+    { key: 'ap', label: 'Accounts Payable' },
+    { key: 'office', label: 'Office Manager' },
+    { key: 'admin', label: 'Admin' },
+  ];
+  const renderStatusChip = (size = 'lg') => (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: size === 'lg' ? '6px 14px' : '4px 10px',
+        borderRadius: '9999px',
+        backgroundColor: statusMeta.bg,
+        color: statusMeta.fg,
+        border: `1px solid ${statusMeta.border}`,
+        fontSize: size === 'lg' ? '13px' : '12px',
+        fontWeight: 600,
+        textTransform: 'capitalize',
+      }}
+    >
+      {statusMeta.label}
+    </span>
+  );
+  const formatApprovalTimestamp = (value) => {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   useEffect(() => {
     setPaymentAmount(invoice?.amount || invoice?.total || '');
@@ -376,6 +448,79 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }
   }
 
+  async function transitionInvoice(action) {
+    if (!invoice) return;
+    const invoiceId = invoice.id || invoice.invoice_number || invoice.invoice;
+    if (!invoiceId) {
+      showToast('Missing invoice identifier.', 'error');
+      return;
+    }
+
+    if (action === 'approve') {
+      const officeValue = (details?.office || invoice.office || invoice.office_location || invoice.clinic_id || '').trim();
+      if (!officeValue || officeValue.toLowerCase() === 'unknown') {
+        showToast('Office is required before approval.', 'error');
+        return;
+      }
+    }
+
+    setProcessing(true);
+    try {
+      const response = await fetch('/api/invoices/transition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: invoiceId,
+          action,
+          ...(action === 'reject' ? { reason: 'Rejected from invoice detail' } : {}),
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok || payload?.error) {
+        const message = payload?.error || `Failed to ${action} invoice`;
+        if (message.toLowerCase().includes('office required')) {
+          showToast('Office is required before approval.', 'error');
+        } else {
+          showToast(message, 'error');
+        }
+        return;
+      }
+
+      if (payload?.invoice) {
+        const updated = payload.invoice;
+        setDetails((prev) => ({
+          ...prev,
+          invoice: updated.invoice_number || updated.invoice || prev.invoice,
+          vendor: updated.vendor_name || updated.vendor || prev.vendor,
+          office:
+            updated.office_location ||
+            updated.office ||
+            updated.clinic_id ||
+            prev.office,
+          category: updated.category || prev.category,
+          invoice_date: updated.invoice_date || prev.invoice_date,
+          due_date: updated.due_date || prev.due_date,
+        }));
+        if (updated.total || updated.invoice_total) {
+          const amountValue = updated.total ?? updated.invoice_total;
+          const parsed =
+            typeof amountValue === 'number'
+              ? amountValue
+              : Number.parseFloat(String(amountValue).replace(/[^0-9.-]/g, '')) || 0;
+          setPaymentAmount(`$${parsed.toFixed(2)}`);
+        }
+      }
+
+      alert(action === 'approve' ? 'Invoice moved to the next approval step.' : 'Invoice rejected.');
+      if (onBack) onBack();
+    } catch (error) {
+      showToast(error?.message || 'Unexpected error while updating invoice', 'error');
+    } finally {
+      setProcessing(false);
+    }
+  }
+
   // Function to update invoice status in the queue
   async function updateInvoiceStatus(newStatus, newApproved = null) {
     setProcessing(true);
@@ -524,11 +669,11 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
   // Button click handlers
   function handleApprove() {
-    updateInvoiceStatus('approved', true);
+    transitionInvoice('approve');
   }
 
   function handleReject() {
-    updateInvoiceStatus('rejected', false);
+    transitionInvoice('reject');
   }
 
   async function handleRepair() {
@@ -586,8 +731,34 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }
   }
 
-  function handlePaid() {
-    updateInvoiceStatus('completed', true);
+  async function handlePaid() {
+    if (!invoice) return;
+    const invoiceId = invoice.id || invoice.invoice_number || invoice.invoice;
+    if (!invoiceId) {
+      showToast('Missing invoice identifier.', 'error');
+      return;
+    }
+    setProcessing(true);
+    try {
+      const amountValue = paymentAmount || invoice?.amount || invoice?.total || '';
+      const numeric = typeof amountValue === 'number' ? amountValue : Number(String(amountValue).replace(/[^0-9.\-]/g, '')) || 0;
+      const response = await fetch('/api/invoices/transition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: invoiceId, action: 'mark_paid', total: numeric }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload?.error) {
+        showToast(payload?.error || 'Failed to mark as paid', 'error');
+        return;
+      }
+      alert('Invoice marked as paid.');
+      if (onBack) onBack();
+    } catch (err) {
+      showToast(err?.message || 'Unexpected error while marking paid', 'error');
+    } finally {
+      setProcessing(false);
+    }
   }
 
   // Strong remove for completed invoices: delete from queue + delete files
@@ -625,30 +796,24 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
   // Determine which buttons to show based on invoice status
   function getActionButtons() {
-    let status = invoice?.status || 'new';
-    // If coming from Completed page and status is missing, treat as completed
-    if ((!invoice?.status || invoice?.status === 'new') && invoice?._sourcePage === 'complete') {
-      status = 'completed';
-    }
-    const approved = invoice?.approved || false;
+    const status = (invoice?.status || 'incoming').toLowerCase();
 
     console.log('🔍 InvoiceDetailPage Debug:');
     console.log('  - Invoice Number:', invoice?.invoice_number);
     console.log('  - Status:', status);
-    console.log('  - Approved:', approved);
     console.log('  - Full invoice object:', invoice);
 
     if (status === 'removed') {
       return []; // No buttons for removed invoices
     }
 
-    if (status === 'completed') {
+    if (status === 'completed' || status === 'paid') {
       return [
         { label: 'Remove', onClick: handleRemoveCompletely, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } }
       ];
     }
 
-    if (status === 'approved') {
+    if (status === 'to_be_paid' || status === 'approved') {
       return [
         { label: 'Paid', onClick: handlePaid, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
         { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
@@ -656,12 +821,17 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       ];
     }
 
-    // Default buttons for new/unapproved invoices
-    return [
+    const defaultButtons = [
       { label: 'Approve', onClick: handleApprove, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
       { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
       { label: 'Repair', onClick: handleRepair, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
     ];
+
+    if (status === 'to_be_paid' || status === 'paid') {
+      return defaultButtons.slice(1); // only allow reject/repair in paid states
+    }
+
+    return defaultButtons;
   }
 
   // Basic styles used throughout the detail page
@@ -805,6 +975,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               <ACHBadge status={getStatusForVendor(invoice?.vendor)} />
             </span>
             <span>{invoice?.amount || 'N/A'}</span>
+            {renderStatusChip()}
           </div>
         </div>
         <button
@@ -849,17 +1020,32 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           {/* Invoice Status section */}
           <div style={sectionStyle}>
             <h2 style={sectionTitleStyle}>Invoice Status</h2>
+            <div style={{ marginBottom: '12px' }}>{renderStatusChip('sm')}</div>
             <table style={tableStyle}>
-              <tbody>
-                {/* Row 1: Approval with name and email */}
+              <thead>
                 <tr>
-                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Approval</td>
-                  <td style={cellStyle}>McKay</td>
-                  <td style={cellStyle}>mckaym@pacificcrestsmiles.com</td>
+                  <th style={cellHeaderStyle}>Stage</th>
+                  <th style={cellHeaderStyle}>User</th>
+                  <th style={cellHeaderStyle}>Last Action</th>
                 </tr>
-                {/* Row 2: Payment with editable amount and status */}
+              </thead>
+              <tbody>
+                {approvalStages.map((stage) => {
+                  const entry = approvals[stage.key] || null;
+                  return (
+                    <tr key={stage.key}>
+                      <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>{stage.label}</td>
+                      <td style={cellStyle}>{entry?.by || 'Pending'}</td>
+                      <td style={cellStyle}>{formatApprovalTimestamp(entry?.at)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <table style={{ ...tableStyle, marginTop: '12px' }}>
+              <tbody>
                 <tr>
-                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Payment</td>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Payment Amount</td>
                   <td style={cellStyle}>
                     <input
                       type="text"
@@ -874,7 +1060,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                       }}
                     />
                   </td>
-                  <td style={cellStyle}>{invoice?.status || 'New'}</td>
+                  <td style={{ ...cellStyle, fontWeight: '600', color: statusMeta.fg }}>{statusMeta.label}</td>
                 </tr>
               </tbody>
             </table>
@@ -1208,6 +1394,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           )}
         </div>
       </div>
+      <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
     </div>
   );
 }

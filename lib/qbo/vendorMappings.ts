@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { isValidAccountPath } from './chartOfAccounts';
+import { findVendorKey, loadClassOverrides } from '../workflow/rolesStore';
 
 export type VendorMappingEntry = {
   defaultAccount: string | null;
@@ -207,6 +208,20 @@ export async function pickMappingForVendor(
     const overrideClasses = classOverrides[overrideKey];
     if (overrideClasses && overrideClasses.length > 0) {
       classes = overrideClasses.map((value) => (typeof value === 'string' ? value.trim() : '')).filter((value) => value);
+    }
+  }
+
+  const classOverrides = loadClassOverrides();
+  let overrideKey = findVendorKey(vendorName, classOverrides);
+  if (!overrideKey && classOverrides[matchedKey]) {
+    overrideKey = matchedKey;
+  }
+  if (overrideKey) {
+    const overrideClasses = classOverrides[overrideKey];
+    if (overrideClasses && overrideClasses.length > 0) {
+      classes = overrideClasses
+        .map((value) => (typeof value === 'string' ? value.trim() : ''))
+        .filter((value) => value.length > 0);
     }
   }
 

@@ -216,9 +216,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
                 const resp = await fetch(`/api/vendors/ach-info?vendor=${encodeURIComponent(vendor)}&t=${Date.now()}`, { cache: 'no-store' });
                 const data = await resp.json();
                 setAchInfo(data || {});
-              } catch (refreshError) {
-                console.error('Failed to refresh ACH status for vendor:', vendor, refreshError);
-              }
+              } catch (_) {}
             }}
             style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #357ab2', color: '#357ab2', background: '#fff', cursor: 'pointer' }}
           >
@@ -226,63 +224,18 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
           </button>
           <button
             onClick={async () => {
-              const email = prompt('Enter vendor email to send onboarding link');
-              if (!email) return;
               try {
-                const resp = await fetch('/api/vendors/email-onboard-link', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ vendor, email })
-                });
+                const resp = await fetch('/api/vendors/onboard-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vendor }) });
                 const data = await resp.json();
-                const proxy = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_EMAIL_PROXY_URL)
-                  || (typeof window !== 'undefined' ? window.localStorage.getItem('EMAIL_PROXY_URL') : null);
-
-                const tryProxySend = async (link) => {
-                  if (!proxy || !link) return false;
-                  try {
-                    const p = await fetch(proxy, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: email, vendor, url: link }) });
-                    const pj = await p.json().catch(() => ({}));
-                    if (p.ok && (pj?.ok || pj?.sent)) {
-                      alert('Onboarding email sent.');
-                      return true;
-                    }
-                  } catch (proxyError) {
-                    console.error('Proxy email send failed:', proxyError);
-                  }
-                  return false;
-                };
-
-                if (resp.ok && data?.ok) {
-                  if (data.sent) { alert('Onboarding email sent.'); return; }
-                  // ok but not sent (server returned link). Try proxy if available
-                  const link = data?.url || '';
-                  const sentViaProxy = await tryProxySend(link);
-                  if (!sentViaProxy) {
-                    alert(`Email not configured on server. Copy this link and email manually: ${link || 'unavailable'}`);
-                  }
-                } else {
-                  // Server failed; attempt to create onboarding link and send via proxy
-                  let link = data?.url;
-                  if (!link) {
-                    try {
-                      const mk = await fetch('/api/vendors/onboard-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vendor }) });
-                      const mkd = await mk.json();
-                      if (mkd?.ok && mkd?.url) link = mkd.url;
-                    } catch (linkError) {
-                      console.error('Failed to create onboarding link for vendor:', vendor, linkError);
-                    }
-                  }
-                  const sentViaProxy = await tryProxySend(link);
-                  if (!sentViaProxy) alert(`Failed to send onboarding email: ${data?.error || 'Unknown error'}`);
-                }
+                if (data?.ok && data?.url) window.open(data.url, '_blank');
+                else alert(`Failed to create onboarding link: ${data?.error || 'Unknown error'}`);
               } catch (e) {
-                alert('Failed to send onboarding email');
+                alert('Failed to create onboarding link');
               }
             }}
             style={{ marginLeft: 8, padding: '6px 10px', borderRadius: 8, border: '1px solid #357ab2', color: '#fff', background: '#357ab2', cursor: 'pointer' }}
           >
-            Email ACH Onboarding
+            Onboard / Update ACH
           </button>
         </div>
         <div style={achGrid}>
@@ -309,3 +262,5 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
     </div>
   );
 }
+
+

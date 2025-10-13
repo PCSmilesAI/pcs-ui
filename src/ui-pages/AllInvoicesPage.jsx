@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
-import { fetchInvoiceQueue } from '../lib/fetchQueue';
+import { useSearchParams } from 'next/navigation';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 
@@ -28,11 +28,20 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
   const [error, setError] = useState(null);
   const { getStatusForVendor } = useVendorAchMap();
 
+  async function fetchVisibleInvoices() {
+    const params = new URLSearchParams({ limit: '5000' });
+    const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Failed to load invoices (HTTP ${res.status})`);
+    const payload = await res.json();
+    if (!payload?.ok) throw new Error(payload?.error || 'Failed to load invoices');
+    return Array.isArray(payload.invoices) ? payload.invoices : [];
+  }
+
   useEffect(() => {
     const loadInvoices = async () => {
       try {
         setLoading(true);
-        const data = await fetchInvoiceQueue({ limit: 5000 });
+        const data = await fetchVisibleInvoices();
 
         const transformed = data.map((invoice) => {
           const formatDate = (dateString) => {
@@ -46,8 +55,8 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
             vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-            office: invoice.office_location || invoice.clinic_id || 'Unknown',
+            amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+            office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
             status: invoice.status || 'New',
             category: invoice.category || 'Other',
             invoiceDate: formatDate(invoice.invoice_date || null),
@@ -79,7 +88,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
   async function reloadList() {
     try {
       setLoading(true);
-      const data = await fetchInvoiceQueue({ limit: 5000 });
+      const data = await fetchVisibleInvoices();
       const transformed = data.map((invoice) => {
         const formatDate = (dateString) => {
           if (!dateString) return 'N/A';
@@ -91,8 +100,8 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
           vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-          amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-          office: invoice.office_location || invoice.clinic_id || 'Unknown',
+          amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+          office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
           status: invoice.status || 'New',
           category: invoice.category || 'Other',
           invoiceDate: formatDate(invoice.invoice_date || null),
@@ -120,15 +129,13 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     const selectedRows = filteredData.filter((r, i) => ids.includes(getRowId(r, i)));
-    await Promise.all(
-      selectedRows.map((r) =>
-        fetch('/api/update-invoice-status', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ invoice_number: r.invoice_number, status: 'removed', approved: false }),
-        }).catch(() => null)
-      )
-    );
+    for (const r of selectedRows) {
+      await fetch('/api/invoices/transition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: r.invoice_number || r.invoice, action: 'reject', reason: 'Removed from All Invoices' }),
+      }).catch(() => null);
+    }
     setSelectedIds(new Set());
     await reloadList();
   }
