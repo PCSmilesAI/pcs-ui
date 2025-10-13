@@ -80,7 +80,7 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
 
   // Filter rows by search and filters (merge URL filters too)
   const effectiveQuery = (spQuery || searchQuery || '').trim().toLowerCase();
-  const effectiveFilters = { ...filters, ...Object.fromEntries(Object.entries(spFilters).filter(([_, v]) => v !== undefined)) };
+  const effectiveFilters = { ...filters, ...Object.fromEntries(Object.entries(spFilters).filter(([, value]) => value !== undefined)) };
   const filteredRows = useMemo(() => vendors.filter((row) => {
     const query = effectiveQuery;
     if (query) {
@@ -143,7 +143,9 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
             const name = row?.name || '';
             if (onVendorClick) onVendorClick(row);
             if (name) router.push(`/VendorDetailPage?vendor=${encodeURIComponent(name)}`);
-          } catch (_) {}
+          } catch (navigationError) {
+            console.error('Failed to navigate to vendor detail:', navigationError);
+          }
         }}
       />
       <div className="mt-4 text-xs text-gray-500">

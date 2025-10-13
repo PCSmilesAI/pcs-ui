@@ -1,6 +1,6 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
-import { fetchInvoiceQueue } from '../lib/fetchQueue';
+import { useSearchParams } from 'next/navigation';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 
@@ -19,18 +19,29 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
   
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+
+  async function fetchVisibleInvoices() {
+    const params = new URLSearchParams({ limit: '5000', status: 'to_be_paid' });
+    const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Failed to load invoices (HTTP ${res.status})`);
+    const payload = await res.json();
+    if (!payload?.ok) throw new Error(payload?.error || 'Failed to load invoices');
+    return Array.isArray(payload.invoices) ? payload.invoices : [];
+  }
+
   async function reloadList() {
     try {
       setLoading(true);
-      const data = await fetchInvoiceQueue({ limit: 5000 });
+      const data = await fetchVisibleInvoices();
       const transformedData = data
-        .filter(invoice => (invoice.approved === true) && (invoice.status === 'approved'))
-        .map(invoice => ({
+        .filter((invoice) => (String(invoice.status || '').toLowerCase() === 'to_be_paid'))
+        .map((invoice) => ({
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
           vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-          amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-          office: invoice.office_location || invoice.clinic_id || 'Unknown',
+          amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+          office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
           dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A'),
           invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
           displayStatus: 'Pending Payment',
@@ -59,43 +70,43 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
-    await Promise.all(
-      selectedRows.map((r) =>
-        fetch('/api/update-invoice-status', {
+    for (const row of selectedRows) {
+      if (status === 'completed') {
+        await fetch('/api/invoices/transition', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ invoice_number: r.invoice_number, status, approved: approvedVal }),
-        }).catch(() => null)
-      )
-    );
+          body: JSON.stringify({ id: row.invoice_number || row.invoice, action: 'mark_paid', total: row.amount?.replace(/[^0-9.\-]/g, '') }),
+        }).catch(() => null);
+      } else if (status === 'rejected') {
+        await fetch('/api/invoices/transition', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: row.invoice_number || row.invoice, action: 'reject', reason: 'Rejected from To Be Paid page' }),
+        }).catch(() => null);
+      }
+    }
     setSelectedIds(new Set());
     await reloadList();
   }
   
 
-  // Load invoice data from the queue (live API)
+  // Load invoice data using visible API
   useEffect(() => {
     const loadInvoices = async () => {
       try {
-        console.log('🔄 ToBePaidPage: Loading invoices from /api/invoice-queue ...');
+        console.log('🔄 ToBePaidPage: Loading invoices from /api/invoices/visible ...');
         setLoading(true);
-        
-        const data = await fetchInvoiceQueue({ limit: 5000 });
+        const data = await fetchVisibleInvoices();
         console.log('📊 ToBePaidPage: Raw data received:', data.length, 'invoices');
-        
-        // Filter for invoices approved and marked approved status
+
         const transformedData = data
-          .filter(invoice => {
-            const isApproved = (invoice.approved === true) && (invoice.status === 'approved');
-            console.log(`📋 Invoice ${invoice.invoice_number}: approved=${invoice.approved}, status=${invoice.status}, showing=${isApproved}`);
-            return isApproved;
-          })
-          .map(invoice => ({
+          .filter((invoice) => String(invoice.status || '').toLowerCase() === 'to_be_paid')
+          .map((invoice) => ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number, // needed by detail view
             vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-            office: invoice.office_location || invoice.clinic_id || 'Unknown',
+            amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+            office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
             dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',

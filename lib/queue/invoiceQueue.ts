@@ -9,8 +9,24 @@ export type QueueFile = {
   format: 'array' | 'object';
 };
 
+const DATA_DIR = (() => {
+  let dir = process.env.PCS_DATA_DIR?.trim();
+  if (!dir) {
+    dir = path.resolve(process.cwd(), 'pcs_ui_data');
+    process.env.PCS_DATA_DIR = dir;
+  }
+  if (!path.isAbsolute(dir)) {
+    dir = path.resolve(process.cwd(), dir);
+    process.env.PCS_DATA_DIR = dir;
+  }
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  return dir;
+})();
+
 export const INVOICE_QUEUE_PATHS = [
-  path.join(process.cwd(), 'pcs_ai_data', 'invoice_queue.json'),
+  path.join(DATA_DIR, 'invoice_queue.json'),
   path.join(process.cwd(), 'invoice_queue.json'),
   path.join(process.cwd(), 'public', 'invoice_queue.json'),
 ];

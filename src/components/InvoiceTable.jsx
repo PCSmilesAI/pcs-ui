@@ -76,7 +76,7 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
               <input
                 type="checkbox"
                 checked={allSelected}
-                onChange={(e) => {
+                onChange={() => {
                   if (typeof onToggleAll === 'function') onToggleAll(allSelected, allVisibleIds);
                 }}
               />

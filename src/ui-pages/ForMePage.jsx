@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
-import { fetchInvoiceQueue } from '../lib/fetchQueue';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
+import Toast from '../components/Toast.jsx';
 
 export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
@@ -13,67 +13,148 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [qboLoading, setQboLoading] = useState(true);
   const { handleInvoiceRowClick } = useInvoiceClick();
   const [selectedIds, setSelectedIds] = useState(new Set());
-  const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
+  const [toast, setToast] = useState(null);
+  const getRowId = (r, i) =>
+    r.id ||
+    r.invoice_number ||
+    r.json_path ||
+    r.pdf_path ||
+    r.source_file ||
+    `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
 
-  async function reloadList() {
+  const showToast = useCallback((message, variant = 'info') => {
+    setToast({ message, variant, at: Date.now() });
+  }, []);
+
+  const dismissToast = useCallback(() => setToast(null), []);
+
+  const transformInvoice = useCallback((invoice) => {
+    const vendorName = invoice.vendor_name || invoice.vendor || 'Unknown';
+    const rawInvoiceDate = invoice.invoice_date || null;
+    const rawDueDate = invoice.due_date || null;
+    const officeRaw = invoice.office_location || invoice.office || invoice.clinic_id || '';
+    const formatDate = (dateString) => {
+      if (!dateString) return 'N/A';
+      const parsed = new Date(dateString);
+      if (Number.isNaN(parsed.getTime())) return 'N/A';
+      return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+    };
+    const amountValue = invoice.invoice_total ?? invoice.total ?? invoice.amount;
+    const parsedAmount =
+      typeof amountValue === 'number'
+        ? amountValue
+        : Number.parseFloat(String(amountValue || '0').replace(/[^0-9.-]/g, '')) || 0;
+
+    return {
+      id: invoice.id || invoice.invoice_number || invoice.invoice || invoice.source_file || null,
+      invoice: invoice.invoice_number || invoice.invoice || 'Unknown',
+      invoice_number: invoice.invoice_number,
+      vendor: vendorName,
+      amount: `$${parsedAmount.toFixed(2)}`,
+      office: officeRaw || 'Unknown',
+      rawOffice: officeRaw,
+      dueDate: formatDate(rawDueDate || rawInvoiceDate),
+      invoiceDate: formatDate(rawInvoiceDate),
+      category: invoice.category || 'Other',
+      invoice_date: rawInvoiceDate,
+      due_date: rawDueDate,
+      json_path: invoice.json_path,
+      source_file: invoice.source_file,
+      pdf_path: invoice.pdf_path,
+      timestamp: invoice.timestamp,
+      assigned_to: invoice.assigned_to,
+      approved: invoice.approved,
+      status: invoice.status,
+      line_items: invoice.line_items || [],
+      approvals: invoice.approvals || {},
+    };
+  }, []);
+
+  const fetchVisibleInvoices = useCallback(async () => {
+    const params = new URLSearchParams({ limit: '5000' });
+    const res = await fetch(`/api/invoices/visible?${params.toString()}`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      const payload = await res.json().catch(() => ({}));
+      throw new Error(payload?.error || `Failed to load invoices (HTTP ${res.status})`);
+    }
+    const payload = await res.json();
+    if (!payload?.ok) {
+      throw new Error(payload?.error || 'Failed to load invoices');
+    }
+    const list = Array.isArray(payload.invoices) ? payload.invoices : [];
+    return list
+      .filter((invoice) => {
+        if (invoice.deleted || invoice.workflow_deleted_at) return false;
+        const status = (invoice.status || '').toLowerCase();
+        if (status === 'approved' || status === 'paid') return false;
+        if (invoice.approved === true) return false;
+        return true;
+      })
+      .map(transformInvoice);
+  }, [transformInvoice]);
+
+  const reloadList = useCallback(async () => {
     try {
-      const data = await fetchInvoiceQueue({ limit: 5000 });
-      const transformed = data
-        .filter((invoice) => {
-          const status = invoice.status;
-          const approved = invoice.approved;
-          const isNotApproved = approved !== true;
-          const isNotApprovedStatus = status !== 'approved';
-          return isNotApproved && isNotApprovedStatus;
-        })
-        .map((invoice) => {
-          const vendorName = invoice.vendor_name || invoice.vendor || 'Unknown';
-          const rawInvoiceDate = invoice.invoice_date || null;
-          const rawDueDate = invoice.due_date || null;
-          const formatDate = (dateString) => {
-            if (!dateString) return 'N/A';
-            const parsed = new Date(dateString);
-            if (Number.isNaN(parsed.getTime())) return 'N/A';
-            return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
-          };
-          return {
-            invoice: invoice.invoice_number || 'Unknown',
-            invoice_number: invoice.invoice_number,
-            vendor: vendorName,
-            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-            office: invoice.office_location || invoice.clinic_id || 'Unknown',
-            dueDate: formatDate(rawDueDate || rawInvoiceDate),
-            invoiceDate: formatDate(rawInvoiceDate),
-            category: invoice.category || 'Other',
-            invoice_date: rawInvoiceDate,
-            due_date: rawDueDate,
-            json_path: invoice.json_path,
-            source_file: invoice.source_file,
-            pdf_path: invoice.pdf_path,
-            timestamp: invoice.timestamp,
-            assigned_to: invoice.assigned_to,
-            approved: invoice.approved,
-            status: invoice.status,
-            line_items: invoice.line_items || [],
-          };
-        });
-      setInvoices(transformed);
-    } catch (_) {}
-  }
+      const data = await fetchVisibleInvoices();
+      setInvoices(data);
+    } catch (reloadError) {
+      console.error('❌ ForMePage: reload failed', reloadError);
+      showToast(reloadError?.message || 'Failed to refresh invoices', 'error');
+    }
+  }, [fetchVisibleInvoices, showToast]);
 
-  async function bulkUpdate(status, approvedVal) {
+  async function bulkUpdate(action) {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
-    await Promise.all(
-      selectedRows.map((r) =>
-        fetch('/api/update-invoice-status', {
+
+    if (action === 'approve') {
+      const missingOffice = selectedRows.find((row) => !row.rawOffice);
+      if (missingOffice) {
+        showToast('Office is required before approval.', 'error');
+        return;
+      }
+    }
+
+    let hadError = false;
+    let officeError = false;
+    for (const row of selectedRows) {
+      try {
+        const response = await fetch('/api/invoices/transition', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ invoice_number: r.invoice_number, status, approved: approvedVal }),
-        }).catch(() => null)
-      )
-    );
+          body: JSON.stringify({
+            id: row.id || row.invoice_number,
+            action,
+            ...(action === 'reject' ? { reason: 'Rejected from For Me page' } : {}),
+          }),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          const message = data?.error || `Request failed (HTTP ${response.status})`;
+          if (message.toLowerCase().includes('office required')) {
+            officeError = true;
+          } else {
+            hadError = true;
+            showToast(message, 'error');
+          }
+        }
+      } catch (err) {
+        hadError = true;
+        showToast(err?.message || 'Network error while updating invoice', 'error');
+      }
+    }
+
+    if (officeError) {
+      showToast('Office is required before approval.', 'error');
+    }
+
+    if (!hadError && !officeError) {
+      showToast(action === 'approve' ? 'Invoices approved.' : 'Invoices rejected.', 'success');
+    }
+
     setSelectedIds(new Set());
     await reloadList();
   }
@@ -116,54 +197,11 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   }, [checkQboStatus]);
 
   useEffect(() => {
-    checkQboStatus();
     const loadInvoices = async () => {
       try {
         setLoading(true);
-        const data = await fetchInvoiceQueue({ limit: 5000 });
-
-        const transformed = data
-          .filter((invoice) => {
-            const status = invoice.status;
-            const approved = invoice.approved;
-            const isNotApproved = approved !== true;
-            const isNotApprovedStatus = status !== 'approved';
-            return isNotApproved && isNotApprovedStatus;
-          })
-          .map((invoice) => {
-            const vendorName = invoice.vendor_name || invoice.vendor || 'Unknown';
-            const rawInvoiceDate = invoice.invoice_date || null;
-            const rawDueDate = invoice.due_date || null;
-            const formatDate = (dateString) => {
-              if (!dateString) return 'N/A';
-              const parsed = new Date(dateString);
-              if (Number.isNaN(parsed.getTime())) return 'N/A';
-              return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
-            };
-
-            return {
-              invoice: invoice.invoice_number || 'Unknown',
-              invoice_number: invoice.invoice_number,
-              vendor: vendorName,
-              amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-              office: invoice.office_location || invoice.clinic_id || 'Unknown',
-              dueDate: formatDate(rawDueDate || rawInvoiceDate),
-              invoiceDate: formatDate(rawInvoiceDate),
-              category: invoice.category || 'Other',
-              invoice_date: rawInvoiceDate,
-              due_date: rawDueDate,
-              json_path: invoice.json_path,
-              source_file: invoice.source_file,
-              pdf_path: invoice.pdf_path,
-              timestamp: invoice.timestamp,
-              assigned_to: invoice.assigned_to,
-              approved: invoice.approved,
-              status: invoice.status,
-              line_items: invoice.line_items || [],
-            };
-          });
-
-        setInvoices(transformed);
+        const visible = await fetchVisibleInvoices();
+        setInvoices(visible);
         setError(null);
       } catch (loadError) {
         console.error('❌ ForMePage: Error loading invoices:', loadError);
@@ -175,7 +213,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     };
 
     loadInvoices();
-  }, [checkQboStatus]);
+  }, [fetchVisibleInvoices]);
 
   const filteredRows = useMemo(() => {
     const query = effectiveQuery;
@@ -267,13 +305,13 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
       {selectedIds.size > 0 && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
           <button
-            onClick={() => bulkUpdate('approved', true)}
+            onClick={() => bulkUpdate('approve')}
             style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
           >
             Approve
           </button>
           <button
-            onClick={() => bulkUpdate('rejected', false)}
+            onClick={() => bulkUpdate('reject')}
             style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
           >
             Reject
@@ -347,6 +385,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
           });
         }}
       />
+      <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
     </div>
   );
 }

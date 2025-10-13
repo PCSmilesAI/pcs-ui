@@ -8,12 +8,22 @@ import json
 import time
 import glob
 from datetime import datetime
+from deleted_invoice_guard import compute_file_hash, should_skip_deleted_invoice
 
-# Configuration
-OUTPUT_JSONS_PATH = os.path.join(os.path.dirname(__file__), "output_jsons")
-INVOICE_QUEUE_PATH = os.path.join(os.path.dirname(__file__), "pcs_ai_data", "invoice_queue.json")
-EMAIL_INVOICES_PATH = os.path.join(os.path.dirname(__file__), "email_invoices")
-LOG_PATH = os.path.join(os.path.dirname(__file__), "queue_writer.log")
+BASE_DIR = os.path.dirname(__file__)
+DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
+if not os.path.isabs(DATA_DIR):
+    DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, DATA_DIR))
+
+# Ensure core directories exist
+OUTPUT_JSONS_PATH = os.path.join(DATA_DIR, "output_jsons")
+EMAIL_INVOICES_PATH = os.path.join(DATA_DIR, "email_invoices")
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(OUTPUT_JSONS_PATH, exist_ok=True)
+os.makedirs(EMAIL_INVOICES_PATH, exist_ok=True)
+
+INVOICE_QUEUE_PATH = os.path.join(DATA_DIR, "invoice_queue.json")
+LOG_PATH = os.path.join(DATA_DIR, "queue_writer.log")
 
 def log(msg):
     """Log messages with timestamp"""
@@ -95,7 +105,19 @@ def add_invoice_to_queue(json_file_path):
         # Find the correct PDF path
         json_filename = os.path.basename(json_file_path)
         pdf_path = find_corresponding_pdf(json_filename)
-        
+
+        file_hash = compute_file_hash(pdf_path)
+        skip_deleted, skip_reason = should_skip_deleted_invoice(
+            vendor=vendor,
+            invoice_number=invoice_number,
+            pdf_path=pdf_path,
+            file_hash=file_hash,
+            source_file=invoice_data.get('source_file') or json_filename,
+        )
+        if skip_deleted:
+            log(f"⏭️ Skipped deleted invoice ({skip_reason}): vendor={vendor} invoice={invoice_number}")
+            return False
+
         # Create queue entry
         queue_entry = {
             "invoice_number": invoice_number,
@@ -108,12 +130,15 @@ def add_invoice_to_queue(json_file_path):
             "pdf_path": pdf_path,
             "timestamp": datetime.now().isoformat(),
             "assigned_to": None,
-            "approved": False
+            "approved": False,
+            "source_file": invoice_data.get('source_file') or json_filename,
         }
-        
+        if file_hash:
+            queue_entry["file_hash"] = file_hash
+
         # Load current queue
         queue = load_invoice_queue()
-        
+
         # Check if invoice already exists
         existing_invoices = [inv for inv in queue if inv.get('invoice_number') == invoice_number]
         if existing_invoices:

@@ -9,9 +9,10 @@
       "autorestart": true,
       "restart_delay": 5000,
       "env": {
-        "PYTHONUNBUFFERED": "1"
+        "PYTHONUNBUFFERED": "1",
+        "PCS_ENV": "production",
+        "PCS_DATA_DIR": "/var/www/pcs-ui-data"
       }
     }
   ]
 }
-
