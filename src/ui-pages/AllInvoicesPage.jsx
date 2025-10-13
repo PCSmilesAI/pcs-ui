@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
-import { useSearchParams } from 'next/navigation';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 

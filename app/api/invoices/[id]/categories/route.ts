@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
-import { resolveDataPath } from '../../../../lib/workflow/dataDir'
+import { resolveDataPath } from '../../../../../lib/workflow/dataDir'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
