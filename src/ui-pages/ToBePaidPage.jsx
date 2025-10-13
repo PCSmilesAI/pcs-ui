@@ -36,11 +36,17 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
       const data = await fetchVisibleInvoices();
       const transformedData = data
         .filter((invoice) => (String(invoice.status || '').toLowerCase() === 'to_be_paid'))
-        .map((invoice) => ({
+        .map((invoice) => {
+          const rawTotal = (invoice.invoice_total ?? invoice.total);
+          const numericTotal =
+            typeof rawTotal === 'number'
+              ? rawTotal
+              : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+          return ({
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
           vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-          amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+          amount: `$${numericTotal.toFixed(2)}`,
           office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
           dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A'),
           invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
@@ -55,7 +61,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           approved: invoice.approved,
           status: invoice.status,
           line_items: invoice.line_items || [],
-        }));
+        })});
       setInvoices(transformedData);
       setError(null);
     } catch (err) {
@@ -101,11 +107,17 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
 
         const transformedData = data
           .filter((invoice) => String(invoice.status || '').toLowerCase() === 'to_be_paid')
-          .map((invoice) => ({
+          .map((invoice) => {
+            const rawTotal = (invoice.invoice_total ?? invoice.total);
+            const numericTotal =
+              typeof rawTotal === 'number'
+                ? rawTotal
+                : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+            return ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number, // needed by detail view
             vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-            amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+            amount: `$${numericTotal.toFixed(2)}`,
             office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
             dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
@@ -133,7 +145,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             approved: invoice.approved,
             status: invoice.status,
             line_items: invoice.line_items || [],
-          }));
+          })});
         
         console.log('✅ ToBePaidPage: Data transformed successfully:', transformedData.length, 'approved invoices');
         setInvoices(transformedData);

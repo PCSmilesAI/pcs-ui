@@ -50,12 +50,17 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
             if (Number.isNaN(parsed.getTime())) return 'N/A';
             return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
           };
+          const rawTotal = (invoice.invoice_total ?? invoice.total);
+          const numericTotal =
+            typeof rawTotal === 'number'
+              ? rawTotal
+              : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
 
           return {
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
             vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-            amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+            amount: `$${numericTotal.toFixed(2)}`,
             office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
             status: invoice.status || 'New',
             category: invoice.category || 'Other',
@@ -96,11 +101,16 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           if (Number.isNaN(parsed.getTime())) return 'N/A';
           return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
         };
+        const rawTotal = (invoice.invoice_total ?? invoice.total);
+        const numericTotal =
+          typeof rawTotal === 'number'
+            ? rawTotal
+            : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
         return {
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
           vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-          amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+          amount: `$${numericTotal.toFixed(2)}`,
           office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
           status: invoice.status || 'New',
           category: invoice.category || 'Other',
