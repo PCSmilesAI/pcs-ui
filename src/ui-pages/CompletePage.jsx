@@ -37,11 +37,17 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
 
         const transformedData = data
           .filter((invoice) => ['paid', 'completed'].includes(String(invoice.status || '').toLowerCase()))
-          .map((invoice) => ({
+          .map((invoice) => {
+            const rawTotal = (invoice.invoice_total ?? invoice.total);
+            const numericTotal =
+              typeof rawTotal === 'number'
+                ? rawTotal
+                : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+            return ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
             vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-            amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+            amount: `$${numericTotal.toFixed(2)}`,
             office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
             dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', {
               month: 'numeric',
@@ -57,7 +63,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
             assigned_to: invoice.assigned_to,
             approved: invoice.approved,
             status: invoice.status
-          }));
+          })});
         
         console.log('✅ CompletePage: Data transformed successfully:', transformedData.length, 'completed invoices');
         setInvoices(transformedData);
@@ -82,11 +88,17 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
       const data = await fetchVisibleInvoices();
       const transformedData = data
         .filter((invoice) => ['paid', 'completed'].includes(String(invoice.status || '').toLowerCase()))
-        .map((invoice) => ({
+        .map((invoice) => {
+          const rawTotal = (invoice.invoice_total ?? invoice.total);
+          const numericTotal =
+            typeof rawTotal === 'number'
+              ? rawTotal
+              : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+          return ({
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
           vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-          amount: `$${(typeof (invoice.invoice_total ?? invoice.total) === 'number' ? (invoice.invoice_total ?? invoice.total) : parseFloat(String(invoice.invoice_total ?? invoice.total || '0').replace(/[^0-9.\-]/g, ''))).toFixed(2)}`,
+          amount: `$${numericTotal.toFixed(2)}`,
           office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
           dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
           invoice_date: invoice.invoice_date,
@@ -97,7 +109,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
           assigned_to: invoice.assigned_to,
           approved: invoice.approved,
           status: invoice.status
-        }));
+        })});
       setInvoices(transformedData);
       setError(null);
     } catch (err) {
