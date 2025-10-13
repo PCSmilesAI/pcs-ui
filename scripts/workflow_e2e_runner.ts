@@ -18,9 +18,9 @@ const roles = {
 writeFileSync(path.join(dataDir, 'roles.json'), JSON.stringify(roles, null, 2));
 writeFileSync(path.join(dataDir, 'invoice_queue.json'), JSON.stringify({ invoices: [] }, null, 2));
 
-const { readRoles } = await import('../lib/workflow/rolesStore.ts');
-const { approveAP, approveOffice, approveAdmin, markPaid } = await import('../lib/workflow/engine.ts');
-const { save, getById } = await import('../lib/workflow/invoiceStore.ts');
+const { readRoles } = await import('../lib/workflow/rolesStore');
+const { approveAP, approveOffice, approveAdmin, markPaid } = await import('../lib/workflow/engine');
+const { save, getById } = await import('../lib/workflow/invoiceStore');
 
 const apUser = { email: 'ap@example.com', name: 'AP User' };
 const officeUser = { email: 'office.manager@example.com', name: 'Office Manager' };
