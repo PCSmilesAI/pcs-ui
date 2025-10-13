@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
       const status = (invoice.status || '').toLowerCase();
       if (status !== 'awaiting_office_approval') return false;
       const office = getOffice(invoice).toLowerCase();
-      return office && officeSet.has(office);
+      return (!!office) && officeSet.has(office);
     });
   }
 
