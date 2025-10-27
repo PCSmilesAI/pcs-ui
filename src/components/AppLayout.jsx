@@ -56,7 +56,14 @@ export default function AppLayout({ children }) {
     };
     
     const urlPath = urlMapping[pageKey] || 'ForMePage';
-    router.push(`/${urlPath}`);
+    // Preserve existing query params (e.g., ?email=...)
+    try {
+      const params = new URLSearchParams(sp.toString());
+      const query = params.toString();
+      router.push(`/${urlPath}${query ? `?${query}` : ''}`);
+    } catch (_) {
+      router.push(`/${urlPath}`);
+    }
   };
 
   const handleToggleFilter = () => {

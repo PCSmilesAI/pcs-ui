@@ -19,6 +19,7 @@ export default function RolesPage() {
   const [error, setError] = useState('');
   const [toast, setToast] = useState(null);
   const [thresholdInput, setThresholdInput] = useState('1000');
+  const [testMode, setTestMode] = useState(false);
   const [adminsInput, setAdminsInput] = useState('');
   const [apInput, setApInput] = useState('');
   const [officeManagerInputs, setOfficeManagerInputs] = useState({});
@@ -47,11 +48,9 @@ export default function RolesPage() {
   }, []);
   const dismissToast = useCallback(() => setToast(null), []);
 
-  const initialiseOfficeInputs = useCallback((rolesOffices = {}, companyOffices = []) => {
-    const names = new Set([
-      ...Object.keys(rolesOffices || {}),
-      ...companyOffices.map((office) => office?.name || '').filter(Boolean),
-    ]);
+  const initialiseOfficeInputs = useCallback((rolesOffices = {}) => {
+    // Fixed offices: only include keys that already exist in roles.office_managers
+    const names = Object.keys(rolesOffices || {});
     const prepared = {};
     names.forEach((name) => {
       if (!name) return;
@@ -69,7 +68,7 @@ export default function RolesPage() {
       const [rolesRes, configRes, officesRes] = await Promise.all([
         fetch('/api/workflow/roles', { cache: 'no-store' }),
         fetch('/api/workflow/config', { cache: 'no-store' }),
-        fetch('/office_info.json', { cache: 'no-store' }),
+        fetch('/api/company/offices', { cache: 'no-store' }),
       ]);
 
       if (rolesRes.status === 403) {
@@ -97,6 +96,7 @@ export default function RolesPage() {
           ? configPayload.admin_threshold_usd
           : roles.threshold_usd || 0;
       setThresholdInput(String(thresholdValue));
+      setTestMode(Boolean(roles?.test_mode_route_all_to_admin));
 
       if (Array.isArray(roles.admins)) {
         setAdminsInput(roles.admins.join('\n'));
@@ -111,13 +111,11 @@ export default function RolesPage() {
 
       let officeList = [];
       if (officesRes.ok) {
-        officeList = await officesRes.json().catch(() => []);
-        if (!Array.isArray(officeList)) {
-          officeList = [];
-        }
+        const payload = await officesRes.json().catch(() => ({}));
+        officeList = Array.isArray(payload?.offices) ? payload.offices : [];
       }
       setOffices(officeList);
-      initialiseOfficeInputs(roles.office_managers || {}, officeList);
+      initialiseOfficeInputs(roles.office_managers || {});
     } catch (err) {
       console.error('❌ RolesPage: load failed', err);
       setError(err?.message || 'Failed to load role configuration');
@@ -146,16 +144,20 @@ export default function RolesPage() {
         return;
       }
 
+      // Normalise and dedupe emails
+      const dedupe = (list) => Array.from(new Set(list.map((e) => e.toLowerCase())));
+
       const rolesPayload = {
-        admins: parseEmailList(adminsInput),
-        ap_authorizers: parseEmailList(apInput),
+        admins: dedupe(parseEmailList(adminsInput)),
+        ap_authorizers: dedupe(parseEmailList(apInput)),
         office_managers: Object.fromEntries(
           combinedOffices.map((office) => [
             office,
-            parseEmailList(officeManagerInputs[office] || ''),
+            dedupe(parseEmailList(officeManagerInputs[office] || '')),
           ])
         ),
         threshold_usd: thresholdValue,
+        test_mode_route_all_to_admin: Boolean(testMode),
       };
 
       const rolesResp = await fetch('/api/workflow/roles', {
@@ -182,6 +184,23 @@ export default function RolesPage() {
         throw new Error(failure?.error || 'Failed to update workflow threshold');
       }
 
+      // Persist updates to Company Offices (manager/email edits)
+      const updatedOffices = offices.map((office) => ({
+        name: office?.name || '',
+        address: office?.address || '',
+        manager: office?.manager || '',
+        email: office?.email || '',
+      }));
+      const officesResp = await fetch('/api/company/offices', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ offices: updatedOffices }),
+      });
+      if (!officesResp.ok) {
+        const failure = await officesResp.json().catch(() => ({}));
+        throw new Error(failure?.error || 'Failed to update company offices');
+      }
+
       showToast('Workflow roles updated.', 'success');
       await loadData();
     } catch (err) {
@@ -201,14 +220,11 @@ export default function RolesPage() {
     }));
   }
 
-  const addOffice = () => {
-    const name = window.prompt('Office name');
-    if (!name) return;
-    setOfficeManagerInputs((prev) => {
-      if (prev[name]) return prev;
-      return { ...prev, [name]: '' };
-    });
-  };
+  // No add/remove offices here; office names are managed in Company Info (fixed list)
+
+  function handleOfficeFieldChange(index, key, value) {
+    setOffices((prev) => prev.map((o, i) => (i === index ? { ...o, [key]: value } : o)));
+  }
 
   const containerStyle = { padding: '24px' };
   const titleStyle = { fontSize: '24px', fontWeight: 600, color: '#357ab2', marginBottom: '16px' };
@@ -281,6 +297,16 @@ export default function RolesPage() {
           onChange={(e) => setThresholdInput(e.target.value)}
           style={inputStyle}
         />
+        <div style={{ marginTop: '12px' }}>
+          <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input
+              type="checkbox"
+              checked={testMode}
+              onChange={(e) => setTestMode(e.target.checked)}
+            />
+            Route all approvals directly to Admin (Test mode)
+          </label>
+        </div>
       </div>
 
       <div style={cardStyle}>
@@ -310,26 +336,9 @@ export default function RolesPage() {
       </div>
 
       <div style={cardStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <h2 style={{ ...sectionTitleStyle, marginTop: 0 }}>Office Managers</h2>
-          <button
-            onClick={addOffice}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '9999px',
-              border: '1px solid #357ab2',
-              backgroundColor: '#357ab2',
-              color: '#ffffff',
-              fontSize: '13px',
-              cursor: 'pointer',
-            }}
-            type="button"
-          >
-            Add Office
-          </button>
-        </div>
+        <h2 style={{ ...sectionTitleStyle, marginTop: 0 }}>Office Managers</h2>
         <p style={{ color: '#4a5568', fontSize: '13px', marginBottom: '12px' }}>
-          Provide one email per line. Leave blank for offices that do not require approvals.
+          Provide one email per line. Office names are managed in Company Info (read-only here).
         </p>
         {combinedOffices.length === 0 && (
           <div style={{ color: '#64748b' }}>No offices found.</div>
@@ -347,6 +356,55 @@ export default function RolesPage() {
             />
           </div>
         ))}
+      </div>
+
+      <div style={cardStyle}>
+        <h2 style={{ ...sectionTitleStyle, marginTop: 0 }}>Company Offices</h2>
+        {offices.length === 0 ? (
+          <div style={{ color: '#64748b' }}>No office information available.</div>
+        ) : (
+          <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+            {offices.map((office, index) => (
+              <li
+                key={`${office.name || 'office'}-${index}`}
+                style={{
+                  marginBottom: '16px',
+                  fontSize: '16px',
+                  color: '#1f1f1f',
+                  padding: '12px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  backgroundColor: '#f8fafc',
+                }}
+              >
+                <div style={{ fontWeight: 600, color: '#357ab2', fontSize: '18px', marginBottom: '4px' }}>
+                  {office.name || 'Unnamed Office'}
+                </div>
+                <div style={{ color: '#4a5568', marginBottom: '8px', lineHeight: '1.4' }}>
+                  {office.address || ''}
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={labelStyle}>Office Manager</label>
+                    <input
+                      style={inputStyle}
+                      value={office.manager || ''}
+                      onChange={(e) => handleOfficeFieldChange(index, 'manager', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={labelStyle}>Email</label>
+                    <input
+                      style={inputStyle}
+                      value={office.email || ''}
+                      onChange={(e) => handleOfficeFieldChange(index, 'email', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div style={{ marginBottom: '16px' }}>
@@ -368,45 +426,6 @@ export default function RolesPage() {
         >
           {saving ? 'Saving…' : 'Save Changes'}
         </button>
-      </div>
-
-      <div style={cardStyle}>
-        <h2 style={{ ...sectionTitleStyle, marginTop: 0 }}>Company Offices</h2>
-        {offices.length === 0 ? (
-          <div style={{ color: '#64748b' }}>No office information available.</div>
-        ) : (
-          <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
-            {offices.map((office, index) => (
-              <li
-                key={`${office.name || 'office'}-${index}`}
-                style={{
-                  padding: '12px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  marginBottom: '12px',
-                  backgroundColor: '#f8fafc',
-                }}
-              >
-                <div style={{ fontWeight: 600, color: '#357ab2', marginBottom: '4px' }}>
-                  {office.name || 'Unnamed Office'}
-                </div>
-                {office.address && (
-                  <div style={{ color: '#475569', marginBottom: '4px' }}>{office.address}</div>
-                )}
-                {office.manager && (
-                  <div style={{ color: '#1e293b', marginBottom: '4px' }}>
-                    <strong>Manager:</strong> {office.manager}
-                  </div>
-                )}
-                {office.email && (
-                  <div style={{ color: '#0f172a' }}>
-                    <strong>Email:</strong> {office.email}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
       <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />

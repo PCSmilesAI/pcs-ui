@@ -28,7 +28,11 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
   const { getStatusForVendor } = useVendorAchMap();
 
   async function fetchVisibleInvoices() {
-    const params = new URLSearchParams({ limit: '5000' });
+    // Include current page query params (e.g., ?email=...) so preview works without cookies
+    const params = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams();
+    params.set('limit', '5000');
     const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`Failed to load invoices (HTTP ${res.status})`);
     const payload = await res.json();
