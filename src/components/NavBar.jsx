@@ -57,6 +57,27 @@ export default function NavBar({
     }
   }, []);
 
+  // Fallback: if email is present in URL (?email=...), adopt it and persist
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const urlEmail = sp.get('email');
+      const normalised = urlEmail ? String(urlEmail).trim().toLowerCase() : '';
+      if (normalised && normalised !== userEmail) {
+        setUserEmail(normalised);
+        try {
+          window.localStorage.setItem('loggedInUser', JSON.stringify({ email: normalised, name: normalised }));
+          document.cookie =
+            'loggedInUser=' + encodeURIComponent(JSON.stringify({ email: normalised, name: normalised })) + '; path=/';
+        } catch (_) {
+          // ignore persistence errors
+        }
+      }
+    } catch (_) {
+      // ignore URL parsing errors
+    }
+  }, [sp, userEmail]);
+
   const isAdminUser = ADMIN_EMAILS.has(userEmail);
 
   // Tab definitions

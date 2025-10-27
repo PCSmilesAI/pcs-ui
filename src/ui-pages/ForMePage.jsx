@@ -71,7 +71,11 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   }, []);
 
   const fetchVisibleInvoices = useCallback(async () => {
-    const params = new URLSearchParams({ limit: '5000' });
+    // Propagate any query params from the page (e.g., ?email=...) to the API call
+    const params = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams();
+    params.set('limit', '5000');
     const res = await fetch(`/api/invoices/visible?${params.toString()}`, {
       cache: 'no-store',
     });

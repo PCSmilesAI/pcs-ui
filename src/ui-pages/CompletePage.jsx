@@ -18,7 +18,12 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
   const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
 
   async function fetchVisibleInvoices() {
-    const params = new URLSearchParams({ limit: '5000', status: 'paid' });
+    // Carry through page query params (e.g., ?email=...) for preview without cookies
+    const params = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams();
+    params.set('limit', '5000');
+    params.set('status', 'paid');
     const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`Failed to load invoices (HTTP ${res.status})`);
     const payload = await res.json();

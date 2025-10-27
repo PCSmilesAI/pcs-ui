@@ -58,6 +58,17 @@ async function backfillIfNeeded() {
         }
       }
 
+      // If the file exists but is zero-length (was truncated), seed it
+      try {
+        const stats = await fs.stat(file);
+        if (stats.size === 0) {
+          console.warn('[WORKFLOW][BACKFILL] detected empty store file, seeding from fallback');
+          await trySeed(file);
+        }
+      } catch (_) {
+        // If stat fails here, the access above succeeded; ignore and continue
+      }
+
       const buf = await fs.readFile(file, 'utf8');
       let store: any;
       try {

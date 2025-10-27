@@ -22,7 +22,12 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
 
   async function fetchVisibleInvoices() {
-    const params = new URLSearchParams({ limit: '5000', status: 'to_be_paid' });
+    // Pass through existing query params (e.g., ?email=...) for preview without cookies
+    const params = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams();
+    params.set('limit', '5000');
+    params.set('status', 'to_be_paid');
     const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`Failed to load invoices (HTTP ${res.status})`);
     const payload = await res.json();
