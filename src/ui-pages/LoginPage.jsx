@@ -32,6 +32,8 @@ export default function LoginPage() {
         'loggedInUser',
         JSON.stringify({ name, email: userEmail })
       );
+      // Also set cookie for server-side API access
+      document.cookie = `loggedInUser=${encodeURIComponent(JSON.stringify({ name, email: userEmail }))}; path=/`;
       // Navigate to For Me page after login
       try {
         router.push('/ForMePage');
