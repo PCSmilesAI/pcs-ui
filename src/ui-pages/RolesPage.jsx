@@ -30,14 +30,18 @@ export default function RolesPage() {
     if (typeof window === 'undefined') return;
     try {
       const stored = window.localStorage.getItem('loggedInUser');
+      console.log('[RolesPage] localStorage loggedInUser:', stored);
       if (stored) {
         const parsed = JSON.parse(stored);
+        console.log('[RolesPage] parsed user:', parsed);
         if (parsed?.email) {
-          setCurrentUserEmail(String(parsed.email).toLowerCase());
+          const email = String(parsed.email).toLowerCase();
+          console.log('[RolesPage] setting currentUserEmail:', email);
+          setCurrentUserEmail(email);
         }
       }
-    } catch (_) {
-      // ignore storage errors
+    } catch (err) {
+      console.error('[RolesPage] storage error:', err);
     }
   }, []);
 
