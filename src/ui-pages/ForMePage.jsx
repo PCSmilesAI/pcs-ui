@@ -9,8 +9,6 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [qboConnected, setQboConnected] = useState(false);
-  const [qboLoading, setQboLoading] = useState(true);
   const { handleInvoiceRowClick } = useInvoiceClick();
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [toast, setToast] = useState(null);
@@ -183,22 +181,6 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
       Object.entries(spFilters).filter(([, value]) => value !== undefined && value !== null && value !== ''),
     ),
   }), [filters, spFilters]);
-  // Check QuickBooks connection status
-  const checkQboStatus = useCallback(async () => {
-    try {
-      const response = await fetch('/api/qbo/status');
-      const data = await response.json();
-      setQboConnected(!!data.connected);
-    } catch (statusError) {
-      console.error('❌ Failed to check QuickBooks status:', statusError);
-      setQboConnected(false);
-    } finally {
-      setQboLoading(false);
-    }
-  }, []);
-  useEffect(() => {
-    checkQboStatus();
-  }, [checkQboStatus]);
 
   useEffect(() => {
     const loadInvoices = async () => {
@@ -323,44 +305,6 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
         </div>
       )}
 
-      <div
-        className={`mb-6 p-4 border rounded-lg ${
-          qboConnected ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-        }`}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div
-              className={`w-3 h-3 rounded-full mr-3 ${qboConnected ? 'bg-green-500' : 'bg-red-500'}`}
-            />
-            <div>
-              <p className={`${qboConnected ? 'text-green-800' : 'text-red-800'} font-medium`}>
-                {qboConnected ? 'QuickBooks Connected' : 'QuickBooks Not Connected'}
-              </p>
-              <p className={`${qboConnected ? 'text-green-700' : 'text-red-700'} text-sm`}>
-                {qboConnected
-                  ? 'Connection established successfully.'
-                  : 'Connect to QuickBooks to enable full functionality.'}
-              </p>
-            </div>
-          </div>
-          {!qboConnected && (
-            <a
-              href="/api/qbo/auth"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-            >
-              Connect QuickBooks
-            </a>
-          )}
-        </div>
-        <div className="mt-2 text-sm text-gray-600">
-          {qboLoading
-            ? 'Checking QuickBooks connection...'
-            : qboConnected
-              ? 'Your QuickBooks connection is active. You can proceed with invoice approvals.'
-              : 'QuickBooks is currently disconnected. Connect your account to enable automated billing.'}
-        </div>
-      </div>
 
       <InvoiceTable
         rows={filteredRows}
