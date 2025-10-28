@@ -39,7 +39,9 @@ export async function GET(req: NextRequest) {
     got_code: !!code, 
     got_state: !!state, 
     state_len: state?.length,
-    realmId
+    realmId,
+    redirect_uri: QBO_REDIRECT_URI,
+    environment: QBO_ENVIRONMENT
   });
 
   if (!code || !state) {
@@ -75,7 +77,7 @@ export async function GET(req: NextRequest) {
     // Exchange code for tokens with PKCE - use correct endpoint based on environment
     const { QBO_ENVIRONMENT = 'production' } = process.env;
     const tokenUrl = QBO_ENVIRONMENT === 'sandbox'
-      ? 'https://sandbox-quickbooks.api.intuit.com/oauth2/v1/tokens/bearer'
+      ? 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
       : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
     
     const authString = Buffer.from(`${QBO_CLIENT_ID}:${QBO_CLIENT_SECRET}`).toString('base64');
