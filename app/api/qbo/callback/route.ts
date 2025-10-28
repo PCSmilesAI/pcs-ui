@@ -123,9 +123,9 @@ export async function GET(req: NextRequest) {
     console.log('🎉 Successfully connected to QuickBooks!');
     console.log('📊 Realm ID:', realmId);
 
-    // Redirect back to the app
+    // Redirect back to the Connections page
     const baseUrl = QBO_REDIRECT_URI.replace('/api/qbo/callback', '');
-    return NextResponse.redirect(`${baseUrl}/?qbo_connected=true`, 302);
+    return NextResponse.redirect(`${baseUrl}/ConnectionsPage?qbo_connected=true`, 302);
     
   } catch (e: any) {
     console.error('❌ OAuth error:', e);

@@ -8,6 +8,20 @@ export default function ConnectionsPage() {
   const [stripeLoading, setStripeLoading] = useState(true);
   const [qboError, setQboError] = useState(null);
   const [stripeError, setStripeError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  // Check for success message from URL params
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('qbo_connected') === 'true') {
+        setSuccessMessage('QuickBooks connected successfully!');
+        // Clear the URL parameter
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    }
+  }, []);
 
   // Check QuickBooks connection status
   const checkQboStatus = useCallback(async () => {
@@ -126,6 +140,21 @@ export default function ConnectionsPage() {
         <p style={{ color: '#6b7280', marginBottom: '32px' }}>
           Manage your API connections for QuickBooks and Stripe integrations.
         </p>
+
+        {/* Success Message */}
+        {successMessage && (
+          <div style={{
+            padding: '16px',
+            borderRadius: '8px',
+            border: '1px solid #10b981',
+            backgroundColor: '#f0fdf4',
+            marginBottom: '24px',
+            color: '#065f46',
+            fontWeight: 500,
+          }}>
+            ✅ {successMessage}
+          </div>
+        )}
 
         {/* QuickBooks Connection Status */}
         <div style={statusCardStyle(qboConnected)}>
