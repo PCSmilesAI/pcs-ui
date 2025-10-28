@@ -29,7 +29,8 @@ export default function AppLayout({ children }) {
       'PayoutAccountPage': 'payoutAccount',
       'ReportsPage': 'reports',
       'RolesPage': 'roles',
-      'roles': 'roles'
+      'roles': 'roles',
+      'ConnectionsPage': 'connections'
     };
     
     setCurrentPage(pageMapping[path] || 'forMe');
@@ -52,7 +53,8 @@ export default function AppLayout({ children }) {
       'companyInfo': 'CompanyInfoPage',
       'payoutAccount': 'PayoutAccountPage',
       'reports': 'ReportsPage',
-      'roles': 'roles'
+      'roles': 'roles',
+      'connections': 'ConnectionsPage'
     };
     
     const urlPath = urlMapping[pageKey] || 'ForMePage';

@@ -345,6 +345,17 @@ export default function NavBar({
                   Roles
                 </div>
               )}
+              {isAdminUser && (
+                <div
+                  style={dropdownItemStyle}
+                  onClick={() => {
+                    setIsAccountOpen(false);
+                    onChangePage('connections');
+                  }}
+                >
+                  Connections
+                </div>
+              )}
               <div
                 style={dropdownItemStyle}
                 onClick={() => {
