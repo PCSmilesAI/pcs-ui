@@ -340,29 +340,6 @@ export default function RolesPage() {
       </div>
 
       <div style={cardStyle}>
-        <h2 style={{ ...sectionTitleStyle, marginTop: 0 }}>Office Managers</h2>
-        <p style={{ color: '#4a5568', fontSize: '13px', marginBottom: '12px' }}>
-          Provide one email per line. Office names are managed in Company Info (read-only here).
-        </p>
-        {combinedOffices.length === 0 && (
-          <div style={{ color: '#64748b' }}>No offices found.</div>
-        )}
-        {combinedOffices.map((office) => (
-          <div key={office} style={{ marginBottom: '16px' }}>
-            <label style={labelStyle} htmlFor={`office-${office}`}>
-              {office}
-            </label>
-            <textarea
-              id={`office-${office}`}
-              value={officeManagerInputs[office] || ''}
-              onChange={(e) => handleOfficeInputChange(office, e.target.value)}
-              style={textAreaStyle}
-            />
-          </div>
-        ))}
-      </div>
-
-      <div style={cardStyle}>
         <h2 style={{ ...sectionTitleStyle, marginTop: 0 }}>Company Offices</h2>
         {offices.length === 0 ? (
           <div style={{ color: '#64748b' }}>No office information available.</div>
