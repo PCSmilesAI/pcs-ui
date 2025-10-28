@@ -72,8 +72,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Exchange code for tokens with PKCE
-    const tokenUrl = 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
+    // Exchange code for tokens with PKCE - use correct endpoint based on environment
+    const { QBO_ENVIRONMENT = 'production' } = process.env;
+    const tokenUrl = QBO_ENVIRONMENT === 'sandbox'
+      ? 'https://sandbox-quickbooks.api.intuit.com/oauth2/v1/tokens/bearer'
+      : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
     
     const authString = Buffer.from(`${QBO_CLIENT_ID}:${QBO_CLIENT_SECRET}`).toString('base64');
     
