@@ -87,7 +87,7 @@ export async function GET(request: Request) {
 
   // Use correct OAuth endpoint based on environment
   const oauthEndpoint = QBO_ENVIRONMENT === 'sandbox' 
-    ? 'https://sandbox-quickbooks.api.intuit.com/oauth2/v1/authorize'
+    ? 'https://appcenter.intuit.com/connect/oauth2'
     : 'https://appcenter.intuit.com/connect/oauth2';
   
   const authUrl = new URL(oauthEndpoint);
