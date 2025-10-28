@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     state_len: state?.length,
     realmId,
     redirect_uri: QBO_REDIRECT_URI,
-    environment: QBO_ENVIRONMENT
+    environment: process.env.QBO_ENVIRONMENT
   });
 
   if (!code || !state) {
