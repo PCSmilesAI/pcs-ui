@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import ConnectionsPage from '../../../src/ui-pages/ConnectionsPage';
+import ConnectionsPage from '../../src/ui-pages/ConnectionsPage';
 
 export const dynamic = 'force-dynamic';
 
