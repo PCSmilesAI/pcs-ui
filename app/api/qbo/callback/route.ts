@@ -35,6 +35,8 @@ export async function GET(req: NextRequest) {
   const state = url.searchParams.get('state');
   const realmId = url.searchParams.get('realmId');
   
+  const { QBO_STATE_SECRET, QBO_REDIRECT_URI, QBO_CLIENT_ID, QBO_CLIENT_SECRET } = process.env;
+  
   console.log('[QBO][CALLBACK] incoming', {
     got_code: !!code, 
     got_state: !!state, 
@@ -50,8 +52,6 @@ export async function GET(req: NextRequest) {
       received: { code: !!code, state: !!state, realmId }
     }, { status: 400 });
   }
-
-  const { QBO_STATE_SECRET, QBO_REDIRECT_URI, QBO_CLIENT_ID, QBO_CLIENT_SECRET } = process.env;
   if (!QBO_STATE_SECRET || !QBO_REDIRECT_URI || !QBO_CLIENT_ID || !QBO_CLIENT_SECRET) {
     return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
   }
