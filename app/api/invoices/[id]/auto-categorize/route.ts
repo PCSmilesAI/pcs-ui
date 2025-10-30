@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { categorizeInvoiceLines } from '../../../../../lib/categorize'
 import fs from 'fs'
-import path from 'path'
+import { resolveDataPath } from '../../../../../lib/workflow/dataDir'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 // Load invoice data from JSON file
 async function loadInvoice(invoiceId: string) {
-  const filePath = path.join(process.cwd(), 'pcs_ai_data', 'invoice_queue.json')
+  const filePath = resolveDataPath('invoice_queue.json')
   
   if (!fs.existsSync(filePath)) {
     throw new Error('Invoice queue file not found')
   }
   
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+  const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+  const data = Array.isArray(raw) ? raw : Array.isArray(raw?.invoices) ? raw.invoices : []
   const invoice = data.find((inv: any) => inv.id === invoiceId || inv.invoice_number === invoiceId)
   
   if (!invoice) {
@@ -26,8 +27,10 @@ async function loadInvoice(invoiceId: string) {
 
 // Save line categories back to the invoice
 async function saveLineCategories(invoiceId: string, categories: any[]) {
-  const filePath = path.join(process.cwd(), 'pcs_ai_data', 'invoice_queue.json')
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+  const filePath = resolveDataPath('invoice_queue.json')
+  const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+  const isArray = Array.isArray(raw)
+  const data = isArray ? raw : Array.isArray(raw?.invoices) ? raw.invoices : []
   
   const invoiceIndex = data.findIndex((inv: any) => inv.id === invoiceId || inv.invoice_number === invoiceId)
   if (invoiceIndex === -1) {
@@ -49,7 +52,8 @@ async function saveLineCategories(invoiceId: string, categories: any[]) {
     }
   })
   
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
+  const payload = isArray ? data : { ...(raw || {}), invoices: data }
+  fs.writeFileSync(filePath, JSON.stringify(payload, null, 2))
 }
 
 // Get QuickBooks categories

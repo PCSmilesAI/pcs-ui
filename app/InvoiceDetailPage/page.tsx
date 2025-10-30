@@ -50,13 +50,16 @@ function InvoiceDetailContent() {
           setInvoiceQueue(queue);
           setCurrentIndex(currentIndex);
           
+          const officeRaw = foundInvoice.office_location || foundInvoice.office || foundInvoice.clinic_id || '';
           // Transform the invoice data to match the expected format
           const transformedInvoice = {
+            id: foundInvoice.id || foundInvoice.invoice_number,
             invoice: foundInvoice.invoice_number || 'Unknown',
             invoice_number: foundInvoice.invoice_number,
             vendor: foundInvoice.vendor_name || foundInvoice.vendor || 'Unknown',
             amount: `$${foundInvoice.invoice_total || foundInvoice.total || '0.00'}`,
-            office: foundInvoice.office_location || foundInvoice.clinic_id || 'Unknown',
+            office: officeRaw || 'Unknown',
+            rawOffice: officeRaw,
             dueDate: foundInvoice.due_date ? new Date(foundInvoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
@@ -72,11 +75,14 @@ function InvoiceDetailContent() {
             due_date: foundInvoice.due_date,
             json_path: foundInvoice.json_path,
             pdf_path: foundInvoice.pdf_path,
+            source_file: foundInvoice.source_file,
             timestamp: foundInvoice.timestamp,
             assigned_to: foundInvoice.assigned_to,
             approved: foundInvoice.approved,
             status: foundInvoice.status,
-            total: foundInvoice.total
+            total: foundInvoice.total,
+            approvals: foundInvoice.approvals || {},
+            line_items: Array.isArray(foundInvoice.line_items) ? foundInvoice.line_items : []
           };
           setInvoice(transformedInvoice);
         } else {
@@ -93,14 +99,22 @@ function InvoiceDetailContent() {
   }, [searchParams]);
 
   const handleBack = () => {
-    router.back();
+    const from = searchParams.get('from');
+    if (from) {
+      // Always go back to originating list (explicit target)
+      router.replace(from);
+    } else {
+      router.back();
+    }
   };
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
       const prevInvoice = invoiceQueue[currentIndex - 1];
       const identifier = prevInvoice.invoice_number || prevInvoice.id;
-      router.push(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`);
+      const from = searchParams.get('from');
+      // Replace current history entry and preserve the original list target
+      router.replace(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}${from ? `&from=${encodeURIComponent(from)}` : ''}`);
     }
   };
 
@@ -108,7 +122,9 @@ function InvoiceDetailContent() {
     if (currentIndex < invoiceQueue.length - 1) {
       const nextInvoice = invoiceQueue[currentIndex + 1];
       const identifier = nextInvoice.invoice_number || nextInvoice.id;
-      router.push(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}`);
+      const from = searchParams.get('from');
+      // Replace current history entry and preserve the original list target
+      router.replace(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}${from ? `&from=${encodeURIComponent(from)}` : ''}`);
     }
   };
 

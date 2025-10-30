@@ -27,7 +27,10 @@ export default function AppLayout({ children }) {
       'AccountPage': 'account',
       'CompanyInfoPage': 'companyInfo',
       'PayoutAccountPage': 'payoutAccount',
-      'ReportsPage': 'reports'
+      'ReportsPage': 'reports',
+      'RolesPage': 'roles',
+      'roles': 'roles',
+      'ConnectionsPage': 'connections'
     };
     
     setCurrentPage(pageMapping[path] || 'forMe');
@@ -49,11 +52,20 @@ export default function AppLayout({ children }) {
       'account': 'AccountPage',
       'companyInfo': 'CompanyInfoPage',
       'payoutAccount': 'PayoutAccountPage',
-      'reports': 'ReportsPage'
+      'reports': 'ReportsPage',
+      'roles': 'roles',
+      'connections': 'ConnectionsPage'
     };
     
     const urlPath = urlMapping[pageKey] || 'ForMePage';
-    router.push(`/${urlPath}`);
+    // Preserve existing query params (e.g., ?email=...)
+    try {
+      const params = new URLSearchParams(sp.toString());
+      const query = params.toString();
+      router.push(`/${urlPath}${query ? `?${query}` : ''}`);
+    } catch (_) {
+      router.push(`/${urlPath}`);
+    }
   };
 
   const handleToggleFilter = () => {
@@ -91,13 +103,15 @@ export default function AppLayout({ children }) {
               try {
                 // Mirror filters into the URL so pages can read them reliably
                 const params = new URLSearchParams(sp.toString());
-                const keys = ['vendor','office','category','minAmount','maxAmount','dueWithin'];
+                const keys = ['vendor','office','category','minAmount','maxAmount','dueWithin','ach'];
                 keys.forEach((k) => {
                   const v = (criteria && criteria[k]) ? String(criteria[k]).trim() : '';
                   if (v) params.set(k, v); else params.delete(k);
                 });
                 router.replace(`${pathname}?${params.toString()}`);
-              } catch (_) {}
+              } catch (applyError) {
+                console.error('Failed to mirror filter parameters in URL:', applyError);
+              }
             }}
           />
         )}

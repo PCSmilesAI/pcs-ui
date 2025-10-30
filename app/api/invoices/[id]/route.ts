@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
-import path from 'path';
+import { resolveDataPath } from '../../../../lib/workflow/dataDir';
 
 export async function GET(
   request: NextRequest,
@@ -10,16 +10,17 @@ export async function GET(
     const invoiceId = params.id;
     
     // Load the invoice queue
-    const invoiceQueuePath = path.join(process.cwd(), 'pcs_ai_data', 'invoice_queue.json');
+    const invoiceQueuePath = resolveDataPath('invoice_queue.json');
     
     if (!fs.existsSync(invoiceQueuePath)) {
       return NextResponse.json({ error: 'Invoice queue not found' }, { status: 404 });
     }
     
-    const invoiceQueue = JSON.parse(fs.readFileSync(invoiceQueuePath, 'utf8'));
+    const raw = JSON.parse(fs.readFileSync(invoiceQueuePath, 'utf8'));
+    const invoices = Array.isArray(raw) ? raw : Array.isArray(raw?.invoices) ? raw.invoices : [];
     
     // Find the invoice by ID
-    const invoice = invoiceQueue.find((inv: any) => inv.id === invoiceId);
+    const invoice = invoices.find((inv: any) => inv.id === invoiceId);
     
     if (!invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });

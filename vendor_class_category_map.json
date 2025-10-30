@@ -1,0 +1,1792 @@
+{
+  "Dunivin Denture": {
+    "Classes": [
+      "Corp-RCM"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10390 Prepaid Rent",
+      "11000 Fixed Assets:11060 ROU Assets:11061 ROU Assets - Operating Leases",
+      "22200 Other Current Liabilities:22210 Operating Lease Liabilities - Current",
+      "25000 Operating Lease Liabilities",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53312 TICAM"
+    ]
+  },
+  "SKN Properties": {
+    "Classes": [
+      "General-Columbia"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10320 Prepaid Taxes",
+      "11000 Fixed Assets:11060 ROU Assets:11061 ROU Assets - Operating Leases",
+      "22200 Other Current Liabilities:22210 Operating Lease Liabilities - Current",
+      "25000 Operating Lease Liabilities",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53312 TICAM"
+    ]
+  },
+  "Campbell Commercial Real Estate": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10320 Prepaid Taxes",
+      "11000 Fixed Assets:11060 ROU Assets:11061 ROU Assets - Operating Leases",
+      "22200 Other Current Liabilities:22210 Operating Lease Liabilities - Current",
+      "25000 Operating Lease Liabilities",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53312 TICAM"
+    ]
+  },
+  "Lynda Lynch": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11060 ROU Assets:11061 ROU Assets - Operating Leases",
+      "22200 Other Current Liabilities:22210 Operating Lease Liabilities - Current",
+      "25000 Operating Lease Liabilities",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53312 TICAM",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water"
+    ]
+  },
+  "The Bugni Family Revocable Living Trust": {
+    "Classes": [
+      "General-Milwaukie"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11060 ROU Assets:11061 ROU Assets - Operating Leases",
+      "22200 Other Current Liabilities:22210 Operating Lease Liabilities - Current",
+      "25000 Operating Lease Liabilities",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53312 TICAM"
+    ]
+  },
+  "XuanLan Pham": {
+    "Classes": [
+      "General-Riddle"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11060 ROU Assets:11061 ROU Assets - Operating Leases",
+      "22200 Other Current Liabilities:22210 Operating Lease Liabilities - Current",
+      "25000 Operating Lease Liabilities",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53312 TICAM"
+    ]
+  },
+  "TRI Mountain LLC": {
+    "Classes": [
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10390 Prepaid Rent",
+      "11000 Fixed Assets:11060 ROU Assets:11061 ROU Assets - Operating Leases",
+      "22200 Other Current Liabilities:22210 Operating Lease Liabilities - Current",
+      "25000 Operating Lease Liabilities",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53312 TICAM"
+    ]
+  },
+  "Sharp Smiles LLC": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10320 Prepaid Taxes",
+      "11000 Fixed Assets:11060 ROU Assets:11061 ROU Assets - Operating Leases",
+      "22200 Other Current Liabilities:22210 Operating Lease Liabilities - Current",
+      "25000 Operating Lease Liabilities",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53312 TICAM"
+    ]
+  },
+  "KT Commercial LLC": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11060 ROU Assets:11061 ROU Assets - Operating Leases",
+      "22200 Other Current Liabilities:22210 Operating Lease Liabilities - Current",
+      "25000 Operating Lease Liabilities",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53312 TICAM"
+    ]
+  },
+  "Haynes Family LLC": {
+    "Classes": [
+      "Div-Operations"
+    ],
+    "Categories": [
+      "10400 Short-term Notes Receivable",
+      "50000 Expenses:55000 Divisional Expense:55100 Divisional Expense-Labor:55110 Divisional Expense Labor-Gross Wages"
+    ]
+  },
+  "Patterson Dental": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory",
+      "11000 Fixed Assets",
+      "11000 Fixed Assets:11010 Dental Equipment",
+      "11000 Fixed Assets:11020 Office Equipment",
+      "50000 Expenses:52000 Direct Supplies:52100 Sundries:52110 Dental Supplies",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software"
+    ]
+  },
+  "Jacques Andre": {
+    "Classes": [
+      "Corp-Finance",
+      "Corp-IT"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11050 Intangible Assets",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53332 IT Contract Labor",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software"
+    ]
+  },
+  "Braxton Ellsworth": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11050 Intangible Assets"
+    ]
+  },
+  "Trustworkz Inc": {
+    "Classes": [
+      "Div-Marketing",
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11050 Intangible Assets",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53241 Online Advertising",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53243 Website",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53246 Marketing Managed Service Partners"
+    ]
+  },
+  "Chase Merchant Services Paymentech": {
+    "Classes": [
+      "Corp-RCM",
+      "General- Milwaukie",
+      "General- Salem",
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11020 Office Equipment"
+    ]
+  },
+  "Sunbit": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11020 Office Equipment"
+    ]
+  },
+  "Pacific Office Automation": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11020 Office Equipment",
+      "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53223 Office Supplies"
+    ]
+  },
+  "Nexcom": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11020 Office Equipment",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "A-J's Painting & More LLC": {
+    "Classes": [
+      "Corp-RCM"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11040 Leasehold Improvements"
+    ]
+  },
+  "Affordable Tile and Roofing": {
+    "Classes": [
+      "Corp-RCM"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11040 Leasehold Improvements"
+    ]
+  },
+  "Emerge Electrical LLC": {
+    "Classes": [
+      "Corp-RCM"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11040 Leasehold Improvements"
+    ]
+  },
+  "FastSigns": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11040 Leasehold Improvements"
+    ]
+  },
+  "Builder's Electric, Inc": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11040 Leasehold Improvements"
+    ]
+  },
+  "Positive Electric, Inc": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11040 Leasehold Improvements"
+    ]
+  },
+  "Evenflo Plumbing LLC": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11040 Leasehold Improvements"
+    ]
+  },
+  "Bruton Comfort Control, Inc": {
+    "Classes": [
+      "General-Milwaukie"
+    ],
+    "Categories": [
+      "11000 Fixed Assets:11040 Leasehold Improvements"
+    ]
+  },
+  "Henry Schein": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory",
+      "11000 Fixed Assets:11010 Dental Equipment",
+      "50000 Expenses:52000 Direct Supplies:52100 Sundries:52110 Dental Supplies",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53223 Office Supplies",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software",
+      "Cost of goods sold"
+    ]
+  },
+  "Ultradent Products Inc": {
+    "Classes": [
+      "General-Columbia",
+      "General-Lebanon",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory",
+      "11000 Fixed Assets:11010 Dental Equipment"
+    ]
+  },
+  "Darby Dental Supply": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory",
+      "11000 Fixed Assets:11010 Dental Equipment",
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees",
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Brasseler": {
+    "Classes": [
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory",
+      "11000 Fixed Assets:11010 Dental Equipment",
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Miracle Cleaners": {
+    "Classes": [
+      "General-Columbia",
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53224 Uniforms & Cleaning"
+    ]
+  },
+  "TC Dental Lab": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "AS & P Billing Services Corp": {
+    "Classes": [
+      "General-Columbia",
+      "General-Milwaukie",
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53221 Janitorial"
+    ]
+  },
+  "Ctrl+Alt+IT": {
+    "Classes": [
+      "Corp-RCM",
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53331 IT Management Service Partners"
+    ]
+  },
+  "Oregon Linen": {
+    "Classes": [
+      "General-Riddle",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53224 Uniforms & Cleaning"
+    ]
+  },
+  "South Umpaqua Disposal": {
+    "Classes": [
+      "General-Columbia"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53225 Hazardous Disposal"
+    ]
+  },
+  "Valley Fire Control": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Dandy": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Exodus Dental Solutions": {
+    "Classes": [
+      "General-Columbia",
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Marion Recycling Center Inc": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53225 Hazardous Disposal"
+    ]
+  },
+  "OnDeim/Gig Forces Inc": {
+    "Classes": [
+      "General-Milwaukie"
+    ],
+    "Categories": [
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51210 Hygienist:51218 Hygienist-Contract Labor",
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51221 Other Direct Labor-Gross Wages",
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Naomi Swinehart": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53221 Janitorial"
+    ]
+  },
+  "Kettenbach LP": {
+    "Classes": [
+      "General-Columbia",
+      "General-Milwaukie",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory"
+    ]
+  },
+  "Signing Resources & Interpreters": {
+    "Classes": [
+      "General-Columbia",
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53362 Professional Fees"
+    ]
+  },
+  "Crystal Falls": {
+    "Classes": [
+      "General-Riddle",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53223 Office Supplies"
+    ]
+  },
+  "American Backflow & Plumbing Services, Inc": {
+    "Classes": [
+      "General-Milwaukie"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Heaths Laundry": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53224 Uniforms & Cleaning"
+    ]
+  },
+  "Preat Corporation": {
+    "Classes": [
+      "General-Columbia",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory"
+    ]
+  },
+  "Thrive Dental Marketing": {
+    "Classes": [
+      "General-Riddle",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10340 Prepaid Consulting",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53362 Professional Fees"
+    ]
+  },
+  "Physician's Resource": {
+    "Classes": [
+      "General-Eugene",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10340 Prepaid Consulting",
+      "50000 Expenses:51000 Direct Labor:51100 Doctor:51140 Doctor-Training & Continuing Education",
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51224 Other Direct Labor-Training & Continuing Education"
+    ]
+  },
+  "Dental & Medical Staffing, Inc": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51210 Hygienist:51218 Hygienist-Contract Labor",
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51221 Other Direct Labor-Gross Wages",
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51224 Other Direct Labor-Training & Continuing Education",
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor"
+    ]
+  },
+  "Stampli": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software"
+    ]
+  },
+  "Artisan Dental": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Vancouver Lab Inc": {
+    "Classes": [
+      "General-Columbia"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Dentis USA Corp": {
+    "Classes": [
+      "General-Columbia"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory"
+    ]
+  },
+  "Janella Spears": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Epic Dental Lab": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Riddle",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Culligan": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses"
+    ]
+  },
+  "Airgas USA LLC": {
+    "Classes": [
+      "General-Columbia",
+      "General-Lebanon",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases"
+    ]
+  },
+  "Professional Office Services Inc": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Judson's Heating-Plumbing-Electric": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Dentsply": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory"
+    ]
+  },
+  "American Logo Gear LLC": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10370 Prepaid Patient Gifts",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53242 Printing & Distribution Marketing"
+    ]
+  },
+  "Young Surgical/Puragraft Holdings Inc": {
+    "Classes": [
+      "General-Columbia"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory",
+      "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases"
+    ]
+  },
+  "First United Methodist": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent"
+    ]
+  },
+  "Murphys Law Janitorial": {
+    "Classes": [
+      "General-Eugene",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53221 Janitorial",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "A1 Professional Exterminating": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53221 Janitorial",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Roseburg Disposal": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53227 Waste Disposal"
+    ]
+  },
+  "Fyle Inc": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53332 IT Contract Labor",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software"
+    ]
+  },
+  "Dexis": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software"
+    ]
+  },
+  "Pavloff Landscaping": {
+    "Classes": [
+      "General-Riddle",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Obrien Dental Lab": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Industrial Source": {
+    "Classes": [
+      "General-Eugene",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases"
+    ]
+  },
+  "Washington Printing": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53223 Office Supplies"
+    ]
+  },
+  "Linde Gas & Equipment Inc": {
+    "Classes": [
+      "General-Columbia"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases"
+    ]
+  },
+  "Western Exterminator Company": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Bio-Tek Medical": {
+    "Classes": [
+      "General-Columbia"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases"
+    ]
+  },
+  "Pension Plan Specialist": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10340 Prepaid Consulting"
+    ]
+  },
+  "Med Pro Waste Disposal LLC": {
+    "Classes": [
+      "General-Riddle"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53225 Hazardous Disposal",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53227 Waste Disposal"
+    ]
+  },
+  "Springfield Denture Lab": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees",
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Sierra Springs": {
+    "Classes": [
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses"
+    ]
+  },
+  "Iron Mountain": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "ABC Fire Extinguisher, Inc": {
+    "Classes": [
+      "General-Milwaukie"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Patriot Plumbing": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Republic Services": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53227 Waste Disposal"
+    ]
+  },
+  "Trilogy Medwaste West LLC": {
+    "Classes": [
+      "General-Columbia",
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53225 Hazardous Disposal"
+    ]
+  },
+  "Clipboard Health": {
+    "Classes": [],
+    "Categories": [
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51210 Hygienist:51218 Hygienist-Contract Labor",
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51221 Other Direct Labor-Gross Wages"
+    ]
+  },
+  "Roseburg Urban Sanitary Authority": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53227 Waste Disposal",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water"
+    ]
+  },
+  "Straumann Group": {
+    "Classes": [
+      "General-Ridgefield",
+      "General-Salem"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory"
+    ]
+  },
+  "Refreshing Pro Wash": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10380 Prepaid Services"
+    ]
+  },
+  "Glidewell": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Hermann Sarmiento": {
+    "Classes": [
+      "Div-Marketing"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53242 Printing & Distribution Marketing"
+    ]
+  },
+  "Deluxe": {
+    "Classes": [
+      "Corp-Finance",
+      "Corp-RCM",
+      "General-Columbia",
+      "General-Eugene",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Riddle",
+      "General-Ridgefield",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "10200 Inventory:10260 Office Supplies Inventory"
+    ]
+  },
+  "Thrive Coworking": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent"
+    ]
+  },
+  "Clark Public Utilities": {
+    "Classes": [
+      "General-Columbia",
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53322 Electricity"
+    ]
+  },
+  "Portland General": {
+    "Classes": [
+      "General-Milwaukie"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10380 Prepaid Services",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53322 Electricity"
+    ]
+  },
+  "NW Natural": {
+    "Classes": [
+      "General-Columbia",
+      "General-Lebanon",
+      "General-Milwaukie",
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53323 Natural Gas"
+    ]
+  },
+  "Travis Strand": {
+    "Classes": [
+      "Corp-RCM"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Avista": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53323 Natural Gas"
+    ]
+  },
+  "Pacific Power": {
+    "Classes": [
+      "General-Lebanon",
+      "General-Riddle",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53322 Electricity"
+    ]
+  },
+  "Stericycle": {
+    "Classes": [
+      "General-Columbia",
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53227 Waste Disposal"
+    ]
+  },
+  "All Hands Interpreting Services": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Plant Managers Plus": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "Cintas": {
+    "Classes": [
+      "General-Columbia"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services"
+    ]
+  },
+  "City of Milwaukie": {
+    "Classes": [
+      "General-Milwaukie"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water"
+    ]
+  },
+  "Samantha A Foy": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53362 Professional Fees"
+    ]
+  },
+  "Paylocity": {
+    "Classes": [
+      "Corp-HR",
+      "Div-Operations"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10310 Prepaid Wages",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software"
+    ]
+  },
+  "Do Good Cleaning Services LLC": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53221 Janitorial"
+    ]
+  },
+  "Crozier Kimball": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "50000 Expenses:54000 Corporate Expense:54100 Corporate Expenses Labor:54110 Corporate Expense Labor-Gross Wages"
+    ]
+  },
+  "United Healthcare": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "22100 Payroll Liabilities:22160 Employee Benefits Payable",
+      "22100 Payroll Liabilities:22190 Insurance Paybale"
+    ]
+  },
+  "Elevate Dental Consulting": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53362 Professional Fees"
+    ]
+  },
+  "Plastech IT Services, LLC": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53332 IT Contract Labor"
+    ]
+  },
+  "Maxxeus": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory"
+    ]
+  },
+  "SABowen Holdings, LLC": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53234 Lodging",
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53340 Insurance:53342 Malpractice Insurance"
+    ]
+  },
+  "Crest+Oral-B": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory"
+    ]
+  },
+  "American Express": {
+    "Classes": [],
+    "Categories": [
+      "21100 AMEX"
+    ]
+  },
+  "The Hartford": {
+    "Classes": [
+      "Corp-Finance",
+      "Div-Operations"
+    ],
+    "Categories": [
+      "22100 Payroll Liabilities:22190 Insurance Paybale"
+    ]
+  },
+  "Patricia Schaak": {
+    "Classes": [
+      "General-Lebanon",
+      "General-Roseburg",
+      "General-Salem"
+    ],
+    "Categories": [
+      "22100 Payroll Liabilities:22150 Payroll Tax Payable",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53231 Office Drive Time",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53232 Office Business Meals",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53234 Lodging"
+    ]
+  },
+  "Rocky Mountain Power": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10380 Prepaid Services"
+    ]
+  },
+  "Roseburg High School": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "10300 Prepaid Expenses:10341 Prepaid Advertising"
+    ]
+  },
+  "Dr Kenneth Do": {
+    "Classes": [
+      "General-Columbia"
+    ],
+    "Categories": [
+      "10200 Inventory:10210 Dental Supplies Inventory"
+    ]
+  },
+  "Distinct Office Structures LLC": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent"
+    ]
+  },
+  "Amigos Capital": {
+    "Classes": [],
+    "Categories": [
+      "15000 Long-term Notes Receivable:15010 Long-term Notes Receivable - Partners"
+    ]
+  },
+  "Syed Umer": {
+    "Classes": [
+      "General-Riddle"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53231 Office Drive Time",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53234 Lodging"
+    ]
+  },
+  "Nitai Stein": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Kimberly Gawlick": {
+    "Classes": [],
+    "Categories": [
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51210 Hygienist:51218 Hygienist-Contract Labor"
+    ]
+  },
+  "Abby Losee": {
+    "Classes": [
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53100 Center Level Support Level:53110 Front Desk:53118 Front Desk-Contract Labor"
+    ]
+  },
+  "Umpqua Valley Arts": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing"
+    ]
+  },
+  "The Oral Cancer Foundation": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing"
+    ]
+  },
+  "Glide Booster Club": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing"
+    ]
+  },
+  "RHS Cheer Booster Club": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing"
+    ]
+  },
+  "City of Riddle": {
+    "Classes": [
+      "General-Riddle"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water"
+    ]
+  },
+  "Wolfe Plumbing & Mechanical": {
+    "Classes": [
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor"
+    ]
+  },
+  "Althea Seloover": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "William Todd": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Benjamin Bird": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Rosemarie Wess": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Robert Melara": {
+    "Classes": [
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "John Foxwell": {
+    "Classes": [
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Christine Deardorff": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Dr Dennis Perala": {
+    "Classes": [
+      "General-Eugene",
+      "General-Riddle"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53234 Lodging"
+    ]
+  },
+  "Dr Reza Safari": {
+    "Classes": [],
+    "Categories": [
+      "50000 Expenses:51000 Direct Labor:51100 Doctor:51180 Doctor-Contract Labor"
+    ]
+  },
+  "Terra Munger": {
+    "Classes": [
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Dr Bernard McGraw": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel"
+    ]
+  },
+  "Dr Reid Donakey": {
+    "Classes": [],
+    "Categories": [
+      "50000 Expenses:51000 Direct Labor:51100 Doctor:51140 Doctor-Training & Continuing Education"
+    ]
+  },
+  "JPMorgan Chase": {
+    "Classes": [
+      "Corp-Finance",
+      "Corp-RCM"
+    ],
+    "Categories": []
+  },
+  "IRS": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Clearent": {
+    "Classes": [
+      "Corp-RCM"
+    ],
+    "Categories": []
+  },
+  "Deborah Allert": {
+    "Classes": [
+      "General-Riddle"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "City of Roseburg Water Division": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water"
+    ]
+  },
+  "Mary Tresh-Brumm": {
+    "Classes": [
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Umpqua Valley Baseball": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing"
+    ]
+  },
+  "Tasia Smith": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Linda Ackerman": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Lucille Mozena": {
+    "Classes": [],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses"
+    ]
+  },
+  "Darko Marusnik": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Lapriel Gilpatrick": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Julieanne Stone": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Spencer Bowen": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel"
+    ]
+  },
+  "Caitlin McBride": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Leila Loyer": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Jackson Hull": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Noah Longfellow": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Christina Sweringen": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Carlos Cortes Santos": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Jean Varner": {
+    "Classes": [],
+    "Categories": []
+  },
+  "John Hancock": {
+    "Classes": [],
+    "Categories": [
+      "22100 Payroll Liabilities:22170 401K Contributions Payable"
+    ]
+  },
+  "Saraphina Yancey-": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel"
+    ]
+  },
+  "Dane Anguiano-": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel"
+    ]
+  },
+  "Hiroko Koketsu": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Sharon Hansen-": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53223 Office Supplies",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel"
+    ]
+  },
+  "Holly Faas": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Katherine McLaughlin": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Kimberly King": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel"
+    ]
+  },
+  "Angela Garretson_": {
+    "Classes": [
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51224 Other Direct Labor-Training & Continuing Education"
+    ]
+  },
+  "Collin Harris": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Sarah Beaudoin": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Laura Georlett_ (deleted)": {
+    "Classes": [
+      "Div-Operations"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses"
+    ]
+  },
+  "Lacey Drake -": {
+    "Classes": [
+      "Corp-RCM"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel"
+    ]
+  },
+  "Patricia Schaak-": {
+    "Classes": [],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses"
+    ]
+  },
+  "Roseburg Volleyball": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing"
+    ]
+  },
+  "James DeGroat": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Ginny Dane-": {
+    "Classes": [
+      "General-Salem"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel"
+    ]
+  },
+  "Katrina Christ-": {
+    "Classes": [
+      "General-Milwaukie"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel"
+    ]
+  },
+  "Haley Holland": {
+    "Classes": [
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses"
+    ]
+  },
+  "Washington Department of Revenue": {
+    "Classes": [
+      "General-Columbia",
+      "General-Ridgefield"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53370 Other:53352 B&O Taxes"
+    ]
+  },
+  "Levi Hirsch": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Lebanon Chamber of Commerce": {
+    "Classes": [
+      "General-Lebanon"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53350 Permits & Membership"
+    ]
+  },
+  "LLoyds Dental Lab, Inc": {
+    "Classes": [
+      "General-Milwaukie"
+    ],
+    "Categories": [
+      "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+    ]
+  },
+  "Sophia Rogers": {
+    "Classes": [],
+    "Categories": []
+  },
+  "North River Electric Inc": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor"
+    ]
+  },
+  "Javier Masiel": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Sandra Resendiz": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Karla Harr": {
+    "Classes": [],
+    "Categories": []
+  },
+  "UHC C/O Asset Protection Unit": {
+    "Classes": [],
+    "Categories": []
+  },
+  "David Arnett": {
+    "Classes": [],
+    "Categories": []
+  },
+  "Laura Georlett-": {
+    "Classes": [
+      "Corp-Finance"
+    ],
+    "Categories": [
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+      "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53234 Lodging"
+    ]
+  },
+  "Jememe Wilson": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Andrea Trotter": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Roger Ludeman": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Thomas Daly": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Jason Beverly": {
+    "Classes": [
+      "General-Eugene"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Robert Lee": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Janna Roselund": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Stacy Allen": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  },
+  "Kristi Seeley": {
+    "Classes": [
+      "General-Roseburg"
+    ],
+    "Categories": [
+      "40000 Net Revenue:42000 Refunds"
+    ]
+  }
+}

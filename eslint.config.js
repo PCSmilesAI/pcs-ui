@@ -22,6 +22,18 @@ module.exports = [
       'output_jsons/**',
       'sample_invoices_pcs/**',
       'converted/**',
+      'backup-ui-20250914-143153/**',
+      'dev-server.js',
+      'production-server.js',
+      'production.config.js',
+      'src/ui-pages/VendorDetailPage copy.jsx',
+    ],
+  },
+  {
+    files: [
+      'app/**/*.{js,jsx}',
+      'lib/**/*.{js,jsx}',
+      'src/**/*.{js,jsx}',
     ],
   },
   {

@@ -2,10 +2,15 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
-import { fetchInvoiceQueue } from '../lib/fetchQueue';
+import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { useVendorAchMap } from '../ui/ach/useVendorAch';
 
 export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
   const searchParams = useSearchParams();
+  const { handleInvoiceRowClick } = useInvoiceClick();
+  const rowClickHandler = onRowClick || handleInvoiceRowClick;
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
   const spQuery = (searchParams.get('search') || '').trim().toLowerCase();
   const spFilters = {
     vendor: searchParams.get('vendor') || undefined,
@@ -14,17 +19,32 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
     minAmount: searchParams.get('minAmount') || undefined,
     maxAmount: searchParams.get('maxAmount') || undefined,
     dueWithin: searchParams.get('dueWithin') || undefined,
+    ach: searchParams.get('ach') || undefined,
   };
 
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { getStatusForVendor } = useVendorAchMap();
+
+  async function fetchVisibleInvoices() {
+    // Include current page query params (e.g., ?email=...) so preview works without cookies
+    const params = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams();
+    params.set('limit', '5000');
+    const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Failed to load invoices (HTTP ${res.status})`);
+    const payload = await res.json();
+    if (!payload?.ok) throw new Error(payload?.error || 'Failed to load invoices');
+    return Array.isArray(payload.invoices) ? payload.invoices : [];
+  }
 
   useEffect(() => {
     const loadInvoices = async () => {
       try {
         setLoading(true);
-        const data = await fetchInvoiceQueue({ limit: 5000 });
+        const data = await fetchVisibleInvoices();
 
         const transformed = data.map((invoice) => {
           const formatDate = (dateString) => {
@@ -33,13 +53,18 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
             if (Number.isNaN(parsed.getTime())) return 'N/A';
             return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
           };
+          const rawTotal = (invoice.invoice_total ?? invoice.total);
+          const numericTotal =
+            typeof rawTotal === 'number'
+              ? rawTotal
+              : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
 
           return {
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
             vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-            amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-            office: invoice.office_location || invoice.clinic_id || 'Unknown',
+            amount: `$${numericTotal.toFixed(2)}`,
+            office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
             status: invoice.status || 'New',
             category: invoice.category || 'Other',
             invoiceDate: formatDate(invoice.invoice_date || null),
@@ -67,6 +92,66 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
 
     loadInvoices();
   }, []);
+
+  async function reloadList() {
+    try {
+      setLoading(true);
+      const data = await fetchVisibleInvoices();
+      const transformed = data.map((invoice) => {
+        const formatDate = (dateString) => {
+          if (!dateString) return 'N/A';
+          const parsed = new Date(dateString);
+          if (Number.isNaN(parsed.getTime())) return 'N/A';
+          return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+        };
+        const rawTotal = (invoice.invoice_total ?? invoice.total);
+        const numericTotal =
+          typeof rawTotal === 'number'
+            ? rawTotal
+            : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+        return {
+          invoice: invoice.invoice_number || 'Unknown',
+          invoice_number: invoice.invoice_number,
+          vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+          amount: `$${numericTotal.toFixed(2)}`,
+          office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
+          status: invoice.status || 'New',
+          category: invoice.category || 'Other',
+          invoiceDate: formatDate(invoice.invoice_date || null),
+          dueDate: formatDate(invoice.due_date || invoice.invoice_date || null),
+          invoice_date: invoice.invoice_date,
+          due_date: invoice.due_date,
+          json_path: invoice.json_path,
+          pdf_path: invoice.pdf_path,
+          timestamp: invoice.timestamp,
+          assigned_to: invoice.assigned_to,
+          approved: invoice.approved,
+        };
+      });
+      setInvoices(transformed);
+      setError(null);
+    } catch (e) {
+      setError(e?.message || 'Failed to load invoices');
+      setInvoices([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function bulkRemove() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const selectedRows = filteredData.filter((r, i) => ids.includes(getRowId(r, i)));
+    for (const r of selectedRows) {
+      await fetch('/api/invoices/transition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: r.invoice_number || r.invoice, action: 'reject', reason: 'Removed from All Invoices' }),
+      }).catch(() => null);
+    }
+    setSelectedIds(new Set());
+    await reloadList();
+  }
 
   const columns = [
     { key: 'invoice', label: 'Invoice' },
@@ -99,6 +184,12 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
         if (effectiveFilters.office && row.office !== effectiveFilters.office) return false;
         if (effectiveFilters.category && row.category !== effectiveFilters.category) return false;
 
+        // Vendor ACH Status filter
+        if (effectiveFilters.ach) {
+          const status = (getStatusForVendor(row.vendor) || '').toLowerCase();
+          if (status !== String(effectiveFilters.ach).toLowerCase()) return false;
+        }
+
         const amount = parseAmount(row.amount);
         if (effectiveFilters.minAmount && amount < Number(effectiveFilters.minAmount)) return false;
         if (effectiveFilters.maxAmount && amount > Number(effectiveFilters.maxAmount)) return false;
@@ -115,7 +206,6 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
             if (daysDiff < 0 || daysDiff > days) return false;
           }
         }
-
         return true;
       } catch (filterError) {
         console.error('❌ Error applying filters for row:', row, filterError);
@@ -148,10 +238,39 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           {filteredData.length} invoice{filteredData.length !== 1 ? 's' : ''} found
         </p>
       </div>
+      {selectedIds.size > 0 && (
+        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <button
+            onClick={bulkRemove}
+            style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
+          >
+            Remove
+          </button>
+        </div>
+      )}
       <InvoiceTable
         rows={filteredData}
         columns={columns}
-        onRowClick={onRowClick}
+        onRowClick={rowClickHandler}
+        selectable
+        selectedIds={selectedIds}
+        getRowId={getRowId}
+        onToggleRow={(id, row, checked) => {
+          setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (checked) next.add(id); else next.delete(id);
+            return next;
+          });
+        }}
+        onToggleAll={(_allSelected, ids) => {
+          setSelectedIds((prev) => {
+            const next = new Set(prev);
+            const currentlyAllSelected = ids.every((id) => next.has(id));
+            if (currentlyAllSelected) ids.forEach((id) => next.delete(id));
+            else ids.forEach((id) => next.add(id));
+            return next;
+          });
+        }}
       />
     </div>
   );

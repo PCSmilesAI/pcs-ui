@@ -1,5 +1,21 @@
 [
   {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_1",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.485856",
+    "source_file": "email_68_20250911_154357_Scan_2025_09_11_08_27_19_236_aeff4158.json",
+    "pdf_path": "/email_invoices/email_68_20250911_154357_Scan_2025_09_11_08_27_19_236_aeff4158.pdf"
+  },
+  {
     "vendor": "Henry schein",
     "invoice_number": "46597163",
     "invoice_date": "09/09/25",
@@ -68,9 +84,25 @@
     "id": "inv_2",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.216008",
+    "created_at": "2025-09-23T13:35:23.486020",
     "source_file": "henryschein_4434143_20250910_31253796_14597339597.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250910_31253796_14597339597.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250910_31253796_14597339597.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_3",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.486180",
+    "source_file": "V6360946 - 78004.json",
+    "pdf_path": "/email_invoices/V6360946 - 78004.pdf"
   },
   {
     "invoice_number": "44134561",
@@ -91,9 +123,9 @@
     "id": "inv_4",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.216217",
+    "created_at": "2025-09-23T13:35:23.486329",
     "source_file": "corrected_output.json",
-    "pdf_path": "/api/pdf/email_11_20250911_154112_henryschein_4434143_20250909_31249878_14594621910_f0b12b93.pdf"
+    "pdf_path": "/email_invoices/email_11_20250911_154112_henryschein_4434143_20250909_31249878_14594621910_f0b12b93.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -156,8 +188,46 @@
     "id": "inv_5",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.217638",
+    "created_at": "2025-09-23T13:35:23.487806",
     "source_file": "Patterson  Invoice # 3038216492.json",
+    "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_6",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.488909",
+    "source_file": "email_2_20250805_230044_V6015761_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230044_V6015761_-78004.pdf"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "invoice_number": "251-608",
+    "invoice_date": "5/13/2025",
+    "total": "267.00",
+    "office_location": "Salem",
+    "vendor_name": "TC Dental",
+    "line_items": [
+      {
+        "product_number": "N/A",
+        "product_name": "D2740 Full Zirconia Crown Posterior",
+        "Quantity": "3.00",
+        "unit_price": "89.00",
+        "line_item_total": "267.00"
+      }
+    ],
+    "id": "inv_7",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.489052",
+    "source_file": "tc_invoice_1.json",
     "pdf_path": null
   },
   {
@@ -180,9 +250,9 @@
     "id": "inv_8",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.220011",
+    "created_at": "2025-09-23T13:35:23.490413",
     "source_file": "email_5_20250805_232223_henryschein_4434143_20250719_31082503_14485030066.json",
-    "pdf_path": "/api/pdf/email_5_20250805_232223_henryschein_4434143_20250719_31082503_14485030066.pdf"
+    "pdf_path": "/email_invoices/email_5_20250805_232223_henryschein_4434143_20250719_31082503_14485030066.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -196,9 +266,25 @@
     "id": "inv_9",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.220255",
+    "created_at": "2025-09-23T13:35:23.490562",
     "source_file": "email_5_20250911_154102_Patterson  Invoice # 3038840482_15acccd5.json",
-    "pdf_path": "/api/pdf/email_5_20250911_154102_Patterson  Invoice # 3038840482_15acccd5.pdf"
+    "pdf_path": "/email_invoices/email_5_20250911_154102_Patterson  Invoice # 3038840482_15acccd5.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_10",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.490705",
+    "source_file": "email_21_20250911_154146_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082819_79ca414e.json",
+    "pdf_path": "/email_invoices/email_21_20250911_154146_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082819_79ca414e.pdf"
   },
   {
     "invoice_number": "44134561",
@@ -220,9 +306,56 @@
     "id": "inv_11",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.220660",
+    "created_at": "2025-09-23T13:35:23.490836",
     "source_file": "email_9_20250805_232214_Invoice_20250716_0001.json",
-    "pdf_path": "/api/pdf/email_9_20250805_232214_Invoice_20250716_0001.pdf"
+    "pdf_path": "/email_invoices/email_9_20250805_232214_Invoice_20250716_0001.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_12",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.490950",
+    "source_file": "email_2_20250805_232229_V6145664_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232229_V6145664_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_13",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.491062",
+    "source_file": "email_19_20250911_154135_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082907_cecf996b.json",
+    "pdf_path": "/email_invoices/email_19_20250911_154135_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082907_cecf996b.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_14",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.491181",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082957.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082957.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -244,9 +377,40 @@
     "id": "inv_15",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.221010",
+    "created_at": "2025-09-23T13:35:23.491327",
     "source_file": "henryschein_4434143_20250720_31085143_14487143784.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250720_31085143_14487143784.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250720_31085143_14487143784.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_16",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.491481",
+    "source_file": "email_2_20250805_231845_V6360946_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231845_V6360946_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_17",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.491651",
+    "source_file": "email_22_20250911_154152_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082755_55ff79fb.json",
+    "pdf_path": "/email_invoices/email_22_20250911_154152_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082755_55ff79fb.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -303,9 +467,9 @@
     "id": "inv_18",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.221509",
+    "created_at": "2025-09-23T13:35:23.491760",
     "source_file": "email_3_20250805_230042_henryschein_4434143_20250718_31080183_14484025460.json",
-    "pdf_path": "/api/pdf/email_3_20250805_230042_henryschein_4434143_20250718_31080183_14484025460.pdf"
+    "pdf_path": "/email_invoices/email_3_20250805_230042_henryschein_4434143_20250718_31080183_14484025460.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -327,9 +491,39 @@
     "id": "inv_19",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.221690",
+    "created_at": "2025-09-23T13:35:23.491875",
     "source_file": "email_11_20250805_232210_henryschein_4434143_20250725_31102443_14497454388.json",
-    "pdf_path": "/api/pdf/email_11_20250805_232210_henryschein_4434143_20250725_31102443_14497454388.pdf"
+    "pdf_path": "/email_invoices/email_11_20250805_232210_henryschein_4434143_20250725_31102443_14497454388.pdf"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "vendor_name": "TC Dental",
+    "invoice_number": "260-601",
+    "invoice_date": "",
+    "due_date": "",
+    "total": "0.00",
+    "office_location": "Salem",
+    "patient_name": "Unknown",
+    "doctor_name": "Rosaly",
+    "line_items": [
+      {
+        "product_number": "N/A",
+        "product_name": "D2740 Full Zirconia Crown Posterior",
+        "Quantity": "2.00",
+        "unit_price": "94.00",
+        "line_item_total": "188.00"
+      }
+    ],
+    "source_page": 4,
+    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "pdf_path": "/email_invoices/email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "id": "inv_20",
+    "clinic_id": "Salem",
+    "invoice_total": "0.00",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.492024",
+    "source_file": "email_49_20250911_154308_tc dental_648bbe67_invoice_4_260-601.json"
   },
   {
     "vendor": "patterson_dental",
@@ -348,12 +542,28 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_20",
+    "id": "inv_21",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.221926",
+    "created_at": "2025-09-23T13:35:23.493239",
     "source_file": "email_61_20250911_154350_Patterson  Invoice # 3038925922_d39a776f.json",
-    "pdf_path": "/api/pdf/email_61_20250911_154350_Patterson  Invoice # 3038925922_d39a776f.pdf"
+    "pdf_path": "/email_invoices/email_61_20250911_154350_Patterson  Invoice # 3038925922_d39a776f.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_22",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.493369",
+    "source_file": "invoice_1092025-130814.json",
+    "pdf_path": "/email_invoices/invoice_1092025-130814.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -393,12 +603,12 @@
         "line_item_total": "38.00"
       }
     ],
-    "id": "inv_22",
+    "id": "inv_23",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.222113",
+    "created_at": "2025-09-23T13:35:23.493480",
     "source_file": "epic_invoice_7_parsed.json",
-    "pdf_path": "/api/pdf/304500120691_0450004311513_20250531.pdf"
+    "pdf_path": null
   },
   {
     "vendor": "Henry schein",
@@ -409,12 +619,44 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_23",
+    "id": "inv_24",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.223009",
+    "created_at": "2025-09-23T13:35:23.494247",
     "source_file": "email_53_20250911_154330_Patterson  Invoice # 3038889973_358ef60e.json",
-    "pdf_path": "/api/pdf/email_53_20250911_154330_Patterson  Invoice # 3038889973_358ef60e.pdf"
+    "pdf_path": "/email_invoices/email_53_20250911_154330_Patterson  Invoice # 3038889973_358ef60e.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_25",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.494302",
+    "source_file": "V6145664 - 78004.json",
+    "pdf_path": "/email_invoices/V6145664 - 78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_26",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.494421",
+    "source_file": "tc dental.json",
+    "pdf_path": "/email_invoices/tc dental.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -432,12 +674,59 @@
         "line_item_total": "170.99"
       }
     ],
-    "id": "inv_26",
+    "id": "inv_27",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.223224",
+    "created_at": "2025-09-23T13:35:23.494539",
     "source_file": "Patterson  Invoice # 3038197656.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_28",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.495472",
+    "source_file": "email_2_20250805_230046_V6273090_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230046_V6273090_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_29",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.495590",
+    "source_file": "email_59_20250911_154346_Invoice-QDSNFCRE-0004_8da87f6a.json",
+    "pdf_path": "/email_invoices/email_59_20250911_154346_Invoice-QDSNFCRE-0004_8da87f6a.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_30",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.495688",
+    "source_file": "email_26_20250911_154214_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083655_68149839.json",
+    "pdf_path": "/email_invoices/email_26_20250911_154214_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083655_68149839.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -540,12 +829,12 @@
         "line_item_total": "26.19"
       }
     ],
-    "id": "inv_30",
+    "id": "inv_31",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.224662",
+    "created_at": "2025-09-23T13:35:23.495809",
     "source_file": "email_10_20250805_231253_henryschein_4434143_20250725_31102443_14497454391.json",
-    "pdf_path": "/api/pdf/email_10_20250805_231253_henryschein_4434143_20250725_31102443_14497454391.pdf"
+    "pdf_path": "/email_invoices/email_10_20250805_231253_henryschein_4434143_20250725_31102443_14497454391.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -606,12 +895,12 @@
         "line_item_total": "30.46"
       }
     ],
-    "id": "inv_31",
+    "id": "inv_32",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.224812",
+    "created_at": "2025-09-23T13:35:23.495925",
     "source_file": "henry_invoice_1.json",
-    "pdf_path": "/api/pdf/henry schein.pdf"
+    "pdf_path": null
   },
   {
     "vendor": "Henry schein",
@@ -630,12 +919,28 @@
         "line_item_total": "250.00"
       }
     ],
-    "id": "inv_32",
+    "id": "inv_33",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.226072",
+    "created_at": "2025-09-23T13:35:23.497440",
     "source_file": "I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357.json",
-    "pdf_path": "/api/pdf/I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357.pdf"
+    "pdf_path": "/email_invoices/I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_34",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.497499",
+    "source_file": "V6230412 - 78004.json",
+    "pdf_path": "/email_invoices/V6230412 - 78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -654,12 +959,28 @@
         "line_item_total": "28.63"
       }
     ],
-    "id": "inv_34",
+    "id": "inv_35",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.226352",
+    "created_at": "2025-09-23T13:35:23.497623",
     "source_file": "email_44_20250911_154259_henryschein_4434143_20250910_31253796_14597339594_672bd979.json",
-    "pdf_path": "/api/pdf/email_44_20250911_154259_henryschein_4434143_20250910_31253796_14597339594_672bd979.pdf"
+    "pdf_path": "/email_invoices/email_44_20250911_154259_henryschein_4434143_20250910_31253796_14597339594_672bd979.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_36",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.497804",
+    "source_file": "304500120691_0450004311513_20250531.json",
+    "pdf_path": "/email_invoices/304500120691_0450004311513_20250531.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -678,12 +999,113 @@
         "line_item_total": "83.76"
       }
     ],
-    "id": "inv_36",
+    "id": "inv_37",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.226408",
+    "created_at": "2025-09-23T13:35:23.497933",
     "source_file": "henryschein_4434143_20250909_31249878_14594621910.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250909_31249878_14594621910.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250909_31249878_14594621910.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_38",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.498043",
+    "source_file": "email_2_20250805_230045_V63202641_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230045_V63202641_-_78004.pdf"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "vendor_name": "TC Dental",
+    "invoice_number": "260-600",
+    "invoice_date": "",
+    "due_date": "",
+    "total": "0.00",
+    "office_location": "Salem",
+    "patient_name": "A",
+    "doctor_name": "Rosaly",
+    "line_items": [],
+    "source_page": 5,
+    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "pdf_path": "/email_invoices/email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "id": "inv_39",
+    "clinic_id": "Salem",
+    "invoice_total": "0.00",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.498159",
+    "source_file": "email_49_20250911_154308_tc dental_648bbe67_invoice_5_260-600.json"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_40",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.499283",
+    "source_file": "V6186388 - 78004.json",
+    "pdf_path": "/email_invoices/V6186388 - 78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_41",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.499392",
+    "source_file": "Sales Invoice - PS-INV177040.json",
+    "pdf_path": "/email_invoices/Sales Invoice - PS-INV177040.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_42",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.499517",
+    "source_file": "email_17_20250911_154124_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083020_b86459f1.json",
+    "pdf_path": "/email_invoices/email_17_20250911_154124_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083020_b86459f1.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_43",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.499659",
+    "source_file": "email_15_20250911_154116_Invoice #1c092f42358f_f2d020d3.json",
+    "pdf_path": "/email_invoices/email_15_20250911_154116_Invoice #1c092f42358f_f2d020d3.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -702,12 +1124,28 @@
         "line_item_total": "17.03"
       }
     ],
-    "id": "inv_42",
+    "id": "inv_44",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.227085",
+    "created_at": "2025-09-23T13:35:23.499950",
     "source_file": "email_7_20250805_230037_henryschein_4434143_20250720_31085143_14487143784.json",
-    "pdf_path": "/api/pdf/email_7_20250805_230037_henryschein_4434143_20250720_31085143_14487143784.pdf"
+    "pdf_path": "/email_invoices/email_7_20250805_230037_henryschein_4434143_20250720_31085143_14487143784.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_45",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.500312",
+    "source_file": "email_33_20250911_154233_img20250909_12155837_05251854.json",
+    "pdf_path": "/email_invoices/email_33_20250911_154233_img20250909_12155837_05251854.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -725,10 +1163,10 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_44",
+    "id": "inv_46",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.227414",
+    "created_at": "2025-09-23T13:35:23.500478",
     "source_file": "sample_test_invoice.json",
     "pdf_path": null
   },
@@ -741,12 +1179,12 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_45",
+    "id": "inv_47",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.228202",
+    "created_at": "2025-09-23T13:35:23.501466",
     "source_file": "Patterson  Invoice # 3038889973.json",
-    "pdf_path": "/api/pdf/Patterson  Invoice # 3038889973.pdf"
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038889973.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -848,12 +1286,12 @@
         "line_item_total": "26.19"
       }
     ],
-    "id": "inv_46",
+    "id": "inv_48",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.228361",
+    "created_at": "2025-09-23T13:35:23.501598",
     "source_file": "email_10_20250805_232212_henryschein_4434143_20250725_31102443_14497454391.json",
-    "pdf_path": "/api/pdf/email_10_20250805_232212_henryschein_4434143_20250725_31102443_14497454391.pdf"
+    "pdf_path": "/email_invoices/email_10_20250805_232212_henryschein_4434143_20250725_31102443_14497454391.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -872,12 +1310,12 @@
         "line_item_total": "64.78"
       }
     ],
-    "id": "inv_47",
+    "id": "inv_49",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.228389",
+    "created_at": "2025-09-23T13:35:23.501657",
     "source_file": "henryschein_4434143_20250719_31082503_14485030066.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250719_31082503_14485030066.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250719_31082503_14485030066.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -895,12 +1333,43 @@
         "line_item_total": "17.03"
       }
     ],
-    "id": "inv_48",
+    "id": "inv_50",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.228506",
+    "created_at": "2025-09-23T13:35:23.501762",
     "source_file": "email_7_20250805_231401_henryschein_4434143_20250720_31085143_14487143784.json",
-    "pdf_path": "/api/pdf/email_7_20250805_231401_henryschein_4434143_20250720_31085143_14487143784.pdf"
+    "pdf_path": "/email_invoices/email_7_20250805_231401_henryschein_4434143_20250720_31085143_14487143784.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_51",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.501909",
+    "source_file": "email_2_20250805_232048_V6186388_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232048_V6186388_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_52",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.502010",
+    "source_file": "henry schein.json",
+    "pdf_path": "/email_invoices/henry schein.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -919,12 +1388,74 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_51",
+    "id": "inv_53",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.229049",
+    "created_at": "2025-09-23T13:35:23.502122",
     "source_file": "email_64_20250911_154351_Patterson  Invoice # 3038926613_2080f445.json",
-    "pdf_path": "/api/pdf/email_64_20250911_154351_Patterson  Invoice # 3038926613_2080f445.pdf"
+    "pdf_path": "/email_invoices/email_64_20250911_154351_Patterson  Invoice # 3038926613_2080f445.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_54",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.502263",
+    "source_file": "henry_schein_invoice_.json",
+    "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_55",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.502315",
+    "source_file": "henryschein_4434143_20250720_31085178_14486986364.json",
+    "pdf_path": "/email_invoices/henryschein_4434143_20250720_31085178_14486986364.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_56",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.502360",
+    "source_file": "V63202641 - 78004.json",
+    "pdf_path": "/email_invoices/V63202641 - 78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_57",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.502478",
+    "source_file": "email_2_20250805_230045_V6360946_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230045_V6360946_-_78004.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -949,12 +1480,28 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_56",
+    "id": "inv_58",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.229508",
+    "created_at": "2025-09-23T13:35:23.502589",
     "source_file": "Patterson Dental.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_59",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.503556",
+    "source_file": "Credit Note CN-20266 (1).json",
+    "pdf_path": "/email_invoices/Credit Note CN-20266 (1).pdf"
   },
   {
     "vendor": "Henry schein",
@@ -973,12 +1520,44 @@
         "line_item_total": "2.000"
       }
     ],
-    "id": "inv_58",
+    "id": "inv_60",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.230576",
+    "created_at": "2025-09-23T13:35:23.503604",
     "source_file": "email_55_20250911_154336_Patterson  Invoice # 3038897968_8402ae87.json",
-    "pdf_path": "/api/pdf/email_55_20250911_154336_Patterson  Invoice # 3038897968_8402ae87.pdf"
+    "pdf_path": "/email_invoices/email_55_20250911_154336_Patterson  Invoice # 3038897968_8402ae87.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_61",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.503732",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082844.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082844.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_62",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.503776",
+    "source_file": "email_9_20250911_154109_Credit Note CN-20266 (1)_b062d090.json",
+    "pdf_path": "/email_invoices/email_9_20250911_154109_Credit Note CN-20266 (1)_b062d090.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -996,10 +1575,10 @@
         "line_item_total": "352.50"
       }
     ],
-    "id": "inv_61",
+    "id": "inv_63",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.230945",
+    "created_at": "2025-09-23T13:35:23.503874",
     "source_file": "Patterson  Invoice # 3038072963.json",
     "pdf_path": null
   },
@@ -1020,12 +1599,27 @@
         "line_item_total": "59.00"
       }
     ],
-    "id": "inv_62",
+    "id": "inv_64",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.231866",
+    "created_at": "2025-09-23T13:35:23.504837",
     "source_file": "epic_invoice_11_parsed.json",
-    "pdf_path": "/api/pdf/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+    "pdf_path": "/email_invoices/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_65",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.505160",
+    "source_file": "email_2_20250805_231814_V6015761_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231814_V6015761_-78004.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -1044,12 +1638,123 @@
         "line_item_total": "153.00"
       }
     ],
-    "id": "inv_64",
+    "id": "inv_66",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.232271",
+    "created_at": "2025-09-23T13:35:23.505285",
     "source_file": "epic_invoice_2_parsed.json",
-    "pdf_path": "/api/pdf/304500120691_0450004323231_20250630.pdf"
+    "pdf_path": null
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_67",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.506120",
+    "source_file": "email_25_20250911_154208_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082630_f8caf287.json",
+    "pdf_path": "/email_invoices/email_25_20250911_154208_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082630_f8caf287.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_68",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.506172",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "9/11/2025",
+    "id": "inv_69",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.506220",
+    "source_file": "Scan_2025_09_11_08_27_37_550.json",
+    "pdf_path": "/email_invoices/Scan_2025_09_11_08_27_37_550.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_70",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.506335",
+    "source_file": "email_52_20250911_154325_henry schein_2592989e.json",
+    "pdf_path": "/email_invoices/email_52_20250911_154325_henry schein_2592989e.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_71",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.506429",
+    "source_file": "email_2_20250805_231916_V63202641_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231916_V63202641_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_72",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.506530",
+    "source_file": "email_23_20250911_154157_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082722_769cd654.json",
+    "pdf_path": "/email_invoices/email_23_20250911_154157_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082722_769cd654.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_73",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.506575",
+    "source_file": "email_10_20250911_154110_Credit Note CN-20265 (1)_2b7e56d1.json",
+    "pdf_path": "/email_invoices/email_10_20250911_154110_Credit Note CN-20265 (1)_2b7e56d1.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1117,12 +1822,12 @@
         "line_item_total": "24.32"
       }
     ],
-    "id": "inv_72",
+    "id": "inv_74",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.233770",
+    "created_at": "2025-09-23T13:35:23.506690",
     "source_file": "email_46_20250911_154300_henryschein_4434143_20250910_31253796_14597339597_0a2ab93e.json",
-    "pdf_path": "/api/pdf/email_46_20250911_154300_henryschein_4434143_20250910_31253796_14597339597_0a2ab93e.pdf"
+    "pdf_path": "/email_invoices/email_46_20250911_154300_henryschein_4434143_20250910_31253796_14597339597_0a2ab93e.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -1148,12 +1853,12 @@
         "line_item_total": "38.00"
       }
     ],
-    "id": "inv_73",
+    "id": "inv_75",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.233880",
+    "created_at": "2025-09-23T13:35:23.506805",
     "source_file": "epic_invoice_1_parsed.json",
-    "pdf_path": "/api/pdf/304500120691_0450004323231_20250630.pdf"
+    "pdf_path": null
   },
   {
     "vendor": "Henry schein",
@@ -1171,12 +1876,28 @@
         "line_item_total": "64.78"
       }
     ],
-    "id": "inv_74",
+    "id": "inv_76",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.234512",
+    "created_at": "2025-09-23T13:35:23.507493",
     "source_file": "email_5_20250805_231505_henryschein_4434143_20250719_31082503_14485030066.json",
-    "pdf_path": "/api/pdf/email_5_20250805_231505_henryschein_4434143_20250719_31082503_14485030066.pdf"
+    "pdf_path": "/email_invoices/email_5_20250805_231505_henryschein_4434143_20250719_31082503_14485030066.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_77",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.507614",
+    "source_file": "email_34_20250911_154238_Receipt_b1451d0a.json",
+    "pdf_path": "/email_invoices/email_34_20250911_154238_Receipt_b1451d0a.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1195,12 +1916,59 @@
         "line_item_total": "13.43"
       }
     ],
-    "id": "inv_76",
+    "id": "inv_78",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.234745",
+    "created_at": "2025-09-23T13:35:23.507733",
     "source_file": "henry_invoice_7.json",
-    "pdf_path": "/api/pdf/email_12_20250911_154114_henryschein_4434143_20250909_31249878_14594621916_8ca28925.pdf"
+    "pdf_path": "/email_invoices/email_12_20250911_154114_henryschein_4434143_20250909_31249878_14594621916_8ca28925.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_79",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.509214",
+    "source_file": "Scan_2025_09_11_08_39_14_325.json",
+    "pdf_path": "/email_invoices/Scan_2025_09_11_08_39_14_325.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_80",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.509351",
+    "source_file": "email_2_20250805_230043_V6145664_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230043_V6145664_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_81",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.509483",
+    "source_file": "email_74_20250911_154422_invoice-13970-638931909850717798_aaccc5cb.json",
+    "pdf_path": "/email_invoices/email_74_20250911_154422_invoice-13970-638931909850717798_aaccc5cb.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1219,12 +1987,44 @@
         "line_item_total": "59.83"
       }
     ],
-    "id": "inv_80",
+    "id": "inv_82",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.236341",
+    "created_at": "2025-09-23T13:35:23.509532",
     "source_file": "henryschein_4434143_20250909_31249878_14594621916.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250909_31249878_14594621916.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250909_31249878_14594621916.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_83",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.509580",
+    "source_file": "Invoice_082512346_from_TRUSTWORKZ_INC.json",
+    "pdf_path": "/email_invoices/Invoice_082512346_from_TRUSTWORKZ_INC.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_84",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.509747",
+    "source_file": "email_47_20250911_154302_water_invoice.14636642_081925.2025-08-19_77c77604.json",
+    "pdf_path": "/email_invoices/email_47_20250911_154302_water_invoice.14636642_081925.2025-08-19_77c77604.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -1243,12 +2043,43 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_83",
+    "id": "inv_85",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.236829",
+    "created_at": "2025-09-23T13:35:23.510057",
     "source_file": "email_65_20250911_154351_Patterson  Invoice # 3038926844_a3e30724.json",
-    "pdf_path": "/api/pdf/email_65_20250911_154351_Patterson  Invoice # 3038926844_a3e30724.pdf"
+    "pdf_path": "/email_invoices/email_65_20250911_154351_Patterson  Invoice # 3038926844_a3e30724.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_86",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.510195",
+    "source_file": "email_69_20250911_154402_Scan_2025_09_11_08_39_14_325_2a4967f6.json",
+    "pdf_path": "/email_invoices/email_69_20250911_154402_Scan_2025_09_11_08_39_14_325_2a4967f6.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_87",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.510296",
+    "source_file": "email_6_20250805_232221_henryschein_4434143_20250720_31085178_14486986364.json",
+    "pdf_path": "/email_invoices/email_6_20250805_232221_henryschein_4434143_20250720_31085178_14486986364.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1267,12 +2098,27 @@
         "line_item_total": "28.63"
       }
     ],
-    "id": "inv_86",
+    "id": "inv_88",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.237180",
+    "created_at": "2025-09-23T13:35:23.510421",
     "source_file": "email_43_20250911_154258_henryschein_4434143_20250910_31253796_14597339595_e19a2b86.json",
-    "pdf_path": "/api/pdf/email_43_20250911_154258_henryschein_4434143_20250910_31253796_14597339595_e19a2b86.pdf"
+    "pdf_path": "/email_invoices/email_43_20250911_154258_henryschein_4434143_20250910_31253796_14597339595_e19a2b86.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_89",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.510463",
+    "source_file": "email_2_20250805_231743_V6060603_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231743_V6060603_-78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1291,12 +2137,59 @@
         "line_item_total": "59.83"
       }
     ],
-    "id": "inv_88",
+    "id": "inv_90",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.237414",
+    "created_at": "2025-09-23T13:35:23.510510",
     "source_file": "email_13_20250911_154115_henryschein_4434143_20250909_31249878_14594621914_f990131a.json",
-    "pdf_path": "/api/pdf/email_13_20250911_154115_henryschein_4434143_20250909_31249878_14594621914_f990131a.pdf"
+    "pdf_path": "/email_invoices/email_13_20250911_154115_henryschein_4434143_20250909_31249878_14594621914_f990131a.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_91",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.510622",
+    "source_file": "email_6_20250805_231433_henryschein_4434143_20250720_31085178_14486986364.json",
+    "pdf_path": "/email_invoices/email_6_20250805_231433_henryschein_4434143_20250720_31085178_14486986364.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_92",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.510749",
+    "source_file": "email_73_20250911_154420_Invoice 1282639_8eca40f6.json",
+    "pdf_path": "/email_invoices/email_73_20250911_154420_Invoice 1282639_8eca40f6.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_93",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.510794",
+    "source_file": "email_6_20250911_154105__79U0Y2T9L_6012586f.json",
+    "pdf_path": "/email_invoices/email_6_20250911_154105__79U0Y2T9L_6012586f.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -1315,10 +2208,10 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_92",
+    "id": "inv_94",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.237954",
+    "created_at": "2025-09-23T13:35:23.510929",
     "source_file": "patterson_invoice_2.json",
     "pdf_path": null
   },
@@ -1339,10 +2232,10 @@
         "line_item_total": "232.00"
       }
     ],
-    "id": "inv_93",
+    "id": "inv_95",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.238853",
+    "created_at": "2025-09-23T13:35:23.511922",
     "source_file": "epic_invoice_8_parsed.json",
     "pdf_path": null
   },
@@ -1355,12 +2248,12 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_94",
+    "id": "inv_96",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.239523",
+    "created_at": "2025-09-23T13:35:23.512690",
     "source_file": "Patterson  Invoice # 3038840482.json",
-    "pdf_path": "/api/pdf/Patterson  Invoice # 3038840482.pdf"
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038840482.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1371,12 +2264,42 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_95",
+    "id": "inv_97",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.239562",
+    "created_at": "2025-09-23T13:35:23.512821",
     "source_file": "Patterson  Invoice # 3038963782.json",
-    "pdf_path": "/api/pdf/Patterson  Invoice # 3038963782.pdf"
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038963782.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_98",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.512956",
+    "source_file": "email_2_20250805_230044_V6060603_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230044_V6060603_-78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_99",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.513061",
+    "source_file": "email_2_20250805_231642_V6145664_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231642_V6145664_-_78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1394,12 +2317,28 @@
         "line_item_total": "64.78"
       }
     ],
-    "id": "inv_98",
+    "id": "inv_100",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.239906",
+    "created_at": "2025-09-23T13:35:23.513114",
     "source_file": "email_5_20250805_230039_henryschein_4434143_20250719_31082503_14485030066.json",
-    "pdf_path": "/api/pdf/email_5_20250805_230039_henryschein_4434143_20250719_31082503_14485030066.pdf"
+    "pdf_path": "/email_invoices/email_5_20250805_230039_henryschein_4434143_20250719_31082503_14485030066.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_101",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.513211",
+    "source_file": "email_4_20250911_154100_Inv_75629_from_Dental_Medical_Staffing_Inc._5522892_15528_41231a59.json",
+    "pdf_path": "/email_invoices/email_4_20250911_154100_Inv_75629_from_Dental_Medical_Staffing_Inc._5522892_15528_41231a59.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1410,12 +2349,12 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_100",
+    "id": "inv_102",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.240217",
+    "created_at": "2025-09-23T13:35:23.513355",
     "source_file": "email_2_20250911_154055_56008564_cdb12005.json",
-    "pdf_path": "/api/pdf/email_2_20250911_154055_56008564_cdb12005.pdf"
+    "pdf_path": "/email_invoices/email_2_20250911_154055_56008564_cdb12005.pdf"
   },
   {
     "vendor": "exodus_dental_solutions",
@@ -1441,12 +2380,43 @@
       }
     ],
     "due_date": "09/30/2025",
-    "id": "inv_101",
+    "id": "inv_103",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.240330",
+    "created_at": "2025-09-23T13:35:23.513512",
     "source_file": "5237.json",
-    "pdf_path": "/api/pdf/email_27_20250911_154224_Invoices_5237_7278c26f.pdf"
+    "pdf_path": "/email_invoices/email_27_20250911_154224_Invoices_5237_7278c26f.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_104",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.513821",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083655.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083655.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_105",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.513868",
+    "source_file": "email_2_20250805_232231_V6015761_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232231_V6015761_-78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1456,12 +2426,12 @@
     "office_location": "UNKNOWN",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_104",
+    "id": "inv_106",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.240806",
+    "created_at": "2025-09-23T13:35:23.513988",
     "source_file": "henry_schein_invoice_unknown.json",
-    "pdf_path": "/api/pdf/henry schein.pdf"
+    "pdf_path": null
   },
   {
     "vendor": "exodus_dental_solutions",
@@ -1487,12 +2457,28 @@
       }
     ],
     "due_date": "09/30/2025",
-    "id": "inv_105",
+    "id": "inv_107",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.240948",
+    "created_at": "2025-09-23T13:35:23.514121",
     "source_file": "5236.json",
-    "pdf_path": "/api/pdf/email_28_20250911_154224_Invoices_5236_43212d95.pdf"
+    "pdf_path": "/email_invoices/email_28_20250911_154224_Invoices_5236_43212d95.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_108",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.514440",
+    "source_file": "email_20_20250911_154140_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082844_b90f2ac7.json",
+    "pdf_path": "/email_invoices/email_20_20250911_154140_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082844_b90f2ac7.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1503,12 +2489,28 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_107",
+    "id": "inv_109",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.241366",
+    "created_at": "2025-09-23T13:35:23.514585",
     "source_file": "Patterson  Invoice # 3038897967.json",
-    "pdf_path": "/api/pdf/Patterson  Invoice # 3038897967.pdf"
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038897967.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_110",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.514771",
+    "source_file": "V6529148.json",
+    "pdf_path": "/email_invoices/V6529148.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1527,12 +2529,43 @@
         "line_item_total": "83.76"
       }
     ],
-    "id": "inv_109",
+    "id": "inv_111",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.241523",
+    "created_at": "2025-09-23T13:35:23.514877",
     "source_file": "email_11_20250911_154112_henryschein_4434143_20250909_31249878_14594621910_f0b12b93.json",
-    "pdf_path": "/api/pdf/email_11_20250911_154112_henryschein_4434143_20250909_31249878_14594621910_f0b12b93.pdf"
+    "pdf_path": "/email_invoices/email_11_20250911_154112_henryschein_4434143_20250909_31249878_14594621910_f0b12b93.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_112",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.515006",
+    "source_file": "email_2_20250805_232231_V6360946_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232231_V6360946_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_113",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.515055",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082907.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082907.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1565,12 +2598,12 @@
         "line_item_total": "41.88"
       }
     ],
-    "id": "inv_112",
+    "id": "inv_114",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.241731",
+    "created_at": "2025-09-23T13:35:23.515188",
     "source_file": "email_45_20250911_154259_henryschein_4434143_20250910_31253796_14597339598_34771940.json",
-    "pdf_path": "/api/pdf/email_45_20250911_154259_henryschein_4434143_20250910_31253796_14597339598_34771940.pdf"
+    "pdf_path": "/email_invoices/email_45_20250911_154259_henryschein_4434143_20250910_31253796_14597339598_34771940.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -1596,10 +2629,10 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_113",
+    "id": "inv_115",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.241907",
+    "created_at": "2025-09-23T13:35:23.515311",
     "source_file": "patterson_invoice_3.json",
     "pdf_path": null
   },
@@ -1654,12 +2687,27 @@
         "line_item_total": "311.52"
       }
     ],
-    "id": "inv_114",
+    "id": "inv_116",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.242868",
+    "created_at": "2025-09-23T13:35:23.516321",
     "source_file": "email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.json",
-    "pdf_path": "/api/pdf/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+    "pdf_path": "/email_invoices/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_117",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.516458",
+    "source_file": "email_2_20250805_230044_V6102702_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230044_V6102702_-_78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1677,12 +2725,27 @@
         "line_item_total": "17.03"
       }
     ],
-    "id": "inv_116",
+    "id": "inv_118",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.243111",
+    "created_at": "2025-09-23T13:35:23.516564",
     "source_file": "email_7_20250805_232220_henryschein_4434143_20250720_31085143_14487143784.json",
-    "pdf_path": "/api/pdf/email_7_20250805_232220_henryschein_4434143_20250720_31085143_14487143784.pdf"
+    "pdf_path": "/email_invoices/email_7_20250805_232220_henryschein_4434143_20250720_31085143_14487143784.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_119",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.516676",
+    "source_file": "email_2_20250805_232230_V6060603_-78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232230_V6060603_-78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1876,12 +2939,74 @@
         "line_item_total": "69.59"
       }
     ],
-    "id": "inv_119",
+    "id": "inv_120",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.243566",
+    "created_at": "2025-09-23T13:35:23.516828",
     "source_file": "email_42_20250911_154257_henryschein_4434143_20250910_31253796_14597339599_b8942009.json",
-    "pdf_path": "/api/pdf/email_42_20250911_154257_henryschein_4434143_20250910_31253796_14597339599_b8942009.pdf"
+    "pdf_path": "/email_invoices/email_42_20250911_154257_henryschein_4434143_20250910_31253796_14597339599_b8942009.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_121",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.516875",
+    "source_file": "Darby_Invoice_5572651.json",
+    "pdf_path": "/email_invoices/Darby_Invoice_5572651.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_122",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.516926",
+    "source_file": "Invoice-QDSNFCRE-0004.json",
+    "pdf_path": "/email_invoices/Invoice-QDSNFCRE-0004.pdf"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "vendor_name": "TC Dental",
+    "invoice_number": "260-489",
+    "invoice_date": "",
+    "due_date": "",
+    "total": "188.00",
+    "office_location": "Salem",
+    "patient_name": "Kayla Wohl Pauiler Doctor Name: Gra",
+    "doctor_name": "Gra",
+    "line_items": [
+      {
+        "product_number": "N/A",
+        "product_name": "D2740 Full Zirconia Crown Posterior",
+        "Quantity": "2.00",
+        "unit_price": "94.00",
+        "line_item_total": "188.00"
+      }
+    ],
+    "source_page": 3,
+    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "pdf_path": null,
+    "id": "inv_123",
+    "clinic_id": "Salem",
+    "invoice_total": "188.00",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.517056",
+    "source_file": "email_49_20250911_154308_tc dental_648bbe67_invoice_3_260-489.json"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -1900,12 +3025,152 @@
         "line_item_total": "225.00"
       }
     ],
-    "id": "inv_122",
+    "id": "inv_124",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.243865",
+    "created_at": "2025-09-23T13:35:23.518436",
     "source_file": "epic_invoice_4_parsed.json",
-    "pdf_path": "/api/pdf/304500120691_0450004323231_20250630.pdf"
+    "pdf_path": null
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "vendor_name": "TC Dental",
+    "invoice_number": "260-599",
+    "invoice_date": "",
+    "due_date": "",
+    "total": "0.00",
+    "office_location": "Salem",
+    "patient_name": "Elisa Warde",
+    "doctor_name": "Rosaly",
+    "line_items": [],
+    "source_page": 7,
+    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "pdf_path": "/email_invoices/email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "id": "inv_125",
+    "clinic_id": "Salem",
+    "invoice_total": "0.00",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.519200",
+    "source_file": "email_49_20250911_154308_tc dental_648bbe67_invoice_7_260-599.json"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "vendor_name": "TC Dental",
+    "invoice_number": "260-605",
+    "invoice_date": "",
+    "due_date": "",
+    "total": "0.00",
+    "office_location": "Salem",
+    "patient_name": "Unknown",
+    "doctor_name": "Gra",
+    "line_items": [],
+    "source_page": 6,
+    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "pdf_path": "/email_invoices/email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "id": "inv_126",
+    "clinic_id": "Salem",
+    "invoice_total": "0.00",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.520409",
+    "source_file": "email_49_20250911_154308_tc dental_648bbe67_invoice_6_260-605.json"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_127",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.521776",
+    "source_file": "email_32_20250911_154231_Invoice_NEA3947271_a0d44480.json",
+    "pdf_path": "/email_invoices/email_32_20250911_154231_Invoice_NEA3947271_a0d44480.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_128",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.521930",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082819.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082819.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_129",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.522000",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170835.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170835.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_130",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.522139",
+    "source_file": "email_71_20250911_154415_304500120691_0450004311513_20250531_a0fe1385.json",
+    "pdf_path": "/email_invoices/email_71_20250911_154415_304500120691_0450004311513_20250531_a0fe1385.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_131",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.522301",
+    "source_file": "email_35_20250911_154239_Invoice 464_db82f6ef.json",
+    "pdf_path": "/email_invoices/email_35_20250911_154239_Invoice 464_db82f6ef.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_132",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.522568",
+    "source_file": "patterson.json",
+    "pdf_path": "/email_invoices/patterson.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -1958,12 +3223,12 @@
         "line_item_total": "311.52"
       }
     ],
-    "id": "inv_129",
+    "id": "inv_133",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.245303",
+    "created_at": "2025-09-23T13:35:23.522676",
     "source_file": "email_3_20250805_232227_henryschein_4434143_20250718_31080183_14484025460.json",
-    "pdf_path": "/api/pdf/email_3_20250805_232227_henryschein_4434143_20250718_31080183_14484025460.pdf"
+    "pdf_path": "/email_invoices/email_3_20250805_232227_henryschein_4434143_20250718_31080183_14484025460.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2017,12 +3282,12 @@
         "line_item_total": "311.52"
       }
     ],
-    "id": "inv_130",
+    "id": "inv_134",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.245428",
+    "created_at": "2025-09-23T13:35:23.522840",
     "source_file": "henry_invoice_6.json",
-    "pdf_path": "/api/pdf/henry schein.pdf"
+    "pdf_path": null
   },
   {
     "vendor": "Henry schein",
@@ -2125,12 +3390,60 @@
         "line_item_total": "26.19"
       }
     ],
-    "id": "inv_131",
+    "id": "inv_135",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.246850",
+    "created_at": "2025-09-23T13:35:23.524431",
     "source_file": "henryschein_4434143_20250725_31102443_14497454391.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250725_31102443_14497454391.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250725_31102443_14497454391.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_136",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.524486",
+    "source_file": "email_38_20250911_154247_Darby_Invoice_5572473_f849f327.json",
+    "pdf_path": "/email_invoices/email_38_20250911_154247_Darby_Invoice_5572473_f849f327.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_137",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.524533",
+    "source_file": "email_18_20250911_154129_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082957_95b352a7.json",
+    "pdf_path": "/email_invoices/email_18_20250911_154129_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082957_95b352a7.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_138",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.524578",
+    "source_file": "email_56_20250911_154339_V6529148_8df5afae.json",
+    "pdf_path": "/email_invoices/email_56_20250911_154339_V6529148_8df5afae.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2141,12 +3454,28 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_135",
+    "id": "inv_139",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.247460",
+    "created_at": "2025-09-23T13:35:23.524718",
     "source_file": "email_54_20250911_154333_Patterson  Invoice # 3038897967_6870df27.json",
-    "pdf_path": "/api/pdf/email_54_20250911_154333_Patterson  Invoice # 3038897967_6870df27.pdf"
+    "pdf_path": "/email_invoices/email_54_20250911_154333_Patterson  Invoice # 3038897967_6870df27.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_140",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.524849",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-171030.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-171030.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -2165,12 +3494,12 @@
         "line_item_total": "51.00"
       }
     ],
-    "id": "inv_137",
+    "id": "inv_141",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.247660",
+    "created_at": "2025-09-23T13:35:23.524985",
     "source_file": "epic_invoice_3_parsed.json",
-    "pdf_path": "/api/pdf/304500120691_0450004323231_20250630.pdf"
+    "pdf_path": null
   },
   {
     "vendor": "Henry schein",
@@ -2189,12 +3518,106 @@
         "line_item_total": "2.000"
       }
     ],
-    "id": "inv_138",
+    "id": "inv_142",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.248352",
+    "created_at": "2025-09-23T13:35:23.525665",
     "source_file": "Patterson  Invoice # 3038897968.json",
-    "pdf_path": "/api/pdf/Patterson  Invoice # 3038897968.pdf"
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038897968.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_143",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.525721",
+    "source_file": "Invoice 27170.json",
+    "pdf_path": "/email_invoices/Invoice 27170.pdf"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "vendor_name": "TC Dental",
+    "invoice_number": "260-602",
+    "invoice_date": "",
+    "due_date": "",
+    "total": "0.00",
+    "office_location": "Salem",
+    "patient_name": "Natalie Bar",
+    "doctor_name": "Rosaly",
+    "line_items": [
+      {
+        "product_number": "N/A",
+        "product_name": "D2740 Full Zirconia Crown Posterior",
+        "Quantity": "3.00",
+        "unit_price": "94.00",
+        "line_item_total": "282.00"
+      }
+    ],
+    "source_page": 9,
+    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "pdf_path": "/email_invoices/email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "id": "inv_144",
+    "clinic_id": "Salem",
+    "invoice_total": "0.00",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.525773",
+    "source_file": "email_49_20250911_154308_tc dental_648bbe67_invoice_9_260-602.json"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_145",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.526914",
+    "source_file": "email_1_20250911_154049_ColumbiaSmiles12855_14a67f54.json",
+    "pdf_path": "/email_invoices/email_1_20250911_154049_ColumbiaSmiles12855_14a67f54.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_146",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.527031",
+    "source_file": "Credit Note CN-20265 (1).json",
+    "pdf_path": "/email_invoices/Credit Note CN-20265 (1).pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_147",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.527084",
+    "source_file": "email_51_20250911_154318_patterson_3ff4e698.json",
+    "pdf_path": "/email_invoices/email_51_20250911_154318_patterson_3ff4e698.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2213,12 +3636,12 @@
         "line_item_total": "59.83"
       }
     ],
-    "id": "inv_143",
+    "id": "inv_148",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.248915",
+    "created_at": "2025-09-23T13:35:23.527253",
     "source_file": "henryschein_4434143_20250909_31249878_14594621914.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250909_31249878_14594621914.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250909_31249878_14594621914.pdf"
   },
   {
     "invoice_number": "44134561",
@@ -2237,12 +3660,12 @@
       }
     ],
     "due_date": "08/15/2025",
-    "id": "inv_144",
+    "id": "inv_149",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.248947",
+    "created_at": "2025-09-23T13:35:23.527361",
     "source_file": "Invoice_20250716_0001.json",
-    "pdf_path": "/api/pdf/Invoice_20250716_0001.pdf"
+    "pdf_path": "/email_invoices/Invoice_20250716_0001.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2317,12 +3740,43 @@
         "line_item_total": "27.11"
       }
     ],
-    "id": "inv_145",
+    "id": "inv_150",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.249088",
+    "created_at": "2025-09-23T13:35:23.527507",
     "source_file": "henry_invoice_5.json",
-    "pdf_path": "/api/pdf/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+    "pdf_path": "/email_invoices/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_151",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.528053",
+    "source_file": "email_2_20250805_232017_V6230412_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232017_V6230412_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_152",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.528105",
+    "source_file": "Darby_Invoice_5572473.json",
+    "pdf_path": "/email_invoices/Darby_Invoice_5572473.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2355,12 +3809,12 @@
         "line_item_total": "82.15"
       }
     ],
-    "id": "inv_148",
+    "id": "inv_153",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.249705",
+    "created_at": "2025-09-23T13:35:23.528208",
     "source_file": "email_14_20250911_154116_henryschein_4434143_20250909_31249878_14594621913_3a8d31fc.json",
-    "pdf_path": "/api/pdf/email_14_20250911_154116_henryschein_4434143_20250909_31249878_14594621913_3a8d31fc.pdf"
+    "pdf_path": "/email_invoices/email_14_20250911_154116_henryschein_4434143_20250909_31249878_14594621913_3a8d31fc.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2378,12 +3832,12 @@
         "line_item_total": "13.43"
       }
     ],
-    "id": "inv_149",
+    "id": "inv_154",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.249762",
+    "created_at": "2025-09-23T13:35:23.528330",
     "source_file": "email_11_20250805_231221_henryschein_4434143_20250725_31102443_14497454388.json",
-    "pdf_path": "/api/pdf/email_11_20250805_231221_henryschein_4434143_20250725_31102443_14497454388.pdf"
+    "pdf_path": "/email_invoices/email_11_20250805_231221_henryschein_4434143_20250725_31102443_14497454388.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -2423,12 +3877,44 @@
         "line_item_total": "38.00"
       }
     ],
-    "id": "inv_150",
+    "id": "inv_155",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.249900",
+    "created_at": "2025-09-23T13:35:23.528442",
     "source_file": "epic_invoice_10_parsed.json",
-    "pdf_path": "/api/pdf/304500120691_0450004311513_20250531.pdf"
+    "pdf_path": null
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_156",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.529200",
+    "source_file": "email_16_20250911_154119_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083050_bbb35a67.json",
+    "pdf_path": "/email_invoices/email_16_20250911_154119_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083050_bbb35a67.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_157",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.529244",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-160154.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-160154.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2503,12 +3989,44 @@
         "line_item_total": "27.11"
       }
     ],
-    "id": "inv_153",
+    "id": "inv_158",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.250775",
+    "created_at": "2025-09-23T13:35:23.529398",
     "source_file": "email_4_20250805_231537_henryschein_4434143_20250718_31082051_14484727803.json",
-    "pdf_path": "/api/pdf/email_4_20250805_231537_henryschein_4434143_20250718_31082051_14484727803.pdf"
+    "pdf_path": "/email_invoices/email_4_20250805_231537_henryschein_4434143_20250718_31082051_14484727803.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_159",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.529442",
+    "source_file": "Invoice_NEA3947271.json",
+    "pdf_path": "/email_invoices/Invoice_NEA3947271.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_160",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.529560",
+    "source_file": "V6015761 -78004.json",
+    "pdf_path": "/email_invoices/V6015761 -78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2548,12 +4066,12 @@
         "line_item_total": "233.64"
       }
     ],
-    "id": "inv_156",
+    "id": "inv_161",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.250862",
+    "created_at": "2025-09-23T13:35:23.529676",
     "source_file": "henryschein_4434143_20250912_31261900_14602917150.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250912_31261900_14602917150.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250912_31261900_14602917150.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -2572,12 +4090,89 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_157",
+    "id": "inv_162",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.250913",
+    "created_at": "2025-09-23T13:35:23.529813",
     "source_file": "email_63_20250911_154351_Patterson  Invoice # 3038926445_14e33919.json",
-    "pdf_path": "/api/pdf/email_63_20250911_154351_Patterson  Invoice # 3038926445_14e33919.pdf"
+    "pdf_path": "/email_invoices/email_63_20250911_154351_Patterson  Invoice # 3038926445_14e33919.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_163",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.529924",
+    "source_file": "invoice-13970-638931909850717798.json",
+    "pdf_path": "/email_invoices/invoice-13970-638931909850717798.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_164",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.530021",
+    "source_file": "email_2_20250805_231946_V6273090_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231946_V6273090_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_165",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.530125",
+    "source_file": "Crest & Oral-B Professional Invoice.json",
+    "pdf_path": "/email_invoices/Crest & Oral-B Professional Invoice.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_166",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.530220",
+    "source_file": "email_2_20250805_230046_V6186388_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230046_V6186388_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_167",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.530332",
+    "source_file": "email_2_20250805_230046_V6230412_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_230046_V6230412_-_78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2596,12 +4191,12 @@
         "line_item_total": "13.43"
       }
     ],
-    "id": "inv_163",
+    "id": "inv_168",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.251377",
+    "created_at": "2025-09-23T13:35:23.530429",
     "source_file": "henryschein_4434143_20250725_31102443_14497454388.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250725_31102443_14497454388.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250725_31102443_14497454388.pdf"
   },
   {
     "invoice_number": "44134561",
@@ -2619,12 +4214,12 @@
         "line_item_total": "77.88"
       }
     ],
-    "id": "inv_164",
+    "id": "inv_169",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.251501",
+    "created_at": "2025-09-23T13:35:23.530537",
     "source_file": "email_9_20250805_231325_Invoice_20250716_0001.json",
-    "pdf_path": "/api/pdf/email_9_20250805_231325_Invoice_20250716_0001.pdf"
+    "pdf_path": "/email_invoices/email_9_20250805_231325_Invoice_20250716_0001.pdf"
   },
   {
     "invoice_number": "44134561",
@@ -2642,12 +4237,28 @@
         "line_item_total": "77.88"
       }
     ],
-    "id": "inv_165",
+    "id": "inv_170",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.251625",
+    "created_at": "2025-09-23T13:35:23.530669",
     "source_file": "original_output.json",
-    "pdf_path": "/api/pdf/Invoice_20250716_0001.pdf"
+    "pdf_path": "/email_invoices/Invoice_20250716_0001.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_171",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.531424",
+    "source_file": "V6273090 - 78004.json",
+    "pdf_path": "/email_invoices/V6273090 - 78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2658,12 +4269,28 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_167",
+    "id": "inv_172",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.252239",
+    "created_at": "2025-09-23T13:35:23.531471",
     "source_file": "Patterson  Invoice # 3038872509.json",
-    "pdf_path": "/api/pdf/Patterson  Invoice # 3038872509.pdf"
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038872509.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_173",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.531633",
+    "source_file": "Med Pro Inv.json",
+    "pdf_path": "/email_invoices/Med Pro Inv.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2766,12 +4393,28 @@
         "line_item_total": "26.19"
       }
     ],
-    "id": "inv_169",
+    "id": "inv_174",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.252411",
+    "created_at": "2025-09-23T13:35:23.531833",
     "source_file": "henry_invoice_8.json",
-    "pdf_path": "/api/pdf/henry schein.pdf"
+    "pdf_path": null
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_175",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.533208",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083050.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083050.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -2790,10 +4433,10 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_171",
+    "id": "inv_176",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.253818",
+    "created_at": "2025-09-23T13:35:23.533329",
     "source_file": "patterson_invoice_1.json",
     "pdf_path": null
   },
@@ -2870,12 +4513,12 @@
         "line_item_total": "27.11"
       }
     ],
-    "id": "inv_172",
+    "id": "inv_177",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.254637",
+    "created_at": "2025-09-23T13:35:23.534187",
     "source_file": "henryschein_4434143_20250718_31082051_14484727803.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250718_31082051_14484727803.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250718_31082051_14484727803.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2894,12 +4537,12 @@
         "line_item_total": "2.000"
       }
     ],
-    "id": "inv_173",
+    "id": "inv_178",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.254673",
+    "created_at": "2025-09-23T13:35:23.534306",
     "source_file": "Patterson  Invoice # 3038963781.json",
-    "pdf_path": "/api/pdf/Patterson  Invoice # 3038963781.pdf"
+    "pdf_path": "/email_invoices/Patterson  Invoice # 3038963781.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -2909,12 +4552,12 @@
     "office_location": "Riddle",
     "vendor_name": "Epic Dental Lab",
     "line_items": [],
-    "id": "inv_174",
+    "id": "inv_179",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.254831",
+    "created_at": "2025-09-23T13:35:23.534419",
     "source_file": "5371.json",
-    "pdf_path": "/api/pdf/email_6_20250805_230038_henryschein_4434143_20250720_31085178_14486986364.pdf"
+    "pdf_path": "/email_invoices/email_6_20250805_230038_henryschein_4434143_20250720_31085178_14486986364.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -2933,12 +4576,27 @@
         "line_item_total": "241.77"
       }
     ],
-    "id": "inv_175",
+    "id": "inv_180",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.255231",
+    "created_at": "2025-09-23T13:35:23.534990",
     "source_file": "henryschein_4434143_20250911_31259810_14600935136.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250911_31259810_14600935136.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250911_31259810_14600935136.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_181",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.535098",
+    "source_file": "email_2_20250805_232234_V6230412_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232234_V6230412_-_78004.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -2971,12 +4629,50 @@
         "line_item_total": "30.00"
       }
     ],
-    "id": "inv_177",
+    "id": "inv_182",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.255412",
+    "created_at": "2025-09-23T13:35:23.535213",
     "source_file": "epic_invoice_6_parsed.json",
-    "pdf_path": "/api/pdf/email_6_20250805_230038_henryschein_4434143_20250720_31085178_14486986364.pdf"
+    "pdf_path": "/email_invoices/email_6_20250805_230038_henryschein_4434143_20250720_31085178_14486986364.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_183",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.535646",
+    "source_file": "email_57_20250911_154342_Darby_Invoice_5572651_a501195a.json",
+    "pdf_path": "/email_invoices/email_57_20250911_154342_Darby_Invoice_5572651_a501195a.pdf"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "vendor_name": "TC Dental",
+    "invoice_number": "260-447",
+    "invoice_date": "",
+    "due_date": "",
+    "total": "0.00",
+    "office_location": "Salem",
+    "patient_name": "Robert Comstock Doctor Name: Rosaly",
+    "doctor_name": "Rosaly",
+    "line_items": [],
+    "source_page": 1,
+    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "pdf_path": "/email_invoices/email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "id": "inv_184",
+    "clinic_id": "Salem",
+    "invoice_total": "0.00",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.535754",
+    "source_file": "email_49_20250911_154308_tc dental_648bbe67_invoice_1_260-447.json"
   },
   {
     "vendor": "patterson_dental",
@@ -2994,10 +4690,10 @@
         "line_item_total": "71.00"
       }
     ],
-    "id": "inv_179",
+    "id": "inv_185",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.256029",
+    "created_at": "2025-09-23T13:35:23.536897",
     "source_file": "Patterson  Invoice # 3038198528.json",
     "pdf_path": null
   },
@@ -3018,12 +4714,76 @@
         "line_item_total": "13.43"
       }
     ],
-    "id": "inv_180",
+    "id": "inv_186",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.256906",
+    "created_at": "2025-09-23T13:35:23.537857",
     "source_file": "email_11_20250805_230030_henryschein_4434143_20250725_31102443_14497454388.json",
-    "pdf_path": "/api/pdf/email_11_20250805_230030_henryschein_4434143_20250725_31102443_14497454388.pdf"
+    "pdf_path": "/email_invoices/email_11_20250805_230030_henryschein_4434143_20250725_31102443_14497454388.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_187",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.537903",
+    "source_file": "ColumbiaSmiles12855.json",
+    "pdf_path": "/email_invoices/ColumbiaSmiles12855.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_188",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.538035",
+    "source_file": "INVOICE_031516_from_Physician's Resource.json",
+    "pdf_path": "/email_invoices/INVOICE_031516_from_Physician's Resource.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_189",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.538080",
+    "source_file": "email_41_20250911_154254_Med Pro Inv_3865262b.json",
+    "pdf_path": "/email_invoices/email_41_20250911_154254_Med Pro Inv_3865262b.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_190",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.538125",
+    "source_file": "Invoice #1c092f42358f.json",
+    "pdf_path": "/email_invoices/Invoice #1c092f42358f.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -3111,12 +4871,58 @@
         "line_item_total": "30.46"
       }
     ],
-    "id": "inv_185",
+    "id": "inv_191",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.257246",
+    "created_at": "2025-09-23T13:35:23.538257",
     "source_file": "henry_schein_invoice_43912059.json",
-    "pdf_path": "/api/pdf/henry schein.pdf"
+    "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_192",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.539469",
+    "source_file": "Invoice 464.json",
+    "pdf_path": "/email_invoices/Invoice 464.pdf"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "vendor_name": "TC Dental",
+    "invoice_number": "260-490",
+    "invoice_date": "",
+    "due_date": "",
+    "total": "94.00",
+    "office_location": "Salem",
+    "patient_name": "Kare",
+    "doctor_name": "Gra",
+    "line_items": [
+      {
+        "product_number": "N/A",
+        "product_name": "D2740 Full Zirconia Crown Posterior",
+        "Quantity": "1.00",
+        "unit_price": "94.00",
+        "line_item_total": "94.00"
+      }
+    ],
+    "source_page": 2,
+    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "pdf_path": null,
+    "id": "inv_193",
+    "clinic_id": "Salem",
+    "invoice_total": "94.00",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.539589",
+    "source_file": "email_49_20250911_154308_tc dental_648bbe67_invoice_2_260-490.json"
   },
   {
     "vendor": "exodus_dental_solutions",
@@ -3163,12 +4969,65 @@
       }
     ],
     "due_date": "07/14/2025",
-    "id": "inv_187",
+    "id": "inv_194",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.258362",
+    "created_at": "2025-09-23T13:35:23.540885",
     "source_file": "4307.json",
-    "pdf_path": "/api/pdf/304500120691_0450004323231_20250630.pdf"
+    "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_195",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.541626",
+    "source_file": "email_2_20250805_232234_V6186388_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232234_V6186388_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_196",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.541697",
+    "source_file": "_79U0Y2T9L.json",
+    "pdf_path": "/email_invoices/_79U0Y2T9L.pdf"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "vendor_name": "TC Dental",
+    "invoice_number": "260-486",
+    "invoice_date": "",
+    "due_date": "",
+    "total": "376.00",
+    "office_location": "Salem",
+    "patient_name": "Merria",
+    "doctor_name": "Rosaly",
+    "line_items": [],
+    "source_page": 8,
+    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
+    "pdf_path": null,
+    "id": "inv_197",
+    "clinic_id": "Salem",
+    "invoice_total": "376.00",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.541771",
+    "source_file": "email_49_20250911_154308_tc dental_648bbe67_invoice_8_260-486.json"
   },
   {
     "vendor": "Henry schein",
@@ -3179,12 +5038,12 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_190",
+    "id": "inv_198",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.259118",
+    "created_at": "2025-09-23T13:35:23.542947",
     "source_file": "email_39_20250911_154250_Patterson  Invoice # 3038872509_84915bd7.json",
-    "pdf_path": "/api/pdf/email_39_20250911_154250_Patterson  Invoice # 3038872509_84915bd7.pdf"
+    "pdf_path": "/email_invoices/email_39_20250911_154250_Patterson  Invoice # 3038872509_84915bd7.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -3203,12 +5062,123 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_191",
+    "id": "inv_199",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.259175",
+    "created_at": "2025-09-23T13:35:23.543074",
     "source_file": "email_66_20250911_154352_Patterson  Invoice # 3038927334_ea93c766.json",
-    "pdf_path": "/api/pdf/email_66_20250911_154352_Patterson  Invoice # 3038927334_ea93c766.pdf"
+    "pdf_path": "/email_invoices/email_66_20250911_154352_Patterson  Invoice # 3038927334_ea93c766.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_200",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.543130",
+    "source_file": "email_50_20250911_154316_INVOICE_031516_from_Physician's Resource_2e088326.json",
+    "pdf_path": "/email_invoices/email_50_20250911_154316_INVOICE_031516_from_Physician's Resource_2e088326.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_201",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.543178",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-122945.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-122945.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_202",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.543304",
+    "source_file": "Darby_Invoice_5571812.json",
+    "pdf_path": "/email_invoices/Darby_Invoice_5571812.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_203",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.543348",
+    "source_file": "img20250909_12155837.json",
+    "pdf_path": "/email_invoices/img20250909_12155837.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_204",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.543470",
+    "source_file": "email_2_20250805_232229_V6102702_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232229_V6102702_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_205",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.543583",
+    "source_file": "Receipt-2509-5794.json",
+    "pdf_path": "/email_invoices/Receipt-2509-5794.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_206",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.543677",
+    "source_file": "Scan_2025_09_11_08_27_19_236.json",
+    "pdf_path": "/email_invoices/Scan_2025_09_11_08_27_19_236.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -3234,12 +5204,83 @@
         "line_item_total": "51.00"
       }
     ],
-    "id": "inv_199",
+    "id": "inv_207",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.259722",
+    "created_at": "2025-09-23T13:35:23.543804",
     "source_file": "epic_invoice_5_parsed.json",
-    "pdf_path": "/api/pdf/304500120691_0450004323231_20250630.pdf"
+    "pdf_path": null
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_208",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.544587",
+    "source_file": "Scan_2025_09_11_08_38_34_838.json",
+    "pdf_path": "/email_invoices/Scan_2025_09_11_08_38_34_838.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_209",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.544726",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-171145.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-171145.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_210",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.544845",
+    "source_file": "email_70_20250911_154406_Scan_2025_09_11_08_38_34_838_e2108fd7.json",
+    "pdf_path": "/email_invoices/email_70_20250911_154406_Scan_2025_09_11_08_38_34_838_e2108fd7.pdf"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "invoice_number": "251-879",
+    "invoice_date": "5/20/2025",
+    "total": "178.00",
+    "office_location": "Salem",
+    "vendor_name": "TC Dental",
+    "line_items": [
+      {
+        "product_number": "N/A",
+        "product_name": "D2740 Full Zirconia Crown Posterior",
+        "Quantity": "2.00",
+        "unit_price": "89.00",
+        "line_item_total": "178.00"
+      }
+    ],
+    "id": "inv_211",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.544975",
+    "source_file": "tc_invoice_3.json",
+    "pdf_path": null
   },
   {
     "vendor": "Henry schein",
@@ -3258,12 +5299,91 @@
         "line_item_total": "28.63"
       }
     ],
-    "id": "inv_204",
+    "id": "inv_212",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.261523",
+    "created_at": "2025-09-23T13:35:23.546034",
     "source_file": "henryschein_4434143_20250910_31253796_14597339595.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250910_31253796_14597339595.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250910_31253796_14597339595.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_213",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.546176",
+    "source_file": "email_2_20250805_232232_V63202641_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232232_V63202641_-_78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_214",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.546221",
+    "source_file": "V6102702 - 78004.json",
+    "pdf_path": "/email_invoices/V6102702 - 78004.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_215",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.546275",
+    "source_file": "V6060603 -78004.json",
+    "pdf_path": "/email_invoices/V6060603 -78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_216",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.546337",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170723.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170723.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_217",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.546444",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083020.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-083020.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -3282,12 +5402,44 @@
         "line_item_total": "59.83"
       }
     ],
-    "id": "inv_210",
+    "id": "inv_218",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.261829",
+    "created_at": "2025-09-23T13:35:23.546550",
     "source_file": "email_12_20250911_154114_henryschein_4434143_20250909_31249878_14594621916_8ca28925.json",
-    "pdf_path": "/api/pdf/email_12_20250911_154114_henryschein_4434143_20250909_31249878_14594621916_8ca28925.pdf"
+    "pdf_path": "/email_invoices/email_12_20250911_154114_henryschein_4434143_20250909_31249878_14594621916_8ca28925.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_219",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.546697",
+    "source_file": "Invoice 1282639.json",
+    "pdf_path": "/email_invoices/Invoice 1282639.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_220",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.546765",
+    "source_file": "email_72_20250911_154417_304500120691_0450004323231_20250630_51da3879.json",
+    "pdf_path": "/email_invoices/email_72_20250911_154417_304500120691_0450004323231_20250630_51da3879.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -3487,12 +5639,27 @@
         "line_item_total": "79.00"
       }
     ],
-    "id": "inv_213",
+    "id": "inv_221",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.262063",
+    "created_at": "2025-09-23T13:35:23.546935",
     "source_file": "PCS invoices.json",
     "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_222",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.547988",
+    "source_file": "email_2_20250805_232233_V6273090_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_232233_V6273090_-_78004.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -3546,12 +5713,12 @@
         "line_item_total": "311.52"
       }
     ],
-    "id": "inv_215",
+    "id": "inv_223",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.263045",
+    "created_at": "2025-09-23T13:35:23.548044",
     "source_file": "henryschein_4434143_20250718_31080183_14484025460.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250718_31080183_14484025460.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250718_31080183_14484025460.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -3570,12 +5737,28 @@
         "line_item_total": "64.78"
       }
     ],
-    "id": "inv_216",
+    "id": "inv_224",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.263173",
+    "created_at": "2025-09-23T13:35:23.548183",
     "source_file": "henry_invoice_3.json",
-    "pdf_path": "/api/pdf/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+    "pdf_path": "/email_invoices/email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_225",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.548857",
+    "source_file": "email_8_20250911_154107_Invoice_082512346_from_TRUSTWORKZ_INC_8b22c3e9.json",
+    "pdf_path": "/email_invoices/email_8_20250911_154107_Invoice_082512346_from_TRUSTWORKZ_INC_8b22c3e9.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -3769,12 +5952,12 @@
         "line_item_total": "69.59"
       }
     ],
-    "id": "inv_218",
+    "id": "inv_226",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.263948",
+    "created_at": "2025-09-23T13:35:23.549112",
     "source_file": "henryschein_4434143_20250910_31253796_14597339599.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250910_31253796_14597339599.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250910_31253796_14597339599.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -3807,12 +5990,44 @@
         "line_item_total": "41.88"
       }
     ],
-    "id": "inv_219",
+    "id": "inv_227",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.263978",
+    "created_at": "2025-09-23T13:35:23.549160",
     "source_file": "henryschein_4434143_20250910_31253796_14597339598.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250910_31253796_14597339598.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250910_31253796_14597339598.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_228",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.549265",
+    "source_file": "Inv_75629_from_Dental_Medical_Staffing_Inc._5522892_15528.json",
+    "pdf_path": "/email_invoices/Inv_75629_from_Dental_Medical_Staffing_Inc._5522892_15528.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_229",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.549309",
+    "source_file": "email_31_20250911_154229_Sales Invoice - PS-INV177040_ef2ea3c0.json",
+    "pdf_path": "/email_invoices/email_31_20250911_154229_Sales Invoice - PS-INV177040_ef2ea3c0.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -3831,12 +6046,12 @@
         "line_item_total": "250.00"
       }
     ],
-    "id": "inv_222",
+    "id": "inv_230",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.264291",
+    "created_at": "2025-09-23T13:35:23.549409",
     "source_file": "email_3_20250911_154058_I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357_af254e04.json",
-    "pdf_path": "/api/pdf/email_3_20250911_154058_I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357_af254e04.pdf"
+    "pdf_path": "/email_invoices/email_3_20250911_154058_I0997866_OMINV#INVOICES@PACIFICCRESTSMILES.COM_250908_114357_af254e04.pdf"
   },
   {
     "invoice_number": "44134561",
@@ -3855,12 +6070,12 @@
       }
     ],
     "due_date": "08/15/2025",
-    "id": "inv_223",
+    "id": "inv_231",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.264418",
+    "created_at": "2025-09-23T13:35:23.549551",
     "source_file": "henry_invoice_2.json",
-    "pdf_path": "/api/pdf/Invoice_20250716_0001.pdf"
+    "pdf_path": "/email_invoices/Invoice_20250716_0001.pdf"
   },
   {
     "vendor": "exodus_dental_solutions",
@@ -3886,12 +6101,44 @@
       }
     ],
     "due_date": "09/27/2025",
-    "id": "inv_224",
+    "id": "inv_232",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.264826",
+    "created_at": "2025-09-23T13:35:23.549992",
     "source_file": "5195.json",
-    "pdf_path": "/api/pdf/email_30_20250911_154228_Invoices_5195_1c565825.pdf"
+    "pdf_path": "/email_invoices/email_30_20250911_154228_Invoices_5195_1c565825.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_233",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.550316",
+    "source_file": "email_60_20250911_154348_Receipt-2509-5794_4756a3d1.json",
+    "pdf_path": "/email_invoices/email_60_20250911_154348_Receipt-2509-5794_4756a3d1.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_234",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.550365",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082722.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082722.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -3924,12 +6171,12 @@
         "line_item_total": "82.15"
       }
     ],
-    "id": "inv_227",
+    "id": "inv_235",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.265124",
+    "created_at": "2025-09-23T13:35:23.550414",
     "source_file": "henryschein_4434143_20250909_31249878_14594621913.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250909_31249878_14594621913.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250909_31249878_14594621913.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -4003,12 +6250,12 @@
         "line_item_total": "27.11"
       }
     ],
-    "id": "inv_228",
+    "id": "inv_236",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.265182",
+    "created_at": "2025-09-23T13:35:23.550529",
     "source_file": "email_4_20250805_232225_henryschein_4434143_20250718_31082051_14484727803.json",
-    "pdf_path": "/api/pdf/email_4_20250805_232225_henryschein_4434143_20250718_31082051_14484727803.pdf"
+    "pdf_path": "/email_invoices/email_4_20250805_232225_henryschein_4434143_20250718_31082051_14484727803.pdf"
   },
   {
     "vendor": "Henry schein",
@@ -4019,12 +6266,75 @@
     "office_location": "",
     "vendor_name": "Henry Schein",
     "line_items": [],
-    "id": "inv_229",
+    "id": "inv_237",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.265214",
+    "created_at": "2025-09-23T13:35:23.550571",
     "source_file": "56008564.json",
-    "pdf_path": "/api/pdf/56008564.pdf"
+    "pdf_path": "/email_invoices/56008564.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_238",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.550696",
+    "source_file": "email_2_20250805_231713_V6102702_-_78004.json",
+    "pdf_path": "/email_invoices/email_2_20250805_231713_V6102702_-_78004.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_239",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.550742",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082630.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082630.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_240",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.550855",
+    "source_file": "304500120691_0450004323231_20250630.json",
+    "pdf_path": "/email_invoices/304500120691_0450004323231_20250630.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "9/11/2025",
+    "id": "inv_241",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.550978",
+    "source_file": "email_67_20250911_154352_Scan_2025_09_11_08_27_37_550_0ffec07a.json",
+    "pdf_path": "/email_invoices/email_67_20250911_154352_Scan_2025_09_11_08_27_37_550_0ffec07a.pdf"
   },
   {
     "vendor": "Epic Dental Lab",
@@ -4043,10 +6353,10 @@
         "line_item_total": "195.00"
       }
     ],
-    "id": "inv_234",
+    "id": "inv_242",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.265550",
+    "created_at": "2025-09-23T13:35:23.551081",
     "source_file": "epic_invoice_9_parsed.json",
     "pdf_path": null
   },
@@ -4067,12 +6377,28 @@
         "line_item_total": "28.63"
       }
     ],
-    "id": "inv_235",
+    "id": "inv_243",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.266129",
+    "created_at": "2025-09-23T13:35:23.551737",
     "source_file": "henryschein_4434143_20250910_31253796_14597339594.json",
-    "pdf_path": "/api/pdf/henryschein_4434143_20250910_31253796_14597339594.pdf"
+    "pdf_path": "/email_invoices/henryschein_4434143_20250910_31253796_14597339594.pdf"
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_244",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.551787",
+    "source_file": "water_invoice.14636642_081925.2025-08-19.json",
+    "pdf_path": "/email_invoices/water_invoice.14636642_081925.2025-08-19.pdf"
   },
   {
     "vendor": "patterson_dental",
@@ -4091,12 +6417,115 @@
         "line_item_total": "259.00"
       }
     ],
-    "id": "inv_237",
+    "id": "inv_245",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.266212",
+    "created_at": "2025-09-23T13:35:23.551918",
     "source_file": "email_62_20250911_154350_Patterson  Invoice # 3038926240_b2c41aba.json",
-    "pdf_path": "/api/pdf/email_62_20250911_154350_Patterson  Invoice # 3038926240_b2c41aba.pdf"
+    "pdf_path": "/email_invoices/email_62_20250911_154350_Patterson  Invoice # 3038926240_b2c41aba.pdf"
+  },
+  {
+    "vendor": "tc dental laboratory, inc.",
+    "invoice_number": "252-487",
+    "invoice_date": "5/20/2025",
+    "total": "445.00",
+    "office_location": "Salem",
+    "vendor_name": "TC Dental",
+    "line_items": [
+      {
+        "product_number": "N/A",
+        "product_name": "D2740 Full Zirconia Crown Posterior",
+        "Quantity": "5.00",
+        "unit_price": "89.00",
+        "line_item_total": "445.00"
+      }
+    ],
+    "id": "inv_246",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.552029",
+    "source_file": "tc_invoice_2.json",
+    "pdf_path": null
+  },
+  {
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_247",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.553072",
+    "source_file": "email_36_20250911_154241_invoice_1092025-130814_043ed509.json",
+    "pdf_path": "/email_invoices/email_36_20250911_154241_invoice_1092025-130814_043ed509.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_248",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.553126",
+    "source_file": "email_29_20250911_154225_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-122945_aa6bb264.json",
+    "pdf_path": "/email_invoices/email_29_20250911_154225_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-122945_aa6bb264.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_249",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.553249",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170647.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170647.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_250",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.553296",
+    "source_file": "email_37_20250911_154243_Darby_Invoice_5571812_cb7aff97.json",
+    "pdf_path": "/email_invoices/email_37_20250911_154243_Darby_Invoice_5571812_cb7aff97.pdf"
+  },
+  {
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_251",
+    "status": "pending",
+    "assigned_to": null,
+    "created_at": "2025-09-23T13:35:23.553445",
+    "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082755.json",
+    "pdf_path": "/email_invoices/Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082755.pdf"
   },
   {
     "invoice_number": "44134561",
@@ -4115,274 +6544,59 @@
       }
     ],
     "due_date": "08/15/2025",
-    "id": "inv_244",
+    "id": "inv_252",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.267589",
+    "created_at": "2025-09-23T13:35:23.553572",
     "source_file": "email_9_20250805_230033_Invoice_20250716_0001.json",
-    "pdf_path": "/api/pdf/email_9_20250805_230033_Invoice_20250716_0001.pdf"
+    "pdf_path": "/email_invoices/email_9_20250805_230033_Invoice_20250716_0001.pdf"
   },
   {
-    "vendor": "tc dental laboratory, inc.",
-    "vendor_name": "TC Dental",
-    "invoice_number": "260-601",
+    "vendor": "Henry schein",
+    "invoice_number": "",
     "invoice_date": "",
     "due_date": "",
-    "total": "0.00",
-    "office_location": "Salem",
-    "patient_name": "Unknown",
-    "doctor_name": "Rosaly",
-    "line_items": [
-      {
-        "product_number": "N/A",
-        "product_name": "D2740 Full Zirconia Crown Posterior",
-        "Quantity": "2.00",
-        "unit_price": "94.00",
-        "line_item_total": "188.00"
-      }
-    ],
-    "source_page": 4,
-    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "id": "tc_260-601_4",
-    "clinic_id": "Salem",
-    "invoice_total": "0.00"
-  },
-  {
-    "vendor": "tc dental laboratory, inc.",
-    "vendor_name": "TC Dental",
-    "invoice_number": "260-600",
-    "invoice_date": "",
-    "due_date": "",
-    "total": "0.00",
-    "office_location": "Salem",
-    "patient_name": "A",
-    "doctor_name": "Rosaly",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
     "line_items": [],
-    "source_page": 5,
-    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "id": "tc_260-600_5",
-    "clinic_id": "Salem",
-    "invoice_total": "0.00"
-  },
-  {
-    "vendor": "tc dental laboratory, inc.",
-    "vendor_name": "TC Dental",
-    "invoice_number": "260-489",
-    "invoice_date": "",
-    "due_date": "",
-    "total": "188.00",
-    "office_location": "Salem",
-    "patient_name": "Kayla Wohl Pauiler Doctor Name: Gra",
-    "doctor_name": "Gra",
-    "line_items": [
-      {
-        "product_number": "N/A",
-        "product_name": "D2740 Full Zirconia Crown Posterior",
-        "Quantity": "2.00",
-        "unit_price": "94.00",
-        "line_item_total": "188.00"
-      }
-    ],
-    "source_page": 3,
-    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "id": "tc_260-489_3",
-    "clinic_id": "Salem",
-    "invoice_total": "188.00"
-  },
-  {
-    "vendor": "tc dental laboratory, inc.",
-    "vendor_name": "TC Dental",
-    "invoice_number": "260-599",
-    "invoice_date": "",
-    "due_date": "",
-    "total": "0.00",
-    "office_location": "Salem",
-    "patient_name": "Elisa Warde",
-    "doctor_name": "Rosaly",
-    "line_items": [],
-    "source_page": 7,
-    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "id": "tc_260-599_7",
-    "clinic_id": "Salem",
-    "invoice_total": "0.00"
-  },
-  {
-    "vendor": "tc dental laboratory, inc.",
-    "vendor_name": "TC Dental",
-    "invoice_number": "260-605",
-    "invoice_date": "",
-    "due_date": "",
-    "total": "0.00",
-    "office_location": "Salem",
-    "patient_name": "Unknown",
-    "doctor_name": "Gra",
-    "line_items": [],
-    "source_page": 6,
-    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "id": "tc_260-605_6",
-    "clinic_id": "Salem",
-    "invoice_total": "0.00"
-  },
-  {
-    "vendor": "tc dental laboratory, inc.",
-    "vendor_name": "TC Dental",
-    "invoice_number": "260-602",
-    "invoice_date": "",
-    "due_date": "",
-    "total": "0.00",
-    "office_location": "Salem",
-    "patient_name": "Natalie Bar",
-    "doctor_name": "Rosaly",
-    "line_items": [
-      {
-        "product_number": "N/A",
-        "product_name": "D2740 Full Zirconia Crown Posterior",
-        "Quantity": "3.00",
-        "unit_price": "94.00",
-        "line_item_total": "282.00"
-      }
-    ],
-    "source_page": 9,
-    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "id": "tc_260-602_9",
-    "clinic_id": "Salem",
-    "invoice_total": "0.00"
-  },
-  {
-    "vendor": "tc dental laboratory, inc.",
-    "vendor_name": "TC Dental",
-    "invoice_number": "260-447",
-    "invoice_date": "",
-    "due_date": "",
-    "total": "0.00",
-    "office_location": "Salem",
-    "patient_name": "Robert Comstock Doctor Name: Rosaly",
-    "doctor_name": "Rosaly",
-    "line_items": [],
-    "source_page": 1,
-    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "id": "tc_260-447_1",
-    "clinic_id": "Salem",
-    "invoice_total": "0.00"
-  },
-  {
-    "vendor": "tc dental laboratory, inc.",
-    "vendor_name": "TC Dental",
-    "invoice_number": "260-490",
-    "invoice_date": "",
-    "due_date": "",
-    "total": "94.00",
-    "office_location": "Salem",
-    "patient_name": "Kare",
-    "doctor_name": "Gra",
-    "line_items": [
-      {
-        "product_number": "N/A",
-        "product_name": "D2740 Full Zirconia Crown Posterior",
-        "Quantity": "1.00",
-        "unit_price": "94.00",
-        "line_item_total": "94.00"
-      }
-    ],
-    "source_page": 2,
-    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "id": "tc_260-490_2",
-    "clinic_id": "Salem",
-    "invoice_total": "94.00"
-  },
-  {
-    "vendor": "tc dental laboratory, inc.",
-    "vendor_name": "TC Dental",
-    "invoice_number": "260-486",
-    "invoice_date": "",
-    "due_date": "",
-    "total": "376.00",
-    "office_location": "Salem",
-    "patient_name": "Merria",
-    "doctor_name": "Rosaly",
-    "line_items": [],
-    "source_page": 8,
-    "source_pdf": "email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "pdf_path": "/api/pdf/email_49_20250911_154308_tc dental_648bbe67.pdf",
-    "id": "tc_260-486_8",
-    "clinic_id": "Salem",
-    "invoice_total": "376.00"
-  },
-  {
-    "vendor": "tc dental laboratory, inc.",
-    "invoice_number": "251-608",
-    "invoice_date": "5/13/2025",
-    "total": "267.00",
-    "office_location": "Salem",
-    "vendor_name": "TC Dental",
-    "line_items": [
-      {
-        "product_number": "N/A",
-        "product_name": "D2740 Full Zirconia Crown Posterior",
-        "Quantity": "3.00",
-        "unit_price": "89.00",
-        "line_item_total": "267.00"
-      }
-    ],
-    "id": "inv_7",
+    "id": "inv_253",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.218740",
-    "source_file": "tc_invoice_1.json",
-    "pdf_path": null
+    "created_at": "2025-09-23T13:35:23.553613",
+    "source_file": "Receipt.json",
+    "pdf_path": "/email_invoices/Receipt.pdf"
   },
   {
-    "vendor": "tc dental laboratory, inc.",
-    "invoice_number": "251-879",
-    "invoice_date": "5/20/2025",
-    "total": "178.00",
-    "office_location": "Salem",
-    "vendor_name": "TC Dental",
-    "line_items": [
-      {
-        "product_number": "N/A",
-        "product_name": "D2740 Full Zirconia Crown Posterior",
-        "Quantity": "2.00",
-        "unit_price": "89.00",
-        "line_item_total": "178.00"
-      }
-    ],
-    "id": "inv_203",
+    "vendor": "Henry schein",
+    "invoice_number": "",
+    "invoice_date": "",
+    "due_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "id": "inv_254",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.260598",
-    "source_file": "tc_invoice_3.json",
-    "pdf_path": null
+    "created_at": "2025-09-23T13:35:23.553711",
+    "source_file": "email_48_20250911_154305_Receipt_cb290553.json",
+    "pdf_path": "/email_invoices/email_48_20250911_154305_Receipt_cb290553.pdf"
   },
   {
-    "vendor": "tc dental laboratory, inc.",
-    "invoice_number": "252-487",
-    "invoice_date": "5/20/2025",
-    "total": "445.00",
-    "office_location": "Salem",
-    "vendor_name": "TC Dental",
-    "line_items": [
-      {
-        "product_number": "N/A",
-        "product_name": "D2740 Full Zirconia Crown Posterior",
-        "Quantity": "5.00",
-        "unit_price": "89.00",
-        "line_item_total": "445.00"
-      }
-    ],
-    "id": "inv_238",
+    "invoice_number": "",
+    "invoice_date": "",
+    "invoice_total": "",
+    "office_location": "",
+    "vendor": "Henry schein",
+    "vendor_name": "Henry Schein",
+    "line_items": [],
+    "due_date": "",
+    "id": "inv_255",
     "status": "pending",
     "assigned_to": null,
-    "created_at": "2025-09-12T14:53:08.266325",
-    "source_file": "tc_invoice_2.json",
-    "pdf_path": null
+    "created_at": "2025-09-23T13:35:23.553848",
+    "source_file": "email_24_20250911_154202_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700_ca42f236.json",
+    "pdf_path": "/email_invoices/email_24_20250911_154202_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700_ca42f236.pdf"
   }
 ]

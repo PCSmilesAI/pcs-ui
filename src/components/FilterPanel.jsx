@@ -21,6 +21,7 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
   const [office, setOffice] = React.useState('');
   const [dueWithin, setDueWithin] = React.useState('');
   const [category, setCategory] = React.useState('');
+  const [ach, setAch] = React.useState('');
 
   // Only render when open. We use inline styles for the overlay and
   // panel so that the presentation is independent of any CSS build.
@@ -154,6 +155,21 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
           </select>
         </div>
 
+        {/* Vendor ACH Status */}
+        <div>
+          <label style={labelStyle}>Vendor ACH Status</label>
+          <select
+            style={inputStyle}
+            value={ach}
+            onChange={(e) => setAch(e.target.value)}
+          >
+            <option value="">Choose options</option>
+            <option value="missing">Missing</option>
+            <option value="pending">Pending</option>
+            <option value="complete">Complete</option>
+          </select>
+        </div>
+
         {/* Apply button */}
         <div style={{ marginTop: '16px' }}>
           <button
@@ -166,6 +182,7 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
                 office,
                 dueWithin,
                 category,
+                ach,
               };
               if (onApplyFilters) {
                 onApplyFilters(criteria);

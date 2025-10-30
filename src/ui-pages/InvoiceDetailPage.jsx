@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { fetchQboCategories } from '../lib/categoriesClient';
+import ACHBadge from '../ui/ach/ACHBadge';
+import { useVendorAchMap } from '../ui/ach/useVendorAch';
+import Toast from '../components/Toast.jsx';
 
 /**
  * Detail view for a single invoice. Displays high level summary
@@ -15,31 +18,7 @@ import { fetchQboCategories } from '../lib/categoriesClient';
 export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext }) {
   const invoiceIdentifier = invoice?.id || invoice?.invoice_number || null;
   const invoiceJsonPath = invoice?.json_path || null;
-
-  if (!invoice) {
-    return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
-        <h2>Invoice not found</h2>
-        <p>This invoice could not be loaded.</p>
-        {onBack && (
-          <button
-            onClick={onBack}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#357ab2',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              marginTop: '16px'
-            }}
-          >
-            Go Back
-          </button>
-        )}
-      </div>
-    );
-  }
+  const invoiceSourceFile = invoice?.source_file || null;
 
   // State for editable fields. Payment amount can be modified by the
   // user. Other details and line items could be lifted into state
@@ -60,6 +39,78 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [lineCategories, setLineCategories] = useState({});
   const [loadingLineCategories, setLoadingLineCategories] = useState(false);
+  const [toast, setToast] = useState(null);
+  const { getStatusForVendor } = useVendorAchMap();
+  const showToast = useCallback((message, variant = 'info') => {
+    setToast({ message, variant, at: Date.now() });
+  }, []);
+  const dismissToast = useCallback(() => setToast(null), []);
+  const STATUS_META = {
+    incoming: { label: 'Incoming', fg: '#1d4ed8', bg: '#e0f2fe', border: '#60a5fa' },
+    categorized: { label: 'Categorized', fg: '#0369a1', bg: '#e0f2fe', border: '#38bdf8' },
+    awaiting_office_approval: {
+      label: 'Awaiting Office Approval',
+      fg: '#b45309',
+      bg: '#fef3c7',
+      border: '#f59e0b',
+    },
+    awaiting_admin_approval: {
+      label: 'Awaiting Admin Approval',
+      fg: '#6b21a8',
+      bg: '#f3e8ff',
+      border: '#c084fc',
+    },
+    to_be_paid: { label: 'Ready to Pay', fg: '#047857', bg: '#d1fae5', border: '#34d399' },
+    paid: { label: 'Paid', fg: '#065f46', bg: '#d1fae5', border: '#34d399' },
+    rejected: { label: 'Rejected', fg: '#b91c1c', bg: '#fee2e2', border: '#f87171' },
+    repair: { label: 'Needs Repair', fg: '#92400e', bg: '#fef3c7', border: '#fbbf24' },
+  };
+  const statusValue = (invoice?.status || 'incoming').toLowerCase();
+  const statusMeta =
+    STATUS_META[statusValue] ||
+    {
+      label: statusValue ? statusValue.replace(/_/g, ' ') : 'Unknown',
+      fg: '#1f2937',
+      bg: '#e5e7eb',
+      border: '#cbd5f5',
+    };
+  const approvals =
+    invoice?.approvals && typeof invoice.approvals === 'object' ? invoice.approvals : {};
+  const approvalStages = [
+    { key: 'ap', label: 'Accounts Payable' },
+    { key: 'office', label: 'Office Manager' },
+    { key: 'admin', label: 'Admin' },
+  ];
+  const renderStatusChip = (size = 'lg') => (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: size === 'lg' ? '6px 14px' : '4px 10px',
+        borderRadius: '9999px',
+        backgroundColor: statusMeta.bg,
+        color: statusMeta.fg,
+        border: `1px solid ${statusMeta.border}`,
+        fontSize: size === 'lg' ? '13px' : '12px',
+        fontWeight: 600,
+        textTransform: 'capitalize',
+      }}
+    >
+      {statusMeta.label}
+    </span>
+  );
+  const formatApprovalTimestamp = (value) => {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   useEffect(() => {
     setPaymentAmount(invoice?.amount || invoice?.total || '');
@@ -78,20 +129,11 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     let isActive = true;
 
     async function loadLineItems() {
-      if (!invoiceJsonPath) {
+      if (!invoiceJsonPath && !invoiceSourceFile) {
         if (isActive) {
-          setItems([]);
-          setLoading(false);
-        }
-        return;
-      }
-
-      try {
-        const response = await fetch(`/${invoiceJsonPath}`);
-        if (response.ok) {
-          const jsonData = await response.json();
-          if (Array.isArray(jsonData.line_items)) {
-            const transformedItems = jsonData.line_items.map((item, index) => ({
+          console.log('🧭 Line item load: no json_path or source_file; using embedded line_items if available');
+          if (Array.isArray(invoice?.line_items) && invoice.line_items.length > 0) {
+            const transformedItems = invoice.line_items.map((item, index) => ({
               id: item.product_number || `item-${index}`,
               name: item.product_name || '',
               qty: item.Quantity || '1',
@@ -99,15 +141,102 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               total: `$${item.line_item_total || '0.00'}`,
               category: item.quickbooks_category || 'Not categorized',
             }));
-            if (isActive) {
-              setItems(transformedItems);
-            }
-          } else if (isActive) {
+            setItems(transformedItems);
+          } else {
             setItems([]);
           }
-        } else if (isActive) {
-          console.warn('Failed to load JSON data for line items');
-          setItems([]);
+          setLoading(false);
+        }
+        return;
+      }
+
+      const trySetFromJson = (jsonData) => {
+        if (Array.isArray(jsonData?.line_items)) {
+          const transformedItems = jsonData.line_items.map((item, index) => ({
+            id: item.product_number || `item-${index}`,
+            name: item.product_name || '',
+            qty: item.Quantity || '1',
+            unit: `$${item.unit_price || '0.00'}`,
+            total: `$${item.line_item_total || '0.00'}`,
+            category: item.quickbooks_category || 'Not categorized',
+          }));
+          setItems(transformedItems);
+          return true;
+        }
+        return false;
+      };
+
+      try {
+        console.log('🧭 Line item load start', {
+          invoice_number: invoice?.invoice_number,
+          invoiceJsonPath,
+          invoiceSourceFile
+        });
+        // First attempt: direct fetch using the provided path
+        const directUrl = invoiceJsonPath
+          ? (invoiceJsonPath.startsWith('/') ? invoiceJsonPath : `/${invoiceJsonPath}`)
+          : null;
+        let response = null;
+        if (directUrl) {
+          console.log('🌐 Fetch (direct)', directUrl);
+          response = await fetch(directUrl, { cache: 'no-store' });
+          console.log('🌐 Fetch (direct) status', response.status);
+          if (response.ok) {
+            const jsonData = await response.json();
+            if (isActive && trySetFromJson(jsonData)) {
+              setLoading(false);
+              return;
+            }
+          }
+        }
+
+        // Fallback: use safe API route to serve from output_jsons
+        // Prefer json_path; if missing, derive from source_file
+        const marker = '/output_jsons/';
+        let rel = '';
+        if (invoiceJsonPath) {
+          const idx = invoiceJsonPath.indexOf(marker);
+          rel = idx >= 0
+            ? invoiceJsonPath.slice(idx + marker.length)
+            : invoiceJsonPath.replace(/^\/?output_jsons\/?/, '');
+        } else if (invoiceSourceFile) {
+          rel = invoiceSourceFile.replace(/^\//, '');
+        }
+        if (rel) {
+          const apiUrl = `/output_jsons/${rel}`;
+          console.log('🌐 Fetch (fallback /output_jsons)', apiUrl);
+          response = await fetch(apiUrl, { cache: 'no-store' });
+          console.log('🌐 Fetch (fallback) status', response.status);
+          if (response.ok) {
+            const jsonData = await response.json();
+            if (isActive && trySetFromJson(jsonData)) {
+              setLoading(false);
+              return;
+            }
+          }
+        }
+
+        if (isActive) {
+          console.warn('Failed to load JSON data for line items from both direct and API routes', {
+            invoice_number: invoice?.invoice_number,
+            invoiceJsonPath,
+            invoiceSourceFile
+          });
+          // Final fallback: use embedded line_items from the invoice object if present
+          if (Array.isArray(invoice?.line_items) && invoice.line_items.length > 0) {
+            console.log('🧩 Using embedded invoice.line_items as fallback');
+            const transformedItems = invoice.line_items.map((item, index) => ({
+              id: item.product_number || `item-${index}`,
+              name: item.product_name || '',
+              qty: item.Quantity || '1',
+              unit: `$${item.unit_price || '0.00'}`,
+              total: `$${item.line_item_total || '0.00'}`,
+              category: item.quickbooks_category || 'Not categorized',
+            }));
+            setItems(transformedItems);
+          } else {
+            setItems([]);
+          }
         }
       } catch (error) {
         if (isActive) {
@@ -126,7 +255,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     return () => {
       isActive = false;
     };
-  }, [invoiceJsonPath]);
+  }, [invoiceJsonPath, invoiceSourceFile]);
 
   const loadLineCategories = useCallback(async () => {
     if (!invoiceIdentifier) {
@@ -298,13 +427,97 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     if (invoice?.pdf_path) {
       // Create a link element to trigger the download
       const link = document.createElement('a');
-      link.href = invoice.pdf_path.startsWith('/api/') ? invoice.pdf_path : `/${invoice.pdf_path}`;
+      link.href = (() => {
+        const p = invoice.pdf_path;
+        if (!p) return '';
+        if (p.startsWith('http://') || p.startsWith('https://')) return p;
+        if (p.startsWith('/api/pdf/')) return p;
+        if (p.startsWith('/email_invoices/')) {
+          const filename = p.split('/').pop();
+          return `/api/pdf/${filename}`;
+        }
+        if (p.startsWith('/')) return p; // already absolute root path
+        return `/${p}`;
+      })();
       link.download = `${invoice?.invoice || invoice?.invoice_number || 'invoice'}_${invoice?.vendor || 'vendor'}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } else {
       console.warn('No PDF path available for download');
+    }
+  }
+
+  async function transitionInvoice(action) {
+    if (!invoice) return;
+    const invoiceId = invoice.id || invoice.invoice_number || invoice.invoice;
+    if (!invoiceId) {
+      showToast('Missing invoice identifier.', 'error');
+      return;
+    }
+
+    if (action === 'approve') {
+      const officeValue = (details?.office || invoice.office || invoice.office_location || invoice.clinic_id || '').trim();
+      if (!officeValue || officeValue.toLowerCase() === 'unknown') {
+        showToast('Office is required before approval.', 'error');
+        return;
+      }
+    }
+
+    setProcessing(true);
+    try {
+      const response = await fetch('/api/invoices/transition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: invoiceId,
+          action,
+          ...(action === 'reject' ? { reason: 'Rejected from invoice detail' } : {}),
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok || payload?.error) {
+        const message = payload?.error || `Failed to ${action} invoice`;
+        if (message.toLowerCase().includes('office required')) {
+          showToast('Office is required before approval.', 'error');
+        } else {
+          showToast(message, 'error');
+        }
+        return;
+      }
+
+      if (payload?.invoice) {
+        const updated = payload.invoice;
+        setDetails((prev) => ({
+          ...prev,
+          invoice: updated.invoice_number || updated.invoice || prev.invoice,
+          vendor: updated.vendor_name || updated.vendor || prev.vendor,
+          office:
+            updated.office_location ||
+            updated.office ||
+            updated.clinic_id ||
+            prev.office,
+          category: updated.category || prev.category,
+          invoice_date: updated.invoice_date || prev.invoice_date,
+          due_date: updated.due_date || prev.due_date,
+        }));
+        if (updated.total || updated.invoice_total) {
+          const amountValue = updated.total ?? updated.invoice_total;
+          const parsed =
+            typeof amountValue === 'number'
+              ? amountValue
+              : Number.parseFloat(String(amountValue).replace(/[^0-9.-]/g, '')) || 0;
+          setPaymentAmount(`$${parsed.toFixed(2)}`);
+        }
+      }
+
+      alert(action === 'approve' ? 'Invoice moved to the next approval step.' : 'Invoice rejected.');
+      if (onBack) onBack();
+    } catch (error) {
+      showToast(error?.message || 'Unexpected error while updating invoice', 'error');
+    } finally {
+      setProcessing(false);
     }
   }
 
@@ -380,13 +593,27 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           // Check QBO connection first to avoid noisy errors
           const statusUrl = `${baseUrl}/api/qbo/status?ts=${Date.now()}`;
           const statusRes = await fetch(statusUrl, { cache: 'no-store' });
-          const statusJson = await statusRes.json().catch(() => ({ connected: false }));
-
-          if (!statusRes.ok) {
-            console.warn('⚠️ QuickBooks status check returned non-OK response:', statusRes.status, statusJson);
+          const statusText = await statusRes.text();
+          let statusJson = null;
+          try {
+            statusJson = statusText ? JSON.parse(statusText) : null;
+          } catch (parseErr) {
+            console.error('❌ Failed to parse QuickBooks status JSON:', parseErr, { statusText });
           }
 
-          if (!statusJson.connected) {
+          const isConnected = !!statusJson?.connected;
+
+          if (!statusRes.ok || !isConnected) {
+            console.warn('⚠️ QuickBooks status check issue:', {
+              status: statusRes.status,
+              ok: statusRes.ok,
+              isConnected,
+              statusJson,
+              statusText,
+            });
+          }
+
+          if (!isConnected) {
             alert('Invoice approved. QuickBooks not connected — please connect QuickBooks first.');
             onBack();
             return;
@@ -442,11 +669,11 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
   // Button click handlers
   function handleApprove() {
-    updateInvoiceStatus('approved', true);
+    transitionInvoice('approve');
   }
 
   function handleReject() {
-    updateInvoiceStatus('rejected', false);
+    transitionInvoice('reject');
   }
 
   async function handleRepair() {
@@ -504,8 +731,34 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }
   }
 
-  function handlePaid() {
-    updateInvoiceStatus('completed', true);
+  async function handlePaid() {
+    if (!invoice) return;
+    const invoiceId = invoice.id || invoice.invoice_number || invoice.invoice;
+    if (!invoiceId) {
+      showToast('Missing invoice identifier.', 'error');
+      return;
+    }
+    setProcessing(true);
+    try {
+      const amountValue = paymentAmount || invoice?.amount || invoice?.total || '';
+      const numeric = typeof amountValue === 'number' ? amountValue : Number(String(amountValue).replace(/[^0-9.\-]/g, '')) || 0;
+      const response = await fetch('/api/invoices/transition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: invoiceId, action: 'mark_paid', total: numeric }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload?.error) {
+        showToast(payload?.error || 'Failed to mark as paid', 'error');
+        return;
+      }
+      alert('Invoice marked as paid.');
+      if (onBack) onBack();
+    } catch (err) {
+      showToast(err?.message || 'Unexpected error while marking paid', 'error');
+    } finally {
+      setProcessing(false);
+    }
   }
 
   // Strong remove for completed invoices: delete from queue + delete files
@@ -543,30 +796,24 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
   // Determine which buttons to show based on invoice status
   function getActionButtons() {
-    let status = invoice?.status || 'new';
-    // If coming from Completed page and status is missing, treat as completed
-    if ((!invoice?.status || invoice?.status === 'new') && invoice?._sourcePage === 'complete') {
-      status = 'completed';
-    }
-    const approved = invoice?.approved || false;
+    const status = (invoice?.status || 'incoming').toLowerCase();
 
     console.log('🔍 InvoiceDetailPage Debug:');
     console.log('  - Invoice Number:', invoice?.invoice_number);
     console.log('  - Status:', status);
-    console.log('  - Approved:', approved);
     console.log('  - Full invoice object:', invoice);
 
     if (status === 'removed') {
       return []; // No buttons for removed invoices
     }
 
-    if (status === 'completed') {
+    if (status === 'completed' || status === 'paid') {
       return [
         { label: 'Remove', onClick: handleRemoveCompletely, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } }
       ];
     }
 
-    if (status === 'approved') {
+    if (status === 'to_be_paid' || status === 'approved') {
       return [
         { label: 'Paid', onClick: handlePaid, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
         { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
@@ -574,12 +821,17 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       ];
     }
 
-    // Default buttons for new/unapproved invoices
-    return [
+    const defaultButtons = [
       { label: 'Approve', onClick: handleApprove, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
       { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
       { label: 'Repair', onClick: handleRepair, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
     ];
+
+    if (status === 'to_be_paid' || status === 'paid') {
+      return defaultButtons.slice(1); // only allow reject/repair in paid states
+    }
+
+    return defaultButtons;
   }
 
   // Basic styles used throughout the detail page
@@ -718,8 +970,12 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           </button>
           <div style={summaryStyle}>
             <span>{invoice?.invoice || invoice?.invoice_number || 'N/A'}</span>
-            <span>{invoice?.vendor || 'N/A'}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span>{invoice?.vendor || 'N/A'}</span>
+              <ACHBadge status={getStatusForVendor(invoice?.vendor)} />
+            </span>
             <span>{invoice?.amount || 'N/A'}</span>
+            {renderStatusChip()}
           </div>
         </div>
         <button
@@ -764,17 +1020,32 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           {/* Invoice Status section */}
           <div style={sectionStyle}>
             <h2 style={sectionTitleStyle}>Invoice Status</h2>
+            <div style={{ marginBottom: '12px' }}>{renderStatusChip('sm')}</div>
             <table style={tableStyle}>
-              <tbody>
-                {/* Row 1: Approval with name and email */}
+              <thead>
                 <tr>
-                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Approval</td>
-                  <td style={cellStyle}>McKay</td>
-                  <td style={cellStyle}>mckaym@pacificcrestsmiles.com</td>
+                  <th style={cellHeaderStyle}>Stage</th>
+                  <th style={cellHeaderStyle}>User</th>
+                  <th style={cellHeaderStyle}>Last Action</th>
                 </tr>
-                {/* Row 2: Payment with editable amount and status */}
+              </thead>
+              <tbody>
+                {approvalStages.map((stage) => {
+                  const entry = approvals[stage.key] || null;
+                  return (
+                    <tr key={stage.key}>
+                      <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>{stage.label}</td>
+                      <td style={cellStyle}>{entry?.by || 'Pending'}</td>
+                      <td style={cellStyle}>{formatApprovalTimestamp(entry?.at)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <table style={{ ...tableStyle, marginTop: '12px' }}>
+              <tbody>
                 <tr>
-                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Payment</td>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Payment Amount</td>
                   <td style={cellStyle}>
                     <input
                       type="text"
@@ -789,7 +1060,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                       }}
                     />
                   </td>
-                  <td style={cellStyle}>{invoice?.status || 'New'}</td>
+                  <td style={{ ...cellStyle, fontWeight: '600', color: statusMeta.fg }}>{statusMeta.label}</td>
                 </tr>
               </tbody>
             </table>
@@ -1096,7 +1367,18 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         <div style={rightColumnStyle}>
           {invoice?.pdf_path ? (
             <iframe
-              src={invoice.pdf_path.startsWith('/api/') ? invoice.pdf_path : `/${invoice.pdf_path}`}
+              src={(function() {
+                const p = invoice.pdf_path;
+                if (!p) return '';
+                if (p.startsWith('http://') || p.startsWith('https://')) return p;
+                if (p.startsWith('/api/pdf/')) return p;
+                if (p.startsWith('/email_invoices/')) {
+                  const filename = p.split('/').pop();
+                  return `/api/pdf/${filename}`;
+                }
+                if (p.startsWith('/')) return p;
+                return `/${p}`;
+              })()}
             style={{
               width: '100%',
               height: '100%',
@@ -1112,6 +1394,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           )}
         </div>
       </div>
+      <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
     </div>
   );
 }
