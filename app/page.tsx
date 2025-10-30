@@ -6,7 +6,10 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/LoginPage');
+    // Immediate redirect using window.location for better Safari compatibility
+    if (typeof window !== 'undefined') {
+      window.location.replace('/LoginPage');
+    }
   }, [router]);
 
   return (
