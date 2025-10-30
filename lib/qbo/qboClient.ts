@@ -16,20 +16,24 @@ export interface QBOBill {
   PrivateNote?: string;
   Memo?: string;
   Line: Array<{
-    Id?: string;
     LineNum?: number;
     Amount: number;
     Description?: string;
-    DetailType: 'ItemBasedExpenseLineDetail';
-    ItemBasedExpenseLineDetail: {
-      ItemRef: {
+    DetailType: 'AccountBasedExpenseLineDetail';
+    AccountBasedExpenseLineDetail: {
+      AccountRef: {
         value: string;
         name?: string;
       };
-      Qty?: number;
-      UnitPrice?: number;
+      ClassRef?: {
+        value: string;
+      };
     };
   }>;
+  DepartmentRef?: {
+    value: string;
+    name?: string;
+  };
   AttachRef?: Array<{
     EntityRef: {
       value: string;
@@ -205,6 +209,8 @@ export class QBOClient {
     return response.QueryResponse?.Item || [];
   }
 
+  // getAllAccounts is defined later with richer typing
+
   async getDentalItems(): Promise<QBOItem[]> {
     const items = await this.getItems();
     return items.filter((item) => {
@@ -260,7 +266,7 @@ export class QBOClient {
     return response?.Bill || response;
   }
 
-  async uploadAttachment(billId: string, fileName: string, fileContent: Buffer, mimeType: string): Promise<any> {
+  async uploadAttachment(billId: string, fileName: string, fileContent: ArrayBuffer | Uint8Array | Buffer, mimeType: string): Promise<any> {
     await this.ensureValidToken();
 
     const url = `https://quickbooks.api.intuit.com/v3/company/${this.tokens!.realmId}/upload?minorversion=65`;
@@ -279,7 +285,17 @@ export class QBOClient {
     };
 
     formData.append('file_metadata_01', new Blob([JSON.stringify(metadata)], { type: 'application/json' }), 'metadata.json');
-    formData.append('file_content_01', new Blob([new Uint8Array(fileContent as any)], { type: mimeType }), fileName);
+    const bytes: Uint8Array =
+      fileContent instanceof ArrayBuffer
+        ? new Uint8Array(fileContent)
+        : fileContent instanceof Uint8Array
+          ? fileContent
+          : new Uint8Array((fileContent as Buffer).buffer, (fileContent as Buffer).byteOffset, (fileContent as Buffer).byteLength);
+    const arrayBuffer: ArrayBuffer =
+      bytes.byteOffset === 0 && bytes.byteLength === bytes.buffer.byteLength
+        ? (bytes.buffer as ArrayBuffer)
+        : (bytes.buffer as ArrayBuffer).slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+    formData.append('file_content_01', new Blob([arrayBuffer], { type: mimeType }), fileName);
 
     const response = await fetch(url, {
       method: 'POST',
@@ -364,7 +380,7 @@ export class QBOClient {
 
   async getExpenseAccounts(): Promise<Array<{ id: string; name: string; type: string }>> {
     try {
-      const response = await this.query("SELECT Id, Name, AccountType, AccountSubType FROM Account WHERE Active = true");
+      const response = await this.query("SELECT Id, Name, AccountType, AccountSubType, FullyQualifiedName FROM Account WHERE Active = true");
       const accounts = response.QueryResponse?.Account || [];
 
       const expenseAccounts = accounts.filter((acc: any) =>
@@ -375,11 +391,61 @@ export class QBOClient {
 
       return expenseAccounts.map((account: any) => ({
         id: account.Id,
-        name: account.Name,
+        name: account.FullyQualifiedName || account.Name,
         type: account.AccountType,
       }));
     } catch (error) {
       console.error('❌ Error getting expense accounts:', error);
+      return [];
+    }
+  }
+
+  async getAllAccounts(): Promise<Array<{ id: string; name: string; fullName: string; type: string; subType?: string }>> {
+    try {
+      const response = await this.query(
+        'SELECT Id, Name, AccountType, AccountSubType, FullyQualifiedName FROM Account WHERE Active = true'
+      );
+      const accounts = response.QueryResponse?.Account || [];
+
+      return accounts.map((account: any) => ({
+        id: account.Id,
+        name: account.Name,
+        fullName: account.FullyQualifiedName || account.Name,
+        type: account.AccountType,
+        subType: account.AccountSubType,
+      }));
+    } catch (error) {
+      console.error('❌ Error getting all accounts:', error);
+      return [];
+    }
+  }
+
+  async getClasses(): Promise<Array<{ id: string; name: string; fullName: string }>> {
+    try {
+      const response = await this.query("SELECT Id, Name, FullyQualifiedName FROM Class WHERE Active = true");
+      const classes = response.QueryResponse?.Class || [];
+      return (classes || []).map((c: any) => ({
+        id: c.Id,
+        name: c.Name,
+        fullName: c.FullyQualifiedName || c.Name,
+      }));
+    } catch (error) {
+      console.error('❌ Error getting classes:', error);
+      return [];
+    }
+  }
+
+  async getLocations(): Promise<Array<{ id: string; name: string; fullName: string }>> {
+    try {
+      const response = await this.query("SELECT Id, Name, FullyQualifiedName FROM Department WHERE Active = true");
+      const departments = response.QueryResponse?.Department || [];
+      return (departments || []).map((dept: any) => ({
+        id: dept.Id,
+        name: dept.Name,
+        fullName: dept.FullyQualifiedName || dept.Name,
+      }));
+    } catch (error) {
+      console.error('❌ Error getting locations (Department):', error);
       return [];
     }
   }

@@ -35,11 +35,15 @@ export async function GET(req: NextRequest) {
   const state = url.searchParams.get('state');
   const realmId = url.searchParams.get('realmId');
   
+  const { QBO_STATE_SECRET, QBO_REDIRECT_URI, QBO_CLIENT_ID, QBO_CLIENT_SECRET } = process.env;
+  
   console.log('[QBO][CALLBACK] incoming', {
     got_code: !!code, 
     got_state: !!state, 
     state_len: state?.length,
-    realmId
+    realmId,
+    redirect_uri: QBO_REDIRECT_URI,
+    environment: process.env.QBO_ENVIRONMENT
   });
 
   if (!code || !state) {
@@ -48,8 +52,6 @@ export async function GET(req: NextRequest) {
       received: { code: !!code, state: !!state, realmId }
     }, { status: 400 });
   }
-
-  const { QBO_STATE_SECRET, QBO_REDIRECT_URI, QBO_CLIENT_ID, QBO_CLIENT_SECRET } = process.env;
   if (!QBO_STATE_SECRET || !QBO_REDIRECT_URI || !QBO_CLIENT_ID || !QBO_CLIENT_SECRET) {
     return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
   }
@@ -72,8 +74,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Exchange code for tokens with PKCE
-    const tokenUrl = 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
+    // Exchange code for tokens with PKCE - use correct endpoint based on environment
+    const { QBO_ENVIRONMENT = 'production' } = process.env;
+    const tokenUrl = QBO_ENVIRONMENT === 'sandbox'
+      ? 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
+      : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
     
     const authString = Buffer.from(`${QBO_CLIENT_ID}:${QBO_CLIENT_SECRET}`).toString('base64');
     
@@ -123,9 +128,9 @@ export async function GET(req: NextRequest) {
     console.log('🎉 Successfully connected to QuickBooks!');
     console.log('📊 Realm ID:', realmId);
 
-    // Redirect back to the app
+    // Redirect back to the Connections page
     const baseUrl = QBO_REDIRECT_URI.replace('/api/qbo/callback', '');
-    return NextResponse.redirect(`${baseUrl}/?qbo_connected=true`, 302);
+    return NextResponse.redirect(`${baseUrl}/ConnectionsPage?qbo_connected=true`, 302);
     
   } catch (e: any) {
     console.error('❌ OAuth error:', e);

@@ -42,7 +42,8 @@ export async function GET(request: Request) {
     QBO_CLIENT_ID,
     QBO_REDIRECT_URI,
     QBO_SCOPES = 'com.intuit.quickbooks.accounting',
-    QBO_STATE_SECRET
+    QBO_STATE_SECRET,
+    QBO_ENVIRONMENT = 'production'
   } = process.env as Record<string, string | undefined>;
 
   const missing: string[] = [];
@@ -82,10 +83,14 @@ export async function GET(request: Request) {
 
   const state = signState(payload, QBO_STATE_SECRET as string);
 
-  console.log('[QBO][AUTH] redirecting to Intuit', { redirect_uri: QBO_REDIRECT_URI, scopes: QBO_SCOPES, has_state_secret: !!QBO_STATE_SECRET });
+  console.log('[QBO][AUTH] redirecting to Intuit', { redirect_uri: QBO_REDIRECT_URI, scopes: QBO_SCOPES, has_state_secret: !!QBO_STATE_SECRET, environment: QBO_ENVIRONMENT });
 
-  // Intuit login endpoint – use AppCenter for interactive auth
-  const authUrl = new URL('https://appcenter.intuit.com/connect/oauth2');
+  // Use correct OAuth endpoint based on environment
+  const oauthEndpoint = QBO_ENVIRONMENT === 'sandbox' 
+    ? 'https://appcenter.intuit.com/connect/oauth2'
+    : 'https://appcenter.intuit.com/connect/oauth2';
+  
+  const authUrl = new URL(oauthEndpoint);
   authUrl.searchParams.set('client_id', QBO_CLIENT_ID as string);
   authUrl.searchParams.set('response_type', 'code');
   authUrl.searchParams.set('scope', QBO_SCOPES as string);

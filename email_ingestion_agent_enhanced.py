@@ -7,6 +7,7 @@ import subprocess
 import re
 import json
 from datetime import datetime
+from deduplicate_invoices import deduplicate_invoices
 
 EMAIL_USER = "invoices@pcsmilesai.com"
 EMAIL_PASS = "Inv!PCSAI"
@@ -219,9 +220,16 @@ def check_inbox():
         
     except Exception as e:
         log(f"❌ Exception in inbox check: {e}")
+    finally:
+        # Always run deduplication after each check to keep queue clean
+        try:
+            log("🧹 Running invoice queue deduplication...")
+            deduplicate_invoices()
+        except Exception as de:
+            log(f"❌ Deduplication error: {de}")
 
 if __name__ == "__main__":
-    log("🚀 Starting enhanced invoice watcher (30s loop)...")
+    log("🚀 Starting enhanced invoice watcher (10s loop)...")
     while True:
         check_inbox()
-        time.sleep(30)  # Check every 30 seconds
+        time.sleep(10)  # Check every 10 seconds

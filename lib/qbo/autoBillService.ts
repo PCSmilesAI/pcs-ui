@@ -11,7 +11,6 @@ export type InvoiceData = BillInvoiceData & {
   pdf_path: string;
   json_path: string;
 };
-
 function parseAmount(value: unknown): number | undefined {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value;
@@ -31,28 +30,43 @@ function parseAmount(value: unknown): number | undefined {
 
 export class AutoBillService {
   private isProcessing = false;
+  private processingStart = 0;
 
-  async processApprovedInvoice(invoiceData: InvoiceData): Promise<{
+  async processApprovedInvoice(
+    invoiceData: InvoiceData,
+    meta: { dryRun?: boolean } = {}
+  ): Promise<{
     success: boolean;
     billId?: string;
     pdfAttached?: boolean;
     categories?: Array<{ description: string; category: string }>;
+    // Enriched dry-run preview fields
+    lineCount?: number;
+    vendor?: string | null;
+    accounts?: Array<string | null>;
+    classRefs?: Array<string | null>;
     error?: string;
   }> {
+    const now = Date.now();
     if (this.isProcessing) {
-      return {
-        success: false,
-        error: 'Another invoice is being processed'
-      };
+      const elapsed = now - this.processingStart;
+      if (elapsed < 120_000) {
+        return {
+          success: false,
+          error: 'Another invoice is being processed'
+        };
+      }
+
+      console.warn('⚠️ AutoBillService: previous processing still marked active after', elapsed, 'ms. Resetting lock.');
+      this.isProcessing = false;
     }
 
     this.isProcessing = true;
+    this.processingStart = now;
 
     try {
       console.log('🔄 AutoBillService: Processing approved invoice:', invoiceData.invoice_number);
-
       let detailedData: BillInvoiceData = { ...invoiceData };
-
       if (invoiceData.json_path && fs.existsSync(invoiceData.json_path)) {
         try {
           const jsonData = JSON.parse(fs.readFileSync(invoiceData.json_path, 'utf8'));
@@ -80,37 +94,28 @@ export class AutoBillService {
         line_items: detailedData.line_items || detailedData.lineItems || invoiceData.line_items || []
       };
 
-      const options = {
+      const parsedAmount = parseAmount(invoiceData.total);
+      const result = await createBillFromInvoice({
         invoiceData: detailedData,
         vendorName: invoiceData.vendor || detailedData.vendor || detailedData.vendorName,
         invoiceNumber: invoiceData.invoice_number || detailedData.invoice_number || detailedData.invoiceNumber,
         invoiceDate: invoiceData.invoice_date || detailedData.invoice_date || detailedData.invoiceDate,
         dueDate: invoiceData.due_date ?? detailedData.due_date ?? detailedData.dueDate,
         pdfPath: invoiceData.pdf_path || detailedData.pdf_path || detailedData.pdfPath,
-      } as {
-        invoiceData: BillInvoiceData;
-        vendorName?: string;
-        invoiceNumber?: string;
-        invoiceDate?: string;
-        dueDate?: string;
-        pdfPath?: string;
-        totalAmount?: number;
-      };
-
-      const parsedAmount = parseAmount(invoiceData.total);
-      if (typeof parsedAmount === 'number') {
-        options.totalAmount = parsedAmount;
-      }
-
-      const result = await createBillFromInvoice(options);
-
+        totalAmount: typeof parsedAmount === 'number' ? parsedAmount : undefined,
+        dryRun: meta.dryRun,
+      });
       if (result.success) {
         console.log('✅ AutoBillService: Bill created successfully:', result.billId);
         return {
           success: true,
           billId: result.billId,
           pdfAttached: result.pdfAttached,
-          categories: result.categories
+          categories: result.categories,
+          lineCount: result.lineCount,
+          vendor: result.vendor ?? (invoiceData.vendor || detailedData.vendor),
+          accounts: result.accounts,
+          classRefs: result.classRefs,
         };
       }
 
@@ -128,6 +133,7 @@ export class AutoBillService {
       };
     } finally {
       this.isProcessing = false;
+      this.processingStart = 0;
     }
   }
 

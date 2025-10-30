@@ -294,7 +294,7 @@ kubectl logs -f deployment/pcs-ai-quickbooks -n pcs-ai
 cp -r pcs_ai_data backups/$(date +%Y%m%d_%H%M%S)
 
 # Automated backup (cron job)
-0 2 * * * /usr/bin/cp -r /path/to/pcs_ai_data /path/to/backups/$(date +\%Y\%m\%d_\%H\%M\%S)
+0 2 * * * tar czf /var/backups/pcs-ui-data-$(date +\%F).tgz /var/www/pcs-ui-data
 ```
 
 ### **Performance Monitoring**

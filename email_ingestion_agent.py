@@ -6,6 +6,7 @@ import time
 import subprocess
 import re
 from datetime import datetime
+from deleted_invoice_guard import compute_content_hash, should_skip_deleted_invoice
 
 EMAIL_USER = "invoices@pcsmilesai.com"
 EMAIL_PASS = "Inv!PCSAI"
@@ -97,12 +98,26 @@ def process_attachments(msg):
 
         filename = part.get_filename()
         if filename and filename.lower().endswith(".pdf"):
+            payload = part.get_payload(decode=True)
+            if not payload:
+                log(f"⚠️ Empty attachment payload for {filename}, skipping")
+                continue
+
+            file_hash = compute_content_hash(payload)
+            skip_deleted, skip_reason = should_skip_deleted_invoice(
+                file_hash=file_hash,
+                source_file=filename
+            )
+            if skip_deleted:
+                log(f"⏭️ Skipped attachment {filename} (deleted invoice match: {skip_reason})")
+                continue
+
             filepath = os.path.join(SAVE_DIR, filename)
             if os.path.exists(filepath):
                 log(f"⏩ Skipped duplicate attachment: {filename}")
                 continue
             with open(filepath, 'wb') as f:
-                f.write(part.get_payload(decode=True))
+                f.write(payload)
             log(f"✅ Saved: {filepath}")
 
             vendor = run_vendor_router(filepath, detected_vendor)

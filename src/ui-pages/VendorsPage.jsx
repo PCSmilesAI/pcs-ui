@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import VendorTable from '../components/VendorTable.jsx';
+import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
+import ACHBadge from '../ui/ach/ACHBadge';
+import { useVendorAchMap } from '../ui/ach/useVendorAch';
 
 /**
  * Page for the "Vendors" view. Displays a list of vendors with
@@ -19,6 +21,8 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
     minAmount: spApi.get('minAmount') || undefined,
     maxAmount: spApi.get('maxAmount') || undefined,
   };
+
+  const { getStatusForVendor, path, version } = useVendorAchMap();
 
   // Load and aggregate vendor data from live All Invoices source
   useEffect(() => {
@@ -55,6 +59,7 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
           amount: `$${v.amount.toFixed(2)}`,
           contact: v.contact,
           invoiceCount: v.invoiceCount,
+          ach: getStatusForVendor(v.name)
         }));
 
         setVendors(transformedData);
@@ -75,7 +80,7 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
 
   // Filter rows by search and filters (merge URL filters too)
   const effectiveQuery = (spQuery || searchQuery || '').trim().toLowerCase();
-  const effectiveFilters = { ...filters, ...Object.fromEntries(Object.entries(spFilters).filter(([_, v]) => v !== undefined)) };
+  const effectiveFilters = { ...filters, ...Object.fromEntries(Object.entries(spFilters).filter(([, value]) => value !== undefined)) };
   const filteredRows = useMemo(() => vendors.filter((row) => {
     const query = effectiveQuery;
     if (query) {
@@ -111,6 +116,14 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
     );
   }
 
+  const columns = [
+    { key: 'name', label: 'Name' },
+    { key: 'method', label: 'Payment Method' },
+    { key: 'amount', label: 'Outstanding Amount', align: 'right' },
+    { key: 'contact', label: 'Contact' },
+    { key: 'achBadge', label: '', align: 'right' },
+  ];
+
   return (
     <div style={wrapperStyle}>
       <div className="mb-6">
@@ -119,16 +132,25 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
           {filteredRows.length} vendor{filteredRows.length !== 1 ? 's' : ''} with outstanding invoices
         </p>
       </div>
-      <VendorTable
-        rows={filteredRows}
+      <InvoiceTable
+        rows={filteredRows.map((row) => ({
+          ...row,
+          achBadge: <ACHBadge status={row.ach} />,
+        }))}
+        columns={columns}
         onRowClick={(row) => {
           try {
             const name = row?.name || '';
             if (onVendorClick) onVendorClick(row);
             if (name) router.push(`/VendorDetailPage?vendor=${encodeURIComponent(name)}`);
-          } catch (_) {}
+          } catch (navigationError) {
+            console.error('Failed to navigate to vendor detail:', navigationError);
+          }
         }}
       />
+      <div className="mt-4 text-xs text-gray-500">
+        Runtime path: {path || 'unknown'} · Version: {String(version || 'n/a')}
+      </div>
     </div>
   );
 }

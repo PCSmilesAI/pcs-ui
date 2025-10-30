@@ -1,0 +1,7661 @@
+{
+  "UHC C/O Asset Protection Unit": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "Corp-RCM",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-RCM",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1117"
+    ],
+    "sampleCount": 2
+  },
+  "Caitlin McBride": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1082"
+    ],
+    "sampleCount": 2
+  },
+  "Leila Loyer": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1083"
+    ],
+    "sampleCount": 2
+  },
+  "Jackson Hull": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1081"
+    ],
+    "sampleCount": 2
+  },
+  "Lucille Mozena": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1073",
+      "1061"
+    ],
+    "sampleCount": 4
+  },
+  "Hiroko Koketsu": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1087"
+    ],
+    "sampleCount": 2
+  },
+  "Collin Harris": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1094"
+    ],
+    "sampleCount": 2
+  },
+  "Sarah Beaudoin": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1095"
+    ],
+    "sampleCount": 2
+  },
+  "Levi Hirsch": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1107"
+    ],
+    "sampleCount": 2
+  },
+  "Sophia Rogers": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1111"
+    ],
+    "sampleCount": 2
+  },
+  "David Arnett": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1118"
+    ],
+    "sampleCount": 2
+  },
+  "Holly Faas": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Riddle",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Riddle",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1089"
+    ],
+    "sampleCount": 2
+  },
+  "Lapriel Gilpatrick": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1072",
+      "1063"
+    ],
+    "sampleCount": 4
+  },
+  "Katherine McLaughlin": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1090"
+    ],
+    "sampleCount": 2
+  },
+  "Javier Masiel": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1114"
+    ],
+    "sampleCount": 2
+  },
+  "Sandra Resendiz": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1115"
+    ],
+    "sampleCount": 2
+  },
+  "Karla Harr": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1116"
+    ],
+    "sampleCount": 2
+  },
+  "Tasia Smith": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1055"
+    ],
+    "sampleCount": 2
+  },
+  "Linda Ackerman": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1060"
+    ],
+    "sampleCount": 2
+  },
+  "Darko Marusnik": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1074",
+      "1062"
+    ],
+    "sampleCount": 4
+  },
+  "Julieanne Stone": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 3,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 2,
+        "ratio": 0.3333
+      },
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.1667
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 3,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1070",
+      "1064",
+      "1045"
+    ],
+    "sampleCount": 6
+  },
+  "Noah Longfellow": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1079"
+    ],
+    "sampleCount": 2
+  },
+  "Christina Sweringen": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1080"
+    ],
+    "sampleCount": 2
+  },
+  "Carlos Cortes Santos": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1078"
+    ],
+    "sampleCount": 2
+  },
+  "Jean Varner": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10120 Accounts Receivable Clearing",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1076"
+    ],
+    "sampleCount": 2
+  },
+  "Dunivin Denture": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "Corp-RCM",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.0043
+      },
+      {
+        "name": "10300 Prepaid Expenses:10390 Prepaid Rent",
+        "count": 1,
+        "ratio": 0.0043
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-RCM",
+        "count": 232,
+        "ratio": 0.9957
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0002_202505_361",
+      "0003_202505_361",
+      "0003_202506_361",
+      "0003_202507_361",
+      "0003_202508_361",
+      "0003_202509_361",
+      "0003_202510_361",
+      "0003_202511_361",
+      "0003_202512_361",
+      "0003_202601_361"
+    ],
+    "sampleCount": 233
+  },
+  "SKN Properties": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.0084
+      },
+      {
+        "name": "10300 Prepaid Expenses:10320 Prepaid Taxes",
+        "count": 1,
+        "ratio": 0.0084
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 118,
+        "ratio": 0.9916
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0002_202504_45",
+      "0003_202504_45",
+      "0003_202505_45",
+      "0003_202506_45",
+      "0003_202507_45",
+      "0003_202508_45",
+      "0003_202509_45",
+      "0003_202510_45",
+      "0003_202511_45",
+      "0003_202512_45"
+    ],
+    "sampleCount": 119
+  },
+  "Campbell Commercial Real Estate": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.0047
+      },
+      {
+        "name": "10300 Prepaid Expenses:10320 Prepaid Taxes",
+        "count": 1,
+        "ratio": 0.0047
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 210,
+        "ratio": 0.9953
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0002_202504_100",
+      "0003_202504_100",
+      "0003_202505_100",
+      "0003_202506_100",
+      "0003_202507_100",
+      "0003_202508_100",
+      "0003_202509_100",
+      "0003_202510_100",
+      "0003_202511_100",
+      "0003_202512_100"
+    ],
+    "sampleCount": 211
+  },
+  "Lynda Lynch": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 6,
+        "ratio": 0.0504
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water",
+        "count": 2,
+        "ratio": 0.0168
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 117,
+        "ratio": 0.9832
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0002_202504_145",
+      "0003_202504_145",
+      "0003_202505_145",
+      "0003_202506_145",
+      "0003_202507_145",
+      "0003_202508_145",
+      "0003_202509_145",
+      "0003_202510_145",
+      "0003_202511_145",
+      "0003_202512_145"
+    ],
+    "sampleCount": 119
+  },
+  "The Bugni Family Revocable Living Trust": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 4,
+        "ratio": 0.0109
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+        "count": 2,
+        "ratio": 0.0054
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.0054
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 362,
+        "ratio": 0.9837
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0002_202506",
+      "0003_202506",
+      "0003_202507",
+      "0003_202508",
+      "0003_202509",
+      "0003_202510",
+      "0003_202511",
+      "0003_202512",
+      "0003_202601",
+      "0003_202602"
+    ],
+    "sampleCount": 368
+  },
+  "XuanLan Pham": {
+    "defaultAccount": null,
+    "defaultClass": "General-Riddle",
+    "accounts": [],
+    "classes": [
+      {
+        "name": "General-Riddle",
+        "count": 129,
+        "ratio": 1
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0002_202504_99",
+      "0003_202504_99",
+      "0003_202505_99",
+      "0003_202506_99",
+      "0003_202507_99",
+      "0003_202508_99",
+      "0003_202509_99",
+      "0003_202510_99",
+      "0003_202511_99",
+      "0003_202512_99"
+    ],
+    "sampleCount": 129
+  },
+  "TRI Mountain LLC": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.0069
+      },
+      {
+        "name": "10300 Prepaid Expenses:10390 Prepaid Rent",
+        "count": 1,
+        "ratio": 0.0034
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53312 TICAM",
+        "count": 1,
+        "ratio": 0.0034
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 288,
+        "ratio": 0.9931
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0002_202504_85",
+      "0003_202504_85",
+      "0003_202505_85",
+      "0003_202506_85",
+      "0003_202507_85",
+      "0003_202508_85",
+      "0003_202509_85",
+      "0003_202510_85",
+      "0003_202511_85",
+      "0003_202512_85"
+    ],
+    "sampleCount": 290
+  },
+  "Sharp Smiles LLC": {
+    "defaultAccount": null,
+    "defaultClass": "General-Roseburg",
+    "accounts": [],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 316,
+        "ratio": 1
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0002_202504_360",
+      "0003_202504_360",
+      "0003_202505_360",
+      "0003_202506_360",
+      "0003_202507_360",
+      "0003_202508_360",
+      "0003_202509_360",
+      "0003_202510_360",
+      "0003_202511_360",
+      "0003_202512_360"
+    ],
+    "sampleCount": 316
+  },
+  "KT Commercial LLC": {
+    "defaultAccount": null,
+    "defaultClass": "General-Salem",
+    "accounts": [],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 87,
+        "ratio": 1
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0002_202508_324",
+      "0003_202508_324",
+      "0003_202509_324",
+      "0003_202510_324",
+      "0003_202511_324",
+      "0003_202512_324",
+      "0003_202601_324",
+      "0003_202602_324",
+      "0003_202603_324",
+      "0003_202604_324"
+    ],
+    "sampleCount": 87
+  },
+  "Haynes Family LLC": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "Div-Operations",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:55000 Divisional Expense:55100 Divisional Expense-Labor:55110 Divisional Expense Labor-Gross Wages",
+        "count": 4,
+        "ratio": 0.2857
+      },
+      {
+        "name": "10400 Short-term Notes Receivable",
+        "count": 3,
+        "ratio": 0.2143
+      }
+    ],
+    "classes": [
+      {
+        "name": "Div-Operations",
+        "count": 7,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Haynes Family LLC"
+    ],
+    "sampleCount": 14
+  },
+  "Patterson Dental": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 521,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 382,
+        "ratio": 0.3666
+      },
+      {
+        "name": "11000 Fixed Assets:11010 Dental Equipment",
+        "count": 78,
+        "ratio": 0.0749
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software",
+        "count": 36,
+        "ratio": 0.0345
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 20,
+        "ratio": 0.0192
+      },
+      {
+        "name": "11000 Fixed Assets:11020 Office Equipment",
+        "count": 3,
+        "ratio": 0.0029
+      },
+      {
+        "name": "11000 Fixed Assets",
+        "count": 1,
+        "ratio": 0.001
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52110 Dental Supplies",
+        "count": 1,
+        "ratio": 0.001
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 93,
+        "ratio": 0.0893
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 78,
+        "ratio": 0.0749
+      },
+      {
+        "name": "General-Eugene",
+        "count": 75,
+        "ratio": 0.072
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 68,
+        "ratio": 0.0653
+      },
+      {
+        "name": "General-Salem",
+        "count": 54,
+        "ratio": 0.0518
+      },
+      {
+        "name": "General-Riddle",
+        "count": 47,
+        "ratio": 0.0451
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 43,
+        "ratio": 0.0413
+      },
+      {
+        "name": "General-Columbia",
+        "count": 42,
+        "ratio": 0.0403
+      }
+    ],
+    "sampleInvoiceIds": [
+      "3038095890",
+      "3037319039",
+      "3036539963",
+      "3036492094",
+      "3036133741",
+      "3037166562",
+      "3037569994",
+      "3037846365",
+      "3038010406",
+      "3037889276"
+    ],
+    "sampleCount": 1042
+  },
+  "Jacques Andre": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-IT",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 32,
+        "ratio": 0.5
+      },
+      {
+        "name": "11000 Fixed Assets:11050 Intangible Assets",
+        "count": 12,
+        "ratio": 0.1875
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 11,
+        "ratio": 0.1719
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53332 IT Contract Labor",
+        "count": 6,
+        "ratio": 0.0938
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software",
+        "count": 3,
+        "ratio": 0.0469
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-IT",
+        "count": 14,
+        "ratio": 0.2188
+      },
+      {
+        "name": "Corp-Finance",
+        "count": 7,
+        "ratio": 0.1094
+      }
+    ],
+    "sampleInvoiceIds": [
+      "C06C7682-0020",
+      "C06C7682-0018",
+      "C06C7682-0019",
+      "C06C7682-0021",
+      "C06C7682-0026",
+      "C06C7682-0024",
+      "C06C7682-0025",
+      "C06C7682-0027",
+      "C06C7682-0029",
+      "C06C7682-0028"
+    ],
+    "sampleCount": 64
+  },
+  "Braxton Ellsworth": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "11000 Fixed Assets:11050 Intangible Assets",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Braxton Ellsworth"
+    ],
+    "sampleCount": 2
+  },
+  "Trustworkz Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Div-Marketing",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 34,
+        "ratio": 0.7391
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.1522
+      },
+      {
+        "name": "11000 Fixed Assets:11050 Intangible Assets",
+        "count": 5,
+        "ratio": 0.1087
+      }
+    ],
+    "classes": [
+      {
+        "name": "Div-Marketing",
+        "count": 11,
+        "ratio": 0.2391
+      },
+      {
+        "name": "General-Columbia",
+        "count": 2,
+        "ratio": 0.0435
+      },
+      {
+        "name": "General-Eugene",
+        "count": 2,
+        "ratio": 0.0435
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 2,
+        "ratio": 0.0435
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 2,
+        "ratio": 0.0435
+      },
+      {
+        "name": "General-Riddle",
+        "count": 2,
+        "ratio": 0.0435
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 2,
+        "ratio": 0.0435
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 2,
+        "ratio": 0.0435
+      },
+      {
+        "name": "General-Salem",
+        "count": 2,
+        "ratio": 0.0435
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0425/11977",
+      "0425/12004",
+      "0525/12093",
+      "0625/12184",
+      "0725/12275",
+      "0825/12369",
+      "21056000009",
+      "21056000053",
+      "21056000112",
+      "21056000219"
+    ],
+    "sampleCount": 46
+  },
+  "Chase Merchant Services Paymentech": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 114,
+        "ratio": 0.5205
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 57,
+        "ratio": 0.2603
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53370 Other:53371 Bank & Collection Fees",
+        "count": 48,
+        "ratio": 0.2192
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 8,
+        "ratio": 0.0365
+      },
+      {
+        "name": "General-Columbia",
+        "count": 7,
+        "ratio": 0.032
+      },
+      {
+        "name": "General-Eugene",
+        "count": 7,
+        "ratio": 0.032
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 7,
+        "ratio": 0.032
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 6,
+        "ratio": 0.0274
+      },
+      {
+        "name": "General-Riddle",
+        "count": 6,
+        "ratio": 0.0274
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 6,
+        "ratio": 0.0274
+      },
+      {
+        "name": "General-Salem",
+        "count": 5,
+        "ratio": 0.0228
+      },
+      {
+        "name": "Corp-RCM",
+        "count": 3,
+        "ratio": 0.0137
+      },
+      {
+        "name": "General- Milwaukie",
+        "count": 1,
+        "ratio": 0.0046
+      },
+      {
+        "name": "General- Salem",
+        "count": 1,
+        "ratio": 0.0046
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Chase Merchant Services Paymentech",
+      "202507_RCM",
+      "202507_COLUMBIA",
+      "202507_EUGENE",
+      "202507_LEBANON",
+      "202507_MILWAUKIE",
+      "202507_RIDDLE",
+      "202507_RIDGEFIELD",
+      "202507_ROSEBURG",
+      "202507_SALEM"
+    ],
+    "sampleCount": 219
+  },
+  "Sunbit": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Riddle",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 9,
+        "ratio": 0.5
+      },
+      {
+        "name": "11000 Fixed Assets:11020 Office Equipment",
+        "count": 9,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Riddle",
+        "count": 2,
+        "ratio": 0.1111
+      },
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.0556
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Sunbit"
+    ],
+    "sampleCount": 18
+  },
+  "Pacific Office Automation": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 38,
+        "ratio": 0.8261
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 6,
+        "ratio": 0.1304
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+        "count": 1,
+        "ratio": 0.0217
+      },
+      {
+        "name": "11000 Fixed Assets:11020 Office Equipment",
+        "count": 1,
+        "ratio": 0.0217
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 5,
+        "ratio": 0.1087
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 5,
+        "ratio": 0.1087
+      },
+      {
+        "name": "General-Eugene",
+        "count": 4,
+        "ratio": 0.087
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 4,
+        "ratio": 0.087
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 4,
+        "ratio": 0.087
+      },
+      {
+        "name": "General-Riddle",
+        "count": 4,
+        "ratio": 0.087
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 4,
+        "ratio": 0.087
+      },
+      {
+        "name": "General-Salem",
+        "count": 4,
+        "ratio": 0.087
+      }
+    ],
+    "sampleInvoiceIds": [
+      "188447",
+      "Pacific Office Automation",
+      "21056000140",
+      "368666",
+      "21056000215",
+      "21056000269",
+      "2105600338",
+      "2105600385",
+      "295227",
+      "437406"
+    ],
+    "sampleCount": 46
+  },
+  "Nexcom": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 15,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 7,
+        "ratio": 0.2333
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.2333
+      },
+      {
+        "name": "11000 Fixed Assets:11020 Office Equipment",
+        "count": 1,
+        "ratio": 0.0333
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 8,
+        "ratio": 0.2667
+      }
+    ],
+    "sampleInvoiceIds": [
+      "26272",
+      "26199",
+      "21056000079",
+      "25917",
+      "21056000101",
+      "26458",
+      "21056000138",
+      "26738",
+      "21056000222",
+      "21056000277"
+    ],
+    "sampleCount": 30
+  },
+  "A-J's Painting & More LLC": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-RCM",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 3,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.3333
+      },
+      {
+        "name": "11000 Fixed Assets:11040 Leasehold Improvements",
+        "count": 1,
+        "ratio": 0.1667
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-RCM",
+        "count": 1,
+        "ratio": 0.1667
+      }
+    ],
+    "sampleInvoiceIds": [
+      "A-J's Painting & More LLC",
+      "21056000261",
+      "21056000262"
+    ],
+    "sampleCount": 6
+  },
+  "Affordable Tile and Roofing": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-RCM",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 3,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.3333
+      },
+      {
+        "name": "11000 Fixed Assets:11040 Leasehold Improvements",
+        "count": 1,
+        "ratio": 0.1667
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-RCM",
+        "count": 1,
+        "ratio": 0.1667
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Affordable Tile and Roofing",
+      "21056000263",
+      "21056000264"
+    ],
+    "sampleCount": 6
+  },
+  "Emerge Electrical LLC": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-RCM",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 5,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 3,
+        "ratio": 0.3
+      },
+      {
+        "name": "11000 Fixed Assets:11040 Leasehold Improvements",
+        "count": 2,
+        "ratio": 0.2
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-RCM",
+        "count": 2,
+        "ratio": 0.2
+      }
+    ],
+    "sampleInvoiceIds": [
+      "2754-2",
+      "2754",
+      "21056000265",
+      "21056000266",
+      "21056000267"
+    ],
+    "sampleCount": 10
+  },
+  "FastSigns": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 11,
+        "ratio": 0.7857
+      },
+      {
+        "name": "11000 Fixed Assets:11040 Leasehold Improvements",
+        "count": 2,
+        "ratio": 0.1429
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.0714
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 2,
+        "ratio": 0.1429
+      },
+      {
+        "name": "General-Riddle",
+        "count": 2,
+        "ratio": 0.1429
+      },
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.0714
+      },
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.0714
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 1,
+        "ratio": 0.0714
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.0714
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.0714
+      },
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.0714
+      }
+    ],
+    "sampleInvoiceIds": [
+      "FastSigns",
+      "30788",
+      "30786",
+      "21056000268"
+    ],
+    "sampleCount": 14
+  },
+  "Builder's Electric, Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "11000 Fixed Assets:11040 Leasehold Improvements",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "350386"
+    ],
+    "sampleCount": 2
+  },
+  "Positive Electric, Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "11000 Fixed Assets:11040 Leasehold Improvements",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "15220",
+      "2105600358"
+    ],
+    "sampleCount": 4
+  },
+  "Evenflo Plumbing LLC": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "11000 Fixed Assets:11040 Leasehold Improvements",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "39639",
+      "2105600348"
+    ],
+    "sampleCount": 4
+  },
+  "Bruton Comfort Control, Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "11000 Fixed Assets:11040 Leasehold Improvements",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "20525449",
+      "21056000038"
+    ],
+    "sampleCount": 4
+  },
+  "Henry Schein": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 263,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 232,
+        "ratio": 0.4411
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 16,
+        "ratio": 0.0304
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software",
+        "count": 11,
+        "ratio": 0.0209
+      },
+      {
+        "name": "11000 Fixed Assets:11010 Dental Equipment",
+        "count": 1,
+        "ratio": 0.0019
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53223 Office Supplies",
+        "count": 1,
+        "ratio": 0.0019
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52110 Dental Supplies",
+        "count": 1,
+        "ratio": 0.0019
+      },
+      {
+        "name": "Cost of goods sold",
+        "count": 1,
+        "ratio": 0.0019
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 72,
+        "ratio": 0.1369
+      },
+      {
+        "name": "General-Eugene",
+        "count": 37,
+        "ratio": 0.0703
+      },
+      {
+        "name": "General-Riddle",
+        "count": 32,
+        "ratio": 0.0608
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 27,
+        "ratio": 0.0513
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 24,
+        "ratio": 0.0456
+      },
+      {
+        "name": "General-Columbia",
+        "count": 22,
+        "ratio": 0.0418
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 18,
+        "ratio": 0.0342
+      },
+      {
+        "name": "General-Salem",
+        "count": 14,
+        "ratio": 0.0266
+      }
+    ],
+    "sampleInvoiceIds": [
+      "38922729",
+      "40000351",
+      "40167196",
+      "40107740",
+      "40121958",
+      "40155350",
+      "40167209",
+      "40155346",
+      "40171301",
+      "40155369"
+    ],
+    "sampleCount": 526
+  },
+  "Ultradent Products Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 17,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 9,
+        "ratio": 0.2647
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.2059
+      },
+      {
+        "name": "11000 Fixed Assets:11010 Dental Equipment",
+        "count": 1,
+        "ratio": 0.0294
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 4,
+        "ratio": 0.1176
+      },
+      {
+        "name": "General-Columbia",
+        "count": 2,
+        "ratio": 0.0588
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 2,
+        "ratio": 0.0588
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 2,
+        "ratio": 0.0588
+      }
+    ],
+    "sampleInvoiceIds": [
+      "25862294/1",
+      "25180678",
+      "21056000182",
+      "24772558",
+      "21056000218",
+      "25852396",
+      "25852400",
+      "25852391",
+      "25510430",
+      "2105600296"
+    ],
+    "sampleCount": 34
+  },
+  "Darby Dental Supply": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 38,
+        "ratio": 0.5067
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 27,
+        "ratio": 0.36
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.0533
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees",
+        "count": 3,
+        "ratio": 0.04
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 2,
+        "ratio": 0.0267
+      },
+      {
+        "name": "11000 Fixed Assets:11010 Dental Equipment",
+        "count": 1,
+        "ratio": 0.0133
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 9,
+        "ratio": 0.12
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 7,
+        "ratio": 0.0933
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 5,
+        "ratio": 0.0667
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 5,
+        "ratio": 0.0667
+      },
+      {
+        "name": "General-Columbia",
+        "count": 4,
+        "ratio": 0.0533
+      },
+      {
+        "name": "General-Salem",
+        "count": 2,
+        "ratio": 0.0267
+      },
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.0133
+      }
+    ],
+    "sampleInvoiceIds": [
+      "3036112166",
+      "3036207346",
+      "3036310956",
+      "5520156",
+      "5514671",
+      "5513922",
+      "5518481",
+      "5511966",
+      "5511967",
+      "5519699"
+    ],
+    "sampleCount": 75
+  },
+  "Brasseler": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 37,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 21,
+        "ratio": 0.2838
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 13,
+        "ratio": 0.1757
+      },
+      {
+        "name": "11000 Fixed Assets:11010 Dental Equipment",
+        "count": 2,
+        "ratio": 0.027
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 1,
+        "ratio": 0.0135
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 14,
+        "ratio": 0.1892
+      },
+      {
+        "name": "General-Salem",
+        "count": 4,
+        "ratio": 0.0541
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 3,
+        "ratio": 0.0405
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 3,
+        "ratio": 0.0405
+      }
+    ],
+    "sampleInvoiceIds": [
+      "6291507",
+      "6344870",
+      "6241629",
+      "21056000024",
+      "6255584",
+      "21056000048",
+      "6261729",
+      "6267415",
+      "21056000097",
+      "6270884"
+    ],
+    "sampleCount": 74
+  },
+  "Miracle Cleaners": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 108,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53224 Uniforms & Cleaning",
+        "count": 87,
+        "ratio": 0.4028
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 20,
+        "ratio": 0.0926
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses",
+        "count": 1,
+        "ratio": 0.0046
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 44,
+        "ratio": 0.2037
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 44,
+        "ratio": 0.2037
+      }
+    ],
+    "sampleInvoiceIds": [
+      "17159",
+      "17039",
+      "16976",
+      "21056000003",
+      "00019",
+      "21056000011",
+      "17381",
+      "17315",
+      "17241",
+      "21056000033"
+    ],
+    "sampleCount": 216
+  },
+  "TC Dental Lab": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 523,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 501,
+        "ratio": 0.479
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 22,
+        "ratio": 0.021
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 316,
+        "ratio": 0.3021
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 73,
+        "ratio": 0.0698
+      },
+      {
+        "name": "General-Eugene",
+        "count": 44,
+        "ratio": 0.0421
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 33,
+        "ratio": 0.0315
+      },
+      {
+        "name": "General-Columbia",
+        "count": 29,
+        "ratio": 0.0277
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 4,
+        "ratio": 0.0038
+      },
+      {
+        "name": "General-Riddle",
+        "count": 2,
+        "ratio": 0.0019
+      }
+    ],
+    "sampleInvoiceIds": [
+      "248-292",
+      "247-947",
+      "247-962",
+      "21056000004",
+      "249-200",
+      "247-574",
+      "248-778",
+      "21056000017",
+      "250-013",
+      "249-303"
+    ],
+    "sampleCount": 1046
+  },
+  "AS & P Billing Services Corp": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 28,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53221 Janitorial",
+        "count": 21,
+        "ratio": 0.375
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.125
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 7,
+        "ratio": 0.125
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 7,
+        "ratio": 0.125
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 7,
+        "ratio": 0.125
+      }
+    ],
+    "sampleInvoiceIds": [
+      "131304",
+      "131303",
+      "131302",
+      "21056000002",
+      "131621",
+      "131617",
+      "131619",
+      "21056000010",
+      "132686",
+      "132685"
+    ],
+    "sampleCount": 56
+  },
+  "Ctrl+Alt+IT": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 56,
+        "ratio": 0.918
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 5,
+        "ratio": 0.082
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 6,
+        "ratio": 0.0984
+      },
+      {
+        "name": "General-Eugene",
+        "count": 6,
+        "ratio": 0.0984
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 6,
+        "ratio": 0.0984
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 6,
+        "ratio": 0.0984
+      },
+      {
+        "name": "General-Riddle",
+        "count": 6,
+        "ratio": 0.0984
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 6,
+        "ratio": 0.0984
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 6,
+        "ratio": 0.0984
+      },
+      {
+        "name": "General-Salem",
+        "count": 6,
+        "ratio": 0.0984
+      },
+      {
+        "name": "Corp-RCM",
+        "count": 3,
+        "ratio": 0.0492
+      }
+    ],
+    "sampleInvoiceIds": [
+      "21056000005",
+      "21056000130",
+      "21056000177",
+      "21056000239",
+      "2105600403",
+      "0001550",
+      "0001561",
+      "0001567",
+      "0001507",
+      "0001525"
+    ],
+    "sampleCount": 61
+  },
+  "Oregon Linen": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 47,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53224 Uniforms & Cleaning",
+        "count": 32,
+        "ratio": 0.3404
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 15,
+        "ratio": 0.1596
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 25,
+        "ratio": 0.266
+      },
+      {
+        "name": "General-Riddle",
+        "count": 7,
+        "ratio": 0.0745
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1215733",
+      "21056000008",
+      "1219637",
+      "21056000049",
+      "1216928",
+      "1211502",
+      "1214224",
+      "1222351",
+      "21056000062",
+      "1226598"
+    ],
+    "sampleCount": 94
+  },
+  "South Umpaqua Disposal": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53225 Hazardous Disposal",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53225 Hazardous Disposal",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "648196"
+    ],
+    "sampleCount": 2
+  },
+  "Valley Fire Control": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "117542",
+      "21056000016"
+    ],
+    "sampleCount": 4
+  },
+  "Dandy": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 53,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 49,
+        "ratio": 0.4623
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.0377
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 10,
+        "ratio": 0.0943
+      },
+      {
+        "name": "General-Columbia",
+        "count": 6,
+        "ratio": 0.0566
+      },
+      {
+        "name": "General-Eugene",
+        "count": 6,
+        "ratio": 0.0566
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 6,
+        "ratio": 0.0566
+      },
+      {
+        "name": "General-Salem",
+        "count": 6,
+        "ratio": 0.0566
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 5,
+        "ratio": 0.0472
+      },
+      {
+        "name": "General-Riddle",
+        "count": 5,
+        "ratio": 0.0472
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 5,
+        "ratio": 0.0472
+      }
+    ],
+    "sampleInvoiceIds": [
+      "50712-2474-044",
+      "21056000028",
+      "10331-8837-044",
+      "10041-8841-047",
+      "51129-9505-043",
+      "78171-1097-045",
+      "51262-6427-047",
+      "77546-1180-047",
+      "78303-1252-049",
+      "77408-2475-044"
+    ],
+    "sampleCount": 106
+  },
+  "Exodus Dental Solutions": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 265,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 245,
+        "ratio": 0.4623
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 20,
+        "ratio": 0.0377
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 133,
+        "ratio": 0.2509
+      },
+      {
+        "name": "General-Columbia",
+        "count": 112,
+        "ratio": 0.2113
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0025000948",
+      "0025000949",
+      "0025000960",
+      "0025000977",
+      "0025000943",
+      "0025001003",
+      "21056000015",
+      "0025000964",
+      "0025000978",
+      "0025000959"
+    ],
+    "sampleCount": 530
+  },
+  "Marion Recycling Center Inc": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53225 Hazardous Disposal",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53225 Hazardous Disposal",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "166919",
+      "1016"
+    ],
+    "sampleCount": 4
+  },
+  "OnDeim/Gig Forces Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 40,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51210 Hygienist:51218 Hygienist-Contract Labor",
+        "count": 17,
+        "ratio": 0.2125
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 9,
+        "ratio": 0.1125
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor",
+        "count": 9,
+        "ratio": 0.1125
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51221 Other Direct Labor-Gross Wages",
+        "count": 4,
+        "ratio": 0.05
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 1,
+        "ratio": 0.0125
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 31,
+        "ratio": 0.3875
+      }
+    ],
+    "sampleInvoiceIds": [
+      "8d649772904c",
+      "21056000019",
+      "70446667d5bb",
+      "d96e93e699c6",
+      "8b40c8a328dc",
+      "27f7fba051c0",
+      "21056000075",
+      "cc588b7d6afa",
+      "c7b1ba4d4fb5",
+      "7d886ebccb75"
+    ],
+    "sampleCount": 80
+  },
+  "Naomi Swinehart": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 22,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53221 Janitorial",
+        "count": 13,
+        "ratio": 0.2955
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 9,
+        "ratio": 0.2045
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 13,
+        "ratio": 0.2955
+      }
+    ],
+    "sampleInvoiceIds": [
+      "29899",
+      "29898",
+      "21056000012",
+      "29900",
+      "654951",
+      "21056000063",
+      "654952",
+      "21056000129",
+      "06062025",
+      "21056000160"
+    ],
+    "sampleCount": 44
+  },
+  "Kettenbach LP": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 35,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 25,
+        "ratio": 0.3571
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 10,
+        "ratio": 0.1429
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 21,
+        "ratio": 0.3
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 3,
+        "ratio": 0.0429
+      },
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.0143
+      }
+    ],
+    "sampleInvoiceIds": [
+      "402409",
+      "400771",
+      "405600",
+      "403991",
+      "403828",
+      "21056000094",
+      "406086",
+      "408174",
+      "21056000117",
+      "399056"
+    ],
+    "sampleCount": 70
+  },
+  "Signing Resources & Interpreters": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 9,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 6,
+        "ratio": 0.3333
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.1111
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53362 Professional Fees",
+        "count": 1,
+        "ratio": 0.0556
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 6,
+        "ratio": 0.3333
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.0556
+      }
+    ],
+    "sampleInvoiceIds": [
+      "12480",
+      "12567",
+      "12536",
+      "12736",
+      "12766",
+      "12781",
+      "2105600345",
+      "12855",
+      "2105600435"
+    ],
+    "sampleCount": 18
+  },
+  "Crystal Falls": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Riddle",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 42,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+        "count": 21,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 16,
+        "ratio": 0.1905
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53223 Office Supplies",
+        "count": 5,
+        "ratio": 0.0595
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Riddle",
+        "count": 14,
+        "ratio": 0.1667
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 12,
+        "ratio": 0.1429
+      }
+    ],
+    "sampleInvoiceIds": [
+      "518325",
+      "517664",
+      "21056000018",
+      "520801",
+      "21056000026",
+      "523074",
+      "21056000034",
+      "524140",
+      "523861",
+      "21056000041"
+    ],
+    "sampleCount": 84
+  },
+  "American Backflow & Plumbing Services, Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "NS22636",
+      "21056000013"
+    ],
+    "sampleCount": 4
+  },
+  "Heaths Laundry": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 41,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53224 Uniforms & Cleaning",
+        "count": 26,
+        "ratio": 0.3171
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 15,
+        "ratio": 0.1829
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 26,
+        "ratio": 0.3171
+      }
+    ],
+    "sampleInvoiceIds": [
+      "06633",
+      "21056000014",
+      "07233",
+      "06922",
+      "21056000029",
+      "07552",
+      "21056000047",
+      "07867",
+      "21056000052",
+      "08185"
+    ],
+    "sampleCount": 82
+  },
+  "Preat Corporation": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 4,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 2,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.125
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.125
+      }
+    ],
+    "sampleInvoiceIds": [
+      "CD64155605",
+      "21056000055",
+      "CD64177186",
+      "2105600382"
+    ],
+    "sampleCount": 8
+  },
+  "Thrive Dental Marketing": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 6,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 3,
+        "ratio": 0.25
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53362 Professional Fees",
+        "count": 2,
+        "ratio": 0.1667
+      },
+      {
+        "name": "10300 Prepaid Expenses:10340 Prepaid Consulting",
+        "count": 1,
+        "ratio": 0.0833
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.0833
+      },
+      {
+        "name": "General-Riddle",
+        "count": 1,
+        "ratio": 0.0833
+      },
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.0833
+      }
+    ],
+    "sampleInvoiceIds": [
+      "001",
+      "21056000025",
+      "002",
+      "21056000100",
+      "003",
+      "21056000244"
+    ],
+    "sampleCount": 12
+  },
+  "Physician's Resource": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 31,
+        "ratio": 0.7561
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.1707
+      },
+      {
+        "name": "10300 Prepaid Expenses:10340 Prepaid Consulting",
+        "count": 1,
+        "ratio": 0.0244
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51100 Doctor:51140 Doctor-Training & Continuing Education",
+        "count": 1,
+        "ratio": 0.0244
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51224 Other Direct Labor-Training & Continuing Education",
+        "count": 1,
+        "ratio": 0.0244
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 15,
+        "ratio": 0.3659
+      },
+      {
+        "name": "General-Eugene",
+        "count": 3,
+        "ratio": 0.0732
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 3,
+        "ratio": 0.0732
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 2,
+        "ratio": 0.0488
+      },
+      {
+        "name": "General-Riddle",
+        "count": 1,
+        "ratio": 0.0244
+      }
+    ],
+    "sampleInvoiceIds": [
+      "031287",
+      "21056000021",
+      "031273",
+      "21056000057",
+      "21056000144",
+      "031217",
+      "21056000161",
+      "21056000202",
+      "21056000243",
+      "2105600437"
+    ],
+    "sampleCount": 41
+  },
+  "Dental & Medical Staffing, Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 30,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 11,
+        "ratio": 0.1833
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51221 Other Direct Labor-Gross Wages",
+        "count": 9,
+        "ratio": 0.15
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51210 Hygienist:51218 Hygienist-Contract Labor",
+        "count": 8,
+        "ratio": 0.1333
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor",
+        "count": 1,
+        "ratio": 0.0167
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51224 Other Direct Labor-Training & Continuing Education",
+        "count": 1,
+        "ratio": 0.0167
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 10,
+        "ratio": 0.1667
+      },
+      {
+        "name": "General-Eugene",
+        "count": 5,
+        "ratio": 0.0833
+      },
+      {
+        "name": "General-Columbia",
+        "count": 2,
+        "ratio": 0.0333
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.0167
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 1,
+        "ratio": 0.0167
+      }
+    ],
+    "sampleInvoiceIds": [
+      "74562",
+      "74512",
+      "74631",
+      "74632",
+      "21056000023",
+      "74735",
+      "74777",
+      "21056000074",
+      "74923",
+      "21056000119"
+    ],
+    "sampleCount": 60
+  },
+  "Stampli": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "3336-9107C",
+      "3516-1079C"
+    ],
+    "sampleCount": 4
+  },
+  "Artisan Dental": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 169,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 151,
+        "ratio": 0.4467
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 18,
+        "ratio": 0.0533
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 151,
+        "ratio": 0.4467
+      }
+    ],
+    "sampleInvoiceIds": [
+      "IN744379",
+      "IN744055",
+      "IN743660",
+      "21056000022",
+      "IN745123",
+      "IN744813",
+      "IN745044",
+      "21056000039",
+      "IN745827",
+      "IN745713"
+    ],
+    "sampleCount": 338
+  },
+  "Vancouver Lab Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 10,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 6,
+        "ratio": 0.3
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.2
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 6,
+        "ratio": 0.3
+      }
+    ],
+    "sampleInvoiceIds": [
+      "A Wilson",
+      "21056000058",
+      "RKelso",
+      "C.Johnson",
+      "21056000209",
+      "CJohnson",
+      "S Park",
+      "2105600304",
+      "C.Johnson-2",
+      "2105600431"
+    ],
+    "sampleCount": 20
+  },
+  "Dentis USA Corp": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "65615",
+      "21056000036"
+    ],
+    "sampleCount": 4
+  },
+  "Janella Spears": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "SS#562747875",
+      "21056000040"
+    ],
+    "sampleCount": 4
+  },
+  "Epic Dental Lab": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 262,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 251,
+        "ratio": 0.479
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 11,
+        "ratio": 0.021
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 185,
+        "ratio": 0.3531
+      },
+      {
+        "name": "General-Riddle",
+        "count": 54,
+        "ratio": 0.1031
+      },
+      {
+        "name": "General-Eugene",
+        "count": 11,
+        "ratio": 0.021
+      },
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.0019
+      }
+    ],
+    "sampleInvoiceIds": [
+      "#4990",
+      "21056000051",
+      "#5004",
+      "#4995",
+      "21056000080",
+      "#5048",
+      "#4821",
+      "#5047",
+      "#5052",
+      "#4986"
+    ],
+    "sampleCount": 524
+  },
+  "Culligan": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "2025037304104223"
+    ],
+    "sampleCount": 2
+  },
+  "Airgas USA LLC": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 27,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+        "count": 17,
+        "ratio": 0.3148
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 10,
+        "ratio": 0.1852
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 9,
+        "ratio": 0.1667
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 5,
+        "ratio": 0.0926
+      },
+      {
+        "name": "General-Columbia",
+        "count": 3,
+        "ratio": 0.0556
+      }
+    ],
+    "sampleInvoiceIds": [
+      "9160244966",
+      "49248515",
+      "9160154657",
+      "21056000044",
+      "5516348100",
+      "5516327049",
+      "9160777668",
+      "21056000103",
+      "49566309",
+      "21056000128"
+    ],
+    "sampleCount": 54
+  },
+  "Professional Office Services Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 32,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 25,
+        "ratio": 0.3906
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.1094
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 5,
+        "ratio": 0.0781
+      },
+      {
+        "name": "General-Columbia",
+        "count": 4,
+        "ratio": 0.0625
+      },
+      {
+        "name": "General-Eugene",
+        "count": 4,
+        "ratio": 0.0625
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 4,
+        "ratio": 0.0625
+      },
+      {
+        "name": "General-Riddle",
+        "count": 4,
+        "ratio": 0.0625
+      },
+      {
+        "name": "General-Salem",
+        "count": 4,
+        "ratio": 0.0625
+      }
+    ],
+    "sampleInvoiceIds": [
+      "003684342",
+      "21056000076",
+      "003684341",
+      "003684338",
+      "003684336",
+      "003684333",
+      "003684340",
+      "21056000091",
+      "003696878",
+      "003696874"
+    ],
+    "sampleCount": 64
+  },
+  "Judson's Heating-Plumbing-Electric": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 4,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 2,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 2,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "6502",
+      "21056000088",
+      "8348",
+      "2105600339"
+    ],
+    "sampleCount": 8
+  },
+  "Dentsply": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "59743704",
+      "21056000068"
+    ],
+    "sampleCount": 4
+  },
+  "American Logo Gear LLC": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 13,
+        "ratio": 0.7222
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 3,
+        "ratio": 0.1667
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53242 Printing & Distribution Marketing",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "10300 Prepaid Expenses:10370 Prepaid Patient Gifts",
+        "count": 1,
+        "ratio": 0.0556
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 3,
+        "ratio": 0.1667
+      },
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Riddle",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.0556
+      },
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.0556
+      }
+    ],
+    "sampleInvoiceIds": [
+      "04262025",
+      "21056000056",
+      "21056000104",
+      "05192025",
+      "21056000154",
+      "04142025"
+    ],
+    "sampleCount": 18
+  },
+  "Young Surgical/Puragraft Holdings Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 6,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 3,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.1667
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+        "count": 1,
+        "ratio": 0.0833
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 4,
+        "ratio": 0.3333
+      }
+    ],
+    "sampleInvoiceIds": [
+      "3590325",
+      "21056000069",
+      "3596429",
+      "21056000153",
+      "3628013",
+      "3628039"
+    ],
+    "sampleCount": 12
+  },
+  "First United Methodist": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 5,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+        "count": 3,
+        "ratio": 0.3
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.2
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 3,
+        "ratio": 0.3
+      }
+    ],
+    "sampleInvoiceIds": [
+      "711",
+      "710",
+      "2105600298",
+      "715",
+      "2105600364"
+    ],
+    "sampleCount": 10
+  },
+  "Murphys Law Janitorial": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 13,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53221 Janitorial",
+        "count": 6,
+        "ratio": 0.2308
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 6,
+        "ratio": 0.2308
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 1,
+        "ratio": 0.0385
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 6,
+        "ratio": 0.2308
+      },
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.0385
+      }
+    ],
+    "sampleInvoiceIds": [
+      "SD-25040",
+      "21056000072",
+      "SD-25050",
+      "21056000089",
+      "SD-25060",
+      "21056000176",
+      "SD-25080",
+      "SD-25070",
+      "21056000233",
+      "2105600285"
+    ],
+    "sampleCount": 26
+  },
+  "A1 Professional Exterminating": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 9,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.2222
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 4,
+        "ratio": 0.2222
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53221 Janitorial",
+        "count": 1,
+        "ratio": 0.0556
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 5,
+        "ratio": 0.2778
+      }
+    ],
+    "sampleInvoiceIds": [
+      "24482",
+      "21056000066",
+      "24535",
+      "21056000082",
+      "25106",
+      "21056000132",
+      "26474",
+      "2105600305",
+      "27071"
+    ],
+    "sampleCount": 18
+  },
+  "Roseburg Disposal": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 10,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53227 Waste Disposal",
+        "count": 5,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 5,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 5,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1420072",
+      "21056000064",
+      "1423191",
+      "21056000150",
+      "1426410",
+      "1435553",
+      "2105600290",
+      "Roseburg Disposal",
+      "2105600327"
+    ],
+    "sampleCount": 20
+  },
+  "Fyle Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 6,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 3,
+        "ratio": 0.25
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software",
+        "count": 2,
+        "ratio": 0.1667
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53332 IT Contract Labor",
+        "count": 1,
+        "ratio": 0.0833
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 3,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "QDSNFCRE-0001",
+      "21056000077",
+      "QDSNFCRE-0003",
+      "2105600289",
+      "QDSNFCRE-0004",
+      "2105600406"
+    ],
+    "sampleCount": 12
+  },
+  "Dexis": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "9044557040"
+    ],
+    "sampleCount": 2
+  },
+  "Pavloff Landscaping": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Riddle",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 12,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 6,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 6,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Riddle",
+        "count": 3,
+        "ratio": 0.125
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 3,
+        "ratio": 0.125
+      }
+    ],
+    "sampleInvoiceIds": [
+      "363",
+      "21056000059",
+      "342",
+      "368",
+      "21056000131",
+      "21056000139",
+      "404",
+      "21056000211",
+      "454",
+      "2105600334"
+    ],
+    "sampleCount": 24
+  },
+  "Obrien Dental Lab": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 122,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 110,
+        "ratio": 0.4508
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 12,
+        "ratio": 0.0492
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 110,
+        "ratio": 0.4508
+      }
+    ],
+    "sampleInvoiceIds": [
+      "2025-9222",
+      "2025-14050",
+      "2025-13527",
+      "2025-13070",
+      "21056000073",
+      "2025-14051",
+      "21056000096",
+      "2025-15583",
+      "21056000149",
+      "2025-17126"
+    ],
+    "sampleCount": 244
+  },
+  "Industrial Source": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 32,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+        "count": 25,
+        "ratio": 0.3906
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.1094
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 11,
+        "ratio": 0.1719
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 7,
+        "ratio": 0.1094
+      },
+      {
+        "name": "General-Eugene",
+        "count": 5,
+        "ratio": 0.0781
+      },
+      {
+        "name": "General-Riddle",
+        "count": 2,
+        "ratio": 0.0313
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0002420397",
+      "0002423124",
+      "0002420396",
+      "0002418592",
+      "0002407766",
+      "0002397825",
+      "0002397496",
+      "21056000093",
+      "0002427693",
+      "21056000146"
+    ],
+    "sampleCount": 64
+  },
+  "Washington Printing": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53223 Office Supplies",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "54567",
+      "21056000081"
+    ],
+    "sampleCount": 4
+  },
+  "Linde Gas & Equipment Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 17,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+        "count": 10,
+        "ratio": 0.2941
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.2059
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 10,
+        "ratio": 0.2941
+      }
+    ],
+    "sampleInvoiceIds": [
+      "65929288zo23319672",
+      "21056000085",
+      "48689603",
+      "21056000113",
+      "49844270",
+      "49248515",
+      "17633984",
+      "21056000168",
+      "50438775",
+      "21056000235"
+    ],
+    "sampleCount": 34
+  },
+  "Western Exterminator Company": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "77397535",
+      "21056000102"
+    ],
+    "sampleCount": 4
+  },
+  "Bio-Tek Medical": {
+    "defaultAccount": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "697478",
+      "07172025"
+    ],
+    "sampleCount": 4
+  },
+  "Pension Plan Specialist": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10300 Prepaid Expenses:10340 Prepaid Consulting",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "INV1846194",
+      "Pension Plan Specialist"
+    ],
+    "sampleCount": 4
+  },
+  "Med Pro Waste Disposal LLC": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Riddle",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 8,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.25
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53225 Hazardous Disposal",
+        "count": 3,
+        "ratio": 0.1875
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53227 Waste Disposal",
+        "count": 1,
+        "ratio": 0.0625
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Riddle",
+        "count": 4,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1516751",
+      "21056000173",
+      "1535881",
+      "21056000221",
+      "1564323",
+      "2105600368",
+      "11054 - 20250630",
+      "2105600429"
+    ],
+    "sampleCount": 16
+  },
+  "Springfield Denture Lab": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 4,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 3,
+        "ratio": 0.375
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees",
+        "count": 1,
+        "ratio": 0.125
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 4,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "26981",
+      "27079",
+      "27144",
+      "27368"
+    ],
+    "sampleCount": 8
+  },
+  "Sierra Springs": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 18,
+        "ratio": 0.5455
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 14,
+        "ratio": 0.4242
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+        "count": 1,
+        "ratio": 0.0303
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 6,
+        "ratio": 0.1818
+      },
+      {
+        "name": "General-Columbia",
+        "count": 5,
+        "ratio": 0.1515
+      },
+      {
+        "name": "General-Eugene",
+        "count": 5,
+        "ratio": 0.1515
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 5,
+        "ratio": 0.1515
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 5,
+        "ratio": 0.1515
+      }
+    ],
+    "sampleInvoiceIds": [
+      "21056000143",
+      "21056000186",
+      "25162828",
+      "2105600443",
+      "14636642 41925",
+      "14636642 051925",
+      "1025",
+      "1026",
+      "1027"
+    ],
+    "sampleCount": 33
+  },
+  "Iron Mountain": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 3,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 2,
+        "ratio": 0.3333
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.1667
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 2,
+        "ratio": 0.3333
+      }
+    ],
+    "sampleInvoiceIds": [
+      "KLGG842",
+      "21056000196",
+      "KRLC170"
+    ],
+    "sampleCount": 6
+  },
+  "ABC Fire Extinguisher, Inc": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "12475472",
+      "21056000180"
+    ],
+    "sampleCount": 4
+  },
+  "Patriot Plumbing": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "5181",
+      "2105600312"
+    ],
+    "sampleCount": 4
+  },
+  "Republic Services": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 11,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53227 Waste Disposal",
+        "count": 7,
+        "ratio": 0.3182
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.1818
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 7,
+        "ratio": 0.3182
+      }
+    ],
+    "sampleInvoiceIds": [
+      "045-004253569",
+      "21056000188",
+      "0450-004323231-2",
+      "0450-004311513",
+      "0450-004323231",
+      "21056000241",
+      "0450-004351356",
+      "2105600367",
+      "0452-005540833",
+      "0452-005528134"
+    ],
+    "sampleCount": 22
+  },
+  "Trilogy Medwaste West LLC": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 11,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53225 Hazardous Disposal",
+        "count": 5,
+        "ratio": 0.2273
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.1818
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+        "count": 2,
+        "ratio": 0.0909
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 4,
+        "ratio": 0.1818
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 3,
+        "ratio": 0.1364
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1749059",
+      "1764367",
+      "21056000204",
+      "1778131",
+      "1778130",
+      "21056000245",
+      "2105600371",
+      "1801394",
+      "1801395",
+      "1763837"
+    ],
+    "sampleCount": 22
+  },
+  "Clipboard Health": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 22,
+        "ratio": 0.5116
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51210 Hygienist:51218 Hygienist-Contract Labor",
+        "count": 14,
+        "ratio": 0.3256
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.093
+      },
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51221 Other Direct Labor-Gross Wages",
+        "count": 3,
+        "ratio": 0.0698
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 17,
+        "ratio": 0.3953
+      }
+    ],
+    "sampleInvoiceIds": [
+      "448376-1",
+      "455604-1",
+      "448650-1",
+      "21056000191",
+      "21056000210",
+      "466063-1",
+      "462684-1",
+      "466311-1",
+      "CN-19635",
+      "CN-19654"
+    ],
+    "sampleCount": 43
+  },
+  "Roseburg Urban Sanitary Authority": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 6,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 3,
+        "ratio": 0.25
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water",
+        "count": 2,
+        "ratio": 0.1667
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53227 Waste Disposal",
+        "count": 1,
+        "ratio": 0.0833
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 3,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "56002451",
+      "Roseburg Urban Sanitary Authority"
+    ],
+    "sampleCount": 12
+  },
+  "Straumann Group": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 3,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 2,
+        "ratio": 0.3333
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.1667
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.1667
+      },
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.1667
+      }
+    ],
+    "sampleInvoiceIds": [
+      "976058321",
+      "976480256",
+      "2105600314"
+    ],
+    "sampleCount": 6
+  },
+  "Refreshing Pro Wash": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10300 Prepaid Expenses:10380 Prepaid Services",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "000033",
+      "2105600318"
+    ],
+    "sampleCount": 4
+  },
+  "Glidewell": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 6,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 4,
+        "ratio": 0.3333
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.1667
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 4,
+        "ratio": 0.3333
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1131756770",
+      "1131885163",
+      "2105600311",
+      "1132143129",
+      "1132241592",
+      "2105600356"
+    ],
+    "sampleCount": 12
+  },
+  "Hermann Sarmiento": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Div-Marketing",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53242 Printing & Distribution Marketing",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "Div-Marketing",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "00468",
+      "21056000238"
+    ],
+    "sampleCount": 4
+  },
+  "Deluxe": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 33,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10260 Office Supplies Inventory",
+        "count": 25,
+        "ratio": 0.3788
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.1061
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10020 Checking - CTR Dental Northwest",
+        "count": 1,
+        "ratio": 0.0152
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 5,
+        "ratio": 0.0758
+      },
+      {
+        "name": "Corp-RCM",
+        "count": 4,
+        "ratio": 0.0606
+      },
+      {
+        "name": "General-Columbia",
+        "count": 2,
+        "ratio": 0.0303
+      },
+      {
+        "name": "General-Eugene",
+        "count": 2,
+        "ratio": 0.0303
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 2,
+        "ratio": 0.0303
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 2,
+        "ratio": 0.0303
+      },
+      {
+        "name": "General-Riddle",
+        "count": 2,
+        "ratio": 0.0303
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 2,
+        "ratio": 0.0303
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 2,
+        "ratio": 0.0303
+      },
+      {
+        "name": "General-Salem",
+        "count": 2,
+        "ratio": 0.0303
+      }
+    ],
+    "sampleInvoiceIds": [
+      "9007188636",
+      "9007532497",
+      "9007930876",
+      "9007555322",
+      "9007532496",
+      "9007532488",
+      "9007532502",
+      "9007792571",
+      "9007555320",
+      "9007532492"
+    ],
+    "sampleCount": 66
+  },
+  "Thrive Coworking": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 12,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53310 Facilities:53311 Rent",
+        "count": 6,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 6,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 6,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Thrive Coworking",
+      "21056000270",
+      "21056000271",
+      "21056000272",
+      "21056000273"
+    ],
+    "sampleCount": 24
+  },
+  "Clark Public Utilities": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 12,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53322 Electricity",
+        "count": 7,
+        "ratio": 0.2917
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 5,
+        "ratio": 0.2083
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 5,
+        "ratio": 0.2083
+      },
+      {
+        "name": "General-Columbia",
+        "count": 2,
+        "ratio": 0.0833
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Clark Public Utilities"
+    ],
+    "sampleCount": 24
+  },
+  "Portland General": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 9,
+        "ratio": 0.5625
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.25
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53322 Electricity",
+        "count": 3,
+        "ratio": 0.1875
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 5,
+        "ratio": 0.3125
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Portland General"
+    ],
+    "sampleCount": 16
+  },
+  "NW Natural": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 22,
+        "ratio": 0.3793
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53323 Natural Gas",
+        "count": 18,
+        "ratio": 0.3103
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 18,
+        "ratio": 0.3103
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 9,
+        "ratio": 0.1552
+      },
+      {
+        "name": "General-Milwaukie",
+        "count": 4,
+        "ratio": 0.069
+      },
+      {
+        "name": "General-Lebanon",
+        "count": 3,
+        "ratio": 0.0517
+      },
+      {
+        "name": "General-Columbia",
+        "count": 2,
+        "ratio": 0.0345
+      }
+    ],
+    "sampleInvoiceIds": [
+      "NW Natural"
+    ],
+    "sampleCount": 58
+  },
+  "Travis Strand": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-RCM",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 4,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 2,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-RCM",
+        "count": 2,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "07102025",
+      "07302025",
+      "21056000240",
+      "2105600310"
+    ],
+    "sampleCount": 8
+  },
+  "Avista": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53323 Natural Gas",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53323 Natural Gas",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Avista"
+    ],
+    "sampleCount": 4
+  },
+  "Stericycle": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 5,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.2
+      },
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52100 Sundries:52120 Medical Gases",
+        "count": 1,
+        "ratio": 0.1
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53227 Waste Disposal",
+        "count": 1,
+        "ratio": 0.1
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+        "count": 1,
+        "ratio": 0.1
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 2,
+        "ratio": 0.2
+      },
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.1
+      }
+    ],
+    "sampleInvoiceIds": [
+      "8011659265",
+      "8010769262",
+      "8011368411",
+      "21056000274",
+      "2105600374"
+    ],
+    "sampleCount": 10
+  },
+  "All Hands Interpreting Services": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "7151",
+      "2105600315"
+    ],
+    "sampleCount": 4
+  },
+  "Plant Managers Plus": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 7,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 5,
+        "ratio": 0.3571
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.1429
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 5,
+        "ratio": 0.3571
+      }
+    ],
+    "sampleInvoiceIds": [
+      "12544",
+      "12482",
+      "12524",
+      "12504",
+      "2105600286",
+      "12585",
+      "2105600432"
+    ],
+    "sampleCount": 14
+  },
+  "Cintas": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53361 Contract Services",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "11302735"
+    ],
+    "sampleCount": 2
+  },
+  "City of Milwaukie": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water",
+        "count": 4,
+        "ratio": 0.3333
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.3333
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 4,
+        "ratio": 0.3333
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 4,
+        "ratio": 0.3333
+      }
+    ],
+    "sampleInvoiceIds": [
+      "City of Milwaukie"
+    ],
+    "sampleCount": 12
+  },
+  "Pacific Power": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 12,
+        "ratio": 0.8
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 3,
+        "ratio": 0.2
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 3,
+        "ratio": 0.2
+      },
+      {
+        "name": "General-Riddle",
+        "count": 3,
+        "ratio": 0.2
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 3,
+        "ratio": 0.2
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Pacific Power"
+    ],
+    "sampleCount": 15
+  },
+  "Samantha A Foy": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53362 Professional Fees",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "36282489839",
+      "2105600331"
+    ],
+    "sampleCount": 4
+  },
+  "Paylocity": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "Corp-HR",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 15,
+        "ratio": 0.4412
+      },
+      {
+        "name": "10300 Prepaid Expenses:10310 Prepaid Wages",
+        "count": 12,
+        "ratio": 0.3529
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 4,
+        "ratio": 0.1176
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53334 Software",
+        "count": 3,
+        "ratio": 0.0882
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-HR",
+        "count": 3,
+        "ratio": 0.0882
+      },
+      {
+        "name": "Div-Operations",
+        "count": 1,
+        "ratio": 0.0294
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Paylocity",
+      "INV3086827"
+    ],
+    "sampleCount": 34
+  },
+  "Do Good Cleaning Services LLC": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 4,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53221 Janitorial",
+        "count": 2,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 2,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "150",
+      "2105600366",
+      "181",
+      "2105600396"
+    ],
+    "sampleCount": 8
+  },
+  "Crozier Kimball": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 3,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:54000 Corporate Expense:54100 Corporate Expenses Labor:54110 Corporate Expense Labor-Gross Wages",
+        "count": 2,
+        "ratio": 0.3333
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.1667
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 2,
+        "ratio": 0.3333
+      }
+    ],
+    "sampleInvoiceIds": [
+      "CRK_001",
+      "2105600350",
+      "01-SEP-25"
+    ],
+    "sampleCount": 6
+  },
+  "United Healthcare": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-HR",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 5,
+        "ratio": 0.4167
+      },
+      {
+        "name": "22100 Payroll Liabilities:22160 Employee Benefits Payable",
+        "count": 4,
+        "ratio": 0.3333
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.1667
+      },
+      {
+        "name": "22100 Payroll Liabilities:22190 Insurance Paybale",
+        "count": 1,
+        "ratio": 0.0833
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-HR",
+        "count": 4,
+        "ratio": 0.3333
+      },
+      {
+        "name": "Corp-Finance",
+        "count": 1,
+        "ratio": 0.0833
+      }
+    ],
+    "sampleInvoiceIds": [
+      "251480000317",
+      "251480000318",
+      "251760000433",
+      "251970003624",
+      "2105600438",
+      "United Healthcare"
+    ],
+    "sampleCount": 12
+  },
+  "Elevate Dental Consulting": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53360 Services:53362 Professional Fees",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "02-SEP-25",
+      "2105600369"
+    ],
+    "sampleCount": 4
+  },
+  "Plastech IT Services, LLC": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53330 IT Expenses:53332 IT Contract Labor",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1301",
+      "2105600399"
+    ],
+    "sampleCount": 4
+  },
+  "Maxxeus": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "10975410",
+      "2105600420"
+    ],
+    "sampleCount": 4
+  },
+  "SABowen Holdings, LLC": {
+    "defaultAccount": "20000 Accounts Payable (A/P)",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 6,
+        "ratio": 0.75
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53340 Insurance:53342 Malpractice Insurance",
+        "count": 1,
+        "ratio": 0.125
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.125
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 5,
+        "ratio": 0.625
+      }
+    ],
+    "sampleInvoiceIds": [
+      "20250910",
+      "2105600434",
+      "20250909"
+    ],
+    "sampleCount": 8
+  },
+  "Crest+Oral-B": {
+    "defaultAccount": "10200 Inventory:10210 Dental Supplies Inventory",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "20000 Accounts Payable (A/P)",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1115762760"
+    ],
+    "sampleCount": 2
+  },
+  "American Express": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": null,
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 19,
+        "ratio": 0.5
+      },
+      {
+        "name": "21100 AMEX",
+        "count": 19,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [],
+    "sampleInvoiceIds": [
+      "American Express"
+    ],
+    "sampleCount": 38
+  },
+  "John Hancock": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "0",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.3333
+      },
+      {
+        "name": "22100 Payroll Liabilities:22170 401K Contributions Payable",
+        "count": 1,
+        "ratio": 0.3333
+      }
+    ],
+    "classes": [
+      {
+        "name": "0",
+        "count": 1,
+        "ratio": 0.3333
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0010_202507_01",
+      "John Hancock"
+    ],
+    "sampleCount": 3
+  },
+  "The Hartford": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.5
+      },
+      {
+        "name": "22100 Payroll Liabilities:22190 Insurance Paybale",
+        "count": 7,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 5,
+        "ratio": 0.3571
+      },
+      {
+        "name": "Div-Operations",
+        "count": 2,
+        "ratio": 0.1429
+      }
+    ],
+    "sampleInvoiceIds": [
+      "The Hartford"
+    ],
+    "sampleCount": 14
+  },
+  "Patricia Schaak": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 37,
+        "ratio": 0.9487
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+        "count": 2,
+        "ratio": 0.0513
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 17,
+        "ratio": 0.4359
+      },
+      {
+        "name": "General-Salem",
+        "count": 14,
+        "ratio": 0.359
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 6,
+        "ratio": 0.1538
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1030_01",
+      "1021",
+      "1041",
+      "1021_01",
+      "1037_01",
+      "1005_01",
+      "1045_01",
+      "1011_01",
+      "1016_01",
+      "1017_01"
+    ],
+    "sampleCount": 39
+  },
+  "Rocky Mountain Power": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10300 Prepaid Expenses:10380 Prepaid Services",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Rocky Mountain Power"
+    ],
+    "sampleCount": 2
+  },
+  "Roseburg High School": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10300 Prepaid Expenses:10341 Prepaid Advertising",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1096"
+    ],
+    "sampleCount": 2
+  },
+  "Dr Kenneth Do": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10200 Inventory:10210 Dental Supplies Inventory",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1105"
+    ],
+    "sampleCount": 2
+  },
+  "Distinct Office Structures LLC": {
+    "defaultAccount": null,
+    "defaultClass": "General-Salem",
+    "accounts": [],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 8,
+        "ratio": 1
+      }
+    ],
+    "sampleInvoiceIds": [
+      "0003_202504_102",
+      "0003_202506_102",
+      "0003_202507_102",
+      "0003_202505_102"
+    ],
+    "sampleCount": 8
+  },
+  "Amigos Capital": {
+    "defaultAccount": "31000 Owner's Equity:31010 Partner Investments",
+    "defaultClass": null,
+    "accounts": [
+      {
+        "name": "31000 Owner's Equity:31010 Partner Investments",
+        "count": 4,
+        "ratio": 0.4
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.4
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10030 Partner Contribution Receivables",
+        "count": 1,
+        "ratio": 0.1
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10020 Checking - CTR Dental Northwest",
+        "count": 1,
+        "ratio": 0.1
+      }
+    ],
+    "classes": [],
+    "sampleInvoiceIds": [
+      "Amigos Capital"
+    ],
+    "sampleCount": 10
+  },
+  "Nitai Stein": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1003_01"
+    ],
+    "sampleCount": 2
+  },
+  "Kimberly Gawlick": {
+    "defaultAccount": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51210 Hygienist:51218 Hygienist-Contract Labor",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51210 Hygienist:51218 Hygienist-Contract Labor",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1014_01"
+    ],
+    "sampleCount": 2
+  },
+  "Abby Losee": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53100 Center Level Support Level:53110 Front Desk:53118 Front Desk-Contract Labor",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53100 Center Level Support Level:53110 Front Desk:53118 Front Desk-Contract Labor",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1020_01"
+    ],
+    "sampleCount": 2
+  },
+  "Umpqua Valley Arts": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1033_01"
+    ],
+    "sampleCount": 2
+  },
+  "The Oral Cancer Foundation": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1044_01"
+    ],
+    "sampleCount": 2
+  },
+  "Glide Booster Club": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1049_01"
+    ],
+    "sampleCount": 2
+  },
+  "RHS Cheer Booster Club": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1050_01"
+    ],
+    "sampleCount": 2
+  },
+  "City of Riddle": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water",
+    "defaultClass": "General-Riddle",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Riddle",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1007",
+      "1003"
+    ],
+    "sampleCount": 4
+  },
+  "Wolfe Plumbing & Mechanical": {
+    "defaultAccount": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1008"
+    ],
+    "sampleCount": 2
+  },
+  "Althea Seloover": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1010"
+    ],
+    "sampleCount": 2
+  },
+  "William Todd": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1011"
+    ],
+    "sampleCount": 2
+  },
+  "Benjamin Bird": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1013"
+    ],
+    "sampleCount": 2
+  },
+  "Rosemarie Wess": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1014"
+    ],
+    "sampleCount": 2
+  },
+  "Robert Melara": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1017"
+    ],
+    "sampleCount": 2
+  },
+  "John Foxwell": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1009"
+    ],
+    "sampleCount": 2
+  },
+  "Christine Deardorff": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1006"
+    ],
+    "sampleCount": 2
+  },
+  "Dr Reza Safari": {
+    "defaultAccount": "50000 Expenses:51000 Direct Labor:51100 Doctor:51180 Doctor-Contract Labor",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51100 Doctor:51180 Doctor-Contract Labor",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1019",
+      "1018"
+    ],
+    "sampleCount": 4
+  },
+  "Terra Munger": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1020"
+    ],
+    "sampleCount": 2
+  },
+  "Dr Bernard McGraw": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+        "count": 3,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 3,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 3,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1022",
+      "1057",
+      "1106"
+    ],
+    "sampleCount": 6
+  },
+  "Dr Reid Donakey": {
+    "defaultAccount": "50000 Expenses:51000 Direct Labor:51100 Doctor:51140 Doctor-Training & Continuing Education",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51100 Doctor:51140 Doctor-Training & Continuing Education",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1023",
+      "1077"
+    ],
+    "sampleCount": 4
+  },
+  "JPMorgan Chase": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53370 Other:53371 Bank & Collection Fees",
+    "defaultClass": "Corp-RCM",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53370 Other:53371 Bank & Collection Fees",
+        "count": 4,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-RCM",
+        "count": 3,
+        "ratio": 0.375
+      },
+      {
+        "name": "Corp-Finance",
+        "count": 1,
+        "ratio": 0.125
+      }
+    ],
+    "sampleInvoiceIds": [
+      "JPMorgan Chase"
+    ],
+    "sampleCount": 8
+  },
+  "IRS": {
+    "defaultAccount": "31000 Owner's Equity:31020 Partner Distributions",
+    "defaultClass": null,
+    "accounts": [
+      {
+        "name": "31000 Owner's Equity:31020 Partner Distributions",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [],
+    "sampleInvoiceIds": [
+      "IRS"
+    ],
+    "sampleCount": 2
+  },
+  "Clearent": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53370 Other:53371 Bank & Collection Fees",
+    "defaultClass": "Corp-RCM",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53370 Other:53371 Bank & Collection Fees",
+        "count": 4,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-RCM",
+        "count": 4,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Clearent"
+    ],
+    "sampleCount": 8
+  },
+  "Deborah Allert": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Riddle",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Riddle",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1035"
+    ],
+    "sampleCount": 2
+  },
+  "City of Roseburg Water Division": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53320 Utilities:53321 Water",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1036",
+      "1119"
+    ],
+    "sampleCount": 4
+  },
+  "Mary Tresh-Brumm": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1037"
+    ],
+    "sampleCount": 2
+  },
+  "Umpqua Valley Baseball": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1038"
+    ],
+    "sampleCount": 2
+  },
+  "Jememe Wilson": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1043"
+    ],
+    "sampleCount": 2
+  },
+  "Robert Lee": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1044"
+    ],
+    "sampleCount": 2
+  },
+  "Janna Roselund": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1046"
+    ],
+    "sampleCount": 2
+  },
+  "Stacy Allen": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1040"
+    ],
+    "sampleCount": 2
+  },
+  "Andrea Trotter": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1047"
+    ],
+    "sampleCount": 2
+  },
+  "Roger Ludeman": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1048"
+    ],
+    "sampleCount": 2
+  },
+  "Thomas Daly": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1049"
+    ],
+    "sampleCount": 2
+  },
+  "Jason Beverly": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1051"
+    ],
+    "sampleCount": 2
+  },
+  "Kristi Seeley": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1053"
+    ],
+    "sampleCount": 2
+  },
+  "Spencer Bowen": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1069"
+    ],
+    "sampleCount": 2
+  },
+  "Saraphina Yancey-": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1085"
+    ],
+    "sampleCount": 2
+  },
+  "Dane Anguiano-": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1086"
+    ],
+    "sampleCount": 2
+  },
+  "Sharon Hansen-": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses:53223 Office Supplies",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1088",
+      "1110"
+    ],
+    "sampleCount": 4
+  },
+  "Kimberly King": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1091",
+      "1001"
+    ],
+    "sampleCount": 4
+  },
+  "Angela Garretson_": {
+    "defaultAccount": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51224 Other Direct Labor-Training & Continuing Education",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51224 Other Direct Labor-Training & Continuing Education",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1092"
+    ],
+    "sampleCount": 2
+  },
+  "Laura Georlett_ (deleted)": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "Div-Operations",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 7,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+        "count": 5,
+        "ratio": 0.3571
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses",
+        "count": 2,
+        "ratio": 0.1429
+      }
+    ],
+    "classes": [
+      {
+        "name": "Div-Operations",
+        "count": 2,
+        "ratio": 0.1429
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1002",
+      "1028",
+      "1029",
+      "1030",
+      "1031",
+      "1032",
+      "1033"
+    ],
+    "sampleCount": 14
+  },
+  "Lacey Drake -": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "Corp-RCM",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+        "count": 1,
+        "ratio": 0.25
+      },
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-RCM",
+        "count": 1,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1065",
+      "1100"
+    ],
+    "sampleCount": 4
+  },
+  "Patricia Schaak-": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+    "defaultClass": null,
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [],
+    "sampleInvoiceIds": [
+      "1066"
+    ],
+    "sampleCount": 2
+  },
+  "Roseburg Volleyball": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53240 Marketing:53248 Local Marketing",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1097",
+      "1104"
+    ],
+    "sampleCount": 4
+  },
+  "James DeGroat": {
+    "defaultAccount": "40000 Net Revenue:42000 Refunds",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "40000 Net Revenue:42000 Refunds",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1098"
+    ],
+    "sampleCount": 2
+  },
+  "Ginny Dane-": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+    "defaultClass": "General-Salem",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Salem",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1099"
+    ],
+    "sampleCount": 2
+  },
+  "Katrina Christ-": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53230 Office Travel & Meals:53233 Office Travel",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1102"
+    ],
+    "sampleCount": 2
+  },
+  "Haley Holland": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+    "defaultClass": "General-Ridgefield",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53200 Office Expenses:53220 Office Expenses",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1103"
+    ],
+    "sampleCount": 2
+  },
+  "Washington Department of Revenue": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53370 Other:53352 B&O Taxes",
+    "defaultClass": "General-Columbia",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53370 Other:53352 B&O Taxes",
+        "count": 4,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 2,
+        "ratio": 0.25
+      },
+      {
+        "name": "General-Ridgefield",
+        "count": 2,
+        "ratio": 0.25
+      }
+    ],
+    "sampleInvoiceIds": [
+      "Washington Department of Revenue"
+    ],
+    "sampleCount": 8
+  },
+  "Lebanon Chamber of Commerce": {
+    "defaultAccount": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53350 Permits & Membership",
+    "defaultClass": "General-Lebanon",
+    "accounts": [
+      {
+        "name": "50000 Expenses:53000 Center Level Expenses:53300 Overhead:53350 Permits & Membership",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Lebanon",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1108"
+    ],
+    "sampleCount": 2
+  },
+  "LLoyds Dental Lab, Inc": {
+    "defaultAccount": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+    "defaultClass": "General-Milwaukie",
+    "accounts": [
+      {
+        "name": "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Milwaukie",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1109"
+    ],
+    "sampleCount": 2
+  },
+  "North River Electric Inc": {
+    "defaultAccount": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor",
+    "defaultClass": "General-Roseburg",
+    "accounts": [
+      {
+        "name": "50000 Expenses:51000 Direct Labor:51200 Support Labor:51220 Other Direct Labor:51228 Other Direct Labor-Contract Labor",
+        "count": 1,
+        "ratio": 0.5
+      },
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Roseburg",
+        "count": 1,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1113"
+    ],
+    "sampleCount": 2
+  },
+  "Syed Umer": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Riddle",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 1
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Riddle",
+        "count": 2,
+        "ratio": 1
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1002_01"
+    ],
+    "sampleCount": 2
+  },
+  "Laura Georlett-": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "Corp-Finance",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 2,
+        "ratio": 1
+      }
+    ],
+    "classes": [
+      {
+        "name": "Corp-Finance",
+        "count": 2,
+        "ratio": 1
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1120"
+    ],
+    "sampleCount": 2
+  },
+  "Dr Dennis Perala": {
+    "defaultAccount": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+    "defaultClass": "General-Eugene",
+    "accounts": [
+      {
+        "name": "10000 Cash and Cash Equivalents:10010 Checking - CTR Services Northwest",
+        "count": 4,
+        "ratio": 1
+      }
+    ],
+    "classes": [
+      {
+        "name": "General-Eugene",
+        "count": 2,
+        "ratio": 0.5
+      },
+      {
+        "name": "General-Riddle",
+        "count": 2,
+        "ratio": 0.5
+      }
+    ],
+    "sampleInvoiceIds": [
+      "1015"
+    ],
+    "sampleCount": 4
+  },
+  "2904 (deleted)": {
+    "defaultAccount": null,
+    "defaultClass": "General-Columbia",
+    "accounts": [],
+    "classes": [
+      {
+        "name": "General-Columbia",
+        "count": 1,
+        "ratio": 1
+      }
+    ],
+    "sampleInvoiceIds": [
+      "2025061302"
+    ],
+    "sampleCount": 1
+  },
+  "2803 (deleted)": {
+    "defaultAccount": null,
+    "defaultClass": "General-Ridgefield",
+    "accounts": [],
+    "classes": [
+      {
+        "name": "General-Ridgefield",
+        "count": 1,
+        "ratio": 1
+      }
+    ],
+    "sampleInvoiceIds": [
+      "2025061302"
+    ],
+    "sampleCount": 1
+  }
+}

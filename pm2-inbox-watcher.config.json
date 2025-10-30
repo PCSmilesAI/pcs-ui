@@ -1,0 +1,18 @@
+{
+  "apps": [
+    {
+      "name": "inbox-watcher",
+      "script": "email_ingestion_agent_enhanced.py",
+      "interpreter": "/usr/bin/python3",
+      "cwd": "/var/www/pcs-ui",
+      "watch": false,
+      "autorestart": true,
+      "restart_delay": 5000,
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "PCS_ENV": "production",
+        "PCS_DATA_DIR": "/var/www/pcs-ui-data"
+      }
+    }
+  ]
+}

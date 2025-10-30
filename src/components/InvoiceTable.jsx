@@ -16,7 +16,7 @@ import React, { useState } from 'react';
  *   onRowClick={(row) => {...}}
  * />
  */
-export default function InvoiceTable({ columns, rows, onRowClick }) {
+export default function InvoiceTable({ columns, rows, onRowClick, selectable = false, selectedIds = new Set(), onToggleRow, onToggleAll, getRowId }) {
   // Track which row the mouse is hovering over so we can change
   // its background colour without relying on CSS hover rules.
   const [hoverIndex, setHoverIndex] = useState(null);
@@ -48,10 +48,40 @@ export default function InvoiceTable({ columns, rows, onRowClick }) {
     color: '#1f1f1f',
   };
 
+  const getId = (row, index) => {
+    if (typeof getRowId === 'function') return getRowId(row, index);
+    // Robust defaults to avoid collisions when values like "Unknown" repeat
+    return (
+      row.invoice_number ||
+      row.json_path ||
+      row.pdf_path ||
+      row.source_file ||
+      row.id ||
+      `${row.invoice || 'row'}_${index}`
+    );
+  };
+
+  const allVisibleIds = selectable ? rows.map((r, i) => getId(r, i)) : [];
+  const allSelected = selectable && allVisibleIds.length > 0 && allVisibleIds.every((id) => (selectedIds instanceof Set ? selectedIds.has(id) : (selectedIds || []).includes(id)));
+
   return (
     <table style={tableStyle}>
       <thead>
         <tr>
+          {selectable && (
+            <th
+              key="__select"
+              style={{ ...headerCellBase, textAlign: 'center', width: 36 }}
+            >
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={() => {
+                  if (typeof onToggleAll === 'function') onToggleAll(allSelected, allVisibleIds);
+                }}
+              />
+            </th>
+          )}
           {columns.map((col) => {
             // Determine alignment; default left
             let textAlign = col.align || 'left';
@@ -71,6 +101,8 @@ export default function InvoiceTable({ columns, rows, onRowClick }) {
           // Background colour for hover effect
           const backgroundColor =
             hoverIndex === rowIndex ? '#f0f7fc' : '#ffffff';
+          const rowId = getId(row, rowIndex);
+          const isChecked = selectable && (selectedIds instanceof Set ? selectedIds.has(rowId) : (selectedIds || []).includes(rowId));
           return (
             <tr
               key={rowIndex}
@@ -87,6 +119,18 @@ export default function InvoiceTable({ columns, rows, onRowClick }) {
               onMouseLeave={() => setHoverIndex(null)}
               style={{ backgroundColor, cursor: onRowClick ? 'pointer' : 'default' }}
             >
+              {selectable && (
+                <td key="__select" style={{ ...rowCellBase, textAlign: 'center' }}>
+                  <input
+                    type="checkbox"
+                    checked={!!isChecked}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => {
+                      if (typeof onToggleRow === 'function') onToggleRow(rowId, row, e.target.checked);
+                    }}
+                  />
+                </td>
+              )}
               {columns.map((col) => {
                 let textAlign = col.align || 'left';
                 return (

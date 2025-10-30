@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
+const ADMIN_EMAILS = new Set([
+  'business@pcsmilesai.com',
+  'mckaym@pacificcrestsmiles.com',
+]);
+
 // Navigation bar implemented with inline styles. This component avoids
 // reliance on Tailwind so that styling always appears even when
 // Tailwind isn't processed. It exposes the same props as before.
@@ -24,6 +29,7 @@ export default function NavBar({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const dropdownRef = useRef(null);
+  const [userEmail, setUserEmail] = useState('');
 
   // Close the account menu when clicking outside
   useEffect(() => {
@@ -35,6 +41,44 @@ export default function NavBar({
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = window.localStorage.getItem('loggedInUser');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed?.email) {
+          setUserEmail(String(parsed.email).toLowerCase());
+        }
+      }
+    } catch (_) {
+      // ignore storage parsing issues
+    }
+  }, []);
+
+  // Fallback: if email is present in URL (?email=...), adopt it and persist
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const urlEmail = sp.get('email');
+      const normalised = urlEmail ? String(urlEmail).trim().toLowerCase() : '';
+      if (normalised && normalised !== userEmail) {
+        setUserEmail(normalised);
+        try {
+          window.localStorage.setItem('loggedInUser', JSON.stringify({ email: normalised, name: normalised }));
+          document.cookie =
+            'loggedInUser=' + encodeURIComponent(JSON.stringify({ email: normalised, name: normalised })) + '; path=/';
+        } catch (_) {
+          // ignore persistence errors
+        }
+      }
+    } catch (_) {
+      // ignore URL parsing errors
+    }
+  }, [sp, userEmail]);
+
+  const isAdminUser = ADMIN_EMAILS.has(userEmail);
 
   // Tab definitions
   const tabs = [
@@ -290,6 +334,28 @@ export default function NavBar({
               >
                 Reports
               </div>
+              {isAdminUser && (
+                <div
+                  style={dropdownItemStyle}
+                  onClick={() => {
+                    setIsAccountOpen(false);
+                    onChangePage('roles');
+                  }}
+                >
+                  Roles
+                </div>
+              )}
+              {isAdminUser && (
+                <div
+                  style={dropdownItemStyle}
+                  onClick={() => {
+                    setIsAccountOpen(false);
+                    onChangePage('connections');
+                  }}
+                >
+                  Connections
+                </div>
+              )}
               <div
                 style={dropdownItemStyle}
                 onClick={() => {
