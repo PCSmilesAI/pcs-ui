@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
+import Toast from '../components/Toast.jsx';
 
 export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
   const searchParams = useSearchParams();
@@ -25,7 +26,15 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [toast, setToast] = useState(null);
   const { getStatusForVendor } = useVendorAchMap();
+
+  const showToast = useCallback((message, variant = 'info') => {
+    setToast({ message, variant, at: Date.now() });
+  }, []);
+
+  const dismissToast = useCallback(() => setToast(null), []);
 
   async function fetchVisibleInvoices() {
     // Include current page query params (e.g., ?email=...) so preview works without cookies
@@ -230,13 +239,60 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
     );
   }
 
+  const handleRefreshInbox = async () => {
+    setRefreshing(true);
+    try {
+      const params = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search)
+        : new URLSearchParams();
+      const email = params.get('email') || 'user@pcsmilesai.com';
+
+      const res = await fetch('/api/inbox/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const result = await res.json();
+
+      if (!result.ok) {
+        showToast(result.message || result.error || 'Failed to refresh inbox', 'error');
+        return;
+      }
+
+      showToast(
+        `Inbox refreshed! Added ${result.added || 0} new invoice(s), skipped ${result.skipped || 0}`,
+        'success'
+      );
+
+      // Reload the invoice list
+      await reloadList();
+    } catch (err) {
+      console.error('Error refreshing inbox:', err);
+      showToast('Failed to refresh inbox', 'error');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <div style={{ padding: '24px' }}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">All Invoices</h1>
-        <p className="text-gray-600 mt-2">
-          {filteredData.length} invoice{filteredData.length !== 1 ? 's' : ''} found
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">All Invoices</h1>
+          <p className="text-gray-600 mt-2">
+            {filteredData.length} invoice{filteredData.length !== 1 ? 's' : ''} found
+          </p>
+        </div>
+        <button
+          onClick={handleRefreshInbox}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          title="Check inbox for new invoices"
+        >
+          <i className={`fas fa-sync-alt ${refreshing ? 'fa-spin' : ''}`}></i>
+          {refreshing ? 'Refreshing...' : 'Refresh Inbox'}
+        </button>
       </div>
       {selectedIds.size > 0 && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
@@ -272,6 +328,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           });
         }}
       />
+      <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
     </div>
   );
 }

@@ -7,12 +7,14 @@ module.exports = {
     env: {
       NODE_ENV: 'development',
       PCS_ENV: 'development',
-      PCS_DATA_DIR: './pcs_ui_data'
+      PCS_DATA_DIR: './pcs_ui_data',
+      INBOX_SCAN_INTERVAL_MS: '10000'
     },
     env_production: {
       NODE_ENV: 'production',
       PCS_ENV: 'production',
       PCS_DATA_DIR: '/var/www/pcs-ui-data',
+      INBOX_SCAN_INTERVAL_MS: '60000',
       PORT: 3001,
       HOST: '0.0.0.0',
       // Security Settings
