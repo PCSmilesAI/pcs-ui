@@ -11,7 +11,8 @@
       "env": {
         "PYTHONUNBUFFERED": "1",
         "PCS_ENV": "production",
-        "PCS_DATA_DIR": "/var/www/pcs-ui-data"
+        "PCS_DATA_DIR": "/var/www/pcs-ui-data",
+        "INBOX_SCAN_INTERVAL_MS": "60000"
       }
     }
   ]
