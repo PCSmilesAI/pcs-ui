@@ -34,8 +34,11 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
         if (!resp.ok) throw new Error(`Failed to load invoices: ${resp.status}`);
         let data = await resp.json();
 
+        // Extract invoices array from response
+        const invoices = data?.invoices || [];
+
         // Filter for this vendor
-        const filtered = (data || []).filter((inv) => {
+        const filtered = invoices.filter((inv) => {
           const vendorName = inv.vendor_name || inv.vendor || 'Unknown';
           return vendorName === vendor;
         });
