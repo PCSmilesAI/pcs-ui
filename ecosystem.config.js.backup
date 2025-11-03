@@ -21,13 +21,10 @@ module.exports = {
       ENCRYPTION_KEY: '36e81c4fa793c1673df8d6dd6c6db856e668ae198d28fae458fcb295ce7d4f5c',
       WEBHOOK_VERIFICATION_TOKEN: 'a8d2b999f429de47d9446316796a07c488566196377816ddba7e0f014beb1f8a',
       WEBHOOK_SIGNATURE_KEY: 'a8d2b999f429de47d9446316796a07c488566196377816ddba7e0f014beb1f8a',
-      // QuickBooks OAuth Settings (SANDBOX/DEVELOPMENT)
-      QBO_CLIENT_ID: 'AB2KnsBep2GtaSf9yTLjxA90TZKlwcF5ItDjF89UiwQH75aaoE',
-      QBO_CLIENT_SECRET: 'SjQLypVE8KnRDsFWwmYJa8qFGH3jxqoMlk6bSF74',
-      QBO_REDIRECT_URI: 'https://pcsmilesai.com/api/qbo/callback',
-      QBO_SCOPES: 'com.intuit.quickbooks.accounting',
-      QBO_ENVIRONMENT: 'sandbox',
-      QBO_STATE_SECRET: 'your-secret-key-for-state-signing-min-32-chars-long',
+      // QuickBooks OAuth Settings
+      QBO_CLIENT_ID: 'your-production-client-id',
+      QBO_CLIENT_SECRET: 'your-production-client-secret',
+      QBO_ENVIRONMENT: 'production',
       // PCS AI Integration
       PCS_AI_API_URL: 'https://api.pcs-ai.com',
       PCS_AI_API_KEY: 'your-pcs-ai-api-key',
@@ -68,4 +65,3 @@ module.exports = {
     }
   }
 };
-

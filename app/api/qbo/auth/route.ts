@@ -100,5 +100,8 @@ export async function GET(request: Request) {
   authUrl.searchParams.set('code_challenge', code_challenge);
   authUrl.searchParams.set('code_challenge_method', 'S256');
 
+  console.log('[QBO][AUTH] FULL OAuth URL:', authUrl.toString());
+  console.log('[QBO][AUTH] Client ID being used:', QBO_CLIENT_ID);
+
   return NextResponse.redirect(authUrl.toString(), 302);
 }

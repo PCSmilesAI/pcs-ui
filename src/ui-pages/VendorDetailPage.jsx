@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import ACHBadge from '../ui/ach/ACHBadge';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
+import { normalizeVendorName, getDisplayVendorName, vendorNamesMatch } from '../lib/vendorUtils';
 
 export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
   const [rows, setRows] = useState([]);
@@ -26,22 +28,25 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
     const load = async () => {
       try {
         setLoading(true);
-        // Use dynamic API endpoint instead of static JSON file
-        const resp = await fetch(`/api/invoices/visible?t=${Date.now()}`, {
-          method: 'GET',
-          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
-        });
-        if (!resp.ok) throw new Error(`Failed to load invoices: ${resp.status}`);
-        let data = await resp.json();
+        console.log('🔄 VendorDetailPage: Fetching invoices for vendor:', vendor);
 
-        // Extract invoices array from response
-        const invoices = data?.invoices || [];
+        // Use the same data source as VendorsPage for consistency
+        const invoices = await fetchInvoiceQueue({ limit: 5000 });
+        console.log('📊 VendorDetailPage: API returned', invoices.length, 'invoices');
 
-        // Filter for this vendor
+        // Normalize the vendor name from the URL parameter
+        const normalizedVendor = normalizeVendorName(vendor);
+        console.log('🔍 VendorDetailPage: Looking for normalized vendor:', normalizedVendor);
+
+        // Filter for this vendor using normalized comparison
         const filtered = invoices.filter((inv) => {
-          const vendorName = inv.vendor_name || inv.vendor || 'Unknown';
-          return vendorName === vendor;
+          const invVendorName = inv.vendor_name || inv.vendor || 'Unknown';
+          const normalizedInvVendor = normalizeVendorName(invVendorName);
+          const matches = normalizedInvVendor === normalizedVendor;
+          return matches;
         });
+
+        console.log('✅ VendorDetailPage: Found', filtered.length, 'invoices for vendor');
 
         const mapped = filtered.map((invoice) => ({
           invoice: invoice.invoice_number || 'Unknown',
@@ -184,11 +189,14 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
   const achPanel = { border: '1px solid #357ab2', borderRadius: 12, padding: 16, background: '#fff', marginBottom: 16 };
   const achGrid = { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 };
 
+  // Get display-friendly vendor name for the header
+  const displayVendor = getDisplayVendorName(vendor);
+
   return (
     <div style={wrapperStyle}>
       <div style={headerStyle}>
         <button style={backBtn} onClick={onBack}>&larr; Back</button>
-        <div style={titleStyle}>{vendor}</div>
+        <div style={titleStyle}>{displayVendor}</div>
         <div style={{ flex: 1 }} />
         <button
           onClick={() => setRefreshCounter(c => c + 1)}

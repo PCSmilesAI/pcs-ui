@@ -4,6 +4,7 @@ import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
 import ACHBadge from '../ui/ach/ACHBadge';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
+import { normalizeVendorName, getDisplayVendorName, getNormalizedVendorFromInvoice } from '../lib/vendorUtils';
 
 /**
  * Page for the "Vendors" view. Displays a list of vendors with
@@ -38,16 +39,19 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
 
         const vendorMap = new Map();
         data.forEach((invoice) => {
-          const vendorName = invoice.vendor_name || invoice.vendor || 'Unknown';
+          // Use normalized vendor name as the key to prevent duplicates
+          const normalizedName = getNormalizedVendorFromInvoice(invoice);
+          const displayName = getDisplayVendorName(invoice.vendor_name || invoice.vendor);
           const amountNum = parseFloat(String(invoice.invoice_total ?? invoice.total ?? '0'));
 
-          if (vendorMap.has(vendorName)) {
-            const existing = vendorMap.get(vendorName);
+          if (vendorMap.has(normalizedName)) {
+            const existing = vendorMap.get(normalizedName);
             existing.amount += (isNaN(amountNum) ? 0 : amountNum);
             existing.invoiceCount += 1;
           } else {
-            vendorMap.set(vendorName, {
-              name: vendorName,
+            vendorMap.set(normalizedName, {
+              name: displayName,  // Use display name for UI
+              normalizedName: normalizedName,  // Store normalized name for filtering
               method: 'ACH',
               amount: isNaN(amountNum) ? 0 : amountNum,
               contact: 'Contact via invoice',
@@ -152,9 +156,10 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
         columns={columns}
         onRowClick={(row) => {
           try {
-            const name = row?.name || '';
+            // Use the normalized name for URL to ensure consistent matching
+            const normalizedName = row?.normalizedName || normalizeVendorName(row?.name || '');
             if (onVendorClick) onVendorClick(row);
-            if (name) router.push(`/VendorDetailPage?vendor=${encodeURIComponent(name)}`);
+            if (normalizedName) router.push(`/VendorDetailPage?vendor=${encodeURIComponent(normalizedName)}`);
           } catch (navigationError) {
             console.error('Failed to navigate to vendor detail:', navigationError);
           }
