@@ -18,24 +18,33 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
     },
   };
 
+  // Track refresh counter to force re-fetch
+  const [refreshCounter, setRefreshCounter] = useState(0);
+
   useEffect(() => {
     if (!vendor) return;
     const load = async () => {
       try {
         setLoading(true);
-        const resp = await fetch(`/invoice_queue.json?t=${Date.now()}`, {
+        // Use dynamic API endpoint instead of static JSON file
+        const resp = await fetch(`/api/invoices/visible?t=${Date.now()}`, {
           method: 'GET',
           headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
         });
         if (!resp.ok) throw new Error(`Failed to load invoices: ${resp.status}`);
         let data = await resp.json();
-        // Status overrides removed - using direct API calls
-        const filtered = (data || []).filter((inv) => (inv.vendor || 'Unknown') === vendor);
+
+        // Filter for this vendor
+        const filtered = (data || []).filter((inv) => {
+          const vendorName = inv.vendor_name || inv.vendor || 'Unknown';
+          return vendorName === vendor;
+        });
+
         const mapped = filtered.map((invoice) => ({
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
-          vendor: invoice.vendor || 'Unknown',
-          amount: `$${invoice.total || '0.00'}`,
+          vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+          amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
           office: invoice.clinic_id || 'Unknown',
           dueDate: invoice.due_date
             ? new Date(invoice.due_date).toLocaleDateString('en-US', {
@@ -77,7 +86,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
       }
     };
     load();
-  }, [vendor]);
+  }, [vendor, refreshCounter]); // Re-fetch when vendor or refreshCounter changes
 
   // Load vendor ACH info for banner/details panel
   useEffect(() => {
@@ -177,6 +186,22 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
       <div style={headerStyle}>
         <button style={backBtn} onClick={onBack}>&larr; Back</button>
         <div style={titleStyle}>{vendor}</div>
+        <div style={{ flex: 1 }} />
+        <button
+          onClick={() => setRefreshCounter(c => c + 1)}
+          disabled={loading}
+          style={{
+            padding: '8px 16px',
+            borderRadius: 6,
+            border: '1px solid #357ab2',
+            color: loading ? '#999' : '#fff',
+            background: loading ? '#e0e0e0' : '#357ab2',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: 500,
+          }}
+        >
+          {loading ? 'Refreshing...' : 'Refresh Data'}
+        </button>
       </div>
       {loading && <div style={{ color: '#357ab2', marginBottom: 12 }}>Loading invoices…</div>}
       {error && <div style={{ color: '#dc2626', marginBottom: 12 }}>Error: {error}</div>}
