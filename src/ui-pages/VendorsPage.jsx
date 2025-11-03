@@ -24,6 +24,9 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
 
   const { getStatusForVendor, path, version } = useVendorAchMap();
 
+  // Track refresh counter to force re-fetch
+  const [refreshCounter, setRefreshCounter] = useState(0);
+
   // Load and aggregate vendor data from live All Invoices source
   useEffect(() => {
     const loadVendors = async () => {
@@ -36,7 +39,7 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
         const vendorMap = new Map();
         data.forEach((invoice) => {
           const vendorName = invoice.vendor_name || invoice.vendor || 'Unknown';
-          const amountNum = parseFloat(String(invoice.invoice_total ?? invoice.total ?? '0')); 
+          const amountNum = parseFloat(String(invoice.invoice_total ?? invoice.total ?? '0'));
 
           if (vendorMap.has(vendorName)) {
             const existing = vendorMap.get(vendorName);
@@ -74,7 +77,7 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
     };
 
     loadVendors();
-  }, []);
+  }, [refreshCounter]); // Re-fetch when refreshCounter changes
 
   const wrapperStyle = { padding: '24px' };
 
@@ -126,11 +129,20 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
 
   return (
     <div style={wrapperStyle}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Vendors</h1>
-        <p className="text-gray-600 mt-2">
-          {filteredRows.length} vendor{filteredRows.length !== 1 ? 's' : ''} with outstanding invoices
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Vendors</h1>
+          <p className="text-gray-600 mt-2">
+            {filteredRows.length} vendor{filteredRows.length !== 1 ? 's' : ''} with outstanding invoices
+          </p>
+        </div>
+        <button
+          onClick={() => setRefreshCounter(c => c + 1)}
+          disabled={loading}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {loading ? 'Refreshing...' : 'Refresh Vendors'}
+        </button>
       </div>
       <InvoiceTable
         rows={filteredRows.map((row) => ({
