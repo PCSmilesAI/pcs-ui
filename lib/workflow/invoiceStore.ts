@@ -5,15 +5,19 @@ import { resolveDataPath } from './dataDir';
 
 export type InvoiceRecord = Record<string, any>;
 
-const SEED_PATHS = [
-  // Try to seed from the old invoice queue file (which is an array)
-  path.join(process.cwd(), 'pcs_ai_data', 'invoice_queue.json'),
-  path.join(process.cwd(), 'public', 'invoice_queue.json'),
-  path.join(process.cwd(), 'invoice_queue.json'),
-];
-
 function getStorePath(): string {
   return resolveDataPath('workflow_invoices.json');
+}
+
+function getSeedPaths(): string[] {
+  // Try to seed from the old invoice queue file (which is an array)
+  // First try the data directory (where it's actually stored)
+  return [
+    resolveDataPath('invoice_queue.json'),
+    path.join(process.cwd(), 'pcs_ai_data', 'invoice_queue.json'),
+    path.join(process.cwd(), 'public', 'invoice_queue.json'),
+    path.join(process.cwd(), 'invoice_queue.json'),
+  ];
 }
 
 async function ensureDir(dir: string) {
@@ -39,7 +43,8 @@ async function atomicWrite(filePath: string, data: any) {
 }
 
 async function trySeed(targetPath: string) {
-  for (const seed of SEED_PATHS) {
+  const seedPaths = getSeedPaths();
+  for (const seed of seedPaths) {
     try {
       const buf = await fs.readFile(seed, 'utf8');
       const parsed = JSON.parse(buf);
