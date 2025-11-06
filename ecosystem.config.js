@@ -1,9 +1,71 @@
+/**
+ * PM2 Ecosystem Configuration
+ *
+ * ⚠️  SECURITY NOTICE: All secrets must be provided via environment variables.
+ * Never hardcode secrets in this file. Use /etc/environment or a secret manager.
+ *
+ * Required environment variables (must be set before starting):
+ * - SESSION_SECRET (min 32 chars)
+ * - ENCRYPTION_KEY (min 32 chars)
+ * - QBO_CLIENT_ID
+ * - QBO_CLIENT_SECRET
+ * - QBO_REDIRECT_URI
+ * - STRIPE_SECRET_KEY
+ * - STRIPE_WEBHOOK_SECRET
+ * - SENDGRID_API_KEY
+ */
+
+const requiredEnvVars = [
+  'SESSION_SECRET',
+  'ENCRYPTION_KEY',
+  'QBO_CLIENT_ID',
+  'QBO_CLIENT_SECRET',
+  'QBO_REDIRECT_URI',
+];
+
+const optionalEnvVars = [
+  'STRIPE_SECRET_KEY',
+  'STRIPE_WEBHOOK_SECRET',
+  'SENDGRID_API_KEY',
+  'SENTRY_DSN',
+];
+
+// Validate required environment variables on startup
+function validateConfig() {
+  const missing = [];
+  const nodeEnv = process.env.NODE_ENV || 'development';
+
+  // Only validate secrets in production
+  if (nodeEnv === 'production') {
+    for (const varName of requiredEnvVars) {
+      if (!process.env[varName]) {
+        missing.push(varName);
+      }
+    }
+
+    if (missing.length > 0) {
+      console.error('[CONFIG] ❌ FATAL: Missing required environment variables:');
+      missing.forEach(v => console.error(`  - ${v}`));
+      console.error('[CONFIG] Set these in /etc/environment or your secret manager');
+      process.exit(1);
+    }
+  }
+
+  console.log('[CONFIG] ✅ CONFIG_OK: true');
+  console.log(`[CONFIG] Environment: ${nodeEnv}`);
+  console.log(`[CONFIG] Loaded ${requiredEnvVars.length} required secrets from environment`);
+}
+
+// Validate on module load
+validateConfig();
+
 module.exports = {
   apps: [{
-    name: 'pcs-ai-quickbooks',
-    script: 'dev-server.js',
-    instances: 1, // Changed from 'max' to 1 to avoid port conflicts
-    exec_mode: 'cluster',
+    name: 'pcs-ui',
+    script: 'npm',
+    args: 'run start',
+    instances: 1,
+    exec_mode: 'fork',
     env: {
       NODE_ENV: 'development',
       PCS_ENV: 'development',
@@ -15,58 +77,26 @@ module.exports = {
       PCS_ENV: 'production',
       PCS_DATA_DIR: '/var/www/pcs-ui-data',
       INBOX_SCAN_INTERVAL_MS: '60000',
-      PORT: 3001,
+      PORT: 3000,
       HOST: '0.0.0.0',
-      // Security Settings
-      API_KEYS: '2c2774895ae438e86c71f7efe5ca9f5f326621c1df399f2d0a4fa7ed124724ba,d156f77282cef33af3a906c6af137f67bb33b6fd26913a406116a9d6ca779d8a',
-      SESSION_SECRET: '3e10b131d772430f721b24388bb92fa978d037e82ecdd193d2e8264e50050705523375eb75ab514c05b60d7abf70254bde11743609faa0f28eb53520c773327f',
-      ENCRYPTION_KEY: '36e81c4fa793c1673df8d6dd6c6db856e668ae198d28fae458fcb295ce7d4f5c',
-      WEBHOOK_VERIFICATION_TOKEN: 'a8d2b999f429de47d9446316796a07c488566196377816ddba7e0f014beb1f8a',
-      WEBHOOK_SIGNATURE_KEY: 'a8d2b999f429de47d9446316796a07c488566196377816ddba7e0f014beb1f8a',
-      // QuickBooks OAuth Settings (SANDBOX/DEVELOPMENT)
-      QBO_CLIENT_ID: 'AB2KnsBep2GtaSf9yTLjxA90TZKlwcF5ItDjF89UiwQH75aaoE',
-      QBO_CLIENT_SECRET: 'SjQLypVE8KnRDsFWwmYJa8qFGH3jxqoMlk6bSF74',
-      QBO_REDIRECT_URI: 'https://pcsmilesai.com/api/qbo/callback',
-      QBO_SCOPES: 'com.intuit.quickbooks.accounting',
-      QBO_ENVIRONMENT: 'sandbox',
-      QBO_STATE_SECRET: 'your-secret-key-for-state-signing-min-32-chars-long',
-      // PCS AI Integration
-      PCS_AI_API_URL: 'https://api.pcs-ai.com',
-      PCS_AI_API_KEY: 'your-pcs-ai-api-key',
-      // Database Settings
-      DB_HOST: 'localhost',
-      DB_PORT: 5432,
-      DB_NAME: 'pcs_ai_quickbooks',
-      DB_USER: 'pcs_ai_user',
-      DB_PASSWORD: 'your-secure-db-password',
-      // Logging
+      // All secrets come from environment variables - see /etc/environment
       LOG_LEVEL: 'info',
-      LOG_FILE: 'logs/app.log',
-      // Monitoring
       ENABLE_METRICS: true,
       METRICS_PORT: 9090,
-      // Performance
       ENABLE_CACHE: true,
       CACHE_TTL: 300,
-      // File Upload
       MAX_FILE_SIZE: '10mb',
-      UPLOAD_DIR: 'uploads',
-      // Error Reporting
-      SENTRY_DSN: 'your-sentry-dsn',
-      // SSL/TLS
-      SSL_ENABLED: false,
-      SSL_CERT_PATH: '/path/to/cert.pem',
-      SSL_KEY_PATH: '/path/to/key.pem'
+      UPLOAD_DIR: 'uploads'
     }
   }],
   deploy: {
     production: {
-      user: 'node',
-      host: 'your-production-server.com',
+      user: 'root',
+      host: '159.65.181.148',
       ref: 'origin/main',
-      repo: 'git@github.com:yourusername/pcs-ui.git',
-      path: '/var/www/pcs-ai-quickbooks',
-      'post-deploy': 'npm install && pm2 reload ecosystem.config.js --env production'
+      repo: 'https://github.com/PCSmilesAI/pcs-ui.git',
+      path: '/var/www/pcs-ui',
+      'post-deploy': 'npm install && npm run build && pm2 restart pcs-ui --update-env'
     }
   }
 };
