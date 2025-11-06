@@ -17,6 +17,7 @@ function InvoiceDetailContent() {
     const loadInvoice = async () => {
       try {
         const invoiceNumber = searchParams.get('invoice');
+        const from = searchParams.get('from');
         if (!invoiceNumber) {
           console.error('No invoice number provided');
           setLoading(false);
@@ -28,14 +29,33 @@ function InvoiceDetailContent() {
         if (!response.ok) {
           throw new Error('Failed to load invoice queue');
         }
-        
+
         const data = await response.json();
-        const queue = data.invoices || [];
-        
+        let queue = data.invoices || [];
+
+        // Filter the queue based on which tab the user came from
+        if (from) {
+          if (from.includes('ToBePaid')) {
+            // Only show invoices with status 'to_be_paid'
+            queue = queue.filter(inv => (inv.status || '').toLowerCase() === 'to_be_paid');
+          } else if (from.includes('ForMe')) {
+            // Only show invoices that are NOT approved/paid/to_be_paid
+            queue = queue.filter(inv => {
+              const status = (inv.status || '').toLowerCase();
+              return status !== 'approved' && status !== 'paid' && status !== 'to_be_paid' && !inv.deleted && !inv.workflow_deleted_at;
+            });
+          } else if (from.includes('Complete')) {
+            // Only show invoices with status 'paid'
+            queue = queue.filter(inv => (inv.status || '').toLowerCase() === 'paid');
+          } else if (from.includes('AllInvoices')) {
+            // Show all invoices (no filter)
+          }
+        }
+
         // Try to find by invoice_number first, then by id
         let foundInvoice = queue.find(inv => inv.invoice_number === invoiceNumber);
         let currentIndex = -1;
-        
+
         if (foundInvoice) {
           currentIndex = queue.findIndex(inv => inv.invoice_number === invoiceNumber);
         } else {
@@ -44,7 +64,7 @@ function InvoiceDetailContent() {
             currentIndex = queue.findIndex(inv => inv.id === invoiceNumber);
           }
         }
-        
+
         if (foundInvoice) {
           // Set the queue and current index for navigation
           setInvoiceQueue(queue);

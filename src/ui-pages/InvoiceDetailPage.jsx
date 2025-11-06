@@ -894,7 +894,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       ];
     }
 
-    if (status === 'to_be_paid' || status === 'approved') {
+    // For invoices ready to be paid (to_be_paid status), show Pay button
+    if (status === 'to_be_paid') {
       return [
         { label: 'Pay', onClick: handlePaid, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
         { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
@@ -902,15 +903,12 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       ];
     }
 
+    // For all other statuses (incoming, awaiting_office_approval, awaiting_admin_approval, etc.), show Approve
     const defaultButtons = [
       { label: 'Approve', onClick: handleApprove, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
       { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
       { label: 'Repair', onClick: handleRepair, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
     ];
-
-    if (status === 'to_be_paid' || status === 'paid') {
-      return defaultButtons.slice(1); // only allow reject/repair in paid states
-    }
 
     return defaultButtons;
   }
