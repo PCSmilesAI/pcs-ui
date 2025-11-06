@@ -331,8 +331,13 @@ console.log('\n🧹 CLEANUP');
 console.log('----------');
 
 test('Delete test invoices', () => {
+  // Delete audit events first (due to foreign key constraint)
+  const testInvoices = db.prepare("SELECT id FROM invoices WHERE invoice_number LIKE 'TEST-%' OR invoice_number LIKE 'STRESS-%'").all();
+  for (const inv of testInvoices) {
+    db.prepare("DELETE FROM invoice_events WHERE invoice_id = ?").run(inv.id);
+  }
+  // Then delete invoices
   db.prepare("DELETE FROM invoices WHERE invoice_number LIKE 'TEST-%' OR invoice_number LIKE 'STRESS-%'").run();
-  db.prepare("DELETE FROM invoice_events WHERE invoice_id NOT IN (SELECT id FROM invoices)").run();
   console.log('   Test data cleaned up');
 });
 
