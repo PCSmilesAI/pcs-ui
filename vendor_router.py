@@ -11,7 +11,14 @@ import time
 from datetime import datetime
 
 PARSER_FOLDER = os.path.dirname(__file__)
-OUTPUT_FOLDER = os.path.join(PARSER_FOLDER, "output_jsons/")
+
+# Use PCS_DATA_DIR if set, otherwise use relative path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
+if not os.path.isabs(DATA_DIR):
+    DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, DATA_DIR))
+
+OUTPUT_FOLDER = os.path.join(DATA_DIR, "output_jsons/")
 QUEUE_WRITER = os.path.join(PARSER_FOLDER, "invoice_queue_writer.py")
 
 # Vendor parser mappings
