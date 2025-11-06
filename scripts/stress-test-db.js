@@ -57,11 +57,23 @@ test('Pragmas are set correctly', () => {
   const fk = db.prepare('PRAGMA foreign_keys').all()[0];
   const wal = db.prepare('PRAGMA journal_mode').all()[0];
   const sync = db.prepare('PRAGMA synchronous').all()[0];
-  
+
   assert(fk.foreign_keys === 1, 'Foreign keys not enabled');
   assert(wal.journal_mode === 'wal', 'WAL mode not enabled');
   assert(sync.synchronous === 1, 'Synchronous not set to NORMAL');
 });
+
+// Clean up any previous test data before running tests
+console.log('   Cleaning up previous test data...');
+try {
+  const testInvoices = db.prepare("SELECT id FROM invoices WHERE invoice_number LIKE 'TEST-%' OR invoice_number LIKE 'STRESS-%'").all();
+  for (const inv of testInvoices) {
+    db.prepare("DELETE FROM invoice_events WHERE invoice_id = ?").run(inv.id);
+  }
+  db.prepare("DELETE FROM invoices WHERE invoice_number LIKE 'TEST-%' OR invoice_number LIKE 'STRESS-%'").run();
+} catch (err) {
+  // Ignore errors during cleanup
+}
 
 test('invoices table exists with correct schema', () => {
   const schema = db.prepare("PRAGMA table_info(invoices)").all();
