@@ -191,7 +191,14 @@ if __name__ == "__main__":
     pdf_path = sys.argv[1]
     parsed_data = parse_exodus_invoice(pdf_path)
     print(json.dumps(parsed_data, indent=2))
-    output_dir = "output_jsons"
+
+    # Use PCS_DATA_DIR if set, otherwise use relative path
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
+    if not os.path.isabs(DATA_DIR):
+        DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, DATA_DIR))
+
+    output_dir = os.path.join(DATA_DIR, "output_jsons")
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, f"{parsed_data['invoice_number']}.json")
     with open(output_path, "w") as f:

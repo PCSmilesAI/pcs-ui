@@ -285,7 +285,15 @@ if __name__ == "__main__":  # pragma: no cover
     print(json.dumps(result, indent=2))
     # Also save the output to output_jsons/<filename>.json
     import os
-    os.makedirs('output_jsons', exist_ok=True)
+
+    # Use PCS_DATA_DIR if set, otherwise use relative path
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
+    if not os.path.isabs(DATA_DIR):
+        DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, DATA_DIR))
+
+    OUTPUT_DIR = os.path.join(DATA_DIR, "output_jsons")
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
     base = os.path.basename(pdf_path).replace('.PDF', '').replace('.pdf', '')
-    with open(f'output_jsons/{base}.json', 'w') as f:
+    with open(os.path.join(OUTPUT_DIR, f'{base}.json'), 'w') as f:
         json.dump(result, f, indent=2)

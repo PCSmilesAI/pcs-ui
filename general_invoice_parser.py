@@ -22,7 +22,13 @@ import re
 import json
 from datetime import datetime
 
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'output_jsons')
+# Use PCS_DATA_DIR if set, otherwise use relative path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
+if not os.path.isabs(DATA_DIR):
+    DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, DATA_DIR))
+
+OUTPUT_DIR = os.path.join(DATA_DIR, 'output_jsons')
 
 
 def safe_mkdir(path: str) -> None:
