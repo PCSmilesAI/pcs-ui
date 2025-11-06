@@ -68,8 +68,13 @@ export function routeAfterAP(invoice: any, roles: RolesConfig): InvoiceStatus {
   }
 
   const office = getInvoiceOffice(invoice);
+
+  // If no office is provided, route to admin approval
+  // This allows admins to approve invoices without office information
   if (!office) {
-    throw new Error('Office required');
+    const next: InvoiceStatus = 'awaiting_admin_approval';
+    logEngine('routeAfterAP_no_office_to_admin', { invoiceId: getInvoiceId(invoice) });
+    return next;
   }
 
   const amount = parseAmount(invoice?.total ?? invoice?.invoice_total);
