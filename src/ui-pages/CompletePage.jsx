@@ -96,6 +96,19 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
     loadInvoices();
   }, []);
 
+  // Refresh invoice list when page comes back into focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('📄 CompletePage: Page came into focus, refreshing invoice list');
+        reloadList();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [reloadList]);
+
   async function reloadList() {
     try {
       setLoading(true);
