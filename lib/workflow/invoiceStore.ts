@@ -58,8 +58,28 @@ async function trySeed(targetPath: string) {
       }
 
       if (invoices.length > 0) {
-        await atomicWrite(targetPath, { invoices });
-        console.warn('[WORKFLOW][STORE] seeded invoice store from', seed, 'with', invoices.length, 'invoices');
+        // Deduplicate invoices by invoice_number, id, invoice, or source_file
+        // Keep the first occurrence of each invoice
+        const seen = new Set<string>();
+        const deduplicated: any[] = [];
+
+        for (const invoice of invoices) {
+          const key = invoice.invoice_number || invoice.id || invoice.invoice || invoice.source_file;
+          if (key && !seen.has(String(key).trim())) {
+            seen.add(String(key).trim());
+            deduplicated.push(invoice);
+          } else if (!key) {
+            // If no key, include it anyway (it's a unique invoice)
+            deduplicated.push(invoice);
+          }
+        }
+
+        const originalCount = invoices.length;
+        const deduplicatedCount = deduplicated.length;
+        const duplicatesRemoved = originalCount - deduplicatedCount;
+
+        await atomicWrite(targetPath, { invoices: deduplicated });
+        console.warn('[WORKFLOW][STORE] seeded invoice store from', seed, 'with', deduplicatedCount, 'invoices (removed', duplicatesRemoved, 'duplicates)');
         return;
       }
     } catch (_) {
