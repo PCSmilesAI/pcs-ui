@@ -215,4 +215,46 @@ def main():
             time.sleep(10)
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    # Support command-line arguments for direct invocation
+    if len(sys.argv) > 1:
+        # Called with arguments: invoice_queue_writer.py <json_path_or_pdf_path> [vendor]
+        input_path = sys.argv[1]
+        vendor = sys.argv[2] if len(sys.argv) > 2 else None
+
+        # Check if input is a JSON file or PDF file
+        if input_path.endswith('.json'):
+            # Direct JSON file path
+            if os.path.exists(input_path):
+                add_invoice_to_queue(input_path)
+                sys.exit(0)
+            else:
+                log(f"❌ JSON file not found: {input_path}")
+                sys.exit(1)
+        elif input_path.endswith('.pdf') or input_path.endswith('.PDF'):
+            # PDF file path - find corresponding JSON
+            if os.path.exists(input_path):
+                pdf_basename = os.path.basename(input_path)
+                json_basename = pdf_basename.replace('.pdf', '.json').replace('.PDF', '.json')
+                json_path = os.path.join(OUTPUT_JSONS_PATH, json_basename)
+
+                # If JSON doesn't exist yet, wait a moment for it to be created
+                if not os.path.exists(json_path):
+                    time.sleep(1)
+
+                if os.path.exists(json_path):
+                    add_invoice_to_queue(json_path)
+                    sys.exit(0)
+                else:
+                    log(f"❌ JSON file not found for {pdf_basename}")
+                    sys.exit(1)
+            else:
+                log(f"❌ PDF file not found: {input_path}")
+                sys.exit(1)
+        else:
+            log(f"❌ Invalid file type: {input_path}")
+            sys.exit(1)
+    else:
+        # Run as daemon
+        main()

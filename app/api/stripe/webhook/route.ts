@@ -113,15 +113,23 @@ export async function POST(request: Request) {
 
         if (!accountId) break; // No connected account context for ACH updates
 
-        // If this isn't an account.* event, you may want to fetch the latest account
-        // snapshot to compute achStatus precisely. Example:
-        //
-        // const acct = await stripe.accounts.retrieve(accountId);
-        // const transfersActive2 = acct.capabilities?.transfers === 'active';
-        // const externalCount2 = (acct.external_accounts?.total_count as number) || 0;
-        // achStatus = transfersActive2 && externalCount2 > 0 ? 'complete'
-        //           : (transfersActive2 || externalCount2 > 0) ? 'pending'
-        //           : 'missing';
+        // For non-account.* events, fetch the latest account snapshot to compute achStatus precisely
+        const isAccountEvent = event.type.startsWith('account.');
+        if (!isAccountEvent) {
+          try {
+            const client = getStripe();
+            if (client) {
+              const acct = await client.accounts.retrieve(accountId);
+              const transfersActive2 = acct.capabilities?.transfers === 'active';
+              const externalCount2 = (acct.external_accounts as any)?.data?.length || 0;
+              achStatus = transfersActive2 && externalCount2 > 0 ? 'complete'
+                        : (transfersActive2 || externalCount2 > 0) ? 'pending'
+                        : 'missing';
+            }
+          } catch (e: any) {
+            console.warn('[STRIPE][WEBHOOK] Failed to fetch account for status update:', e?.message);
+          }
+        }
 
         const updated = await setByAccountId(accountId, { ach_status: achStatus });
         console.log('[STRIPE][WEBHOOK]', event.type, { acct: accountId, ach_status: achStatus, updated });

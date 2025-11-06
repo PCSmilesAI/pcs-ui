@@ -41,6 +41,12 @@ export async function POST(req: NextRequest) {
       console.log('[API][INVOICES]', 'transition_approve_received', { invoiceId: String(invoiceId), userEmail: user.email });
       try {
         const status = (invoice.status || 'incoming').toLowerCase();
+
+        // Ensure office field is populated from request body if provided
+        if (body?.office) {
+          invoice.office = body.office;
+        }
+
         if (status === 'incoming' || status === 'categorized') {
           approveAP(invoice, { email: user.email, name: user.name }, roles);
         } else if (status === 'awaiting_office_approval') {
@@ -55,8 +61,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: err?.message || 'Approval failed' }, { status: 400 });
       }
 
-      await save(invoice);
-      console.log('[API][INVOICES]', 'transition_approve_success', { invoiceId: String(invoiceId), userEmail: user.email });
+      console.log('[API][INVOICES]', 'transition_before_save', { invoiceId: String(invoiceId), status: invoice.status });
+      try {
+        await save(invoice);
+        console.log('[API][INVOICES]', 'transition_approve_success', { invoiceId: String(invoiceId), userEmail: user.email });
+      } catch (err: any) {
+        console.error('[API][INVOICES]', 'transition_save_error', { invoiceId: String(invoiceId), error: String(err) });
+        return NextResponse.json({ error: 'Failed to save invoice: ' + err?.message }, { status: 500 });
+      }
       return NextResponse.json({ ok: true, invoice });
     }
 

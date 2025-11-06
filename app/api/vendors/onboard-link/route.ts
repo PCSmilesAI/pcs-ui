@@ -53,8 +53,8 @@ export async function POST(req: NextRequest) {
       const origin = req.headers.get('x-forwarded-proto') && req.headers.get('host')
         ? `${req.headers.get('x-forwarded-proto')}://${req.headers.get('host')}`
         : '';
-      const refreshUrl = `${origin}/VendorsPage`;
-      const returnUrl = `${origin}/VendorDetailPage?vendor=${encodeURIComponent(vendorParam || '')}`;
+      const refreshUrl = `${origin}/VendorOnboardingSuccess?vendor=${encodeURIComponent(vendorParam || '')}`;
+      const returnUrl = `${origin}/VendorOnboardingSuccess?vendor=${encodeURIComponent(vendorParam || '')}`;
       const al = await stripe.accountLinks.create({
         account: accountId,
         type: 'account_onboarding',

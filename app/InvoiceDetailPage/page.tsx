@@ -52,12 +52,14 @@ function InvoiceDetailContent() {
           
           const officeRaw = foundInvoice.office_location || foundInvoice.office || foundInvoice.clinic_id || '';
           // Transform the invoice data to match the expected format
+          const rawTotal = foundInvoice.invoice_total || foundInvoice.total || '0.00';
           const transformedInvoice = {
             id: foundInvoice.id || foundInvoice.invoice_number,
             invoice: foundInvoice.invoice_number || 'Unknown',
             invoice_number: foundInvoice.invoice_number,
             vendor: foundInvoice.vendor_name || foundInvoice.vendor || 'Unknown',
-            amount: `$${foundInvoice.invoice_total || foundInvoice.total || '0.00'}`,
+            vendor_name: foundInvoice.vendor_name || foundInvoice.vendor || 'Unknown',
+            amount: `$${rawTotal}`,
             office: officeRaw || 'Unknown',
             rawOffice: officeRaw,
             dueDate: foundInvoice.due_date ? new Date(foundInvoice.due_date).toLocaleDateString('en-US', {
@@ -80,7 +82,7 @@ function InvoiceDetailContent() {
             assigned_to: foundInvoice.assigned_to,
             approved: foundInvoice.approved,
             status: foundInvoice.status,
-            total: foundInvoice.total,
+            total: rawTotal,
             approvals: foundInvoice.approvals || {},
             line_items: Array.isArray(foundInvoice.line_items) ? foundInvoice.line_items : []
           };

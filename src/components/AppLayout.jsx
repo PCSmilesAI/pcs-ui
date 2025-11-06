@@ -6,21 +6,26 @@ import { InvoiceClickProvider } from '../context/InvoiceClickContext';
 import FilterPanel from './FilterPanel.jsx'
 
 export default function AppLayout({ children }) {
+  // Get hooks at top level - these must be called unconditionally
   const pathname = usePathname();
   const router = useRouter();
   const sp = useSearchParams();
+
   const [currentPage, setCurrentPage] = useState('');
-  // QBO connection logic removed since QBO is already connected
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({});
 
+  // Determine if this is an auth page or vendor onboarding success page
+  const isAuthPage = pathname === '/LoginPage' || pathname === '/SignupPage';
+  const isVendorOnboardingSuccess = pathname === '/VendorOnboardingSuccess';
+
   useEffect(() => {
     const path = pathname.split('/')[1] || 'ForMePage';
-    
+
     // Map URL paths to NavBar page keys
     const pageMapping = {
       'ForMePage': 'forMe',
-      'ToBePaidPage': 'toBePaid', 
+      'ToBePaidPage': 'toBePaid',
       'CompletePage': 'complete',
       'VendorsPage': 'vendors',
       'AllInvoicesPage': 'allInvoices',
@@ -32,14 +37,9 @@ export default function AppLayout({ children }) {
       'roles': 'roles',
       'ConnectionsPage': 'connections'
     };
-    
+
     setCurrentPage(pageMapping[path] || 'forMe');
   }, [pathname]);
-
-  // QBO status check removed since QBO is already connected
-
-  // Check if current page is an auth page (login/signup)
-  const isAuthPage = pathname === '/LoginPage' || pathname === '/SignupPage';
 
   const handleChangePage = (pageKey) => {
     // Map NavBar page keys to URL paths
@@ -81,44 +81,56 @@ export default function AppLayout({ children }) {
     router.push('/LoginPage');
   };
 
+  // Render content with or without InvoiceClickProvider based on page type
+  const content = (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Render NavBar only on non-auth and non-vendor-onboarding pages */}
+      {!isAuthPage && !isVendorOnboardingSuccess && (
+        <NavBar
+          currentPage={currentPage}
+          onChangePage={handleChangePage}
+          onToggleFilter={handleToggleFilter}
+          onSearch={handleSearch}
+          onLogout={handleLogout}
+        />
+      )}
+      {/* Render FilterPanel only on non-auth and non-vendor-onboarding pages */}
+      {!isAuthPage && !isVendorOnboardingSuccess && (
+        <FilterPanel
+          isOpen={isFilterOpen}
+          onClose={() => setIsFilterOpen(false)}
+          onApplyFilters={(criteria) => {
+            setFilters(criteria || {});
+            setIsFilterOpen(false);
+            try {
+              // Mirror filters into the URL so pages can read them reliably
+              const params = new URLSearchParams(sp.toString());
+              const keys = ['vendor','office','category','minAmount','maxAmount','dueWithin','ach'];
+              keys.forEach((k) => {
+                const v = (criteria && criteria[k]) ? String(criteria[k]).trim() : '';
+                if (v) params.set(k, v); else params.delete(k);
+              });
+              router.replace(`${pathname}?${params.toString()}`);
+            } catch (applyError) {
+              console.error('Failed to mirror filter parameters in URL:', applyError);
+            }
+          }}
+        />
+      )}
+      <main style={{ flex: 1, padding: (isAuthPage || isVendorOnboardingSuccess) ? '0' : '20px' }}>
+        {React.isValidElement(children) ? React.cloneElement(children, { filters }) : children}
+      </main>
+    </div>
+  );
+
+  // Only wrap with InvoiceClickProvider on non-auth and non-vendor-onboarding pages
+  if (isAuthPage || isVendorOnboardingSuccess) {
+    return content;
+  }
+
   return (
     <InvoiceClickProvider>
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        {!isAuthPage && (
-          <NavBar
-            currentPage={currentPage}
-            onChangePage={handleChangePage}
-            onToggleFilter={handleToggleFilter}
-            onSearch={handleSearch}
-            onLogout={handleLogout}
-          />
-        )}
-        {!isAuthPage && (
-          <FilterPanel
-            isOpen={isFilterOpen}
-            onClose={() => setIsFilterOpen(false)}
-            onApplyFilters={(criteria) => {
-              setFilters(criteria || {});
-              setIsFilterOpen(false);
-              try {
-                // Mirror filters into the URL so pages can read them reliably
-                const params = new URLSearchParams(sp.toString());
-                const keys = ['vendor','office','category','minAmount','maxAmount','dueWithin','ach'];
-                keys.forEach((k) => {
-                  const v = (criteria && criteria[k]) ? String(criteria[k]).trim() : '';
-                  if (v) params.set(k, v); else params.delete(k);
-                });
-                router.replace(`${pathname}?${params.toString()}`);
-              } catch (applyError) {
-                console.error('Failed to mirror filter parameters in URL:', applyError);
-              }
-            }}
-          />
-        )}
-        <main style={{ flex: 1, padding: isAuthPage ? '0' : '20px' }}>
-          {React.isValidElement(children) ? React.cloneElement(children, { filters }) : children}
-        </main>
-      </div>
+      {content}
     </InvoiceClickProvider>
   );
 }

@@ -93,7 +93,7 @@ export async function GET(request: Request) {
       ok: true,
       vendor: vendorName || vendorParam || null,
       stripeAccountId,
-      ach_status: achStatus || derivedStatus,
+      ach_status: derivedStatus,
       bank: bank
         ? {
             bank_name: bankName,

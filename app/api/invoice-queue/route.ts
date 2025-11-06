@@ -16,8 +16,7 @@ export async function GET(request: NextRequest) {
 
     const { invoices: deduped, duplicatesRemoved } = dedupeInvoices(data)
     if (duplicatesRemoved > 0) {
-      console.log(`🧹 Removed ${duplicatesRemoved} duplicate invoices from queue`)
-      saveQueueFiles(queueFiles, deduped)
+      console.log(`🧹 Removed ${duplicatesRemoved} duplicate invoices from queue (in-memory only, not persisted)`)
       data = deduped
     }
     

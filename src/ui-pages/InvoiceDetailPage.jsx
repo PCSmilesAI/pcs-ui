@@ -472,6 +472,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         body: JSON.stringify({
           id: invoiceId,
           action,
+          ...(action === 'approve' ? { office: details?.office || invoice.office || invoice.office_location || invoice.clinic_id || '' } : {}),
           ...(action === 'reject' ? { reason: 'Rejected from invoice detail' } : {}),
         }),
       });
@@ -740,20 +741,61 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }
     setProcessing(true);
     try {
-      const amountValue = paymentAmount || invoice?.amount || invoice?.total || '';
-      const numeric = typeof amountValue === 'number' ? amountValue : Number(String(amountValue).replace(/[^0-9.\-]/g, '')) || 0;
-      const response = await fetch('/api/invoices/transition', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: invoiceId, action: 'mark_paid', total: numeric }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload?.error) {
-        showToast(payload?.error || 'Failed to mark as paid', 'error');
+      // Check if vendor is onboarded
+      const vendorName = invoice?.vendor || invoice?.vendor_name || '';
+      if (!vendorName) {
+        showToast('Vendor information missing.', 'error');
+        setProcessing(false);
         return;
       }
-      alert('Invoice marked as paid.');
-      if (onBack) onBack();
+
+      const achResponse = await fetch(`/api/vendors/ach-info?vendor=${encodeURIComponent(vendorName)}`);
+      const achData = await achResponse.json().catch(() => ({}));
+
+      if (!achData.ok) {
+        showToast('Failed to check vendor onboarding status.', 'error');
+        setProcessing(false);
+        return;
+      }
+
+      // Check if vendor is onboarded (ach_status should be 'complete')
+      if (achData.ach_status !== 'complete') {
+        // Show message with button to navigate to vendor page
+        const message = `Vendor "${vendorName}" is not fully onboarded. Please complete their Stripe onboarding before processing payment.`;
+        showToast(message, 'warning');
+
+        // Create a modal-like message with a button
+        const userConfirm = confirm(`${message}\n\nWould you like to go to the Vendor page to complete onboarding?`);
+        if (userConfirm) {
+          // Navigate to vendor detail page
+          window.location.href = `/VendorDetailPage?vendor=${encodeURIComponent(vendorName)}`;
+        }
+        setProcessing(false);
+        return;
+      }
+
+      // Vendor is onboarded, proceed with payment through Stripe
+      showToast('Processing payment...', 'info');
+      const response = await fetch('/api/invoices/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoiceIds: [invoiceId] }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload?.ok) {
+        const errorMsg = payload?.results?.[0]?.error || payload?.error || 'Failed to process payment';
+        showToast(errorMsg, 'error');
+        return;
+      }
+
+      // Check if payment was successful
+      const result = payload.results?.[0];
+      if (result?.ok) {
+        showToast(`✅ Payment processed! Transfer ID: ${result.transferId}`, 'success');
+        if (onBack) onBack();
+      } else {
+        showToast(`Payment failed: ${result?.error || 'Unknown error'}`, 'error');
+      }
     } catch (err) {
       showToast(err?.message || 'Unexpected error while marking paid', 'error');
     } finally {
@@ -815,7 +857,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
     if (status === 'to_be_paid' || status === 'approved') {
       return [
-        { label: 'Paid', onClick: handlePaid, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
+        { label: 'Pay', onClick: handlePaid, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
         { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
         { label: 'Repair', onClick: handleRepair, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
       ];

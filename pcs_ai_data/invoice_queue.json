@@ -1,5 +1,49 @@
 [
   {
+    "id": "test-invoice-001",
+    "vendor": "Braxton Ellsworth",
+    "vendor_name": "Braxton Ellsworth",
+    "invoice_number": "INV-2025-001",
+    "invoice_date": "11/03/2025",
+    "due_date": "12/03/2025",
+    "invoice_total": "5.00",
+    "office_location": "Eugene",
+    "status": "awaiting_office_approval",
+    "approved": false,
+    "approvals": {},
+    "line_items": [
+      {
+        "product_number": "TEST-001",
+        "product_name": "Test Service",
+        "Quantity": "1",
+        "unit_price": "5.00",
+        "line_item_total": "5.00"
+      }
+    ]
+  },
+  {
+    "id": "test-invoice-001",
+    "vendor": "Braxton Ellsworth",
+    "vendor_name": "Braxton Ellsworth",
+    "invoice_number": "INV-2025-001",
+    "invoice_date": "11/03/2025",
+    "due_date": "12/03/2025",
+    "invoice_total": "5.00",
+    "office_location": "Eugene",
+    "status": "awaiting_office_approval",
+    "approved": false,
+    "approvals": {},
+    "line_items": [
+      {
+        "product_number": "TEST-001",
+        "product_name": "Test Service",
+        "Quantity": "1",
+        "unit_price": "5.00",
+        "line_item_total": "5.00"
+      }
+    ]
+  },
+  {
     "invoice_number": "",
     "invoice_date": "",
     "invoice_total": "",

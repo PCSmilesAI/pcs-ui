@@ -90,21 +90,54 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
-    for (const row of selectedRows) {
-      if (status === 'completed') {
-        await fetch('/api/invoices/transition', {
+
+    if (status === 'completed') {
+      // Process payments through Stripe
+      try {
+        showToast('Processing payments...', 'info');
+
+        const invoiceIds = selectedRows.map(r => r.invoice_number || r.invoice);
+        const paymentRes = await fetch('/api/invoices/pay', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: row.invoice_number || row.invoice, action: 'mark_paid', total: row.amount?.replace(/[^0-9.\-]/g, '') }),
-        }).catch(() => null);
-      } else if (status === 'rejected') {
+          body: JSON.stringify({ invoiceIds }),
+        });
+
+        const paymentResult = await paymentRes.json();
+
+        if (!paymentResult.ok) {
+          showToast(`Payment failed: ${paymentResult.error}`, 'error');
+          return;
+        }
+
+        // Show results
+        if (paymentResult.successCount > 0) {
+          showToast(`✅ Successfully paid ${paymentResult.successCount} invoice(s)`, 'success');
+        }
+        if (paymentResult.errorCount > 0) {
+          const errors = paymentResult.results
+            .filter(r => !r.ok)
+            .map(r => `${r.invoiceId}: ${r.error}`)
+            .join('; ');
+          showToast(`⚠️ ${paymentResult.errorCount} payment(s) failed: ${errors}`, 'error');
+        }
+      } catch (err) {
+        console.error('Error processing payments:', err);
+        showToast(`Payment error: ${err.message}`, 'error');
+        return;
+      }
+    } else if (status === 'rejected') {
+      // Reject invoices
+      for (const row of selectedRows) {
         await fetch('/api/invoices/transition', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: row.invoice_number || row.invoice, action: 'reject', reason: 'Rejected from To Be Paid page' }),
         }).catch(() => null);
       }
+      showToast(`Rejected ${selectedRows.length} invoice(s)`, 'success');
     }
+
     setSelectedIds(new Set());
     await reloadList();
   }

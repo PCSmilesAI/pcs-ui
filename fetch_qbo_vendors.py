@@ -2,8 +2,8 @@ from quickbooks import QuickBooks
 from quickbooks.objects.vendor import Vendor
 
 # Replace these with your credentials
-client_id = 'ABfG1MwE5yhkAAqCw0RA2viwkI9cMdn33oagtgGOaJWdrkRBVl'
-client_secret = 'WWbNuMbbXQZKwKdYcpuDHs5H7mwvfP0eVcdsiIEy'
+client_id = 'AB2KnsBep2GtaSf9yTLjxA90TZKlwcF5ItDjF89UiwQH75aaoE'
+client_secret = 'SjQLypVE8KnRDsFWwmYJa8qFGH3jxqoMlk6bSF74'
 refresh_token = 'YOUR_REFRESH_TOKEN'
 realm_id = 'YOUR_REALM_ID'
 

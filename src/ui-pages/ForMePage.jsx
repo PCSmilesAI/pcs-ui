@@ -5,7 +5,7 @@ import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 
-export default function ForMePage({ searchQuery = '', filters = {} }) {
+function ForMePageImpl({ searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -68,6 +68,8 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     };
   }, []);
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const fetchVisibleInvoices = useCallback(async () => {
     // Propagate any query params from the page (e.g., ?email=...) to the API call
     const params = typeof window !== 'undefined'
@@ -90,7 +92,7 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
       .filter((invoice) => {
         if (invoice.deleted || invoice.workflow_deleted_at) return false;
         const status = (invoice.status || '').toLowerCase();
-        if (status === 'approved' || status === 'paid') return false;
+        if (status === 'approved' || status === 'paid' || status === 'to_be_paid') return false;
         if (invoice.approved === true) return false;
         return true;
       })
@@ -107,59 +109,6 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     }
   }, [fetchVisibleInvoices, showToast]);
 
-  async function bulkUpdate(action) {
-    const ids = Array.from(selectedIds);
-    if (ids.length === 0) return;
-    const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
-
-    if (action === 'approve') {
-      const missingOffice = selectedRows.find((row) => !row.rawOffice);
-      if (missingOffice) {
-        showToast('Office is required before approval.', 'error');
-        return;
-      }
-    }
-
-    let hadError = false;
-    let officeError = false;
-    for (const row of selectedRows) {
-      try {
-        const response = await fetch('/api/invoices/transition', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: row.id || row.invoice_number,
-            action,
-            ...(action === 'reject' ? { reason: 'Rejected from For Me page' } : {}),
-          }),
-        });
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          const message = data?.error || `Request failed (HTTP ${response.status})`;
-          if (message.toLowerCase().includes('office required')) {
-            officeError = true;
-          } else {
-            hadError = true;
-            showToast(message, 'error');
-          }
-        }
-      } catch (err) {
-        hadError = true;
-        showToast(err?.message || 'Network error while updating invoice', 'error');
-      }
-    }
-
-    if (officeError) {
-      showToast('Office is required before approval.', 'error');
-    }
-
-    if (!hadError && !officeError) {
-      showToast(action === 'approve' ? 'Invoices approved.' : 'Invoices rejected.', 'success');
-    }
-
-    setSelectedIds(new Set());
-    await reloadList();
-  }
   const searchParams = useSearchParams();
   const { getStatusForVendor } = useVendorAchMap();
 
@@ -253,25 +202,64 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     });
   }, [invoices, effectiveQuery, effectiveFilters]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-600">Loading invoices...</div>
-      </div>
-    );
-  }
+  // Define bulkUpdate after filteredRows is available
+  const bulkUpdate = useCallback(async (action) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-red-600">Error loading invoices: {error}</div>
-      </div>
-    );
-  }
+    if (action === 'approve') {
+      const missingOffice = selectedRows.find((row) => !row.rawOffice);
+      if (missingOffice) {
+        showToast('Office is required before approval.', 'error');
+        return;
+      }
+    }
 
-  const [refreshing, setRefreshing] = useState(false);
+    let hadError = false;
+    let officeError = false;
+    for (const row of selectedRows) {
+      try {
+        const response = await fetch('/api/invoices/transition', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: row.id || row.invoice_number,
+            action,
+            ...(action === 'approve' ? { office: row.rawOffice || row.office || '' } : {}),
+            ...(action === 'reject' ? { reason: 'Rejected from For Me page' } : {}),
+          }),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          const message = data?.error || `Request failed (HTTP ${response.status})`;
+          if (message.toLowerCase().includes('office required')) {
+            officeError = true;
+          } else {
+            hadError = true;
+            showToast(message, 'error');
+          }
+        }
+      } catch (err) {
+        hadError = true;
+        showToast(err?.message || 'Network error while updating invoice', 'error');
+      }
+    }
 
-  const handleRefreshInbox = async () => {
+    if (officeError) {
+      showToast('Office is required before approval.', 'error');
+    }
+
+    if (!hadError && !officeError) {
+      showToast(action === 'approve' ? 'Invoices approved.' : 'Invoices rejected.', 'success');
+    }
+
+    setSelectedIds(new Set());
+    await reloadList();
+  }, [selectedIds, filteredRows, getRowId, showToast, reloadList]);
+
+  // Define all handlers BEFORE any conditional returns
+  const handleRefreshInbox = useCallback(async () => {
     setRefreshing(true);
     try {
       const params = typeof window !== 'undefined'
@@ -305,7 +293,24 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [reloadList, showToast]);
+
+  // Now do conditional returns AFTER all handlers are defined
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-gray-600">Loading invoices...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-red-600">Error loading invoices: {error}</div>
+      </div>
+    );
+  }
 
   const columns = [
     { key: 'invoice', label: 'Invoice' },
@@ -385,4 +390,22 @@ export default function ForMePage({ searchQuery = '', filters = {} }) {
       <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
     </div>
   );
+}
+
+export default function ForMePage(props) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div style={{ padding: '24px', textAlign: 'center' }}>
+        <div className="text-lg text-gray-600">Loading invoices...</div>
+      </div>
+    );
+  }
+
+  return <ForMePageImpl {...props} />;
 }

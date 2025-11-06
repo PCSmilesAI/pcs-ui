@@ -19,12 +19,21 @@ async function ensureDir(dir: string) {
 }
 
 async function atomicWrite(filePath: string, data: any) {
-  const dir = path.dirname(filePath);
-  await ensureDir(dir);
-  const tmp = path.join(dir, `.tmp-${path.basename(filePath)}-${Date.now()}`);
-  const payload = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-  await fs.writeFile(tmp, payload, 'utf8');
-  await fs.rename(tmp, filePath);
+  try {
+    const dir = path.dirname(filePath);
+    console.log('[WORKFLOW][STORE]', 'atomicWrite_start', { filePath, dir });
+    await ensureDir(dir);
+    const tmp = path.join(dir, `.tmp-${path.basename(filePath)}-${Date.now()}`);
+    const payload = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    console.log('[WORKFLOW][STORE]', 'atomicWrite_writeFile', { tmp, payloadSize: payload.length });
+    await fs.writeFile(tmp, payload, 'utf8');
+    console.log('[WORKFLOW][STORE]', 'atomicWrite_rename', { tmp, filePath });
+    await fs.rename(tmp, filePath);
+    console.log('[WORKFLOW][STORE]', 'atomicWrite', { filePath, dataSize: payload.length, success: true });
+  } catch (err) {
+    console.error('[WORKFLOW][STORE]', 'atomicWrite ERROR', { filePath, error: String(err) });
+    throw err;
+  }
 }
 
 async function trySeed(targetPath: string) {
@@ -120,7 +129,7 @@ async function loadStore(): Promise<{ invoices: InvoiceRecord[] }> {
     }
     result = parsed;
   }
-  console.log('[WORKFLOW][STORE]', 'loadStore', { invoiceCount: result.invoices.length });
+  console.log('[WORKFLOW][STORE]', 'loadStore', { file, invoiceCount: result.invoices.length, fileSize: buf.length });
   return result;
 }
 
@@ -147,6 +156,10 @@ export async function getById(id: string): Promise<InvoiceRecord | undefined> {
 export async function save(invoice: InvoiceRecord): Promise<void> {
   const store = await loadStore();
   const targetId = invoice && (invoice.id || invoice.invoice_number);
+  console.log('[WORKFLOW][STORE]', 'save_start', {
+    invoiceId: targetId,
+    storeSize: store.invoices.length,
+  });
   if (!targetId) {
     store.invoices.push(invoice);
     await saveStore(store);
@@ -158,6 +171,11 @@ export async function save(invoice: InvoiceRecord): Promise<void> {
   }
   const normalized = String(targetId).trim();
   const idx = store.invoices.findIndex((inv) => matchInvoiceById(inv, normalized));
+  console.log('[WORKFLOW][STORE]', 'save_found', {
+    invoiceId: normalized,
+    found: idx >= 0,
+    invoiceStatus: invoice.status,
+  });
   if (idx >= 0) {
     store.invoices[idx] = invoice;
   } else {
@@ -167,6 +185,7 @@ export async function save(invoice: InvoiceRecord): Promise<void> {
   console.log('[WORKFLOW][STORE]', 'save', {
     invoiceId: normalized || 'unknown',
     action: idx >= 0 ? 'update' : 'insert',
+    newStoreSize: store.invoices.length,
   });
 }
 

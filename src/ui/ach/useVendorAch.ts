@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { subscribeToAchUpdates } from './achEventBus';
 
 export type AchStatus = 'complete' | 'pending' | 'missing' | undefined;
 
@@ -44,6 +45,19 @@ export function useVendorAchMap() {
       }
     })();
     return () => { active = false; };
+  }, []);
+
+  // Subscribe to global ACH updates
+  useEffect(() => {
+    const unsubscribe = subscribeToAchUpdates(async (vendorName) => {
+      try {
+        const json = await fetchVendorStatus();
+        setData(json);
+      } catch (e: any) {
+        console.error('Failed to refetch vendor status after ACH update:', e);
+      }
+    });
+    return unsubscribe;
   }, []);
 
   const index = useMemo(() => {

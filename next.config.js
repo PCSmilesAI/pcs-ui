@@ -8,6 +8,7 @@ dotenv.config({ path: path.resolve(process.cwd(), 'env') });
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   compress: true,
+  productionBrowserSourceMaps: true,
   async headers() {
     return [
       {
