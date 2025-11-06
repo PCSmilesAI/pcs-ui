@@ -6,12 +6,14 @@ import { resolveDataPath } from './dataDir';
 export type InvoiceRecord = Record<string, any>;
 
 const SEED_PATHS = [
+  // Try to seed from the old invoice queue file (which is an array)
+  path.join(process.cwd(), 'pcs_ai_data', 'invoice_queue.json'),
   path.join(process.cwd(), 'public', 'invoice_queue.json'),
   path.join(process.cwd(), 'invoice_queue.json'),
 ];
 
 function getStorePath(): string {
-  return resolveDataPath('invoice_queue.json');
+  return resolveDataPath('workflow_invoices.json');
 }
 
 async function ensureDir(dir: string) {
@@ -41,9 +43,20 @@ async function trySeed(targetPath: string) {
     try {
       const buf = await fs.readFile(seed, 'utf8');
       const parsed = JSON.parse(buf);
-      await atomicWrite(targetPath, parsed);
-      console.warn('[WORKFLOW][STORE] seeded invoice store from', seed);
-      return;
+
+      // Handle both array format (old invoice queue) and object format (workflow store)
+      let invoices: any[] = [];
+      if (Array.isArray(parsed)) {
+        invoices = parsed;
+      } else if (parsed && typeof parsed === 'object' && Array.isArray(parsed.invoices)) {
+        invoices = parsed.invoices;
+      }
+
+      if (invoices.length > 0) {
+        await atomicWrite(targetPath, { invoices });
+        console.warn('[WORKFLOW][STORE] seeded invoice store from', seed, 'with', invoices.length, 'invoices');
+        return;
+      }
     } catch (_) {
       // try next seed
     }
