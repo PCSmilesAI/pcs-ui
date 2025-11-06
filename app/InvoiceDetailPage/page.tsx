@@ -25,14 +25,14 @@ function InvoiceDetailContent() {
         }
 
         // First, try to load from the workflow store (which has the current status)
-        let foundInvoice = null;
+        let foundInvoice: any = null;
         try {
           const workflowResponse = await fetch(`/api/invoices/${encodeURIComponent(invoiceNumber)}`);
           if (workflowResponse.ok) {
             const workflowData = await workflowResponse.json();
             if (workflowData.ok && workflowData.invoice) {
               foundInvoice = workflowData.invoice;
-              console.log('✅ Loaded invoice from workflow store:', foundInvoice.invoice_number);
+              console.log('✅ Loaded invoice from workflow store:', foundInvoice?.invoice_number);
             }
           }
         } catch (e) {
