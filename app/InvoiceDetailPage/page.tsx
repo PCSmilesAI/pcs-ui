@@ -24,7 +24,39 @@ function InvoiceDetailContent() {
           return;
         }
 
-        // Load the invoice queue to find the specific invoice
+        // First, try to load from the workflow store (which has the current status)
+        let foundInvoice = null;
+        try {
+          const workflowResponse = await fetch(`/api/invoices/${encodeURIComponent(invoiceNumber)}`);
+          if (workflowResponse.ok) {
+            const workflowData = await workflowResponse.json();
+            if (workflowData.ok && workflowData.invoice) {
+              foundInvoice = workflowData.invoice;
+              console.log('✅ Loaded invoice from workflow store:', foundInvoice.invoice_number);
+            }
+          }
+        } catch (e) {
+          console.log('⚠️ Failed to load from workflow store, falling back to queue:', e);
+        }
+
+        // If not found in workflow store, load from the invoice queue
+        if (!foundInvoice) {
+          const response = await fetch('/api/invoice-queue?limit=5000');
+          if (!response.ok) {
+            throw new Error('Failed to load invoice queue');
+          }
+
+          const data = await response.json();
+          let allInvoices = data.invoices || [];
+
+          // Find the invoice in the full list
+          foundInvoice = allInvoices.find(inv => inv.invoice_number === invoiceNumber);
+          if (!foundInvoice) {
+            foundInvoice = allInvoices.find(inv => inv.id === invoiceNumber);
+          }
+        }
+
+        // Load the invoice queue for navigation purposes
         const response = await fetch('/api/invoice-queue?limit=5000');
         if (!response.ok) {
           throw new Error('Failed to load invoice queue');
@@ -32,12 +64,6 @@ function InvoiceDetailContent() {
 
         const data = await response.json();
         let allInvoices = data.invoices || [];
-
-        // First, find the invoice in the full list
-        let foundInvoice = allInvoices.find(inv => inv.invoice_number === invoiceNumber);
-        if (!foundInvoice) {
-          foundInvoice = allInvoices.find(inv => inv.id === invoiceNumber);
-        }
 
         // Now filter the queue based on which tab the user came from
         let queue = allInvoices;

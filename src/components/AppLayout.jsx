@@ -41,14 +41,10 @@ export default function AppLayout({ children }) {
     // If on InvoiceDetailPage, check the 'from' query parameter to determine which tab to highlight
     if (path === 'InvoiceDetailPage') {
       const from = sp.get('from');
-      if (from === 'ToBePaid') {
-        setCurrentPage('toBePaid');
-      } else if (from === 'Complete') {
-        setCurrentPage('complete');
-      } else if (from === 'Vendors') {
-        setCurrentPage('vendors');
-      } else if (from === 'AllInvoices') {
-        setCurrentPage('allInvoices');
+      if (from) {
+        // Extract the page name from the 'from' parameter (e.g., "/ToBePaidPage" -> "ToBePaidPage")
+        const fromPath = from.split('?')[0].split('/').filter(Boolean)[0];
+        setCurrentPage(pageMapping[fromPath] || 'forMe');
       } else {
         setCurrentPage('forMe');
       }
