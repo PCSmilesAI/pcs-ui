@@ -6714,6 +6714,31 @@
       "created_at": "2025-09-23T13:35:23.553848",
       "source_file": "email_24_20250911_154202_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700_ca42f236.json",
       "pdf_path": "/email_invoices/email_24_20250911_154202_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700_ca42f236.pdf"
+    },
+    {
+      "id": "TEST-STRIPE-5DOLLAR-001",
+      "invoice_number": "TEST-STRIPE-001",
+      "vendor": "Braxton Ellsworth",
+      "invoice_total": 5.0,
+      "amount": 5.0,
+      "office": "Pacific Crest Smiles - Eugene",
+      "office_id": "pcs_eugene",
+      "status": "to_be_paid",
+      "date_received": "2025-11-06T09:38:32.240719",
+      "due_date": "2025-12-06T09:38:32.240724",
+      "approvals": {
+        "ap": {
+          "by": "business@pcsmilesai.com",
+          "at": "2025-11-06T09:38:32.240728"
+        },
+        "admin": {
+          "by": "business@pcsmilesai.com",
+          "at": "2025-11-06T09:38:32.240728"
+        }
+      },
+      "description": "Test invoice for Stripe payment testing",
+      "category": "Supplies",
+      "pdf_path": "/email_invoices/test_stripe_invoice.pdf"
     }
   ]
 }
