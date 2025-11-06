@@ -4,28 +4,40 @@ import fs from 'fs';
 import { resolveDataPath } from '../workflow/dataDir';
 
 let db: Database.Database | null = null;
+let migrationsRun = false;
 
 export function getDatabase(): Database.Database {
   if (!db) {
     const dbPath = resolveDataPath('pcs.db');
     const dir = path.dirname(dbPath);
-    
+
     // Ensure directory exists
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    
+
     console.log('[DB] Opening database at:', dbPath);
     db = new Database(dbPath);
-    
+
     // Enable foreign keys and WAL mode for better concurrency
     db.pragma('foreign_keys = ON');
     db.pragma('journal_mode = WAL');
     db.pragma('synchronous = NORMAL');
-    
+
     console.log('[DB] Database initialized successfully');
   }
-  
+
+  // Auto-run migrations on first access
+  if (!migrationsRun) {
+    try {
+      runMigrations();
+      migrationsRun = true;
+    } catch (err: any) {
+      console.error('[DB] Migration error:', err?.message);
+      // Don't throw - migrations might already exist
+    }
+  }
+
   return db;
 }
 
