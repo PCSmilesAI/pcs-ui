@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
           invoice.office = body.office;
         }
 
-        if (status === 'incoming' || status === 'categorized') {
+        if (status === 'incoming' || status === 'categorized' || status === 'pending') {
           approveAP(invoice, { email: user.email, name: user.name }, roles);
         } else if (status === 'awaiting_office_approval') {
           approveOffice(invoice, { email: user.email, name: user.name }, threshold);
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
           }
           approveAdmin(invoice, { email: user.email, name: user.name });
         } else {
-          return NextResponse.json({ error: `Nothing to approve. Invoice status is '${status}' but must be one of: incoming, categorized, awaiting_office_approval, awaiting_admin_approval` }, { status: 400 });
+          return NextResponse.json({ error: `Nothing to approve. Invoice status is '${status}' but must be one of: incoming, categorized, pending, awaiting_office_approval, awaiting_admin_approval` }, { status: 400 });
         }
       } catch (err: any) {
         console.error('[WORKFLOW][ENGINE]', 'error', { invoiceId: String(invoiceId), message: err?.message });
