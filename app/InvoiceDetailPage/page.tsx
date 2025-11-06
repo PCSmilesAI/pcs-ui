@@ -31,9 +31,16 @@ function InvoiceDetailContent() {
         }
 
         const data = await response.json();
-        let queue = data.invoices || [];
+        let allInvoices = data.invoices || [];
 
-        // Filter the queue based on which tab the user came from
+        // First, find the invoice in the full list
+        let foundInvoice = allInvoices.find(inv => inv.invoice_number === invoiceNumber);
+        if (!foundInvoice) {
+          foundInvoice = allInvoices.find(inv => inv.id === invoiceNumber);
+        }
+
+        // Now filter the queue based on which tab the user came from
+        let queue = allInvoices;
         if (from) {
           if (from.includes('ToBePaid')) {
             // Only show invoices with status 'to_be_paid'
@@ -52,17 +59,12 @@ function InvoiceDetailContent() {
           }
         }
 
-        // Try to find by invoice_number first, then by id
-        let foundInvoice = queue.find(inv => inv.invoice_number === invoiceNumber);
+        // Find the current index in the filtered queue
         let currentIndex = -1;
-
         if (foundInvoice) {
-          currentIndex = queue.findIndex(inv => inv.invoice_number === invoiceNumber);
-        } else {
-          foundInvoice = queue.find(inv => inv.id === invoiceNumber);
-          if (foundInvoice) {
-            currentIndex = queue.findIndex(inv => inv.id === invoiceNumber);
-          }
+          currentIndex = queue.findIndex(inv =>
+            (inv.invoice_number === invoiceNumber || inv.id === invoiceNumber)
+          );
         }
 
         if (foundInvoice) {
