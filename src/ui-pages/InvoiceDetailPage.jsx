@@ -48,7 +48,7 @@ async function checkIfAdmin(email) {
  * that the layout and colours appear even if no CSS preprocessor
  * is available.
  */
-export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext }) {
+export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext, onInvoiceRejected }) {
   const invoiceIdentifier = invoice?.id || invoice?.invoice_number || null;
   const invoiceJsonPath = invoice?.json_path || null;
   const invoiceSourceFile = invoice?.source_file || null;
@@ -553,6 +553,13 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       }
 
       alert(action === 'approve' ? 'Invoice moved to the next approval step.' : 'Invoice rejected.');
+
+      // If invoice was rejected, notify parent to update the queue
+      if (action === 'reject' && onInvoiceRejected) {
+        const invoiceId = invoice.id || invoice.invoice_number || invoice.invoice;
+        onInvoiceRejected(invoiceId);
+      }
+
       if (onBack) onBack();
     } catch (error) {
       showToast(error?.message || 'Unexpected error while updating invoice', 'error');
