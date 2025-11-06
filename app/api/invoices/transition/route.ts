@@ -38,8 +38,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'approve') {
-      console.log('[API][INVOICES]', 'transition_approve_received', { invoiceId: String(invoiceId), userEmail: user.email });
+      console.log('[API][INVOICES]', 'transition_approve_received', { invoiceId: String(invoiceId), userEmail: user.email, invoiceStatus: invoice.status });
       try {
+        // Ensure invoice has a valid status - default to 'incoming' if missing
+        if (!invoice.status) {
+          console.log('[API][INVOICES]', 'transition_approve_missing_status', { invoiceId: String(invoiceId), defaulting: 'incoming' });
+          invoice.status = 'incoming';
+        }
+
         const status = (invoice.status || 'incoming').toLowerCase();
 
         // Ensure office field is populated from request body if provided
@@ -60,7 +66,7 @@ export async function POST(req: NextRequest) {
           }
           approveAdmin(invoice, { email: user.email, name: user.name });
         } else {
-          return NextResponse.json({ error: 'Nothing to approve.' }, { status: 400 });
+          return NextResponse.json({ error: `Nothing to approve. Invoice status is '${status}' but must be one of: incoming, categorized, awaiting_office_approval, awaiting_admin_approval` }, { status: 400 });
         }
       } catch (err: any) {
         console.error('[WORKFLOW][ENGINE]', 'error', { invoiceId: String(invoiceId), message: err?.message });
