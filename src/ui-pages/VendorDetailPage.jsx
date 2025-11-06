@@ -252,7 +252,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
       {/* KPI cards: dollars */}
       <div style={cardsGrid}>
         <div style={card}><div style={cardLabel}>Total Amount ($)</div><div style={cardValue}>{fmt(totalAmount)}</div></div>
-        <div style={card}><div style={cardLabel}>Outstanding Amount ($)</div><div style={cardValue} style={{color: outstandingAmount > 0 ? '#dc2626' : '#357ab2'}}>{fmt(outstandingAmount)}</div></div>
+        <div style={card}><div style={cardLabel}>Outstanding Amount ($)</div><div style={{...cardValue, color: outstandingAmount > 0 ? '#dc2626' : '#357ab2'}}>{fmt(outstandingAmount)}</div></div>
         <div style={card}><div style={cardLabel}>Paid Amount ($)</div><div style={cardValue}>{fmt(totalAmount - outstandingAmount)}</div></div>
       </div>
 
