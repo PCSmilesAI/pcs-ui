@@ -38,8 +38,8 @@ export async function GET(_req: NextRequest) {
     try {
       // QuickBooks token check (non-blocking)
       const { tokenStorage } = await import('../../../lib/qbo/tokenStorage');
-      const tokens = await tokenStorage.listTokens();
-      externalServices.qbo_tokens_available = tokens.length > 0;
+      const tokens = await tokenStorage.getLatestTokens();
+      externalServices.qbo_tokens_available = !!tokens;
     } catch (_) {
       externalServices.qbo_tokens_available = false;
     }
