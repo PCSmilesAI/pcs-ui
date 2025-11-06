@@ -1,6 +1,7 @@
 import { getDatabase } from './client';
-import { loadStore } from '../workflow/invoiceStore';
+import { resolveDataPath } from '../workflow/dataDir';
 import { randomUUID } from 'crypto';
+import fs from 'fs/promises';
 
 /**
  * Migrate invoices from JSON workflow store to SQLite database.
@@ -8,11 +9,20 @@ import { randomUUID } from 'crypto';
  */
 export async function migrateFromJSON(): Promise<{ migrated: number; skipped: number }> {
   const db = getDatabase();
-  
+
   try {
     // Load existing invoices from JSON
-    const store = await loadStore();
-    const jsonInvoices = store.invoices || [];
+    const storePath = resolveDataPath('workflow_invoices.json');
+    let jsonInvoices: any[] = [];
+
+    try {
+      const buf = await fs.readFile(storePath, 'utf8');
+      const store = JSON.parse(buf);
+      jsonInvoices = store.invoices || [];
+    } catch (err) {
+      console.log('[DB][MIGRATE]', 'No workflow_invoices.json found, skipping data migration');
+      return { migrated: 0, skipped: 0 };
+    }
     
     console.log('[DB][MIGRATE]', 'Starting migration from JSON', { count: jsonInvoices.length });
     
