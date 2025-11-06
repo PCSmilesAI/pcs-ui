@@ -1112,9 +1112,17 @@ def extract_invoice_data(pdf_path):
 def main():
     parser = argparse.ArgumentParser(description="Parse Epic Dental Lab invoices")
     parser.add_argument("pdf_path", help="Path to PDF invoice")
-    parser.add_argument("--output_dir", default="output_jsons", help="Output directory for JSON files")
+    parser.add_argument("--output_dir", default=None, help="Output directory for JSON files")
     args = parser.parse_args()
-    
+
+    # Use PCS_DATA_DIR if set, otherwise use relative path
+    if args.output_dir is None:
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
+        if not os.path.isabs(DATA_DIR):
+            DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, DATA_DIR))
+        args.output_dir = os.path.join(DATA_DIR, "output_jsons")
+
     # Create output directory if it doesn't exist
     os.makedirs(args.output_dir, exist_ok=True)
     

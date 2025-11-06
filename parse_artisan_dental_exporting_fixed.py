@@ -178,8 +178,14 @@ if __name__ == "__main__":
     pdf_path = sys.argv[1]
     output = parse_invoice(pdf_path)
 
+    # Use PCS_DATA_DIR if set, otherwise use relative path
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
+    if not os.path.isabs(DATA_DIR):
+        DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, DATA_DIR))
+
     # Ensure output folder exists
-    output_dir = os.path.expanduser("~/Desktop/MemorAI_PCS/output_jsons")
+    output_dir = os.path.join(DATA_DIR, "output_jsons")
     os.makedirs(output_dir, exist_ok=True)
 
     # Build output file path
