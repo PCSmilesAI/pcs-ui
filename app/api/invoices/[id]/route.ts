@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getById } from '../../../../lib/workflow/invoiceStore';
+import { getDatabase } from '../../../../lib/db/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,23 +9,33 @@ export async function GET(
 ) {
   try {
     const invoiceId = params.id;
+    const db = getDatabase();
 
-    // Load the invoice from the workflow store (which has the current status)
-    const invoice = await getById(invoiceId);
+    // Load the invoice from the database
+    const invoice = db.prepare(
+      'SELECT * FROM invoices WHERE id = ? AND deleted = 0'
+    ).get(invoiceId) as any;
 
     if (!invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
+    // Parse JSON fields
+    const parsed = {
+      ...invoice,
+      field_locks: invoice.field_locks ? JSON.parse(invoice.field_locks) : {},
+      approvals: invoice.approvals ? JSON.parse(invoice.approvals) : {},
+    };
+
     // Ensure invoice has a valid status - default to 'incoming' if missing
-    if (!invoice.status) {
+    if (!parsed.status) {
       console.log('[API][INVOICES]', 'getById_missing_status', { invoiceId, defaulting: 'incoming' });
-      invoice.status = 'incoming';
+      parsed.status = 'incoming';
     }
 
     return NextResponse.json({
       ok: true,
-      invoice
+      invoice: parsed
     });
 
   } catch (error) {

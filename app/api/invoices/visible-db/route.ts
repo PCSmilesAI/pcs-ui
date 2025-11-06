@@ -16,9 +16,7 @@ function matchesSearch(invoice: any, query: string): boolean {
   const q = normalise(query);
   const fields = [
     invoice.invoice_number,
-    invoice.vendor,
     invoice.vendor_name,
-    invoice.invoice,
     invoice.source_file,
   ];
   return fields.some((field) => field && normalise(String(field)).includes(q));
@@ -27,7 +25,7 @@ function matchesSearch(invoice: any, query: string): boolean {
 function matchesVendor(invoice: any, vendor: string): boolean {
   if (!vendor) return true;
   const target = normalise(vendor);
-  const compare = normalise(invoice.vendor_name || invoice.vendor || '');
+  const compare = normalise(invoice.vendor_name || '');
   return compare.includes(target);
 }
 
@@ -37,11 +35,15 @@ function matchesStatus(invoice: any, status: string): boolean {
 }
 
 function getOffice(invoice: any): string {
-  return (invoice.office_location || invoice.office || invoice.clinic_id || '').trim();
+  return (invoice.office_location || invoice.office_id || '').trim();
 }
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Database-backed visible invoices endpoint.
+ * Reads from SQLite instead of JSON workflow store.
+ */
 export async function GET(req: NextRequest) {
   const user = getCurrentUser(req);
   const limit = Number.parseInt(parseSearchParam(req, 'limit', '50'), 10) || 50;
@@ -49,12 +51,20 @@ export async function GET(req: NextRequest) {
   const search = parseSearchParam(req, 'search');
   const status = parseSearchParam(req, 'status');
   const vendor = parseSearchParam(req, 'vendor');
-  console.log('[API][INVOICES]', 'visible_request', { userEmail: user.email, limit, offset, search, status, vendor });
+  
+  console.log('[API][INVOICES][DB]', 'visible_request', { 
+    userEmail: user.email, 
+    limit, 
+    offset, 
+    search, 
+    status, 
+    vendor 
+  });
 
   try {
     const db = getDatabase();
     const [admin, ap] = await Promise.all([isAdmin(user.email), isAP(user.email)]);
-
+    
     let query = 'SELECT * FROM invoices WHERE deleted = 0';
     const params: any[] = [];
 
@@ -62,14 +72,14 @@ export async function GET(req: NextRequest) {
     if (!admin && !ap) {
       const offices = await officesForManager(user.email);
       if (offices.length === 0) {
-        console.log('[API][INVOICES]', 'visible_no_offices', { userEmail: user.email });
+        console.log('[API][INVOICES][DB]', 'visible_no_offices', { userEmail: user.email });
         return NextResponse.json({ ok: true, count: 0, invoices: [] });
       }
-
+      
       // Only show awaiting_office_approval for managers
       query += ' AND status = ?';
       params.push('awaiting_office_approval');
-
+      
       // Filter by office
       const placeholders = offices.map(() => '?').join(',');
       query += ` AND office_id IN (${placeholders})`;
@@ -78,7 +88,7 @@ export async function GET(req: NextRequest) {
 
     // Get all matching invoices
     const allInvoices = db.prepare(query).all(...params) as any[];
-
+    
     // Parse JSON fields
     const invoices = allInvoices.map(inv => ({
       ...inv,
@@ -88,12 +98,15 @@ export async function GET(req: NextRequest) {
 
     // Apply filters
     const filtered = invoices.filter((invoice) =>
-      matchesSearch(invoice, search) && matchesStatus(invoice, status) && matchesVendor(invoice, vendor)
+      matchesSearch(invoice, search) && 
+      matchesStatus(invoice, status) && 
+      matchesVendor(invoice, vendor)
     );
 
     // Paginate
     const paginated = filtered.slice(offset, offset + limit);
-    console.log('[API][INVOICES]', 'visible_response', {
+    
+    console.log('[API][INVOICES][DB]', 'visible_response', {
       userEmail: user.email,
       total: invoices.length,
       filtered: filtered.length,
@@ -106,10 +119,14 @@ export async function GET(req: NextRequest) {
       invoices: paginated,
     });
   } catch (err: any) {
-    console.error('[API][INVOICES]', 'visible_error', { userEmail: user.email, error: err?.message });
+    console.error('[API][INVOICES][DB]', 'visible_error', { 
+      userEmail: user.email, 
+      error: err?.message 
+    });
     return NextResponse.json(
       { error: err?.message || 'Failed to fetch invoices' },
       { status: 500 }
     );
   }
 }
+
