@@ -76,7 +76,7 @@ async function runTests() {
 
     // Step 2: Approve the invoice
     console.log('📋 Step 2: Approving invoice...');
-    const approveRes = await makeRequest('POST', '/api/invoices/transition', {
+    const approveRes = await makeRequest('POST', `/api/invoices/transition?email=${ADMIN_EMAIL}`, {
       id: testInvoice.id,
       action: 'approve',
       office: testInvoice.office_id || 'Test Office',
