@@ -172,8 +172,9 @@ console.log('\n📊 CHECKING STATUS VALIDITY');
 console.log('---------------------------');
 
 const validStatuses = [
-  'incoming', 'categorized', 'awaiting_office_approval', 
-  'awaiting_admin_approval', 'to_be_paid', 'paid', 'rejected', 'repair', 'removed'
+  'incoming', 'categorized', 'awaiting_office_approval',
+  'awaiting_admin_approval', 'to_be_paid', 'paid', 'rejected', 'repair', 'removed',
+  'pending'  // Legacy status from old data
 ];
 
 const invalidStatuses = db.prepare(`
