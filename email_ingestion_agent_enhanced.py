@@ -26,6 +26,7 @@ SAVE_DIR = os.path.join(BASE_DIR, "email_invoices")
 VENDOR_ROUTER_PATH = os.path.join(BASE_DIR, "vendor_router.py")
 LOG_PATH = os.path.join(BASE_DIR, "log.txt")
 INVOICE_QUEUE_PATH = os.path.join(BASE_DIR, "pcs_ai_data", "invoice_queue.json")
+DB_PATH = os.path.join(DATA_DIR, "pcs.db")
 
 # Runtime configuration
 LOCKS_DIR = os.path.join(DATA_DIR, "locks")
@@ -161,17 +162,53 @@ def release_scan_lock():
         log(f"[INBOX][SCAN][LOCK][ERROR] Failed to release lock: {e}")
 
 def load_existing_invoices():
-    """Load existing invoices from PCS AI system"""
-    if not os.path.exists(INVOICE_QUEUE_PATH):
-        return []
-    
-    try:
-        with open(INVOICE_QUEUE_PATH, 'r') as f:
-            data = json.load(f)
-        return data if isinstance(data, list) else []
-    except Exception as e:
-        log(f"❌ Error loading existing invoices: {e}")
-        return []
+    """Load existing invoices from SQLite database (primary) or JSON (fallback)"""
+    invoices = []
+
+    # Try to load from SQLite database first (new system)
+    if os.path.exists(DB_PATH):
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            # Get all invoices from database (including deleted ones to prevent re-ingestion)
+            cursor.execute("""
+                SELECT id, invoice_number, source_message_id, vendor_name, amount_cents
+                FROM invoices
+                WHERE deleted = 0
+            """)
+
+            for row in cursor.fetchall():
+                invoices.append({
+                    'id': row['id'],
+                    'invoice_number': row['invoice_number'],
+                    'source_message_id': row['source_message_id'],
+                    'vendor_name': row['vendor_name'],
+                    'amount_cents': row['amount_cents'],
+                })
+
+            conn.close()
+            log(f"[INBOX][DB] Loaded {len(invoices)} invoices from SQLite database")
+            return invoices
+
+        except Exception as e:
+            log(f"[INBOX][DB][ERROR] Error loading from database: {e}")
+            # Fall through to JSON fallback
+
+    # Fallback: Load from JSON queue (old system)
+    if os.path.exists(INVOICE_QUEUE_PATH):
+        try:
+            with open(INVOICE_QUEUE_PATH, 'r') as f:
+                data = json.load(f)
+            invoices = data if isinstance(data, list) else []
+            log(f"[INBOX][JSON] Loaded {len(invoices)} invoices from JSON queue (fallback)")
+            return invoices
+        except Exception as e:
+            log(f"[INBOX][JSON][ERROR] Error loading from JSON: {e}")
+
+    log("[INBOX][LOAD] No invoices found in database or JSON")
+    return []
 
 def extract_invoice_number_from_subject(subject):
     """Extract potential invoice numbers from email subject"""
@@ -194,30 +231,44 @@ def extract_invoice_number_from_subject(subject):
     
     return None
 
-def is_invoice_already_processed(email_subject, existing_invoices):
-    """Check if this invoice is already in the PCS AI system"""
+def is_invoice_already_processed(email_subject, existing_invoices, source_message_id=None):
+    """Check if this invoice is already in the PCS AI system or has been deleted"""
     if not email_subject:
         return False
-    
+
+    # Check if this message was previously deleted (tombstone check)
+    if source_message_id and os.path.exists(DB_PATH):
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1 FROM tombstones WHERE source_message_id = ?", (source_message_id,))
+            if cursor.fetchone():
+                log(f"[INBOX][TOMBSTONE] Message {source_message_id} was previously deleted, skipping")
+                conn.close()
+                return True
+            conn.close()
+        except Exception as e:
+            log(f"[INBOX][TOMBSTONE][ERROR] Error checking tombstones: {e}")
+
     # Extract potential invoice number from subject
     subject_invoice_num = extract_invoice_number_from_subject(email_subject)
-    
+
     for invoice in existing_invoices:
         # Check if invoice number matches
         if subject_invoice_num and invoice.get('invoice_number') == subject_invoice_num:
-            log(f"✅ Invoice {subject_invoice_num} already exists in PCS AI")
+            log(f"[INBOX][DUPLICATE] Invoice {subject_invoice_num} already exists in PCS AI")
             return True
-        
+
         # Check if subject contains invoice number
         if invoice.get('invoice_number') and invoice['invoice_number'] in email_subject:
-            log(f"✅ Invoice {invoice['invoice_number']} already exists in PCS AI")
+            log(f"[INBOX][DUPLICATE] Invoice {invoice['invoice_number']} already exists in PCS AI")
             return True
-        
-        # Check if vendor and amount match (fuzzy matching)
-        if invoice.get('vendor_name') and invoice.get('amount'):
-            # This would need more sophisticated matching
-            pass
-    
+
+        # Check if source_message_id matches (most reliable)
+        if source_message_id and invoice.get('source_message_id') == source_message_id:
+            log(f"[INBOX][DUPLICATE] Message ID {source_message_id} already processed")
+            return True
+
     return False
 
 def connect_imap():
@@ -345,6 +396,7 @@ def check_inbox():
 
             # Compute message key for deduplication
             message_key = compute_message_key(msg, uid)
+            source_message_id = msg.get("Message-ID", "")
 
             # Check if we've seen this message before
             if is_message_seen(message_key):
@@ -355,8 +407,8 @@ def check_inbox():
             if isinstance(subject, bytes):
                 subject = subject.decode(errors='ignore')
 
-            # Check if this invoice is already processed
-            if is_invoice_already_processed(subject, existing_invoices):
+            # Check if this invoice is already processed (or was deleted)
+            if is_invoice_already_processed(subject, existing_invoices, source_message_id):
                 mark_message_seen(message_key)
                 skipped_count += 1
                 continue
