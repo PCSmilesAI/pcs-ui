@@ -14,15 +14,17 @@ export async function POST(req: NextRequest) {
 
   // Read the body once
   const body = await req.json();
+  const bodyString = JSON.stringify(body);
 
-  const newReq = new NextRequest(url, {
-    method: req.method,
-    headers: req.headers,
-    body: JSON.stringify(body),
+  // Forward to transition-db using fetch with duplex option
+  const response = await fetch(url.toString(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: bodyString,
     duplex: 'half',
   } as any);
 
-  // Forward to transition-db
-  const response = await fetch(newReq);
   return response;
 }
