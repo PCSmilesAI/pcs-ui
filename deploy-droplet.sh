@@ -72,17 +72,14 @@ ssh $DROPLET_USER@$DROPLET_IP << 'EOF'
   npm install
   
   # Create environment file
+  # ⚠️  SECURITY: Secrets must be set in /etc/environment, NOT in .env.local
   cat > .env.local << 'ENVEOF'
-# QuickBooks OAuth Configuration
-QBO_CLIENT_ID=AB2KnsBep2GtaSf9yTLjxA90TZKlwcF5ItDjF89UiwQH75aaoE
-QBO_CLIENT_SECRET=SjQLypVE8KnRDsFWwmYJa8qFGH3jxqoMlk6bSF74
-QBO_REDIRECT_URI=https://pcsmilesai.com/api/qbo/callback
-QBO_SCOPES=com.intuit.quickbooks.accounting
-QBO_ENV=production
-
 # Next.js Configuration
 NEXT_PUBLIC_APP_URL=https://pcsmilesai.com
 NODE_ENV=production
+
+# ⚠️  IMPORTANT: All secrets must be set in /etc/environment
+# Do NOT hardcode secrets here. See SECURITY_INCIDENT.md for details.
 ENVEOF
 
   # Create data directory for SQLite

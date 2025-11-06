@@ -1,6 +1,11 @@
 .env
 .env.*
-ecosystem.config.js
+*.secret
+*.secrets
+production-secrets.txt
+secrets.txt
+# Note: ecosystem.config.js is tracked but should not contain secrets in production
+# Use environment variables or PM2 ecosystem file without secrets
 
 # Node & Python junk
 node_modules/
