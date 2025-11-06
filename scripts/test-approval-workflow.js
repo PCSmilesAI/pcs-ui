@@ -51,9 +51,9 @@ async function runTests() {
   console.log('================================\n');
 
   try {
-    // Step 1: Get visible invoices
+    // Step 1: Get visible invoices (as admin)
     console.log('📋 Step 1: Fetching visible invoices...');
-    const visibleRes = await makeRequest('GET', '/api/invoices/visible?limit=1');
+    const visibleRes = await makeRequest('GET', '/api/invoices/visible?limit=1&email=business@pcsmilesai.com');
     
     if (visibleRes.status !== 200) {
       console.error('❌ Failed to fetch invoices:', visibleRes.status);
