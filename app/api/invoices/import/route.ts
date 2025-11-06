@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getDatabase();
-    const results = [];
+    const results: Array<{ id: string; ok: boolean; error?: string }> = [];
 
     for (const item of items) {
       try {
