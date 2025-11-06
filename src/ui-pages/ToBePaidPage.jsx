@@ -211,6 +211,19 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     loadInvoices();
   }, []);
 
+  // Refresh invoice list when page comes back into focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('📄 ToBePaidPage: Page came into focus, refreshing invoice list');
+        reloadList();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   const columns = [
     { key: 'invoice', label: 'Invoice' },
     { key: 'vendor', label: 'Vendor' },

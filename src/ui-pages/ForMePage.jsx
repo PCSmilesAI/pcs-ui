@@ -183,6 +183,19 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     loadInvoices();
   }, [fetchVisibleInvoices]);
 
+  // Refresh invoice list when page comes back into focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('📄 ForMePage: Page came into focus, refreshing invoice list');
+        reloadList();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [reloadList]);
+
   const filteredRows = useMemo(() => {
     const query = effectiveQuery;
     const filterConfig = effectiveFilters;
