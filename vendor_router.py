@@ -39,13 +39,18 @@ def detect_vendor_from_pdf(filepath):
             continue
             
         try:
+            # Pass environment variables to parser subprocess
+            env = os.environ.copy()
+            env['PCS_DATA_DIR'] = DATA_DIR
+
             result = subprocess.run(
                 ["python3", parser_path, filepath],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
+                env=env
             )
-            
+
             # Check for successful parsing based on vendor-specific indicators
             if result.returncode == 0:
                 if vendor == 'epic' and "Extracted" in result.stdout:
@@ -82,11 +87,16 @@ def run_parser(filepath, vendor):
         return False
 
     try:
+        # Pass environment variables to parser subprocess
+        env = os.environ.copy()
+        env['PCS_DATA_DIR'] = DATA_DIR
+
         result = subprocess.run(
             ["python3", parser_path, filepath],
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=30,
+            env=env
         )
         return result.returncode == 0
     except Exception:
@@ -159,11 +169,16 @@ def main():
         general_parser = os.path.join(PARSER_FOLDER, 'general_invoice_parser.py')
         if os.path.exists(general_parser):
             try:
+                # Pass environment variables to parser subprocess
+                env = os.environ.copy()
+                env['PCS_DATA_DIR'] = DATA_DIR
+
                 result = subprocess.run(
                     ["python3", general_parser, filepath],
                     capture_output=True,
                     text=True,
-                    timeout=90
+                    timeout=90,
+                    env=env
                 )
                 if result.returncode == 0:
                     vendor = "general"
