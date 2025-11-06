@@ -79,55 +79,6 @@ def log(msg):
         f.write(f"[{timestamp}] {msg}\n")
     print(f"[{timestamp}] {msg}")
 
-def init_ingest_db():
-    """Initialize SQLite database for tracking seen messages"""
-    conn = sqlite3.connect(INGEST_DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS seen_messages (
-            message_key TEXT PRIMARY KEY,
-            provider TEXT NOT NULL,
-            first_seen_ts TEXT NOT NULL,
-            last_seen_ts TEXT NOT NULL
-        )
-    """)
-    conn.commit()
-    conn.close()
-    log("[INBOX][DB][INIT] Initialized ingest.db")
-
-def compute_message_key(msg, uid):
-    """Compute stable message key for IMAP messages"""
-    # For IMAP, use composite hash of UID + Message-ID + Date + From + Subject
-    message_id = msg.get("Message-ID", "")
-    date = msg.get("Date", "")
-    from_addr = msg.get("From", "")
-    subject = msg.get("Subject", "")
-
-    # Create composite key
-    composite = f"{uid}|{message_id}|{date}|{from_addr}|{subject}"
-    return hashlib.md5(composite.encode()).hexdigest()
-
-def is_message_seen(message_key):
-    """Check if message has been seen before"""
-    conn = sqlite3.connect(INGEST_DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT 1 FROM seen_messages WHERE message_key = ?", (message_key,))
-    result = cursor.fetchone()
-    conn.close()
-    return result is not None
-
-def mark_message_seen(message_key):
-    """Mark message as seen in the database"""
-    conn = sqlite3.connect(INGEST_DB_PATH)
-    cursor = conn.cursor()
-    now = datetime.now().isoformat()
-    cursor.execute("""
-        INSERT INTO seen_messages (message_key, provider, first_seen_ts, last_seen_ts)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(message_key) DO UPDATE SET last_seen_ts = ?
-    """, (message_key, "imap", now, now, now))
-    conn.commit()
-    conn.close()
 
 def acquire_scan_lock():
     """Acquire global scan lock. Returns True if acquired, False if busy."""
@@ -394,14 +345,7 @@ def check_inbox():
                 continue
             msg = email.message_from_bytes(msg_data[0][1])
 
-            # Compute message key for deduplication
-            message_key = compute_message_key(msg, uid)
             source_message_id = msg.get("Message-ID", "")
-
-            # Check if we've seen this message before
-            if is_message_seen(message_key):
-                skipped_count += 1
-                continue
 
             subject = decode_header(msg["Subject"])[0][0]
             if isinstance(subject, bytes):
@@ -409,7 +353,6 @@ def check_inbox():
 
             # Check if this invoice is already processed (or was deleted)
             if is_invoice_already_processed(subject, existing_invoices, source_message_id):
-                mark_message_seen(message_key)
                 skipped_count += 1
                 continue
 
@@ -426,13 +369,11 @@ def check_inbox():
                 log(f"[INBOX][SCAN] Processing new invoice email: {subject}")
                 process_attachments(msg, subject)
                 move_to_processed(mail, uid)
-                mark_message_seen(message_key)
                 processed_count += 1
             else:
                 # Email has no PDF - log it for debugging
                 sender = msg.get("From", "unknown")
                 log(f"[INBOX][SCAN][NO_PDF] Skipping email without PDF - From: {sender}, Subject: {subject}")
-                mark_message_seen(message_key)
                 no_pdf_count += 1
                 skipped_count += 1
 
@@ -483,9 +424,6 @@ def check_inbox():
         release_scan_lock()
 
 if __name__ == "__main__":
-    # Initialize database on startup
-    init_ingest_db()
-
     interval_ms = _config["interval_ms"]
     log(f"[INBOX][WATCHER][START] Starting inbox watcher with {interval_ms}ms interval")
     log(f"[INBOX][WATCHER][CONFIG] PCS_DATA_DIR={DATA_DIR}")
