@@ -12,10 +12,14 @@ export async function POST(req: NextRequest) {
   const url = new URL(req.url);
   url.pathname = '/api/invoices/transition-db';
 
+  // Read the body once
+  const body = await req.json();
+
   const newReq = new NextRequest(url, {
     method: req.method,
     headers: req.headers,
-    body: req.body,
+    body: JSON.stringify(body),
+    duplex: 'half',
   });
 
   // Forward to transition-db
