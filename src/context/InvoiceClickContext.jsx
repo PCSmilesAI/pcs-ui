@@ -39,6 +39,11 @@ export function InvoiceClickProvider({ children }) {
 export function useInvoiceClick() {
   const context = useContext(InvoiceClickContext);
   if (!context) {
+    // During SSR, context might not be available yet
+    // Return a no-op function that will be replaced on client
+    if (typeof window === 'undefined') {
+      return { handleInvoiceRowClick: () => {} };
+    }
     throw new Error('useInvoiceClick must be used within an InvoiceClickProvider');
   }
   return context;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import nodemailer from 'nodemailer';
 import Mailjet from 'node-mailjet';
+import sgMail from '@sendgrid/mail';
 import https from 'https';
 import { loadMap, findVendorKey, setVendorStatus } from '@/lib/payments/vendorStore';
 
@@ -176,8 +177,8 @@ async function ensureStripeAccountAndLink(req: NextRequest, vendorParam: string,
     const origin = req.headers.get('x-forwarded-proto') && req.headers.get('host')
       ? `${req.headers.get('x-forwarded-proto')}://${req.headers.get('host')}`
       : '';
-    const refreshUrl = `${origin}/VendorsPage`;
-    const returnUrl = `${origin}/VendorDetailPage?vendor=${encodeURIComponent(vendorParam || '')}`;
+    const refreshUrl = `${origin}/VendorOnboardingSuccess?vendor=${encodeURIComponent(vendorParam || '')}`;
+    const returnUrl = `${origin}/VendorOnboardingSuccess?vendor=${encodeURIComponent(vendorParam || '')}`;
     const al = await stripe.accountLinks.create({
       account: finalAccountId!,
       type: 'account_onboarding',
@@ -256,10 +257,43 @@ export async function POST(req: NextRequest) {
       </div>
     `;
 
+    // Try SendGrid first (most reliable with firewall restrictions)
+    const sgKey = process.env.SENDGRID_API_KEY || '';
+    if (sgKey) {
+      try {
+        sgMail.setApiKey(sgKey);
+        const fromEmail = process.env.PCS_FROM_EMAIL || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'no-reply@pcsmilesai.com';
+        const fromName = process.env.PCS_FROM_NAME || 'PCS AI';
+        const maskedTo = maskEmail(email);
+        console.log('[EMAIL_ONBOARD_LINK][SendGrid] Attempt', { vendor, to: maskedTo });
+
+        await sgMail.send({
+          to: email,
+          from: { email: fromEmail, name: fromName },
+          subject: `ACH Onboarding for ${vendor}`,
+          text: `Hello,\n\nPlease complete ACH onboarding for ${vendor} using the secure link below:\n\n${url}\n\nThis link is provided by PCS AI via Stripe. If you did not expect this email, please contact support.`,
+          html: `
+            <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;">
+              <p>Hello,</p>
+              <p>Please complete ACH onboarding for <strong>${vendor}</strong> using the secure link below:</p>
+              <p><a href="${url}" target="_blank" rel="noopener noreferrer">Complete ACH Onboarding</a></p>
+              <p style="color:#6b7280;font-size:12px;">This link is provided by PCS AI via Stripe.</p>
+            </div>
+          `,
+        });
+
+        console.log('[EMAIL_ONBOARD_LINK][SendGrid] Success', { vendor, to: maskedTo });
+        return json(200, { ok: true, sent: true, vendor, email, accountId: finalAccountId, url, provider: 'sendgrid' });
+      } catch (e: any) {
+        console.warn('[EMAIL_ONBOARD_LINK][SendGrid] Failed', e?.message || e);
+        // Fall through to Mailjet/SMTP
+      }
+    }
+
     const mjKey = process.env.MAILJET_API_KEY || '';
     const mjSecret = process.env.MAILJET_API_SECRET || '';
 
-    // Prefer Mailjet HTTP API if keys provided (no SMTP ports required)
+    // Try Mailjet HTTP API if keys provided (no SMTP ports required)
     if (mjKey && mjSecret) {
       const fromEmail = process.env.PCS_FROM_EMAIL || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'no-reply@pcsmilesai.com';
       const fromName = process.env.PCS_FROM_NAME || 'PCS AI';
@@ -312,9 +346,14 @@ export async function POST(req: NextRequest) {
     const text = baseText;
     const html = baseHtml;
 
-    // Try multiple SMTP configs (primary, GoDaddy variants, then Mailjet 2525)
-    type Attempt = { host: string; port: number; secure: boolean; authUser?: string; authPass?: string };
+    // Try multiple SMTP configs (GoDaddy relay first, then primary, then Mailjet 2525)
+    type Attempt = { host: string; port: number; secure: boolean; authUser?: string; authPass?: string; noAuth?: boolean };
     const attempts: Attempt[] = [];
+
+    // GoDaddy relay server (no authentication required) - TRY FIRST
+    attempts.push({ host: 'relay-hosting.secureserver.net', port: 25, secure: false, noAuth: true });
+
+    // Then try configured SMTP settings
     if (hasSmtpEnv) {
       attempts.push(
         { host, port, secure, authUser: user, authPass: pass },
@@ -323,6 +362,7 @@ export async function POST(req: NextRequest) {
         { host: host || 'smtp.secureserver.net', port: 587, secure: false, authUser: user, authPass: pass },
       );
     }
+
     // Mailjet SMTP fallback on 2525 (open on this server)
     if (process.env.MAILJET_API_KEY && process.env.MAILJET_API_SECRET) {
       attempts.push({ host: 'in-v3.mailjet.com', port: 2525, secure: false, authUser: process.env.MAILJET_API_KEY, authPass: process.env.MAILJET_API_SECRET });
@@ -331,15 +371,19 @@ export async function POST(req: NextRequest) {
     for (const cfg of attempts) {
       try {
         if (!cfg.host) continue;
-        const tx = nodemailer.createTransport({
+        const transportConfig: any = {
           host: cfg.host,
           port: cfg.port,
           secure: cfg.secure,
-          auth: { user: cfg.authUser || user, pass: cfg.authPass || pass },
           connectionTimeout: 10000,
           greetingTimeout: 8000,
           socketTimeout: 15000,
-        });
+        };
+        // Only add auth if not explicitly marked as noAuth
+        if (!cfg.noAuth) {
+          transportConfig.auth = { user: cfg.authUser || user, pass: cfg.authPass || pass };
+        }
+        const tx = nodemailer.createTransport(transportConfig);
         await tx.verify().catch(() => undefined);
         await tx.sendMail({ from, to: email, subject, text, html });
         return json(200, { ok: true, sent: true, vendor, email, accountId: finalAccountId, url, smtp: cfg });

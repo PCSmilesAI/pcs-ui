@@ -3,6 +3,7 @@ import InvoiceTable from '../components/InvoiceTable.jsx';
 import ACHBadge from '../ui/ach/ACHBadge';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
 import { normalizeVendorName, getDisplayVendorName, vendorNamesMatch } from '../lib/vendorUtils';
+import { notifyAchUpdate } from '../ui/ach/achEventBus';
 
 export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
   const [rows, setRows] = useState([]);
@@ -252,6 +253,8 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
                 const resp = await fetch(`/api/vendors/ach-info?vendor=${encodeURIComponent(vendor)}&t=${Date.now()}`, { cache: 'no-store' });
                 const data = await resp.json();
                 setAchInfo(data || {});
+                // Notify all other components that ACH status has been updated
+                notifyAchUpdate(vendor);
               } catch (refreshError) {
                 console.error('Failed to refresh ACH status for vendor:', vendor, refreshError);
               }

@@ -1,5 +1,6 @@
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const ADMIN_EMAILS = new Set([
@@ -10,9 +11,9 @@ const ADMIN_EMAILS = new Set([
 // Navigation bar implemented with inline styles. This component avoids
 // reliance on Tailwind so that styling always appears even when
 // Tailwind isn't processed. It exposes the same props as before.
-export default function NavBar({
+function NavBarInner({
   currentPage,
-  onChangePage = () => { 
+  onChangePage = () => {
     if (process.env.NODE_ENV !== 'production') {
       console.warn('NavBar: onChangePage prop was not provided.');
     }
@@ -24,7 +25,14 @@ export default function NavBar({
   // Minimal logic-only additions to keep UI identical
   const router = useRouter();
   const pathname = usePathname();
-  const sp = useSearchParams();
+  const [sp, setSp] = useState(null);
+
+  // Get search params safely on client side only
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSp(new URLSearchParams(window.location.search));
+    }
+  }, [pathname]);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -59,7 +67,7 @@ export default function NavBar({
 
   // Fallback: if email is present in URL (?email=...), adopt it and persist
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !sp) return;
     try {
       const urlEmail = sp.get('email');
       const normalised = urlEmail ? String(urlEmail).trim().toLowerCase() : '';
@@ -241,6 +249,7 @@ export default function NavBar({
 
   // Keep local searchValue in sync with URL when navigating back/forward
   useEffect(() => {
+    if (!sp) return;
     const initial = sp.get('search') || '';
     setSearchValue(initial);
     // Do not auto-open input; respect UI toggle
@@ -248,6 +257,7 @@ export default function NavBar({
 
   // Debounce URL updates when typing
   useEffect(() => {
+    if (!sp) return;
     const id = setTimeout(() => {
       const params = new URLSearchParams(sp.toString());
       if (searchValue) params.set('search', searchValue);
@@ -371,4 +381,9 @@ export default function NavBar({
       </div>
     </nav>
   );
+}
+
+// Export with Suspense wrapper to handle client-side only rendering
+export default function NavBar(props) {
+  return <NavBarInner {...props} />;
 }

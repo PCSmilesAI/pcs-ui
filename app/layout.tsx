@@ -1,6 +1,5 @@
 import '../src/index.css';
-import AppLayout from '../src/components/AppLayout';
-import { Suspense } from 'react';
+import AppLayoutWrapper from '../src/components/AppLayoutWrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,9 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <Suspense fallback={<div>Loading...</div>}>
-          <AppLayout>{children}</AppLayout>
-        </Suspense>
+        <AppLayoutWrapper>{children}</AppLayoutWrapper>
       </body>
     </html>
   );

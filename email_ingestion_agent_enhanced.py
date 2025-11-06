@@ -249,25 +249,30 @@ def run_vendor_router(filepath, detected_vendor=None):
         cmd = ["python3", VENDOR_ROUTER_PATH, filepath]
         if detected_vendor:
             cmd.append(detected_vendor)
-        
+
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-        if result.returncode == 0:
-            return result.stdout.strip()
+        vendor_output = result.stdout.strip()
+
+        if result.returncode == 0 and vendor_output:
+            log(f"[VENDOR_ROUTER] Detected vendor: {vendor_output}")
+            return vendor_output
         else:
-            log(f"❌ Vendor router failed: {result.stderr}")
+            stderr_msg = result.stderr.strip() if result.stderr else "No output"
+            log(f"[VENDOR_ROUTER][ERROR] Failed for {os.path.basename(filepath)}: {stderr_msg}")
             return None
     except subprocess.TimeoutExpired:
-        log(f"⏰ Vendor router timeout for {filepath}")
+        log(f"[VENDOR_ROUTER][TIMEOUT] Timeout for {os.path.basename(filepath)}")
         return None
     except Exception as e:
-        log(f"❌ Vendor router error: {e}")
+        log(f"[VENDOR_ROUTER][ERROR] Exception: {e}")
         return None
 
 def process_attachments(msg, email_subject):
     detected_vendor = detect_vendor_from_email(msg)
     if detected_vendor:
         log(f"📧 Vendor detected from email: {detected_vendor}")
-    
+
+    pdf_count = 0
     for part in msg.walk():
         if part.get_content_maintype() == 'multipart':
             continue
@@ -276,6 +281,7 @@ def process_attachments(msg, email_subject):
 
         filename = part.get_filename()
         if filename and filename.lower().endswith(".pdf"):
+            pdf_count += 1
             filepath = os.path.join(SAVE_DIR, filename)
             if os.path.exists(filepath):
                 log(f"⏩ Skipped duplicate attachment: {filename}")
@@ -288,7 +294,10 @@ def process_attachments(msg, email_subject):
             if vendor:
                 log(f"📦 Parsed and routed invoice: {vendor}")
             else:
-                log("⏩ Ignored: unknown or unparseable vendor")
+                log(f"⏩ Ignored: unknown or unparseable vendor for {filename}")
+
+    if pdf_count == 0:
+        log(f"⚠️ No PDFs found in email: {email_subject}")
 
 def move_to_processed(mail, uid):
     # Mark as read instead of deleted
@@ -326,6 +335,7 @@ def check_inbox():
 
         processed_count = 0
         skipped_count = 0
+        no_pdf_count = 0
 
         for uid in email_uids:
             status, msg_data = mail.uid('fetch', uid, '(RFC822)')
@@ -367,11 +377,15 @@ def check_inbox():
                 mark_message_seen(message_key)
                 processed_count += 1
             else:
+                # Email has no PDF - log it for debugging
+                sender = msg.get("From", "unknown")
+                log(f"[INBOX][SCAN][NO_PDF] Skipping email without PDF - From: {sender}, Subject: {subject}")
                 mark_message_seen(message_key)
+                no_pdf_count += 1
                 skipped_count += 1
 
         duration_ms = int((time.time() - start_time) * 1000)
-        log(f"[INBOX][SCAN][END] Processed {processed_count} new, skipped {skipped_count}, duration {duration_ms}ms")
+        log(f"[INBOX][SCAN][END] Processed {processed_count} new, skipped {skipped_count} (no PDF: {no_pdf_count}), duration {duration_ms}ms")
 
         # Update last scan result
         _last_scan_result = {

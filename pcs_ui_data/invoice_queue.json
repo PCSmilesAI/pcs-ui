@@ -1,14 +1,46 @@
-{
-  "invoices": [
-    { "id": "local_inv_001", "vendor": "henry_schein", "vendor_name": "Henry Schein", "invoice_number": "44134561", "invoice_date": "2025-07-16", "due_date": "2025-08-15", "office_location": "Lebanon", "invoice_total": "93.37", "status": "incoming", "created_at": "2025-10-27T00:00:00Z", "approvals": {} },
-    { "id": "local_inv_002", "vendor": "patterson_dental", "vendor_name": "Patterson Dental", "invoice_number": "3038216492", "invoice_date": "2025-07-31", "due_date": "2025-08-30", "office_location": "Roseburg", "invoice_total": "1864.51", "status": "incoming", "created_at": "2025-10-27T00:00:00Z", "approvals": {} },
-    { "id": "local_inv_003", "vendor": "henry_schein", "vendor_name": "Henry Schein", "invoice_number": "6360946", "invoice_date": "2025-08-05", "due_date": "2025-09-05", "office_location": "Milwaukie", "invoice_total": "512.45", "status": "incoming", "created_at": "2025-10-27T00:00:00Z", "approvals": {} },
-    { "id": "local_inv_004", "vendor": "patterson_dental", "vendor_name": "Patterson Dental", "invoice_number": "3038217777", "invoice_date": "2025-09-01", "due_date": "2025-10-01", "office_location": "Eugene", "invoice_total": "245.90", "status": "incoming", "created_at": "2025-10-27T00:00:00Z", "approvals": {} },
-    { "id": "local_inv_005", "vendor": "henry_schein", "vendor_name": "Henry Schein", "invoice_number": "44134562", "invoice_date": "2025-09-10", "due_date": "2025-10-10", "office_location": "Ridgefield", "invoice_total": "78.10", "status": "incoming", "created_at": "2025-10-27T00:00:00Z", "approvals": {} },
-    { "id": "local_inv_006", "vendor": "henry_schein", "vendor_name": "Henry Schein", "invoice_number": "44134563", "invoice_date": "2025-09-12", "due_date": "2025-10-12", "office_location": "Riddle", "invoice_total": "152.00", "status": "incoming", "created_at": "2025-10-27T00:00:00Z", "approvals": {} },
-    { "id": "local_inv_007", "vendor": "patterson_dental", "vendor_name": "Patterson Dental", "invoice_number": "3038217001", "invoice_date": "2025-09-15", "due_date": "2025-10-15", "office_location": "Salem", "invoice_total": "990.00", "status": "incoming", "created_at": "2025-10-27T00:00:00Z", "approvals": {} },
-    { "id": "local_inv_008", "vendor": "henry_schein", "vendor_name": "Henry Schein", "invoice_number": "44134564", "invoice_date": "2025-09-18", "due_date": "2025-10-18", "office_location": "Columbia", "invoice_total": "63.75", "status": "incoming", "created_at": "2025-10-27T00:00:00Z", "approvals": {} },
-    { "id": "local_inv_009", "vendor": "patterson_dental", "vendor_name": "Patterson Dental", "invoice_number": "3038217002", "invoice_date": "2025-09-20", "due_date": "2025-10-20", "office_location": "Lebanon", "invoice_total": "125.00", "status": "incoming", "created_at": "2025-10-27T00:00:00Z", "approvals": {} },
-    { "id": "local_inv_010", "vendor": "henry_schein", "vendor_name": "Henry Schein", "invoice_number": "44134565", "invoice_date": "2025-09-22", "due_date": "2025-10-22", "office_location": "Roseburg", "invoice_total": "312.30", "status": "incoming", "created_at": "2025-10-27T00:00:00Z", "approvals": {} }
-  ]
-}
+[
+  {
+    "id": "test-invoice-001",
+    "vendor": "Braxton Ellsworth",
+    "vendor_name": "Braxton Ellsworth",
+    "invoice_number": "INV-2025-001",
+    "invoice_date": "11/03/2025",
+    "due_date": "12/03/2025",
+    "invoice_total": "5.00",
+    "office_location": "Eugene",
+    "status": "awaiting_office_approval",
+    "approved": false,
+    "approvals": {},
+    "line_items": [
+      {
+        "product_number": "TEST-001",
+        "product_name": "Test Service",
+        "Quantity": "1",
+        "unit_price": "5.00",
+        "line_item_total": "5.00"
+      }
+    ]
+  },
+  {
+    "id": "test-invoice-002",
+    "vendor": "Braxton Ellsworth",
+    "vendor_name": "Braxton Ellsworth",
+    "invoice_number": "INV-2025-002",
+    "invoice_date": "11/04/2025",
+    "due_date": "12/04/2025",
+    "invoice_total": "5.00",
+    "office_location": "Eugene",
+    "status": "awaiting_office_approval",
+    "approved": false,
+    "approvals": {},
+    "line_items": [
+      {
+        "product_number": "TEST-002",
+        "product_name": "Test Service - Payment Flow",
+        "Quantity": "1",
+        "unit_price": "5.00",
+        "line_item_total": "5.00"
+      }
+    ]
+  }
+]

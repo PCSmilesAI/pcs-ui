@@ -108,12 +108,14 @@ export function approveAP(invoice: any, actor: Actor, roles: RolesConfig): void 
 }
 
 export function approveOffice(invoice: any, actor: Actor, threshold: number): void {
+  console.log('[WORKFLOW][ENGINE]', 'approveOffice_start', { invoiceId: getInvoiceId(invoice), threshold });
   invoice.approvals = (invoice.approvals && typeof invoice.approvals === 'object') ? invoice.approvals : {} as InvoiceApprovals;
   invoice.approvals.office = {
     by: normaliseEmail(actor.email),
     at: new Date().toISOString(),
   };
   invoice.status = nextStatusAfterOffice(invoice, threshold);
+  console.log('[WORKFLOW][ENGINE]', 'approveOffice_end', { invoiceId: getInvoiceId(invoice), newStatus: invoice.status });
   logEngine('approveOffice', { invoiceId: getInvoiceId(invoice), userEmail: normaliseEmail(actor.email) });
 }
 

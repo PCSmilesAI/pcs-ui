@@ -44,7 +44,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const user = getCurrentUser(req);
-  console.log('[API][INVOICES]', 'visible_request', { userEmail: user.email });
+  const limit = Number.parseInt(parseSearchParam(req, 'limit', '50'), 10) || 50;
+  const offset = Number.parseInt(parseSearchParam(req, 'offset', '0'), 10) || 0;
+  const search = parseSearchParam(req, 'search');
+  const status = parseSearchParam(req, 'status');
+  const vendor = parseSearchParam(req, 'vendor');
+  console.log('[API][INVOICES]', 'visible_request', { userEmail: user.email, limit, offset, search, status, vendor });
 
   const [admin, ap] = await Promise.all([isAdmin(user.email), isAP(user.email)]);
   let invoices: any[] = [];
@@ -65,12 +70,6 @@ export async function GET(req: NextRequest) {
       return (!!office) && officeSet.has(office);
     });
   }
-
-  const limit = Number.parseInt(parseSearchParam(req, 'limit', '50'), 10) || 50;
-  const offset = Number.parseInt(parseSearchParam(req, 'offset', '0'), 10) || 0;
-  const search = parseSearchParam(req, 'search');
-  const status = parseSearchParam(req, 'status');
-  const vendor = parseSearchParam(req, 'vendor');
 
   const filtered = invoices.filter((invoice) =>
     matchesSearch(invoice, search) && matchesStatus(invoice, status) && matchesVendor(invoice, vendor)
