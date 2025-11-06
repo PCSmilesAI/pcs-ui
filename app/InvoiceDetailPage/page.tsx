@@ -152,6 +152,19 @@ function InvoiceDetailContent() {
     }
   };
 
+  const handleInvoiceRejected = (rejectedInvoiceId: string) => {
+    // Remove the rejected invoice from the queue
+    const updatedQueue = invoiceQueue.filter(inv =>
+      (inv.invoice_number !== rejectedInvoiceId && inv.id !== rejectedInvoiceId)
+    );
+    setInvoiceQueue(updatedQueue);
+
+    // Update the current index if needed
+    if (currentIndex >= updatedQueue.length) {
+      setCurrentIndex(Math.max(0, updatedQueue.length - 1));
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
@@ -161,13 +174,14 @@ function InvoiceDetailContent() {
   }
 
   return (
-    <InvoiceDetailPageImpl 
-      invoice={invoice} 
+    <InvoiceDetailPageImpl
+      invoice={invoice}
       onBack={handleBack}
       onPrevious={handlePrevious}
       onNext={handleNext}
       canGoPrevious={currentIndex > 0}
       canGoNext={currentIndex < invoiceQueue.length - 1}
+      onInvoiceRejected={handleInvoiceRejected}
     />
   );
 }
