@@ -8,8 +8,9 @@ export async function fetchInvoiceQueue(
   for (const [k, v] of Object.entries(params)) usp.set(k, String(v))
 
   // IMPORTANT: client-side fetch with no cache
+  // Use the new database-backed API endpoint instead of the old JSON queue
   const timestamp = new Date().getTime()
-  const url = `/api/invoice-queue?${usp.toString()}&_t=${timestamp}`
+  const url = `/api/invoices/visible?${usp.toString()}&_t=${timestamp}`
   const res = await fetch(url, {
     cache: 'no-store',
     headers: {
@@ -20,12 +21,12 @@ export async function fetchInvoiceQueue(
 
   const text = await res.text()
   let data: any
-  try { 
-    data = JSON.parse(text) 
+  try {
+    data = JSON.parse(text)
   } catch {
-    throw new Error(`Bad JSON from /api/invoice-queue: ${text.slice(0, 200)}`)
+    throw new Error(`Bad JSON from /api/invoices/visible: ${text.slice(0, 200)}`)
   }
-  
+
   if (!res.ok || !data?.ok) {
     throw new Error(data?.error || `HTTP ${res.status}`)
   }

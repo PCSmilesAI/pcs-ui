@@ -32,8 +32,9 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
   useEffect(() => {
     const loadVendors = async () => {
       try {
-        console.log('🔄 VendorsPage: Fetching invoices from /api/invoice-queue...');
+        console.log('🔄 VendorsPage: Fetching invoices from database...');
         setLoading(true);
+        // Fetch ALL invoices (no status filter) to show all vendors including historical ones
         const data = await fetchInvoiceQueue({ limit: 5000 });
         console.log('📊 VendorsPage: API returned', data.length, 'invoices');
 
@@ -42,20 +43,40 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
           // Use normalized vendor name as the key to prevent duplicates
           const normalizedName = getNormalizedVendorFromInvoice(invoice);
           const displayName = getDisplayVendorName(invoice.vendor_name || invoice.vendor);
-          const amountNum = parseFloat(String(invoice.invoice_total ?? invoice.total ?? '0'));
+
+          // Parse amount - handle both cents and dollar formats
+          let amountNum = 0;
+          const amountStr = String(invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? '0');
+          if (amountStr.includes('.')) {
+            // Dollar format
+            amountNum = parseFloat(amountStr);
+          } else {
+            // Cents format - convert to dollars
+            amountNum = parseInt(amountStr, 10) / 100;
+          }
+          amountNum = isNaN(amountNum) ? 0 : amountNum;
+
+          // Only count outstanding (unpaid) invoices for the outstanding amount
+          // Paid invoices should not be included in the outstanding total
+          const isPaid = invoice.status === 'paid';
+          const outstandingAmount = isPaid ? 0 : amountNum;
 
           if (vendorMap.has(normalizedName)) {
             const existing = vendorMap.get(normalizedName);
-            existing.amount += (isNaN(amountNum) ? 0 : amountNum);
+            existing.amount += outstandingAmount;
+            existing.totalAmount += amountNum;  // Track total for reference
             existing.invoiceCount += 1;
+            existing.paidCount += isPaid ? 1 : 0;
           } else {
             vendorMap.set(normalizedName, {
               name: displayName,  // Use display name for UI
               normalizedName: normalizedName,  // Store normalized name for filtering
               method: 'ACH',
-              amount: isNaN(amountNum) ? 0 : amountNum,
+              amount: outstandingAmount,  // Outstanding amount (unpaid only)
+              totalAmount: amountNum,  // Total amount (all invoices)
               contact: 'Contact via invoice',
               invoiceCount: 1,
+              paidCount: isPaid ? 1 : 0,
             });
           }
         });
@@ -63,9 +84,10 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
         const transformedData = Array.from(vendorMap.values()).map((v) => ({
           name: v.name,
           method: v.method,
-          amount: `$${v.amount.toFixed(2)}`,
+          amount: `$${v.amount.toFixed(2)}`,  // Outstanding amount
           contact: v.contact,
           invoiceCount: v.invoiceCount,
+          paidCount: v.paidCount,
           ach: getStatusForVendor(v.name)
         }));
 

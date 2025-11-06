@@ -49,42 +49,56 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
 
         console.log('✅ VendorDetailPage: Found', filtered.length, 'invoices for vendor');
 
-        const mapped = filtered.map((invoice) => ({
-          invoice: invoice.invoice_number || 'Unknown',
-          invoice_number: invoice.invoice_number,
-          vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
-          amount: `$${invoice.invoice_total || invoice.total || '0.00'}`,
-          office: invoice.clinic_id || 'Unknown',
-          dueDate: invoice.due_date
-            ? new Date(invoice.due_date).toLocaleDateString('en-US', {
-                month: 'numeric',
-                day: 'numeric',
-                year: '2-digit',
-              })
-            : (invoice.invoice_date
-                ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
-                    month: 'numeric',
-                    day: 'numeric',
-                    year: '2-digit',
-                  })
-                : 'N/A'),
-          invoiceDate: invoice.invoice_date
-            ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
-                month: 'numeric',
-                day: 'numeric',
-                year: '2-digit',
-              })
-            : 'N/A',
-          status: invoice.status,
-          // extras for detail
-          invoice_date: invoice.invoice_date,
-          due_date: invoice.due_date,
-          json_path: invoice.json_path,
-          pdf_path: invoice.pdf_path,
-          timestamp: invoice.timestamp,
-          assigned_to: invoice.assigned_to,
-          approved: invoice.approved,
-        }));
+        const mapped = filtered.map((invoice) => {
+          // Parse amount - handle both cents and dollar formats
+          let amountNum = 0;
+          const amountStr = String(invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? '0');
+          if (amountStr.includes('.')) {
+            // Dollar format
+            amountNum = parseFloat(amountStr);
+          } else {
+            // Cents format - convert to dollars
+            amountNum = parseInt(amountStr, 10) / 100;
+          }
+
+          return {
+            invoice: invoice.invoice_number || 'Unknown',
+            invoice_number: invoice.invoice_number,
+            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            amount: `$${amountNum.toFixed(2)}`,
+            office: invoice.office_id || invoice.office_location || invoice.clinic_id || 'Unknown',
+            dueDate: invoice.due_date
+              ? new Date(invoice.due_date).toLocaleDateString('en-US', {
+                  month: 'numeric',
+                  day: 'numeric',
+                  year: '2-digit',
+                })
+              : (invoice.invoice_date
+                  ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
+                      month: 'numeric',
+                      day: 'numeric',
+                      year: '2-digit',
+                    })
+                  : 'N/A'),
+            invoiceDate: invoice.invoice_date
+              ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
+                  month: 'numeric',
+                  day: 'numeric',
+                  year: '2-digit',
+                })
+              : 'N/A',
+            status: invoice.status,
+            // extras for detail
+            invoice_date: invoice.invoice_date,
+            due_date: invoice.due_date,
+            json_path: invoice.json_path,
+            pdf_path: invoice.pdf_path,
+            timestamp: invoice.timestamp,
+            assigned_to: invoice.assigned_to,
+            approved: invoice.approved,
+            amountNum: amountNum,  // Store numeric amount for metrics calculation
+          };
+        });
         setRows(mapped);
         setError('');
       } catch (e) {
@@ -114,13 +128,14 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
     return () => { active = false; };
   }, [vendor]);
 
-  // Metrics
+  // Metrics - calculate based on invoice status
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
   const parsed = useMemo(() =>
     rows.map((r) => ({
-      amount: parseFloat(String(r.amount).replace(/[^0-9.]/g, '')) || 0,
+      amount: r.amountNum || 0,
+      isPaid: r.status === 'paid',
       date: (() => {
         const parts = String(r.dueDate).split('/');
         if (parts.length === 3) {
@@ -136,11 +151,20 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
     [rows]
   );
 
+  // Total metrics (all invoices)
   const totalCount = parsed.length;
   const totalAmount = parsed.reduce((s, x) => s + x.amount, 0);
+
+  // Outstanding metrics (unpaid invoices only)
+  const outstandingCount = parsed.filter(x => !x.isPaid).length;
+  const outstandingAmount = parsed.filter(x => !x.isPaid).reduce((s, x) => s + x.amount, 0);
+
+  // YTD metrics (all invoices)
   const ytdItems = parsed.filter((x) => x.date.getFullYear() === currentYear);
   const ytdCount = ytdItems.length;
   const ytdAmount = ytdItems.reduce((s, x) => s + x.amount, 0);
+
+  // MTD metrics (all invoices)
   const mtdItems = parsed.filter(
     (x) => x.date.getFullYear() === currentYear && x.date.getMonth() === currentMonth
   );
@@ -220,16 +244,16 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
 
       {/* KPI cards: counts */}
       <div style={cardsGrid}>
-        <div style={card}><div style={cardLabel}>Total Invoices (Count)</div><div style={cardValue}>{totalCount}</div></div>
-        <div style={card}><div style={cardLabel}>Year to Date (Count)</div><div style={cardValue}>{ytdCount}</div></div>
-        <div style={card}><div style={cardLabel}>Month to Date (Count)</div><div style={cardValue}>{mtdCount}</div></div>
+        <div style={card}><div style={cardLabel}>Total Invoices</div><div style={cardValue}>{totalCount}</div></div>
+        <div style={card}><div style={cardLabel}>Outstanding Invoices</div><div style={cardValue}>{outstandingCount}</div></div>
+        <div style={card}><div style={cardLabel}>Paid Invoices</div><div style={cardValue}>{totalCount - outstandingCount}</div></div>
       </div>
 
       {/* KPI cards: dollars */}
       <div style={cardsGrid}>
-        <div style={card}><div style={cardLabel}>Total Invoices ($)</div><div style={cardValue}>{fmt(totalAmount)}</div></div>
-        <div style={card}><div style={cardLabel}>Year to Date ($)</div><div style={cardValue}>{fmt(ytdAmount)}</div></div>
-        <div style={card}><div style={cardLabel}>Month to Date ($)</div><div style={cardValue}>{fmt(mtdAmount)}</div></div>
+        <div style={card}><div style={cardLabel}>Total Amount ($)</div><div style={cardValue}>{fmt(totalAmount)}</div></div>
+        <div style={card}><div style={cardLabel}>Outstanding Amount ($)</div><div style={cardValue} style={{color: outstandingAmount > 0 ? '#dc2626' : '#357ab2'}}>{fmt(outstandingAmount)}</div></div>
+        <div style={card}><div style={cardLabel}>Paid Amount ($)</div><div style={cardValue}>{fmt(totalAmount - outstandingAmount)}</div></div>
       </div>
 
       {/* Vendor info */}
