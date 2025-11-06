@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     headers: req.headers,
     body: JSON.stringify(body),
     duplex: 'half',
-  });
+  } as any);
 
   // Forward to transition-db
   const response = await fetch(newReq);
