@@ -38,8 +38,24 @@ export default function AppLayout({ children }) {
       'ConnectionsPage': 'connections'
     };
 
-    setCurrentPage(pageMapping[path] || 'forMe');
-  }, [pathname]);
+    // If on InvoiceDetailPage, check the 'from' query parameter to determine which tab to highlight
+    if (path === 'InvoiceDetailPage') {
+      const from = sp.get('from');
+      if (from === 'ToBePaid') {
+        setCurrentPage('toBePaid');
+      } else if (from === 'Complete') {
+        setCurrentPage('complete');
+      } else if (from === 'Vendors') {
+        setCurrentPage('vendors');
+      } else if (from === 'AllInvoices') {
+        setCurrentPage('allInvoices');
+      } else {
+        setCurrentPage('forMe');
+      }
+    } else {
+      setCurrentPage(pageMapping[path] || 'forMe');
+    }
+  }, [pathname, sp]);
 
   const handleChangePage = (pageKey) => {
     // Map NavBar page keys to URL paths
