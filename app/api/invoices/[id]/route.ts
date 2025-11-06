@@ -17,6 +17,12 @@ export async function GET(
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
+    // Ensure invoice has a valid status - default to 'incoming' if missing
+    if (!invoice.status) {
+      console.log('[API][INVOICES]', 'getById_missing_status', { invoiceId, defaulting: 'incoming' });
+      invoice.status = 'incoming';
+    }
+
     return NextResponse.json({
       ok: true,
       invoice
