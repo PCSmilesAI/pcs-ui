@@ -50,7 +50,20 @@ export function closeDatabase(): void {
 }
 
 export function runMigrations(): void {
-  const db = getDatabase();
+  // Get database without triggering migrations again
+  if (!db) {
+    const dbPath = resolveDataPath('pcs.db');
+    const dir = path.dirname(dbPath);
+
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    db = new Database(dbPath);
+    db.pragma('foreign_keys = ON');
+    db.pragma('journal_mode = WAL');
+    db.pragma('synchronous = NORMAL');
+  }
   
   // Create invoices table with all fields
   db.exec(`
