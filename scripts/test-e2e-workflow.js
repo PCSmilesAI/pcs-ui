@@ -67,8 +67,14 @@ async function runTests() {
       return;
     }
 
-    // Find an invoice that can be tested
-    const testInvoice = invoices[0];
+    // Find an invoice that can be tested (one that's not already paid)
+    const approvableStatuses = ['incoming', 'categorized', 'pending', 'awaiting_office_approval', 'awaiting_admin_approval'];
+    const testInvoice = invoices.find(inv => approvableStatuses.includes(inv.status)) || invoices[0];
+
+    if (!approvableStatuses.includes(testInvoice.status)) {
+      console.log(`⚠️  No approvable invoices found. First invoice is in '${testInvoice.status}' status`);
+      return;
+    }
     console.log(`✅ Found invoice: ${testInvoice.invoice_number || testInvoice.id}`);
     console.log(`   Current Status: ${testInvoice.status}`);
     console.log(`   Vendor: ${testInvoice.vendor_name}`);
