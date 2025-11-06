@@ -52,6 +52,12 @@ export async function POST(req: NextRequest) {
         } else if (status === 'awaiting_office_approval') {
           approveOffice(invoice, { email: user.email, name: user.name }, threshold);
         } else if (status === 'awaiting_admin_approval') {
+          // Only admins can approve invoices in awaiting_admin_approval status
+          const isUserAdmin = await isAdmin(user.email);
+          if (!isUserAdmin) {
+            console.log('[API][INVOICES]', 'transition_admin_approval_unauthorized', { invoiceId: String(invoiceId), userEmail: user.email });
+            return NextResponse.json({ error: 'Only admins can approve invoices at this stage' }, { status: 403 });
+          }
           approveAdmin(invoice, { email: user.email, name: user.name });
         } else {
           return NextResponse.json({ error: 'Nothing to approve.' }, { status: 400 });
