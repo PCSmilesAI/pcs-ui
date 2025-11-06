@@ -45,21 +45,24 @@ export async function GET(request: NextRequest) {
     
     // Apply filters
     let filteredData = data
-    
+
+    // Filter out deleted invoices
+    filteredData = filteredData.filter(inv => !inv.deleted && !inv.workflow_deleted_at)
+
     if (search) {
-      filteredData = filteredData.filter(inv => 
+      filteredData = filteredData.filter(inv =>
         (inv.invoice_number && inv.invoice_number.toLowerCase().includes(search.toLowerCase())) ||
         (inv.vendor_name && inv.vendor_name.toLowerCase().includes(search.toLowerCase())) ||
         (inv.vendor && inv.vendor.toLowerCase().includes(search.toLowerCase()))
       )
     }
-    
+
     if (status) {
       filteredData = filteredData.filter(inv => inv.status === status)
     }
-    
+
     if (vendor) {
-      filteredData = filteredData.filter(inv => 
+      filteredData = filteredData.filter(inv =>
         (inv.vendor_name && inv.vendor_name.toLowerCase().includes(vendor.toLowerCase())) ||
         (inv.vendor && inv.vendor.toLowerCase().includes(vendor.toLowerCase()))
       )
