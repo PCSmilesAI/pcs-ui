@@ -1,5 +1,44 @@
 [
   {
+    "id": "TEST-COMPLETE-WORKFLOW-001",
+    "invoice_number": "TEST-COMPLETE-001",
+    "invoice": "TEST-COMPLETE-001",
+    "vendor": "Test Dental Supplies Inc",
+    "vendor_name": "Test Dental Supplies Inc",
+    "invoice_date": "11/05/2025",
+    "due_date": "12/05/2025",
+    "invoice_total": 2500.0,
+    "total": 2500.0,
+    "amount": 2500.0,
+    "office": "Pacific Crest Smiles - Eugene",
+    "office_location": "Pacific Crest Smiles - Eugene",
+    "clinic_id": "Pacific Crest Smiles - Eugene",
+    "category": "Dental Lab",
+    "status": "incoming",
+    "approved": false,
+    "approvals": {},
+    "line_items": [
+      {
+        "product_number": "DL-2025-001",
+        "product_name": "Crown - Molar",
+        "Quantity": 5,
+        "unit_price": 250.0,
+        "line_item_total": 1250.0
+      },
+      {
+        "product_number": "DL-2025-002",
+        "product_name": "Bridge - 3 Unit",
+        "Quantity": 2,
+        "unit_price": 625.0,
+        "line_item_total": 1250.0
+      }
+    ],
+    "source_file": "test_complete_workflow.json",
+    "json_path": "/output_jsons/test_complete_workflow.json",
+    "pdf_path": "/email_invoices/test_complete_workflow.pdf",
+    "timestamp": "2025-11-05T20:38:21.133142"
+  },
+  {
     "id": "test-invoice-001",
     "vendor": "Braxton Ellsworth",
     "vendor_name": "Braxton Ellsworth",

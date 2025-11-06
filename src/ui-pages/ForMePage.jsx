@@ -5,6 +5,39 @@ import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 
+// Helper function to get user email from localStorage/cookie
+function getUserEmail() {
+  try {
+    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('loggedInUser') : null;
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed?.email || '';
+    }
+  } catch (e) {
+    console.error('Failed to get user email:', e);
+  }
+  return '';
+}
+
+// Helper function to check if user is an admin
+async function checkIfAdmin(email) {
+  if (!email) return false;
+  
+  try {
+    const response = await fetch('/api/workflow/config');
+    if (!response.ok) return false;
+    
+    const config = await response.json();
+    const admins = config?.admins || [];
+    const normalizedEmail = email.trim().toLowerCase();
+    
+    return admins.map(e => e.trim().toLowerCase()).includes(normalizedEmail);
+  } catch (e) {
+    console.error('Failed to check admin status:', e);
+    return false;
+  }
+}
+
 function ForMePageImpl({ searchQuery = '', filters = {} }) {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -209,10 +242,17 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
 
     if (action === 'approve') {
-      const missingOffice = selectedRows.find((row) => !row.rawOffice);
-      if (missingOffice) {
-        showToast('Office is required before approval.', 'error');
-        return;
+      // Check if the user is an admin
+      const userEmail = getUserEmail();
+      const isAdmin = await checkIfAdmin(userEmail);
+      
+      // Only require office for non-admin users
+      if (!isAdmin) {
+        const missingOffice = selectedRows.find((row) => !row.rawOffice);
+        if (missingOffice) {
+          showToast('Office is required before approval.', 'error');
+          return;
+        }
       }
     }
 
