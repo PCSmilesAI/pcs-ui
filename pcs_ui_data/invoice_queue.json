@@ -1,6 +1,38 @@
 {
   "invoices": [
     {
+      "id": "TEST-BRAXTON-WORKFLOW-001",
+      "invoice_number": "TEST-BRAXTON-001",
+      "invoice": "TEST-BRAXTON-001",
+      "vendor": "Braxton Ellsworth",
+      "vendor_name": "Braxton Ellsworth",
+      "invoice_date": "11/06/2025",
+      "due_date": "12/06/2025",
+      "invoice_total": 1500.0,
+      "total": 1500.0,
+      "amount": 1500.0,
+      "office": "Pacific Crest Smiles - Eugene",
+      "office_location": "Pacific Crest Smiles - Eugene",
+      "clinic_id": "Pacific Crest Smiles - Eugene",
+      "category": "Consulting",
+      "status": "incoming",
+      "approved": false,
+      "approvals": {},
+      "line_items": [
+        {
+          "product_number": "CONS-2025-001",
+          "product_name": "Consulting Services",
+          "Quantity": 1,
+          "unit_price": 1500,
+          "line_item_total": 1500
+        }
+      ],
+      "source_file": "test_braxton_workflow.json",
+      "json_path": "/output_jsons/test_braxton_workflow.json",
+      "pdf_path": "/email_invoices/test_braxton_workflow.pdf",
+      "timestamp": "2025-11-06T08:40:04.081898"
+    },
+    {
       "id": "TEST-COMPLETE-WORKFLOW-001",
       "invoice_number": "TEST-COMPLETE-001",
       "invoice": "TEST-COMPLETE-001",
