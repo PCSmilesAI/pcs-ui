@@ -30,10 +30,12 @@ export function getDatabase(): Database.Database {
   // Auto-run migrations on first access
   if (!migrationsRun) {
     try {
+      console.log('[DB] Running migrations...');
       runMigrations();
       migrationsRun = true;
+      console.log('[DB] Migrations completed');
     } catch (err: any) {
-      console.error('[DB] Migration error:', err?.message);
+      console.error('[DB] Migration error:', err?.message, err?.stack);
       // Don't throw - migrations might already exist
     }
   }
@@ -59,12 +61,15 @@ export function runMigrations(): void {
       fs.mkdirSync(dir, { recursive: true });
     }
 
+    console.log('[DB][MIGRATE] Opening database at:', dbPath);
     db = new Database(dbPath);
     db.pragma('foreign_keys = ON');
     db.pragma('journal_mode = WAL');
     db.pragma('synchronous = NORMAL');
+    console.log('[DB][MIGRATE] Database opened');
   }
-  
+
+  console.log('[DB][MIGRATE] Creating tables...');
   // Create invoices table with all fields
   db.exec(`
     CREATE TABLE IF NOT EXISTS invoices (
