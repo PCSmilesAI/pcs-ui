@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Invoice Queue Writer - Monitors output_jsons directory and adds new invoices to queue
+Invoice Queue Writer - Monitors output_jsons directory and ingests invoices to database
 """
 
 import os
 import json
 import time
 import glob
+import requests
 from datetime import datetime
 from deleted_invoice_guard import compute_file_hash, should_skip_deleted_invoice
 
@@ -24,6 +25,10 @@ os.makedirs(EMAIL_INVOICES_PATH, exist_ok=True)
 
 INVOICE_QUEUE_PATH = os.path.join(DATA_DIR, "invoice_queue.json")
 LOG_PATH = os.path.join(DATA_DIR, "queue_writer.log")
+
+# API endpoint for ingesting invoices
+API_BASE_URL = os.environ.get('PCS_API_URL', 'http://localhost:3000')
+INGEST_ENDPOINT = f"{API_BASE_URL}/api/invoices/ingest"
 
 def log(msg):
     """Log messages with timestamp"""
@@ -83,25 +88,25 @@ def detect_vendor_from_filename(filename):
         return 'unknown'
 
 def add_invoice_to_queue(json_file_path):
-    """Add invoice to queue"""
+    """Ingest invoice to database via API"""
     try:
         # Load the JSON file to get invoice data
         with open(json_file_path, 'r') as f:
             invoice_data = json.load(f)
-        
+
         # Extract invoice information
         invoice_number = invoice_data.get('invoice_number', '')
         vendor = invoice_data.get('vendor', '')
         total = invoice_data.get('total', '') or invoice_data.get('invoice_total', '')
         office_location = invoice_data.get('office_location', '')
         invoice_date = invoice_data.get('invoice_date', '')
-        
+
         # Normalize vendor name
         if vendor.lower() in ['henry schein', 'henry schein']:
             vendor = 'Henry Schein'
         elif vendor.lower() == 'epic dental lab':
             vendor = 'Epic Dental Lab'
-        
+
         # Find the correct PDF path
         json_filename = os.path.basename(json_file_path)
         pdf_path = find_corresponding_pdf(json_filename)
@@ -118,46 +123,77 @@ def add_invoice_to_queue(json_file_path):
             log(f"⏭️ Skipped deleted invoice ({skip_reason}): vendor={vendor} invoice={invoice_number}")
             return False
 
-        # Create queue entry
-        queue_entry = {
+        # Prepare payload for API
+        payload = {
             "invoice_number": invoice_number,
-            "invoice_date": invoice_date,
             "vendor": vendor,
-            "clinic_id": office_location,
             "total": total,
-            "status": "new",
+            "office_location": office_location,
+            "invoice_date": invoice_date,
+            "clinic_id": office_location,
+            "source_file": invoice_data.get('source_file') or json_filename,
             "json_path": json_file_path,
             "pdf_path": pdf_path,
+        }
+
+        # Call API to ingest invoice
+        try:
+            response = requests.post(INGEST_ENDPOINT, json=payload, timeout=10)
+            if response.status_code in [200, 201]:
+                result = response.json()
+                log(f"✅ Ingested invoice {invoice_number} to database")
+                log(f"📊 Vendor: {vendor}")
+                log(f"💰 Total: ${total}")
+                log(f"🏥 Clinic: {office_location}")
+                return True
+            else:
+                log(f"⚠️ API error ingesting {invoice_number}: {response.status_code} {response.text}")
+                return False
+        except requests.exceptions.RequestException as e:
+            log(f"⚠️ Failed to reach API at {INGEST_ENDPOINT}: {e}")
+            log(f"   Falling back to queue file for {invoice_number}")
+            # Fallback: write to queue file if API is unavailable
+            return add_invoice_to_queue_file(json_file_path, payload)
+
+    except Exception as e:
+        log(f"❌ Error ingesting invoice: {e}")
+        return False
+
+def add_invoice_to_queue_file(json_file_path, payload):
+    """Fallback: Add invoice to queue file if API is unavailable"""
+    try:
+        queue_entry = {
+            "invoice_number": payload.get('invoice_number'),
+            "invoice_date": payload.get('invoice_date'),
+            "vendor": payload.get('vendor'),
+            "clinic_id": payload.get('clinic_id'),
+            "total": payload.get('total'),
+            "status": "new",
+            "json_path": json_file_path,
+            "pdf_path": payload.get('pdf_path'),
             "timestamp": datetime.now().isoformat(),
             "assigned_to": None,
             "approved": False,
-            "source_file": invoice_data.get('source_file') or json_filename,
+            "source_file": payload.get('source_file'),
         }
-        if file_hash:
-            queue_entry["file_hash"] = file_hash
 
         # Load current queue
         queue = load_invoice_queue()
 
         # Check if invoice already exists
-        existing_invoices = [inv for inv in queue if inv.get('invoice_number') == invoice_number]
+        existing_invoices = [inv for inv in queue if inv.get('invoice_number') == payload.get('invoice_number')]
         if existing_invoices:
-            log(f"⚠️ Invoice {invoice_number} already in queue, skipping")
+            log(f"⚠️ Invoice {payload.get('invoice_number')} already in queue, skipping")
             return False
-        
+
         # Add to queue
         queue.append(queue_entry)
         save_invoice_queue(queue)
-        
-        log(f"✅ Added invoice {invoice_number} to queue")
-        log(f"📊 Vendor: {vendor}")
-        log(f"💰 Total: ${total}")
-        log(f"🏥 Clinic: {office_location}")
-        
+
+        log(f"✅ Added invoice {payload.get('invoice_number')} to queue file (fallback)")
         return True
-        
     except Exception as e:
-        log(f"❌ Error adding invoice to queue: {e}")
+        log(f"❌ Error adding to queue file: {e}")
         return False
 
 def process_new_json_files():
@@ -165,20 +201,21 @@ def process_new_json_files():
     if not os.path.exists(OUTPUT_JSONS_PATH):
         log(f"❌ Output directory not found: {OUTPUT_JSONS_PATH}")
         return
-    
+
     # Get all JSON files
     json_files = glob.glob(os.path.join(OUTPUT_JSONS_PATH, "*.json"))
-    
-    # Load current queue to check what's already processed
+
+    # Load current queue to check what's already processed (fallback)
     queue = load_invoice_queue()
     processed_files = {entry.get('json_path') for entry in queue}
-    
+
     # Process new files
     new_files = [f for f in json_files if f not in processed_files]
-    
+
     if new_files:
         log(f"📄 Found {len(new_files)} new JSON files to process")
         for json_file in new_files:
+            # Try to ingest via API (with fallback to queue file)
             add_invoice_to_queue(json_file)
     else:
         log("📄 No new JSON files found")
