@@ -17,12 +17,9 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const bodyString = JSON.stringify(body);
 
-  const forwardUrl = url.toString();
-  console.log('[API][INVOICES][TRANSITION]', 'forwarding_to_db', { forwardUrl, searchParams: url.search });
-
   // Forward to transition-db using fetch with duplex option
   // Note: url.toString() includes query parameters from the original request
-  const response = await fetch(forwardUrl, {
+  const response = await fetch(url.toString(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
