@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
       invoices: paginated,
     });
   } catch (err: any) {
-    console.error('[API][INVOICES]', 'visible_error', { userEmail: user.email, error: err?.message });
+    console.error('[API][INVOICES]', 'visible_error', { userEmail: user.email, error: err?.message, stack: err?.stack });
     return NextResponse.json(
       { error: err?.message || 'Failed to fetch invoices' },
       { status: 500 }
