@@ -5,6 +5,39 @@ import ACHBadge from '../ui/ach/ACHBadge';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 
+// Helper function to get user email from localStorage/cookie
+function getUserEmail() {
+  try {
+    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('loggedInUser') : null;
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed?.email || '';
+    }
+  } catch (e) {
+    console.error('Failed to get user email:', e);
+  }
+  return '';
+}
+
+// Helper function to check if user is an admin
+async function checkIfAdmin(email) {
+  if (!email) return false;
+  
+  try {
+    const response = await fetch('/api/workflow/config');
+    if (!response.ok) return false;
+    
+    const config = await response.json();
+    const admins = config?.admins || [];
+    const normalizedEmail = email.trim().toLowerCase();
+    
+    return admins.map(e => e.trim().toLowerCase()).includes(normalizedEmail);
+  } catch (e) {
+    console.error('Failed to check admin status:', e);
+    return false;
+  }
+}
+
 /**
  * Detail view for a single invoice. Displays high level summary
  * information at the top along with actions (approve, reject,
@@ -457,8 +490,14 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }
 
     if (action === 'approve') {
+      // Check if the user is an admin
+      const userEmail = getUserEmail();
+      const isAdmin = await checkIfAdmin(userEmail);
+      
       const officeValue = (details?.office || invoice.office || invoice.office_location || invoice.clinic_id || '').trim();
-      if (!officeValue || officeValue.toLowerCase() === 'unknown') {
+      
+      // Only require office for non-admin users
+      if (!isAdmin && (!officeValue || officeValue.toLowerCase() === 'unknown')) {
         showToast('Office is required before approval.', 'error');
         return;
       }
