@@ -7,6 +7,7 @@ export interface VendorEntry {
   stripeAccountId?: string;
   ach_status?: AchStatus;
   aliases?: string[];
+  email?: string;
 }
 export interface VendorMap { vendors: Record<string, VendorEntry>; version?: number; }
 
