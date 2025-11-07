@@ -91,7 +91,7 @@ export function canApprove(
   invoiceStatus: string
 ): boolean {
   if (context.role === 'admin') return true;
-  if (context.role === 'ap' && ['incoming', 'categorized', 'pending'].includes(invoiceStatus)) return true;
+  if (context.role === 'ap' && ['incoming', 'categorized'].includes(invoiceStatus)) return true;
   if (context.role === 'office_manager' && invoiceStatus === 'awaiting_office_approval') return true;
   return false;
 }

@@ -26,7 +26,6 @@ export interface StateTransition {
 const ALLOWED_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
   'incoming': ['categorized', 'awaiting_office_approval', 'awaiting_admin_approval', 'rejected', 'repair'],
   'categorized': ['awaiting_office_approval', 'awaiting_admin_approval', 'rejected', 'repair'],
-  'pending': ['awaiting_office_approval', 'awaiting_admin_approval', 'rejected', 'repair'],
   'awaiting_office_approval': ['to_be_paid', 'awaiting_admin_approval', 'rejected', 'repair'],
   'awaiting_admin_approval': ['to_be_paid', 'rejected', 'repair'],
   'to_be_paid': ['paid', 'rejected', 'repair'],
@@ -40,9 +39,9 @@ const ALLOWED_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
  * Role-based action permissions
  */
 const ROLE_PERMISSIONS: Record<string, InvoiceStatus[]> = {
-  'ap': ['incoming', 'categorized', 'pending', 'awaiting_office_approval', 'awaiting_admin_approval'],
+  'ap': ['incoming', 'categorized', 'awaiting_office_approval', 'awaiting_admin_approval'],
   'office_manager': ['awaiting_office_approval'],
-  'admin': ['incoming', 'categorized', 'pending', 'awaiting_office_approval', 'awaiting_admin_approval', 'to_be_paid', 'paid'],
+  'admin': ['incoming', 'categorized', 'awaiting_office_approval', 'awaiting_admin_approval', 'to_be_paid', 'paid'],
 };
 
 /**
