@@ -1486,7 +1486,6 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                 minHeight: '600px',
               }}
               title="Invoice PDF"
-              sandbox="allow-same-origin"
             />
           ) : (
             <div style={{ textAlign: 'center', color: '#666' }}>
