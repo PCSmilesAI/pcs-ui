@@ -5,6 +5,7 @@ import { getById, save } from '../../../../lib/workflow/invoiceStore';
 import { isAdmin } from '../../../../lib/workflow/rolesStore';
 import { loadMap, findVendorKey } from '../../../../lib/payments/vendorStore';
 import { generateRemittancePDF, sendRemittanceEmail, RemittanceData } from '../../../../lib/payments/remittanceService';
+import { rateLimitByUser } from '../../../../lib/ratelimit/rateLimiter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,13 @@ function json(status: number, body: unknown) {
 
 export async function POST(req: NextRequest) {
   const user = getCurrentUser(req);
+
+  // Apply rate limiting per user (100 payment requests per minute)
+  const rateLimitResult = rateLimitByUser(user.email, { maxRequests: 100, windowSeconds: 60 });
+  if (!rateLimitResult.allowed) {
+    console.warn('[API][INVOICES][PAY]', 'rate_limit_exceeded', { userEmail: user.email });
+    return json(429, { ok: false, error: 'Too many requests' });
+  }
 
   try {
     // Only admins can process payments

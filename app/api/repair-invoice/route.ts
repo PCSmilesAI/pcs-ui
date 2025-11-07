@@ -1,10 +1,32 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCurrentUser } from '../../../lib/auth/currentUser';
+import { rateLimitByUser } from '../../../lib/ratelimit/rateLimiter';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request): Promise<Response> {
+export async function POST(request: NextRequest): Promise<Response> {
+  const user = getCurrentUser(request);
+
+  // Apply rate limiting per user (200 repair requests per minute)
+  const rateLimitResult = rateLimitByUser(user.email, { maxRequests: 200, windowSeconds: 60 });
+  if (!rateLimitResult.allowed) {
+    console.warn('[API][REPAIR]', 'rate_limit_exceeded', { userEmail: user.email });
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(rateLimitResult.retryAfter),
+          'X-RateLimit-Limit': '200',
+          'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+          'X-RateLimit-Reset': String(rateLimitResult.resetAt),
+        },
+      }
+    );
+  }
+
   try {
     const body = await request.json();
     const { 
