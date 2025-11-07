@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
+import { getCurrentUser } from '../../../lib/auth/currentUser';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,7 +67,14 @@ async function fetchUsersFromGist(): Promise<unknown> {
   throw new Error('Gist did not include content or raw_url');
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // SECURITY: Require authentication for user data access
+  const user = getCurrentUser(req);
+  if (!user.email) {
+    console.warn('[API][GIST-USERS] Unauthorized access attempt');
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     try {
       const users = await fetchUsersFromGist();
