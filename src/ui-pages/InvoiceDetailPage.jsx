@@ -1465,18 +1465,19 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                 if (p.startsWith('/')) return p;
                 return `/${p}`;
               })()}
-            style={{
-              width: '100%',
-              height: '100%',
+              style={{
+                width: '100%',
+                height: '100%',
                 border: 'none',
                 minHeight: '600px',
               }}
               title="Invoice PDF"
+              sandbox="allow-same-origin"
             />
           ) : (
             <div style={{ textAlign: 'center', color: '#666' }}>
               No PDF available
-          </div>
+            </div>
           )}
         </div>
       </div>
