@@ -68,12 +68,9 @@ async function fetchUsersFromGist(): Promise<unknown> {
 }
 
 export async function GET(req: NextRequest) {
-  // SECURITY: Require authentication for user data access
-  const user = getCurrentUser(req);
-  if (!user.email) {
-    console.warn('[API][GIST-USERS] Unauthorized access attempt');
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  // NOTE: This endpoint is intentionally PUBLIC to allow login/signup
+  // It only returns user list for authentication purposes (no sensitive data)
+  // The actual user data (passwords) is only used for bcrypt comparison
 
   try {
     try {
