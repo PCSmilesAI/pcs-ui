@@ -1,4 +1,5 @@
-import puppeteer from 'puppeteer';
+'use server';
+
 import sgMail from '@sendgrid/mail';
 import Mailjet from 'node-mailjet';
 import nodemailer from 'nodemailer';
@@ -27,7 +28,10 @@ export async function generateRemittancePDF(data: RemittanceData): Promise<Buffe
 
   let browser;
   try {
-    browser = await puppeteer.launch({
+    // Dynamically import puppeteer to avoid bundling issues with Next.js
+    const puppeteer = await import('puppeteer');
+
+    browser = await puppeteer.default.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
