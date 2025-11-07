@@ -463,14 +463,21 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       link.href = (() => {
         const p = invoice.pdf_path;
         if (!p) return '';
+        // Already a full URL
         if (p.startsWith('http://') || p.startsWith('https://')) return p;
+        // Already an API path
         if (p.startsWith('/api/pdf/')) return p;
-        if (p.startsWith('/email_invoices/')) {
+        // Extract filename from email_invoices path
+        if (p.includes('email_invoices/')) {
           const filename = p.split('/').pop();
           return `/api/pdf/${filename}`;
         }
-        if (p.startsWith('/')) return p; // already absolute root path
-        return `/${p}`;
+        // If it's just a filename, use the API endpoint
+        if (!p.includes('/')) {
+          return `/api/pdf/${p}`;
+        }
+        // Otherwise treat as relative path
+        return p;
       })();
       link.download = `${invoice?.invoice || invoice?.invoice_number || 'invoice'}_${invoice?.vendor || 'vendor'}.pdf`;
       document.body.appendChild(link);
@@ -1456,14 +1463,21 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               src={(function() {
                 const p = invoice.pdf_path;
                 if (!p) return '';
+                // Already a full URL
                 if (p.startsWith('http://') || p.startsWith('https://')) return p;
+                // Already an API path
                 if (p.startsWith('/api/pdf/')) return p;
-                if (p.startsWith('/email_invoices/')) {
+                // Extract filename from email_invoices path
+                if (p.includes('email_invoices/')) {
                   const filename = p.split('/').pop();
                   return `/api/pdf/${filename}`;
                 }
-                if (p.startsWith('/')) return p;
-                return `/${p}`;
+                // If it's just a filename, use the API endpoint
+                if (!p.includes('/')) {
+                  return `/api/pdf/${p}`;
+                }
+                // Otherwise treat as relative path
+                return p;
               })()}
               style={{
                 width: '100%',
