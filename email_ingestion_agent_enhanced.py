@@ -358,15 +358,15 @@ def check_inbox():
         mail = connect_imap()
         mail.select("INBOX")
 
-        # Get ALL emails
-        status, messages = mail.uid('search', None, 'ALL')
+        # Get UNREAD emails only (UNSEEN flag)
+        status, messages = mail.uid('search', None, 'UNSEEN')
         if status != 'OK':
             log("[INBOX][SCAN][ERROR] Failed to search inbox")
             _last_scan_result["error"] = "Failed to search inbox"
             return
 
         email_uids = messages[0].split() if messages[0] else []
-        log(f"[INBOX][SCAN] Found {len(email_uids)} emails in inbox")
+        log(f"[INBOX][SCAN] Found {len(email_uids)} unread emails in inbox")
 
         processed_count = 0
         skipped_count = 0
