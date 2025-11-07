@@ -10,7 +10,9 @@ import signal
 import random
 import sqlite3
 import hashlib
-from datetime import datetime
+import logging
+from datetime import datetime, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from deduplicate_invoices import deduplicate_invoices
 
 EMAIL_USER = "invoices@pcsmilesai.com"
@@ -55,6 +57,21 @@ _last_scan_result = {
     "error": None,
 }
 
+# Buffered logging
+_log_buffer = []
+_log_buffer_size = 50
+
+def flush_logs():
+    """Flush buffered logs to file"""
+    global _log_buffer
+    if _log_buffer:
+        try:
+            with open(LOG_PATH, "a") as f:
+                f.write("".join(_log_buffer))
+            _log_buffer = []
+        except Exception as e:
+            print(f"Error flushing logs: {e}")
+
 def reload_config():
     """Reload configuration from environment variables (called on SIGHUP)"""
     global _config
@@ -73,11 +90,16 @@ def handle_sighup(signum, frame):
 signal.signal(signal.SIGHUP, handle_sighup)
 
 def log(msg):
-    """Structured logging with predictable format"""
+    """Structured logging with buffering"""
+    global _log_buffer
     timestamp = datetime.now().isoformat()
-    with open(LOG_PATH, "a") as f:
-        f.write(f"[{timestamp}] {msg}\n")
-    print(f"[{timestamp}] {msg}")
+    log_line = f"[{timestamp}] {msg}\n"
+    _log_buffer.append(log_line)
+    print(log_line.rstrip())
+
+    # Flush when buffer reaches size
+    if len(_log_buffer) >= _log_buffer_size:
+        flush_logs()
 
 
 def acquire_scan_lock():
@@ -113,8 +135,11 @@ def release_scan_lock():
         log(f"[INBOX][SCAN][LOCK][ERROR] Failed to release lock: {e}")
 
 def load_existing_invoices():
-    """Load existing invoices from SQLite database (primary) or JSON (fallback)"""
+    """Load existing invoices and build efficient lookup structures"""
     invoices = []
+    invoice_numbers = set()  # For O(1) lookup
+    message_ids = set()      # For O(1) lookup
+    tombstones = set()       # For O(1) tombstone lookup
 
     # Try to load from SQLite database first (new system)
     if os.path.exists(DB_PATH):
@@ -123,7 +148,7 @@ def load_existing_invoices():
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
-            # Get all invoices from database (including deleted ones to prevent re-ingestion)
+            # Get all invoices from database
             cursor.execute("""
                 SELECT id, invoice_number, source_message_id, vendor_name, amount_cents
                 FROM invoices
@@ -138,14 +163,23 @@ def load_existing_invoices():
                     'vendor_name': row['vendor_name'],
                     'amount_cents': row['amount_cents'],
                 })
+                if row['invoice_number']:
+                    invoice_numbers.add(row['invoice_number'].lower())
+                if row['source_message_id']:
+                    message_ids.add(row['source_message_id'])
+
+            # Load tombstones for deleted invoices
+            cursor.execute("SELECT source_message_id FROM tombstones")
+            for row in cursor.fetchall():
+                if row[0]:
+                    tombstones.add(row[0])
 
             conn.close()
-            log(f"[INBOX][DB] Loaded {len(invoices)} invoices from SQLite database")
-            return invoices
+            log(f"[INBOX][DB] Loaded {len(invoices)} invoices, {len(tombstones)} tombstones")
+            return invoices, invoice_numbers, message_ids, tombstones
 
         except Exception as e:
             log(f"[INBOX][DB][ERROR] Error loading from database: {e}")
-            # Fall through to JSON fallback
 
     # Fallback: Load from JSON queue (old system)
     if os.path.exists(INVOICE_QUEUE_PATH):
@@ -153,13 +187,16 @@ def load_existing_invoices():
             with open(INVOICE_QUEUE_PATH, 'r') as f:
                 data = json.load(f)
             invoices = data if isinstance(data, list) else []
+            for inv in invoices:
+                if inv.get('invoice_number'):
+                    invoice_numbers.add(inv['invoice_number'].lower())
             log(f"[INBOX][JSON] Loaded {len(invoices)} invoices from JSON queue (fallback)")
-            return invoices
+            return invoices, invoice_numbers, message_ids, tombstones
         except Exception as e:
             log(f"[INBOX][JSON][ERROR] Error loading from JSON: {e}")
 
     log("[INBOX][LOAD] No invoices found in database or JSON")
-    return []
+    return [], invoice_numbers, message_ids, tombstones
 
 def extract_invoice_number_from_subject(subject):
     """Extract potential invoice numbers from email subject"""
@@ -182,43 +219,28 @@ def extract_invoice_number_from_subject(subject):
     
     return None
 
-def is_invoice_already_processed(email_subject, existing_invoices, source_message_id=None):
-    """Check if this invoice is already in the PCS AI system or has been deleted"""
+def is_invoice_already_processed(email_subject, invoice_numbers, message_ids, tombstones, source_message_id=None):
+    """Check if this invoice is already in the PCS AI system or has been deleted (O(1) lookups)"""
     if not email_subject:
         return False
 
-    # Check if this message was previously deleted (tombstone check)
-    if source_message_id and os.path.exists(DB_PATH):
-        try:
-            conn = sqlite3.connect(DB_PATH)
-            cursor = conn.cursor()
-            cursor.execute("SELECT 1 FROM tombstones WHERE source_message_id = ?", (source_message_id,))
-            if cursor.fetchone():
-                log(f"[INBOX][TOMBSTONE] Message {source_message_id} was previously deleted, skipping")
-                conn.close()
-                return True
-            conn.close()
-        except Exception as e:
-            log(f"[INBOX][TOMBSTONE][ERROR] Error checking tombstones: {e}")
+    # Check if this message was previously deleted (tombstone check) - O(1)
+    if source_message_id and source_message_id in tombstones:
+        log(f"[INBOX][TOMBSTONE] Message {source_message_id} was previously deleted, skipping")
+        return True
+
+    # Check if source_message_id matches (most reliable) - O(1)
+    if source_message_id and source_message_id in message_ids:
+        log(f"[INBOX][DUPLICATE] Message ID {source_message_id} already processed")
+        return True
 
     # Extract potential invoice number from subject
     subject_invoice_num = extract_invoice_number_from_subject(email_subject)
 
-    for invoice in existing_invoices:
-        # Check if invoice number matches
-        if subject_invoice_num and invoice.get('invoice_number') == subject_invoice_num:
-            log(f"[INBOX][DUPLICATE] Invoice {subject_invoice_num} already exists in PCS AI")
-            return True
-
-        # Check if subject contains invoice number
-        if invoice.get('invoice_number') and invoice['invoice_number'] in email_subject:
-            log(f"[INBOX][DUPLICATE] Invoice {invoice['invoice_number']} already exists in PCS AI")
-            return True
-
-        # Check if source_message_id matches (most reliable)
-        if source_message_id and invoice.get('source_message_id') == source_message_id:
-            log(f"[INBOX][DUPLICATE] Message ID {source_message_id} already processed")
-            return True
+    # Check if invoice number matches - O(1)
+    if subject_invoice_num and subject_invoice_num.lower() in invoice_numbers:
+        log(f"[INBOX][DUPLICATE] Invoice {subject_invoice_num} already exists in PCS AI")
+        return True
 
     return False
 
@@ -269,12 +291,13 @@ def run_vendor_router(filepath, detected_vendor=None):
         log(f"[VENDOR_ROUTER][ERROR] Exception: {e}")
         return None
 
-def process_attachments(msg, email_subject):
+def extract_and_save_pdfs(msg, email_subject):
+    """Extract PDFs from email and return list of filepaths"""
     detected_vendor = detect_vendor_from_email(msg)
     if detected_vendor:
         log(f"📧 Vendor detected from email: {detected_vendor}")
 
-    pdf_count = 0
+    pdf_files = []
     for part in msg.walk():
         if part.get_content_maintype() == 'multipart':
             continue
@@ -283,7 +306,6 @@ def process_attachments(msg, email_subject):
 
         filename = part.get_filename()
         if filename and filename.lower().endswith(".pdf"):
-            pdf_count += 1
             filepath = os.path.join(SAVE_DIR, filename)
             if os.path.exists(filepath):
                 log(f"⏩ Skipped duplicate attachment: {filename}")
@@ -291,22 +313,33 @@ def process_attachments(msg, email_subject):
             with open(filepath, 'wb') as f:
                 f.write(part.get_payload(decode=True))
             log(f"✅ Saved: {filepath}")
+            pdf_files.append((filepath, detected_vendor))
 
-            vendor = run_vendor_router(filepath, detected_vendor)
-            if vendor:
-                log(f"📦 Parsed and routed invoice: {vendor}")
-            else:
-                log(f"⏩ Ignored: unknown or unparseable vendor for {filename}")
-
-    if pdf_count == 0:
+    if not pdf_files:
         log(f"⚠️ No PDFs found in email: {email_subject}")
+
+    return pdf_files
+
+def process_pdf_file(filepath, detected_vendor):
+    """Process a single PDF file (can be called in parallel)"""
+    try:
+        vendor = run_vendor_router(filepath, detected_vendor)
+        if vendor:
+            log(f"📦 Parsed and routed invoice: {vendor}")
+            return True
+        else:
+            log(f"⏩ Ignored: unknown or unparseable vendor for {os.path.basename(filepath)}")
+            return False
+    except Exception as e:
+        log(f"[ERROR] Failed to process {os.path.basename(filepath)}: {e}")
+        return False
 
 def move_to_processed(mail, uid):
     # Mark as read instead of deleted
     mail.uid('store', uid, '+FLAGS', '\\Seen')
 
 def check_inbox():
-    """Main inbox scanning function with locking and deduplication"""
+    """Main inbox scanning function with parallel processing and incremental scanning"""
     global _last_scan_result
 
     # Try to acquire lock
@@ -318,14 +351,14 @@ def check_inbox():
     log("[INBOX][SCAN][START] Beginning inbox scan")
 
     try:
-        # Load existing invoices for cross-reference
-        existing_invoices = load_existing_invoices()
-        log(f"[INBOX][SCAN] Loaded {len(existing_invoices)} existing invoices from queue")
+        # Load existing invoices with efficient lookup structures
+        existing_invoices, invoice_numbers, message_ids, tombstones = load_existing_invoices()
+        log(f"[INBOX][SCAN] Loaded {len(existing_invoices)} existing invoices")
 
         mail = connect_imap()
         mail.select("INBOX")
 
-        # Get ALL emails, not just unseen
+        # Get ALL emails
         status, messages = mail.uid('search', None, 'ALL')
         if status != 'OK':
             log("[INBOX][SCAN][ERROR] Failed to search inbox")
@@ -338,7 +371,9 @@ def check_inbox():
         processed_count = 0
         skipped_count = 0
         no_pdf_count = 0
+        pdf_tasks = []  # For parallel processing
 
+        # First pass: identify new emails and extract PDFs
         for uid in email_uids:
             status, msg_data = mail.uid('fetch', uid, '(RFC822)')
             if status != 'OK':
@@ -346,13 +381,12 @@ def check_inbox():
             msg = email.message_from_bytes(msg_data[0][1])
 
             source_message_id = msg.get("Message-ID", "")
-
             subject = decode_header(msg["Subject"])[0][0]
             if isinstance(subject, bytes):
                 subject = subject.decode(errors='ignore')
 
-            # Check if this invoice is already processed (or was deleted)
-            if is_invoice_already_processed(subject, existing_invoices, source_message_id):
+            # Check if this invoice is already processed (O(1) lookups)
+            if is_invoice_already_processed(subject, invoice_numbers, message_ids, tombstones, source_message_id):
                 skipped_count += 1
                 continue
 
@@ -367,15 +401,30 @@ def check_inbox():
 
             if has_pdf:
                 log(f"[INBOX][SCAN] Processing new invoice email: {subject}")
-                process_attachments(msg, subject)
+                pdf_files = extract_and_save_pdfs(msg, subject)
+                # Queue PDFs for parallel processing
+                for filepath, detected_vendor in pdf_files:
+                    pdf_tasks.append((filepath, detected_vendor))
                 move_to_processed(mail, uid)
                 processed_count += 1
             else:
-                # Email has no PDF - log it for debugging
                 sender = msg.get("From", "unknown")
                 log(f"[INBOX][SCAN][NO_PDF] Skipping email without PDF - From: {sender}, Subject: {subject}")
                 no_pdf_count += 1
                 skipped_count += 1
+
+        mail.logout()
+
+        # Second pass: process PDFs in parallel
+        if pdf_tasks:
+            log(f"[INBOX][PARALLEL] Processing {len(pdf_tasks)} PDFs with thread pool")
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                futures = [executor.submit(process_pdf_file, filepath, vendor) for filepath, vendor in pdf_tasks]
+                for future in as_completed(futures):
+                    try:
+                        future.result()
+                    except Exception as e:
+                        log(f"[INBOX][PARALLEL][ERROR] {e}")
 
         duration_ms = int((time.time() - start_time) * 1000)
         log(f"[INBOX][SCAN][END] Processed {processed_count} new, skipped {skipped_count} (no PDF: {no_pdf_count}), duration {duration_ms}ms")
@@ -388,8 +437,6 @@ def check_inbox():
             "duration_ms": duration_ms,
             "error": None,
         }
-
-        mail.logout()
 
         # Reset backoff on success
         _config["backoff_seconds"] = 10
@@ -413,12 +460,16 @@ def check_inbox():
         log(f"[INBOX][SCAN][BACKOFF] Increased backoff to {_config['backoff_seconds']}s")
 
     finally:
-        # Always run deduplication after each check to keep queue clean
-        try:
-            log("[INBOX][SCAN][DEDUPE] Running invoice queue deduplication...")
-            deduplicate_invoices()
-        except Exception as de:
-            log(f"[INBOX][SCAN][DEDUPE][ERROR] Deduplication error: {de}")
+        # Flush any remaining logs
+        flush_logs()
+
+        # Only run deduplication if new invoices were added
+        if processed_count > 0:
+            try:
+                log("[INBOX][SCAN][DEDUPE] Running invoice queue deduplication...")
+                deduplicate_invoices()
+            except Exception as de:
+                log(f"[INBOX][SCAN][DEDUPE][ERROR] Deduplication error: {de}")
 
         # Always release lock
         release_scan_lock()
