@@ -192,14 +192,14 @@ export function getUserSessions(email: string): Session[] {
  */
 export function cleanupExpiredSessions(): number {
   const db = getDatabase();
-  
+
   const result = db.prepare(`
     DELETE FROM sessions WHERE expires_at < CURRENT_TIMESTAMP
-  `);
+  `).run() as any;
 
-  const deleted = result.changes;
+  const deleted = result.changes || 0;
   console.log(`[SESSION] Cleaned up ${deleted} expired sessions`);
-  
+
   return deleted;
 }
 
