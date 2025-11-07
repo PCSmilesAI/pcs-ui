@@ -22,16 +22,18 @@ export interface RemittanceData {
 
 /**
  * Generate a PDF remittance receipt using Puppeteer
+ * This function is only called from server-side API routes
  */
 export async function generateRemittancePDF(data: RemittanceData): Promise<Buffer> {
   const html = generateRemittanceHTML(data);
 
-  let browser;
+  let browser: any;
   try {
-    // Dynamically import puppeteer to avoid bundling issues with Next.js
-    const puppeteer = await import('puppeteer');
+    // Dynamically require puppeteer to avoid bundling issues with Next.js
+    // eslint-disable-next-line global-require
+    const puppeteer = require('puppeteer');
 
-    browser = await puppeteer.default.launch({
+    browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
