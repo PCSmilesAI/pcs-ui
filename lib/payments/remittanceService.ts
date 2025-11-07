@@ -155,7 +155,7 @@ function generateRemittanceHTML(data: RemittanceData): string {
     <body>
       <div class="container">
         <h1>Payment Remittance</h1>
-        <div class="company-name">${data.companyName || 'PCS AI'}</div>
+        <div class="company-name">${data.companyName || 'Pacific Crest Smiles'}</div>
 
         <div class="section">
           <div class="section-title">Vendor Information</div>

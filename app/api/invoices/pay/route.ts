@@ -225,7 +225,7 @@ export async function POST(req: NextRequest) {
           paymentDate: new Date().toLocaleDateString(),
           invoices: remittanceInvoices,
           transferId: paidInvoices[0].transferId,
-          companyName: process.env.COMPANY_NAME || 'PCS AI',
+          companyName: process.env.COMPANY_NAME || 'Pacific Crest Smiles',
         };
 
         console.log('[REMITTANCE] Generating PDF', { vendor: vendorKey, invoiceCount: paidInvoices.length });
