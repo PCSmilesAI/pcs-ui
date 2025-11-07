@@ -82,18 +82,18 @@ function isGlobalScanBusy(): boolean {
   return true;
 }
 
-function runInboxScanOnce(): Promise<RefreshResult> {
+function runInboxScanOnce(fullScan: boolean = false): Promise<RefreshResult> {
   return new Promise((resolve) => {
     const startTime = Date.now();
     let stdout = '';
     let stderr = '';
-    
+
     // Run the Python script's check_inbox function once
     const pythonCode = `
 import sys
 sys.path.insert(0, '${ROOT_DIR.replace(/\\/g, '\\\\')}')
 from email_ingestion_agent_enhanced import check_inbox, _last_scan_result
-check_inbox()
+check_inbox(full_scan=${fullScan})
 import json
 print(json.dumps(_last_scan_result))
 `;
@@ -169,18 +169,19 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const email = body.email || 'unknown';
-    
-    console.log('[INBOX][REFRESH][REQUEST]', { email });
-    
-    // Check cooldown
-    if (isInCooldown(email)) {
+    const fullScan = body.full_scan === true; // One-time full inbox analysis
+
+    console.log('[INBOX][REFRESH][REQUEST]', { email, fullScan });
+
+    // Check cooldown (skip for full scans)
+    if (!fullScan && isInCooldown(email)) {
       console.log('[INBOX][REFRESH][COOLDOWN]', { email });
       return NextResponse.json({
         ok: false,
         message: 'Please wait 30 seconds between refresh requests',
       }, { status: 429 });
     }
-    
+
     // Check if global scan is busy
     if (isGlobalScanBusy()) {
       console.log('[INBOX][REFRESH][BUSY]', { email });
@@ -189,14 +190,16 @@ export async function POST(req: NextRequest) {
         message: 'A scan is already in progress. Please try again in a moment.',
       }, { status: 503 });
     }
-    
-    // Set cooldown
-    setCooldown(email);
-    
+
+    // Set cooldown (skip for full scans)
+    if (!fullScan) {
+      setCooldown(email);
+    }
+
     // Run scan
-    console.log('[INBOX][REFRESH][START]', { email });
-    const result = await runInboxScanOnce();
-    console.log('[INBOX][REFRESH][END]', { email, result });
+    console.log('[INBOX][REFRESH][START]', { email, fullScan });
+    const result = await runInboxScanOnce(fullScan);
+    console.log('[INBOX][REFRESH][END]', { email, fullScan, result });
     
     if (!result.ok) {
       return NextResponse.json(result, { status: 500 });

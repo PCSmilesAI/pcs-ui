@@ -295,6 +295,7 @@ def extract_and_save_pdfs(msg, email_subject, source_message_id):
     """Extract PDFs from email and return list of filepaths
 
     CRITICAL: Each email gets a unique filename to prevent collisions
+    CRITICAL: Check ALL parts, not just those with Content-Disposition header
     """
     detected_vendor = detect_vendor_from_email(msg)
     if detected_vendor:
@@ -302,13 +303,32 @@ def extract_and_save_pdfs(msg, email_subject, source_message_id):
 
     pdf_files = []
     for part in msg.walk():
+        # Skip multipart containers
         if part.get_content_maintype() == 'multipart':
             continue
-        if part.get('Content-Disposition') is None:
-            continue
 
+        # CRITICAL FIX: Don't skip parts without Content-Disposition
+        # Some emails have attachments without this header
+        # Instead, check if the part has a filename
         filename = part.get_filename()
+
+        # If no filename in Content-Disposition, check Content-Type
+        if not filename:
+            content_type = part.get_content_type()
+            # Check if this looks like an attachment based on content type
+            if content_type.startswith('application/'):
+                # Try to extract filename from Content-Type parameters
+                params = part.get_params()
+                if params:
+                    for key, value in params:
+                        if key.lower() == 'name':
+                            filename = value
+                            break
+
+        # Only process if we have a filename and it's a PDF
         if filename and filename.lower().endswith(".pdf"):
+            log(f"[EXTRACT] Found PDF attachment: {filename}")
+
             # CRITICAL FIX: Use message ID to create unique filename
             # This prevents collisions when different emails have PDFs with same name
             if source_message_id:
@@ -388,8 +408,12 @@ def verify_pdf_processing(pdf_tasks):
     log(f"[VERIFY] All {len(pdf_tasks)} PDFs verified to exist")
     return True
 
-def check_inbox():
-    """Main inbox scanning function with parallel processing and incremental scanning"""
+def check_inbox(full_scan=False):
+    """Main inbox scanning function with parallel processing and incremental scanning
+
+    Args:
+        full_scan: If True, scan ALL emails (not just unread). Used for one-time full inbox analysis.
+    """
     global _last_scan_result
 
     # Try to acquire lock
@@ -398,7 +422,8 @@ def check_inbox():
         return
 
     start_time = time.time()
-    log("[INBOX][SCAN][START] Beginning inbox scan")
+    scan_mode = "FULL" if full_scan else "UNREAD"
+    log(f"[INBOX][SCAN][START] Beginning {scan_mode} inbox scan")
 
     try:
         # Load existing invoices with efficient lookup structures
@@ -408,15 +433,23 @@ def check_inbox():
         mail = connect_imap()
         mail.select("INBOX")
 
-        # Get UNREAD emails only (UNSEEN flag)
-        status, messages = mail.uid('search', None, 'UNSEEN')
+        # Get emails based on scan mode
+        if full_scan:
+            # FULL SCAN: Get ALL emails (for one-time analysis)
+            log("[INBOX][SCAN][MODE] FULL SCAN - Processing ALL emails in inbox")
+            status, messages = mail.uid('search', None, 'ALL')
+        else:
+            # NORMAL SCAN: Get UNREAD emails only (UNSEEN flag)
+            status, messages = mail.uid('search', None, 'UNSEEN')
+
         if status != 'OK':
             log("[INBOX][SCAN][ERROR] Failed to search inbox")
             _last_scan_result["error"] = "Failed to search inbox"
             return
 
         email_uids = messages[0].split() if messages[0] else []
-        log(f"[INBOX][SCAN] Found {len(email_uids)} unread emails in inbox")
+        scan_type = "all" if full_scan else "unread"
+        log(f"[INBOX][SCAN] Found {len(email_uids)} {scan_type} emails in inbox")
 
         processed_count = 0
         skipped_count = 0
@@ -441,13 +474,30 @@ def check_inbox():
                 continue
 
             # Check if email has PDF attachments
+            # CRITICAL: Check ALL parts, not just those with Content-Disposition
             has_pdf = False
             for part in msg.walk():
-                if part.get('Content-Disposition') is not None:
-                    filename = part.get_filename()
-                    if filename and filename.lower().endswith(".pdf"):
-                        has_pdf = True
-                        break
+                if part.get_content_maintype() == 'multipart':
+                    continue
+
+                # Check for filename in Content-Disposition
+                filename = part.get_filename()
+
+                # If no filename, check Content-Type for attachments
+                if not filename:
+                    content_type = part.get_content_type()
+                    if content_type.startswith('application/'):
+                        params = part.get_params()
+                        if params:
+                            for key, value in params:
+                                if key.lower() == 'name':
+                                    filename = value
+                                    break
+
+                # Check if it's a PDF
+                if filename and filename.lower().endswith(".pdf"):
+                    has_pdf = True
+                    break
 
             if has_pdf:
                 log(f"[INBOX][SCAN] Processing new invoice email: {subject}")
