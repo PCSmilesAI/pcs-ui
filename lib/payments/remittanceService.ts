@@ -1,5 +1,4 @@
-import PDFDocument from 'pdfkit';
-import { Readable } from 'stream';
+import puppeteer from 'puppeteer';
 import sgMail from '@sendgrid/mail';
 import Mailjet from 'node-mailjet';
 import nodemailer from 'nodemailer';
@@ -21,89 +20,178 @@ export interface RemittanceData {
 }
 
 /**
- * Generate a PDF remittance receipt
+ * Generate a PDF remittance receipt using Puppeteer
  */
 export async function generateRemittancePDF(data: RemittanceData): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({
-      size: 'letter',
-      margin: 50,
+  const html = generateRemittanceHTML(data);
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
-    const chunks: Buffer[] = [];
-    doc.on('data', (chunk) => chunks.push(chunk));
-    doc.on('end', () => resolve(Buffer.concat(chunks)));
-    doc.on('error', reject);
+    const page = await browser.createPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    // Header
-    doc.fontSize(24).font('Helvetica-Bold').text('Payment Remittance', { align: 'center' });
-    doc.moveDown(0.5);
-    doc.fontSize(10).font('Helvetica').text(data.companyName || 'PCS AI', { align: 'center' });
-    doc.moveDown(1);
+    const pdfBuffer = await page.pdf({
+      format: 'letter',
+      margin: { top: 20, right: 20, bottom: 20, left: 20 },
+    });
 
-    // Vendor info
-    doc.fontSize(12).font('Helvetica-Bold').text('Vendor Information');
-    doc.fontSize(10).font('Helvetica');
-    doc.text(`Vendor: ${data.vendorName}`);
-    doc.text(`Email: ${data.vendorEmail}`);
-    doc.moveDown(1);
-
-    // Payment summary
-    doc.fontSize(12).font('Helvetica-Bold').text('Payment Summary');
-    doc.fontSize(10).font('Helvetica');
-    doc.text(`Payment Date: ${data.paymentDate}`);
-    doc.text(`Transfer ID: ${data.transferId}`);
-    doc.text(`Total Amount Paid: $${data.totalAmount.toFixed(2)}`, { underline: true });
-    doc.moveDown(1);
-
-    // Invoice details table
-    doc.fontSize(12).font('Helvetica-Bold').text('Invoices Paid');
-    doc.moveDown(0.5);
-
-    // Table header
-    const tableTop = doc.y;
-    const col1 = 50;
-    const col2 = 250;
-    const col3 = 400;
-    const col4 = 500;
-
-    doc.fontSize(10).font('Helvetica-Bold');
-    doc.text('Invoice #', col1, tableTop);
-    doc.text('Amount', col2, tableTop);
-    doc.text('Due Date', col3, tableTop);
-    doc.text('Status', col4, tableTop);
-
-    // Horizontal line
-    doc.moveTo(col1, tableTop + 15).lineTo(550, tableTop + 15).stroke();
-
-    // Table rows
-    doc.font('Helvetica').fontSize(9);
-    let yPosition = tableTop + 25;
-
-    for (const invoice of data.invoices) {
-      if (yPosition > 700) {
-        doc.addPage();
-        yPosition = 50;
-      }
-
-      doc.text(invoice.invoiceNumber, col1, yPosition);
-      doc.text(`$${invoice.amount.toFixed(2)}`, col2, yPosition);
-      doc.text(invoice.dueDate, col3, yPosition);
-      doc.text('Paid', col4, yPosition);
-
-      yPosition += 20;
+    await page.close();
+    return pdfBuffer;
+  } finally {
+    if (browser) {
+      await browser.close();
     }
+  }
+}
 
-    // Footer
-    doc.moveDown(2);
-    doc.fontSize(9).font('Helvetica').fillColor('#666666');
-    doc.text('This is an automated remittance receipt. Please retain for your records.', {
-      align: 'center',
-    });
-    doc.text(`Generated: ${new Date().toISOString()}`, { align: 'center' });
+/**
+ * Generate HTML for remittance receipt
+ */
+function generateRemittanceHTML(data: RemittanceData): string {
+  const invoiceRows = data.invoices
+    .map(
+      (inv) =>
+        `<tr>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd;">${inv.invoiceNumber}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">$${inv.amount.toFixed(2)}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd;">${inv.dueDate}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">✓ Paid</td>
+    </tr>`
+    )
+    .join('');
 
-    doc.end();
-  });
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body {
+          font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+          color: #333;
+          line-height: 1.6;
+        }
+        .container {
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        h1 {
+          text-align: center;
+          color: #333;
+          margin-bottom: 5px;
+        }
+        .company-name {
+          text-align: center;
+          color: #666;
+          margin-bottom: 30px;
+          font-size: 12px;
+        }
+        .section {
+          margin-bottom: 20px;
+        }
+        .section-title {
+          font-weight: bold;
+          font-size: 14px;
+          margin-bottom: 10px;
+          border-bottom: 2px solid #333;
+          padding-bottom: 5px;
+        }
+        .info-box {
+          background: #f5f5f5;
+          padding: 15px;
+          border-radius: 5px;
+          margin-bottom: 20px;
+        }
+        .info-row {
+          margin: 5px 0;
+        }
+        .info-label {
+          font-weight: bold;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+        }
+        th {
+          background: #f0f0f0;
+          padding: 10px;
+          text-align: left;
+          border-bottom: 2px solid #ddd;
+          font-weight: bold;
+        }
+        td {
+          padding: 10px;
+          border-bottom: 1px solid #ddd;
+        }
+        .amount-col {
+          text-align: right;
+        }
+        .status-col {
+          text-align: center;
+        }
+        .footer {
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #ddd;
+          font-size: 11px;
+          color: #666;
+          text-align: center;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>Payment Remittance</h1>
+        <div class="company-name">${data.companyName || 'PCS AI'}</div>
+
+        <div class="section">
+          <div class="section-title">Vendor Information</div>
+          <div class="info-row"><span class="info-label">Vendor:</span> ${data.vendorName}</div>
+          <div class="info-row"><span class="info-label">Email:</span> ${data.vendorEmail}</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Payment Summary</div>
+          <div class="info-box">
+            <div class="info-row"><span class="info-label">Payment Date:</span> ${data.paymentDate}</div>
+            <div class="info-row"><span class="info-label">Transfer ID:</span> ${data.transferId}</div>
+            <div class="info-row"><span class="info-label">Total Amount Paid:</span> <strong>$${data.totalAmount.toFixed(2)}</strong></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Invoices Paid</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th class="amount-col">Amount</th>
+                <th>Due Date</th>
+                <th class="status-col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${invoiceRows}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="footer">
+          <p>This is an automated remittance receipt. Please retain for your records.</p>
+          <p>If you have any questions, please contact us.</p>
+          <p>Generated: ${new Date().toISOString()}</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
 }
 
 /**
@@ -235,15 +323,15 @@ function generateEmailHTML(data: RemittanceData): string {
     <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Payment Remittance</h2>
       <p style="color: #666;">Dear ${data.vendorName},</p>
-      
+
       <p style="color: #666;">We have successfully processed payment for the invoices listed below.</p>
-      
+
       <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <p style="margin: 5px 0;"><strong>Total Amount Paid:</strong> $${data.totalAmount.toFixed(2)}</p>
         <p style="margin: 5px 0;"><strong>Payment Date:</strong> ${data.paymentDate}</p>
         <p style="margin: 5px 0;"><strong>Transfer ID:</strong> ${data.transferId}</p>
       </div>
-      
+
       <h3 style="color: #333; margin-top: 20px;">Invoices Paid</h3>
       <table style="width: 100%; border-collapse: collapse;">
         <thead>
@@ -258,13 +346,17 @@ function generateEmailHTML(data: RemittanceData): string {
           ${invoiceRows}
         </tbody>
       </table>
-      
+
       <p style="color: #666; margin-top: 20px; font-size: 12px;">
         This is an automated remittance receipt. Please retain for your records. If you have any questions, please contact us.
       </p>
     </div>
   `;
 }
+
+/**
+ * Generate plain text email body
+ */
 
 function generateEmailText(data: RemittanceData): string {
   const invoiceLines = data.invoices
