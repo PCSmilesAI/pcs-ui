@@ -4,6 +4,7 @@ import { getCurrentUser } from '../../../../lib/auth/currentUser';
 import { getById, save } from '../../../../lib/workflow/invoiceStore';
 import { isAdmin } from '../../../../lib/workflow/rolesStore';
 import { loadMap, findVendorKey } from '../../../../lib/payments/vendorStore';
+import { generateRemittancePDF, sendRemittanceEmail, RemittanceData } from '../../../../lib/payments/remittanceService';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -44,6 +45,9 @@ export async function POST(req: NextRequest) {
     const results: any[] = [];
     let successCount = 0;
     let errorCount = 0;
+
+    // Track invoices by vendor for remittance emails
+    const invoicesByVendor: Record<string, any[]> = {};
 
     for (const invoiceId of invoiceIds) {
       try {
@@ -152,8 +156,20 @@ export async function POST(req: NextRequest) {
         invoice.paid_at = new Date().toISOString();
         invoice.paid_by = user.email;
         invoice.stripe_transfer_id = transfer.id;
-        
+
         await save(invoice);
+
+        // Track for remittance email
+        if (!invoicesByVendor[vendorKey]) {
+          invoicesByVendor[vendorKey] = [];
+        }
+        invoicesByVendor[vendorKey].push({
+          invoiceId,
+          invoice,
+          amount: amountNumber,
+          transferId: transfer.id,
+          vendorEntry,
+        });
 
         results.push({
           invoiceId,
@@ -176,11 +192,91 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Send remittance emails for each vendor
+    const remittanceResults: any[] = [];
+    for (const [vendorKey, paidInvoices] of Object.entries(invoicesByVendor)) {
+      try {
+        const vendorEntry = vendorMap.vendors[vendorKey];
+        const vendorEmail = vendorEntry?.email;
+
+        if (!vendorEmail) {
+          console.warn('[REMITTANCE] No email configured for vendor', { vendorKey });
+          remittanceResults.push({
+            vendor: vendorKey,
+            ok: false,
+            error: 'No email configured for vendor',
+          });
+          continue;
+        }
+
+        // Calculate totals
+        const totalAmount = paidInvoices.reduce((sum, p) => sum + p.amount, 0);
+        const remittanceInvoices = paidInvoices.map((p) => ({
+          invoiceNumber: p.invoice.invoice_number || p.invoice.invoice || p.invoiceId,
+          amount: p.amount,
+          dueDate: p.invoice.due_date || p.invoice.dueDate || 'N/A',
+        }));
+
+        // Generate PDF
+        const remittanceData: RemittanceData = {
+          vendorName: vendorKey,
+          vendorEmail,
+          totalAmount,
+          paymentDate: new Date().toLocaleDateString(),
+          invoices: remittanceInvoices,
+          transferId: paidInvoices[0].transferId,
+          companyName: process.env.COMPANY_NAME || 'PCS AI',
+        };
+
+        console.log('[REMITTANCE] Generating PDF', { vendor: vendorKey, invoiceCount: paidInvoices.length });
+        const pdfBuffer = await generateRemittancePDF(remittanceData);
+
+        // Send email
+        console.log('[REMITTANCE] Sending email', { vendor: vendorKey, email: vendorEmail });
+        const emailResult = await sendRemittanceEmail(remittanceData, pdfBuffer);
+
+        if (emailResult.ok) {
+          console.log('[REMITTANCE] Email sent successfully', {
+            vendor: vendorKey,
+            provider: emailResult.provider,
+          });
+          remittanceResults.push({
+            vendor: vendorKey,
+            ok: true,
+            provider: emailResult.provider,
+            invoiceCount: paidInvoices.length,
+            totalAmount,
+          });
+        } else {
+          console.warn('[REMITTANCE] Email send failed', {
+            vendor: vendorKey,
+            error: emailResult.error,
+          });
+          remittanceResults.push({
+            vendor: vendorKey,
+            ok: false,
+            error: emailResult.error,
+          });
+        }
+      } catch (err: any) {
+        console.error('[REMITTANCE] Error sending remittance email', {
+          vendor: vendorKey,
+          error: err?.message,
+        });
+        remittanceResults.push({
+          vendor: vendorKey,
+          ok: false,
+          error: err?.message || 'Failed to send remittance email',
+        });
+      }
+    }
+
     return json(200, {
       ok: true,
       successCount,
       errorCount,
       results,
+      remittance: remittanceResults,
     });
   } catch (error: any) {
     console.error('[PAYMENT] Unexpected error', { error: error?.message });
