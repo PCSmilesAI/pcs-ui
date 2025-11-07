@@ -1,18 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 /**
  * Sliding filter panel. When open this component covers the
  * viewport with a semi-transparent overlay and reveals a panel
  * anchored to the left hand side. The panel contains a series
  * of filter controls that mirror those in the provided wireframe.
- * At present the controls do not perform any filtering; they are
- * purely illustrative and can be wired up to state as needed.
  *
  * Props:
  *  - isOpen: boolean controlling visibility
  *  - onClose: function() called when the overlay is clicked
+ *  - onApplyFilters: function(criteria) called when Apply is clicked
+ *  - invoices: array of invoice objects to extract filter options from
  */
-export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
+export default function FilterPanel({ isOpen, onClose, onApplyFilters, invoices = [] }) {
   // Local state for each filter field. These are tracked so that
   // we can return the selected values when the user clicks Apply.
   const [vendor, setVendor] = React.useState('');
@@ -22,6 +22,25 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
   const [dueWithin, setDueWithin] = React.useState('');
   const [category, setCategory] = React.useState('');
   const [ach, setAch] = React.useState('');
+
+  // Dynamically extract unique vendors, offices, and categories from invoices
+  const { vendors, offices, categories } = useMemo(() => {
+    const vendorSet = new Set();
+    const officeSet = new Set();
+    const categorySet = new Set();
+
+    invoices.forEach((inv) => {
+      if (inv.vendor) vendorSet.add(inv.vendor);
+      if (inv.office) officeSet.add(inv.office);
+      if (inv.category) categorySet.add(inv.category);
+    });
+
+    return {
+      vendors: Array.from(vendorSet).sort(),
+      offices: Array.from(officeSet).sort(),
+      categories: Array.from(categorySet).sort(),
+    };
+  }, [invoices]);
 
   // Only render when open. We use inline styles for the overlay and
   // panel so that the presentation is independent of any CSS build.
@@ -86,9 +105,11 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
             onChange={(e) => setVendor(e.target.value)}
           >
             <option value="">Choose options</option>
-            <option value="Artisan Dental">Artisan Dental</option>
-            <option value="Exodus Dental Solutions">Exodus Dental Solutions</option>
-            <option value="Henry Schein">Henry Schein</option>
+            {vendors.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
           </select>
         </div>
         {/* Min Amount */}
@@ -122,9 +143,11 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
             onChange={(e) => setOffice(e.target.value)}
           >
             <option value="">Choose options</option>
-            <option value="Roseburg">Roseburg</option>
-            <option value="Lebanon">Lebanon</option>
-            <option value="Eugene">Eugene</option>
+            {offices.map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
           </select>
         </div>
         {/* Due Within */}
@@ -150,8 +173,11 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters }) {
             onChange={(e) => setCategory(e.target.value)}
           >
             <option value="">Choose options</option>
-            <option value="Dental Lab">Dental Lab</option>
-            <option value="Dental Supplies">Dental Supplies</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
         </div>
 

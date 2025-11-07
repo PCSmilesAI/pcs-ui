@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useSearchParams } from 'next/navigation';
 import Toast from '../components/Toast.jsx';
 
@@ -16,6 +17,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
   const [refreshing, setRefreshing] = useState(false);
   const [toast, setToast] = useState(null);
   const { handleInvoiceRowClick } = useInvoiceClick();
+  const { setInvoices: setContextInvoices } = useInvoiceData();
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
   const [selectedIds, setSelectedIds] = useState(new Set());
   const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
@@ -81,12 +83,14 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
         
         console.log('✅ CompletePage: Data transformed successfully:', transformedData.length, 'completed invoices');
         setInvoices(transformedData);
+        setContextInvoices(transformedData);
         setError(null);
       } catch (err) {
         console.error('❌ CompletePage: Error loading invoices:', err);
         setError(err.message);
         // Fallback to empty array if loading fails
         setInvoices([]);
+        setContextInvoices([]);
       } finally {
         console.log('🏁 CompletePage: Loading complete');
         setLoading(false);
@@ -138,10 +142,12 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
           status: invoice.status
         })});
       setInvoices(transformedData);
+      setContextInvoices(transformedData);
       setError(null);
     } catch (err) {
       setError(err.message);
       setInvoices([]);
+      setContextInvoices([]);
     } finally {
       setLoading(false);
     }

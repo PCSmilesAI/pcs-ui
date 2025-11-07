@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 
@@ -43,6 +44,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { handleInvoiceRowClick } = useInvoiceClick();
+  const { setInvoices: setContextInvoices } = useInvoiceData();
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [toast, setToast] = useState(null);
   const getRowId = (r, i) =>
@@ -170,18 +172,20 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
         setLoading(true);
         const visible = await fetchVisibleInvoices();
         setInvoices(visible);
+        setContextInvoices(visible);
         setError(null);
       } catch (loadError) {
         console.error('❌ ForMePage: Error loading invoices:', loadError);
         setError(loadError?.message ?? 'Failed to load invoices');
         setInvoices([]);
+        setContextInvoices([]);
       } finally {
         setLoading(false);
       }
     };
 
     loadInvoices();
-  }, [fetchVisibleInvoices]);
+  }, [fetchVisibleInvoices, setContextInvoices]);
 
   // Refresh invoice list when page comes back into focus
   useEffect(() => {
