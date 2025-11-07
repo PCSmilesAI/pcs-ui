@@ -11,10 +11,10 @@ export async function GET(
     const invoiceId = params.id;
     const db = getDatabase();
 
-    // Load the invoice from the database
+    // Load the invoice from the database - support both id and invoice_number lookups
     const invoice = db.prepare(
-      'SELECT * FROM invoices WHERE id = ? AND deleted = 0'
-    ).get(invoiceId) as any;
+      'SELECT * FROM invoices WHERE (id = ? OR invoice_number = ?) AND deleted = 0'
+    ).get(invoiceId, invoiceId) as any;
 
     if (!invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
