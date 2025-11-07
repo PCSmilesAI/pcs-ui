@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '../../../../../lib/auth/currentUser';
 import { getDatabase } from '../../../../../lib/db/client';
 import { applyCorrections } from '../../../../../lib/invoices/write';
+import { rateLimitByUser } from '../../../../../lib/ratelimit/rateLimiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,24 @@ export async function POST(
 ) {
   const user = getCurrentUser(req);
   const invoiceId = params.id;
+
+  // Apply rate limiting per user (500 edit requests per minute)
+  const rateLimitResult = rateLimitByUser(user.email, { maxRequests: 500, windowSeconds: 60 });
+  if (!rateLimitResult.allowed) {
+    console.warn('[API][INVOICES][EDIT]', 'rate_limit_exceeded', { userEmail: user.email, invoiceId });
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(rateLimitResult.retryAfter),
+          'X-RateLimit-Limit': '500',
+          'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+          'X-RateLimit-Reset': String(rateLimitResult.resetAt),
+        },
+      }
+    );
+  }
 
   try {
     const body = await req.json();

@@ -3,6 +3,7 @@ import { getCurrentUser } from '../../../../lib/auth/currentUser';
 import { readRoles, getThreshold, isAdmin } from '../../../../lib/workflow/rolesStore';
 import { getInvoiceById, saveInvoice, softDeleteInvoice } from '../../../../lib/invoices/db-store';
 import { approveAP, approveOffice, approveAdmin, markPaid } from '../../../../lib/workflow/engine';
+import { rateLimitByUser } from '../../../../lib/ratelimit/rateLimiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,24 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(req: NextRequest) {
   const user = getCurrentUser(req);
+
+  // Apply rate limiting per user (1000 requests per minute)
+  const rateLimitResult = rateLimitByUser(user.email, { maxRequests: 1000, windowSeconds: 60 });
+  if (!rateLimitResult.allowed) {
+    console.warn('[API][INVOICES][TRANSITION]', 'rate_limit_exceeded', { userEmail: user.email });
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(rateLimitResult.retryAfter),
+          'X-RateLimit-Limit': '1000',
+          'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+          'X-RateLimit-Reset': String(rateLimitResult.resetAt),
+        },
+      }
+    );
+  }
 
   try {
     const body = await req.json();

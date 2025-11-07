@@ -4,6 +4,7 @@ import { fetchQboCategories } from '../lib/categoriesClient';
 import ACHBadge from '../ui/ach/ACHBadge';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
+import { csrfClient } from '../lib/api/csrfClient';
 
 // Helper function to get user email from localStorage/cookie
 function getUserEmail() {
@@ -512,17 +513,13 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
     setProcessing(true);
     try {
-      const response = await fetch('/api/invoices/transition', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: invoiceId,
-          action,
-          ...(action === 'approve' ? { office: details?.office || invoice.office || invoice.office_location || invoice.clinic_id || '' } : {}),
-          ...(action === 'reject' ? { reason: 'Rejected from invoice detail' } : {}),
-        }),
+      const response = await csrfClient.post('/api/invoices/transition', {
+        id: invoiceId,
+        action,
+        ...(action === 'approve' ? { office: details?.office || invoice.office || invoice.office_location || invoice.clinic_id || '' } : {}),
+        ...(action === 'reject' ? { reason: 'Rejected from invoice detail' } : {}),
       });
-      const payload = await response.json().catch(() => ({}));
+      const payload = response.data || {};
 
       if (!response.ok || payload?.error) {
         const message = payload?.error || `Failed to ${action} invoice`;
@@ -756,18 +753,12 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       };
 
       // Call repair API to log the training data
-      const repairResponse = await fetch('/api/repair-invoice', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          invoice_number: invoice.invoice_number,
-          original_data: invoice,
-          corrected_data: correctedData,
-          pdf_path: invoice.pdf_path,
-          vendor_name: invoice.vendor_name || invoice.vendor
-        })
+      const repairResponse = await csrfClient.post('/api/repair-invoice', {
+        invoice_number: invoice.invoice_number,
+        original_data: invoice,
+        corrected_data: correctedData,
+        pdf_path: invoice.pdf_path,
+        vendor_name: invoice.vendor_name || invoice.vendor
       });
 
       if (!repairResponse.ok) {
@@ -829,12 +820,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
       // Vendor is onboarded, proceed with payment through Stripe
       showToast('Processing payment...', 'info');
-      const response = await fetch('/api/invoices/pay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ invoiceIds: [invoiceId] }),
-      });
-      const payload = await response.json().catch(() => ({}));
+      const response = await csrfClient.post('/api/invoices/pay', { invoiceIds: [invoiceId] });
+      const payload = response.data || {};
       if (!response.ok || !payload?.ok) {
         const errorMsg = payload?.results?.[0]?.error || payload?.error || 'Failed to process payment';
         showToast(errorMsg, 'error');
