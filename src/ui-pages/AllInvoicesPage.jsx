@@ -3,12 +3,14 @@ import { useSearchParams } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 
 export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
   const searchParams = useSearchParams();
   const { handleInvoiceRowClick } = useInvoiceClick();
+  const { setInvoices: setContextInvoices } = useInvoiceData();
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
   const [selectedIds, setSelectedIds] = useState(new Set());
   const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
@@ -89,11 +91,13 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
         });
 
         setInvoices(transformed);
+        setContextInvoices(transformed);
         setError(null);
       } catch (loadError) {
         console.error('❌ AllInvoicesPage: Error loading invoices:', loadError);
         setError(loadError?.message || 'Failed to load invoices');
         setInvoices([]);
+        setContextInvoices([]);
       } finally {
         setLoading(false);
       }

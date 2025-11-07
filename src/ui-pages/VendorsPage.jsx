@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
+import { useInvoiceData } from '../context/InvoiceDataContext';
 import ACHBadge from '../ui/ach/ACHBadge';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import { normalizeVendorName, getDisplayVendorName, getNormalizedVendorFromInvoice } from '../lib/vendorUtils';
@@ -15,6 +16,7 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { setInvoices: setContextInvoices } = useInvoiceData();
   const spApi = useSearchParams();
   const spQuery = (spApi.get('search') || '').trim().toLowerCase();
   const spFilters = {
@@ -92,11 +94,13 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
         }));
 
         setVendors(transformedData);
+        setContextInvoices(data);
         setError(null);
       } catch (err) {
         console.error('❌ VendorsPage: Error loading vendor data:', err);
         setError(err.message);
         setVendors([]);
+        setContextInvoices([]);
       } finally {
         setLoading(false);
       }

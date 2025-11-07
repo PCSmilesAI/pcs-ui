@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import NavBar from './NavBar';
 import { InvoiceClickProvider } from '../context/InvoiceClickContext';
+import { InvoiceDataProvider, useInvoiceData } from '../context/InvoiceDataContext';
 import FilterPanel from './FilterPanel.jsx'
 
 export default function AppLayout({ children }) {
@@ -58,7 +59,7 @@ export default function AppLayout({ children }) {
     const urlMapping = {
       'forMe': 'ForMePage',
       'toBePaid': 'ToBePaidPage',
-      'complete': 'CompletePage', 
+      'complete': 'CompletePage',
       'vendors': 'VendorsPage',
       'allInvoices': 'AllInvoicesPage',
       'account': 'AccountPage',
@@ -93,6 +94,12 @@ export default function AppLayout({ children }) {
     router.push('/LoginPage');
   };
 
+  // Inner component that uses the InvoiceData context
+  function FilterPanelWrapper(props) {
+    const { invoices } = useInvoiceData();
+    return <FilterPanel {...props} invoices={invoices} />;
+  }
+
   // Render content with or without InvoiceClickProvider based on page type
   const content = (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -108,7 +115,7 @@ export default function AppLayout({ children }) {
       )}
       {/* Render FilterPanel only on non-auth and non-vendor-onboarding pages */}
       {!isAuthPage && !isVendorOnboardingSuccess && (
-        <FilterPanel
+        <FilterPanelWrapper
           isOpen={isFilterOpen}
           onClose={() => setIsFilterOpen(false)}
           onApplyFilters={(criteria) => {
@@ -141,8 +148,10 @@ export default function AppLayout({ children }) {
   }
 
   return (
-    <InvoiceClickProvider>
-      {content}
-    </InvoiceClickProvider>
+    <InvoiceDataProvider>
+      <InvoiceClickProvider>
+        {content}
+      </InvoiceClickProvider>
+    </InvoiceDataProvider>
   );
 }

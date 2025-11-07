@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useSearchParams } from 'next/navigation';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
+import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 
@@ -17,6 +18,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const [refreshing, setRefreshing] = useState(false);
   const [toast, setToast] = useState(null);
   const { handleInvoiceRowClick } = useInvoiceClick();
+  const { setInvoices: setContextInvoices } = useInvoiceData();
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
   const { getStatusForVendor } = useVendorAchMap();
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -77,10 +79,12 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           line_items: invoice.line_items || [],
         })});
       setInvoices(transformedData);
+      setContextInvoices(transformedData);
       setError(null);
     } catch (err) {
       setError(err.message);
       setInvoices([]);
+      setContextInvoices([]);
     } finally {
       setLoading(false);
     }
@@ -196,12 +200,14 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         
         console.log('✅ ToBePaidPage: Data transformed successfully:', transformedData.length, 'approved invoices');
         setInvoices(transformedData);
+        setContextInvoices(transformedData);
         setError(null);
       } catch (err) {
         console.error('❌ ToBePaidPage: Error loading invoices:', err);
         setError(err.message);
         // Fallback to empty array if loading fails
         setInvoices([]);
+        setContextInvoices([]);
       } finally {
         console.log('🏁 ToBePaidPage: Loading complete');
         setLoading(false);
