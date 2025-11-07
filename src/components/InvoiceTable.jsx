@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 /**
  * Generic table component for rendering invoice-like data. It
@@ -8,6 +8,9 @@ import React, { useState } from 'react';
  * an `align` property ('left', 'center', or 'right') can be
  * provided to control text alignment. A click handler can be
  * supplied to respond when rows are selected.
+ *
+ * Columns can now be sorted by clicking on the header. The sort
+ * direction cycles through: unsorted → ascending → descending → unsorted
  *
  * Example usage:
  * <InvoiceTable
@@ -20,6 +23,9 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
   // Track which row the mouse is hovering over so we can change
   // its background colour without relying on CSS hover rules.
   const [hoverIndex, setHoverIndex] = useState(null);
+
+  // Track sorting state: { key: column key, direction: 'asc' | 'desc' | null }
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
   // Define reusable styles for table, header and cells. Using
   // JavaScript objects ensures the styles are always applied even
@@ -61,7 +67,68 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
     );
   };
 
-  const allVisibleIds = selectable ? rows.map((r, i) => getId(r, i)) : [];
+  // Sort rows based on current sort configuration
+  const sortedRows = useMemo(() => {
+    if (!sortConfig.key || !sortConfig.direction) {
+      return rows;
+    }
+
+    const sorted = [...rows].sort((a, b) => {
+      const aVal = a[sortConfig.key];
+      const bVal = b[sortConfig.key];
+
+      // Handle null/undefined values
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return sortConfig.direction === 'asc' ? 1 : -1;
+      if (bVal == null) return sortConfig.direction === 'asc' ? -1 : 1;
+
+      // Try numeric comparison first
+      const aNum = parseFloat(String(aVal).replace(/[^0-9.\-]/g, ''));
+      const bNum = parseFloat(String(bVal).replace(/[^0-9.\-]/g, ''));
+
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
+      }
+
+      // Fall back to string comparison
+      const aStr = String(aVal).toLowerCase();
+      const bStr = String(bVal).toLowerCase();
+
+      if (sortConfig.direction === 'asc') {
+        return aStr.localeCompare(bStr);
+      } else {
+        return bStr.localeCompare(aStr);
+      }
+    });
+
+    return sorted;
+  }, [rows, sortConfig]);
+
+  // Handle column header click to toggle sort
+  const handleHeaderClick = (columnKey) => {
+    setSortConfig((prev) => {
+      if (prev.key === columnKey) {
+        // Cycle through: asc -> desc -> null
+        if (prev.direction === 'asc') {
+          return { key: columnKey, direction: 'desc' };
+        } else if (prev.direction === 'desc') {
+          return { key: null, direction: null };
+        }
+      }
+      // Start with ascending
+      return { key: columnKey, direction: 'asc' };
+    });
+  };
+
+  // Get sort arrow for a column
+  const getSortArrow = (columnKey) => {
+    if (sortConfig.key !== columnKey) return null;
+    if (sortConfig.direction === 'asc') return ' ↑';
+    if (sortConfig.direction === 'desc') return ' ↓';
+    return null;
+  };
+
+  const allVisibleIds = selectable ? sortedRows.map((r, i) => getId(r, i)) : [];
   const allSelected = selectable && allVisibleIds.length > 0 && allVisibleIds.every((id) => (selectedIds instanceof Set ? selectedIds.has(id) : (selectedIds || []).includes(id)));
 
   return (
@@ -85,19 +152,30 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
           {columns.map((col) => {
             // Determine alignment; default left
             let textAlign = col.align || 'left';
+            const sortArrow = getSortArrow(col.key);
             return (
               <th
                 key={col.key}
-                style={{ ...headerCellBase, textAlign }}
+                style={{
+                  ...headerCellBase,
+                  textAlign,
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  backgroundColor: sortConfig.key === col.key ? '#f0f7fc' : '#ffffff',
+                  fontWeight: sortConfig.key === col.key ? 600 : 500,
+                }}
+                onClick={() => handleHeaderClick(col.key)}
+                title="Click to sort"
               >
                 {col.label}
+                {sortArrow && <span style={{ marginLeft: '4px', color: '#357ab2' }}>{sortArrow}</span>}
               </th>
             );
           })}
         </tr>
       </thead>
       <tbody>
-        {rows.map((row, rowIndex) => {
+        {sortedRows.map((row, rowIndex) => {
           // Background colour for hover effect
           const backgroundColor =
             hoverIndex === rowIndex ? '#f0f7fc' : '#ffffff';
