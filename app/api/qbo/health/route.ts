@@ -1,6 +1,6 @@
 /**
  * QuickBooks Online Health Check
- * 
+ *
  * Verifies QBO integration is properly configured and operational.
  * Checks:
  * - Environment variables (client_id, client_secret, redirect_uri)
@@ -10,8 +10,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface QBOHealthStatus {
   ok: boolean;
@@ -79,16 +81,16 @@ export async function GET(_req: NextRequest) {
 
   // 3. Check token availability
   try {
-    const { tokenStorage } = await import('../../../lib/qbo/tokenStorage');
     const tokens = await tokenStorage.getLatestTokens();
 
     if (tokens) {
       health.tokens.available = true;
-      if (tokens.expires_at) {
-        health.tokens.expires_at = new Date(tokens.expires_at).toISOString();
-        
-        // Check if token is expired
-        if (new Date(tokens.expires_at) < new Date()) {
+      if (tokens.expiresAt) {
+        health.tokens.expires_at = new Date(tokens.expiresAt * 1000).toISOString();
+
+        // Check if token is expired (expiresAt is in seconds)
+        const now = Math.floor(Date.now() / 1000);
+        if (now > tokens.expiresAt) {
           errors.push('QBO token has expired');
           health.tokens.available = false;
         }
