@@ -1,4 +1,5 @@
 import { getDatabase } from '../db/client';
+import { createTombstone } from './tombstoneService';
 
 export interface InvoiceRecord {
   id: string;
@@ -78,7 +79,10 @@ export function saveInvoice(invoice: InvoiceRecord): void {
  */
 export function softDeleteInvoice(invoiceId: string, reason?: string): void {
   const db = getDatabase();
-  
+
+  // Get the invoice to retrieve source_message_id
+  const invoice = db.prepare('SELECT source_file FROM invoices WHERE id = ?').get(invoiceId) as any;
+
   db.prepare(`
     UPDATE invoices SET
       deleted = 1,
@@ -87,7 +91,12 @@ export function softDeleteInvoice(invoiceId: string, reason?: string): void {
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `).run(invoiceId);
-  
+
+  // Create tombstone to prevent re-ingestion
+  if (invoice?.source_file) {
+    createTombstone(invoice.source_file);
+  }
+
   // Audit event
   db.prepare(`
     INSERT INTO invoice_events (invoice_id, action, payload_json)
