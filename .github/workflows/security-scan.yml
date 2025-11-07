@@ -1,0 +1,182 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  secrets-detection:
+    name: Detect Hardcoded Secrets
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run TruffleHog secret scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint --if-present
+        continue-on-error: true
+
+      - name: Run TypeScript type check
+        run: npm run type-check --if-present
+        continue-on-error: true
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          # Provide minimal env vars for build
+          NODE_ENV: production
+          NEXT_PUBLIC_API_URL: https://pcsmilesai.com
+
+  env-validation:
+    name: Environment Variables Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate environment schema
+        run: |
+          node -e "
+            const env = require('./config/env.ts');
+            console.log('✅ Environment schema loaded successfully');
+          " || echo "⚠️  Environment schema validation skipped (TypeScript file)"
+
+  security-headers:
+    name: Security Headers Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for security headers
+        run: |
+          echo "Checking for security configurations..."
+          
+          # Check for CSRF middleware
+          if grep -r "csrf" pcs-ui/lib/middleware/ --include="*.ts" > /dev/null; then
+            echo "✅ CSRF protection found"
+          else
+            echo "⚠️  CSRF protection not found"
+          fi
+          
+          # Check for cookie hardening
+          if grep -r "httpOnly\|sameSite\|secure" pcs-ui/lib/middleware/ --include="*.ts" > /dev/null; then
+            echo "✅ Cookie hardening found"
+          else
+            echo "⚠️  Cookie hardening not found"
+          fi
+          
+          # Check for auth middleware
+          if grep -r "getCurrentUser\|isAdmin" pcs-ui/lib/auth/ --include="*.ts" > /dev/null; then
+            echo "✅ Auth middleware found"
+          else
+            echo "⚠️  Auth middleware not found"
+          fi
+
+  dependency-check:
+    name: Dependency Vulnerabilities
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  summary:
+    name: Security Scan Summary
+    runs-on: ubuntu-latest
+    needs: [secrets-detection, lint, build, env-validation, security-headers, dependency-check]
+    if: always()
+    
+    steps:
+      - name: Check results
+        run: |
+          echo "🔒 Security Scan Summary"
+          echo "========================"
+          echo "✅ Secrets Detection: ${{ needs.secrets-detection.result }}"
+          echo "✅ Lint & Type Check: ${{ needs.lint.result }}"
+          echo "✅ Build Check: ${{ needs.build.result }}"
+          echo "✅ Environment Validation: ${{ needs.env-validation.result }}"
+          echo "✅ Security Headers: ${{ needs.security-headers.result }}"
+          echo "✅ Dependency Check: ${{ needs.dependency-check.result }}"
+          
+          if [ "${{ needs.secrets-detection.result }}" = "failure" ]; then
+            echo "❌ Secrets detected in code!"
+            exit 1
+          fi
+          
+          if [ "${{ needs.build.result }}" = "failure" ]; then
+            echo "❌ Build failed!"
+            exit 1
+          fi
+

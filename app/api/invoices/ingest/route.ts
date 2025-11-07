@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '../../../../lib/db/client';
 import { applyParserUpdate } from '../../../../lib/invoices/write';
+import { isTombstoned } from '../../../../lib/invoices/tombstoneService';
 import { randomUUID } from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -35,12 +36,24 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getDatabase();
-    
+
+    // Check if invoice has been tombstoned (rejected/deleted)
+    if (isTombstoned(body.source_file)) {
+      console.log('[API][INGEST]', 'invoice_tombstoned', {
+        invoiceNumber: body.invoice_number,
+        sourceFile: body.source_file
+      });
+      return NextResponse.json(
+        { ok: true, message: 'Invoice was previously rejected and cannot be re-ingested', skipped: true },
+        { status: 200 }
+      );
+    }
+
     // Check if invoice already exists
     const existing = db.prepare(
       'SELECT id FROM invoices WHERE invoice_number = ?'
     ).get(body.invoice_number);
-    
+
     if (existing) {
       return NextResponse.json(
         { ok: true, message: 'Invoice already exists', id: (existing as any).id },
