@@ -1,6 +1,18 @@
 {
-  "Braxton Ellsworth": "cus_T9Om6aZhtsYHbB",
-  "Darby Dental Supply": "acct_yyyyyyyyyyyy",
-  "Test Vendor": "acct_1SDq1q49aGbJUPyT"
+  "vendors": {
+    "Artisan Dental": {
+      "email": "customerservice@artisandental.com"
+    },
+    "Exodus Dental Solutions": {
+      "email": "donotreply@seazona.net"
+    },
+    "Henry Schein": {
+      "email": "henryschein@billtrust.com"
+    },
+    "Patterson Dental": {
+      "email": "do_notreply@pattersondental.com"
+    }
+  },
+  "version": 1
 }
 
