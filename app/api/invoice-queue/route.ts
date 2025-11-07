@@ -1,9 +1,17 @@
 import { NextResponse, NextRequest } from 'next/server'
+import { getCurrentUser } from '../../../lib/auth/currentUser'
 import { dedupeInvoices, getExistingQueueFiles, saveQueueFiles } from '../../../lib/queue/invoiceQueue'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
+  // SECURITY: Require authentication for invoice queue access
+  const user = getCurrentUser(request);
+  if (!user.email) {
+    console.warn('[API][INVOICE-QUEUE] Unauthorized access attempt');
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const queueFiles = getExistingQueueFiles()
     if (queueFiles.length === 0) {

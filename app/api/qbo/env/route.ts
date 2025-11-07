@@ -1,9 +1,20 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { getCurrentUser } from '../../../../lib/auth/currentUser'
+import { isAdmin } from '../../../../lib/workflow/rolesStore'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // SECURITY: Require admin authentication for debug endpoint
+  const user = getCurrentUser(req)
+  const allowed = await isAdmin(user.email)
+
+  if (!allowed) {
+    console.warn('[API][QBO][ENV] Unauthorized access attempt', { userEmail: user.email })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+
   const {
     QBO_CLIENT_ID,
     QBO_CLIENT_SECRET,

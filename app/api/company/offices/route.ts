@@ -4,7 +4,13 @@ import { readOffices, saveOffices, OfficeInfo } from '../../../../lib/company/of
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
+  // SECURITY: Require authentication for office data access
+  const user = getCurrentUser(req);
+  if (!user.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const list = await readOffices();
   return NextResponse.json({ ok: true, offices: list });
 }

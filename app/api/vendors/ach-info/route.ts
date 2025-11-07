@@ -18,6 +18,17 @@ export async function GET(request: Request) {
     const vendorParam = (url.searchParams.get('vendor') || '').trim();
     const explicitAcct = (url.searchParams.get('accountId') || '').trim();
 
+    // SECURITY: Validate input parameters
+    if (vendorParam && (vendorParam.length > 255 || !/^[a-zA-Z0-9\s\-&.,()]+$/.test(vendorParam))) {
+      console.warn('[VENDOR_ACH_INFO] Invalid vendor parameter', { vendor: vendorParam });
+      return json(400, { ok: false, error: 'Invalid vendor name' });
+    }
+
+    if (explicitAcct && (explicitAcct.length > 100 || !/^[a-zA-Z0-9_\-]+$/.test(explicitAcct))) {
+      console.warn('[VENDOR_ACH_INFO] Invalid accountId parameter', { accountId: explicitAcct });
+      return json(400, { ok: false, error: 'Invalid account ID' });
+    }
+
     const map = await loadMap();
 
     let vendorName: string | undefined;

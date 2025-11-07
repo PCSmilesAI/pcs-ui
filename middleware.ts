@@ -19,7 +19,28 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 301); // Changed to 301 for consistency
   }
 
-  return NextResponse.next();
+  // 3) Create response with security headers
+  const response = NextResponse.next();
+
+  // SECURITY: Prevent MIME type sniffing
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+
+  // SECURITY: Prevent clickjacking attacks
+  response.headers.set('X-Frame-Options', 'DENY');
+
+  // SECURITY: Enable XSS protection in older browsers
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+
+  // SECURITY: Enforce HTTPS
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+
+  // SECURITY: Referrer policy
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // SECURITY: Permissions policy (formerly Feature-Policy)
+  response.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+
+  return response;
 }
 
 

@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
+import { getCurrentUser } from '../../../../lib/auth/currentUser';
+import { isAdmin } from '../../../../lib/workflow/rolesStore';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
+  // SECURITY: Require admin authentication for debug endpoint
+  const user = getCurrentUser(req);
+  const allowed = await isAdmin(user.email);
+
+  if (!allowed) {
+    console.warn('[API][QBO][DEBUG-TOKENS] Unauthorized access attempt', { userEmail: user.email });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+
   try {
     const latest = await tokenStorage.getLatestTokens();
     const all = await tokenStorage.getAllTokens();
