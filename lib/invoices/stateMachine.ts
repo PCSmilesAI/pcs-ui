@@ -135,7 +135,6 @@ export function getStateLabel(state: InvoiceStatus): string {
   const labels: Record<InvoiceStatus, string> = {
     'incoming': 'Incoming',
     'categorized': 'Categorized',
-    'pending': 'Pending',
     'awaiting_office_approval': 'Awaiting Office Approval',
     'awaiting_admin_approval': 'Awaiting Admin Approval',
     'to_be_paid': 'Ready to Pay',
