@@ -291,8 +291,11 @@ def run_vendor_router(filepath, detected_vendor=None):
         log(f"[VENDOR_ROUTER][ERROR] Exception: {e}")
         return None
 
-def extract_and_save_pdfs(msg, email_subject):
-    """Extract PDFs from email and return list of filepaths"""
+def extract_and_save_pdfs(msg, email_subject, source_message_id):
+    """Extract PDFs from email and return list of filepaths
+
+    CRITICAL: Each email gets a unique filename to prevent collisions
+    """
     detected_vendor = detect_vendor_from_email(msg)
     if detected_vendor:
         log(f"📧 Vendor detected from email: {detected_vendor}")
@@ -306,14 +309,30 @@ def extract_and_save_pdfs(msg, email_subject):
 
         filename = part.get_filename()
         if filename and filename.lower().endswith(".pdf"):
-            filepath = os.path.join(SAVE_DIR, filename)
-            if os.path.exists(filepath):
-                log(f"⏩ Skipped duplicate attachment: {filename}")
+            # CRITICAL FIX: Use message ID to create unique filename
+            # This prevents collisions when different emails have PDFs with same name
+            if source_message_id:
+                # Create unique filename: original_name_MESSAGEID.pdf
+                name_without_ext = os.path.splitext(filename)[0]
+                unique_filename = f"{name_without_ext}_{hashlib.md5(source_message_id.encode()).hexdigest()[:8]}.pdf"
+            else:
+                # Fallback: use timestamp
+                timestamp = int(time.time() * 1000)
+                name_without_ext = os.path.splitext(filename)[0]
+                unique_filename = f"{name_without_ext}_{timestamp}.pdf"
+
+            filepath = os.path.join(SAVE_DIR, unique_filename)
+
+            # CRITICAL: Always save the PDF, even if filename exists
+            # Different emails may have PDFs with same name
+            try:
+                with open(filepath, 'wb') as f:
+                    f.write(part.get_payload(decode=True))
+                log(f"✅ Saved: {unique_filename}")
+                pdf_files.append((filepath, detected_vendor))
+            except Exception as e:
+                log(f"[ERROR] Failed to save PDF {unique_filename}: {e}")
                 continue
-            with open(filepath, 'wb') as f:
-                f.write(part.get_payload(decode=True))
-            log(f"✅ Saved: {filepath}")
-            pdf_files.append((filepath, detected_vendor))
 
     if not pdf_files:
         log(f"⚠️ No PDFs found in email: {email_subject}")
@@ -321,22 +340,53 @@ def extract_and_save_pdfs(msg, email_subject):
     return pdf_files
 
 def process_pdf_file(filepath, detected_vendor):
-    """Process a single PDF file (can be called in parallel)"""
+    """Process a single PDF file (can be called in parallel)
+
+    CRITICAL: This function MUST NOT fail silently
+    """
     try:
+        if not os.path.exists(filepath):
+            log(f"[ERROR][CRITICAL] PDF file does not exist: {filepath}")
+            return False
+
         vendor = run_vendor_router(filepath, detected_vendor)
         if vendor:
             log(f"📦 Parsed and routed invoice: {vendor}")
             return True
         else:
-            log(f"⏩ Ignored: unknown or unparseable vendor for {os.path.basename(filepath)}")
+            log(f"[WARNING] Unknown or unparseable vendor for {os.path.basename(filepath)}")
             return False
     except Exception as e:
-        log(f"[ERROR] Failed to process {os.path.basename(filepath)}: {e}")
+        log(f"[ERROR][CRITICAL] Failed to process {os.path.basename(filepath)}: {e}")
+        import traceback
+        log(f"[ERROR][TRACEBACK] {traceback.format_exc()}")
         return False
 
 def move_to_processed(mail, uid):
-    # Mark as read instead of deleted
+    """Mark email as read"""
     mail.uid('store', uid, '+FLAGS', '\\Seen')
+
+def verify_pdf_processing(pdf_tasks):
+    """CRITICAL: Verify that all extracted PDFs are being processed
+
+    This is a safety check to ensure we don't lose invoices
+    """
+    if not pdf_tasks:
+        return True
+
+    log(f"[VERIFY] Checking that all {len(pdf_tasks)} PDFs exist before processing...")
+    missing_pdfs = []
+    for filepath, vendor in pdf_tasks:
+        if not os.path.exists(filepath):
+            missing_pdfs.append(filepath)
+            log(f"[VERIFY][ERROR] PDF missing: {filepath}")
+
+    if missing_pdfs:
+        log(f"[VERIFY][CRITICAL] {len(missing_pdfs)} PDFs are missing!")
+        return False
+
+    log(f"[VERIFY] All {len(pdf_tasks)} PDFs verified to exist")
+    return True
 
 def check_inbox():
     """Main inbox scanning function with parallel processing and incremental scanning"""
@@ -401,12 +451,18 @@ def check_inbox():
 
             if has_pdf:
                 log(f"[INBOX][SCAN] Processing new invoice email: {subject}")
-                pdf_files = extract_and_save_pdfs(msg, subject)
+                pdf_files = extract_and_save_pdfs(msg, subject, source_message_id)
                 # Queue PDFs for parallel processing
                 for filepath, detected_vendor in pdf_files:
                     pdf_tasks.append((filepath, detected_vendor))
-                move_to_processed(mail, uid)
-                processed_count += 1
+                # CRITICAL FIX: Only mark as read AFTER successfully extracting PDFs
+                # This ensures we don't lose emails if extraction fails
+                if pdf_files:
+                    move_to_processed(mail, uid)
+                    processed_count += 1
+                else:
+                    log(f"[INBOX][SCAN][WARNING] Email had PDF flag but no PDFs extracted: {subject}")
+                    skipped_count += 1
             else:
                 sender = msg.get("From", "unknown")
                 log(f"[INBOX][SCAN][NO_PDF] Skipping email without PDF - From: {sender}, Subject: {subject}")
@@ -415,16 +471,39 @@ def check_inbox():
 
         mail.logout()
 
+        # CRITICAL: Verify all PDFs exist before processing
+        if pdf_tasks and not verify_pdf_processing(pdf_tasks):
+            log("[INBOX][SCAN][CRITICAL] PDF verification failed - aborting processing")
+            _last_scan_result = {
+                "timestamp": datetime.now().isoformat(),
+                "added": 0,
+                "skipped": skipped_count,
+                "duration_ms": int((time.time() - start_time) * 1000),
+                "error": "PDF verification failed",
+            }
+            return
+
         # Second pass: process PDFs in parallel
         if pdf_tasks:
             log(f"[INBOX][PARALLEL] Processing {len(pdf_tasks)} PDFs with thread pool")
+            processed_pdfs = 0
+            failed_pdfs = 0
             with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [executor.submit(process_pdf_file, filepath, vendor) for filepath, vendor in pdf_tasks]
                 for future in as_completed(futures):
                     try:
-                        future.result()
+                        result = future.result()
+                        if result:
+                            processed_pdfs += 1
+                        else:
+                            failed_pdfs += 1
                     except Exception as e:
+                        failed_pdfs += 1
                         log(f"[INBOX][PARALLEL][ERROR] {e}")
+
+            log(f"[INBOX][PARALLEL][SUMMARY] Processed: {processed_pdfs}, Failed: {failed_pdfs}")
+            if failed_pdfs > 0:
+                log(f"[INBOX][PARALLEL][WARNING] {failed_pdfs} PDFs failed to process - check logs")
 
         duration_ms = int((time.time() - start_time) * 1000)
         log(f"[INBOX][SCAN][END] Processed {processed_count} new, skipped {skipped_count} (no PDF: {no_pdf_count}), duration {duration_ms}ms")
