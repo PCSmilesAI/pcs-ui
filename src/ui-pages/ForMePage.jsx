@@ -127,9 +127,10 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       .filter((invoice) => {
         if (invoice.deleted || invoice.workflow_deleted_at) return false;
         const status = (invoice.status || '').toLowerCase();
-        // Show only invoices waiting for AP approval (incoming, categorized, pending)
-        // Hide invoices that have already been approved or moved to next stage
-        if (status === 'awaiting_office_approval' || status === 'awaiting_admin_approval' || status === 'paid' || status === 'to_be_paid' || status === 'rejected' || status === 'removed') return false;
+        // Show invoices waiting for AP approval (incoming, categorized, pending)
+        // Also show awaiting_admin_approval for admins to approve
+        // Hide invoices that have already been paid or rejected
+        if (status === 'paid' || status === 'rejected' || status === 'removed') return false;
         if (invoice.approved === true) return false;
         return true;
       })
