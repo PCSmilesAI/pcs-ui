@@ -5,6 +5,7 @@ import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
+import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
 
 // Helper function to get user email from localStorage/cookie
 function getUserEmail() {
