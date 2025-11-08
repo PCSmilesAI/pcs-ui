@@ -92,10 +92,10 @@ function runInboxScanOnce(fullScan: boolean = false): Promise<RefreshResult> {
     const pythonCode = `
 import sys
 sys.path.insert(0, '${ROOT_DIR.replace(/\\/g, '\\\\')}')
-from email_ingestion_agent_enhanced import check_inbox, _last_scan_result
-check_inbox(full_scan=${fullScan})
+import email_ingestion_agent_enhanced
+email_ingestion_agent_enhanced.check_inbox(full_scan=${fullScan})
 import json
-print(json.dumps(_last_scan_result))
+print(json.dumps(email_ingestion_agent_enhanced._last_scan_result))
 `;
     
     const proc = spawn('python3', ['-c', pythonCode], {
