@@ -4,6 +4,7 @@ import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useSearchParams } from 'next/navigation';
 import Toast from '../components/Toast.jsx';
+import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
 
 /**
  * Page for the "Complete" view. Lists invoices that have been
@@ -78,7 +79,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
             timestamp: invoice.timestamp,
             assigned_to: invoice.assigned_to,
             approved: invoice.approved,
-            status: invoice.status
+            status: formatStatusForDisplay(invoice.status)
           })});
         
         console.log('✅ CompletePage: Data transformed successfully:', transformedData.length, 'completed invoices');
@@ -139,7 +140,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
           timestamp: invoice.timestamp,
           assigned_to: invoice.assigned_to,
           approved: invoice.approved,
-          status: invoice.status
+          status: formatStatusForDisplay(invoice.status)
         })});
       setInvoices(transformedData);
       setContextInvoices(transformedData);
