@@ -137,12 +137,34 @@ export function getStateLabel(state: InvoiceStatus): string {
     'categorized': 'Categorized',
     'awaiting_office_approval': 'Awaiting Office Approval',
     'awaiting_admin_approval': 'Awaiting Admin Approval',
-    'to_be_paid': 'Ready to Pay',
+    'to_be_paid': 'To Be Paid',
     'paid': 'Paid',
     'rejected': 'Rejected',
     'repair': 'Needs Repair',
     'removed': 'Removed',
   };
   return labels[state] || state;
+}
+
+/**
+ * Format status value for display in UI (converts snake_case to Title Case)
+ */
+export function formatStatusForDisplay(status: string | undefined | null): string {
+  if (!status) return 'Unknown';
+  const normalized = String(status).toLowerCase().trim();
+  const labels: Record<string, string> = {
+    'incoming': 'Incoming',
+    'categorized': 'Categorized',
+    'awaiting_office_approval': 'Awaiting Office Approval',
+    'awaiting_admin_approval': 'Awaiting Admin Approval',
+    'to_be_paid': 'To Be Paid',
+    'paid': 'Paid',
+    'rejected': 'Rejected',
+    'repair': 'Needs Repair',
+    'removed': 'Removed',
+    'pending': 'Pending',
+    'completed': 'Completed',
+  };
+  return labels[normalized] || normalized.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
