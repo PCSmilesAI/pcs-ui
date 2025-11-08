@@ -36,7 +36,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
       : new URLSearchParams();
     params.set('limit', '5000');
     params.set('status', 'paid');
-    const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store' });
+    const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store', credentials: 'include' });
     if (!res.ok) throw new Error(`Failed to load invoices (HTTP ${res.status})`);
     const payload = await res.json();
     if (!payload?.ok) throw new Error(payload?.error || 'Failed to load invoices');
