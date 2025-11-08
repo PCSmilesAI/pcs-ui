@@ -118,12 +118,13 @@ print(json.dumps(email_ingestion_agent_enhanced._last_scan_result))
     
     proc.on('close', (code) => {
       const duration_ms = Date.now() - startTime;
-      
+
       if (code !== 0) {
-        console.error('[INBOX][REFRESH][ERROR]', { code, stderr });
+        console.error('[INBOX][REFRESH][ERROR]', { code, stderr, stdout });
         resolve({
           ok: false,
           error: `Scan failed with code ${code}`,
+          details: stderr || stdout,
           duration_ms,
         });
         return;
