@@ -4,6 +4,7 @@ import ACHBadge from '../ui/ach/ACHBadge';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
 import { normalizeVendorName, getDisplayVendorName, vendorNamesMatch } from '../lib/vendorUtils';
 import { notifyAchUpdate } from '../ui/ach/achEventBus';
+import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
 
 export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
   const [rows, setRows] = useState([]);
@@ -24,6 +25,20 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
   // Track refresh counter to force re-fetch
   const [refreshCounter, setRefreshCounter] = useState(0);
 
+  // Helper function to get user email from localStorage/cookie
+  function getUserEmail() {
+    try {
+      const stored = typeof window !== 'undefined' ? window.localStorage.getItem('loggedInUser') : null;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed?.email || '';
+      }
+    } catch (e) {
+      console.error('Failed to get user email:', e);
+    }
+    return '';
+  }
+
   useEffect(() => {
     if (!vendor) return;
     const load = async () => {
@@ -32,7 +47,8 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
         console.log('🔄 VendorDetailPage: Fetching invoices for vendor:', vendor);
 
         // Use the same data source as VendorsPage for consistency
-        const invoices = await fetchInvoiceQueue({ limit: 5000 });
+        const userEmail = getUserEmail();
+        const invoices = await fetchInvoiceQueue({ limit: 5000, email: userEmail });
         console.log('📊 VendorDetailPage: API returned', invoices.length, 'invoices');
 
         // Normalize the vendor name from the URL parameter
@@ -87,7 +103,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
                   year: '2-digit',
                 })
               : 'N/A',
-            status: invoice.status,
+            status: formatStatusForDisplay(invoice.status),
             // extras for detail
             invoice_date: invoice.invoice_date,
             due_date: invoice.due_date,
