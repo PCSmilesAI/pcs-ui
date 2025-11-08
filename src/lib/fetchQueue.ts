@@ -13,6 +13,7 @@ export async function fetchInvoiceQueue(
   const url = `/api/invoices/visible?${usp.toString()}&_t=${timestamp}`
   const res = await fetch(url, {
     cache: 'no-store',
+    credentials: 'include',
     headers: {
       'Cache-Control': 'no-cache',
       'Pragma': 'no-cache'
