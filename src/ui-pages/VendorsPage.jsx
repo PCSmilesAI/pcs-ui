@@ -7,6 +7,20 @@ import ACHBadge from '../ui/ach/ACHBadge';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import { normalizeVendorName, getDisplayVendorName, getNormalizedVendorFromInvoice } from '../lib/vendorUtils';
 
+// Helper function to get user email from localStorage/cookie
+function getUserEmail() {
+  try {
+    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('loggedInUser') : null;
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed?.email || '';
+    }
+  } catch (e) {
+    console.error('Failed to get user email:', e);
+  }
+  return '';
+}
+
 /**
  * Page for the "Vendors" view. Displays a list of vendors with
  * payment method, outstanding amount and contact information.
@@ -37,7 +51,8 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
         console.log('🔄 VendorsPage: Fetching invoices from database...');
         setLoading(true);
         // Fetch ALL invoices (no status filter) to show all vendors including historical ones
-        const data = await fetchInvoiceQueue({ limit: 5000 });
+        const userEmail = getUserEmail();
+        const data = await fetchInvoiceQueue({ limit: 5000, email: userEmail });
         console.log('📊 VendorsPage: API returned', data.length, 'invoices');
 
         const vendorMap = new Map();
