@@ -114,6 +114,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     params.set('limit', '5000');
     const res = await fetch(`/api/invoices/visible?${params.toString()}`, {
       cache: 'no-store',
+      credentials: 'include',
     });
     if (!res.ok) {
       const payload = await res.json().catch(() => ({}));
