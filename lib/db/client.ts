@@ -154,7 +154,21 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_invoice_events_invoice_id ON invoice_events(invoice_id);
     CREATE INDEX IF NOT EXISTS idx_invoice_events_created_at ON invoice_events(created_at);
   `);
-  
+
+  // Create rate_limits table for rate limiting
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS rate_limits (
+      key TEXT PRIMARY KEY,
+      requests INTEGER DEFAULT 0,
+      reset_at INTEGER NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_rate_limits_reset_at ON rate_limits(reset_at);
+  `);
+
   console.log('[DB] Migrations completed successfully');
 }
 
