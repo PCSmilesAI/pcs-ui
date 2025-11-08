@@ -5,6 +5,7 @@ import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
+import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
 
 /**
  * Page for the "To Be Paid" view. Shows invoices that have been
@@ -75,7 +76,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           timestamp: invoice.timestamp,
           assigned_to: invoice.assigned_to,
           approved: invoice.approved,
-          status: invoice.status,
+          status: formatStatusForDisplay(invoice.status),
           line_items: invoice.line_items || [],
         })});
       setInvoices(transformedData);
@@ -194,7 +195,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             timestamp: invoice.timestamp,
             assigned_to: invoice.assigned_to,
             approved: invoice.approved,
-            status: invoice.status,
+            status: formatStatusForDisplay(invoice.status),
             line_items: invoice.line_items || [],
           })});
         
