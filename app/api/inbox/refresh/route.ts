@@ -26,6 +26,7 @@ interface RefreshResult {
   duration_ms?: number;
   error?: string;
   message?: string;
+  details?: string;
 }
 
 function getCooldownPath(email: string): string {
