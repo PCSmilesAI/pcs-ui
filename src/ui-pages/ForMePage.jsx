@@ -6,6 +6,7 @@ import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
+import { getDisplayVendorName } from '../lib/vendorUtils';
 
 // Helper function to get user email from localStorage/cookie
 function getUserEmail() {
@@ -63,7 +64,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
   const dismissToast = useCallback(() => setToast(null), []);
 
   const transformInvoice = useCallback((invoice) => {
-    const vendorName = invoice.vendor_name || invoice.vendor || 'Unknown';
+    const vendorName = getDisplayVendorName(invoice.vendor_name || invoice.vendor);
     const rawInvoiceDate = invoice.invoice_date || null;
     const rawDueDate = invoice.due_date || null;
     const officeRaw = invoice.office_location || invoice.office || invoice.clinic_id || '';

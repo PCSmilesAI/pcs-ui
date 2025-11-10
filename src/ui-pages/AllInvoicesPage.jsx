@@ -7,6 +7,7 @@ import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
+import { getDisplayVendorName } from '../lib/vendorUtils';
 
 export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
   const searchParams = useSearchParams();
@@ -74,7 +75,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           return {
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
-            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
             amount: `$${numericTotal.toFixed(2)}`,
             office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
             status: formatStatusForDisplay(invoice.status),

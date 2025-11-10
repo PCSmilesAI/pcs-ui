@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '../../../../lib/db/client';
 import { applyParserUpdate } from '../../../../lib/invoices/write';
 import { isTombstoned } from '../../../../lib/invoices/tombstoneService';
+import { normalizeVendorNameForStorage } from '../../../../lib/invoices/vendorNormalization';
 import { randomUUID } from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -63,7 +64,10 @@ export async function POST(req: NextRequest) {
 
     // Generate ID
     const id = randomUUID();
-    
+
+    // Normalize vendor name
+    const normalizedVendor = normalizeVendorNameForStorage(body.vendor);
+
     // Parse amount
     let amountCents = 0;
     if (body.total) {
@@ -99,10 +103,10 @@ export async function POST(req: NextRequest) {
       id,
       body.invoice_number,
       body.source_file || body.json_path,
-      body.vendor,
+      normalizedVendor,  // parsed (normalized)
       body.office_location || body.clinic_id,
       amountCents,
-      body.vendor,  // effective = parsed initially
+      normalizedVendor,  // effective = parsed initially (normalized)
       body.office_location || body.clinic_id,  // effective
       amountCents,  // effective
       'incoming',

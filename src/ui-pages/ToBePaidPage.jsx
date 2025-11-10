@@ -6,6 +6,7 @@ import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
+import { getDisplayVendorName } from '../lib/vendorUtils';
 
 /**
  * Page for the "To Be Paid" view. Shows invoices that have been
@@ -62,7 +63,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           return ({
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
-          vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+          vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
           amount: `$${numericTotal.toFixed(2)}`,
           office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
           dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A'),
