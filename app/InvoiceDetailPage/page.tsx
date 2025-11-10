@@ -102,10 +102,15 @@ function InvoiceDetailContent() {
             // Only show invoices with status 'to_be_paid'
             queue = queue.filter(inv => (inv.status || '').toLowerCase() === 'to_be_paid');
           } else if (from.includes('ForMe')) {
-            // Only show invoices that are NOT approved/paid/to_be_paid
+            // Match the exact filter from ForMePage
             queue = queue.filter(inv => {
+              if (inv.deleted || inv.workflow_deleted_at) return false;
               const status = (inv.status || '').toLowerCase();
-              return status !== 'approved' && status !== 'paid' && status !== 'to_be_paid' && !inv.deleted && !inv.workflow_deleted_at;
+              // Hide invoices that have already been paid, rejected, or removed
+              if (status === 'paid' || status === 'rejected' || status === 'removed') return false;
+              // Hide approved invoices
+              if (inv.approved === true) return false;
+              return true;
             });
           } else if (from.includes('Complete')) {
             // Only show invoices with status 'paid'
