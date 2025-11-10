@@ -24,6 +24,18 @@ function InvoiceDetailContent() {
           return;
         }
 
+        // Get user email for API calls
+        let userEmail = '';
+        try {
+          const stored = typeof window !== 'undefined' ? window.localStorage.getItem('loggedInUser') : null;
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            userEmail = parsed?.email || '';
+          }
+        } catch (e) {
+          console.error('Failed to get user email:', e);
+        }
+
         // First, try to load from the workflow store (which has the current status)
         let foundInvoice: any = null;
         try {
@@ -36,14 +48,23 @@ function InvoiceDetailContent() {
             }
           }
         } catch (e) {
-          console.log('⚠️ Failed to load from workflow store, falling back to queue:', e);
+          console.log('⚠️ Failed to load from workflow store, falling back to visible API:', e);
         }
 
-        // If not found in workflow store, load from the invoice queue
+        // If not found in workflow store, load from the visible API (same as list pages)
         if (!foundInvoice) {
-          const response = await fetch('/api/invoice-queue?limit=5000');
+          const timestamp = new Date().getTime();
+          const visibleUrl = `/api/invoices/visible?limit=5000&email=${encodeURIComponent(userEmail)}&_t=${timestamp}`;
+          const response = await fetch(visibleUrl, {
+            cache: 'no-store',
+            credentials: 'include',
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
+          });
           if (!response.ok) {
-            throw new Error('Failed to load invoice queue');
+            throw new Error('Failed to load visible invoices');
           }
 
           const data = await response.json();
@@ -56,10 +77,19 @@ function InvoiceDetailContent() {
           }
         }
 
-        // Load the invoice queue for navigation purposes
-        const response = await fetch('/api/invoice-queue?limit=5000');
+        // Load the invoice list for navigation purposes using the same endpoint as the list pages
+        const timestamp = new Date().getTime();
+        const visibleUrl = `/api/invoices/visible?limit=5000&email=${encodeURIComponent(userEmail)}&_t=${timestamp}`;
+        const response = await fetch(visibleUrl, {
+          cache: 'no-store',
+          credentials: 'include',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
         if (!response.ok) {
-          throw new Error('Failed to load invoice queue');
+          throw new Error('Failed to load visible invoices');
         }
 
         const data = await response.json();
