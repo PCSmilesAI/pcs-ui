@@ -95,6 +95,25 @@ function InvoiceDetailContent() {
         const data = await response.json();
         let allInvoices = data.invoices || [];
 
+        // Parse filter parameters from the 'from' URL
+        let filterParams: any = {};
+        if (from) {
+          try {
+            const fromUrl = new URL(from, 'http://localhost');
+            filterParams = {
+              vendor: fromUrl.searchParams.get('vendor') || undefined,
+              office: fromUrl.searchParams.get('office') || undefined,
+              category: fromUrl.searchParams.get('category') || undefined,
+              minAmount: fromUrl.searchParams.get('minAmount') || undefined,
+              maxAmount: fromUrl.searchParams.get('maxAmount') || undefined,
+              search: fromUrl.searchParams.get('search') || undefined,
+              ach: fromUrl.searchParams.get('ach') || undefined,
+            };
+          } catch (e) {
+            console.warn('Failed to parse filter parameters from URL:', e);
+          }
+        }
+
         // Now filter the queue based on which tab the user came from
         let queue = allInvoices;
         if (from) {
@@ -118,6 +137,50 @@ function InvoiceDetailContent() {
           } else if (from.includes('AllInvoices')) {
             // Show all invoices (no filter)
           }
+        }
+
+        // Apply additional filters from the URL parameters
+        if (filterParams.vendor) {
+          queue = queue.filter(inv => {
+            const invVendor = inv.vendor_name || inv.vendor || '';
+            return invVendor === filterParams.vendor;
+          });
+        }
+        if (filterParams.office) {
+          queue = queue.filter(inv => {
+            const invOffice = inv.office_location || inv.office || inv.clinic_id || '';
+            return invOffice === filterParams.office;
+          });
+        }
+        if (filterParams.category) {
+          queue = queue.filter(inv => (inv.category || 'Other') === filterParams.category);
+        }
+        if (filterParams.minAmount) {
+          const minAmount = parseFloat(filterParams.minAmount);
+          queue = queue.filter(inv => {
+            const amount = parseFloat(String(inv.invoice_total || inv.total || '0').replace(/[^0-9.]/g, '')) || 0;
+            return amount >= minAmount;
+          });
+        }
+        if (filterParams.maxAmount) {
+          const maxAmount = parseFloat(filterParams.maxAmount);
+          queue = queue.filter(inv => {
+            const amount = parseFloat(String(inv.invoice_total || inv.total || '0').replace(/[^0-9.]/g, '')) || 0;
+            return amount <= maxAmount;
+          });
+        }
+        if (filterParams.search) {
+          const searchLower = filterParams.search.toLowerCase();
+          queue = queue.filter(inv => {
+            const searchableText = [
+              inv.invoice_number,
+              inv.vendor_name || inv.vendor,
+              inv.office_location || inv.office || inv.clinic_id,
+              inv.category,
+              String(inv.invoice_total || inv.total || '')
+            ].join(' ').toLowerCase();
+            return searchableText.includes(searchLower);
+          });
         }
 
         // Find the current index in the filtered queue
