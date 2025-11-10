@@ -42,7 +42,7 @@ async function checkIfAdmin(email) {
 /**
  * Detail view for a single invoice. Displays high level summary
  * information at the top along with actions (approve, reject,
- * repair). Below the summary the left column shows invoice
+ * update). Below the summary the left column shows invoice
  * status, details and line items. The right column contains the
  * actual invoice PDF. A back arrow returns the user to the
  * previous list. This version uses only inline styles so
@@ -727,52 +727,48 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     transitionInvoice('reject');
   }
 
-  async function handleRepair() {
+  async function handleUpdate() {
     try {
-      console.log('🔧 Starting repair process...');
-      
-      // Create corrected data from current form state
-      const correctedData = {
-        invoice_number: details.invoice,
-        vendor: details.vendor,
-        vendor_name: details.vendor,
-        total: paymentAmount.replace('$', '').replace(',', ''),
-        invoice_total: paymentAmount.replace('$', '').replace(',', ''),
-        office_location: details.office,
-        clinic_id: details.office,
-        category: details.category,
-        invoice_date: details.invoice_date,
-        due_date: details.due_date,
-        line_items: items,
-        status: 'repair',
-        approved: false,
-        timestamp: new Date().toISOString(),
-        pdf_path: invoice.pdf_path,
-        json_path: invoice.json_path,
-        id: invoice.id
-      };
+      console.log('🔧 Starting invoice update process...');
+      setProcessing(true);
 
-      // Call repair API to log the training data
-      const repairResponse = await csrfClient.post('/api/repair-invoice', {
-        invoice_number: invoice.invoice_number,
-        original_data: invoice,
-        corrected_data: correctedData,
-        pdf_path: invoice.pdf_path,
-        vendor_name: invoice.vendor_name || invoice.vendor
-      });
-
-      if (!repairResponse.ok) {
-        throw new Error('Failed to log repair data');
+      const invoiceId = invoice?.id || invoice?.invoice_number;
+      if (!invoiceId) {
+        showToast('Missing invoice identifier', 'error');
+        return;
       }
 
-      console.log('✅ Repair data logged successfully');
-      
-      // Update the invoice status
-      await updateInvoiceStatus('repair', false);
-      
+      // Parse amount from display format
+      const amountStr = paymentAmount.replace('$', '').replace(',', '');
+      const amountNum = parseFloat(amountStr) || 0;
+      const amountCents = Math.round(amountNum * 100);
+
+      // Call update API with corrected fields
+      const response = await csrfClient.post(`/api/invoices/${encodeURIComponent(invoiceId)}/update`, {
+        vendor_name: details.vendor,
+        office_id: details.office,
+        amount_cents: amountCents
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData?.error || 'Failed to update invoice');
+      }
+
+      console.log('✅ Invoice updated successfully');
+      showToast('Invoice updated successfully! Changes are now reflected across the system.', 'success');
+
+      // Refresh the page after a short delay to show the toast
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+
     } catch (error) {
-      console.error('❌ Error during repair process:', error);
-      alert(`Error logging repair data: ${error.message}`);
+      console.error('❌ Error during invoice update:', error);
+      const errorMsg = error?.message || 'Unknown error';
+      showToast(`Error updating invoice: ${errorMsg}`, 'error');
+    } finally {
+      setProcessing(false);
     }
   }
 
@@ -900,7 +896,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       return [
         { label: 'Pay', onClick: handlePaid, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
         { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
-        { label: 'Repair', onClick: handleRepair, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
+        { label: 'Update', onClick: handleUpdate, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
       ];
     }
 
@@ -908,7 +904,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     const defaultButtons = [
       { label: 'Approve', onClick: handleApprove, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
       { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
-      { label: 'Repair', onClick: handleRepair, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
+      { label: 'Update', onClick: handleUpdate, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
     ];
 
     return defaultButtons;
