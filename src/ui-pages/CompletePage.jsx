@@ -5,6 +5,7 @@ import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useSearchParams } from 'next/navigation';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
+import { getDisplayVendorName } from '../lib/vendorUtils';
 
 /**
  * Page for the "Complete" view. Lists invoices that have been
@@ -63,7 +64,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
             return ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
-            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
             amount: `$${numericTotal.toFixed(2)}`,
             office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
             dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', {

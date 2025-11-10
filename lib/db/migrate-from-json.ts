@@ -1,5 +1,6 @@
 import { getDatabase } from './client';
 import { resolveDataPath } from '../workflow/dataDir';
+import { normalizeVendorNameForStorage } from '../invoices/vendorNormalization';
 import { randomUUID } from 'crypto';
 import fs from 'fs/promises';
 
@@ -43,7 +44,10 @@ export async function migrateFromJSON(): Promise<{ migrated: number; skipped: nu
           
           // Generate ID if not present
           const id = jsonInv.id || randomUUID();
-          
+
+          // Normalize vendor name
+          const normalizedVendor = normalizeVendorNameForStorage(jsonInv.vendor_name);
+
           // Insert invoice with parsed values (from JSON)
           db.prepare(`
             INSERT INTO invoices (
@@ -77,10 +81,10 @@ export async function migrateFromJSON(): Promise<{ migrated: number; skipped: nu
             jsonInv.invoice_number,
             jsonInv.source_file,
             jsonInv.source_message_id,
-            jsonInv.vendor_name,  // parsed
+            normalizedVendor,  // parsed (normalized)
             jsonInv.office_id,    // parsed
             jsonInv.amount_cents, // parsed
-            jsonInv.vendor_name,  // effective (same as parsed initially)
+            normalizedVendor,  // effective (same as parsed initially, normalized)
             jsonInv.office_id,    // effective
             jsonInv.amount_cents, // effective
             jsonInv.status || 'incoming',
