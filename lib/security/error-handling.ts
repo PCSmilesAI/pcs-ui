@@ -42,35 +42,35 @@ export function sanitizeErrorMessage(error: unknown, isDevelopment: boolean = fa
 
 /**
  * Creates a safe error response object
- * 
+ *
  * @param error - The error to respond with
- * @param statusCode - HTTP status code
- * @param isDevelopment - Whether to include development details
+ * @param statusCode - HTTP status code (default: 500)
+ * @param isDevelopment - Whether to include development details (default: false)
  * @returns A safe error response object
  */
 export function createErrorResponse(
   error: unknown,
-  statusCode: number = 500,
-  isDevelopment: boolean = false
+  statusCode?: number,
+  isDevelopment?: boolean
 ): {
   ok: false;
   error: string;
   errorId: string;
   timestamp: string;
-  ...(isDevelopment ? { details?: string } : {});
 } {
   const errorId = generateErrorId();
   const timestamp = new Date().toISOString();
+  const isDev = isDevelopment ?? false;
 
   const response: any = {
     ok: false,
-    error: sanitizeErrorMessage(error, isDevelopment),
+    error: sanitizeErrorMessage(error, isDev),
     errorId,
     timestamp,
   };
 
   // Only include details in development
-  if (isDevelopment && error instanceof Error) {
+  if (isDev && error instanceof Error) {
     response.details = error.message;
   }
 
