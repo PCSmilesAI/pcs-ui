@@ -23,13 +23,6 @@ const requiredEnvVars = [
   'QBO_REDIRECT_URI',
 ];
 
-const optionalEnvVars = [
-  'STRIPE_SECRET_KEY',
-  'STRIPE_WEBHOOK_SECRET',
-  'SENDGRID_API_KEY',
-  'SENTRY_DSN',
-];
-
 // Validate required environment variables on startup
 function validateConfig() {
   const missing = [];

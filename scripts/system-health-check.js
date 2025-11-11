@@ -6,7 +6,6 @@
  */
 
 const { execSync } = require('child_process');
-const fs = require('fs');
 const path = require('path');
 
 const SCRIPTS_DIR = __dirname;
