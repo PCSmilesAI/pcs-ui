@@ -83,8 +83,8 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
       if (bVal == null) return sortConfig.direction === 'asc' ? -1 : 1;
 
       // Try numeric comparison first
-      const aNum = parseFloat(String(aVal).replace(/[^0-9.\-]/g, ''));
-      const bNum = parseFloat(String(bVal).replace(/[^0-9.\-]/g, ''));
+      const aNum = parseFloat(String(aVal).replace(/[^0-9.-]/g, ''));
+      const bNum = parseFloat(String(bVal).replace(/[^0-9.-]/g, ''));
 
       if (!isNaN(aNum) && !isNaN(bNum)) {
         return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;

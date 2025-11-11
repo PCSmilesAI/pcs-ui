@@ -70,7 +70,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           const numericTotal =
             typeof rawTotal === 'number'
               ? rawTotal
-              : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+              : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.-]/g, '')) || 0;
 
           return {
             invoice: invoice.invoice_number || 'Unknown',
@@ -136,7 +136,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
         const numericTotal =
           typeof rawTotal === 'number'
             ? rawTotal
-            : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+            : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.-]/g, '')) || 0;
         return {
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,

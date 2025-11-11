@@ -7,7 +7,6 @@
 
 const Database = require('better-sqlite3');
 const path = require('path');
-const fs = require('fs');
 
 const DB_PATH = process.env.PCS_DATA_DIR 
   ? path.join(process.env.PCS_DATA_DIR, 'pcs.db')

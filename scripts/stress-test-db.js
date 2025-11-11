@@ -198,17 +198,17 @@ test('Query performance: SELECT all invoices', () => {
 
 test('Query performance: Filter by status', () => {
   const start = Date.now();
-  const result = db.prepare('SELECT COUNT(*) as count FROM invoices WHERE status = ?').get('paid');
+  db.prepare('SELECT COUNT(*) as count FROM invoices WHERE status = ?').get('paid');
   const elapsed = Date.now() - start;
-  
+
   console.log(`   Status filter query in ${elapsed}ms`);
 });
 
 test('Query performance: Filter by vendor', () => {
   const start = Date.now();
-  const result = db.prepare('SELECT COUNT(*) as count FROM invoices WHERE vendor_name = ?').get('Vendor-0');
+  db.prepare('SELECT COUNT(*) as count FROM invoices WHERE vendor_name = ?').get('Vendor-0');
   const elapsed = Date.now() - start;
-  
+
   console.log(`   Vendor filter query in ${elapsed}ms`);
 });
 

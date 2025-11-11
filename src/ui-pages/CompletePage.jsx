@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useInvoiceData } from '../context/InvoiceDataContext';
-import { useSearchParams } from 'next/navigation';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
 import { getDisplayVendorName } from '../lib/vendorUtils';
