@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main, develop]
 
+# Principle of least privilege - explicitly define permissions
+permissions:
+  contents: read
+  security-events: write
+  checks: write
+
 jobs:
   secrets-detection:
     name: Detect Hardcoded Secrets
