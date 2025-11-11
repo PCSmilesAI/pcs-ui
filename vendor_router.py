@@ -11,6 +11,7 @@ import time
 from datetime import datetime
 
 PARSER_FOLDER = os.path.dirname(__file__)
+MULTI_INVOICE_DETECTOR = os.path.join(PARSER_FOLDER, "multi_invoice_detector.py")
 
 # Use PCS_DATA_DIR if set, otherwise use relative path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -141,13 +142,41 @@ def call_queue_writer(filepath, vendor):
     except Exception:
         return False
 
+def handle_multi_invoice_pdf(filepath, vendor, source_message_id):
+    """
+    Check if PDF contains multiple invoices and handle accordingly.
+    Returns True if multi-invoice PDF was processed, False otherwise.
+    """
+    if not os.path.exists(MULTI_INVOICE_DETECTOR):
+        return False
+
+    try:
+        result = subprocess.run(
+            ["python3", MULTI_INVOICE_DETECTOR, filepath, vendor, source_message_id],
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+
+        if result.returncode == 0:
+            invoices = json.loads(result.stdout.strip())
+            if isinstance(invoices, list) and len(invoices) > 1:
+                print(f"📦 Processing {len(invoices)} invoices from multi-invoice PDF")
+                # Each invoice will be ingested separately by queue_writer
+                return True
+    except Exception:
+        pass
+
+    return False
+
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python3 vendor_router.py <pdf_filepath> [detected_vendor]")
+        print("Usage: python3 vendor_router.py <pdf_filepath> [detected_vendor] [source_message_id]")
         sys.exit(1)
 
     filepath = sys.argv[1]
     detected_vendor = sys.argv[2] if len(sys.argv) > 2 else None
+    source_message_id = sys.argv[3] if len(sys.argv) > 3 else "unknown"
 
     if not os.path.exists(filepath):
         print(f"File not found: {filepath}")
@@ -185,8 +214,14 @@ def main():
             except Exception:
                 pass
 
-    # If we found a vendor, call queue writer to add to invoice queue
+    # If we found a vendor, check for multi-invoice PDFs first
     if vendor:
+        # Try to handle as multi-invoice PDF
+        if handle_multi_invoice_pdf(filepath, vendor, source_message_id):
+            print(vendor)
+            sys.exit(0)
+
+        # Otherwise, process as single invoice
         call_queue_writer(filepath, vendor)
         print(vendor)
         sys.exit(0)
