@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import crypto from 'crypto';
 import { getCurrentUser } from '../../../../lib/auth/currentUser';
 import { getById, save } from '../../../../lib/workflow/invoiceStore';
 import { isAdmin } from '../../../../lib/workflow/rolesStore';
@@ -122,8 +123,10 @@ export async function POST(req: NextRequest) {
         if (testMode) {
           // In test mode, create a mock transfer object
           console.log('[PAYMENT] Test mode: Creating mock transfer');
+          // SECURITY: Use cryptographically secure random bytes for test transfer ID
+          const randomSuffix = crypto.randomBytes(4).toString('hex');
           transfer = {
-            id: `tr_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: `tr_test_${Date.now()}_${randomSuffix}`,
             object: 'transfer',
             amount: amountCents,
             currency: 'usd',
