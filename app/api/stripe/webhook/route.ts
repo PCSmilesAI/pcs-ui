@@ -51,8 +51,10 @@ export async function POST(request: Request) {
     }
     event = client.webhooks.constructEvent(rawBody, signature, webhookSecret);
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[STRIPE][WEBHOOK] Signature verification failed:', err?.message);
-    return json(400, { ok: false, error: `invalid signature: ${err?.message || 'unknown'}` });
+    // Return safe error message to client
+    return json(400, { ok: false, error: 'invalid signature' });
   }
 
   // Idempotency guard

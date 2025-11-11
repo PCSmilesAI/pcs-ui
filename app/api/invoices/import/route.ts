@@ -71,7 +71,10 @@ export async function POST(req: NextRequest) {
 
         results.push({ id, ok: true });
       } catch (err: any) {
-        results.push({ id: item.id, ok: false, error: err?.message });
+        // Log full error server-side only
+        console.error('[API][INVOICES][IMPORT]', 'item_error', { itemId: item.id, error: err?.message });
+        // Return safe error message to client
+        results.push({ id: item.id, ok: false, error: 'Failed to process item' });
       }
     }
 
@@ -85,8 +88,10 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[API][INVOICES][IMPORT]', 'error', { error: err?.message });
-    return NextResponse.json({ error: err?.message || 'Import failed' }, { status: 400 });
+    // Return safe error message to client
+    return NextResponse.json({ error: 'Import failed' }, { status: 400 });
   }
 }
 
