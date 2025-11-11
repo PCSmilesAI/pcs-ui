@@ -38,10 +38,12 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
 
   } catch (error: any) {
+    // Log full error server-side only
     console.error('❌ Auto-create bill error:', error);
+    // Return safe error message to client
     return NextResponse.json({
       success: false,
-      error: error.message || 'Internal server error'
+      error: 'Failed to create bill'
     }, { status: 500 });
   }
 }
@@ -104,8 +106,10 @@ export async function GET(req: NextRequest) {
         }
         return NextResponse.json({ ok: false, dryRun, error: result.error || 'Failed to create bill' }, { status: 500 });
       } catch (error: any) {
+        // Log full error server-side only
         console.error('❌ Dry-run by id failed:', error);
-        return NextResponse.json({ ok: false, error: error?.message || 'Dry-run failed' }, { status: 500 });
+        // Return safe error message to client
+        return NextResponse.json({ ok: false, error: 'Dry-run failed' }, { status: 500 });
       }
     }
 
@@ -120,10 +124,12 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error: any) {
+    // Log full error server-side only
     console.error('❌ Connection test error:', error);
+    // Return safe error message to client
     return NextResponse.json({
       connected: false,
-      error: error.message || 'Connection test failed'
+      error: 'Connection test failed'
     }, { status: 500 });
   }
 }

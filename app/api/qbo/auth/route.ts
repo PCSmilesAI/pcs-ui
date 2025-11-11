@@ -66,8 +66,10 @@ export async function GET(request: Request) {
   }
 
   if (missing.length) {
+    // Log full error server-side only
     console.error('[QBO][AUTH] Missing env', missing);
-    return NextResponse.json({ error: 'Missing required environment variables', missing }, { status: 500 });
+    // Return safe error message to client
+    return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
   }
 
   const { code_verifier, code_challenge } = genPkce();
