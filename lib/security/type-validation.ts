@@ -186,7 +186,7 @@ export function toSafeNumber(value: unknown, defaultValue: number = 0): number {
 
 /**
  * Safely converts a value to an integer
- * 
+ *
  * @param value - The value to convert
  * @param defaultValue - The default value if conversion fails
  * @returns The integer representation of the value, or defaultValue
@@ -194,5 +194,20 @@ export function toSafeNumber(value: unknown, defaultValue: number = 0): number {
 export function toSafeInteger(value: unknown, defaultValue: number = 0): number {
   const num = toSafeNumber(value, defaultValue);
   return Math.floor(num);
+}
+
+/**
+ * Validates that a value is a valid invoice ID
+ * Invoice IDs can be UUIDs or numeric invoice numbers
+ *
+ * @param value - The value to validate
+ * @returns true if value is a valid invoice ID, false otherwise
+ */
+export function isValidInvoiceId(value: unknown): boolean {
+  if (!isString(value)) return false;
+  // Allow UUIDs or numeric invoice numbers (1-20 digits)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const numericRegex = /^\d{1,20}$/;
+  return uuidRegex.test(value) || numericRegex.test(value);
 }
 

@@ -3,6 +3,7 @@ import { getCurrentUser } from '../../../../../lib/auth/currentUser';
 import { getDatabase } from '../../../../../lib/db/client';
 import { applyCorrections } from '../../../../../lib/invoices/write';
 import { rateLimitByUser } from '../../../../../lib/ratelimit/rateLimiter';
+import { isValidInvoiceId } from '../../../../../lib/security/type-validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,12 @@ export async function POST(
 ) {
   const user = getCurrentUser(req);
   const invoiceId = params.id;
+
+  // SECURITY: Validate invoice ID format
+  if (!isValidInvoiceId(invoiceId)) {
+    console.warn('[API][INVOICES][EDIT]', 'invalid_invoice_id', { invoiceId, userEmail: user.email });
+    return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 });
+  }
 
   // Apply rate limiting per user (500 edit requests per minute)
   const rateLimitResult = rateLimitByUser(user.email, { maxRequests: 500, windowSeconds: 60 });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { categorizeInvoiceLines } from '../../../../../lib/categorize'
 import fs from 'fs'
 import { resolveDataPath } from '../../../../../lib/workflow/dataDir'
+import { isValidInvoiceId } from '../../../../../lib/security/type-validation'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -74,7 +75,13 @@ export async function POST(
 ) {
   try {
     const invoiceId = params.id
-    
+
+    // SECURITY: Validate invoice ID format
+    if (!isValidInvoiceId(invoiceId)) {
+      console.warn('[API][INVOICES][AUTO_CATEGORIZE]', 'invalid_invoice_id', { invoiceId });
+      return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 });
+    }
+
     // Load invoice data
     const invoice = await loadInvoice(invoiceId)
     
