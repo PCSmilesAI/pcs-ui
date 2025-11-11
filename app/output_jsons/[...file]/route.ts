@@ -62,7 +62,10 @@ export async function GET(_req: NextRequest, ctx: { params: { file: string[] } }
     const data = JSON.parse(raw);
     return NextResponse.json(data);
   } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error?.message || 'Internal server error' }, { status: 500 });
+    // Log full error server-side only
+    console.error('[OUTPUT_JSONS] Error:', error);
+    // Return safe error message to client
+    return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 

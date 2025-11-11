@@ -38,9 +38,11 @@ export async function GET(req: NextRequest) {
       })),
     });
   } catch (error: any) {
+    // Log full error server-side only
     console.error('[QBO][DEBUG-TOKENS] failed', error);
+    // Return safe error message to client
     return NextResponse.json({
-      error: error?.message || 'Failed to inspect tokens',
+      error: 'Failed to inspect tokens',
     }, { status: 500 });
   }
 }
