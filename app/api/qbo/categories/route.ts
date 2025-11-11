@@ -94,8 +94,10 @@ async function ensureAccessToken(tokens: Tokens): Promise<Tokens> {
   try { json = JSON.parse(text) } catch {}
 
   if (!r.ok) {
+    // Log full error server-side only
     console.error('[QBO][refresh_failed]', r.status, text)
-    throw j({ error: 'refresh_failed', detail: json?.error_description || text }, 401)
+    // Return safe error message to client
+    throw j({ error: 'refresh_failed' }, 401)
   }
 
   const expiresInSec = Number(json.expires_in ?? 3600)
@@ -132,8 +134,10 @@ async function qboQuery(tokens: Tokens, sql: string, minor = '65'): Promise<any>
   try { data = JSON.parse(text) } catch {}
 
   if (!res.ok) {
+    // Log full error server-side only
     console.error('[QBO][query_failed]', res.status, text.slice(0, 400))
-    throw j({ error: 'qbo_query_failed', status: res.status, detail: data?.Fault ?? text }, res.status)
+    // Return safe error message to client
+    throw j({ error: 'qbo_query_failed', status: res.status }, res.status)
   }
   return data
 }
@@ -218,8 +222,10 @@ export async function GET(req: Request) {
       : j({ categories, source, reason }, 200, { 'x-qbo-count': String(categories.length) })
   } catch (err: any) {
     if (err instanceof Response) return err
+    // Log full error server-side only
     const msg = err?.detail || err?.message || String(err)
     console.error('[QBO][categories] fatal', msg)
-    return j({ error: 'internal_error', detail: msg }, 500)
+    // Return safe error message to client
+    return j({ error: 'internal_error' }, 500)
   }
 }

@@ -61,10 +61,12 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
+    // Log full error server-side only
     console.error('❌ Error updating invoice categories:', error);
+    // Return safe error message to client
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to update invoice categories'
+      error: 'Failed to update invoice categories'
     }, { status: 500 });
   }
 }

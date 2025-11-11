@@ -32,7 +32,10 @@ export async function GET(req: NextRequest) {
       const result = await refreshTokensIfNeeded();
       refreshed = result.refreshed;
       if (result.error) {
-        refreshError = result.error?.message || String(result.error);
+        // Log full error server-side only
+        console.error('[QBO][STATUS] Token refresh error:', result.error?.message);
+        // Return safe error message to client
+        refreshError = 'Token refresh failed';
       }
       if (result.refreshed) {
         tokens = await tokenStorage.getLatestTokens();
@@ -65,14 +68,15 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error: any) {
+    // Log full error server-side only
     console.error('Status check error:', error);
+    // Return safe error message to client
     return NextResponse.json({
       connected: false,
-      error: error.message || 'Failed to check QuickBooks status',
+      error: 'Status check failed',
       tokens: null,
       debug: {
         timestamp: new Date().toISOString(),
-        error: error.toString()
       }
     }, { status: 500 });
   }

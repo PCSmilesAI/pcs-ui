@@ -34,7 +34,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ ok: true, method, result });
   } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error?.message || String(error) }, { status: 500 });
+    // Log full error server-side only
+    console.error('[QBO][GET_BILL]', 'error', { error: error?.message });
+    // Return safe error message to client
+    return NextResponse.json({ ok: false, error: 'Failed to retrieve bill' }, { status: 500 });
   }
 }
 

@@ -99,7 +99,10 @@ export async function GET(_req: NextRequest) {
       errors.push('No QBO tokens available - user needs to authorize');
     }
   } catch (err: any) {
-    errors.push(`Token check failed: ${err?.message || 'unknown_error'}`);
+    // Log full error server-side only
+    console.error('[QBO_HEALTH] Token check error:', err?.message);
+    // Return safe error message to client
+    errors.push('Token check failed');
   }
 
   // 4. Determine overall health status
