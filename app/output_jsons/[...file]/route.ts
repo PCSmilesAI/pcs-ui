@@ -5,10 +5,35 @@ import fs from 'fs';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+/**
+ * Validates that a path segment is safe (no path traversal attempts)
+ */
+function isValidSegment(segment: string): boolean {
+  // Reject empty segments, dots, and path separators
+  if (!segment || segment === '.' || segment === '..' || segment.includes('/') || segment.includes('\\')) {
+    return false;
+  }
+  // Only allow alphanumeric, dots, dashes, underscores
+  return /^[a-zA-Z0-9._-]+$/.test(segment);
+}
+
+/**
+ * Safely joins path segments with proper validation
+ */
 function safeJoin(baseDir: string, segments: string[]): string | null {
+  // Validate all segments
+  if (!segments.every(isValidSegment)) {
+    return null;
+  }
+
   const target = path.resolve(baseDir, ...segments);
   const resolvedBase = path.resolve(baseDir);
-  if (!target.startsWith(resolvedBase)) return null;
+
+  // Ensure target is within base directory
+  if (!target.startsWith(resolvedBase + path.sep) && target !== resolvedBase) {
+    return null;
+  }
+
   return target;
 }
 
