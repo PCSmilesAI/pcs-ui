@@ -108,13 +108,16 @@ export async function POST(
     console.log('[API][INVOICES][UPDATE]', 'success', { invoiceId, userEmail: user.email });
     return NextResponse.json({ ok: true, invoice: updatedInvoice });
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[API][INVOICES][UPDATE]', 'error', { invoiceId, error: err?.message });
-    
+
     if (err?.message?.includes('locked')) {
-      return NextResponse.json({ error: err.message }, { status: 409 });
+      // Return safe error message to client
+      return NextResponse.json({ error: 'Invoice is locked' }, { status: 409 });
     }
-    
-    return NextResponse.json({ error: err?.message || 'Update failed' }, { status: 400 });
+
+    // Return safe error message to client
+    return NextResponse.json({ error: 'Update failed' }, { status: 400 });
   }
 }
 
