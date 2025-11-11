@@ -76,7 +76,9 @@ export async function GET(
       },
     });
   } catch (error) {
+    // Log full error server-side only
     console.error('Error serving PDF:', error);
+    // Return safe error message to client
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

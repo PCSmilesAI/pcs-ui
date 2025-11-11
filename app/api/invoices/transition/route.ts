@@ -88,11 +88,13 @@ export async function POST(req: NextRequest) {
           }
           approveAdmin(invoice, { email: user.email, name: user.name });
         } else {
-          return NextResponse.json({ error: `Nothing to approve. Invoice status is '${status}' but must be one of: incoming, categorized, pending, awaiting_office_approval, awaiting_admin_approval` }, { status: 400 });
+          return NextResponse.json({ error: 'Invoice status does not allow approval at this time' }, { status: 400 });
         }
       } catch (err: any) {
+        // Log full error server-side only
         console.error('[WORKFLOW][ENGINE]', 'error', { invoiceId: String(invoiceId), message: err?.message });
-        return NextResponse.json({ error: err?.message || 'Approval failed' }, { status: 400 });
+        // Return safe error message to client
+        return NextResponse.json({ error: 'Approval failed' }, { status: 400 });
       }
 
       console.log('[API][INVOICES][TRANSITION]', 'before_save', { invoiceId: String(invoiceId), status: invoice.status });
@@ -100,8 +102,10 @@ export async function POST(req: NextRequest) {
         saveInvoice(invoice);
         console.log('[API][INVOICES][TRANSITION]', 'approve_success', { invoiceId: String(invoiceId), userEmail: user.email });
       } catch (err: any) {
+        // Log full error server-side only
         console.error('[API][INVOICES][TRANSITION]', 'save_error', { invoiceId: String(invoiceId), error: String(err) });
-        return NextResponse.json({ error: 'Failed to save invoice: ' + err?.message }, { status: 500 });
+        // Return safe error message to client
+        return NextResponse.json({ error: 'Failed to save invoice' }, { status: 500 });
       }
       return NextResponse.json({ ok: true, invoice });
     }
@@ -121,14 +125,18 @@ export async function POST(req: NextRequest) {
         console.log('[API][INVOICES][TRANSITION]', 'mark_paid_success', { invoiceId: String(invoiceId), userEmail: user.email });
         return NextResponse.json({ ok: true, invoice });
       } catch (err: any) {
+        // Log full error server-side only
         console.error('[API][INVOICES][TRANSITION]', 'mark_paid_error', { invoiceId: String(invoiceId), error: String(err) });
-        return NextResponse.json({ error: err?.message || 'Failed to mark as paid' }, { status: 400 });
+        // Return safe error message to client
+        return NextResponse.json({ error: 'Failed to mark as paid' }, { status: 400 });
       }
     }
 
-    return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
+    return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[API][INVOICES][TRANSITION]', 'unexpected_error', { error: String(err) });
-    return NextResponse.json({ error: err?.message || 'Unexpected error' }, { status: 500 });
+    // Return safe error message to client
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
