@@ -89,10 +89,12 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
 
   } catch (error: any) {
+    // Log full error server-side only
     console.error('❌ Error creating QBO Bill:', error);
+    // Return safe error message to client
     return NextResponse.json({
       success: false,
-      error: error?.message || 'Failed to create bill in QuickBooks',
+      error: 'Failed to create bill in QuickBooks',
     }, { status: 500 });
   }
 }

@@ -70,8 +70,10 @@ export async function GET(req: NextRequest) {
       invoices: result,
     });
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[API][INVOICES][EXPORT]', 'error', { error: err?.message });
-    return NextResponse.json({ error: err?.message || 'Export failed' }, { status: 400 });
+    // Return safe error message to client
+    return NextResponse.json({ error: 'Export failed' }, { status: 400 });
   }
 }
 

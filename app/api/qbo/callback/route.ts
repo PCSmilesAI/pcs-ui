@@ -103,10 +103,11 @@ export async function GET(req: NextRequest) {
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
+      // Log full error server-side only
       console.error('❌ Token exchange failed:', tokenResponse.status, errorText);
-      return NextResponse.json({ 
-        error: 'Token exchange failed', 
-        detail: errorText
+      // Return safe error message to client
+      return NextResponse.json({
+        error: 'Token exchange failed'
       }, { status: 500 });
     }
 
@@ -133,11 +134,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${baseUrl}/ConnectionsPage?qbo_connected=true`, 302);
     
   } catch (e: any) {
+    // Log full error server-side only
     console.error('❌ OAuth error:', e);
-    return NextResponse.json({ 
-      error: 'OAuth error', 
-      detail: e?.message || String(e),
-      stack: e?.stack
+    // Return safe error message to client
+    return NextResponse.json({
+      error: 'OAuth error'
     }, { status: 500 });
   }
 }

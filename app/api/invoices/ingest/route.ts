@@ -144,9 +144,11 @@ export async function POST(req: NextRequest) {
       invoice_number: body.invoice_number
     });
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[API][INGEST]', 'error', { error: err?.message });
+    // Return safe error message to client
     return NextResponse.json(
-      { error: err?.message || 'Ingestion failed' },
+      { error: 'Ingestion failed' },
       { status: 500 }
     );
   }
