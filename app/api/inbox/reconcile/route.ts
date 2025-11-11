@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { getDb } from '@/lib/db/client';
+import { getDatabase } from '@/lib/db/client';
 
 /**
  * Reconciliation endpoint to verify all emails have corresponding invoices
@@ -9,7 +9,7 @@ import { getDb } from '@/lib/db/client';
  */
 export async function GET(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = getDatabase();
     
     // Get email tracking data
     const emailTrackingPath = path.join(process.cwd(), 'email_tracking.json');
