@@ -67,8 +67,10 @@ export async function POST(req: NextRequest) {
     if (!url) return json(500, { ok: false, error: 'failed to create onboarding link' });
     return json(200, { ok: true, url, accountId });
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[VENDOR_ONBOARD_LINK] Error:', err?.message || err);
-    return json(500, { ok: false, error: err?.message || 'unknown error' });
+    // Return safe error message to client
+    return json(500, { ok: false, error: 'Failed to create onboarding link' });
   }
 }
 

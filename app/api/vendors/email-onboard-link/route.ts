@@ -392,11 +392,15 @@ export async function POST(req: NextRequest) {
         console.warn('[EMAIL_ONBOARD_LINK] SMTP send failed', cfg, e?.message || e);
       }
     }
+    // Log full error server-side only
     console.error('[EMAIL_ONBOARD_LINK] All SMTP attempts failed', lastErr?.message || lastErr);
-    return json(500, { ok: false, error: lastErr?.message || 'email send failed', url });
+    // Return safe error message to client
+    return json(500, { ok: false, error: 'Email send failed', url });
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[EMAIL_ONBOARD_LINK] Error:', err?.message || err);
-    return json(500, { ok: false, error: err?.message || 'unknown error' });
+    // Return safe error message to client
+    return json(500, { ok: false, error: 'Failed to send onboarding email' });
   }
 }
 

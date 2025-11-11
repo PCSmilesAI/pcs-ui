@@ -16,7 +16,10 @@ export async function POST(req: Request) {
     await setVendorStatus(vendor, { stripeAccountId, ...(aliases ? { aliases } : {}) });
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (err: any) {
-    return NextResponse.json({ ok: false, error: err?.message || 'error' }, { status: 500 });
+    // Log full error server-side only
+    console.error('[API][VENDORS][BIND-ACCOUNT]', 'error', { error: err?.message });
+    // Return safe error message to client
+    return NextResponse.json({ ok: false, error: 'Failed to bind account' }, { status: 500 });
   }
 }
 

@@ -40,8 +40,10 @@ export async function POST() {
     if (updated > 0) await saveMap(map);
     return json(200, { ok: true, updated });
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[RECOMPUTE][ACH] Error:', err?.message || err);
-    return json(500, { ok: false, error: err?.message || 'unknown error' });
+    // Return safe error message to client
+    return json(500, { ok: false, error: 'Failed to recompute ACH status' });
   }
 }
 

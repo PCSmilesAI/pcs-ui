@@ -15,10 +15,12 @@ export async function POST() {
       timestamp: new Date().toISOString()
     });
   } catch (error: any) {
+    // Log full error server-side only
     console.error('❌ Manual token refresh failed:', error);
+    // Return safe error message to client
     return NextResponse.json({
       success: false,
-      error: error.message || 'Token refresh failed'
+      error: 'Token refresh failed'
     }, { status: 500 });
   }
 }
@@ -35,9 +37,12 @@ export async function GET() {
       timestamp: new Date().toISOString()
     });
   } catch (error: any) {
+    // Log full error server-side only
+    console.error('❌ QBO connection check failed:', error);
+    // Return safe error message to client
     return NextResponse.json({
       connected: false,
-      error: error.message,
+      error: 'Connection check failed',
       timestamp: new Date().toISOString()
     });
   }

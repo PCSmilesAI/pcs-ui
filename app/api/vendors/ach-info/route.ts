@@ -119,8 +119,10 @@ export async function GET(request: Request) {
       address: addressParts,
     });
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[VENDOR_ACH_INFO] Error:', err?.message || err);
-    return json(500, { ok: false, error: err?.message || 'unknown error' });
+    // Return safe error message to client
+    return json(500, { ok: false, error: 'Failed to retrieve ACH information' });
   }
 }
 
