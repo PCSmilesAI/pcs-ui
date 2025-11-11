@@ -20,7 +20,10 @@ export async function GET(req: NextRequest) {
   const scopes = process.env.QBO_SCOPES;
 
   if (!clientId || !redirectUri || !scopes) {
-    return NextResponse.json({ error: 'Missing QBO configuration' }, { status: 500 });
+    // Log full error server-side only
+    console.error('[QBO][SIMPLE_TEST] Missing QBO configuration');
+    // Return safe error message to client
+    return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
   }
 
   // Simple state parameter
