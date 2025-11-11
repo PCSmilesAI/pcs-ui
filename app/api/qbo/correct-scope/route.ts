@@ -6,7 +6,10 @@ export async function GET(req: NextRequest) {
     const redirectUri = process.env.QBO_REDIRECT_URI;
     
     if (!clientId || !redirectUri) {
-      return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
+      // Log full error server-side only
+      console.error('[QBO][CORRECT_SCOPE] Missing environment variables');
+      // Return safe error message to client
+      return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
     }
 
     // Use the exact scope that's enabled in your app
@@ -48,9 +51,11 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error: any) {
+    // Log full error server-side only
+    console.error('[QBO][CORRECT_SCOPE]', 'error', { error: error?.message });
+    // Return safe error message to client
     return NextResponse.json({
-      error: error.message,
-      details: 'Failed to generate test URLs'
+      error: 'Failed to generate test URLs'
     }, { status: 500 });
   }
 }

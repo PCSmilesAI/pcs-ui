@@ -64,8 +64,10 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error: any) {
+    // Log full error server-side only
     console.error('[QBO][MAPPING_PREVIEW] error:', error);
-    return NextResponse.json({ ok: false, error: error?.message || 'Internal server error' }, { status: 500 });
+    // Return safe error message to client
+    return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 

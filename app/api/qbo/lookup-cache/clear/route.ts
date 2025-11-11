@@ -9,7 +9,10 @@ export async function POST(_req: NextRequest) {
     clearLookupCaches();
     return NextResponse.json({ ok: true, cleared: true });
   } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error?.message || 'Internal server error' }, { status: 500 });
+    // Log full error server-side only
+    console.error('[QBO][LOOKUP_CACHE][CLEAR]', 'error', { error: error?.message });
+    // Return safe error message to client
+    return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 

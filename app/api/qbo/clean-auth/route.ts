@@ -10,7 +10,10 @@ export async function GET(req: NextRequest) {
     const scopes = process.env.QBO_SCOPES;
     
     if (!clientId || !redirectUri || !scopes) {
-      return NextResponse.json({ error: 'Missing environment variables' }, { status: 500 });
+      // Log full error server-side only
+      console.error('[QBO][CLEAN_AUTH] Missing environment variables');
+      // Return safe error message to client
+      return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
     }
 
     // Clean, simple OAuth URL with required state parameter
@@ -25,10 +28,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(authUrl, 302);
 
   } catch (error: any) {
+    // Log full error server-side only
     console.error('❌ Clean OAuth Error:', error);
+    // Return safe error message to client
     return NextResponse.json({
-      error: error.message,
-      details: 'Failed to initiate clean QuickBooks OAuth'
+      error: 'Failed to initiate OAuth'
     }, { status: 500 });
   }
 }

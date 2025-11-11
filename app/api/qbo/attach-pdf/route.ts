@@ -64,10 +64,12 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
+    // Log full error server-side only
     console.error('❌ Error attaching PDF to QBO bill:', error);
+    // Return safe error message to client
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to attach PDF to QuickBooks bill'
+      error: 'Failed to attach PDF to QuickBooks bill'
     }, { status: 500 });
   }
 }
