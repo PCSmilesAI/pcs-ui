@@ -69,21 +69,21 @@ export async function POST(req: NextRequest) {
         // Get vendor name and Stripe account
         const vendorName = invoice.vendor || invoice.vendor_name;
         if (!vendorName) {
-          results.push({ invoiceId, ok: false, error: 'Vendor name not found' });
+          results.push({ invoiceId, ok: false, error: 'Vendor information missing' });
           errorCount++;
           continue;
         }
 
         const vendorKey = findVendorKey(vendorMap, vendorName);
         if (!vendorKey) {
-          results.push({ invoiceId, ok: false, error: `Vendor "${vendorName}" not found in system` });
+          results.push({ invoiceId, ok: false, error: 'Vendor not found' });
           errorCount++;
           continue;
         }
 
         const vendorEntry = vendorMap.vendors[vendorKey];
         if (!vendorEntry?.stripeAccountId) {
-          results.push({ invoiceId, ok: false, error: `Vendor "${vendorName}" has no Stripe account` });
+          results.push({ invoiceId, ok: false, error: 'Vendor payment account not configured' });
           errorCount++;
           continue;
         }
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
           : amountStr;
         
         if (isNaN(amountNumber) || amountNumber <= 0) {
-          results.push({ invoiceId, ok: false, error: `Invalid amount: ${amountStr}` });
+          results.push({ invoiceId, ok: false, error: 'Invalid invoice amount' });
           errorCount++;
           continue;
         }
@@ -187,14 +187,16 @@ export async function POST(req: NextRequest) {
         });
         successCount++;
       } catch (err: any) {
+        // Log full error server-side only
         console.error('[PAYMENT] Error processing invoice', {
           invoiceId,
           error: err?.message,
         });
+        // Return safe error message to client
         results.push({
           invoiceId,
           ok: false,
-          error: err?.message || 'Payment processing failed',
+          error: 'Payment processing failed',
         });
         errorCount++;
       }
@@ -267,14 +269,16 @@ export async function POST(req: NextRequest) {
           });
         }
       } catch (err: any) {
+        // Log full error server-side only
         console.error('[REMITTANCE] Error sending remittance email', {
           vendor: vendorKey,
           error: err?.message,
         });
+        // Return safe error message to client
         remittanceResults.push({
           vendor: vendorKey,
           ok: false,
-          error: err?.message || 'Failed to send remittance email',
+          error: 'Failed to send remittance email',
         });
       }
     }
@@ -287,8 +291,10 @@ export async function POST(req: NextRequest) {
       remittance: remittanceResults,
     });
   } catch (error: any) {
+    // Log full error server-side only
     console.error('[PAYMENT] Unexpected error', { error: error?.message });
-    return json(500, { ok: false, error: error?.message || 'Unexpected error' });
+    // Return safe error message to client
+    return json(500, { ok: false, error: 'Payment processing failed' });
   }
 }
 
