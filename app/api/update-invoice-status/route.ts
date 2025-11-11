@@ -56,6 +56,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, updated: true, duplicatesRemoved })
   } catch (err: any) {
-    return NextResponse.json({ ok: false, error: err.message || 'update failed' }, { status: 500 })
+    // Log full error server-side only
+    console.error('[UPDATE_INVOICE_STATUS]', 'error', { error: err?.message });
+    // Return safe error message to client
+    return NextResponse.json({ ok: false, error: 'Update failed' }, { status: 500 })
   }
 }

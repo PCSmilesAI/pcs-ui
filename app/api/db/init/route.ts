@@ -60,9 +60,11 @@ export async function GET(req: NextRequest) {
       ...result,
     });
   } catch (err: any) {
+    // Log full error server-side only
     console.error('[DB][INIT]', 'Initialization failed', { error: err?.message });
+    // Return safe error message to client
     return NextResponse.json(
-      { error: err?.message || 'Initialization failed' },
+      { error: 'Initialization failed' },
       { status: 500 }
     );
   }
