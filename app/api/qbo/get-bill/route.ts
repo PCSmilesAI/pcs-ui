@@ -20,13 +20,16 @@ export async function GET(req: NextRequest) {
       try {
         result = await (qboClient as any).makeRequest?.(`bill/${encodeURIComponent(id)}?minorversion=70`, 'GET');
       } catch (e) {
-        // Fallback to query by Id
-        result = await (qboClient as any).query?.(`SELECT Id, DocNumber, TxnDate, Balance, TotalAmt, PrivateNote FROM Bill WHERE Id = '${id}'`);
+        // Fallback to query by Id - SECURITY: Escape single quotes to prevent SQL injection
+        const escapedId = id.replace(/'/g, "''");
+        result = await (qboClient as any).query?.(`SELECT Id, DocNumber, TxnDate, Balance, TotalAmt, PrivateNote FROM Bill WHERE Id = '${escapedId}'`);
       }
     } else if (doc) {
       method = 'query-by-doc';
+      // SECURITY: Escape single quotes to prevent SQL injection
+      const escapedDoc = doc.replace(/'/g, "''");
       result = await (qboClient as any).query?.(
-        `SELECT Id, DocNumber, TxnDate, Balance, TotalAmt, PrivateNote, MetaData FROM Bill WHERE DocNumber = '${doc.replace(/'/g, "''")}'`
+        `SELECT Id, DocNumber, TxnDate, Balance, TotalAmt, PrivateNote, MetaData FROM Bill WHERE DocNumber = '${escapedDoc}'`
       );
     } else {
       return NextResponse.json({ error: 'Provide ?id=<QBO Id> or ?doc=<DocNumber>' }, { status: 400 });
