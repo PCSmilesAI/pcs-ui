@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { getCurrentUser } from '../../../lib/auth/currentUser';
 import { rateLimitByUser } from '../../../lib/ratelimit/rateLimiter';
+import { isString } from '../../../lib/security/type-validation';
+import { sanitizeErrorMessage } from '../../../lib/security/error-handling';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,23 +31,35 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   try {
     const body = await request.json();
-    const { 
-      invoice_number, 
-      original_data, 
-      corrected_data, 
-      pdf_path, 
-      vendor_name 
+    const {
+      invoice_number,
+      original_data,
+      corrected_data,
+      pdf_path,
+      vendor_name
     } = body;
+
+    // Validate input types
+    if (!isString(invoice_number) || !invoice_number.trim()) {
+      return NextResponse.json({ error: 'Invalid invoice_number' }, { status: 400 });
+    }
+    if (!isString(vendor_name) || !vendor_name.trim()) {
+      return NextResponse.json({ error: 'Invalid vendor_name' }, { status: 400 });
+    }
+    if (!isString(pdf_path) || !pdf_path.trim()) {
+      return NextResponse.json({ error: 'Invalid pdf_path' }, { status: 400 });
+    }
 
     console.log('🔧 Repair API: Processing repair for invoice:', invoice_number);
 
-    // Determine the parser name based on vendor
+    // Determine the parser name based on vendor (whitelist approach)
     let parser_name = 'generic_parser.py';
-    if (vendor_name?.toLowerCase().includes('henry')) {
+    const vendorLower = vendor_name.toLowerCase();
+    if (vendorLower.includes('henry')) {
       parser_name = 'henry_parser.py';
-    } else if (vendor_name?.toLowerCase().includes('patterson')) {
+    } else if (vendorLower.includes('patterson')) {
       parser_name = 'patterson_parser.py';
-    } else if (vendor_name?.toLowerCase().includes('tc dental')) {
+    } else if (vendorLower.includes('tc dental')) {
       parser_name = 'multipage_invoice_processor.py';
     }
 
@@ -70,32 +84,46 @@ export async function POST(request: NextRequest): Promise<Response> {
       actualPdfPath = path.join(process.cwd(), 'pcs_ai_data', 'pdfs', filename);
     }
 
-    // Call the Python repair logging function
+    // Call the Python repair logging function using proper argument passing
     const { spawn } = require('child_process');
-    
-    const pythonProcess = spawn('python3', [
-      '-c',
-      `
+
+    // Create a Python script that reads arguments from environment variables
+    // This prevents shell injection attacks
+    const pythonScript = `
 import sys
-sys.path.append('${process.cwd()}')
-from repair_loop.capture_repair_event import capture_repair_event
+import os
 import json
+
+sys.path.append(os.environ.get('SCRIPT_PATH', ''))
+from repair_loop.capture_repair_event import capture_repair_event
 
 try:
     result = capture_repair_event(
-        invoice_number='${invoice_number}',
-        vendor_name='${vendor_name || 'Unknown'}',
-        parser_name='${parser_name}',
-        original_output_path='${originalJsonPath}',
-        corrected_output_path='${correctedJsonPath}',
-        invoice_pdf_path='${actualPdfPath}'
+        invoice_number=os.environ.get('INVOICE_NUMBER'),
+        vendor_name=os.environ.get('VENDOR_NAME', 'Unknown'),
+        parser_name=os.environ.get('PARSER_NAME'),
+        original_output_path=os.environ.get('ORIGINAL_PATH'),
+        corrected_output_path=os.environ.get('CORRECTED_PATH'),
+        invoice_pdf_path=os.environ.get('PDF_PATH')
     )
     print(f"SUCCESS:{result}")
 except Exception as e:
     print(f"ERROR:{str(e)}")
     sys.exit(1)
-      `
-    ]);
+    `;
+
+    const pythonProcess = spawn('python3', ['-c', pythonScript], {
+      env: {
+        ...process.env,
+        SCRIPT_PATH: process.cwd(),
+        INVOICE_NUMBER: invoice_number,
+        VENDOR_NAME: vendor_name,
+        PARSER_NAME: parser_name,
+        ORIGINAL_PATH: originalJsonPath,
+        CORRECTED_PATH: correctedJsonPath,
+        PDF_PATH: actualPdfPath
+      }
+    });
 
     let output = '';
     let error = '';
@@ -121,26 +149,30 @@ except Exception as e:
         if (code === 0 && output.includes('SUCCESS:')) {
           const resultPath = output.split('SUCCESS:')[1].trim();
           console.log('✅ Repair data logged successfully:', resultPath);
-          resolve(NextResponse.json({ 
-            success: true, 
+          resolve(NextResponse.json({
+            success: true,
             message: 'Repair data logged successfully',
             repair_case_path: resultPath
           }));
         } else {
+          // Log full error server-side only
           console.error('❌ Repair logging failed:', error || output);
-          resolve(NextResponse.json({ 
-            success: false, 
-            error: error || output || 'Unknown error'
+          // Return safe error message to client
+          resolve(NextResponse.json({
+            success: false,
+            error: 'Failed to log repair data'
           }, { status: 500 }));
         }
       });
     });
 
   } catch (error) {
+    // Log full error server-side only
     console.error('❌ Repair API error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error'
+    // Return safe error message to client
+    return NextResponse.json({
+      success: false,
+      error: 'An error occurred while processing the repair request'
     }, { status: 500 });
   }
 }
