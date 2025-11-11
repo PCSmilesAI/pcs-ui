@@ -72,10 +72,13 @@ export async function GET(_req: NextRequest) {
       status: dbHealthy ? 200 : 503 // 503 if database is down
     });
   } catch (error: any) {
-    return NextResponse.json({ 
-      ok: false, 
+    // Log full error server-side only
+    console.error('[HEALTH]', 'error', { error: error?.message });
+    // Return safe error message to client
+    return NextResponse.json({
+      ok: false,
       status: 'unhealthy',
-      error: error?.message || 'health_failed' 
+      error: 'Health check failed'
     }, { status: 500 });
   }
 }

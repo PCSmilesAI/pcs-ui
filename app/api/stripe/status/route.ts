@@ -11,14 +11,14 @@ export async function GET(req: NextRequest) {
     const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     
     if (!stripeSecretKey) {
+      // Log full error server-side only
+      console.warn('[STRIPE][STATUS] Missing STRIPE_SECRET_KEY');
+      // Return safe error message to client
       return NextResponse.json({
         connected: false,
-        message: 'Stripe secret key not configured',
-        error: 'STRIPE_SECRET_KEY environment variable is missing',
+        message: 'Stripe not configured',
         debug: {
           timestamp: new Date().toISOString(),
-          hasSecretKey: false,
-          hasWebhookSecret: !!stripeWebhookSecret,
         }
       });
     }
@@ -45,28 +45,27 @@ export async function GET(req: NextRequest) {
         }
       });
     } catch (stripeError: any) {
+      // Log full error server-side only
       console.error('Stripe API error:', stripeError);
+      // Return safe error message to client
       return NextResponse.json({
         connected: false,
         message: 'Stripe API connection failed',
-        error: stripeError.message || 'Failed to connect to Stripe API',
         debug: {
           timestamp: new Date().toISOString(),
-          hasSecretKey: true,
-          hasWebhookSecret: !!stripeWebhookSecret,
-          stripeError: stripeError.toString(),
         }
       });
     }
 
   } catch (error: any) {
+    // Log full error server-side only
     console.error('Stripe status check error:', error);
+    // Return safe error message to client
     return NextResponse.json({
       connected: false,
-      error: error.message || 'Failed to check Stripe status',
+      message: 'Status check failed',
       debug: {
         timestamp: new Date().toISOString(),
-        error: error.toString()
       }
     }, { status: 500 });
   }

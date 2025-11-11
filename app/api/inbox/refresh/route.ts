@@ -156,10 +156,12 @@ print(json.dumps(email_ingestion_agent_enhanced._last_scan_result))
     });
     
     proc.on('error', (err) => {
+      // Log full error server-side only
       console.error('[INBOX][REFRESH][ERROR]', err);
+      // Return safe error message to client
       resolve({
         ok: false,
-        error: err.message,
+        error: 'Inbox scan failed',
         duration_ms: Date.now() - startTime,
       });
     });
@@ -211,10 +213,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
     
   } catch (error: any) {
+    // Log full error server-side only
     console.error('[INBOX][REFRESH][ERROR]', error);
+    // Return safe error message to client
     return NextResponse.json({
       ok: false,
-      error: error.message || 'Unknown error',
+      error: 'Inbox refresh failed',
     }, { status: 500 });
   }
 }
