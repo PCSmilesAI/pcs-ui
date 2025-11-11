@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import { resolveDataPath } from '../../../../../lib/workflow/dataDir'
+import { isValidInvoiceId } from '../../../../../lib/security/type-validation'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -50,6 +51,13 @@ export async function GET(
 ) {
   try {
     const invoiceId = params.id
+
+    // SECURITY: Validate invoice ID format
+    if (!isValidInvoiceId(invoiceId)) {
+      console.warn('[API][INVOICES][CATEGORIES][GET]', 'invalid_invoice_id', { invoiceId });
+      return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 });
+    }
+
     const invoice = await loadInvoice(invoiceId)
     
     const lineCategories = invoice.line_categories || {}
@@ -77,6 +85,13 @@ export async function PUT(
 ) {
   try {
     const invoiceId = params.id
+
+    // SECURITY: Validate invoice ID format
+    if (!isValidInvoiceId(invoiceId)) {
+      console.warn('[API][INVOICES][CATEGORIES][PUT]', 'invalid_invoice_id', { invoiceId });
+      return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 });
+    }
+
     const body = await request.json()
     const { lineCategories } = body
     

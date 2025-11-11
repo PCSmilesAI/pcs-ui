@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '../../../../lib/db/client';
+import { isValidInvoiceId } from '../../../../lib/security/type-validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,12 @@ export async function GET(
 ) {
   try {
     const invoiceId = params.id;
+
+    // SECURITY: Validate invoice ID format
+    if (!isValidInvoiceId(invoiceId)) {
+      console.warn('[API][INVOICES][GET]', 'invalid_invoice_id', { invoiceId });
+      return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 });
+    }
     const db = getDatabase();
 
     // Load the invoice from the database - support both id and invoice_number lookups
