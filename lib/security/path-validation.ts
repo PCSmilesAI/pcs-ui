@@ -85,12 +85,13 @@ export function safePathJoin(baseDir: string, segments: string[]): string | null
 
 /**
  * Escapes special characters in filenames for use in HTTP headers
- * 
+ *
  * @param filename - The filename to escape
  * @returns The escaped filename
  */
 export function escapeFilenameForHeader(filename: string): string {
-  return filename.replace(/"/g, '\\"');
+  // SECURITY: Escape backslashes first, then quotes to prevent incomplete escaping
+  return filename.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
 /**

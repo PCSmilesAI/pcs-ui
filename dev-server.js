@@ -43,6 +43,41 @@ function loadTokens() {
   return null;
 }
 
+// SECURITY: Path validation functions to prevent path traversal attacks
+function isValidPathSegment(segment) {
+  // Reject empty segments, dots, and path separators
+  if (!segment || segment === '.' || segment === '..' || segment.includes('/') || segment.includes('\\')) {
+    return false;
+  }
+
+  // Only allow alphanumeric, dots, dashes, underscores
+  return /^[a-zA-Z0-9._-]+$/.test(segment);
+}
+
+function isPathWithinBase(filePath, baseDir) {
+  const resolvedPath = path.resolve(filePath);
+  const resolvedBase = path.resolve(baseDir);
+
+  // Check if resolved path starts with base directory
+  return resolvedPath.startsWith(resolvedBase + path.sep) || resolvedPath === resolvedBase;
+}
+
+function safePathJoin(baseDir, segments) {
+  // Validate all segments
+  if (!segments.every(isValidPathSegment)) {
+    return null;
+  }
+
+  const target = path.resolve(baseDir, ...segments);
+
+  // Ensure target is within base directory
+  if (!isPathWithinBase(target, baseDir)) {
+    return null;
+  }
+
+  return target;
+}
+
 function restoreGlobalClient() {
   const savedTokens = loadTokens();
   if (savedTokens) {
@@ -325,8 +360,13 @@ class QBOAuthClient {
 
   async exchangeCodeForToken(authCode, realmId) {
     try {
-      if (!authCode) {
-        throw new Error('Authorization code is required');
+      // SECURITY: Type check to prevent type confusion attacks
+      if (!authCode || typeof authCode !== 'string') {
+        throw new Error('Authorization code is required and must be a string');
+      }
+
+      if (typeof realmId !== 'string' && realmId !== undefined) {
+        throw new Error('Realm ID must be a string');
       }
 
       console.log('🔄 Exchanging authorization code for access token...');
@@ -712,10 +752,21 @@ app.get('/api/qbo/callback', quickbooksRateLimit, async (req, res) => {
     console.log('📋 Headers:', req.headers);
     
     const { code, state, realmId } = req.query;
-    
-    if (!code) {
+
+    // SECURITY: Type check to prevent type confusion attacks
+    if (!code || typeof code !== 'string') {
       console.error('❌ No authorization code received from QuickBooks');
       return res.status(400).json({ error: 'No authorization code received' });
+    }
+
+    if (typeof state !== 'string' && state !== undefined) {
+      console.error('❌ Invalid state parameter');
+      return res.status(400).json({ error: 'Invalid state parameter' });
+    }
+
+    if (typeof realmId !== 'string' && realmId !== undefined) {
+      console.error('❌ Invalid realm ID parameter');
+      return res.status(400).json({ error: 'Invalid realm ID parameter' });
     }
 
     console.log('✅ Received authorization code from QuickBooks');
@@ -890,6 +941,13 @@ app.post('/remove-invoice', async (req, res) => {
     // Best-effort: remove associated files in both root and public
     const tryUnlink = (p) => {
       if (!p) return;
+
+      // SECURITY: Validate path to prevent path traversal attacks
+      if (!isPathWithinBase(p, __dirname) && !isPathWithinBase(p, path.join(__dirname, 'public'))) {
+        console.error('❌ Path traversal attempt detected:', p);
+        return;
+      }
+
       const candidates = [
         path.join(__dirname, p),
         path.join(__dirname, 'public', p),
@@ -2325,15 +2383,20 @@ app.get('/api/qbo/pcs-ai/status', async (req, res) => {
 async function attachPDFToBill(billId, pdfPath) {
   try {
     console.log('📎 Attaching PDF to bill:', billId, 'from path:', pdfPath);
-    
+
     // Read the actual PDF file
     const fs = require('fs');
     const path = require('path');
-    
+
+    // SECURITY: Validate path to prevent path traversal attacks
+    if (!isPathWithinBase(pdfPath, __dirname)) {
+      throw new Error('Invalid PDF path: path traversal detected');
+    }
+
     // Resolve the full path
     const fullPath = path.resolve(pdfPath);
     console.log('📁 Full PDF path:', fullPath);
-    
+
     if (!fs.existsSync(fullPath)) {
       throw new Error(`PDF file not found: ${fullPath}`);
     }
@@ -2402,12 +2465,20 @@ app.post('/api/qbo/test-pdf-attachment', async (req, res) => {
     }
     
     console.log('📎 Testing PDF attachment for bill:', billId, 'with PDF:', pdfPath);
-    
+
     // Check if the PDF file exists before attempting attachment
     const fs = require('fs');
     const path = require('path');
+
+    // SECURITY: Validate path to prevent path traversal attacks
+    if (!isPathWithinBase(pdfPath, __dirname)) {
+      return res.status(400).json({
+        error: 'Invalid PDF path: path traversal detected'
+      });
+    }
+
     const fullPath = path.resolve(pdfPath);
-    
+
     if (!fs.existsSync(fullPath)) {
       return res.status(400).json({
         error: 'PDF file not found',

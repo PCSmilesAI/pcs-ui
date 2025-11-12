@@ -64,7 +64,8 @@ export async function GET(
     const fileBuffer = fs.readFileSync(filePath);
 
     // Escape filename for Content-Disposition header
-    const escapedFilename = filename.replace(/"/g, '\\"');
+    // SECURITY: Escape backslashes first, then quotes to prevent incomplete escaping
+    const escapedFilename = filename.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
     // Return the PDF with appropriate headers
     return new NextResponse(fileBuffer, {
