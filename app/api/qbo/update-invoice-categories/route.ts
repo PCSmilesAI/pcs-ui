@@ -28,7 +28,9 @@ export async function POST(req: NextRequest) {
 
     // Find the invoice JSON file
     const baseDir = path.join(process.cwd(), 'public', 'output_jsons');
-    const jsonPath = path.join(baseDir, `${invoiceNumber}.json`);
+    // SECURITY: Use validated invoiceNumber to construct path
+    const validatedFileName = `${invoiceNumber}.json`;
+    const jsonPath = path.join(baseDir, validatedFileName);
 
     // SECURITY: Validate path is within base directory
     if (!isPathWithinBase(jsonPath, baseDir)) {
