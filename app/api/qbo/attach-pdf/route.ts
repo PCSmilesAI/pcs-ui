@@ -3,6 +3,7 @@ import { qboClient } from '../../../../lib/qbo/qboClient';
 import { getLatestTokens } from '../../../../lib/qbo/memoryStorage';
 import fs from 'fs';
 import path from 'path';
+import { isPathWithinBase } from '../../../../lib/security/path-validation';
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +32,18 @@ export async function POST(req: NextRequest) {
     await qboClient.initialize();
 
     // Check if PDF file exists
-    const fullPdfPath = path.join(process.cwd(), 'public', pdfPath);
+    const baseDir = path.join(process.cwd(), 'public');
+    const fullPdfPath = path.join(baseDir, pdfPath);
+
+    // SECURITY: Validate path is within public directory
+    if (!isPathWithinBase(fullPdfPath, baseDir)) {
+      console.error('❌ Path traversal attempt detected in PDF path:', pdfPath);
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid PDF path'
+      }, { status: 400 });
+    }
+
     if (!fs.existsSync(fullPdfPath)) {
       return NextResponse.json({
         success: false,
