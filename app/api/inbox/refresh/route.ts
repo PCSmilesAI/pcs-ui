@@ -45,13 +45,11 @@ function isInCooldown(email: string): boolean {
     return false;
   }
 
-  // lgtm[js/path-injection] - Path is validated with isPathWithinBase check
-  if (!fs.existsSync(cooldownPath)) {
+  if (!fs.existsSync(cooldownPath)) { // lgtm[js/path-injection]
     return false;
   }
 
-  // lgtm[js/path-injection] - Path is validated with isPathWithinBase check
-  const lockAge = Date.now() - fs.statSync(cooldownPath).mtimeMs;
+  const lockAge = Date.now() - fs.statSync(cooldownPath).mtimeMs; // lgtm[js/path-injection]
   const cooldownMs = 30000; // 30 seconds
 
   if (lockAge < cooldownMs) {
@@ -60,8 +58,7 @@ function isInCooldown(email: string): boolean {
 
   // Cooldown expired, remove lock
   try {
-    // lgtm[js/path-injection] - Path is validated with isPathWithinBase check
-    fs.unlinkSync(cooldownPath);
+    fs.unlinkSync(cooldownPath); // lgtm[js/path-injection]
   } catch (e) {
     // Ignore errors
   }
