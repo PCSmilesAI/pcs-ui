@@ -330,9 +330,9 @@ function generateEmailHTML(data: RemittanceData): string {
     .map(
       (inv) =>
         `<tr>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${inv.invoiceNumber}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${escapeHtml(inv.invoiceNumber)}</td>
       <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">$${inv.amount.toFixed(2)}</td>
-      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${inv.dueDate}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${escapeHtml(inv.dueDate)}</td>
       <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">✓ Paid</td>
     </tr>`
     )
@@ -341,14 +341,14 @@ function generateEmailHTML(data: RemittanceData): string {
   return `
     <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Payment Remittance</h2>
-      <p style="color: #666;">Dear ${data.vendorName},</p>
+      <p style="color: #666;">Dear ${escapeHtml(data.vendorName)},</p>
 
       <p style="color: #666;">We have successfully processed payment for the invoices listed below.</p>
 
       <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <p style="margin: 5px 0;"><strong>Total Amount Paid:</strong> $${data.totalAmount.toFixed(2)}</p>
-        <p style="margin: 5px 0;"><strong>Payment Date:</strong> ${data.paymentDate}</p>
-        <p style="margin: 5px 0;"><strong>Transfer ID:</strong> ${data.transferId}</p>
+        <p style="margin: 5px 0;"><strong>Payment Date:</strong> ${escapeHtml(data.paymentDate)}</p>
+        <p style="margin: 5px 0;"><strong>Transfer ID:</strong> ${escapeHtml(data.transferId)}</p>
       </div>
 
       <h3 style="color: #333; margin-top: 20px;">Invoices Paid</h3>
@@ -379,20 +379,20 @@ function generateEmailHTML(data: RemittanceData): string {
 
 function generateEmailText(data: RemittanceData): string {
   const invoiceLines = data.invoices
-    .map((inv) => `  ${inv.invoiceNumber.padEnd(20)} $${inv.amount.toFixed(2).padEnd(12)} ${inv.dueDate}`)
+    .map((inv) => `  ${escapeHtml(inv.invoiceNumber).padEnd(20)} $${inv.amount.toFixed(2).padEnd(12)} ${escapeHtml(inv.dueDate)}`)
     .join('\n');
 
   return `
 Payment Remittance
 
-Dear ${data.vendorName},
+Dear ${escapeHtml(data.vendorName)},
 
 We have successfully processed payment for the invoices listed below.
 
 PAYMENT SUMMARY
 Total Amount Paid: $${data.totalAmount.toFixed(2)}
-Payment Date: ${data.paymentDate}
-Transfer ID: ${data.transferId}
+Payment Date: ${escapeHtml(data.paymentDate)}
+Transfer ID: ${escapeHtml(data.transferId)}
 
 INVOICES PAID
 Invoice #            Amount       Due Date
