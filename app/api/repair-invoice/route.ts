@@ -5,6 +5,7 @@ import { getCurrentUser } from '../../../lib/auth/currentUser';
 import { rateLimitByUser } from '../../../lib/ratelimit/rateLimiter';
 import { isString } from '../../../lib/security/type-validation';
 import { sanitizeErrorMessage } from '../../../lib/security/error-handling';
+import { isPathWithinBase } from '../../../lib/security/path-validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,9 +70,27 @@ export async function POST(request: NextRequest): Promise<Response> {
       fs.mkdirSync(tempDir, { recursive: true });
     }
 
+    // SECURITY: Validate invoice_number to prevent path traversal
+    if (!invoice_number || !/^[a-zA-Z0-9._-]+$/.test(invoice_number)) {
+      console.error('❌ Invalid invoice_number format:', invoice_number);
+      return NextResponse.json(
+        { error: 'Invalid invoice number format' },
+        { status: 400 }
+      );
+    }
+
     const originalJsonPath = path.join(tempDir, `${invoice_number}_original.json`);
     const correctedJsonPath = path.join(tempDir, `${invoice_number}_corrected.json`);
-    
+
+    // SECURITY: Validate paths are within tempDir
+    if (!isPathWithinBase(originalJsonPath, tempDir) || !isPathWithinBase(correctedJsonPath, tempDir)) {
+      console.error('❌ Path traversal attempt detected in repair-invoice');
+      return NextResponse.json(
+        { error: 'Invalid path' },
+        { status: 400 }
+      );
+    }
+
     // Write the JSON files
     fs.writeFileSync(originalJsonPath, JSON.stringify(original_data, null, 2));
     fs.writeFileSync(correctedJsonPath, JSON.stringify(corrected_data, null, 2));
@@ -81,7 +100,26 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (pdf_path?.startsWith('/api/pdf/')) {
       // Convert API path to actual file path
       const filename = pdf_path.replace('/api/pdf/', '');
+
+      // SECURITY: Validate filename to prevent path traversal
+      if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
+        console.error('❌ Invalid PDF filename format:', filename);
+        return NextResponse.json(
+          { error: 'Invalid PDF filename format' },
+          { status: 400 }
+        );
+      }
+
       actualPdfPath = path.join(process.cwd(), 'pcs_ai_data', 'pdfs', filename);
+
+      // SECURITY: Validate PDF path is within safe directory
+      if (!isPathWithinBase(actualPdfPath, path.join(process.cwd(), 'pcs_ai_data', 'pdfs'))) {
+        console.error('❌ Path traversal attempt detected in PDF path');
+        return NextResponse.json(
+          { error: 'Invalid PDF path' },
+          { status: 400 }
+        );
+      }
     }
 
     // Call the Python repair logging function using proper argument passing

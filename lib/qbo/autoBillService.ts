@@ -73,15 +73,17 @@ export class AutoBillService {
       // SECURITY: Validate json_path to prevent path traversal attacks
       if (invoiceData.json_path) {
         const baseDir = process.cwd();
-        if (!isPathWithinBase(invoiceData.json_path, baseDir)) {
-          console.error('❌ Path traversal attempt detected in json_path:', invoiceData.json_path);
-        } else if (fs.existsSync(invoiceData.json_path)) {
+        // SECURITY: Resolve and validate the path to ensure it's within the base directory
+        const resolvedPath = path.resolve(invoiceData.json_path);
+        if (isPathWithinBase(resolvedPath, baseDir) && fs.existsSync(resolvedPath)) {
           try {
-            const jsonData = JSON.parse(fs.readFileSync(invoiceData.json_path, 'utf8'));
+            const jsonData = JSON.parse(fs.readFileSync(resolvedPath, 'utf8'));
             detailedData = { ...detailedData, ...jsonData };
           } catch (error) {
             console.warn('⚠️ Could not load detailed JSON data:', error);
           }
+        } else if (!isPathWithinBase(resolvedPath, baseDir)) {
+          console.error('❌ Path traversal attempt detected in json_path:', invoiceData.json_path);
         }
       }
 
