@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const OAuthClient = require('intuit-oauth');
+const rateLimit = require('express-rate-limit');
 const { tokenManager } = require('./database');
 
 // SECURITY: Simple HTML escaping function to prevent XSS
@@ -14,6 +15,15 @@ function escapeHtml(text) {
   };
   return String(text).replace(/[&<>"']/g, (char) => map[char] || char);
 }
+
+// SECURITY: Rate limiting for OAuth callback to prevent DoS attacks
+const oauthCallbackLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 requests per 15 minutes per IP
+  message: 'Too many OAuth callback attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Initialize QuickBooks client
 const oauthClient = new OAuthClient({
@@ -38,7 +48,7 @@ router.get('/auth', (req, res) => {
 });
 
 // OAuth callback
-router.get('/callback', async (req, res) => {
+router.get('/callback', oauthCallbackLimiter, async (req, res) => {
     try {
         const authCode = req.query.code;
         const realmId = req.query.realmId;
