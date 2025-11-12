@@ -3,7 +3,7 @@ import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { isPathWithinBase } from '../../../lib/security/path-validation';
+import { isPathWithinBase } from '../../../../lib/security/path-validation';
 
 const ROOT_DIR = path.resolve(process.cwd());
 const DATA_DIR = process.env.PCS_DATA_DIR || path.join(ROOT_DIR, 'pcs_ui_data');
