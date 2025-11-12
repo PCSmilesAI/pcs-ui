@@ -5,7 +5,7 @@
  * Runs all audits and tests to verify system is production-ready
  */
 
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const path = require('path');
 
 const SCRIPTS_DIR = __dirname;
