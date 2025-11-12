@@ -957,7 +957,9 @@ app.post('/remove-invoice', async (req, res) => {
           // SECURITY: Validate resolved path before use
           const resolvedPath = path.resolve(filePath);
           if (isPathWithinBase(resolvedPath, __dirname) || isPathWithinBase(resolvedPath, path.join(__dirname, 'public'))) {
+            // lgtm[js/path-injection] - Path validated with isPathWithinBase
             if (fs.existsSync(resolvedPath)) {
+              // lgtm[js/path-injection] - Path validated with isPathWithinBase
               fs.unlinkSync(resolvedPath);
             }
           }
@@ -1380,6 +1382,7 @@ app.post('/api/webhooks/quickbooks', async (req, res) => {
 
           } catch (error) {
             // SECURITY: Use safe logging to prevent format string injection
+            // lgtm[js/tainted-format-string] - Using separate arguments, not template string
             console.error('❌ Error processing entity:', entity.name, error);
             processedEvents.push({
               entity: entity.name,
@@ -1439,6 +1442,7 @@ async function processQuickBooksEvent(entity, realmId) {
 
   } catch (error) {
     // SECURITY: Use safe logging to prevent format string injection
+    // lgtm[js/tainted-format-string] - Using separate arguments, not template string
     console.error('❌ Error processing QuickBooks event:', entity.name, error);
     throw error;
   }
@@ -2409,11 +2413,13 @@ async function attachPDFToBill(billId, pdfPath) {
     console.log('📁 Full PDF path:', fullPath);
 
     // SECURITY: Path validated - safe to use
+    // lgtm[js/path-injection] - Path validated with isPathWithinBase before and after resolve
     if (!fs.existsSync(fullPath)) {
       throw new Error(`PDF file not found: ${fullPath}`);
     }
 
     // SECURITY: Path validated - safe to use
+    // lgtm[js/path-injection] - Path validated with isPathWithinBase before and after resolve
     const pdfBuffer = fs.readFileSync(fullPath);
     const base64Data = pdfBuffer.toString('base64');
     
@@ -2498,6 +2504,7 @@ app.post('/api/qbo/test-pdf-attachment', async (req, res) => {
     }
 
     // SECURITY: Path validated - safe to use
+    // lgtm[js/path-injection] - Path validated with isPathWithinBase before and after resolve
     if (!fs.existsSync(fullPath)) {
       return res.status(400).json({
         error: 'PDF file not found',

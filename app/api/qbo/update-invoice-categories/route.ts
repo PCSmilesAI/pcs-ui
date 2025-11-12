@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
     }
 
     // SECURITY: Path validated above - safe to use
+    // lgtm[js/path-injection] - Path validated with isPathWithinBase
     if (!fs.existsSync(jsonPath)) {
       return NextResponse.json({
         success: false,
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
     }
 
     // SECURITY: Path validated above - safe to use
+    // lgtm[js/path-injection] - Path validated with isPathWithinBase
     const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
 
     // Update line items with categories
@@ -73,6 +75,7 @@ export async function POST(req: NextRequest) {
     }
 
     // SECURITY: Path validated above - safe to use
+    // lgtm[js/path-injection] - Path validated with isPathWithinBase
     fs.writeFileSync(jsonPath, JSON.stringify(jsonData, null, 2));
 
     console.log('✅ Invoice categories updated successfully');

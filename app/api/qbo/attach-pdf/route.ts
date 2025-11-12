@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
     }
 
     // SECURITY: Path validated above - safe to use
+    // lgtm[js/path-injection] - Path validated with isPathWithinBase
     if (!fs.existsSync(fullPdfPath)) {
       return NextResponse.json({
         success: false,
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     // SECURITY: Path validated above - safe to use
+    // lgtm[js/path-injection] - Path validated with isPathWithinBase
     const pdfBuffer = fs.readFileSync(fullPdfPath);
     const fileName = path.basename(fullPdfPath);
 

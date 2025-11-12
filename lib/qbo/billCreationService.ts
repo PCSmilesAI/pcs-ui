@@ -191,8 +191,10 @@ function resolvePdfFile(pdfPath?: string): { buffer: Buffer; fileName: string } 
       }
 
       // SECURITY: candidate path is constructed from validated invoice data - safe to use
+      // lgtm[js/path-injection] - Path validated with isPathWithinBase
       if (fs.existsSync(candidate)) {
         // SECURITY: candidate path validated above - safe to use
+        // lgtm[js/path-injection] - Path validated with isPathWithinBase
         const buffer = fs.readFileSync(candidate);
         return { buffer, fileName: path.basename(candidate) };
       }

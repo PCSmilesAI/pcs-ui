@@ -85,8 +85,10 @@ export class AutoBillService {
             console.error('❌ Path traversal attempt detected in json_path:', invoiceData.json_path);
           } else {
             // SECURITY: Path has been validated - safe to use
+            // lgtm[js/path-injection] - Path validated with path traversal check
             if (fs.existsSync(realPath)) {
               // SECURITY: Path validated above - safe to use
+              // lgtm[js/path-injection] - Path validated with path traversal check
               const jsonContent = fs.readFileSync(realPath, 'utf8');
               const jsonData = JSON.parse(jsonContent);
               detailedData = { ...detailedData, ...jsonData };
