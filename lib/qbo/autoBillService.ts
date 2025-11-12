@@ -73,22 +73,27 @@ export class AutoBillService {
       // SECURITY: Validate json_path to prevent path traversal attacks
       if (invoiceData.json_path && typeof invoiceData.json_path === 'string') {
         const baseDir = process.cwd();
-        // SECURITY: Resolve and validate the path to ensure it's within the base directory
-        const resolvedPath = path.resolve(invoiceData.json_path);
+        try {
+          // SECURITY: Use fs.realpathSync to fully resolve the path and detect traversal attempts
+          const realPath = fs.realpathSync(invoiceData.json_path);
 
-        // SECURITY: Only proceed if path is within base directory
-        if (isPathWithinBase(resolvedPath, baseDir)) {
-          try {
-            // SECURITY: Path has been validated, safe to use
-            if (fs.existsSync(resolvedPath)) {
-              const jsonData = JSON.parse(fs.readFileSync(resolvedPath, 'utf8'));
-              detailedData = { ...detailedData, ...jsonData };
+          // SECURITY: Verify the resolved path is within the base directory
+          if (realPath.startsWith(baseDir + path.sep) || realPath === baseDir) {
+            try {
+              // SECURITY: Path has been validated, safe to use
+              if (fs.existsSync(realPath)) {
+                const jsonData = JSON.parse(fs.readFileSync(realPath, 'utf8'));
+                detailedData = { ...detailedData, ...jsonData };
+              }
+            } catch (error) {
+              console.warn('⚠️ Could not load detailed JSON data:', error);
             }
-          } catch (error) {
-            console.warn('⚠️ Could not load detailed JSON data:', error);
+          } else {
+            console.error('❌ Path traversal attempt detected in json_path:', invoiceData.json_path);
           }
-        } else {
-          console.error('❌ Path traversal attempt detected in json_path:', invoiceData.json_path);
+        } catch (error) {
+          // fs.realpathSync throws if file doesn't exist, which is fine
+          console.warn('⚠️ JSON path does not exist:', invoiceData.json_path);
         }
       }
 
