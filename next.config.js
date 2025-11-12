@@ -11,22 +11,30 @@ const nextConfig = {
   productionBrowserSourceMaps: true,
   async headers() {
     return [
+      // Static assets - cache forever (safe due to hash-based versioning)
       {
         source: '/_next/static/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+          { key: 'ETag', value: 'W/"static"' },
         ],
       },
+      // API routes - never cache
       {
         source: '/api/:path*',
         headers: [
-          { key: 'Cache-Control', value: 'no-store' },
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
         ],
       },
+      // HTML pages and dynamic content - never cache
       {
         source: '/:path*',
         headers: [
-          { key: 'Cache-Control', value: 'no-store' },
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
         ],
       },
     ];
