@@ -4,6 +4,7 @@ import { qboClient, QBOBill } from './qboClient';
 import { pickMappingForVendor } from './vendorMappings';
 import { resolveAccountByFullName, resolveClassByFullName, resolveLocationByName } from './qboLookup';
 import { isValidAccountPath } from './chartOfAccounts';
+import { isPathWithinBase } from '../security/path-validation';
 
 export interface InvoiceLineItem {
   product_name?: string;
@@ -166,16 +167,29 @@ export function formatDate(dateString: string | undefined | null): string | unde
 function resolvePdfFile(pdfPath?: string): { buffer: Buffer; fileName: string } | null {
   if (!pdfPath) return null;
 
+  // SECURITY: Validate path to prevent path traversal attacks
+  const baseDir = process.cwd();
+  if (!isPathWithinBase(pdfPath, baseDir)) {
+    console.error('❌ Path traversal attempt detected in PDF path:', pdfPath);
+    return null;
+  }
+
   const candidates = new Set<string>();
   const normalized = pdfPath.replace(/^\//, '');
   candidates.add(pdfPath);
   candidates.add(normalized);
-  candidates.add(path.join(process.cwd(), normalized));
-  candidates.add(path.join(process.cwd(), pdfPath));
-  candidates.add(path.join(process.cwd(), 'public', normalized));
+  candidates.add(path.join(baseDir, normalized));
+  candidates.add(path.join(baseDir, pdfPath));
+  candidates.add(path.join(baseDir, 'public', normalized));
 
   for (const candidate of candidates) {
     try {
+      // SECURITY: Validate each candidate path before accessing
+      if (!isPathWithinBase(candidate, baseDir)) {
+        console.warn('⚠️ Candidate path outside base directory:', candidate);
+        continue;
+      }
+
       if (fs.existsSync(candidate)) {
         const buffer = fs.readFileSync(candidate);
         return { buffer, fileName: path.basename(candidate) };
