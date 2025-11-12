@@ -1,0 +1,41 @@
+# CodeQL Configuration
+# This file configures CodeQL analysis for the pcs-ui repository
+
+# Disable default queries that are too noisy
+disable-default-queries: false
+
+# Query suites to run
+queries:
+  - uses: security-and-quality
+
+# Paths to exclude from analysis
+paths-ignore:
+  - backup-ui-*
+  - node_modules
+  - dist
+  - build
+  - .next
+  - venv
+  - __pycache__
+  - "*.test.js"
+  - "*.spec.js"
+
+# Paths to include
+paths:
+  - app
+  - lib
+  - src
+  - scripts
+  - dev-server.js
+  - quickbooks-routes.js
+
+# Severity levels to report
+severity: high
+
+# CodeQL will automatically respect lgtm comments in the code
+# Format: // lgtm[rule-id]
+# Examples:
+#   // lgtm[js/path-injection]
+#   // lgtm[js/tainted-format-string]
+#   // lgtm[js/incomplete-sanitization]
+
