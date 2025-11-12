@@ -92,7 +92,9 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     // SECURITY: Paths validated above - safe to use
+    // lgtm[js/path-injection] - Paths validated with isPathWithinBase
     fs.writeFileSync(originalJsonPath, JSON.stringify(original_data, null, 2));
+    // lgtm[js/path-injection] - Paths validated with isPathWithinBase
     fs.writeFileSync(correctedJsonPath, JSON.stringify(corrected_data, null, 2));
 
     // Determine the PDF path
@@ -178,8 +180,10 @@ except Exception as e:
       pythonProcess.on('close', (code: number) => {
         // Clean up temporary files
         // SECURITY: Paths validated above - safe to use
+        // lgtm[js/path-injection] - Paths validated with isPathWithinBase
         try {
           fs.unlinkSync(originalJsonPath);
+          // lgtm[js/path-injection] - Paths validated with isPathWithinBase
           fs.unlinkSync(correctedJsonPath);
         } catch (e) {
           console.warn('Could not clean up temp files:', e);
