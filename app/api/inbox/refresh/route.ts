@@ -45,11 +45,13 @@ function isInCooldown(email: string): boolean {
     return false;
   }
 
-  if (!fs.existsSync(cooldownPath)) { // lgtm[js/path-injection]
+  // SECURITY: Path validated above - safe to use
+  if (!fs.existsSync(cooldownPath)) {
     return false;
   }
 
-  const lockAge = Date.now() - fs.statSync(cooldownPath).mtimeMs; // lgtm[js/path-injection]
+  // SECURITY: Path validated above - safe to use
+  const lockAge = Date.now() - fs.statSync(cooldownPath).mtimeMs;
   const cooldownMs = 30000; // 30 seconds
 
   if (lockAge < cooldownMs) {
@@ -57,8 +59,9 @@ function isInCooldown(email: string): boolean {
   }
 
   // Cooldown expired, remove lock
+  // SECURITY: Path validated above - safe to use
   try {
-    fs.unlinkSync(cooldownPath); // lgtm[js/path-injection]
+    fs.unlinkSync(cooldownPath);
   } catch (e) {
     // Ignore errors
   }
@@ -74,21 +77,25 @@ function setCooldown(email: string): void {
     return;
   }
 
-  fs.writeFileSync(cooldownPath, `${Date.now()}\n${email}\n`); // lgtm[js/path-injection]
+  // SECURITY: Path validated above - safe to use
+  fs.writeFileSync(cooldownPath, `${Date.now()}\n${email}\n`);
 }
 
 function isGlobalScanBusy(): boolean {
-  if (!fs.existsSync(SCAN_LOCK_PATH)) { // lgtm[js/path-injection]
+  // SECURITY: SCAN_LOCK_PATH is a constant defined at module level - safe to use
+  if (!fs.existsSync(SCAN_LOCK_PATH)) {
     return false;
   }
 
-  const lockAge = Date.now() - fs.statSync(SCAN_LOCK_PATH).mtimeMs; // lgtm[js/path-injection]
+  // SECURITY: SCAN_LOCK_PATH is a constant defined at module level - safe to use
+  const lockAge = Date.now() - fs.statSync(SCAN_LOCK_PATH).mtimeMs;
   const staleThreshold = 600000; // 10 minutes
 
   if (lockAge > staleThreshold) {
     // Stale lock, remove it
+    // SECURITY: SCAN_LOCK_PATH is a constant defined at module level - safe to use
     try {
-      fs.unlinkSync(SCAN_LOCK_PATH); // lgtm[js/path-injection]
+      fs.unlinkSync(SCAN_LOCK_PATH);
     } catch (e) {
       // Ignore errors
     }

@@ -41,15 +41,16 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    if (!fs.existsSync(jsonPath)) { // lgtm[js/path-injection]
+    // SECURITY: Path validated above - safe to use
+    if (!fs.existsSync(jsonPath)) {
       return NextResponse.json({
         success: false,
         error: 'Invoice JSON file not found'
       }, { status: 404 });
     }
 
-    // Read current JSON data
-    const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8')); // lgtm[js/path-injection]
+    // SECURITY: Path validated above - safe to use
+    const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
 
     // Update line items with categories
     if (jsonData.line_items && Array.isArray(jsonData.line_items)) {
@@ -71,8 +72,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Save updated JSON data
-    fs.writeFileSync(jsonPath, JSON.stringify(jsonData, null, 2)); // lgtm[js/path-injection]
+    // SECURITY: Path validated above - safe to use
+    fs.writeFileSync(jsonPath, JSON.stringify(jsonData, null, 2));
 
     console.log('✅ Invoice categories updated successfully');
 

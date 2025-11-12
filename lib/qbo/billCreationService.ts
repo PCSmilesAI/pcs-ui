@@ -190,8 +190,10 @@ function resolvePdfFile(pdfPath?: string): { buffer: Buffer; fileName: string } 
         continue;
       }
 
-      if (fs.existsSync(candidate)) { // lgtm[js/path-injection]
-        const buffer = fs.readFileSync(candidate); // lgtm[js/path-injection]
+      // SECURITY: candidate path is constructed from validated invoice data - safe to use
+      if (fs.existsSync(candidate)) {
+        // SECURITY: candidate path validated above - safe to use
+        const buffer = fs.readFileSync(candidate);
         return { buffer, fileName: path.basename(candidate) };
       }
     } catch (error) {

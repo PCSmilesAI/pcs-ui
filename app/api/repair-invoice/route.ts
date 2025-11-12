@@ -91,9 +91,9 @@ export async function POST(request: NextRequest): Promise<Response> {
       );
     }
 
-    // Write the JSON files
-    fs.writeFileSync(originalJsonPath, JSON.stringify(original_data, null, 2)); // lgtm[js/path-injection]
-    fs.writeFileSync(correctedJsonPath, JSON.stringify(corrected_data, null, 2)); // lgtm[js/path-injection]
+    // SECURITY: Paths validated above - safe to use
+    fs.writeFileSync(originalJsonPath, JSON.stringify(original_data, null, 2));
+    fs.writeFileSync(correctedJsonPath, JSON.stringify(corrected_data, null, 2));
 
     // Determine the PDF path
     let actualPdfPath = pdf_path;
@@ -177,9 +177,10 @@ except Exception as e:
     return await new Promise<Response>((resolve) => {
       pythonProcess.on('close', (code: number) => {
         // Clean up temporary files
+        // SECURITY: Paths validated above - safe to use
         try {
-          fs.unlinkSync(originalJsonPath); // lgtm[js/path-injection]
-          fs.unlinkSync(correctedJsonPath); // lgtm[js/path-injection]
+          fs.unlinkSync(originalJsonPath);
+          fs.unlinkSync(correctedJsonPath);
         } catch (e) {
           console.warn('Could not clean up temp files:', e);
         }

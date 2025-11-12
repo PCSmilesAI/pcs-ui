@@ -44,15 +44,16 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    if (!fs.existsSync(fullPdfPath)) { // lgtm[js/path-injection]
+    // SECURITY: Path validated above - safe to use
+    if (!fs.existsSync(fullPdfPath)) {
       return NextResponse.json({
         success: false,
         error: 'PDF file not found'
       }, { status: 404 });
     }
 
-    // Read PDF file
-    const pdfBuffer = fs.readFileSync(fullPdfPath); // lgtm[js/path-injection]
+    // SECURITY: Path validated above - safe to use
+    const pdfBuffer = fs.readFileSync(fullPdfPath);
     const fileName = path.basename(fullPdfPath);
 
     // Upload attachment to QuickBooks
