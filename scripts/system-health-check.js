@@ -29,7 +29,8 @@ for (const test of tests) {
 
   try {
     const scriptPath = path.join(SCRIPTS_DIR, test.script);
-    execSync(`node ${scriptPath}`, { stdio: 'inherit' });
+    // SECURITY: Use execFileSync instead of execSync to prevent shell injection
+    execFileSync('node', [scriptPath], { stdio: 'inherit' });
     results.push({ name: test.name, status: '✅ PASSED' });
   } catch (err) {
     results.push({ name: test.name, status: '❌ FAILED' });

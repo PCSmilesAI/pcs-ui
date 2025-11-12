@@ -4,6 +4,19 @@ import sgMail from '@sendgrid/mail';
 import Mailjet from 'node-mailjet';
 import nodemailer from 'nodemailer';
 
+// SECURITY: HTML escaping function to prevent XSS
+function escapeHtml(text: string | number | undefined): string {
+  if (text === undefined || text === null) return '';
+  const map: { [key: string]: string } = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return String(text).replace(/[&<>"']/g, (char) => map[char] || char);
+}
+
 export interface RemittanceInvoice {
   invoiceNumber: string;
   amount: number;
@@ -63,9 +76,9 @@ function generateRemittanceHTML(data: RemittanceData): string {
     .map(
       (inv) =>
         `<tr>
-      <td style="padding: 10px; border-bottom: 1px solid #ddd;">${inv.invoiceNumber}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd;">${escapeHtml(inv.invoiceNumber)}</td>
       <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">$${inv.amount.toFixed(2)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #ddd;">${inv.dueDate}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd;">${escapeHtml(inv.dueDate)}</td>
       <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">✓ Paid</td>
     </tr>`
     )
@@ -155,19 +168,19 @@ function generateRemittanceHTML(data: RemittanceData): string {
     <body>
       <div class="container">
         <h1>Payment Remittance</h1>
-        <div class="company-name">${data.companyName || 'Pacific Crest Smiles'}</div>
+        <div class="company-name">${escapeHtml(data.companyName || 'Pacific Crest Smiles')}</div>
 
         <div class="section">
           <div class="section-title">Vendor Information</div>
-          <div class="info-row"><span class="info-label">Vendor:</span> ${data.vendorName}</div>
-          <div class="info-row"><span class="info-label">Email:</span> ${data.vendorEmail}</div>
+          <div class="info-row"><span class="info-label">Vendor:</span> ${escapeHtml(data.vendorName)}</div>
+          <div class="info-row"><span class="info-label">Email:</span> ${escapeHtml(data.vendorEmail)}</div>
         </div>
 
         <div class="section">
           <div class="section-title">Payment Summary</div>
           <div class="info-box">
-            <div class="info-row"><span class="info-label">Payment Date:</span> ${data.paymentDate}</div>
-            <div class="info-row"><span class="info-label">Transfer ID:</span> ${data.transferId}</div>
+            <div class="info-row"><span class="info-label">Payment Date:</span> ${escapeHtml(data.paymentDate)}</div>
+            <div class="info-row"><span class="info-label">Transfer ID:</span> ${escapeHtml(data.transferId)}</div>
             <div class="info-row"><span class="info-label">Total Amount Paid:</span> <strong>$${data.totalAmount.toFixed(2)}</strong></div>
           </div>
         </div>
