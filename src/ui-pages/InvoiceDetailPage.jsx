@@ -739,7 +739,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       }
 
       // Parse amount from display format
-      const amountStr = paymentAmount.replace('$', '').replace(',', '');
+      // SECURITY: Use global regex to replace all occurrences of $ and ,
+      const amountStr = paymentAmount.replace(/\$/g, '').replace(/,/g, '');
       const amountNum = parseFloat(amountStr) || 0;
       const amountCents = Math.round(amountNum * 100);
 

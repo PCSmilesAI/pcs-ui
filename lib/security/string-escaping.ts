@@ -78,24 +78,43 @@ export function escapeSql(text: string): string {
 /**
  * Removes potentially dangerous HTML tags and attributes
  * This is a basic implementation - use DOMPurify for production
- * 
+ *
  * @param html - The HTML to sanitize
  * @returns The sanitized HTML
  */
 export function sanitizeHtml(html: string): string {
-  // Remove script tags and their content
-  let sanitized = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  
-  // Remove event handlers
-  sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
-  sanitized = sanitized.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '');
-  
-  // Remove iframe tags
-  sanitized = sanitized.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
-  
-  // Remove object and embed tags
-  sanitized = sanitized.replace(/<(object|embed)\b[^<]*(?:(?!<\/(object|embed)>)<[^<]*)*<\/(object|embed)>/gi, '');
-  
+  let sanitized = html;
+  let previous: string;
+
+  // Iteratively remove script tags and their content until no more replacements
+  do {
+    previous = sanitized;
+    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  } while (sanitized !== previous);
+
+  // Iteratively remove event handlers until no more replacements
+  do {
+    previous = sanitized;
+    sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
+  } while (sanitized !== previous);
+
+  do {
+    previous = sanitized;
+    sanitized = sanitized.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '');
+  } while (sanitized !== previous);
+
+  // Iteratively remove iframe tags until no more replacements
+  do {
+    previous = sanitized;
+    sanitized = sanitized.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+  } while (sanitized !== previous);
+
+  // Iteratively remove object and embed tags until no more replacements
+  do {
+    previous = sanitized;
+    sanitized = sanitized.replace(/<(object|embed)\b[^<]*(?:(?!<\/(object|embed)>)<[^<]*)*<\/(object|embed)>/gi, '');
+  } while (sanitized !== previous);
+
   return sanitized;
 }
 

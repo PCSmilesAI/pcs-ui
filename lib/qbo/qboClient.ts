@@ -194,7 +194,8 @@ export class QBOClient {
   }
 
   private escapeQueryValue(value: string): string {
-    return value.replace(/'/g, "\\'");
+    // SECURITY: Escape backslashes first, then quotes to prevent incomplete escaping
+    return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   }
 
   private async query<T = any>(sql: string, minorVersion = '65'): Promise<T> {
