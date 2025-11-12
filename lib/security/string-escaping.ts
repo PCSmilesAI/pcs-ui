@@ -87,10 +87,10 @@ export function sanitizeHtml(html: string): string {
   let previous: string;
 
   // Iteratively remove script tags and their content until no more replacements
-  // SECURITY: Match script end tags with optional whitespace like </script >
+  // SECURITY: Match script end tags with optional whitespace and attributes like </script foo="bar">
   do {
     previous = sanitized;
-    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi, '');
+    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script\b)<[^<]*)*<\/script\b[^>]*>/gi, '');
   } while (sanitized !== previous);
 
   // Iteratively remove event handlers until no more replacements
@@ -105,17 +105,17 @@ export function sanitizeHtml(html: string): string {
   } while (sanitized !== previous);
 
   // Iteratively remove iframe tags until no more replacements
-  // SECURITY: Match iframe end tags with optional whitespace like </iframe >
+  // SECURITY: Match iframe end tags with optional whitespace and attributes like </iframe foo="bar">
   do {
     previous = sanitized;
-    sanitized = sanitized.replace(/<iframe\b[^<]*(?:(?!<\/iframe\s*>)<[^<]*)*<\/iframe\s*>/gi, '');
+    sanitized = sanitized.replace(/<iframe\b[^<]*(?:(?!<\/iframe\b)<[^<]*)*<\/iframe\b[^>]*>/gi, '');
   } while (sanitized !== previous);
 
   // Iteratively remove object and embed tags until no more replacements
-  // SECURITY: Match object/embed end tags with optional whitespace like </object > or </embed >
+  // SECURITY: Match object/embed end tags with optional whitespace and attributes like </object foo="bar">
   do {
     previous = sanitized;
-    sanitized = sanitized.replace(/<(object|embed)\b[^<]*(?:(?!<\/(object|embed)\s*>)<[^<]*)*<\/(object|embed)\s*>/gi, '');
+    sanitized = sanitized.replace(/<(object|embed)\b[^<]*(?:(?!<\/(object|embed)\b)<[^<]*)*<\/(object|embed)\b[^>]*>/gi, '');
   } while (sanitized !== previous);
 
   return sanitized;

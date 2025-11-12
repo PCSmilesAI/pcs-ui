@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { isPathWithinBase } from '../../../../lib/security/path-validation';
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,9 +17,28 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
+    // SECURITY: Validate invoiceNumber to prevent path traversal
+    if (!/^[a-zA-Z0-9._-]+$/.test(invoiceNumber)) {
+      console.error('❌ Invalid invoiceNumber format:', invoiceNumber);
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid invoice number format'
+      }, { status: 400 });
+    }
+
     // Find the invoice JSON file
-    const jsonPath = path.join(process.cwd(), 'public', 'output_jsons', `${invoiceNumber}.json`);
-    
+    const baseDir = path.join(process.cwd(), 'public', 'output_jsons');
+    const jsonPath = path.join(baseDir, `${invoiceNumber}.json`);
+
+    // SECURITY: Validate path is within base directory
+    if (!isPathWithinBase(jsonPath, baseDir)) {
+      console.error('❌ Path traversal attempt detected in update-invoice-categories');
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid path'
+      }, { status: 400 });
+    }
+
     if (!fs.existsSync(jsonPath)) {
       return NextResponse.json({
         success: false,
