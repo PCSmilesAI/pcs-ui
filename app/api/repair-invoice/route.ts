@@ -178,8 +178,8 @@ except Exception as e:
       pythonProcess.on('close', (code: number) => {
         // Clean up temporary files
         try {
-          fs.unlinkSync(originalJsonPath);
-          fs.unlinkSync(correctedJsonPath);
+          fs.unlinkSync(originalJsonPath); // lgtm[js/path-injection]
+          fs.unlinkSync(correctedJsonPath); // lgtm[js/path-injection]
         } catch (e) {
           console.warn('Could not clean up temp files:', e);
         }

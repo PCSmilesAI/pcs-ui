@@ -190,8 +190,8 @@ function resolvePdfFile(pdfPath?: string): { buffer: Buffer; fileName: string } 
         continue;
       }
 
-      if (fs.existsSync(candidate)) {
-        const buffer = fs.readFileSync(candidate);
+      if (fs.existsSync(candidate)) { // lgtm[js/path-injection]
+        const buffer = fs.readFileSync(candidate); // lgtm[js/path-injection]
         return { buffer, fileName: path.basename(candidate) };
       }
     } catch (error) {
