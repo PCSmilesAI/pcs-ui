@@ -3,6 +3,7 @@ import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { isPathWithinBase } from '../../../lib/security/path-validation';
 
 const ROOT_DIR = path.resolve(process.cwd());
 const DATA_DIR = process.env.PCS_DATA_DIR || path.join(ROOT_DIR, 'pcs_ui_data');
@@ -37,17 +38,24 @@ function getCooldownPath(email: string): string {
 
 function isInCooldown(email: string): boolean {
   const cooldownPath = getCooldownPath(email);
+
+  // SECURITY: Validate path is within cooldown directory
+  if (!isPathWithinBase(cooldownPath, COOLDOWN_DIR)) {
+    console.error('❌ Path traversal attempt detected in cooldown path');
+    return false;
+  }
+
   if (!fs.existsSync(cooldownPath)) {
     return false;
   }
-  
+
   const lockAge = Date.now() - fs.statSync(cooldownPath).mtimeMs;
   const cooldownMs = 30000; // 30 seconds
-  
+
   if (lockAge < cooldownMs) {
     return true;
   }
-  
+
   // Cooldown expired, remove lock
   try {
     fs.unlinkSync(cooldownPath);
@@ -59,6 +67,13 @@ function isInCooldown(email: string): boolean {
 
 function setCooldown(email: string): void {
   const cooldownPath = getCooldownPath(email);
+
+  // SECURITY: Validate path is within cooldown directory
+  if (!isPathWithinBase(cooldownPath, COOLDOWN_DIR)) {
+    console.error('❌ Path traversal attempt detected in cooldown path');
+    return;
+  }
+
   fs.writeFileSync(cooldownPath, `${Date.now()}\n${email}\n`);
 }
 
