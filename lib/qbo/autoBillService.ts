@@ -83,11 +83,15 @@ export class AutoBillService {
 
           if (!isWithinBase) {
             console.error('❌ Path traversal attempt detected in json_path:', invoiceData.json_path);
-          } else if (fs.existsSync(realPath)) {
-            // SECURITY: Path has been validated and confirmed to exist
-            const jsonContent = fs.readFileSync(realPath, 'utf8');
-            const jsonData = JSON.parse(jsonContent);
-            detailedData = { ...detailedData, ...jsonData };
+          } else {
+            // SECURITY: Path has been validated - only proceed if it exists
+            // lgtm[js/path-injection] - Path is validated with fs.realpathSync and startsWith check
+            if (fs.existsSync(realPath)) {
+              // lgtm[js/path-injection] - Path is validated with fs.realpathSync and startsWith check
+              const jsonContent = fs.readFileSync(realPath, 'utf8');
+              const jsonData = JSON.parse(jsonContent);
+              detailedData = { ...detailedData, ...jsonData };
+            }
           }
         } catch (error) {
           // fs.realpathSync throws if file doesn't exist, which is fine

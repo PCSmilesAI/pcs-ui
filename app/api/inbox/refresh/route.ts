@@ -45,10 +45,12 @@ function isInCooldown(email: string): boolean {
     return false;
   }
 
+  // lgtm[js/path-injection] - Path is validated with isPathWithinBase check
   if (!fs.existsSync(cooldownPath)) {
     return false;
   }
 
+  // lgtm[js/path-injection] - Path is validated with isPathWithinBase check
   const lockAge = Date.now() - fs.statSync(cooldownPath).mtimeMs;
   const cooldownMs = 30000; // 30 seconds
 
@@ -58,6 +60,7 @@ function isInCooldown(email: string): boolean {
 
   // Cooldown expired, remove lock
   try {
+    // lgtm[js/path-injection] - Path is validated with isPathWithinBase check
     fs.unlinkSync(cooldownPath);
   } catch (e) {
     // Ignore errors
