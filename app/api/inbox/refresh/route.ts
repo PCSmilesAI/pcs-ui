@@ -74,7 +74,7 @@ function setCooldown(email: string): void {
     return;
   }
 
-  fs.writeFileSync(cooldownPath, `${Date.now()}\n${email}\n`);
+  fs.writeFileSync(cooldownPath, `${Date.now()}\n${email}\n`); // lgtm[js/path-injection]
 }
 
 function isGlobalScanBusy(): boolean {
