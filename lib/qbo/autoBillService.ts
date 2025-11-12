@@ -1,6 +1,8 @@
 import fs from 'fs';
+import path from 'path';
 import { qboClient } from './qboClient';
 import { createBillFromInvoice, InvoiceData as BillInvoiceData } from './billCreationService';
+import { isPathWithinBase } from '../security/path-validation';
 
 export type InvoiceData = BillInvoiceData & {
   invoice_number: string;
@@ -67,12 +69,19 @@ export class AutoBillService {
     try {
       console.log('🔄 AutoBillService: Processing approved invoice:', invoiceData.invoice_number);
       let detailedData: BillInvoiceData = { ...invoiceData };
-      if (invoiceData.json_path && fs.existsSync(invoiceData.json_path)) {
-        try {
-          const jsonData = JSON.parse(fs.readFileSync(invoiceData.json_path, 'utf8'));
-          detailedData = { ...detailedData, ...jsonData };
-        } catch (error) {
-          console.warn('⚠️ Could not load detailed JSON data:', error);
+
+      // SECURITY: Validate json_path to prevent path traversal attacks
+      if (invoiceData.json_path) {
+        const baseDir = process.cwd();
+        if (!isPathWithinBase(invoiceData.json_path, baseDir)) {
+          console.error('❌ Path traversal attempt detected in json_path:', invoiceData.json_path);
+        } else if (fs.existsSync(invoiceData.json_path)) {
+          try {
+            const jsonData = JSON.parse(fs.readFileSync(invoiceData.json_path, 'utf8'));
+            detailedData = { ...detailedData, ...jsonData };
+          } catch (error) {
+            console.warn('⚠️ Could not load detailed JSON data:', error);
+          }
         }
       }
 
