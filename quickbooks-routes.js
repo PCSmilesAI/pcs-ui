@@ -3,6 +3,18 @@ const router = express.Router();
 const OAuthClient = require('intuit-oauth');
 const { tokenManager } = require('./database');
 
+// SECURITY: Simple HTML escaping function to prevent XSS
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+  return String(text).replace(/[&<>"']/g, (char) => map[char] || char);
+}
+
 // Initialize QuickBooks client
 const oauthClient = new OAuthClient({
     clientId: process.env.QB_CLIENT_ID,
@@ -53,7 +65,9 @@ router.get('/callback', async (req, res) => {
         
     } catch (error) {
         console.error('OAuth callback error:', error);
-        res.status(500).send('Authentication failed: ' + error.message);
+        // SECURITY: Escape error message to prevent XSS through exception text
+        const safeMessage = escapeHtml(error.message || 'Unknown error');
+        res.status(500).send('Authentication failed: ' + safeMessage);
     }
 });
 
