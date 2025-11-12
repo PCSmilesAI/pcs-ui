@@ -16,11 +16,19 @@ function escapeHtml(text) {
   return String(text).replace(/[&<>"']/g, (char) => map[char] || char);
 }
 
-// SECURITY: Rate limiting for OAuth callback to prevent DoS attacks
+// SECURITY: Rate limiting for OAuth flows to prevent DoS attacks
 const oauthCallbackLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // 10 requests per 15 minutes per IP
   message: 'Too many OAuth callback attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const oauthAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 requests per 15 minutes per IP (more lenient for auth initiation)
+  message: 'Too many OAuth auth attempts, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -34,7 +42,7 @@ const oauthClient = new OAuthClient({
 });
 
 // Start OAuth flow
-router.get('/auth', (req, res) => {
+router.get('/auth', oauthAuthLimiter, (req, res) => {
     const authUri = oauthClient.authorizeUri({
         scope: [
             OAuthClient.scopes.Accounting,
