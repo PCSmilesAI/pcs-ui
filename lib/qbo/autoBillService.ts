@@ -72,28 +72,26 @@ export class AutoBillService {
 
       // SECURITY: Validate json_path to prevent path traversal attacks
       if (invoiceData.json_path && typeof invoiceData.json_path === 'string') {
-        const baseDir = process.cwd();
         try {
+          const baseDir = process.cwd();
           // SECURITY: Use fs.realpathSync to fully resolve the path and detect traversal attempts
           const realPath = fs.realpathSync(invoiceData.json_path);
+          const normalizedBase = fs.realpathSync(baseDir);
 
           // SECURITY: Verify the resolved path is within the base directory
-          if (realPath.startsWith(baseDir + path.sep) || realPath === baseDir) {
-            try {
-              // SECURITY: Path has been validated, safe to use
-              if (fs.existsSync(realPath)) {
-                const jsonData = JSON.parse(fs.readFileSync(realPath, 'utf8'));
-                detailedData = { ...detailedData, ...jsonData };
-              }
-            } catch (error) {
-              console.warn('⚠️ Could not load detailed JSON data:', error);
-            }
-          } else {
+          const isWithinBase = realPath.startsWith(normalizedBase + path.sep) || realPath === normalizedBase;
+
+          if (!isWithinBase) {
             console.error('❌ Path traversal attempt detected in json_path:', invoiceData.json_path);
+          } else if (fs.existsSync(realPath)) {
+            // SECURITY: Path has been validated and confirmed to exist
+            const jsonContent = fs.readFileSync(realPath, 'utf8');
+            const jsonData = JSON.parse(jsonContent);
+            detailedData = { ...detailedData, ...jsonData };
           }
         } catch (error) {
           // fs.realpathSync throws if file doesn't exist, which is fine
-          console.warn('⚠️ JSON path does not exist:', invoiceData.json_path);
+          console.warn('⚠️ Could not load detailed JSON data:', error);
         }
       }
 
