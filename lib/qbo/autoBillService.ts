@@ -84,9 +84,10 @@ export class AutoBillService {
           if (!isWithinBase) {
             console.error('❌ Path traversal attempt detected in json_path:', invoiceData.json_path);
           } else {
-            // SECURITY: Path has been validated - only proceed if it exists
-            if (fs.existsSync(realPath)) { // lgtm[js/path-injection]
-              const jsonContent = fs.readFileSync(realPath, 'utf8'); // lgtm[js/path-injection]
+            // SECURITY: Path has been validated - safe to use
+            if (fs.existsSync(realPath)) {
+              // SECURITY: Path validated above - safe to use
+              const jsonContent = fs.readFileSync(realPath, 'utf8');
               const jsonData = JSON.parse(jsonContent);
               detailedData = { ...detailedData, ...jsonData };
             }

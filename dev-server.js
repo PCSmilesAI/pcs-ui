@@ -954,7 +954,13 @@ app.post('/remove-invoice', async (req, res) => {
       ];
       for (const filePath of candidates) {
         try {
-          if (fs.existsSync(filePath)) fs.unlinkSync(filePath); // lgtm[js/path-injection]
+          // SECURITY: Validate resolved path before use
+          const resolvedPath = path.resolve(filePath);
+          if (isPathWithinBase(resolvedPath, __dirname) || isPathWithinBase(resolvedPath, path.join(__dirname, 'public'))) {
+            if (fs.existsSync(resolvedPath)) {
+              fs.unlinkSync(resolvedPath);
+            }
+          }
         } catch (_) {}
       }
     };
@@ -1373,7 +1379,8 @@ app.post('/api/webhooks/quickbooks', async (req, res) => {
             });
 
           } catch (error) {
-            console.error(`❌ Error processing entity ${entity.name}:`, error); // lgtm[js/tainted-format-string]
+            // SECURITY: Use safe logging to prevent format string injection
+            console.error('❌ Error processing entity:', entity.name, error);
             processedEvents.push({
               entity: entity.name,
               id: entity.id,
@@ -1431,7 +1438,8 @@ async function processQuickBooksEvent(entity, realmId) {
     }
 
   } catch (error) {
-    console.error(`❌ Error processing QuickBooks event ${entity.name}:`, error); // lgtm[js/tainted-format-string]
+    // SECURITY: Use safe logging to prevent format string injection
+    console.error('❌ Error processing QuickBooks event:', entity.name, error);
     throw error;
   }
 }
@@ -2393,16 +2401,20 @@ async function attachPDFToBill(billId, pdfPath) {
       throw new Error('Invalid PDF path: path traversal detected');
     }
 
-    // Resolve the full path
+    // Resolve the full path and validate again after resolution
     const fullPath = path.resolve(pdfPath);
+    if (!isPathWithinBase(fullPath, __dirname)) {
+      throw new Error('Invalid PDF path: resolved path outside base directory');
+    }
     console.log('📁 Full PDF path:', fullPath);
 
-    if (!fs.existsSync(fullPath)) { // lgtm[js/path-injection]
+    // SECURITY: Path validated - safe to use
+    if (!fs.existsSync(fullPath)) {
       throw new Error(`PDF file not found: ${fullPath}`);
     }
 
-    // Read the PDF file as base64
-    const pdfBuffer = fs.readFileSync(fullPath); // lgtm[js/path-injection]
+    // SECURITY: Path validated - safe to use
+    const pdfBuffer = fs.readFileSync(fullPath);
     const base64Data = pdfBuffer.toString('base64');
     
     console.log('📄 PDF file read successfully, size:', pdfBuffer.length, 'bytes');
@@ -2477,9 +2489,16 @@ app.post('/api/qbo/test-pdf-attachment', async (req, res) => {
       });
     }
 
+    // Resolve the full path and validate again after resolution
     const fullPath = path.resolve(pdfPath);
+    if (!isPathWithinBase(fullPath, __dirname)) {
+      return res.status(400).json({
+        error: 'Invalid PDF path: resolved path outside base directory'
+      });
+    }
 
-    if (!fs.existsSync(fullPath)) { // lgtm[js/path-injection]
+    // SECURITY: Path validated - safe to use
+    if (!fs.existsSync(fullPath)) {
       return res.status(400).json({
         error: 'PDF file not found',
         providedPath: pdfPath,
