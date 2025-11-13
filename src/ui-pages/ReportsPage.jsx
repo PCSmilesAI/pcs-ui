@@ -13,6 +13,8 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [totalPaid, setTotalPaid] = useState(0);
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -33,7 +35,7 @@ export default function ReportsPage() {
         const data = Array.isArray(payload.invoices) ? payload.invoices : [];
 
         // Map to generic structure used by reports
-        // Uses effective values (corrected > parsed) from database
+        // Only include OUTSTANDING (unpaid) invoices, matching VendorsPage logic
         const mapped = (data || []).map((inv) => {
           // Get the effective vendor name (corrected takes precedence over parsed)
           const vendorName = inv.vendor_name || inv.vendor || 'Unknown';
@@ -65,10 +67,15 @@ export default function ReportsPage() {
             ? rawTotal // Already in dollars from API
             : parseFloat(String(rawTotal || '0').replace(/[^0-9.-]/g, '')) || 0;
 
+          // Only include outstanding (unpaid) invoices
+          const isPaid = inv.status === 'paid';
+          const outstandingAmount = isPaid ? 0 : amount;
+
           return {
             vendor: vendorName,
-            amount,
+            amount: outstandingAmount,
             date: isoDate,
+            isPaid,
           };
         });
         setInvoices(mapped);
@@ -81,6 +88,33 @@ export default function ReportsPage() {
       }
     };
     load();
+  }, []);
+
+  // Fetch total amount paid from Stripe
+  useEffect(() => {
+    const fetchPaidAmount = async () => {
+      try {
+        const response = await fetch('/api/stripe/status', {
+          method: 'GET',
+          cache: 'no-store',
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Calculate total from successful charges
+          if (data.charges && Array.isArray(data.charges)) {
+            const total = data.charges
+              .filter(c => c.status === 'succeeded')
+              .reduce((sum, c) => sum + (c.amount || 0), 0);
+            setTotalPaid(total / 100); // Convert from cents to dollars
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch Stripe payment history:', err);
+        // Don't show error to user, just leave as 0
+      }
+    };
+    fetchPaidAmount();
   }, []);
 
   // Determine current month and year for filtering.
@@ -236,8 +270,14 @@ export default function ReportsPage() {
           </div>
         ))}
       </div>
-      {/* Total amount paid */}
-      <h2 style={sectionTitleStyle}>Total Amount Paid</h2>
+      {/* Total amount paid (from Stripe) */}
+      <h2 style={sectionTitleStyle}>Total Amount Paid (via Stripe)</h2>
+      <div style={{ fontSize: '20px', fontWeight: '600', color: '#357ab2', marginBottom: '16px' }}>
+        ${totalPaid.toFixed(2)}
+      </div>
+
+      {/* Outstanding amount (unpaid invoices) */}
+      <h2 style={sectionTitleStyle}>Outstanding Amount (Unpaid Invoices)</h2>
       <div style={{ fontSize: '20px', fontWeight: '600', color: '#357ab2', marginBottom: '16px' }}>
         ${grandTotal.toFixed(2)}
       </div>
