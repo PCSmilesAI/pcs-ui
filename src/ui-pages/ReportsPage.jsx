@@ -59,9 +59,10 @@ export default function ReportsPage() {
           }
 
           // Get the effective amount (use invoice_total or total, parse if string)
+          // Note: API returns invoice_total and total as REAL (dollars), not cents
           const rawTotal = inv.invoice_total ?? inv.total;
           const amount = typeof rawTotal === 'number'
-            ? rawTotal / 100 // Convert from cents if needed
+            ? rawTotal // Already in dollars from API
             : parseFloat(String(rawTotal || '0').replace(/[^0-9.-]/g, '')) || 0;
 
           return {
