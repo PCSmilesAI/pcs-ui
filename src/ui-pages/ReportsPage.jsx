@@ -17,32 +17,55 @@ export default function ReportsPage() {
     const load = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/invoice_queue.json?t=${Date.now()}`, {
+        // Use the same API endpoint as AllInvoicesPage to get current invoice data
+        const params = typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search)
+          : new URLSearchParams();
+        params.set('limit', '5000');
+        const response = await fetch(`/api/invoices/visible?${params.toString()}`, {
           method: 'GET',
-          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+          cache: 'no-store',
+          credentials: 'include',
         });
         if (!response.ok) throw new Error(`Failed to load invoices: ${response.status}`);
-        let data = await response.json();
-        // Apply client-side overrides (mirrors list pages)
-        // Status overrides removed - using direct API calls
+        const payload = await response.json();
+        if (!payload?.ok) throw new Error(payload?.error || 'Failed to load invoices');
+        const data = Array.isArray(payload.invoices) ? payload.invoices : [];
 
         // Map to generic structure used by reports
+        // Uses effective values (corrected > parsed) from database
         const mapped = (data || []).map((inv) => {
-          // invoice_date is typically MM/DD/YY or MM/DD/YYYY
-          let y = '2000', m = '01', d = '01';
+          // Get the effective vendor name (corrected takes precedence over parsed)
+          const vendorName = inv.vendor_name || inv.vendor || 'Unknown';
+
+          // Parse invoice_date (typically ISO format from API, but handle MM/DD/YY format too)
+          let isoDate = '2000-01-01';
           if (inv.invoice_date) {
-            const parts = String(inv.invoice_date).split('/');
-            if (parts.length === 3) {
-              m = parts[0].padStart(2, '0');
-              d = parts[1].padStart(2, '0');
-              const yy = parts[2];
-              y = yy.length === 2 ? `20${yy}` : yy;
+            const dateStr = String(inv.invoice_date).trim();
+            // Check if it's already ISO format (YYYY-MM-DD)
+            if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+              isoDate = dateStr.substring(0, 10);
+            } else if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dateStr)) {
+              // Handle MM/DD/YY or MM/DD/YYYY format
+              const parts = dateStr.split('/');
+              if (parts.length === 3) {
+                const m = parts[0].padStart(2, '0');
+                const d = parts[1].padStart(2, '0');
+                const yy = parts[2];
+                const y = yy.length === 2 ? `20${yy}` : yy;
+                isoDate = `${y}-${m}-${d}`;
+              }
             }
           }
-          const isoDate = `${y}-${m}-${d}`;
-          const amount = parseFloat(String(inv.total || '0').replace(/[^0-9.]/g, '')) || 0;
+
+          // Get the effective amount (use invoice_total or total, parse if string)
+          const rawTotal = inv.invoice_total ?? inv.total;
+          const amount = typeof rawTotal === 'number'
+            ? rawTotal / 100 // Convert from cents if needed
+            : parseFloat(String(rawTotal || '0').replace(/[^0-9.-]/g, '')) || 0;
+
           return {
-            vendor: inv.vendor || 'Unknown',
+            vendor: vendorName,
             amount,
             date: isoDate,
           };
