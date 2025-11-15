@@ -206,9 +206,6 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
           }
         }}
       />
-      <div className="mt-4 text-xs text-gray-500">
-        Runtime path: {path || 'unknown'} · Version: {String(version || 'n/a')}
-      </div>
     </div>
   );
 }
