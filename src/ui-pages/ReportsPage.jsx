@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { fetchInvoiceQueue } from '../lib/fetchQueue';
 
 /**
  * Reports page summarises invoice data into charts and tables. The
@@ -6,9 +7,12 @@ import React, { useState, useMemo, useEffect } from 'react';
  * application. Users can switch between all‑time, year‑to‑date and
  * month‑to‑date views. Charts are rendered using simple divs with
  * relative widths to approximate a pie chart and bar chart.
+ *
+ * IMPORTANT: Uses the SAME data source as VendorsPage (fetchInvoiceQueue)
+ * to ensure consistent outstanding amounts across the dashboard.
  */
 export default function ReportsPage() {
-  // Dynamically load all invoices from the same source as "All Invoices"
+  // Dynamically load all invoices from the same source as VendorsPage
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,23 +23,11 @@ export default function ReportsPage() {
     const load = async () => {
       try {
         setLoading(true);
-        // Use the same API endpoint as AllInvoicesPage to get current invoice data
-        const params = typeof window !== 'undefined'
-          ? new URLSearchParams(window.location.search)
-          : new URLSearchParams();
-        params.set('limit', '5000');
-        const response = await fetch(`/api/invoices/visible?${params.toString()}`, {
-          method: 'GET',
-          cache: 'no-store',
-          credentials: 'include',
-        });
-        if (!response.ok) throw new Error(`Failed to load invoices: ${response.status}`);
-        const payload = await response.json();
-        if (!payload?.ok) throw new Error(payload?.error || 'Failed to load invoices');
-        const data = Array.isArray(payload.invoices) ? payload.invoices : [];
+        // Use SAME data source as VendorsPage to ensure consistency
+        const data = await fetchInvoiceQueue({ limit: 5000 });
 
         // Map to generic structure used by reports
-        // Only include OUTSTANDING (unpaid) invoices, matching VendorsPage logic
+        // Only include OUTSTANDING (unpaid) invoices, matching VendorsPage logic exactly
         const mapped = (data || []).map((inv) => {
           // Get the effective vendor name (corrected takes precedence over parsed)
           const vendorName = inv.vendor_name || inv.vendor || 'Unknown';
@@ -60,16 +52,23 @@ export default function ReportsPage() {
             }
           }
 
-          // Get the effective amount (use invoice_total or total, parse if string)
-          // Note: API returns invoice_total and total as REAL (dollars), not cents
-          const rawTotal = inv.invoice_total ?? inv.total;
-          const amount = typeof rawTotal === 'number'
-            ? rawTotal // Already in dollars from API
-            : parseFloat(String(rawTotal || '0').replace(/[^0-9.-]/g, '')) || 0;
+          // Parse amount - EXACTLY matching VendorsPage logic (lines 64-74)
+          // Handle both cents and dollar formats
+          let amountNum = 0;
+          const amountStr = String(inv.amount_cents ?? inv.invoice_total ?? inv.total ?? '0');
+          if (amountStr.includes('.')) {
+            // Dollar format
+            amountNum = parseFloat(amountStr);
+          } else {
+            // Cents format - convert to dollars
+            amountNum = parseInt(amountStr, 10) / 100;
+          }
+          amountNum = isNaN(amountNum) ? 0 : amountNum;
 
           // Only include outstanding (unpaid) invoices
+          // EXACTLY matching VendorsPage logic (lines 78-79)
           const isPaid = inv.status === 'paid';
-          const outstandingAmount = isPaid ? 0 : amount;
+          const outstandingAmount = isPaid ? 0 : amountNum;
 
           return {
             vendor: vendorName,
