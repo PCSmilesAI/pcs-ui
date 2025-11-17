@@ -4,14 +4,16 @@
     "mckaym@pacificcrestsmiles.com"
   ],
   "ap_authorizers": [
-    "business@pcsmilesai.com"
+    "business@pcsmilesai.com",
+    "mckaym@pacificcrestsmiles.com"
   ],
   "office_managers": {
     "Milwaukie": [
-      "business@pcsmilesai.com"
+      "business@pcsmilesai.com",
+      "mckaym@pacificcrestsmiles.com"
     ]
   },
   "threshold_usd": 1000,
   "test_mode_route_all_to_admin": true,
-  "version": 5
+  "version": 6
 }
