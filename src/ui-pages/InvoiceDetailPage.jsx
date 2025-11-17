@@ -74,6 +74,9 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [lineCategories, setLineCategories] = useState({});
   const [loadingLineCategories, setLoadingLineCategories] = useState(false);
   const [toast, setToast] = useState(null);
+  const [paymentDetails, setPaymentDetails] = useState(null);
+  const [loadingPaymentDetails, setLoadingPaymentDetails] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -323,6 +326,59 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       loadLineCategories();
     }
   }, [invoiceIdentifier, loadLineCategories]);
+
+  // Load payment details for paid invoices
+  useEffect(() => {
+    const loadPaymentDetails = async () => {
+      const status = (invoice?.status || '').toLowerCase();
+      if (status !== 'paid' && status !== 'completed') {
+        setPaymentDetails(null);
+        return;
+      }
+
+      // If we already have payment details, don't reload
+      if (paymentDetails) return;
+
+      try {
+        setLoadingPaymentDetails(true);
+        const stripeTransferId = invoice?.stripe_transfer_id;
+        const vendorName = invoice?.vendor || invoice?.vendor_name;
+
+        if (!stripeTransferId || !vendorName) {
+          setPaymentDetails(null);
+          return;
+        }
+
+        // Fetch payment details from Stripe
+        const response = await fetch(
+          `/api/stripe/payment-history?vendor=${encodeURIComponent(vendorName)}&t=${Date.now()}`,
+          { cache: 'no-store', credentials: 'include' }
+        );
+
+        if (!response.ok) {
+          console.warn('Failed to load payment details');
+          setPaymentDetails(null);
+          return;
+        }
+
+        const data = await response.json();
+        if (data?.ok && data?.paymentHistory) {
+          // Find the payment matching this transfer ID
+          const payment = data.paymentHistory.find(p => p.id === stripeTransferId);
+          if (payment) {
+            setPaymentDetails(payment);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading payment details:', error);
+        setPaymentDetails(null);
+      } finally {
+        setLoadingPaymentDetails(false);
+      }
+    };
+
+    loadPaymentDetails();
+  }, [invoice?.status, invoice?.stripe_transfer_id, invoice?.vendor, invoice?.vendor_name]);
 
   if (!invoice) {
     return (
@@ -1121,24 +1177,72 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
             </table>
             <table style={{ ...tableStyle, marginTop: '12px' }}>
               <tbody>
-                <tr>
-                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Payment Amount</td>
-                  <td style={cellStyle}>
-                    <input
-                      type="text"
-                      value={paymentAmount}
-                      onChange={(e) => setPaymentAmount(e.target.value)}
-                      style={{
-                        border: '1px solid #cbd5e0',
-                        borderRadius: '4px',
-                        padding: '4px 8px',
-                        fontSize: '14px',
-                        width: '80px',
-                      }}
-                    />
-                  </td>
-                  <td style={{ ...cellStyle, fontWeight: '600', color: statusMeta.fg }}>{statusMeta.label}</td>
-                </tr>
+                {statusValue === 'paid' || statusValue === 'completed' ? (
+                  // Payment Details Row for Paid Invoices
+                  <tr>
+                    <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Payment Details</td>
+                    <td style={cellStyle}>
+                      {loadingPaymentDetails ? (
+                        <span style={{ color: '#357ab2' }}>Loading...</span>
+                      ) : paymentDetails ? (
+                        <span>
+                          {new Date(paymentDetails.date).toLocaleDateString('en-US', {
+                            month: '2-digit',
+                            day: '2-digit',
+                            year: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#999' }}>N/A</span>
+                      )}
+                    </td>
+                    <td style={cellStyle}>
+                      <strong>${paymentAmount.replace(/[^0-9.]/g, '')}</strong>
+                    </td>
+                    <td style={cellStyle}>
+                      {paymentDetails ? (
+                        <button
+                          onClick={() => setSelectedPayment(paymentDetails)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#357ab2',
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                            fontWeight: '500',
+                            padding: 0,
+                          }}
+                        >
+                          Receipt
+                        </button>
+                      ) : (
+                        <span style={{ color: '#999' }}>N/A</span>
+                      )}
+                    </td>
+                  </tr>
+                ) : (
+                  // Original Payment Amount Row for Non-Paid Invoices
+                  <tr>
+                    <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Payment Amount</td>
+                    <td style={cellStyle}>
+                      <input
+                        type="text"
+                        value={paymentAmount}
+                        onChange={(e) => setPaymentAmount(e.target.value)}
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '14px',
+                          width: '80px',
+                        }}
+                      />
+                    </td>
+                    <td style={{ ...cellStyle, fontWeight: '600', color: statusMeta.fg }}>{statusMeta.label}</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -1478,7 +1582,188 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           )}
         </div>
       </div>
+
+      {/* Payment Receipt Modal */}
+      {selectedPayment && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: 8,
+            maxWidth: '800px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            position: 'relative',
+            padding: 24,
+          }}>
+            <button
+              onClick={() => setSelectedPayment(null)}
+              style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                background: 'none',
+                border: 'none',
+                fontSize: 24,
+                cursor: 'pointer',
+                color: '#357ab2',
+              }}
+            >
+              ✕
+            </button>
+            <PaymentReceiptModal payment={selectedPayment} invoice={invoice} />
+          </div>
+        </div>
+      )}
+
       <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
+    </div>
+  );
+}
+
+// Inline component for payment receipt display
+function PaymentReceiptModal({ payment, invoice }) {
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!payment || !invoice) return;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+        // For a single invoice, just use the current invoice
+        setInvoices([invoice]);
+      } catch (e) {
+        console.error('Failed to load invoice details:', e);
+        setInvoices([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [payment, invoice]);
+
+  const sectionStyle = { marginBottom: 20 };
+  const sectionTitleStyle = { fontSize: 14, fontWeight: 600, color: '#357ab2', marginBottom: 12 };
+
+  return (
+    <div>
+      <div style={{ fontSize: 18, fontWeight: 600, color: '#357ab2', marginBottom: 20 }}>Payment Receipt</div>
+
+      {/* Stripe Receipt Section */}
+      <div style={sectionStyle}>
+        <div style={sectionTitleStyle}>Stripe Receipt</div>
+        <div style={{ marginBottom: 8 }}>
+          <strong>Payment ID:</strong> {payment.id}
+        </div>
+        <div style={{ marginBottom: 8 }}>
+          <strong>Date Paid:</strong>{' '}
+          {new Date(payment.date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </div>
+        <div style={{ marginBottom: 8 }}>
+          <strong>Amount:</strong> ${payment.amount.toFixed(2)}
+        </div>
+        <div style={{ marginBottom: 8 }}>
+          <strong>Status:</strong> <span style={{ color: '#16a34a' }}>Succeeded</span>
+        </div>
+        {payment.receiptUrl && (
+          <div>
+            <a
+              href={payment.receiptUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#357ab2', textDecoration: 'none', fontWeight: 500 }}
+            >
+              View Full Stripe Receipt →
+            </a>
+          </div>
+        )}
+      </div>
+
+      {/* PCS Dashboard Receipt Section */}
+      <div style={sectionStyle}>
+        <div style={sectionTitleStyle}>PCS Dashboard Receipt</div>
+        <div style={{ marginBottom: 8 }}>
+          <strong>Vendor:</strong> {invoice?.vendor || invoice?.vendor_name || 'N/A'}
+        </div>
+        <div style={{ marginBottom: 8 }}>
+          <strong>Total Amount Paid:</strong> ${payment.amount.toFixed(2)}
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <strong>Invoices Paid:</strong> {invoices.length}
+        </div>
+
+        {loading && <div style={{ color: '#357ab2' }}>Loading invoice details...</div>}
+
+        {invoices.length > 0 && (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 13 }}>Invoices Included:</div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '1px solid #357ab2' }}>
+                    <th style={{ padding: '6px', textAlign: 'left', fontWeight: 600 }}>Invoice #</th>
+                    <th style={{ padding: '6px', textAlign: 'left', fontWeight: 600 }}>Amount</th>
+                    <th style={{ padding: '6px', textAlign: 'left', fontWeight: 600 }}>Date</th>
+                    <th style={{ padding: '6px', textAlign: 'left', fontWeight: 600 }}>PDF</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((inv, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                      <td style={{ padding: '6px' }}>{inv.invoice_number || inv.invoice || 'N/A'}</td>
+                      <td style={{ padding: '6px' }}>
+                        ${(inv.invoice_total || inv.total || inv.amount || 0).toFixed(2)}
+                      </td>
+                      <td style={{ padding: '6px' }}>
+                        {inv.invoice_date
+                          ? new Date(inv.invoice_date).toLocaleDateString('en-US')
+                          : 'N/A'}
+                      </td>
+                      <td style={{ padding: '6px' }}>
+                        {inv.pdf_path ? (
+                          <a
+                            href={inv.pdf_path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: '#357ab2', textDecoration: 'none', fontSize: '11px' }}
+                          >
+                            View
+                          </a>
+                        ) : (
+                          'N/A'
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {!loading && invoices.length === 0 && (
+          <div style={{ color: '#5a5a5a', fontSize: '12px' }}>No invoices found for this payment</div>
+        )}
+      </div>
     </div>
   );
 }
