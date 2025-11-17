@@ -1642,11 +1642,33 @@ function PaymentReceiptModal({ payment, invoice }) {
     const load = async () => {
       try {
         setLoading(true);
-        // For a single invoice, just use the current invoice
-        setInvoices([invoice]);
+
+        // Get all invoice IDs from the payment metadata
+        const invoiceIds = payment.invoiceIds || [];
+
+        if (invoiceIds.length === 0) {
+          // Fallback to current invoice if no metadata
+          setInvoices([invoice]);
+          return;
+        }
+
+        // Fetch all invoices associated with this payment
+        const invoicePromises = invoiceIds.map(id =>
+          fetch(`/api/invoices/${id}?t=${Date.now()}`, {
+            cache: 'no-store',
+            credentials: 'include',
+          })
+            .then(res => res.ok ? res.json() : null)
+            .catch(() => null)
+        );
+
+        const results = await Promise.all(invoicePromises);
+        const loadedInvoices = results.filter(Boolean);
+
+        setInvoices(loadedInvoices.length > 0 ? loadedInvoices : [invoice]);
       } catch (e) {
         console.error('Failed to load invoice details:', e);
-        setInvoices([]);
+        setInvoices([invoice]);
       } finally {
         setLoading(false);
       }
