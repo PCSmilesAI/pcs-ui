@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,20 +26,45 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Fetch all charges from Stripe
-    // Filter by metadata.vendor if available, or by description
-    const charges = await stripe.charges.list({
-      limit: 100,
-      expand: ['data.refunds'],
-    });
+    let allCharges: any[] = [];
+
+    // Try to fetch from Stripe
+    try {
+      const charges = await stripe.charges.list({
+        limit: 100,
+        expand: ['data.refunds'],
+      });
+      allCharges = charges.data;
+    } catch (stripeError: any) {
+      console.warn('[STRIPE][PAYMENT_HISTORY] Stripe API error, checking for mock charges:', stripeError?.message);
+      // Fall through to check for mock charges
+    }
+
+    // In test/development mode, also load mock charges from file
+    const isTestMode = process.env.NODE_ENV === 'development' || process.env.STRIPE_TEST_MODE === 'true';
+    if (isTestMode) {
+      try {
+        const dataDir = process.env.PCS_DATA_DIR || path.join(process.cwd(), 'pcs_ui_data');
+        const mockChargesFile = path.join(dataDir, 'mock-stripe-charges.json');
+
+        if (fs.existsSync(mockChargesFile)) {
+          const mockChargesData = fs.readFileSync(mockChargesFile, 'utf-8');
+          const mockCharges = JSON.parse(mockChargesData);
+          console.log('[STRIPE][PAYMENT_HISTORY] Loaded mock charges from file');
+          allCharges = [...allCharges, ...mockCharges];
+        }
+      } catch (mockError: any) {
+        console.warn('[STRIPE][PAYMENT_HISTORY] Could not load mock charges:', mockError?.message);
+      }
+    }
 
     // Filter charges for this vendor
     // Charges can have metadata with vendor info, or we can match by description
-    const vendorCharges = charges.data.filter((charge) => {
+    const vendorCharges = allCharges.filter((charge) => {
       const metadata = charge.metadata || {};
       const chargeVendor = metadata.vendor || metadata.vendorName || '';
       const description = charge.description || '';
-      
+
       // Match if vendor is in metadata or description
       return (
         chargeVendor.toLowerCase().includes(vendor.toLowerCase()) ||
