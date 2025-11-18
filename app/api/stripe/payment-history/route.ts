@@ -49,10 +49,7 @@ export async function GET(req: NextRequest) {
         path.join(process.cwd(), '..', 'pcs-ui-data', 'mock-stripe-charges.json'),
       ].filter(Boolean) as string[];
 
-      console.log('[STRIPE][PAYMENT_HISTORY] Looking for mock charges in:', possiblePaths);
-
       for (const mockChargesFile of possiblePaths) {
-        console.log('[STRIPE][PAYMENT_HISTORY] Checking:', mockChargesFile, 'exists:', fs.existsSync(mockChargesFile));
         if (fs.existsSync(mockChargesFile)) {
           const mockChargesData = fs.readFileSync(mockChargesFile, 'utf-8');
           const mockCharges = JSON.parse(mockChargesData);
@@ -61,14 +58,13 @@ export async function GET(req: NextRequest) {
           break;
         }
       }
-
-      console.log('[STRIPE][PAYMENT_HISTORY] Total charges after loading mock:', allCharges.length);
     } catch (mockError: any) {
       console.warn('[STRIPE][PAYMENT_HISTORY] Could not load mock charges:', mockError?.message);
     }
 
     // Filter charges for this vendor
     // Charges can have metadata with vendor info, or we can match by description
+    console.log('[STRIPE][PAYMENT_HISTORY] Total charges before filtering:', allCharges.length);
     const vendorCharges = allCharges.filter((charge) => {
       const metadata = charge.metadata || {};
       const chargeVendor = metadata.vendor || metadata.vendorName || '';
@@ -80,6 +76,7 @@ export async function GET(req: NextRequest) {
         description.toLowerCase().includes(vendor.toLowerCase())
       );
     });
+    console.log('[STRIPE][PAYMENT_HISTORY] Vendor charges after filtering:', vendorCharges.length);
 
     // Transform charges into payment history format
     const paymentHistory = vendorCharges
