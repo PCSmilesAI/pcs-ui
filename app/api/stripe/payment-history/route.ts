@@ -7,16 +7,6 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    if (!stripeSecretKey) {
-      return NextResponse.json(
-        { ok: false, error: 'Stripe not configured' },
-        { status: 500 }
-      );
-    }
-
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2024-06-20' });
-
     // Get vendor from query params
     const vendor = req.nextUrl.searchParams.get('vendor');
     if (!vendor) {
@@ -28,18 +18,24 @@ export async function GET(req: NextRequest) {
 
     let allCharges: any[] = [];
 
-    // Try to fetch from Stripe
-    try {
-      console.log('[STRIPE][PAYMENT_HISTORY] Fetching charges from Stripe API...');
-      const charges = await stripe.charges.list({
-        limit: 100,
-        expand: ['data.refunds'],
-      });
-      console.log('[STRIPE][PAYMENT_HISTORY] Got', charges.data.length, 'charges from Stripe');
-      allCharges = charges.data;
-    } catch (stripeError: any) {
-      console.warn('[STRIPE][PAYMENT_HISTORY] Stripe API error:', stripeError?.message);
-      // Fall through to check for mock charges
+    // Try to fetch from Stripe if configured
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    if (stripeSecretKey) {
+      try {
+        console.log('[STRIPE][PAYMENT_HISTORY] Fetching charges from Stripe API...');
+        const stripe = new Stripe(stripeSecretKey, { apiVersion: '2024-06-20' });
+        const charges = await stripe.charges.list({
+          limit: 100,
+          expand: ['data.refunds'],
+        });
+        console.log('[STRIPE][PAYMENT_HISTORY] Got', charges.data.length, 'charges from Stripe');
+        allCharges = charges.data;
+      } catch (stripeError: any) {
+        console.warn('[STRIPE][PAYMENT_HISTORY] Stripe API error:', stripeError?.message);
+        // Fall through to check for mock charges
+      }
+    } else {
+      console.log('[STRIPE][PAYMENT_HISTORY] Stripe not configured, will use mock charges if available');
     }
 
     // Load mock charges from file if it exists (for testing)
