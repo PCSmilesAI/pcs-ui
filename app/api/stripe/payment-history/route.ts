@@ -30,13 +30,15 @@ export async function GET(req: NextRequest) {
 
     // Try to fetch from Stripe
     try {
+      console.log('[STRIPE][PAYMENT_HISTORY] Fetching charges from Stripe API...');
       const charges = await stripe.charges.list({
         limit: 100,
         expand: ['data.refunds'],
       });
+      console.log('[STRIPE][PAYMENT_HISTORY] Got', charges.data.length, 'charges from Stripe');
       allCharges = charges.data;
     } catch (stripeError: any) {
-      console.warn('[STRIPE][PAYMENT_HISTORY] Stripe API error, checking for mock charges:', stripeError?.message);
+      console.warn('[STRIPE][PAYMENT_HISTORY] Stripe API error:', stripeError?.message);
       // Fall through to check for mock charges
     }
 
