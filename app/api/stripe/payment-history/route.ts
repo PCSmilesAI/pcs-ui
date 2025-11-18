@@ -98,6 +98,8 @@ export async function GET(req: NextRequest) {
       vendor,
       paymentHistory,
       total: paymentHistory.length,
+      _timestamp: new Date().toISOString(),
+      _chargesLoaded: allCharges.length,
     });
   } catch (error: any) {
     console.error('[STRIPE][PAYMENT_HISTORY]', error);
