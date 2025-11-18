@@ -49,16 +49,25 @@ export async function GET(req: NextRequest) {
         path.join(process.cwd(), '..', 'pcs-ui-data', 'mock-stripe-charges.json'),
       ].filter(Boolean) as string[];
 
+      // Write debug info to file
+      const debugInfo = `[${new Date().toISOString()}] Looking for mock charges in: ${possiblePaths.join(', ')}\n`;
+      fs.appendFileSync('/tmp/payment-history-debug.log', debugInfo);
+
       for (const mockChargesFile of possiblePaths) {
-        if (fs.existsSync(mockChargesFile)) {
+        const exists = fs.existsSync(mockChargesFile);
+        fs.appendFileSync('/tmp/payment-history-debug.log', `  Checking ${mockChargesFile}: ${exists}\n`);
+
+        if (exists) {
           const mockChargesData = fs.readFileSync(mockChargesFile, 'utf-8');
           const mockCharges = JSON.parse(mockChargesData);
+          fs.appendFileSync('/tmp/payment-history-debug.log', `  Loaded ${mockCharges.length} mock charges\n`);
           console.log('[STRIPE][PAYMENT_HISTORY] Loaded', mockCharges.length, 'mock charges from:', mockChargesFile);
           allCharges = [...allCharges, ...mockCharges];
           break;
         }
       }
     } catch (mockError: any) {
+      fs.appendFileSync('/tmp/payment-history-debug.log', `  Error: ${mockError?.message}\n`);
       console.warn('[STRIPE][PAYMENT_HISTORY] Could not load mock charges:', mockError?.message);
     }
 
