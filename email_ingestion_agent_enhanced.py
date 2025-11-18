@@ -413,6 +413,7 @@ def check_inbox(full_scan=False):
 
     Args:
         full_scan: If True, scan ALL emails (not just unread). Used for one-time full inbox analysis.
+                   In full_scan mode, we compare ALL emails in inbox to database and import missing ones.
     """
     global _last_scan_result
 
@@ -428,7 +429,7 @@ def check_inbox(full_scan=False):
     try:
         # Load existing invoices with efficient lookup structures
         existing_invoices, invoice_numbers, message_ids, tombstones = load_existing_invoices()
-        log(f"[INBOX][SCAN] Loaded {len(existing_invoices)} existing invoices")
+        log(f"[INBOX][SCAN] Loaded {len(existing_invoices)} existing invoices from database")
 
         mail = connect_imap()
         mail.select("INBOX")
@@ -436,7 +437,9 @@ def check_inbox(full_scan=False):
         # Get emails based on scan mode
         if full_scan:
             # FULL SCAN: Get ALL emails (for one-time analysis)
-            log("[INBOX][SCAN][MODE] FULL SCAN - Processing ALL emails in inbox")
+            # In full_scan mode, we DON'T skip already-processed emails
+            # Instead, we compare ALL emails to database and import missing ones
+            log("[INBOX][SCAN][MODE] FULL SCAN - Processing ALL emails in inbox, comparing to database")
             status, messages = mail.uid('search', None, 'ALL')
         else:
             # NORMAL SCAN: Get UNREAD emails only (UNSEEN flag)
@@ -468,10 +471,21 @@ def check_inbox(full_scan=False):
             if isinstance(subject, bytes):
                 subject = subject.decode(errors='ignore')
 
-            # Check if this invoice is already processed (O(1) lookups)
-            if is_invoice_already_processed(subject, invoice_numbers, message_ids, tombstones, source_message_id):
-                skipped_count += 1
-                continue
+            # In full_scan mode, ONLY skip if message was deleted (tombstone)
+            # Otherwise, we want to re-import all emails to ensure database is in sync
+            if full_scan:
+                # Only skip if this message was previously deleted
+                if source_message_id and source_message_id in tombstones:
+                    log(f"[INBOX][TOMBSTONE] Message {source_message_id} was previously deleted, skipping")
+                    skipped_count += 1
+                    continue
+                # In full_scan, we process ALL other emails, even if they look like duplicates
+                log(f"[INBOX][SCAN][FULL] Processing email in full scan mode: {subject}")
+            else:
+                # In normal mode, skip already processed invoices
+                if is_invoice_already_processed(subject, invoice_numbers, message_ids, tombstones, source_message_id):
+                    skipped_count += 1
+                    continue
 
             # Check if email has PDF attachments
             # CRITICAL: Check ALL parts, not just those with Content-Disposition
@@ -500,7 +514,7 @@ def check_inbox(full_scan=False):
                     break
 
             if has_pdf:
-                log(f"[INBOX][SCAN] Processing new invoice email: {subject}")
+                log(f"[INBOX][SCAN] Processing invoice email: {subject}")
                 pdf_files = extract_and_save_pdfs(msg, subject, source_message_id)
                 # Queue PDFs for parallel processing
                 for filepath, detected_vendor in pdf_files:
@@ -508,7 +522,10 @@ def check_inbox(full_scan=False):
                 # CRITICAL FIX: Only mark as read AFTER successfully extracting PDFs
                 # This ensures we don't lose emails if extraction fails
                 if pdf_files:
-                    move_to_processed(mail, uid)
+                    # Only mark as processed in normal mode
+                    # In full_scan mode, leave emails as-is so they can be re-scanned
+                    if not full_scan:
+                        move_to_processed(mail, uid)
                     processed_count += 1
                 else:
                     log(f"[INBOX][SCAN][WARNING] Email had PDF flag but no PDFs extracted: {subject}")

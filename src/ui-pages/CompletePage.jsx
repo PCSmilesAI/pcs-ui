@@ -241,7 +241,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
       const res = await fetch('/api/inbox/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, full_scan: true }),
       });
 
       const result = await res.json();

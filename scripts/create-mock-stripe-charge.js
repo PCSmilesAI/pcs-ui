@@ -21,6 +21,9 @@ if (!fs.existsSync(mockChargesDir)) {
 
 const mockChargesFile = path.join(mockChargesDir, 'mock-stripe-charges.json');
 
+// Extract invoice number from ID if needed
+const invoiceNumber = invoiceId.includes('MOCK') ? invoiceId : `MOCK-${Date.now()}`;
+
 const mockCharge = {
   id: stripeTransferId,
   object: 'charge',
@@ -31,7 +34,7 @@ const mockCharge = {
   created: Math.floor(Date.now() / 1000) - (2 * 24 * 60 * 60), // 2 days ago
   currency: 'usd',
   customer: null,
-  description: 'Payment for invoice MOCK-1763498662595',
+  description: `Payment for invoice ${invoiceNumber}`,
   destination: 'acct_test_vendor',
   dispute: null,
   disputed: false,
@@ -42,7 +45,7 @@ const mockCharge = {
   livemode: false,
   metadata: {
     invoiceIds: invoiceId,
-    invoiceNumber: 'MOCK-1763498662595',
+    invoiceNumber: invoiceNumber,
     vendor: 'Pacific Crest Smiles',
     paidBy: 'business@pcsmilesai.com',
     testMode: 'true',
