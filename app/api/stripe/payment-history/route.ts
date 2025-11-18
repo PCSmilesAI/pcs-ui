@@ -49,15 +49,20 @@ export async function GET(req: NextRequest) {
         path.join(process.cwd(), '..', 'pcs-ui-data', 'mock-stripe-charges.json'),
       ].filter(Boolean) as string[];
 
+      console.log('[STRIPE][PAYMENT_HISTORY] Looking for mock charges in:', possiblePaths);
+
       for (const mockChargesFile of possiblePaths) {
+        console.log('[STRIPE][PAYMENT_HISTORY] Checking:', mockChargesFile, 'exists:', fs.existsSync(mockChargesFile));
         if (fs.existsSync(mockChargesFile)) {
           const mockChargesData = fs.readFileSync(mockChargesFile, 'utf-8');
           const mockCharges = JSON.parse(mockChargesData);
-          console.log('[STRIPE][PAYMENT_HISTORY] Loaded mock charges from:', mockChargesFile);
+          console.log('[STRIPE][PAYMENT_HISTORY] Loaded', mockCharges.length, 'mock charges from:', mockChargesFile);
           allCharges = [...allCharges, ...mockCharges];
           break;
         }
       }
+
+      console.log('[STRIPE][PAYMENT_HISTORY] Total charges after loading mock:', allCharges.length);
     } catch (mockError: any) {
       console.warn('[STRIPE][PAYMENT_HISTORY] Could not load mock charges:', mockError?.message);
     }
