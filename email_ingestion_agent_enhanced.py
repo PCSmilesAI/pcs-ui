@@ -551,10 +551,10 @@ def check_inbox(full_scan=False):
             return
 
         # Second pass: process PDFs in parallel
+        processed_pdfs = 0
+        failed_pdfs = 0
         if pdf_tasks:
             log(f"[INBOX][PARALLEL] Processing {len(pdf_tasks)} PDFs with thread pool")
-            processed_pdfs = 0
-            failed_pdfs = 0
             with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [executor.submit(process_pdf_file, filepath, vendor) for filepath, vendor in pdf_tasks]
                 for future in as_completed(futures):
@@ -573,12 +573,12 @@ def check_inbox(full_scan=False):
                 log(f"[INBOX][PARALLEL][WARNING] {failed_pdfs} PDFs failed to process - check logs")
 
         duration_ms = int((time.time() - start_time) * 1000)
-        log(f"[INBOX][SCAN][END] Processed {processed_count} new, skipped {skipped_count} (no PDF: {no_pdf_count}), duration {duration_ms}ms")
+        log(f"[INBOX][SCAN][END] Processed {processed_pdfs} invoices, skipped {skipped_count} (no PDF: {no_pdf_count}), duration {duration_ms}ms")
 
-        # Update last scan result
+        # Update last scan result - use processed_pdfs (actual invoices added) not processed_count (emails with PDFs)
         _last_scan_result = {
             "timestamp": datetime.now().isoformat(),
-            "added": processed_count,
+            "added": processed_pdfs,
             "skipped": skipped_count,
             "duration_ms": duration_ms,
             "error": None,
