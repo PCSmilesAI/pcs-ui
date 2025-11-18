@@ -49,31 +49,21 @@ export async function GET(req: NextRequest) {
         path.join(process.cwd(), '..', 'pcs-ui-data', 'mock-stripe-charges.json'),
       ].filter(Boolean) as string[];
 
-      // Write debug info to file
-      const debugInfo = `[${new Date().toISOString()}] Looking for mock charges in: ${possiblePaths.join(', ')}\n`;
-      fs.appendFileSync('/tmp/payment-history-debug.log', debugInfo);
-
       for (const mockChargesFile of possiblePaths) {
-        const exists = fs.existsSync(mockChargesFile);
-        fs.appendFileSync('/tmp/payment-history-debug.log', `  Checking ${mockChargesFile}: ${exists}\n`);
-
-        if (exists) {
+        if (fs.existsSync(mockChargesFile)) {
           const mockChargesData = fs.readFileSync(mockChargesFile, 'utf-8');
           const mockCharges = JSON.parse(mockChargesData);
-          fs.appendFileSync('/tmp/payment-history-debug.log', `  Loaded ${mockCharges.length} mock charges\n`);
           console.log('[STRIPE][PAYMENT_HISTORY] Loaded', mockCharges.length, 'mock charges from:', mockChargesFile);
           allCharges = [...allCharges, ...mockCharges];
           break;
         }
       }
     } catch (mockError: any) {
-      fs.appendFileSync('/tmp/payment-history-debug.log', `  Error: ${mockError?.message}\n`);
       console.warn('[STRIPE][PAYMENT_HISTORY] Could not load mock charges:', mockError?.message);
     }
 
     // Filter charges for this vendor
     // Charges can have metadata with vendor info, or we can match by description
-    console.log('[STRIPE][PAYMENT_HISTORY] Total charges before filtering:', allCharges.length);
     const vendorCharges = allCharges.filter((charge) => {
       const metadata = charge.metadata || {};
       const chargeVendor = metadata.vendor || metadata.vendorName || '';
@@ -85,7 +75,6 @@ export async function GET(req: NextRequest) {
         description.toLowerCase().includes(vendor.toLowerCase())
       );
     });
-    console.log('[STRIPE][PAYMENT_HISTORY] Vendor charges after filtering:', vendorCharges.length);
 
     // Transform charges into payment history format
     const paymentHistory = vendorCharges
@@ -107,8 +96,6 @@ export async function GET(req: NextRequest) {
       vendor,
       paymentHistory,
       total: paymentHistory.length,
-      _timestamp: new Date().toISOString(),
-      _chargesLoaded: allCharges.length,
     });
   } catch (error: any) {
     console.error('[STRIPE][PAYMENT_HISTORY]', error);
