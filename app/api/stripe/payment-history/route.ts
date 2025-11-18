@@ -43,14 +43,22 @@ export async function GET(req: NextRequest) {
     // Load mock charges from file if it exists (for testing)
     // This works in both development and production if the file is present
     try {
-      const dataDir = process.env.PCS_DATA_DIR || path.join(process.cwd(), 'pcs_ui_data');
-      const mockChargesFile = path.join(dataDir, 'mock-stripe-charges.json');
+      // Try multiple possible locations for the mock charges file
+      const possiblePaths = [
+        process.env.PCS_DATA_DIR ? path.join(process.env.PCS_DATA_DIR, 'mock-stripe-charges.json') : null,
+        path.join(process.cwd(), 'pcs_ui_data', 'mock-stripe-charges.json'),
+        '/var/www/pcs-ui-data/mock-stripe-charges.json',
+        path.join(process.cwd(), '..', 'pcs-ui-data', 'mock-stripe-charges.json'),
+      ].filter(Boolean) as string[];
 
-      if (fs.existsSync(mockChargesFile)) {
-        const mockChargesData = fs.readFileSync(mockChargesFile, 'utf-8');
-        const mockCharges = JSON.parse(mockChargesData);
-        console.log('[STRIPE][PAYMENT_HISTORY] Loaded mock charges from file');
-        allCharges = [...allCharges, ...mockCharges];
+      for (const mockChargesFile of possiblePaths) {
+        if (fs.existsSync(mockChargesFile)) {
+          const mockChargesData = fs.readFileSync(mockChargesFile, 'utf-8');
+          const mockCharges = JSON.parse(mockChargesData);
+          console.log('[STRIPE][PAYMENT_HISTORY] Loaded mock charges from:', mockChargesFile);
+          allCharges = [...allCharges, ...mockCharges];
+          break;
+        }
       }
     } catch (mockError: any) {
       console.warn('[STRIPE][PAYMENT_HISTORY] Could not load mock charges:', mockError?.message);
