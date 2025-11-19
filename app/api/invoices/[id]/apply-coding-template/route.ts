@@ -48,7 +48,7 @@ export async function POST(
       console.log('[API][CODING_TEMPLATE]', 'unauthorized', {
         invoiceId,
         userEmail: user.email,
-        userRole: user.role
+        isAdmin: user.isAdmin
       });
       return NextResponse.json(
         { error: 'Only Accounts Payable Managers can apply coding templates' },
