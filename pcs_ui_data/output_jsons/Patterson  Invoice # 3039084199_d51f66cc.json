@@ -1,0 +1,18 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039084199",
+  "invoice_date": "2025-09-19",
+  "due_date": "10/19/2025",
+  "total": "0.00",
+  "office_location": "Roseburg",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03952716",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    }
+  ]
+}

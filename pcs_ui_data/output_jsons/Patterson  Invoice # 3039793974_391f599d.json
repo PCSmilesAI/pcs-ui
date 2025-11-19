@@ -1,0 +1,18 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039793974",
+  "invoice_date": "2025-11-01",
+  "due_date": "12/01/2025",
+  "total": "666.70",
+  "office_location": "Roseburg",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "04022133",
+      "product_name": "52376630        SYRINGE,STD,QUICK CLEAN,LESS TBG KIT",
+      "Quantity": "2.000",
+      "unit_price": "93.75",
+      "line_item_total": "187.50"
+    }
+  ]
+}

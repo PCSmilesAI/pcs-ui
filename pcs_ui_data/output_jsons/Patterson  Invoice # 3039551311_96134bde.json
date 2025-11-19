@@ -1,0 +1,25 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039551311",
+  "invoice_date": "2025-10-16",
+  "due_date": "11/15/2025",
+  "total": "363.88",
+  "office_location": "Eugene",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03732230",
+      "product_name": "54038519        M3/M11 SIGHT/DRAIN TUBE",
+      "Quantity": "1.000",
+      "unit_price": "13.00",
+      "line_item_total": "13.00"
+    },
+    {
+      "product_number": "03732230",
+      "product_name": "50229864        WAGO CONNECTOR, 2-POSITION, 10PK",
+      "Quantity": "1.000",
+      "unit_price": "31.88",
+      "line_item_total": "31.88"
+    }
+  ]
+}

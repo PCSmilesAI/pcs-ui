@@ -1,0 +1,25 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039743508",
+  "invoice_date": "2025-10-29",
+  "due_date": "11/28/2025",
+  "total": "114.92",
+  "office_location": "Riddle",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03980824",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "04015666",
+      "product_name": "54040523        M11/M11D STEAM BLOCK",
+      "Quantity": "1.000",
+      "unit_price": "16.88",
+      "line_item_total": "16.88"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039202528",
+  "invoice_date": "2025-09-27",
+  "due_date": "10/27/2025",
+  "total": "2915.26",
+  "office_location": "Salem",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03922356",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03931050",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03966465",
+      "product_name": "50208835        HOSE MX2 400 GRAY MX2 LONG COLLAR",
+      "Quantity": "1.000",
+      "unit_price": "542.21",
+      "line_item_total": "542.21"
+    },
+    {
+      "product_number": "03966465",
+      "product_name": "51020445        SERVICE KIT FOOT CONTROL 3",
+      "Quantity": "1.000",
+      "unit_price": "49.38",
+      "line_item_total": "49.38"
+    },
+    {
+      "product_number": "03966465",
+      "product_name": "71030709        SYR TIP RETAINER ASSY SMOOTH",
+      "Quantity": "1.000",
+      "unit_price": "32.99",
+      "line_item_total": "32.99"
+    },
+    {
+      "product_number": "03966470",
+      "product_name": "55515127        SERVICE FILTERS",
+      "Quantity": "1.000",
+      "unit_price": "440.00",
+      "line_item_total": "440.00"
+    },
+    {
+      "product_number": "03966470",
+      "product_name": "50381160        RAMVAC SYNTHETIC OIL",
+      "Quantity": "4.000",
+      "unit_price": "47.71",
+      "line_item_total": "190.84"
+    }
+  ]
+}

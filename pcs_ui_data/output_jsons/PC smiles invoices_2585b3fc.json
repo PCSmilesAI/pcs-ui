@@ -1,0 +1,74 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3037602970",
+  "invoice_date": "2025-06-24",
+  "due_date": "07/24/2025",
+  "total": "2360.79",
+  "office_location": "Eugene",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03819705",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03821024",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03825219",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "71506674",
+      "product_name": "EAGLESOFT SERVICE CLUB MONTHLY",
+      "Quantity": "1.000",
+      "unit_price": "259.00",
+      "line_item_total": "259.00"
+    },
+    {
+      "product_number": "03858421",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03878692",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03885828",
+      "product_name": "52703221        WATER REGULATOR SOLENOID G121",
+      "Quantity": "1.000",
+      "unit_price": "363.60",
+      "line_item_total": "363.60"
+    },
+    {
+      "product_number": "73179157",
+      "product_name": "SPRT CLINICAL MONTHLY",
+      "Quantity": "1.000",
+      "unit_price": "259.00",
+      "line_item_total": "259.00"
+    },
+    {
+      "product_number": "73179157",
+      "product_name": "SPRT CLINICAL MONTHLY",
+      "Quantity": "1.000",
+      "unit_price": "259.00",
+      "line_item_total": "259.00"
+    }
+  ]
+}

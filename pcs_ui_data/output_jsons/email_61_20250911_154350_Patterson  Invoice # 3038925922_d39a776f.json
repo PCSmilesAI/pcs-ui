@@ -1,0 +1,18 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3038925922",
+  "invoice_date": "2025-09-11",
+  "due_date": "10/11/2025",
+  "total": "259.00",
+  "office_location": "Salem",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "73179157",
+      "product_name": "SPRT CLINICAL MONTHLY",
+      "Quantity": "1.000",
+      "unit_price": "259.00",
+      "line_item_total": "259.00"
+    }
+  ]
+}

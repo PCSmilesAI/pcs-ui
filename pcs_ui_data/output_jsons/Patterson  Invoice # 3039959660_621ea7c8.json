@@ -1,0 +1,18 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039959660",
+  "invoice_date": "2025-11-11",
+  "due_date": "12/11/2025",
+  "total": "276.00",
+  "office_location": "Milwaukie",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "71339753",
+      "product_name": "EAGLESOFT CORE BUNDLE MO",
+      "Quantity": "1.000",
+      "unit_price": "276.00",
+      "line_item_total": "276.00"
+    }
+  ]
+}

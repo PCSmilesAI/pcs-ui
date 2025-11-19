@@ -1,0 +1,25 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039763839",
+  "invoice_date": "2025-10-30",
+  "due_date": "11/29/2025",
+  "total": "501.66",
+  "office_location": "Roseburg",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "04017703",
+      "product_name": "200000483         OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "04017703",
+      "product_name": "71020106         BIOLOGICAL FILTER F/ STATIM",
+      "Quantity": "1.000",
+      "unit_price": "43.17",
+      "line_item_total": "43.17"
+    }
+  ]
+}

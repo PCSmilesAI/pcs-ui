@@ -1,0 +1,18 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039829526",
+  "invoice_date": "2025-11-04",
+  "due_date": "12/04/2025",
+  "total": "0.00",
+  "office_location": "Riddle",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "04023401",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    }
+  ]
+}
