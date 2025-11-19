@@ -67,6 +67,14 @@ export function routeAfterAP(invoice: any, roles: RolesConfig): InvoiceStatus {
     return forcedStatus;
   }
 
+  // Multi-location invoices always route to admin (McKay) for final approval
+  // They bypass office manager approval entirely
+  if (invoice?.is_multi_location) {
+    const next: InvoiceStatus = 'awaiting_admin_approval';
+    logEngine('routeAfterAP_multi_location_to_admin', { invoiceId: getInvoiceId(invoice) });
+    return next;
+  }
+
   const office = getInvoiceOffice(invoice);
 
   // If no office is provided, route to admin approval
