@@ -12,12 +12,18 @@ interface CodingTemplate {
   created_at: string;
 }
 
+const ADMIN_EMAILS = new Set([
+  'business@pcsmilesai.com',
+  'mckaym@pacificcrestsmiles.com',
+]);
+
 export default function CodingTemplatesPage() {
   const router = useRouter();
   const [templates, setTemplates] = useState<CodingTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     vendor_name: '',
@@ -26,8 +32,31 @@ export default function CodingTemplatesPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    checkAdminAccess();
     fetchTemplates();
   }, []);
+
+  async function checkAdminAccess() {
+    try {
+      const stored = typeof window !== 'undefined' ? window.localStorage.getItem('loggedInUser') : null;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const userEmail = parsed?.email?.toLowerCase() || '';
+        setIsAdmin(ADMIN_EMAILS.has(userEmail));
+        if (!ADMIN_EMAILS.has(userEmail)) {
+          setError('Only admins can access this page');
+          setTimeout(() => router.push('/'), 2000);
+        }
+      } else {
+        setError('Please log in first');
+        setTimeout(() => router.push('/'), 2000);
+      }
+    } catch (err) {
+      console.error('Error checking admin access:', err);
+      setError('Error verifying access');
+      setTimeout(() => router.push('/'), 2000);
+    }
+  }
 
   async function fetchTemplates() {
     try {
@@ -78,6 +107,31 @@ export default function CodingTemplatesPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (!isAdmin && loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600">Verifying access...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-red-600 font-semibold">Access Denied</p>
+            <p className="text-gray-600 mt-2">Only admins can access this page. Redirecting...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
