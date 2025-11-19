@@ -366,6 +366,20 @@ function NavBarInner({
                   Connections
                 </div>
               )}
+              {isAdminUser && (
+                <div
+                  style={dropdownItemStyle}
+                  onClick={() => {
+                    setIsAccountOpen(false);
+                    // Navigate to coding templates page
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/admin/coding-templates';
+                    }
+                  }}
+                >
+                  Coding Templates
+                </div>
+              )}
               <div
                 style={dropdownItemStyle}
                 onClick={() => {
