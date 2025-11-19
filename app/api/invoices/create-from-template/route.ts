@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/lib/auth/currentUser';
 import { isAP } from '@/lib/workflow/rolesStore';
 import { applyCodingTemplate } from '@/lib/invoices/coding-template-service';
 import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Create a new invoice from a coding template
@@ -34,16 +36,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
-    const {
-      template_id,
-      invoice_number,
-      vendor_name,
-      amount_cents,
-      invoice_date,
-      due_date,
-      description,
-    } = body;
+    // Parse FormData to handle both JSON and file uploads
+    const formData = await req.formData();
+    const template_id = formData.get('template_id') as string;
+    const invoice_number = formData.get('invoice_number') as string;
+    const vendor_name = formData.get('vendor_name') as string;
+    const amount_cents = parseInt(formData.get('amount_cents') as string, 10);
+    const invoice_date = formData.get('invoice_date') as string;
+    const due_date = formData.get('due_date') as string;
+    const description = formData.get('description') as string;
+    const pdfFileInput = formData.get('pdf_file') as File | null;
 
     // Validate required fields
     if (!template_id || !invoice_number || !vendor_name || !amount_cents) {
@@ -71,6 +73,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Handle PDF file upload if provided
+    let pdfPath: string | null = null;
+    if (pdfFileInput) {
+      try {
+        const buffer = await pdfFileInput.arrayBuffer();
+        const invoiceDir = path.join(process.cwd(), 'email_invoices');
+
+        // Create directory if it doesn't exist
+        if (!fs.existsSync(invoiceDir)) {
+          fs.mkdirSync(invoiceDir, { recursive: true });
+        }
+
+        // Generate filename: invoice_number_timestamp.pdf
+        const timestamp = Date.now();
+        const filename = `${invoice_number}_${timestamp}.pdf`;
+        const filePath = path.join(invoiceDir, filename);
+
+        // Write file
+        fs.writeFileSync(filePath, Buffer.from(buffer));
+        pdfPath = `email_invoices/${filename}`;
+
+        console.log('[API][CREATE_FROM_TEMPLATE]', 'pdf_uploaded', {
+          invoiceNumber: invoice_number,
+          filename,
+          size: buffer.byteLength,
+        });
+      } catch (err: any) {
+        console.error('[API][CREATE_FROM_TEMPLATE]', 'pdf_upload_error', err);
+        return NextResponse.json(
+          { error: 'Failed to upload PDF file' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Create new invoice
     const invoiceId = uuidv4();
     const now = new Date().toISOString();
@@ -90,8 +127,9 @@ export async function POST(req: NextRequest) {
         created_at,
         updated_at,
         is_multi_location,
-        coding_template_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        coding_template_id,
+        pdf_path
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       invoiceId,
       invoice_number,
@@ -106,7 +144,8 @@ export async function POST(req: NextRequest) {
       now,
       now,
       1,  // is_multi_location = true
-      template_id
+      template_id,
+      pdfPath
     );
 
     // Apply the coding template to generate allocations

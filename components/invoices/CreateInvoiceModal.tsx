@@ -29,6 +29,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState('');
   const [description, setDescription] = useState('');
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Load templates on mount
@@ -66,18 +67,22 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
       setSubmitting(true);
       const amountCents = Math.round(parseFloat(amount) * 100);
 
+      // Create FormData to handle file upload
+      const formData = new FormData();
+      formData.append('template_id', templateId);
+      formData.append('invoice_number', invoiceNumber);
+      formData.append('vendor_name', vendorName);
+      formData.append('amount_cents', amountCents.toString());
+      formData.append('invoice_date', invoiceDate);
+      formData.append('due_date', dueDate || '');
+      formData.append('description', description || '');
+      if (pdfFile) {
+        formData.append('pdf_file', pdfFile);
+      }
+
       const res = await fetch('/api/invoices/create-from-template', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          template_id: templateId,
-          invoice_number: invoiceNumber,
-          vendor_name: vendorName,
-          amount_cents: amountCents,
-          invoice_date: invoiceDate,
-          due_date: dueDate || null,
-          description: description || '',
-        }),
+        body: formData,
       });
 
       if (!res.ok) {
@@ -87,7 +92,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
 
       const data = await res.json();
       setSuccess(`✅ Invoice ${invoiceNumber} created with ${data.allocations.length} allocations!`);
-      
+
       // Reset form
       setTemplateId('');
       setInvoiceNumber('');
@@ -96,6 +101,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
       setInvoiceDate(new Date().toISOString().split('T')[0]);
       setDueDate('');
       setDescription('');
+      setPdfFile(null);
 
       // Close modal and refresh
       setTimeout(() => {
@@ -328,6 +334,60 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
                 fontFamily: 'inherit',
               }}
             />
+          </div>
+
+          {/* PDF Attachment */}
+          <div>
+            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
+              PDF Attachment
+            </label>
+            <div style={{
+              border: '2px dashed #ddd',
+              borderRadius: '4px',
+              padding: '12px',
+              textAlign: 'center',
+              backgroundColor: pdfFile ? '#f0f9ff' : '#fafafa',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file && file.type === 'application/pdf') {
+                    setPdfFile(file);
+                  } else if (file) {
+                    setError('Please select a valid PDF file');
+                  }
+                }}
+                style={{
+                  display: 'none',
+                }}
+                id="pdf-input"
+              />
+              <label
+                htmlFor="pdf-input"
+                style={{
+                  display: 'block',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  color: pdfFile ? '#2563eb' : '#666',
+                }}
+              >
+                {pdfFile ? (
+                  <>
+                    <i className="fas fa-file-pdf" style={{ marginRight: '8px', color: '#dc2626' }}></i>
+                    {pdfFile.name}
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-cloud-upload-alt" style={{ marginRight: '8px', color: '#999' }}></i>
+                    Click to upload PDF or drag and drop
+                  </>
+                )}
+              </label>
+            </div>
           </div>
 
           {/* Buttons */}
