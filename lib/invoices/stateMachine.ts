@@ -24,8 +24,9 @@ export interface StateTransition {
  * Format: fromState -> [allowedToStates]
  */
 const ALLOWED_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
-  'incoming': ['categorized', 'awaiting_office_approval', 'awaiting_admin_approval', 'rejected', 'repair'],
-  'categorized': ['awaiting_office_approval', 'awaiting_admin_approval', 'rejected', 'repair'],
+  'incoming': ['categorized', 'coded', 'awaiting_office_approval', 'awaiting_admin_approval', 'rejected', 'repair'],
+  'categorized': ['coded', 'awaiting_office_approval', 'awaiting_admin_approval', 'rejected', 'repair'],
+  'coded': ['awaiting_admin_approval', 'rejected', 'repair'], // Multi-location invoices route directly to admin
   'awaiting_office_approval': ['to_be_paid', 'awaiting_admin_approval', 'rejected', 'repair'],
   'awaiting_admin_approval': ['to_be_paid', 'rejected', 'repair'],
   'to_be_paid': ['paid', 'rejected', 'repair'],
@@ -39,9 +40,9 @@ const ALLOWED_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
  * Role-based action permissions
  */
 const ROLE_PERMISSIONS: Record<string, InvoiceStatus[]> = {
-  'ap': ['incoming', 'categorized', 'awaiting_office_approval', 'awaiting_admin_approval'],
+  'ap': ['incoming', 'categorized', 'coded', 'awaiting_office_approval', 'awaiting_admin_approval'],
   'office_manager': ['awaiting_office_approval'],
-  'admin': ['incoming', 'categorized', 'awaiting_office_approval', 'awaiting_admin_approval', 'to_be_paid', 'paid'],
+  'admin': ['incoming', 'categorized', 'coded', 'awaiting_office_approval', 'awaiting_admin_approval', 'to_be_paid', 'paid'],
 };
 
 /**
@@ -135,6 +136,7 @@ export function getStateLabel(state: InvoiceStatus): string {
   const labels: Record<InvoiceStatus, string> = {
     'incoming': 'Incoming',
     'categorized': 'Categorized',
+    'coded': 'Coded (Multi-Location)',
     'awaiting_office_approval': 'Awaiting Office Approval',
     'awaiting_admin_approval': 'Awaiting Admin Approval',
     'to_be_paid': 'To Be Paid',
@@ -155,6 +157,7 @@ export function formatStatusForDisplay(status: string | undefined | null): strin
   const labels: Record<string, string> = {
     'incoming': 'Incoming',
     'categorized': 'Categorized',
+    'coded': 'Coded (Multi-Location)',
     'awaiting_office_approval': 'Awaiting Office Approval',
     'awaiting_admin_approval': 'Awaiting Admin Approval',
     'to_be_paid': 'To Be Paid',
