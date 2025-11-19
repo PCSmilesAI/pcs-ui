@@ -25,8 +25,8 @@ export async function POST(
   const user = getCurrentUser(req);
   const invoiceId = params.id;
 
-  // Rate limiting
-  const rateLimitResult = await rateLimitByUser(user.email, 'apply_coding_template', 100, 60);
+  // Rate limiting (100 requests per 60 seconds)
+  const rateLimitResult = await rateLimitByUser(user.email, 'apply_coding_template');
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
       { error: 'Rate limit exceeded' },
