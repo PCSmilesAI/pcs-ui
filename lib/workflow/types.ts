@@ -1,6 +1,7 @@
 export type InvoiceStatus =
   | 'incoming'
   | 'categorized'
+  | 'coded'
   | 'awaiting_office_approval'
   | 'awaiting_admin_approval'
   | 'to_be_paid'

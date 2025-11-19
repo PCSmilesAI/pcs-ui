@@ -169,6 +169,117 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_rate_limits_reset_at ON rate_limits(reset_at);
   `);
 
+  // Create clinics table for all 9 locations
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS clinics (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      address TEXT,
+      ship_to_reference TEXT UNIQUE,
+      contact_name TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Create coding_templates table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS coding_templates (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      vendor_id TEXT,
+      vendor_name TEXT,
+      allocation_type TEXT DEFAULT 'equal_split',
+      apply_to_locations TEXT DEFAULT 'all_locations',
+      gl_account_id TEXT,
+      gl_account_name TEXT,
+      created_by_user_id TEXT,
+      is_active INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Create coding_template_locations table (future-ready for per-location percentages)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS coding_template_locations (
+      id TEXT PRIMARY KEY,
+      template_id TEXT NOT NULL,
+      clinic_id TEXT NOT NULL,
+      percentage REAL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (template_id) REFERENCES coding_templates(id),
+      FOREIGN KEY (clinic_id) REFERENCES clinics(id),
+      UNIQUE(template_id, clinic_id)
+    );
+  `);
+
+  // Create invoice_allocations table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS invoice_allocations (
+      id TEXT PRIMARY KEY,
+      invoice_id TEXT NOT NULL,
+      clinic_id TEXT NOT NULL,
+      amount_cents INTEGER NOT NULL,
+      gl_account_id TEXT,
+      gl_account_name TEXT,
+      template_id TEXT,
+      created_by_user_id TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (invoice_id) REFERENCES invoices(id),
+      FOREIGN KEY (clinic_id) REFERENCES clinics(id),
+      FOREIGN KEY (template_id) REFERENCES coding_templates(id)
+    );
+  `);
+
+  // Extend invoices table with multi-location fields
+  db.exec(`
+    ALTER TABLE invoices ADD COLUMN IF NOT EXISTS is_multi_location INTEGER DEFAULT 0;
+  `);
+
+  db.exec(`
+    ALTER TABLE invoices ADD COLUMN IF NOT EXISTS coding_template_id TEXT;
+  `);
+
+  db.exec(`
+    ALTER TABLE invoices ADD COLUMN IF NOT EXISTS coded_by_user_id TEXT;
+  `);
+
+  db.exec(`
+    ALTER TABLE invoices ADD COLUMN IF NOT EXISTS coded_at TEXT;
+  `);
+
+  // Create indexes for new tables
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_coding_templates_vendor_id ON coding_templates(vendor_id);
+    CREATE INDEX IF NOT EXISTS idx_coding_templates_is_active ON coding_templates(is_active);
+    CREATE INDEX IF NOT EXISTS idx_invoice_allocations_invoice_id ON invoice_allocations(invoice_id);
+    CREATE INDEX IF NOT EXISTS idx_invoice_allocations_clinic_id ON invoice_allocations(clinic_id);
+    CREATE INDEX IF NOT EXISTS idx_invoices_is_multi_location ON invoices(is_multi_location);
+    CREATE INDEX IF NOT EXISTS idx_invoices_coding_template_id ON invoices(coding_template_id);
+  `);
+
+  // Seed clinics table with all 9 locations
+  const clinicsData = [
+    { id: 'clinic_longview', name: 'SMILES DENTAL - LONGVIEW', address: '820 OCEAN BEACH HWY STE 110, LONGVIEW, WA 98632-2508', ship_to_reference: '5351067', contact_name: 'Shelly Streffry' },
+    { id: 'clinic_hazel_dell', name: 'SMILES DENTAL - HAZEL DELL', address: '10009 NE HAZEL DELL AVE, VANCOUVER, WA 98685', ship_to_reference: '14288930', contact_name: 'Ericka Dall' },
+    { id: 'clinic_ridgefield', name: 'SMILES DENTAL - RIDGEFIELD', address: '109 S 65TH AVE STE 104, RIDGEFIELD, WA 98642', ship_to_reference: '14288931', contact_name: 'Julie Wolf' },
+    { id: 'clinic_eugene', name: 'SMILES DENTAL - EUGENE', address: '2201 WILLAMETTE ST STE A, EUGENE, OR 97405', ship_to_reference: '14288934', contact_name: 'Kendall Gresham' },
+    { id: 'clinic_lebanon', name: 'SMILES DENTAL - LEBANON', address: '175 PARK ST, LEBANON, OR 97355', ship_to_reference: '14288935', contact_name: 'Joan P' },
+    { id: 'clinic_milwaukie', name: 'SMILES DENTAL - MILWAUKIE', address: '11084 SE OAK ST, MILWAUKIE, OR 97222', ship_to_reference: '16820101', contact_name: 'Caitlin Nelson' },
+    { id: 'clinic_snohomish', name: 'SMILES DENTAL - SNOHOMISH', address: '1322 AVENUE D STE A, SNOHOMISH, WA 98290-1746', ship_to_reference: '19599218', contact_name: 'Jena Ewald' },
+    { id: 'clinic_15th_st', name: 'SMILES DENTAL - 15TH ST VANCOUVER', address: '16415 SE 15TH ST UNIT 105, VANCOUVER, WA 98683', ship_to_reference: '21405584', contact_name: 'Jena Ewald' },
+    { id: 'clinic_salem', name: 'SMILES DENTAL - SALEM', address: 'Salem, OR', ship_to_reference: '21405585', contact_name: 'TBD' }
+  ];
+
+  const insertClinic = db.prepare(`
+    INSERT OR IGNORE INTO clinics (id, name, address, ship_to_reference, contact_name)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+
+  for (const clinic of clinicsData) {
+    insertClinic.run(clinic.id, clinic.name, clinic.address, clinic.ship_to_reference, clinic.contact_name);
+  }
+
   console.log('[DB] Migrations completed successfully');
 }
 
