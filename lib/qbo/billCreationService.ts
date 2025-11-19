@@ -299,6 +299,64 @@ function ensureAccountLines(
   return { qboLines, categories };
 }
 
+/**
+ * NEW: Create bill lines from invoice-level categories
+ * If invoice has categories, create one line per category with the full invoice total
+ * If single category, create one line with full amount
+ * If multiple categories, split amount equally among categories
+ */
+function createCategoryBasedLines(
+  categories: Array<{ id: string; name: string }>,
+  totalAmount: number,
+  fallbackAccount: { id: string; name: string }
+): ExpenseLine[] {
+  if (!categories || categories.length === 0) {
+    // No categories - create single line with full amount
+    return [{
+      Description: 'Invoice',
+      Amount: totalAmount,
+      DetailType: 'AccountBasedExpenseLineDetail',
+      AccountBasedExpenseLineDetail: {
+        AccountRef: {
+          value: fallbackAccount.id,
+          name: fallbackAccount.name,
+        },
+      },
+    }];
+  }
+
+  if (categories.length === 1) {
+    // Single category - create one line with full amount
+    return [{
+      Description: `${categories[0].name}`,
+      Amount: totalAmount,
+      DetailType: 'AccountBasedExpenseLineDetail',
+      AccountBasedExpenseLineDetail: {
+        AccountRef: {
+          value: fallbackAccount.id,
+          name: fallbackAccount.name,
+        },
+      },
+      __categoryHint: { category: categories[0].name },
+    }];
+  }
+
+  // Multiple categories - split amount equally
+  const amountPerCategory = totalAmount / categories.length;
+  return categories.map((cat) => ({
+    Description: `${cat.name}`,
+    Amount: amountPerCategory,
+    DetailType: 'AccountBasedExpenseLineDetail',
+    AccountBasedExpenseLineDetail: {
+      AccountRef: {
+        value: fallbackAccount.id,
+        name: fallbackAccount.name,
+      },
+    },
+    __categoryHint: { category: cat.name },
+  }));
+}
+
 function applyAccountMappings(
   qboLines: ExpenseLine[],
   availableAccounts: Array<{ id: string; name: string; type: string }>,
@@ -633,3 +691,6 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
     };
   }
 }
+
+// Export the new category-based line creation function for use in other modules
+export { createCategoryBasedLines };

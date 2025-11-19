@@ -73,6 +73,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [lineCategories, setLineCategories] = useState({});
   const [loadingLineCategories, setLoadingLineCategories] = useState(false);
+  const [invoiceCategories, setInvoiceCategories] = useState([]); // NEW: Invoice-level categories
   const [toast, setToast] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [loadingPaymentDetails, setLoadingPaymentDetails] = useState(false);
@@ -547,6 +548,73 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       }
     }));
   }
+
+  // NEW: Invoice-level category handlers
+  function addInvoiceCategory() {
+    setInvoiceCategories(prev => [...prev, { id: '', name: '', source: 'manual' }]);
+  }
+
+  function removeInvoiceCategory(index) {
+    setInvoiceCategories(prev => prev.filter((_, i) => i !== index));
+  }
+
+  function updateInvoiceCategory(index, categoryId, categoryName) {
+    setInvoiceCategories(prev => {
+      const updated = [...prev];
+      updated[index] = { id: categoryId, name: categoryName, source: 'manual' };
+      return updated;
+    });
+  }
+
+  async function saveInvoiceCategories() {
+    if (!invoiceIdentifier) return;
+
+    setProcessing(true);
+    try {
+      const response = await fetch(`/api/invoices/${invoiceIdentifier}/invoice-categories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ categories: invoiceCategories })
+      });
+
+      if (response.ok) {
+        showToast('Categories saved successfully', 'success');
+        console.log('✅ Invoice categories saved');
+      } else {
+        const errorData = await response.json();
+        const errorMsg = errorData.detail || errorData.error || 'Failed to save categories';
+        showToast(errorMsg, 'error');
+        console.error('❌ Failed to save invoice categories:', errorMsg);
+      }
+    } catch (error) {
+      console.error('❌ Error saving invoice categories:', error);
+      showToast(`Failed to save categories: ${error.message}`, 'error');
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  // Load invoice categories when component mounts
+  useEffect(() => {
+    const loadInvoiceCategories = async () => {
+      if (!invoiceIdentifier) return;
+
+      try {
+        const response = await fetch(`/api/invoices/${invoiceIdentifier}/invoice-categories`);
+        if (response.ok) {
+          const data = await response.json();
+          setInvoiceCategories(data.categories || []);
+          console.log('✅ Invoice categories loaded:', data.categories?.length || 0);
+        }
+      } catch (error) {
+        console.error('❌ Error loading invoice categories:', error);
+      }
+    };
+
+    loadInvoiceCategories();
+  }, [invoiceIdentifier]);
 
   // Function to handle PDF download
   function handleDownload() {
@@ -1375,207 +1443,127 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                     />
                   </td>
                 </tr>
-                <tr>
-                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Category</td>
-                  <td style={cellStyle}>
-                    <input
-                      type="text"
-                      value={details.category}
-                      onChange={(e) => handleDetailChange('category', e.target.value)}
-                      style={{
-                        border: '1px solid #cbd5e0',
-                        borderRadius: '4px',
-                        padding: '4px 8px',
-                        fontSize: '14px',
-                        width: 'calc(100% - 16px)',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
-          {/* Line Items section */}
+          {/* NEW: Categories section (replaces Line Items) */}
           <div style={sectionStyle}>
-            <h2 style={sectionTitleStyle}>Line Items</h2>
-            
-            {/* Category Management Buttons */}
-            <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <h2 style={sectionTitleStyle}>Categories</h2>
+
+            {/* Categories list */}
+            <div style={{ marginBottom: '16px' }}>
+              {invoiceCategories && invoiceCategories.length > 0 ? (
+                <div>
+                  {invoiceCategories.map((cat, index) => (
+                    <div key={index} style={{
+                      display: 'flex',
+                      gap: '12px',
+                      alignItems: 'center',
+                      marginBottom: '12px',
+                      padding: '12px',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '4px',
+                      backgroundColor: '#f8fafc'
+                    }}>
+                      <select
+                        value={cat.id || ''}
+                        onChange={(e) => {
+                          const selectedCat = categories.find(c => c.id === e.target.value);
+                          if (selectedCat) {
+                            updateInvoiceCategory(index, selectedCat.id, selectedCat.name);
+                          }
+                        }}
+                        style={{
+                          flex: 1,
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                          padding: '8px',
+                          fontSize: '14px',
+                          backgroundColor: 'white'
+                        }}
+                      >
+                        <option value="">{cat.name || 'Select category...'}</option>
+                        {categories.map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+
+                      {/* Source badge */}
+                      {cat.source && (
+                        <span style={{
+                          fontSize: '12px',
+                          padding: '4px 8px',
+                          borderRadius: '3px',
+                          backgroundColor: cat.source === 'parser' ? '#e0f2fe' : '#fef3c7',
+                          color: cat.source === 'parser' ? '#0369a1' : '#b45309',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {cat.source === 'parser' ? '🔍 Parser' : '✏️ Manual'}
+                        </span>
+                      )}
+
+                      {/* Remove button */}
+                      <button
+                        onClick={() => removeInvoiceCategory(index)}
+                        style={{
+                          padding: '6px 10px',
+                          backgroundColor: '#fee2e2',
+                          color: '#991b1b',
+                          border: '1px solid #fca5a5',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                  No categories assigned yet
+                </div>
+              )}
+            </div>
+
+            {/* Add category button */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
               <button
-                onClick={fetchCategories}
-                disabled={loadingCategories}
+                onClick={addInvoiceCategory}
                 style={{
                   padding: '8px 16px',
-                  backgroundColor: '#357ab2',
+                  backgroundColor: '#10b981',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: loadingCategories ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                   fontSize: '14px',
-                  opacity: loadingCategories ? 0.6 : 1
+                  fontWeight: '500'
                 }}
               >
-                {loadingCategories ? 'Loading...' : 'Fetch QuickBooks Categories'}
+                + Add Category
               </button>
-              
+
               <button
-                onClick={autoCategorize}
-                disabled={processing || categories.length === 0}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: (processing || categories.length === 0) ? 'not-allowed' : 'pointer',
-                  fontSize: '14px',
-                  opacity: (processing || categories.length === 0) ? 0.6 : 1
-                }}
-              >
-                {loadingLineCategories ? 'Processing...' : 'Auto-Categorize Items'}
-              </button>
-              
-              <button
-                onClick={saveLineCategories}
+                onClick={saveInvoiceCategories}
                 disabled={processing}
                 style={{
                   padding: '8px 16px',
-                  backgroundColor: '#ffc107',
-                  color: 'black',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
                   border: 'none',
                   borderRadius: '4px',
                   cursor: processing ? 'not-allowed' : 'pointer',
                   fontSize: '14px',
+                  fontWeight: '500',
                   opacity: processing ? 0.6 : 1
                 }}
               >
                 {processing ? 'Saving...' : 'Save Categories'}
               </button>
             </div>
-            {loading ? (
-              <div style={{ textAlign: 'center', padding: '20px' }}>Loading line items...</div>
-            ) : items.length > 0 ? (
-            <table style={tableStyle}>
-              <thead>
-                <tr>
-                    <th style={cellHeaderStyle}>Item</th>
-                    <th style={cellHeaderStyle}>Qty</th>
-                    <th style={cellHeaderStyle}>Unit</th>
-                    <th style={cellHeaderStyle}>Total</th>
-                    <th style={cellHeaderStyle}>Category</th>
-                </tr>
-              </thead>
-              <tbody>
-                  {items.map((item, index) => (
-                    <tr key={item.id || index}>
-                    <td style={cellStyle}>
-                      <input
-                        type="text"
-                          value={item.name}
-                          onChange={(e) => handleItemChange(index, 'name', e.target.value)}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                            padding: '4px 8px',
-                          fontSize: '14px',
-                            width: 'calc(100% - 16px)',
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    </td>
-                    <td style={cellStyle}>
-                      <input
-                        type="text"
-                        value={item.qty}
-                          onChange={(e) => handleItemChange(index, 'qty', e.target.value)}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                            padding: '4px 8px',
-                          fontSize: '14px',
-                          width: '60px',
-                          textAlign: 'center',
-                        }}
-                      />
-                    </td>
-                      <td style={cellStyle}>
-                      <input
-                        type="text"
-                        value={item.unit}
-                          onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                            padding: '4px 8px',
-                          fontSize: '14px',
-                            width: '80px',
-                          textAlign: 'right',
-                        }}
-                      />
-                    </td>
-                      <td style={cellStyle}>
-                      <input
-                        type="text"
-                        value={item.total}
-                          onChange={(e) => handleItemChange(index, 'total', e.target.value)}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                            padding: '4px 8px',
-                          fontSize: '14px',
-                            width: '80px',
-                          textAlign: 'right',
-                        }}
-                      />
-                    </td>
-                    <td style={cellStyle}>
-                      <select
-                        value={lineCategories[index]?.categoryId || ''}
-                        onChange={(e) => {
-                          const selectedCategory = categories.find(cat => cat.id === e.target.value);
-                          if (selectedCategory) {
-                            updateLineCategory(index, selectedCategory.id, selectedCategory.name);
-                          }
-                        }}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                          padding: '4px 8px',
-                          fontSize: '14px',
-                          width: '100%',
-                          boxSizing: 'border-box',
-                          backgroundColor: lineCategories[index]?.source === 'vendor-default' ? '#f0f9ff' : 
-                                         lineCategories[index]?.source === 'keyword' ? '#f0fdf4' : 'white'
-                        }}
-                      >
-                        <option value="">{lineCategories[index]?.categoryName || 'Not categorized'}</option>
-                        {categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
-                      {lineCategories[index] && (
-                        <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
-                          {lineCategories[index].source === 'vendor-default' && '🎯 Vendor default'}
-                          {lineCategories[index].source === 'keyword' && '🔍 Auto-detected'}
-                          {lineCategories[index].source === 'manual' && '✏️ Manual'}
-                          {lineCategories[index].confidence > 0 && (
-                            <span> ({(lineCategories[index].confidence * 100).toFixed(0)}%)</span>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                No line items available
-              </div>
-            )}
           </div>
         </div>
         {/* Right column: PDF viewer */}

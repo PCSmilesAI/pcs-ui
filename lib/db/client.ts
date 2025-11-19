@@ -256,6 +256,20 @@ export function runMigrations(): void {
     ALTER TABLE invoices ADD COLUMN IF NOT EXISTS coded_at TEXT;
   `);
 
+  // NEW: Create invoice_categories table for invoice-level categories
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS invoice_categories (
+      id TEXT PRIMARY KEY,
+      invoice_id TEXT NOT NULL,
+      category_id TEXT NOT NULL,
+      category_name TEXT NOT NULL,
+      source TEXT DEFAULT 'manual',
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (invoice_id) REFERENCES invoices(id),
+      UNIQUE(invoice_id, category_id)
+    );
+  `);
+
   // Create indexes for new tables
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_coding_templates_vendor_id ON coding_templates(vendor_id);
@@ -264,6 +278,7 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_invoice_allocations_clinic_id ON invoice_allocations(clinic_id);
     CREATE INDEX IF NOT EXISTS idx_invoices_is_multi_location ON invoices(is_multi_location);
     CREATE INDEX IF NOT EXISTS idx_invoices_coding_template_id ON invoices(coding_template_id);
+    CREATE INDEX IF NOT EXISTS idx_invoice_categories_invoice_id ON invoice_categories(invoice_id);
   `);
 
   // Seed clinics table with all 9 locations
