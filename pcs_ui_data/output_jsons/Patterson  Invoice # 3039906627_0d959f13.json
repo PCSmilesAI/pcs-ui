@@ -1,0 +1,18 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039906627",
+  "invoice_date": "2025-11-08",
+  "due_date": "12/08/2025",
+  "total": "10.08",
+  "office_location": "Riddle",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "04033503",
+      "product_name": "50284075        SNAP CLIP F/ M11",
+      "Quantity": "8.000",
+      "unit_price": "1.00",
+      "line_item_total": "8.00"
+    }
+  ]
+}

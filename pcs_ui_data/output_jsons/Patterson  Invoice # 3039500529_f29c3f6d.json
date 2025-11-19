@@ -1,0 +1,46 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039500529",
+  "invoice_date": "2025-10-14",
+  "due_date": "11/13/2025",
+  "total": "2245.06",
+  "office_location": "Roseburg",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03972914",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03981643",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03990631",
+      "product_name": "51015320        SERVICE KIT,CENTURY PLUS,BLOCK,W/O TOOLS",
+      "Quantity": "2.000",
+      "unit_price": "200.00",
+      "line_item_total": "400.00"
+    },
+    {
+      "product_number": "03990632",
+      "product_name": "51015320        SERVICE KIT,CENTURY PLUS,BLOCK,W/O TOOLS",
+      "Quantity": "1.000",
+      "unit_price": "200.00",
+      "line_item_total": "200.00"
+    },
+    {
+      "product_number": "03990632",
+      "product_name": "51016609        DIAPHRAGM FIBER OPTIC SWITCH",
+      "Quantity": "4.000",
+      "unit_price": "7.25",
+      "line_item_total": "29.00"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039439138",
+  "invoice_date": "2025-10-11",
+  "due_date": "11/10/2025",
+  "total": "248.40",
+  "office_location": "Roseburg",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "71506674",
+      "product_name": "EAGLESOFT SERVICE CLUB MONTHLY",
+      "Quantity": "1.000",
+      "unit_price": "276.00",
+      "line_item_total": "276.00"
+    }
+  ]
+}

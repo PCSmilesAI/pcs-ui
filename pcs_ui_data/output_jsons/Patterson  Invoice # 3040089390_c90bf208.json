@@ -1,0 +1,25 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3040089390",
+  "invoice_date": "2025-11-17",
+  "due_date": "12/17/2025",
+  "total": "35.00",
+  "office_location": "Milwaukie",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "00081501",
+      "product_name": "200000228        MFR REPAIR 20LP CONTRA ANGLE SN 2043128",
+      "Quantity": "1.000",
+      "unit_price": "35.00",
+      "line_item_total": "35.00"
+    },
+    {
+      "product_number": "00081502",
+      "product_name": "200000228        MFR REPAIR 68LU LATCH HEAD SN 1002126",
+      "Quantity": "1.000",
+      "unit_price": "0.00",
+      "line_item_total": "0.00"
+    }
+  ]
+}

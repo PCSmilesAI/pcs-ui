@@ -1,0 +1,18 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039394575",
+  "invoice_date": "2025-10-09",
+  "due_date": "11/08/2025",
+  "total": "279.00",
+  "office_location": "Salem",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03984674",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    }
+  ]
+}

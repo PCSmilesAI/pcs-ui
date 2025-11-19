@@ -1,0 +1,25 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039235145",
+  "invoice_date": "2025-09-30",
+  "due_date": "10/30/2025",
+  "total": "482.67",
+  "office_location": "Milwaukie",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03967311",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "03967311",
+      "product_name": "74876389        DOOR DAM GASKET KIT M11",
+      "Quantity": "1.000",
+      "unit_price": "151.67",
+      "line_item_total": "151.67"
+    }
+  ]
+}

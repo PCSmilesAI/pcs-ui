@@ -1,0 +1,39 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039851978",
+  "invoice_date": "2025-11-05",
+  "due_date": "12/05/2025",
+  "total": "497.67",
+  "office_location": "Milwaukie",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03992837",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "04026856",
+      "product_name": "71030519        VALVE ASSY KIT PENCIL SOFT AUTOMATIC",
+      "Quantity": "1.000",
+      "unit_price": "52.99",
+      "line_item_total": "52.99"
+    },
+    {
+      "product_number": "04026856",
+      "product_name": "51011246        O-RING AS568-006 10/PK",
+      "Quantity": "1.000",
+      "unit_price": "8.44",
+      "line_item_total": "8.44"
+    },
+    {
+      "product_number": "04026883",
+      "product_name": "50127928        O-RING SET, ACCESSORY",
+      "Quantity": "3.000",
+      "unit_price": "14.38",
+      "line_item_total": "43.14"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3039083566",
+  "invoice_date": "2025-09-19",
+  "due_date": "10/19/2025",
+  "total": "774.33",
+  "office_location": "Eugene",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "03953084",
+      "product_name": "52383859        TEE FEM 10-32",
+      "Quantity": "2.000",
+      "unit_price": "2.20",
+      "line_item_total": "4.40"
+    },
+    {
+      "product_number": "03953084",
+      "product_name": "51139773        TEE, BARBED, 1/8, POM",
+      "Quantity": "1.000",
+      "unit_price": "1.63",
+      "line_item_total": "1.63"
+    },
+    {
+      "product_number": "03953084",
+      "product_name": "51227495        TBG,1/8 OD,BLUE,URETHANE,ALPHA",
+      "Quantity": "2.000",
+      "unit_price": "1.33",
+      "line_item_total": "2.66"
+    },
+    {
+      "product_number": "03953084",
+      "product_name": "51237189        TBG 1/4 OD BLUE URETHANE ALPHA",
+      "Quantity": "6.000",
+      "unit_price": "2.20",
+      "line_item_total": "13.20"
+    }
+  ]
+}

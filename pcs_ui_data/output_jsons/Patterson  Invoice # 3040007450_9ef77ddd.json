@@ -1,0 +1,32 @@
+{
+  "vendor": "patterson_dental",
+  "invoice_number": "3040007450",
+  "invoice_date": "2025-11-12",
+  "due_date": "12/12/2025",
+  "total": "812.32",
+  "office_location": "Roseburg",
+  "vendor_name": "Patterson Dental",
+  "line_items": [
+    {
+      "product_number": "04014426",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    },
+    {
+      "product_number": "04037604",
+      "product_name": "55300843        RUBBER WASHER YOKE ASSEMBLY, EA",
+      "Quantity": "4.000",
+      "unit_price": "3.75",
+      "line_item_total": "15.00"
+    },
+    {
+      "product_number": "04038012",
+      "product_name": "200000483        OFFICE CALL FEE",
+      "Quantity": "1.000",
+      "unit_price": "71.00",
+      "line_item_total": "71.00"
+    }
+  ]
+}
