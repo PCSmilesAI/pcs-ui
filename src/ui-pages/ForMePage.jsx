@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useInvoiceData } from '../context/InvoiceDataContext';
@@ -7,6 +8,9 @@ import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
 import { getDisplayVendorName } from '../lib/vendorUtils';
+
+// Dynamically import the modal to avoid SSR issues
+const CreateInvoiceModal = dynamic(() => import('../../components/invoices/CreateInvoiceModal'), { ssr: false });
 
 // Helper function to get user email from localStorage/cookie
 function getUserEmail() {
@@ -49,6 +53,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
   const { setInvoices: setContextInvoices } = useInvoiceData();
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [toast, setToast] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const getRowId = (r, i) =>
     r.id ||
     r.invoice_number ||
@@ -394,15 +399,25 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
             {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} assigned to you
           </p>
         </div>
-        <button
-          onClick={handleRefreshInbox}
-          disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          title="Check inbox for new invoices"
-        >
-          <i className={`fas fa-sync-alt ${refreshing ? 'fa-spin' : ''}`}></i>
-          {refreshing ? 'Refreshing...' : 'Refresh Inbox'}
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            title="Create a new invoice from a template"
+          >
+            <i className="fas fa-plus"></i>
+            Create Invoice
+          </button>
+          <button
+            onClick={handleRefreshInbox}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            title="Check inbox for new invoices"
+          >
+            <i className={`fas fa-sync-alt ${refreshing ? 'fa-spin' : ''}`}></i>
+            {refreshing ? 'Refreshing...' : 'Refresh Inbox'}
+          </button>
+        </div>
       </div>
 
       {selectedIds.size > 0 && (
@@ -451,6 +466,16 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
         }}
       />
       <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
+
+      {/* Create Invoice Modal */}
+      <CreateInvoiceModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={() => {
+          reloadList();
+          showToast('Invoice created successfully!', 'success');
+        }}
+      />
     </div>
   );
 }
