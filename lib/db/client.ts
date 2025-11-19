@@ -99,7 +99,15 @@ export function runMigrations(): void {
       -- Workflow fields
       status TEXT DEFAULT 'incoming',
       approvals TEXT,  -- JSON: { ap: {...}, office: {...}, admin: {...}, ... }
-      
+
+      -- Three-stage status tracking (Coded -> Approved -> Paid)
+      coded_at TEXT,
+      coded_by_user_id TEXT,
+      approved_at TEXT,
+      approved_by_user_id TEXT,
+      paid_at TEXT,
+      paid_by_user_id TEXT,
+
       -- Metadata
       deleted INTEGER DEFAULT 0,
       workflow_deleted_at TEXT,

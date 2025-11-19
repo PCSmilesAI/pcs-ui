@@ -113,6 +113,27 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     };
   const approvals =
     invoice?.approvals && typeof invoice.approvals === 'object' ? invoice.approvals : {};
+
+  // NEW: Three-stage status system (Coded -> Approved -> Paid)
+  const threeStageStatus = [
+    {
+      stage: 'Coded',
+      timestamp: invoice?.coded_at,
+      user: invoice?.coded_by_user_id,
+    },
+    {
+      stage: 'Approved',
+      timestamp: invoice?.approved_at,
+      user: invoice?.approved_by_user_id,
+    },
+    {
+      stage: 'Paid',
+      timestamp: invoice?.paid_at,
+      user: invoice?.paid_by_user_id,
+    },
+  ];
+
+  // Legacy approval stages (kept for backward compatibility)
   const approvalStages = [
     { key: 'ap', label: 'Accounts Payable' },
     { key: 'office', label: 'Office Manager' },
@@ -147,6 +168,21 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  // NEW: Format timestamp for three-stage status display (e.g., "On Nov 3 at 9:26am")
+  const formatStageTimestamp = (timestamp) => {
+    if (!timestamp) return 'Incomplete';
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return 'Incomplete';
+    const formatted = date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      meridiem: 'short',
+    });
+    return `On ${formatted}`;
   };
 
   useEffect(() => {
@@ -1154,25 +1190,23 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           <div style={sectionStyle}>
             <h2 style={sectionTitleStyle}>Invoice Status</h2>
             <div style={{ marginBottom: '12px' }}>{renderStatusChip('sm')}</div>
+            {/* NEW: Three-stage status table (Coded -> Approved -> Paid) */}
             <table style={tableStyle}>
               <thead>
                 <tr>
                   <th style={cellHeaderStyle}>Stage</th>
+                  <th style={cellHeaderStyle}>Status</th>
                   <th style={cellHeaderStyle}>User</th>
-                  <th style={cellHeaderStyle}>Last Action</th>
                 </tr>
               </thead>
               <tbody>
-                {approvalStages.map((stage) => {
-                  const entry = approvals[stage.key] || null;
-                  return (
-                    <tr key={stage.key}>
-                      <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>{stage.label}</td>
-                      <td style={cellStyle}>{entry?.by || 'Pending'}</td>
-                      <td style={cellStyle}>{formatApprovalTimestamp(entry?.at)}</td>
-                    </tr>
-                  );
-                })}
+                {threeStageStatus.map((stageInfo) => (
+                  <tr key={stageInfo.stage}>
+                    <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>{stageInfo.stage}</td>
+                    <td style={cellStyle}>{formatStageTimestamp(stageInfo.timestamp)}</td>
+                    <td style={cellStyle}>{stageInfo.user || '—'}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
             <table style={{ ...tableStyle, marginTop: '12px' }}>

@@ -116,6 +116,12 @@ export function approveAP(invoice: any, actor: Actor, roles: RolesConfig): void 
     by: normaliseEmail(actor.email),
     at: new Date().toISOString(),
   };
+
+  // NEW: Set three-stage status tracking - mark as "Coded"
+  const now = new Date().toISOString();
+  invoice.coded_at = now;
+  invoice.coded_by_user_id = normaliseEmail(actor.email);
+
   invoice.status = routeAfterAP(invoice, roles);
   logEngine('approveAP', { invoiceId: getInvoiceId(invoice), userEmail: normaliseEmail(actor.email) });
 }
@@ -127,6 +133,12 @@ export function approveOffice(invoice: any, actor: Actor, threshold: number): vo
     by: normaliseEmail(actor.email),
     at: new Date().toISOString(),
   };
+
+  // NEW: Set three-stage status tracking - mark as "Approved"
+  const now = new Date().toISOString();
+  invoice.approved_at = now;
+  invoice.approved_by_user_id = normaliseEmail(actor.email);
+
   invoice.status = nextStatusAfterOffice(invoice, threshold);
   console.log('[WORKFLOW][ENGINE]', 'approveOffice_end', { invoiceId: getInvoiceId(invoice), newStatus: invoice.status });
   logEngine('approveOffice', { invoiceId: getInvoiceId(invoice), userEmail: normaliseEmail(actor.email) });
@@ -160,6 +172,11 @@ export function markPaid(
     ...(stripePaymentId ? { stripePaymentId } : {}),
     ...(total !== undefined ? { total } : {}),
   };
+
+  // NEW: Set three-stage status tracking - mark as "Paid"
+  invoice.paid_at = timestamp;
+  invoice.paid_by_user_id = normalised;
+
   invoice.status = 'paid';
   logEngine('markPaid', {
     invoiceId: getInvoiceId(invoice),
