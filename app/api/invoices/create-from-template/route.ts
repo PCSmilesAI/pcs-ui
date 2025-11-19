@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/db/client';
-import { getCurrentUser } from '@/lib/workflow/auth';
+import { getCurrentUser } from '@/lib/auth/currentUser';
 import { isAPManager } from '@/lib/workflow/rolesStore';
 import { applyCodingTemplate } from '@/lib/invoices/coding-template-service';
 import { v4 as uuidv4 } from 'uuid';
