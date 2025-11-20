@@ -31,7 +31,7 @@ export async function getReassignmentTargets(): Promise<ReassignmentTarget[]> {
   if (roles.office_managers) {
     for (const [officeName, managers] of Object.entries(roles.office_managers)) {
       // Get the first non-empty manager email for this office
-      const managerEmail = managers?.find(e => e && e.trim())?.[0];
+      const managerEmail = managers?.find(e => e && e.trim());
       if (managerEmail && managerEmail.trim()) {
         targets.push({
           type: 'office',
