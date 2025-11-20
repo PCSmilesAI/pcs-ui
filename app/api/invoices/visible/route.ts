@@ -55,6 +55,15 @@ export async function GET(req: NextRequest) {
     const db = getDatabase();
     const [admin, ap] = await Promise.all([isAdmin(user.email), isAP(user.email)]);
 
+    // Check if current_assigned_user_email column exists
+    let hasReassignmentColumn = false;
+    try {
+      const columns = db.prepare(`PRAGMA table_info(invoices)`).all() as any[];
+      hasReassignmentColumn = columns.some(col => col.name === 'current_assigned_user_email');
+    } catch (e) {
+      console.warn('[API][INVOICES]', 'Could not check for reassignment column:', e);
+    }
+
     let query = 'SELECT * FROM invoices WHERE deleted = 0';
     const params: any[] = [];
 
@@ -70,20 +79,29 @@ export async function GET(req: NextRequest) {
       }
 
       // Show invoices either:
-      // 1. Assigned to this user via reassignment, OR
+      // 1. Assigned to this user via reassignment (if column exists), OR
       // 2. In awaiting_office_approval status for their offices
-      query += ` AND (
-        LOWER(current_assigned_user_email) = ? OR
-        (status = ? AND office_id IN (${offices.map(() => '?').join(',')}))
-      )`;
-      params.push(normalizedUserEmail, 'awaiting_office_approval', ...offices);
+      if (hasReassignmentColumn) {
+        query += ` AND (
+          LOWER(current_assigned_user_email) = ? OR
+          (status = ? AND office_id IN (${offices.map(() => '?').join(',')}))
+        )`;
+        params.push(normalizedUserEmail, 'awaiting_office_approval', ...offices);
+      } else {
+        // Fallback: just use status and office filtering
+        query += ` AND status = ? AND office_id IN (${offices.map(() => '?').join(',')})`;
+        params.push('awaiting_office_approval', ...offices);
+      }
     } else {
       // For admins and AP managers, also show invoices assigned to them
-      query += ` AND (
-        LOWER(current_assigned_user_email) = ? OR
-        current_assigned_user_email IS NULL
-      )`;
-      params.push(normalizedUserEmail);
+      if (hasReassignmentColumn) {
+        query += ` AND (
+          LOWER(current_assigned_user_email) = ? OR
+          current_assigned_user_email IS NULL
+        )`;
+        params.push(normalizedUserEmail);
+      }
+      // If column doesn't exist, show all invoices (no filtering)
     }
 
     // Get all matching invoices
