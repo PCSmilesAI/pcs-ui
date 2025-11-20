@@ -78,6 +78,9 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [loadingPaymentDetails, setLoadingPaymentDetails] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
+  const [reassignmentTargets, setReassignmentTargets] = useState([]); // NEW: Reassignment targets
+  const [selectedReassignmentTarget, setSelectedReassignmentTarget] = useState(null); // NEW: Selected target
+  const [reassigningInvoice, setReassigningInvoice] = useState(false); // NEW: Reassignment loading state
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -616,6 +619,26 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     loadInvoiceCategories();
   }, [invoiceIdentifier]);
 
+  // NEW: Load reassignment targets when component mounts
+  useEffect(() => {
+    const loadReassignmentTargets = async () => {
+      if (!invoiceIdentifier) return;
+
+      try {
+        const response = await fetch(`/api/invoices/${invoiceIdentifier}/reassign`);
+        if (response.ok) {
+          const data = await response.json();
+          setReassignmentTargets(data.targets || []);
+          console.log('✅ Reassignment targets loaded:', data.targets?.length || 0);
+        }
+      } catch (error) {
+        console.error('❌ Error loading reassignment targets:', error);
+      }
+    };
+
+    loadReassignmentTargets();
+  }, [invoiceIdentifier]);
+
   // Function to handle PDF download
   function handleDownload() {
     if (invoice?.pdf_path) {
@@ -933,6 +956,48 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }
   }
 
+  // NEW: Handle invoice reassignment
+  async function handleReassignInvoice() {
+    if (!invoice || !selectedReassignmentTarget) {
+      showToast('Please select a target to send the invoice to.', 'error');
+      return;
+    }
+
+    const invoiceId = invoice.id || invoice.invoice_number || invoice.invoice;
+    if (!invoiceId) {
+      showToast('Missing invoice identifier.', 'error');
+      return;
+    }
+
+    try {
+      setReassigningInvoice(true);
+      const response = await fetch(`/api/invoices/${invoiceId}/reassign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetEmail: selectedReassignmentTarget.email }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to reassign invoice');
+      }
+
+      showToast(`Invoice sent to ${selectedReassignmentTarget.name}`, 'success');
+      setSelectedReassignmentTarget(null);
+
+      // Refresh invoice lists after reassignment
+      if (onBack) {
+        setTimeout(() => onBack(), 1000);
+      }
+    } catch (error) {
+      console.error('❌ Error reassigning invoice:', error);
+      showToast(error?.message || 'Failed to reassign invoice', 'error');
+    } finally {
+      setReassigningInvoice(false);
+    }
+  }
+
   async function handlePaid() {
     if (!invoice) return;
     const invoiceId = invoice.id || invoice.invoice_number || invoice.invoice;
@@ -1247,6 +1312,67 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           </button>
         ))}
       </div>
+
+      {/* NEW: Send to: Reassignment UI */}
+      {reassignmentTargets.length > 0 && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '24px',
+          padding: '12px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '6px',
+          border: '1px solid #e0e0e0',
+        }}>
+          <label style={{ fontWeight: '500', color: '#4a5568', whiteSpace: 'nowrap' }}>
+            Send to:
+          </label>
+          <select
+            value={selectedReassignmentTarget?.email || ''}
+            onChange={(e) => {
+              const target = reassignmentTargets.find(t => t.email === e.target.value);
+              setSelectedReassignmentTarget(target || null);
+            }}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '4px',
+              border: '1px solid #cbd5e0',
+              fontSize: '14px',
+              backgroundColor: '#ffffff',
+              cursor: 'pointer',
+              flex: 1,
+              maxWidth: '300px',
+            }}
+          >
+            <option value="">-- Select a destination --</option>
+            {reassignmentTargets.map((target) => (
+              <option key={target.email} value={target.email}>
+                {target.name}
+              </option>
+            ))}
+          </select>
+          {selectedReassignmentTarget && (
+            <button
+              onClick={handleReassignInvoice}
+              disabled={reassigningInvoice}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: '1px solid #059669',
+                backgroundColor: '#059669',
+                color: '#ffffff',
+                cursor: reassigningInvoice ? 'not-allowed' : 'pointer',
+                opacity: reassigningInvoice ? 0.6 : 1,
+              }}
+            >
+              {reassigningInvoice ? 'Sending...' : 'Send'}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Main content: two columns using grid. On small screens it
           stacks; on larger screens we allow it to span 2/3 and 1/3

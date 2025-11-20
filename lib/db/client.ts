@@ -270,6 +270,10 @@ export function runMigrations(): void {
     );
   `);
 
+  // NEW: Invoice reassignment field - tracks current owner/assignee
+  db.exec(`
+    ALTER TABLE invoices ADD COLUMN IF NOT EXISTS current_assigned_user_email TEXT;
+  `);
   // Create indexes for new tables
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_coding_templates_vendor_id ON coding_templates(vendor_id);

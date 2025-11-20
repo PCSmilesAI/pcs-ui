@@ -58,6 +58,9 @@ export async function GET(req: NextRequest) {
     let query = 'SELECT * FROM invoices WHERE deleted = 0';
     const params: any[] = [];
 
+    // NEW: Check for invoices assigned to current user (reassignment feature)
+    const normalizedUserEmail = user.email.trim().toLowerCase();
+
     // Role-based filtering
     if (!admin && !ap) {
       const offices = await officesForManager(user.email);
@@ -66,14 +69,21 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ ok: true, count: 0, invoices: [] });
       }
 
-      // Only show awaiting_office_approval for managers
-      query += ' AND status = ?';
-      params.push('awaiting_office_approval');
-
-      // Filter by office
-      const placeholders = offices.map(() => '?').join(',');
-      query += ` AND office_id IN (${placeholders})`;
-      params.push(...offices);
+      // Show invoices either:
+      // 1. Assigned to this user via reassignment, OR
+      // 2. In awaiting_office_approval status for their offices
+      query += ` AND (
+        LOWER(current_assigned_user_email) = ? OR
+        (status = ? AND office_id IN (${offices.map(() => '?').join(',')}))
+      )`;
+      params.push(normalizedUserEmail, 'awaiting_office_approval', ...offices);
+    } else {
+      // For admins and AP managers, also show invoices assigned to them
+      query += ` AND (
+        LOWER(current_assigned_user_email) = ? OR
+        current_assigned_user_email IS NULL
+      )`;
+      params.push(normalizedUserEmail);
     }
 
     // Get all matching invoices
