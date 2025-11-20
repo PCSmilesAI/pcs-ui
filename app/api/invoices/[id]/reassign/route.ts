@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '../../../../lib/auth/currentUser';
-import { reassignInvoice, getReassignmentTargets } from '../../../../lib/invoices/reassignmentService';
+import { getCurrentUser } from '../../../../../lib/auth/currentUser';
+import { reassignInvoice, getReassignmentTargets } from '../../../../../lib/invoices/reassignmentService';
 
 export const dynamic = 'force-dynamic';
 
