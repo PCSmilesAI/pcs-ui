@@ -79,11 +79,12 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       if (Number.isNaN(parsed.getTime())) return 'N/A';
       return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
     };
-    const amountValue = invoice.invoice_total ?? invoice.total ?? invoice.amount;
+    // Amount is stored in cents in the database, convert to dollars
+    const amountCents = invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? invoice.amount ?? 0;
     const parsedAmount =
-      typeof amountValue === 'number'
-        ? amountValue
-        : Number.parseFloat(String(amountValue || '0').replace(/[^0-9.-]/g, '')) || 0;
+      typeof amountCents === 'number'
+        ? amountCents / 100  // Convert cents to dollars
+        : Number.parseFloat(String(amountCents || '0').replace(/[^0-9.-]/g, '')) / 100;
 
     return {
       id: invoice.id || invoice.invoice_number || invoice.invoice || invoice.source_file || null,

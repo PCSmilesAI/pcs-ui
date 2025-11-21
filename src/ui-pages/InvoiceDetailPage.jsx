@@ -57,7 +57,9 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   // State for editable fields. Payment amount can be modified by the
   // user. Other details and line items could be lifted into state
   // similarly; here we demonstrate for payment and details.
-  const [paymentAmount, setPaymentAmount] = useState(invoice?.amount || invoice?.total || '');
+  // Amount is stored in cents in the database, convert to dollars
+  const initialAmount = invoice?.amount_cents ? (invoice.amount_cents / 100).toFixed(2) : (invoice?.amount || invoice?.total || '');
+  const [paymentAmount, setPaymentAmount] = useState(initialAmount);
   const [details, setDetails] = useState({
     invoice: invoice?.invoice || invoice?.invoice_number || '',
     vendor: invoice?.vendor || '',
