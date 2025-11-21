@@ -55,11 +55,12 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
         const transformedData = data
           .filter((invoice) => ['paid', 'completed'].includes(String(invoice.status || '').toLowerCase()))
           .map((invoice) => {
-            const rawTotal = (invoice.invoice_total ?? invoice.total);
+            // Amount is stored in cents in the database, convert to dollars
+            const amountCents = invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? 0;
             const numericTotal =
-              typeof rawTotal === 'number'
-                ? rawTotal
-                : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+              typeof amountCents === 'number'
+                ? amountCents / 100  // Convert cents to dollars
+                : parseFloat(String(amountCents ?? '0').replace(/[^0-9.\-]/g, '')) / 100;
             return ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
