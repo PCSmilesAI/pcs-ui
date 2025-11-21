@@ -18,6 +18,7 @@ SAVE_DIR = os.path.join(BASE_DIR, "email_invoices")  # Changed to email_invoices
 VENDOR_ROUTER_PATH = os.path.join(BASE_DIR, "vendor_router.py")
 LOG_PATH = os.path.join(BASE_DIR, "log.txt")
 EMAIL_TRACKING_DB = os.path.join(BASE_DIR, "email_tracking.json")  # NEW: Track all emails
+PDF_PROCESSING_DB = os.path.join(BASE_DIR, "pdf_processing.json")  # Track processed PDFs by content hash
 
 os.makedirs(SAVE_DIR, exist_ok=True)
 
@@ -51,6 +52,36 @@ def track_email(message_id, status, details=None):
         "details": details or {}
     }
     save_email_tracking(tracking)
+
+def load_pdf_processing_db():
+    """Load PDF processing database (tracks by content hash)"""
+    if os.path.exists(PDF_PROCESSING_DB):
+        try:
+            with open(PDF_PROCESSING_DB, 'r') as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def save_pdf_processing_db(db):
+    """Save PDF processing database"""
+    with open(PDF_PROCESSING_DB, 'w') as f:
+        json.dump(db, f, indent=2)
+
+def is_pdf_already_processed(file_hash):
+    """Check if a PDF with this content hash has already been processed"""
+    db = load_pdf_processing_db()
+    return file_hash in db
+
+def mark_pdf_as_processed(file_hash, filename, vendor):
+    """Mark a PDF as processed"""
+    db = load_pdf_processing_db()
+    db[file_hash] = {
+        "timestamp": datetime.now().isoformat(),
+        "filename": filename,
+        "vendor": vendor
+    }
+    save_pdf_processing_db(db)
 
 def connect_imap():
     mail = imaplib.IMAP4_SSL(IMAP_SERVER)
@@ -138,6 +169,13 @@ def process_attachments(msg, message_id=None):
                 continue
 
             file_hash = compute_content_hash(payload)
+
+            # Check if this PDF content has already been processed
+            if is_pdf_already_processed(file_hash):
+                log(f"⏩ Skipped PDF (already processed by content hash): {filename}")
+                success_count += 1  # Don't fail on duplicates
+                continue
+
             skip_deleted, skip_reason = should_skip_deleted_invoice(
                 file_hash=file_hash,
                 source_file=filename
@@ -161,6 +199,8 @@ def process_attachments(msg, message_id=None):
                 vendor = run_vendor_router(filepath, detected_vendor, message_id)
                 if vendor:
                     log(f"📦 Parsed and routed invoice: {vendor}")
+                    # Mark this PDF as processed by content hash
+                    mark_pdf_as_processed(file_hash, filename, vendor)
                     success_count += 1
                 else:
                     log(f"❌ Failed: unknown or unparseable vendor for {filename}")
@@ -182,12 +222,17 @@ def check_inbox():
     try:
         mail = connect_imap()
         mail.select("INBOX")
-        status, messages = mail.uid('search', None, 'UNSEEN')
+        # CRITICAL FIX: Search for ALL emails, not just UNSEEN
+        # This ensures we process all invoices in the inbox, including those marked as read
+        status, messages = mail.uid('search', None, 'ALL')
         if status != 'OK':
             log("❌ Failed to search inbox.")
             return
 
-        for uid in messages[0].split():
+        email_uids = messages[0].split() if messages[0] else []
+        log(f"📧 Found {len(email_uids)} total emails in inbox")
+
+        for uid in email_uids:
             status, msg_data = mail.uid('fetch', uid, '(RFC822)')
             if status != 'OK':
                 continue
