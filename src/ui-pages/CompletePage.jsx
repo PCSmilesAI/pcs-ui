@@ -193,6 +193,12 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
     if (filters.vendor && row.vendor !== filters.vendor) return false;
     // office filter
     if (filters.office && row.office !== filters.office) return false;
+    // PDF Attachment filter
+    if (filters.hasAttachment) {
+      const hasPdf = !!(row.pdf_path || row.pdfPath);
+      if (filters.hasAttachment === 'yes' && !hasPdf) return false;
+      if (filters.hasAttachment === 'no' && hasPdf) return false;
+    }
     // amount filter
     const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
     if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;

@@ -1,0 +1,32 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN778785",
+  "invoice_date": "10/31/2025",
+  "due_date": "11/30/2025",
+  "total": "297.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1185",
+      "product_name": "1.00 1.00 1.00 1.00 1180 4027 3097 3043 Z360 ANTERIOR Z360 Zirconia Crown Digital Mandibular Frame Artisan Digital Bruxguard (ADB) Flipper 11-12 Teeth 173.00 135.00 296.00 185.00",
+      "Quantity": "1.00",
+      "unit_price": "185.00",
+      "line_item_total": "256.00"
+    },
+    {
+      "product_number": "4077",
+      "product_name": "1.00 3255 Digital Maxillary Frame Strengthner Bar 324.00",
+      "Quantity": "1.00",
+      "unit_price": "324.00",
+      "line_item_total": "41.00"
+    },
+    {
+      "product_number": "3145",
+      "product_name": "Wax-rim On Partial Frame",
+      "Quantity": "2.00",
+      "unit_price": "N/A",
+      "line_item_total": "82.00"
+    }
+  ]
+}

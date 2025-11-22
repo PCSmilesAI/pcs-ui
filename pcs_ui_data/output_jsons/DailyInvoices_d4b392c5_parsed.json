@@ -1,0 +1,32 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN771877",
+  "invoice_date": "09/18/2025",
+  "due_date": "10/18/2025",
+  "total": "535.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "3037",
+      "product_name": "1.00 1.00 1.00 4017 1180 7297 Flipper with Wire 1 Tooth Duraflex Repair Z360 Zirconia Crown Megagen Abutment 161.00 138.00 135.00",
+      "Quantity": "1.00",
+      "unit_price": "135.00",
+      "line_item_total": "225.00"
+    },
+    {
+      "product_number": "8665",
+      "product_name": "1.00 1009 Vita MFT 1x1 Posterior Z360 Implant Crown 245.00",
+      "Quantity": "1.00",
+      "unit_price": "245.00",
+      "line_item_total": "5.00"
+    },
+    {
+      "product_number": "7113",
+      "product_name": "Implant Body Analog",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "65.00"
+    }
+  ]
+}

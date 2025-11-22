@@ -1,10 +1,165 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "49581490",
+  "invoice_date": "11/12/25",
+  "due_date": "12/12/25",
+  "invoice_total": "1148.35",
+  "office_location": "Riddle",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "543-3685",
+      "product_name": "72/BX Whitening Bundle #1",
+      "Quantity": "1",
+      "unit_price": "56.16",
+      "line_item_total": "56.16"
+    },
+    {
+      "product_number": "543-0304",
+      "product_name": "6/BX Colgate",
+      "Quantity": "360",
+      "unit_price": "9.49",
+      "line_item_total": "37.96"
+    },
+    {
+      "product_number": "107-5503",
+      "product_name": "100/PK HVE Screens",
+      "Quantity": "2",
+      "unit_price": "17.46",
+      "line_item_total": "34.92"
+    },
+    {
+      "product_number": "100-4263",
+      "product_name": "EA Tartar & Stain Remover 1Gal",
+      "Quantity": "1",
+      "unit_price": "10.50",
+      "line_item_total": "10.50"
+    },
+    {
+      "product_number": "102-5073",
+      "product_name": "4/BX VP Mix HP Fast Set Heavy Body",
+      "Quantity": "1",
+      "unit_price": "26.91",
+      "line_item_total": "26.91"
+    },
+    {
+      "product_number": "600-7081",
+      "product_name": "EA Retractor Cheek Orringer",
+      "Quantity": "2",
+      "unit_price": "120.79",
+      "line_item_total": "120.79"
+    },
+    {
+      "product_number": "378-1336",
+      "product_name": "275/BX Cure-Thru Matrix Forms Assortment",
+      "Quantity": "1",
+      "unit_price": "163.06",
+      "line_item_total": "163.06"
+    },
+    {
+      "product_number": "300-0332",
+      "product_name": "50/PK Composi-Tight 3D Fusion Wedge Yellow XS",
+      "Quantity": "1",
+      "unit_price": "32.79",
+      "line_item_total": "32.79"
+    },
+    {
+      "product_number": "900-7262",
+      "product_name": "5/PK Maxima Diamond FG 856-016SC",
+      "Quantity": "2",
+      "unit_price": "32.08",
+      "line_item_total": "64.16"
+    },
+    {
+      "product_number": "777-0210",
+      "product_name": "10/BT Filtek Supreme Ultra Capsule A3-D",
+      "Quantity": "1",
+      "unit_price": "50.66",
+      "line_item_total": "50.66"
+    },
+    {
+      "product_number": "170-7681",
+      "product_name": "10ML/BT Micro Prime G Type",
+      "Quantity": "1",
+      "unit_price": "99.33",
+      "line_item_total": "99.33"
+    },
+    {
+      "product_number": "195-0590",
+      "product_name": "12/BX Brownie FG Mini Point",
+      "Quantity": "1",
+      "unit_price": "26.55",
+      "line_item_total": "26.55"
+    },
+    {
+      "product_number": "100-1847",
+      "product_name": "10/PK Carbide Bur RA",
+      "Quantity": "4",
+      "unit_price": "13.12",
+      "line_item_total": "26.24"
+    },
+    {
+      "product_number": "100-8765",
+      "product_name": "10/PK Carbide Bur RA",
+      "Quantity": "6",
+      "unit_price": "13.12",
+      "line_item_total": "13.12"
+    },
+    {
+      "product_number": "640-2805",
+      "product_name": "160/CN CaviWipes Towelettes Disin Large",
+      "Quantity": "2",
+      "unit_price": "10.74",
+      "line_item_total": "21.48"
+    },
+    {
+      "product_number": "222-0863",
+      "product_name": "15/PK SDR flow+ Refill A2",
+      "Quantity": "1",
+      "unit_price": "91.01",
+      "line_item_total": "91.01"
+    },
+    {
+      "product_number": "570-1316",
+      "product_name": "500/BX LT Hndl Barrier Sleeve T-Style 75\"Lx4\"W",
+      "Quantity": "1",
+      "unit_price": "10.89",
+      "line_item_total": "10.89"
+    },
+    {
+      "product_number": "570-1320",
+      "product_name": "500/BX A/W Syringe Barrier Sleeve 10\"Lx2.5\"W",
+      "Quantity": "2",
+      "unit_price": "19.40",
+      "line_item_total": "38.80"
+    },
+    {
+      "product_number": "112-6858",
+      "product_name": "100/BX Criterion Glove Chloroprene S Green",
+      "Quantity": "6",
+      "unit_price": "9.94",
+      "line_item_total": "59.64"
+    },
+    {
+      "product_number": "801-0179",
+      "product_name": "10/PK Isolite Posterior Mouthpiece Small",
+      "Quantity": "1",
+      "unit_price": "29.95",
+      "line_item_total": "29.95"
+    },
+    {
+      "product_number": "801-0180",
+      "product_name": "10/PK Isolite Posterior Mouthpiece Medium",
+      "Quantity": "1",
+      "unit_price": "29.95",
+      "line_item_total": "29.95"
+    },
+    {
+      "product_number": "378-0687",
+      "product_name": "24/PK Traxodent Hemos Retr Past Syst",
+      "Quantity": "1",
+      "unit_price": "96.99",
+      "line_item_total": "96.99"
+    }
+  ]
 }

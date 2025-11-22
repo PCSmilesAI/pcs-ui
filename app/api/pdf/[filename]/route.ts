@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { resolveDataPath } from '../../../../lib/workflow/dataDir';
 
 /**
  * Validates filename to prevent path traversal attacks
@@ -45,9 +46,36 @@ export async function GET(
     return new NextResponse('Only PDF files are allowed', { status: 400 });
   }
 
-  // Construct the file path
-  const baseDir = path.join(process.cwd(), 'email_invoices');
-  const filePath = path.join(baseDir, filename);
+  // Try multiple locations for PDFs (in order of preference)
+  const possibleDirs = [
+    resolveDataPath('email_invoices'),  // PCS_DATA_DIR/email_invoices (primary)
+    path.join(process.cwd(), 'dist', 'email_invoices'),  // dist/email_invoices (build output)
+    path.join(process.cwd(), 'email_invoices'),  // root email_invoices (fallback)
+  ];
+
+  let filePath: string | null = null;
+  let baseDir: string | null = null;
+
+  // Try each directory until we find the file
+  for (const dir of possibleDirs) {
+    const testPath = path.join(dir, filename);
+    if (fs.existsSync(testPath)) {
+      filePath = testPath;
+      baseDir = dir;
+      break;
+    }
+  }
+
+  // If file not found in any location, return 404
+  if (!filePath || !baseDir) {
+    console.warn('[PDF API] PDF not found:', {
+      filename,
+      searchedDirs: possibleDirs,
+      cwd: process.cwd(),
+      dataDir: resolveDataPath('email_invoices')
+    });
+    return new NextResponse('PDF not found', { status: 404 });
+  }
 
   // Security check - ensure path is within base directory
   if (!isPathWithinBase(filePath, baseDir)) {
@@ -55,10 +83,6 @@ export async function GET(
   }
 
   try {
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-      return new NextResponse('PDF not found', { status: 404 });
-    }
 
     // Read the file
     const fileBuffer = fs.readFileSync(filePath);

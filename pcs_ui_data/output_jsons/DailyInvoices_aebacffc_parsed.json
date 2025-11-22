@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN775906",
+  "invoice_date": "10/14/2025",
+  "due_date": "11/13/2025",
+  "total": "0.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "3053",
+      "product_name": "Set-up & Wax Denture",
+      "Quantity": "2.00",
+      "unit_price": "N/A",
+      "line_item_total": "0.00"
+    }
+  ]
+}

@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "49137510",
+  "invoice_date": "11/04/25",
+  "due_date": "12/04/25",
+  "invoice_total": "86.92",
+  "office_location": "Ridgefield",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "933-7559",
+      "product_name": "100/BX Dispos-A-Bite #7085C",
+      "Quantity": "1",
+      "unit_price": "64.48",
+      "line_item_total": "64.48"
+    }
+  ]
 }

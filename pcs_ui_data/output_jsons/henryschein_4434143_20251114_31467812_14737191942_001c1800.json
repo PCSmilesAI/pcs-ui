@@ -1,10 +1,39 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "49611206",
+  "invoice_date": "11/13/25",
+  "due_date": "12/13/25",
+  "invoice_total": "291.72",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "112-6765",
+      "product_name": "200/BX Essentials Nitrile Glove X-SMALL",
+      "Quantity": "10",
+      "unit_price": "7.55",
+      "line_item_total": "75.50"
+    },
+    {
+      "product_number": "112-6766",
+      "product_name": "200/BX Essentials Nitrile Glove SMALL",
+      "Quantity": "5",
+      "unit_price": "7.55",
+      "line_item_total": "37.75"
+    },
+    {
+      "product_number": "112-6767",
+      "product_name": "200/BX Essentials Nitrile Glove MEDIUM",
+      "Quantity": "10",
+      "unit_price": "7.55",
+      "line_item_total": "75.50"
+    },
+    {
+      "product_number": "543-3435",
+      "product_name": "72/BX Sensitivity Bundle",
+      "Quantity": "2",
+      "unit_price": "48.24",
+      "line_item_total": "96.48"
+    }
+  ]
 }

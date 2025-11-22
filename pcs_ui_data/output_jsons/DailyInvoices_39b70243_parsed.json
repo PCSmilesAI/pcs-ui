@@ -1,0 +1,25 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN776987",
+  "invoice_date": "10/21/2025",
+  "due_date": "11/20/2025",
+  "total": "538.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "3035",
+      "product_name": "1.00 1.00 1180 7265 Flipper 1 tooth Z360 Zirconia Crown Nobel Biocare Milled Titanium Abutment 138.00 135.00",
+      "Quantity": "1.00",
+      "unit_price": "135.00",
+      "line_item_total": "293.00"
+    },
+    {
+      "product_number": "1009",
+      "product_name": "Z360 Implant Crown",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "245.00"
+    }
+  ]
+}

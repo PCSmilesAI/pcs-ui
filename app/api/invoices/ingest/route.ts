@@ -29,12 +29,13 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json() as IngestPayload;
     
-    if (!body.invoice_number || !body.vendor) {
-      return NextResponse.json(
-        { error: 'invoice_number and vendor are required' },
-        { status: 400 }
-      );
-    }
+    // Use fallback values for missing fields - ingest ALL invoices even with missing data
+    const invoice_number = body.invoice_number || 
+      body.source_file?.replace(/\.(pdf|json)$/i, '') || 
+      body.json_path?.replace(/\.json$/i, '')?.split('/').pop() || 
+      `UNKNOWN-${Date.now()}`;
+    
+    const vendor = body.vendor || 'Unknown Vendor';
 
     const db = getDatabase();
 
@@ -50,10 +51,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if invoice already exists
-    const existing = db.prepare(
-      'SELECT id FROM invoices WHERE invoice_number = ?'
-    ).get(body.invoice_number);
+    // Check if invoice already exists - use source_file as primary check, fallback to invoice_number
+    const sourceFile = body.source_file || body.json_path || body.pdf_path;
+    let existing: { id: string } | undefined = undefined;
+    
+    if (sourceFile) {
+      existing = db.prepare(
+        'SELECT id FROM invoices WHERE source_file = ?'
+      ).get(sourceFile) as { id: string } | undefined;
+    }
+    
+    // Fallback check by invoice_number if source_file check didn't find it
+    if (!existing && invoice_number) {
+      existing = db.prepare(
+        'SELECT id FROM invoices WHERE invoice_number = ?'
+      ).get(invoice_number) as { id: string } | undefined;
+    }
 
     if (existing) {
       return NextResponse.json(
@@ -101,7 +114,7 @@ export async function POST(req: NextRequest) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
-      body.invoice_number,
+      invoice_number,
       body.source_file || body.json_path,
       normalizedVendor,  // parsed (normalized)
       body.office_location || body.clinic_id,
@@ -131,17 +144,18 @@ export async function POST(req: NextRequest) {
     }));
 
     console.log('[API][INGEST]', 'invoice_ingested', {
-      invoiceNumber: body.invoice_number,
-      vendor: body.vendor,
+      invoiceNumber: invoice_number,
+      vendor: vendor,
       amountCents,
-      id
+      id,
+      hadMissingFields: !body.invoice_number || !body.vendor
     });
 
     return NextResponse.json({
       ok: true,
       message: 'Invoice ingested successfully',
       id,
-      invoice_number: body.invoice_number
+      invoice_number: invoice_number
     });
   } catch (err: any) {
     // Log full error server-side only

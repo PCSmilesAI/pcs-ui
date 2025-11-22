@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48944348",
+  "invoice_date": "10/31/25",
+  "due_date": "11/30/25",
+  "invoice_total": "163.10",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "905-4347",
+      "product_name": "80/PK Tissue Bath Od 2-Ply 80/Rolls",
+      "Quantity": "2",
+      "unit_price": "81.55",
+      "line_item_total": "163.10"
+    }
+  ]
 }

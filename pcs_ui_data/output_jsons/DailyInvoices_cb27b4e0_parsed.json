@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN780312",
+  "invoice_date": "11/10/2025",
+  "due_date": "12/10/2025",
+  "total": "399.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1200",
+      "product_name": "1.00 1200 Digital Surgical Guide Digital Surgical Guide 399.00",
+      "Quantity": "1.00",
+      "unit_price": "399.00",
+      "line_item_total": "399.00"
+    }
+  ]
+}

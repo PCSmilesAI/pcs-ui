@@ -1,10 +1,109 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48225882",
+  "invoice_date": "10/14/25",
+  "due_date": "11/13/25",
+  "invoice_total": "1478.88",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "228-8210",
+      "product_name": "50/BX Septocaine 4% w/EPI 1.7 mL INJ 1:100M Go",
+      "Quantity": "1",
+      "unit_price": "61.41",
+      "line_item_total": "61.41"
+    },
+    {
+      "product_number": "222-2417",
+      "product_name": "48/PK Palodent",
+      "Quantity": "360",
+      "unit_price": "71.09",
+      "line_item_total": "71.09"
+    },
+    {
+      "product_number": "222-2422",
+      "product_name": "48/PK Palodent",
+      "Quantity": "360",
+      "unit_price": "71.09",
+      "line_item_total": "71.09"
+    },
+    {
+      "product_number": "222-2423",
+      "product_name": "48/PK Palodent",
+      "Quantity": "360",
+      "unit_price": "71.09",
+      "line_item_total": "71.09"
+    },
+    {
+      "product_number": "135-5985",
+      "product_name": "EA PowerScrub Vaccum Line Cleaner Intro Kit",
+      "Quantity": "3",
+      "unit_price": "70.58",
+      "line_item_total": "211.74"
+    },
+    {
+      "product_number": "543-0221",
+      "product_name": "3.4OZ/BT PreviDent",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "32.45"
+    },
+    {
+      "product_number": "543-0219",
+      "product_name": "3.4OZ/BT PreviDent",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "45.43"
+    },
+    {
+      "product_number": "468-1020",
+      "product_name": "3/PK Edgeone PT FW File 25mm #20",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "222-1135",
+      "product_name": "EA IRM Complete Package Ivory",
+      "Quantity": "1",
+      "unit_price": "114.88",
+      "line_item_total": "114.88"
+    },
+    {
+      "product_number": "378-4499",
+      "product_name": "EA RC Prep 18Gm/Jr",
+      "Quantity": "1",
+      "unit_price": "34.46",
+      "line_item_total": "34.46"
+    },
+    {
+      "product_number": "999-1740",
+      "product_name": "200/PK Futurabond U Single Dose",
+      "Quantity": "1",
+      "unit_price": "408.51",
+      "line_item_total": "408.51"
+    },
+    {
+      "product_number": "112-7144",
+      "product_name": "200/BX Criterion Glove Aloe Magenta Nitrile S",
+      "Quantity": "6",
+      "unit_price": "14.84",
+      "line_item_total": "89.04"
+    },
+    {
+      "product_number": "570-2099",
+      "product_name": "200/BX Criterion N200 Glove Sky Blue Nitrile M",
+      "Quantity": "4",
+      "unit_price": "15.19",
+      "line_item_total": "60.76"
+    },
+    {
+      "product_number": "900-7973",
+      "product_name": "1000/BG Sure Tip Colors Bulk Package Blue",
+      "Quantity": "1",
+      "unit_price": "107.30",
+      "line_item_total": "107.30"
+    }
+  ]
 }

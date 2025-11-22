@@ -1,0 +1,18 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "49889702",
+  "invoice_date": "11/19/25",
+  "due_date": "12/19/25",
+  "invoice_total": "52.19",
+  "office_location": "Ridgefield",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "900-0766",
+      "product_name": "48/BG HP Mixing Tips Large Green 6.5mm",
+      "Quantity": "1",
+      "unit_price": "32.53",
+      "line_item_total": "32.53"
+    }
+  ]
+}

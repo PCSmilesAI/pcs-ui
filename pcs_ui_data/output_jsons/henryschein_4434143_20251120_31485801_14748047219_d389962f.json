@@ -1,0 +1,116 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "49862637",
+  "invoice_date": "11/19/25",
+  "due_date": "12/19/25",
+  "invoice_total": "860.50",
+  "office_location": "Riddle",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "570-3281",
+      "product_name": "50/BX Criterion AntiFog Ear Msk L3 Blue",
+      "Quantity": "10",
+      "unit_price": "13.99",
+      "line_item_total": "139.90"
+    },
+    {
+      "product_number": "139-0355",
+      "product_name": "25/PK Ortho Technology Retainer Case Green",
+      "Quantity": "1",
+      "unit_price": "32.23",
+      "line_item_total": "32.23"
+    },
+    {
+      "product_number": "216-0251",
+      "product_name": "250/PK Acutips Disp A/W Syringe Tips Assorted",
+      "Quantity": "4",
+      "unit_price": "15.37",
+      "line_item_total": "61.48"
+    },
+    {
+      "product_number": "112-7323",
+      "product_name": "300/BX Essentials",
+      "Quantity": "300",
+      "unit_price": "12.95",
+      "line_item_total": "77.70"
+    },
+    {
+      "product_number": "378-0349",
+      "product_name": "5ML/EA Scotchbond Universal Vial Refill",
+      "Quantity": "1",
+      "unit_price": "119.49",
+      "line_item_total": "119.49"
+    },
+    {
+      "product_number": "570-2499",
+      "product_name": "12/PK Tofflemire Matrix Bands .0015 #1",
+      "Quantity": "3",
+      "unit_price": "1.40",
+      "line_item_total": "4.20"
+    },
+    {
+      "product_number": "101-2270",
+      "product_name": "25/PK Aspirator Tip Surgical White 1/8\"D",
+      "Quantity": "4",
+      "unit_price": "4.59",
+      "line_item_total": "18.36"
+    },
+    {
+      "product_number": "112-6690",
+      "product_name": "32OZ/BT Maxi-Evac Plus",
+      "Quantity": "1",
+      "unit_price": "27.19",
+      "line_item_total": "27.19"
+    },
+    {
+      "product_number": "570-3522",
+      "product_name": "EA Maxitemp Temp C&B 10:1_A2 A2",
+      "Quantity": "1",
+      "unit_price": "136.98",
+      "line_item_total": "136.98"
+    },
+    {
+      "product_number": "123-8189",
+      "product_name": "EA TempBond NE Tubes",
+      "Quantity": "1",
+      "unit_price": "66.89",
+      "line_item_total": "66.89"
+    },
+    {
+      "product_number": "102-3597",
+      "product_name": "2/BX Blu-Bite HP Fast Set Unflavored",
+      "Quantity": "2",
+      "unit_price": "18.12",
+      "line_item_total": "36.24"
+    },
+    {
+      "product_number": "112-6865",
+      "product_name": "50/PK MaxiTemp HP Mixing Tips Lt Blue",
+      "Quantity": "1",
+      "unit_price": "29.68",
+      "line_item_total": "29.68"
+    },
+    {
+      "product_number": "112-6862",
+      "product_name": "48/BG Maxima HP Mixing Tips Green 6.5mm",
+      "Quantity": "2",
+      "unit_price": "25.22",
+      "line_item_total": "50.44"
+    },
+    {
+      "product_number": "945-0983",
+      "product_name": "10/BX MultiCore Flow Mixing Tips 10Gm Syringe",
+      "Quantity": "1",
+      "unit_price": "13.64",
+      "line_item_total": "13.64"
+    },
+    {
+      "product_number": "701-3623",
+      "product_name": "25/PK Singles Diamond Sterile FG 0512C",
+      "Quantity": "1",
+      "unit_price": "39.59",
+      "line_item_total": "39.59"
+    }
+  ]
+}

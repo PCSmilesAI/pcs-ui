@@ -1,10 +1,39 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48495429",
+  "invoice_date": "10/20/25",
+  "due_date": "11/19/25",
+  "invoice_total": "343.10",
+  "office_location": "Lebanon",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "900-1281",
+      "product_name": "EA MaxiTemp HP C&B Kit 4:1 A2",
+      "Quantity": "1",
+      "unit_price": "82.15",
+      "line_item_total": "82.15"
+    },
+    {
+      "product_number": "101-0476",
+      "product_name": "500/CA Dri-Gard Towel 2Ply+Poly Lavend 13x19",
+      "Quantity": "1",
+      "unit_price": "19.57",
+      "line_item_total": "19.57"
+    },
+    {
+      "product_number": "429-0005",
+      "product_name": "20/BX SafeGauze HemoStat",
+      "Quantity": "1",
+      "unit_price": "81.38",
+      "line_item_total": "81.38"
+    },
+    {
+      "product_number": "555-0626",
+      "product_name": "20/BX Oraqix Periodontal Gel 2.5%",
+      "Quantity": "1",
+      "unit_price": "153.51",
+      "line_item_total": "153.51"
+    }
+  ]
 }

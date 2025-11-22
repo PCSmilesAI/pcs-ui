@@ -1,10 +1,32 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "47566054",
+  "invoice_date": "09/30/25",
+  "due_date": "10/30/25",
+  "invoice_total": "86.91",
+  "office_location": "Lebanon",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "543-0221",
+      "product_name": "3.4OZ/BT PreviDent",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "38.94"
+    },
+    {
+      "product_number": "543-0219",
+      "product_name": "3.4OZ/BT PreviDent",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "25.96"
+    },
+    {
+      "product_number": "570-2249",
+      "product_name": "16OZ/BT Acclean Chlorhexidine Rinse Mint",
+      "Quantity": "2",
+      "unit_price": "3.26",
+      "line_item_total": "6.52"
+    }
+  ]
 }

@@ -1,0 +1,18 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "5196",
+  "invoice_date": "9/6/2025",
+  "total": "469.00",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "Custom Screw Retain Plus Crown",
+      "Quantity": "N/A",
+      "unit_price": "469.00",
+      "line_item_total": "469.00"
+    }
+  ],
+  "due_date": "10/06/2025"
+}

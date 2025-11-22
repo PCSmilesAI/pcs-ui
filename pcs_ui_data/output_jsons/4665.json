@@ -1,0 +1,39 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "4665",
+  "invoice_date": "7/15/2025",
+  "total": "214.00",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "Temporary Acrylic Partial (Flipper)",
+      "Quantity": "N/A",
+      "unit_price": "129.00",
+      "line_item_total": "129.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Single Anterior",
+      "Quantity": "N/A",
+      "unit_price": "16.00",
+      "line_item_total": "16.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Additional Wire Clasp (2)",
+      "Quantity": "N/A",
+      "unit_price": "39.00",
+      "line_item_total": "39.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "3D Model Printing (2 x $15.00)",
+      "Quantity": "N/A",
+      "unit_price": "30.00",
+      "line_item_total": "30.00"
+    }
+  ],
+  "due_date": "08/14/2025"
+}

@@ -1,10 +1,39 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "47714355",
+  "invoice_date": "10/02/25",
+  "due_date": "11/01/25",
+  "invoice_total": "285.28",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "633-0007",
+      "product_name": "200/BX Sure-Check Sterile Pouch 5.25x6.5",
+      "Quantity": "2",
+      "unit_price": "12.82",
+      "line_item_total": "25.64"
+    },
+    {
+      "product_number": "228-8210",
+      "product_name": "50/BX Septocaine 4% w/EPI 1.7 mL INJ 1:100M Go",
+      "Quantity": "1",
+      "unit_price": "61.41",
+      "line_item_total": "61.41"
+    },
+    {
+      "product_number": "640-2805",
+      "product_name": "160/CN CaviWipes Towelettes Disin Large",
+      "Quantity": "6",
+      "unit_price": "10.74",
+      "line_item_total": "64.44"
+    },
+    {
+      "product_number": "777-2549",
+      "product_name": "100/PK 3M Clinpro Clear Fluoride Trtm Mint Unit",
+      "Quantity": "1",
+      "unit_price": "127.30",
+      "line_item_total": "127.30"
+    }
+  ]
 }

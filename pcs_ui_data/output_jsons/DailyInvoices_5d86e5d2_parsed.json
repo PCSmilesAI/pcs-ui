@@ -1,0 +1,25 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN778199",
+  "invoice_date": "10/28/2025",
+  "due_date": "11/27/2025",
+  "total": "538.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "7265",
+      "product_name": "Nobel Biocare Milled Titanium Abutment",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "293.00"
+    },
+    {
+      "product_number": "1009",
+      "product_name": "Z360 Implant Crown",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "245.00"
+    }
+  ]
+}

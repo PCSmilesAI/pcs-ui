@@ -1,10 +1,32 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
+  "vendor": "Henry schein",
+  "invoice_number": "62077052",
   "invoice_date": "",
   "due_date": "",
-  "total": "170.20",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "invoice_total": "",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "818-2602",
+      "product_name": "ZENFLEX ONE RECIPROCATING NITI FILE SMAL $ 42.55 $ 42.55 T",
+      "Quantity": "71395938",
+      "unit_price": "1.000",
+      "line_item_total": "1.000"
+    },
+    {
+      "product_number": "818-2605",
+      "product_name": "ZENFLEX ONE RECIPROCATING NITI FILE PRIM $ 42.55 $ 42.55 T",
+      "Quantity": "71395920",
+      "unit_price": "1.000",
+      "line_item_total": "1.000"
+    },
+    {
+      "product_number": "818-2604",
+      "product_name": "ZENFLEX ONE RECIPROCATING NITI FILE PRIM $ 42.55 $ 42.55 T",
+      "Quantity": "71395896",
+      "unit_price": "1.000",
+      "line_item_total": "1.000"
+    }
+  ]
 }

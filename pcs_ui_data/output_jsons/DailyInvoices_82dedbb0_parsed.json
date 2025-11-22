@@ -1,0 +1,32 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN779068",
+  "invoice_date": "11/03/2025",
+  "due_date": "12/03/2025",
+  "total": "332.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1185",
+      "product_name": "2.00 7287 Z360 ANTERIOR Strauman Abutment 346.00",
+      "Quantity": "2.00",
+      "unit_price": "346.00",
+      "line_item_total": "642.00"
+    },
+    {
+      "product_number": "1180",
+      "product_name": "2.00 1009 Z360 Zirconia Crown Z360 Implant Crown 135.00",
+      "Quantity": "1.00",
+      "unit_price": "135.00",
+      "line_item_total": "490.00"
+    },
+    {
+      "product_number": "7113",
+      "product_name": "Implant Body Analog",
+      "Quantity": "2.00",
+      "unit_price": "N/A",
+      "line_item_total": "200.00"
+    }
+  ]
+}

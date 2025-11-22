@@ -1,10 +1,74 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "46973014",
+  "invoice_date": "09/16/25",
+  "due_date": "10/16/25",
+  "invoice_total": "464.40",
+  "office_location": "Riddle",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "100-6640",
+      "product_name": "72/BX Mirror Disposable Dental",
+      "Quantity": "1",
+      "unit_price": "27.03",
+      "line_item_total": "27.03"
+    },
+    {
+      "product_number": "640-8482",
+      "product_name": "65/CN CaviWipes Towelettes XLarge",
+      "Quantity": "4",
+      "unit_price": "15.23",
+      "line_item_total": "60.92"
+    },
+    {
+      "product_number": "640-2805",
+      "product_name": "160/CN CaviWipes Towelettes Disin Large",
+      "Quantity": "5",
+      "unit_price": "10.74",
+      "line_item_total": "53.70"
+    },
+    {
+      "product_number": "107-4619",
+      "product_name": "EA Debacterol Vial 1.5ml",
+      "Quantity": "1",
+      "unit_price": "87.19",
+      "line_item_total": "87.19"
+    },
+    {
+      "product_number": "216-0251",
+      "product_name": "250/PK Acutips Disp A/W Syringe Tips Assorted",
+      "Quantity": "4",
+      "unit_price": "15.37",
+      "line_item_total": "61.48"
+    },
+    {
+      "product_number": "777-2545",
+      "product_name": "50/PK 3M Clinpro Clear Fluoride Trtm Mint Unit",
+      "Quantity": "1",
+      "unit_price": "71.61",
+      "line_item_total": "71.61"
+    },
+    {
+      "product_number": "586-4339",
+      "product_name": "EA Burnisher DE Ball Lg4&Md3 D/l Rnd",
+      "Quantity": "2",
+      "unit_price": "32.78",
+      "line_item_total": "65.56"
+    },
+    {
+      "product_number": "112-6857",
+      "product_name": "100/BX Criterion Glove Chloroprene XS Green",
+      "Quantity": "2",
+      "unit_price": "9.94",
+      "line_item_total": "19.88"
+    },
+    {
+      "product_number": "100-3836",
+      "product_name": "GAL/BT General Purpose Cleaner Non-Ammonia",
+      "Quantity": "1",
+      "unit_price": "10.54",
+      "line_item_total": "10.54"
+    }
+  ]
 }

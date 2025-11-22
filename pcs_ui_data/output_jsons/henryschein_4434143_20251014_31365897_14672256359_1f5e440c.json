@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
+  "vendor": "Henry schein",
+  "invoice_number": "48199767",
+  "invoice_date": "10/14/25",
+  "due_date": "11/13/25",
+  "invoice_total": "237.70",
   "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "108-4349",
+      "product_name": "144/BG Prophy Cups Rib/Web Firm Screw",
+      "Quantity": "7",
+      "unit_price": "33.03",
+      "line_item_total": "231.21"
+    }
+  ]
 }

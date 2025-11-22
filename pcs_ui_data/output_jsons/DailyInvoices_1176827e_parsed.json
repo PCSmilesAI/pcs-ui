@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN775863",
+  "invoice_date": "10/13/2025",
+  "due_date": "11/12/2025",
+  "total": "221.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1132",
+      "product_name": "e.max Anterior",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "221.00"
+    }
+  ]
+}

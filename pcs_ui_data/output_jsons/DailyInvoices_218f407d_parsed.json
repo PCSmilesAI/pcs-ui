@@ -1,0 +1,25 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN775582",
+  "invoice_date": "10/10/2025",
+  "due_date": "11/09/2025",
+  "total": "135.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1180",
+      "product_name": "1.00 1.00 7297 1180 Z360 Zirconia Crown Megagen Abutment Z360 Zirconia Crown 135.00 225.00",
+      "Quantity": "1.00",
+      "unit_price": "225.00",
+      "line_item_total": "135.00"
+    },
+    {
+      "product_number": "1009",
+      "product_name": "Z360 Implant Crown",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "245.00"
+    }
+  ]
+}

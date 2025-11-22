@@ -1,0 +1,46 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "5175",
+  "invoice_date": "9/8/2025",
+  "total": "371.00",
+  "office_location": "Vancouver",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "Cast Partial Framework",
+      "Quantity": "N/A",
+      "unit_price": "99.00",
+      "line_item_total": "99.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "P/ Setup teeth",
+      "Quantity": "N/A",
+      "unit_price": "89.00",
+      "line_item_total": "89.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "P/ Finish or Process Complete",
+      "Quantity": "N/A",
+      "unit_price": "135.00",
+      "line_item_total": "135.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Single Posterior (2 x $9.00)",
+      "Quantity": "N/A",
+      "unit_price": "18.00",
+      "line_item_total": "18.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "3D Model Printing (2 x $15.00)",
+      "Quantity": "N/A",
+      "unit_price": "30.00",
+      "line_item_total": "30.00"
+    }
+  ],
+  "due_date": "10/08/2025"
+}

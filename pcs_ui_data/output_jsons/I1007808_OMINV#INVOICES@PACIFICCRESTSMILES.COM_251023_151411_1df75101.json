@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
+  "vendor": "Henry schein",
   "invoice_number": "",
   "invoice_date": "",
   "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "invoice_total": "",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "407-995847",
+      "product_name": ".Ordered By: Jennifer/MB 10/22/2025 P10389 Net",
+      "Quantity": "30",
+      "unit_price": "50.000ea",
+      "line_item_total": "200.00"
+    }
+  ]
 }

@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN774692",
+  "invoice_date": "10/06/2025",
+  "due_date": "11/05/2025",
+  "total": "185.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "3097",
+      "product_name": "1.00 3097 Artisan Digital Bruxguard (ADB) Artisan Digital Bruxguard (ADB) 185.00",
+      "Quantity": "1.00",
+      "unit_price": "185.00",
+      "line_item_total": "185.00"
+    }
+  ]
+}

@@ -1,10 +1,25 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "47031273",
+  "invoice_date": "09/17/25",
+  "due_date": "10/17/25",
+  "invoice_total": "79.45",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "570-2133",
+      "product_name": "100/PK Micro Applicators H10 Fine Pink",
+      "Quantity": "4",
+      "unit_price": "3.05",
+      "line_item_total": "12.20"
+    },
+    {
+      "product_number": "112-7067",
+      "product_name": "16OZ/BT Isopropyl Alcohol 70%",
+      "Quantity": "4",
+      "unit_price": "3.13",
+      "line_item_total": "12.52"
+    }
+  ]
 }

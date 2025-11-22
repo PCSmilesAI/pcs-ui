@@ -1,10 +1,10 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "10087-7128",
-  "invoice_date": "03/31/2025",
+  "vendor": "Henry schein",
+  "invoice_number": "",
+  "invoice_date": "",
   "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
+  "invoice_total": "",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
   "line_items": []
 }

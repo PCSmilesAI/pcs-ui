@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN772463",
+  "invoice_date": "09/22/2025",
+  "due_date": "10/22/2025",
+  "total": "231.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1181",
+      "product_name": "Layered Zirconia Crown",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "231.00"
+    }
+  ]
+}

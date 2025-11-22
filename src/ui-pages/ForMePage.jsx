@@ -240,6 +240,13 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
           if (status !== String(filterConfig.ach).toLowerCase()) return false;
         }
 
+        // PDF Attachment filter
+        if (filterConfig.hasAttachment) {
+          const hasPdf = !!(row.pdf_path || row.pdfPath);
+          if (filterConfig.hasAttachment === 'yes' && !hasPdf) return false;
+          if (filterConfig.hasAttachment === 'no' && hasPdf) return false;
+        }
+
         const amount = parseAmount(String(row.amount));
         if (filterConfig.minAmount && amount < Number(filterConfig.minAmount)) return false;
         if (filterConfig.maxAmount && amount > Number(filterConfig.maxAmount)) return false;

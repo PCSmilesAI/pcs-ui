@@ -1,0 +1,25 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN778320",
+  "invoice_date": "10/29/2025",
+  "due_date": "11/28/2025",
+  "total": "348.60",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "2019",
+      "product_name": "+3 Surf Hi Noble Onlay",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "148.00"
+    },
+    {
+      "product_number": "7310",
+      "product_name": "Noble Yellow Alloy",
+      "Quantity": "1.30",
+      "unit_price": "N/A",
+      "line_item_total": "200.60"
+    }
+  ]
+}

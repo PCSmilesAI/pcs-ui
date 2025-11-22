@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "49581491",
+  "invoice_date": "11/14/25",
+  "due_date": "12/14/25",
+  "invoice_total": "240.79",
+  "office_location": "Riddle",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "561-9319",
+      "product_name": "4/ST Periotomes",
+      "Quantity": "1",
+      "unit_price": "240.79",
+      "line_item_total": "240.79"
+    }
+  ]
 }

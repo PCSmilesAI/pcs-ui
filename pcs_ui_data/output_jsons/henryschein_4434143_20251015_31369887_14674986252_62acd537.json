@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48256862",
+  "invoice_date": "10/15/25",
+  "due_date": "11/14/25",
+  "invoice_total": "31.04",
+  "office_location": "Lebanon",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "107-6840",
+      "product_name": "35/BX Polybite Tray Anterior",
+      "Quantity": "1",
+      "unit_price": "15.55",
+      "line_item_total": "15.55"
+    }
+  ]
 }

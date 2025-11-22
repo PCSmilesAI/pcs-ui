@@ -270,6 +270,13 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         if (status !== String(filters.ach).toLowerCase()) return false;
       }
 
+      // PDF Attachment filter
+      if (filters.hasAttachment) {
+        const hasPdf = !!(row.pdf_path || row.pdfPath);
+        if (filters.hasAttachment === 'yes' && !hasPdf) return false;
+        if (filters.hasAttachment === 'no' && hasPdf) return false;
+      }
+
       // Due Within filter
       if (filters.dueWithin) {
         const days = parseInt(filters.dueWithin);

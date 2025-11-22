@@ -1,10 +1,32 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "49247183",
+  "invoice_date": "11/05/25",
+  "due_date": "12/05/25",
+  "invoice_total": "153.89",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "135-6058",
+      "product_name": "EA PowerScrub Vaccum Line Cleaner",
+      "Quantity": "64",
+      "unit_price": "45.34",
+      "line_item_total": "90.68"
+    },
+    {
+      "product_number": "900-7434",
+      "product_name": "20/PK Mixing Tips Automix Brown",
+      "Quantity": "1",
+      "unit_price": "14.84",
+      "line_item_total": "14.84"
+    },
+    {
+      "product_number": "133-7442",
+      "product_name": "50/BX CitriSil Waterline Cleaner Blue",
+      "Quantity": "1",
+      "unit_price": "41.88",
+      "line_item_total": "41.88"
+    }
+  ]
 }

@@ -1,10 +1,32 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "47740523",
+  "invoice_date": "10/03/25",
+  "due_date": "11/02/25",
+  "invoice_total": "117.23",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "133-7442",
+      "product_name": "50/BX CitriSil Waterline Cleaner Blue",
+      "Quantity": "1",
+      "unit_price": "41.88",
+      "line_item_total": "41.88"
+    },
+    {
+      "product_number": "100-7934",
+      "product_name": "EA Elevator Apical #301",
+      "Quantity": "2",
+      "unit_price": "23.51",
+      "line_item_total": "47.02"
+    },
+    {
+      "product_number": "104-5206",
+      "product_name": "50/BG Multi-Tray Posterior Wide Body",
+      "Quantity": "1",
+      "unit_price": "12.84",
+      "line_item_total": "12.84"
+    }
+  ]
 }

@@ -1,10 +1,123 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48180609",
+  "invoice_date": "10/13/25",
+  "due_date": "11/12/25",
+  "invoice_total": "1226.09",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "101-1559",
+      "product_name": "EA Bur Cleaning Brush Steel",
+      "Quantity": "1",
+      "unit_price": "5.15",
+      "line_item_total": "5.15"
+    },
+    {
+      "product_number": "153-0372",
+      "product_name": "100/BG Halyard CSR Wrap 15\" x 15\"",
+      "Quantity": "3",
+      "unit_price": "8.82",
+      "line_item_total": "26.46"
+    },
+    {
+      "product_number": "112-6865",
+      "product_name": "50/PK MaxiTemp HP Mixing Tips Lt Blue",
+      "Quantity": "1",
+      "unit_price": "29.68",
+      "line_item_total": "29.68"
+    },
+    {
+      "product_number": "496-0047",
+      "product_name": "6/PK Elcomed/Implantmed Irrigation Tubing 2.2",
+      "Quantity": "2",
+      "unit_price": "80.99",
+      "line_item_total": "161.98"
+    },
+    {
+      "product_number": "333-3464",
+      "product_name": "48/BX Fuji II LC Capsules A2",
+      "Quantity": "1",
+      "unit_price": "245.10",
+      "line_item_total": "245.10"
+    },
+    {
+      "product_number": "228-6589",
+      "product_name": "10/PK Qwikstrip Serrated Strips White",
+      "Quantity": "1",
+      "unit_price": "74.67",
+      "line_item_total": "74.67"
+    },
+    {
+      "product_number": "222-0381",
+      "product_name": "50/BX Palodent Plus Matrices Refill 4.5mm",
+      "Quantity": "1",
+      "unit_price": "63.02",
+      "line_item_total": "63.02"
+    },
+    {
+      "product_number": "900-1890",
+      "product_name": "100/BX Standard Needles 27Ga Long Plastic Hub",
+      "Quantity": "1",
+      "unit_price": "11.12",
+      "line_item_total": "11.12"
+    },
+    {
+      "product_number": "107-0546",
+      "product_name": "35/BX Polybite Tray Quadrant",
+      "Quantity": "1",
+      "unit_price": "15.55",
+      "line_item_total": "15.55"
+    },
+    {
+      "product_number": "654-5663",
+      "product_name": "12/BX Surgifoam Gelatin Sponge 2cmx6cmx7mm",
+      "Quantity": "1",
+      "unit_price": "178.61",
+      "line_item_total": "178.61"
+    },
+    {
+      "product_number": "900-1892",
+      "product_name": "100/BX Standard Needles 30Ga Short Plastic Hub",
+      "Quantity": "1",
+      "unit_price": "11.12",
+      "line_item_total": "11.12"
+    },
+    {
+      "product_number": "543-0308",
+      "product_name": "24/CA Colgate Total Clean Mint TP 0.88 oz",
+      "Quantity": "2",
+      "unit_price": "11.99",
+      "line_item_total": "23.98"
+    },
+    {
+      "product_number": "127-0122",
+      "product_name": "100/BX Pinnacle Sensor Sheath Dexis Platinum",
+      "Quantity": "2",
+      "unit_price": "19.91",
+      "line_item_total": "39.82"
+    },
+    {
+      "product_number": "543-0293",
+      "product_name": "6/BX Colgate",
+      "Quantity": "360",
+      "unit_price": "9.49",
+      "line_item_total": "284.70"
+    },
+    {
+      "product_number": "712-0157",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Wide",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    },
+    {
+      "product_number": "712-0154",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Tight",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    }
+  ]
 }

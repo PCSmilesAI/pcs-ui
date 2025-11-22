@@ -1,0 +1,18 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "",
+  "invoice_date": "",
+  "due_date": "",
+  "invoice_total": "",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "407-103996",
+      "product_name": ".Ordered By: Takisha/BS 11/18/2025 P10475 Net",
+      "Quantity": "30",
+      "unit_price": "76.000ea",
+      "line_item_total": "76.00"
+    }
+  ]
+}

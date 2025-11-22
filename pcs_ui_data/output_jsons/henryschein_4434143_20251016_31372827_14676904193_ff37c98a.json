@@ -1,10 +1,67 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48280253",
+  "invoice_date": "10/15/25",
+  "due_date": "11/14/25",
+  "invoice_total": "332.92",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "136-3741",
+      "product_name": "20/BX DryShield Disp Mouthpiece Medium",
+      "Quantity": "2",
+      "unit_price": "36.96",
+      "line_item_total": "73.92"
+    },
+    {
+      "product_number": "153-7468",
+      "product_name": "EA Sodium Chloride 0.9% Inj Bag 250mL",
+      "Quantity": "6",
+      "unit_price": "6.05",
+      "line_item_total": "36.30"
+    },
+    {
+      "product_number": "900-7021",
+      "product_name": "250/BG Sure Tip Colors Blue",
+      "Quantity": "2",
+      "unit_price": "18.26",
+      "line_item_total": "36.52"
+    },
+    {
+      "product_number": "112-5696",
+      "product_name": "100/BX Maestro F&P Strips Regular Coarse/Med",
+      "Quantity": "1",
+      "unit_price": "28.79",
+      "line_item_total": "28.79"
+    },
+    {
+      "product_number": "112-4859",
+      "product_name": "200/BX Self Seal Sterilization Pouch 2.25x4",
+      "Quantity": "3",
+      "unit_price": "7.23",
+      "line_item_total": "21.69"
+    },
+    {
+      "product_number": "112-4856",
+      "product_name": "200/BX Self Seal Sterilization Pouch 2.75x9",
+      "Quantity": "3",
+      "unit_price": "9.18",
+      "line_item_total": "27.54"
+    },
+    {
+      "product_number": "112-4864",
+      "product_name": "100/BX Self Seal Sterilization Pouch 8x13",
+      "Quantity": "3",
+      "unit_price": "13.44",
+      "line_item_total": "40.32"
+    },
+    {
+      "product_number": "507-5001",
+      "product_name": "EA Sterile Water F/Irrigat Bottle 500mL",
+      "Quantity": "6",
+      "unit_price": "6.63",
+      "line_item_total": "39.78"
+    }
+  ]
 }

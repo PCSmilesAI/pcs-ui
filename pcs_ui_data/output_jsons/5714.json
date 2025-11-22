@@ -1,0 +1,25 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "5714",
+  "invoice_date": "10/18/2025",
+  "total": "14.99",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "Full-Contour Zirconia #3",
+      "Quantity": "N/A",
+      "unit_price": "69.00",
+      "line_item_total": "69.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Shipping & Handling",
+      "Quantity": "N/A",
+      "unit_price": "14.99",
+      "line_item_total": "14.99"
+    }
+  ],
+  "due_date": "11/17/2025"
+}

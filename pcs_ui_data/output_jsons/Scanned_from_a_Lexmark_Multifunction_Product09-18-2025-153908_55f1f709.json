@@ -1,10 +1,46 @@
 {
-  "vendor": "tc dental laboratory, inc.",
   "invoice_number": "",
   "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "invoice_total": "",
+  "office_location": "",
+  "vendor": "Henry schein",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "471-2812",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0.47",
+      "line_item_total": "2.43"
+    },
+    {
+      "product_number": "543-0308",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0.00",
+      "line_item_total": "0.88"
+    },
+    {
+      "product_number": "900-1892",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0.00",
+      "line_item_total": "11.12"
+    },
+    {
+      "product_number": "543-0293",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0.00",
+      "line_item_total": "379.60"
+    },
+    {
+      "product_number": "131-3943",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0.00",
+      "line_item_total": "64.90"
+    }
+  ],
+  "due_date": ""
 }

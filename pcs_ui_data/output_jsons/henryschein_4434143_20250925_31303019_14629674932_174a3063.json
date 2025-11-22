@@ -1,10 +1,158 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "47333301",
+  "invoice_date": "09/24/25",
+  "due_date": "10/24/25",
+  "invoice_total": "1156.98",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "731-1639",
+      "product_name": "EA PDT Scaler MontJack Rigid",
+      "Quantity": "8",
+      "unit_price": "34.20",
+      "line_item_total": "273.60"
+    },
+    {
+      "product_number": "601-1323",
+      "product_name": "EA Diamond Sharpening Card Medium",
+      "Quantity": "3",
+      "unit_price": "56.18",
+      "line_item_total": "168.54"
+    },
+    {
+      "product_number": "777-2549",
+      "product_name": "100/PK 3M Clinpro Clear Fluoride Trtm Mint Unit",
+      "Quantity": "1",
+      "unit_price": "127.30",
+      "line_item_total": "127.30"
+    },
+    {
+      "product_number": "712-0154",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Tight",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    },
+    {
+      "product_number": "712-0157",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Wide",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    },
+    {
+      "product_number": "712-0164",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Ultra Tight",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    },
+    {
+      "product_number": "543-0308",
+      "product_name": "24/CA Colgate Total Clean Mint TP 0.88 oz",
+      "Quantity": "2",
+      "unit_price": "11.99",
+      "line_item_total": "23.98"
+    },
+    {
+      "product_number": "242-6875",
+      "product_name": "12/PK Hatho Mini Scotch-Brite Brush HP Fine",
+      "Quantity": "1",
+      "unit_price": "19.86",
+      "line_item_total": "19.86"
+    },
+    {
+      "product_number": "777-4272",
+      "product_name": "85/BX Sof-Lex XT Pop-On Discs 1/2\" Coarse",
+      "Quantity": "1",
+      "unit_price": "75.07",
+      "line_item_total": "75.07"
+    },
+    {
+      "product_number": "378-0178",
+      "product_name": "50/PK Traxodent Applicator Tips",
+      "Quantity": "1",
+      "unit_price": "38.21",
+      "line_item_total": "38.21"
+    },
+    {
+      "product_number": "100-6970",
+      "product_name": "9.12OZ MicroTorch Butane RF300",
+      "Quantity": "1",
+      "unit_price": "10.39",
+      "line_item_total": "10.39"
+    },
+    {
+      "product_number": "468-1595",
+      "product_name": "3/PK EdgeOne Blaze Utopia R45 31MM R45 - 31mm",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "468-0511",
+      "product_name": "6/PK Edge SSteel K-File 21mm #08",
+      "Quantity": "2",
+      "unit_price": "5.39",
+      "line_item_total": "10.78"
+    },
+    {
+      "product_number": "468-0469",
+      "product_name": "6/PK Edge SSteel K-File 21mm #10",
+      "Quantity": "1",
+      "unit_price": "5.39",
+      "line_item_total": "5.39"
+    },
+    {
+      "product_number": "468-1593",
+      "product_name": "3/PK EdgeOne Blaze Utopia R45 21MM R45 - 21mm",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "468-1584",
+      "product_name": "3/PK EdgeOne Blaze Utopia R20 21MM R20 - 21mm",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "468-1590",
+      "product_name": "3/PK EdgeOne Blaze Utopia R35 21MM R35 - 21mm",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "468-0512",
+      "product_name": "6/PK Edge SSteel K-File 25mm #08",
+      "Quantity": "2",
+      "unit_price": "5.39",
+      "line_item_total": "10.78"
+    },
+    {
+      "product_number": "468-0472",
+      "product_name": "6/PK Edge SSteel K-File 21mm #15",
+      "Quantity": "2",
+      "unit_price": "5.39",
+      "line_item_total": "10.78"
+    },
+    {
+      "product_number": "712-0231",
+      "product_name": "12/BX GUM Monsterz Kids Toothbrush 5+ Years",
+      "Quantity": "3",
+      "unit_price": "11.54",
+      "line_item_total": "34.62"
+    },
+    {
+      "product_number": "100-7416",
+      "product_name": "EA Hazardous Material Charge",
+      "Quantity": "1",
+      "unit_price": "29.99",
+      "line_item_total": "29.99"
+    }
+  ]
 }

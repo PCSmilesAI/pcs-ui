@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "47219756",
+  "invoice_date": "09/29/25",
+  "due_date": "10/29/25",
+  "invoice_total": "44.63",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "107-8939",
+      "product_name": "144/BX Screen-4-Vac Disposable Trap #5501",
+      "Quantity": "1",
+      "unit_price": "44.63",
+      "line_item_total": "44.63"
+    }
+  ]
 }

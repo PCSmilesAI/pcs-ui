@@ -1,10 +1,60 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48614939",
+  "invoice_date": "10/22/25",
+  "due_date": "11/21/25",
+  "invoice_total": "507.59",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "100-5205",
+      "product_name": "100/PK Saliva Ejector White Opaque",
+      "Quantity": "1",
+      "unit_price": "3.15",
+      "line_item_total": "3.15"
+    },
+    {
+      "product_number": "900-6542",
+      "product_name": "100/BX Disposable Toothbrush w/Paste",
+      "Quantity": "1",
+      "unit_price": "11.06",
+      "line_item_total": "11.06"
+    },
+    {
+      "product_number": "543-0221",
+      "product_name": "3.4OZ/BT PreviDent",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "129.80"
+    },
+    {
+      "product_number": "543-0219",
+      "product_name": "3.4OZ/BT PreviDent",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "162.25"
+    },
+    {
+      "product_number": "492-0070",
+      "product_name": "50/BX ICX Water Treatment Tablets",
+      "Quantity": "2",
+      "unit_price": "53.76",
+      "line_item_total": "53.76"
+    },
+    {
+      "product_number": "136-3739",
+      "product_name": "20/BX DryShield Disp Mouthpiece Pedo",
+      "Quantity": "1",
+      "unit_price": "36.96",
+      "line_item_total": "36.96"
+    },
+    {
+      "product_number": "570-1998",
+      "product_name": "12/BX Etch Gel Syringe Kit 40% Bulk Pk",
+      "Quantity": "1",
+      "unit_price": "45.88",
+      "line_item_total": "45.88"
+    }
+  ]
 }

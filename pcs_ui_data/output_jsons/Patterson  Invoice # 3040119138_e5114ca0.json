@@ -1,0 +1,25 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "62078500",
+  "invoice_date": "",
+  "due_date": "",
+  "invoice_total": "",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "043-6816",
+      "product_name": "POUCH STER 3.5 X",
+      "Quantity": "9",
+      "unit_price": "4.000",
+      "line_item_total": "4.000"
+    },
+    {
+      "product_number": "043-6808",
+      "product_name": "POUCH STER 3.5 X 5.25 200/BX $ 10.55 $ 42.20",
+      "Quantity": "71186931",
+      "unit_price": "3.000",
+      "line_item_total": "3.000"
+    }
+  ]
+}
