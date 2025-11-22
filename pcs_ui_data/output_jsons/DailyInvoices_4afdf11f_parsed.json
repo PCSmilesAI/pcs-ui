@@ -1,0 +1,46 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN770175",
+  "invoice_date": "09/08/2025",
+  "due_date": "10/08/2025",
+  "total": "761.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "3039",
+      "product_name": "Flipper with Wire 4-6 Teeth",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "238.00"
+    },
+    {
+      "product_number": "3076",
+      "product_name": "Immediate Set And Finish",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "397.00"
+    },
+    {
+      "product_number": "3255",
+      "product_name": "Strengthner Bar",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "41.00"
+    },
+    {
+      "product_number": "8325",
+      "product_name": "Vita MFT 1X6",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "45.00"
+    },
+    {
+      "product_number": "8660",
+      "product_name": "Vita MFT 1X8",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "40.00"
+    }
+  ]
+}

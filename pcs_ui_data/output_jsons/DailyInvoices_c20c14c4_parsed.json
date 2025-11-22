@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN776394",
+  "invoice_date": "10/16/2025",
+  "due_date": "11/15/2025",
+  "total": "185.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1650",
+      "product_name": "1.00 3097 Prep - Removable Artisan Digital Bruxguard (ADB) 185.00",
+      "Quantity": "1.00",
+      "unit_price": "185.00",
+      "line_item_total": "30.00"
+    }
+  ]
+}

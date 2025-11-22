@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN771207",
+  "invoice_date": "09/15/2025",
+  "due_date": "10/15/2025",
+  "total": "185.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1142",
+      "product_name": "1.00 3097 Lithium Disilicate Ant. Artisan Digital Bruxguard (ADB) 221.00",
+      "Quantity": "1.00",
+      "unit_price": "221.00",
+      "line_item_total": "185.00"
+    }
+  ]
+}

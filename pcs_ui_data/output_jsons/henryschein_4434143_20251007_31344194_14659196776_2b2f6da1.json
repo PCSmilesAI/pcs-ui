@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "47748219",
+  "invoice_date": "10/07/25",
+  "due_date": "11/06/25",
+  "invoice_total": "69.41",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "570-3903",
+      "product_name": "100/BG ACCLEAN Hands-Free HVE Refill Mini",
+      "Quantity": "1",
+      "unit_price": "69.41",
+      "line_item_total": "69.41"
+    }
+  ]
 }

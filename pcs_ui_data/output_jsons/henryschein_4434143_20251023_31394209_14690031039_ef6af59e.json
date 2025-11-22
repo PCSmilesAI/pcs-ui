@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48593687",
+  "invoice_date": "10/22/25",
+  "due_date": "11/21/25",
+  "invoice_total": "11.99",
+  "office_location": "Riddle",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "681-4576",
+      "product_name": "EA Ellipse Safety Glasses Tinted",
+      "Quantity": "1",
+      "unit_price": "11.99",
+      "line_item_total": "11.99"
+    }
+  ]
 }

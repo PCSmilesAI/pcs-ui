@@ -1,0 +1,39 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "5497",
+  "invoice_date": "9/30/2025",
+  "total": "377.00",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "Valplast Finished Direct UPPER",
+      "Quantity": "N/A",
+      "unit_price": "295.00",
+      "line_item_total": "295.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Single Anterior",
+      "Quantity": "N/A",
+      "unit_price": "16.00",
+      "line_item_total": "16.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Single Posterior (4 x $9.00)",
+      "Quantity": "N/A",
+      "unit_price": "36.00",
+      "line_item_total": "36.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "3D Model Printing (2 x $15.00)",
+      "Quantity": "N/A",
+      "unit_price": "30.00",
+      "line_item_total": "30.00"
+    }
+  ],
+  "due_date": "10/30/2025"
+}

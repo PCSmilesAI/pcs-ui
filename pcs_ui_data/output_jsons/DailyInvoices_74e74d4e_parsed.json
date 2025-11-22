@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN774222",
+  "invoice_date": "10/02/2025",
+  "due_date": "11/01/2025",
+  "total": "188.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1185",
+      "product_name": "4.00 1.00 1185 3160 Z360 ANTERIOR Z360 ANTERIOR Reline Denture 865.00 692.00",
+      "Quantity": "5.00",
+      "unit_price": "692.00",
+      "line_item_total": "188.00"
+    }
+  ]
+}

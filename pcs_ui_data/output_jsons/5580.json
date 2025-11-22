@@ -1,0 +1,32 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "5580",
+  "invoice_date": "10/6/2025",
+  "total": "14.99",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "Full-Contour Zirconia #30",
+      "Quantity": "N/A",
+      "unit_price": "69.00",
+      "line_item_total": "69.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "3D Model Printing (2 x $15.00)",
+      "Quantity": "N/A",
+      "unit_price": "30.00",
+      "line_item_total": "30.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Shipping & Handling",
+      "Quantity": "N/A",
+      "unit_price": "14.99",
+      "line_item_total": "14.99"
+    }
+  ],
+  "due_date": "11/05/2025"
+}

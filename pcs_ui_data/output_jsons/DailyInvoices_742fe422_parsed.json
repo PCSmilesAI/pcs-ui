@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN770637",
+  "invoice_date": "09/10/2025",
+  "due_date": "10/10/2025",
+  "total": "135.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "3330",
+      "product_name": "1.00 1180 Repair Minor Z360 Zirconia Crown 102.00",
+      "Quantity": "1.00",
+      "unit_price": "102.00",
+      "line_item_total": "135.00"
+    }
+  ]
+}

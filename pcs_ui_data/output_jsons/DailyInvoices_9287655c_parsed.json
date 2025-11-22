@@ -1,0 +1,25 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN770736",
+  "invoice_date": "09/11/2025",
+  "due_date": "10/11/2025",
+  "total": "403.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "4019",
+      "product_name": "Duraflex",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "395.00"
+    },
+    {
+      "product_number": "8350",
+      "product_name": "Vita MFT 1x1 Anterior",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "8.00"
+    }
+  ]
+}

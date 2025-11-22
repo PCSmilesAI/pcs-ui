@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
+  "vendor": "Henry schein",
+  "invoice_number": "62075618",
   "invoice_date": "",
   "due_date": "",
-  "total": "1210.99",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "invoice_total": "",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "043-7558",
+      "product_name": "POUCH PLUS",
+      "Quantity": "10",
+      "unit_price": "3.000",
+      "line_item_total": "3.000"
+    }
+  ]
 }

@@ -1,10 +1,32 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "46981557",
+  "invoice_date": "09/16/25",
+  "due_date": "10/16/25",
+  "invoice_total": "629.53",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "543-0219",
+      "product_name": "(CS=12/EA) PreviDent",
+      "Quantity": "5000",
+      "unit_price": "77.88",
+      "line_item_total": "155.76"
+    },
+    {
+      "product_number": "543-0221",
+      "product_name": "(CS=12/EA) PreviDent",
+      "Quantity": "5000",
+      "unit_price": "77.88",
+      "line_item_total": "311.52"
+    },
+    {
+      "product_number": "131-3943",
+      "product_name": "(CS=12/EA) Prevident",
+      "Quantity": "5000",
+      "unit_price": "77.88",
+      "line_item_total": "155.76"
+    }
+  ]
 }

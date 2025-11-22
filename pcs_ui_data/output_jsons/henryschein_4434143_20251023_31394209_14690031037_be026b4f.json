@@ -1,10 +1,102 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48619538",
+  "invoice_date": "10/22/25",
+  "due_date": "11/21/25",
+  "invoice_total": "806.53",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "468-1629",
+      "product_name": "60/PK EdgeOne R Gutta Percha R25",
+      "Quantity": "1",
+      "unit_price": "13.61",
+      "line_item_total": "13.61"
+    },
+    {
+      "product_number": "468-1589",
+      "product_name": "3/PK EdgeOne Blaze Utopia R25 31MM R25 - 31mm",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "791-0378",
+      "product_name": "EA A.S.A.P. 6-Pack Refill Kit Large",
+      "Quantity": "1",
+      "unit_price": "88.43",
+      "line_item_total": "88.43"
+    },
+    {
+      "product_number": "102-9023",
+      "product_name": "25/PK Aspirator Tip Surgical Green 1/4\"D",
+      "Quantity": "2",
+      "unit_price": "8.04",
+      "line_item_total": "16.08"
+    },
+    {
+      "product_number": "112-6865",
+      "product_name": "50/PK MaxiTemp HP Mixing Tips Lt Blue",
+      "Quantity": "1",
+      "unit_price": "29.68",
+      "line_item_total": "29.68"
+    },
+    {
+      "product_number": "112-4863",
+      "product_name": "200/BX Self Seal Sterilization Pouch 4.25x11",
+      "Quantity": "1",
+      "unit_price": "13.18",
+      "line_item_total": "13.18"
+    },
+    {
+      "product_number": "900-1892",
+      "product_name": "100/BX Standard Needles 30Ga Short Plastic Hub",
+      "Quantity": "1",
+      "unit_price": "11.12",
+      "line_item_total": "11.12"
+    },
+    {
+      "product_number": "112-6830",
+      "product_name": "300/BX Criterion N300 Glove Ice Blue Nitrile S",
+      "Quantity": "10",
+      "unit_price": "11.61",
+      "line_item_total": "116.10"
+    },
+    {
+      "product_number": "195-1020",
+      "product_name": "EA Beautifil Flow Plus F00 A2",
+      "Quantity": "2",
+      "unit_price": "32.20",
+      "line_item_total": "64.40"
+    },
+    {
+      "product_number": "712-4416",
+      "product_name": "12/PK End Tuft Toothbrush Tapered",
+      "Quantity": "2",
+      "unit_price": "11.05",
+      "line_item_total": "22.10"
+    },
+    {
+      "product_number": "465-1205",
+      "product_name": "50/BX Lidocaine 2% w/EPI 1.7 mL INJ 1:100 Red",
+      "Quantity": "1",
+      "unit_price": "34.56",
+      "line_item_total": "34.56"
+    },
+    {
+      "product_number": "123-5762",
+      "product_name": "2/PK Tempbond Automix Syringe Eugenol",
+      "Quantity": "1",
+      "unit_price": "115.10",
+      "line_item_total": "115.10"
+    },
+    {
+      "product_number": "543-0308",
+      "product_name": "24/CA Colgate Total Clean Mint TP 0.88 oz",
+      "Quantity": "5",
+      "unit_price": "11.99",
+      "line_item_total": "59.95"
+    }
+  ]
 }

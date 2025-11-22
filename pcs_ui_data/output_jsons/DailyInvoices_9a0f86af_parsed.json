@@ -1,0 +1,46 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN778524",
+  "invoice_date": "10/30/2025",
+  "due_date": "11/29/2025",
+  "total": "520.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "3058",
+      "product_name": "1.00 1.00 1.00 3097 3097 7287 Immediate Interim Denture Artisan Digital Bruxguard (ADB) Artisan Digital Bruxguard (ADB) ASC Strauman Abutment 254.00 185.00 185.00",
+      "Quantity": "1.00",
+      "unit_price": "185.00",
+      "line_item_total": "371.00"
+    },
+    {
+      "product_number": "3000",
+      "product_name": "1.00 1192 Set & Finish Denture Layered Z360 Implant Crown 347.00",
+      "Quantity": "1.00",
+      "unit_price": "347.00",
+      "line_item_total": "289.00"
+    },
+    {
+      "product_number": "8325",
+      "product_name": "5.00 1181 Vita MFT 1X6 Layered Zirconia Crown 1,255.00",
+      "Quantity": "1.00",
+      "unit_price": "5.00",
+      "line_item_total": "45.00"
+    },
+    {
+      "product_number": "8660",
+      "product_name": "3.00 1180 Vita MFT 1X8 Z360 Zirconia Crown 405.00",
+      "Quantity": "1.00",
+      "unit_price": "405.00",
+      "line_item_total": "40.00"
+    },
+    {
+      "product_number": "9997",
+      "product_name": "LOANER DRIVER",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "200.00"
+    }
+  ]
+}

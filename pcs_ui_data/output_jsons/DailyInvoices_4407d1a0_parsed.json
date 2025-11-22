@@ -1,0 +1,25 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN777151",
+  "invoice_date": "10/22/2025",
+  "due_date": "11/21/2025",
+  "total": "470.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "7297",
+      "product_name": "Megagen Abutment",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "225.00"
+    },
+    {
+      "product_number": "1009",
+      "product_name": "Z360 Implant Crown",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "245.00"
+    }
+  ]
+}

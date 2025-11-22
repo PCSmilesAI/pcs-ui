@@ -1,0 +1,18 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "5688",
+  "invoice_date": "10/20/2025",
+  "total": "69.00",
+  "office_location": "Vancouver",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "Full-Contour Zirconia #13",
+      "Quantity": "N/A",
+      "unit_price": "69.00",
+      "line_item_total": "69.00"
+    }
+  ],
+  "due_date": "11/19/2025"
+}

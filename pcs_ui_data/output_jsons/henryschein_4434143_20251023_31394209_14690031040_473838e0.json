@@ -1,10 +1,81 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48586094",
+  "invoice_date": "10/22/25",
+  "due_date": "11/21/25",
+  "invoice_total": "515.74",
+  "office_location": "Riddle",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "112-7323",
+      "product_name": "300/BX Essentials",
+      "Quantity": "300",
+      "unit_price": "12.95",
+      "line_item_total": "129.50"
+    },
+    {
+      "product_number": "261-0434",
+      "product_name": "12/PK Unica Anterior Refill",
+      "Quantity": "1",
+      "unit_price": "54.81",
+      "line_item_total": "54.81"
+    },
+    {
+      "product_number": "378-0413",
+      "product_name": "25/BX Solo Diamond FG Single Use 245M",
+      "Quantity": "1",
+      "unit_price": "53.59",
+      "line_item_total": "53.59"
+    },
+    {
+      "product_number": "570-3281",
+      "product_name": "50/BX Criterion AntiFog Ear Msk L3 Blue",
+      "Quantity": "6",
+      "unit_price": "13.99",
+      "line_item_total": "83.94"
+    },
+    {
+      "product_number": "140-3081",
+      "product_name": "160/CN CaviWipes 2.0 Wipes 6\"x6.75\"",
+      "Quantity": "3",
+      "unit_price": "15.24",
+      "line_item_total": "45.72"
+    },
+    {
+      "product_number": "712-0121",
+      "product_name": "12/BX Gum Crayola Pip-Squeaks TB USoft",
+      "Quantity": "1",
+      "unit_price": "13.03",
+      "line_item_total": "13.03"
+    },
+    {
+      "product_number": "543-9412",
+      "product_name": "72/BX Junior Bundle",
+      "Quantity": "1",
+      "unit_price": "35.28",
+      "line_item_total": "35.28"
+    },
+    {
+      "product_number": "101-0476",
+      "product_name": "500/CA Dri-Gard Towel 2Ply+Poly Lavend 13x19",
+      "Quantity": "1",
+      "unit_price": "19.57",
+      "line_item_total": "19.57"
+    },
+    {
+      "product_number": "100-2880",
+      "product_name": "EA Poly Pad Mix Pad 3\"x3\"",
+      "Quantity": "4",
+      "unit_price": "1.73",
+      "line_item_total": "6.92"
+    },
+    {
+      "product_number": "123-8189",
+      "product_name": "EA TempBond NE Tubes",
+      "Quantity": "1",
+      "unit_price": "66.89",
+      "line_item_total": "66.89"
+    }
+  ]
 }

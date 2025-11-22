@@ -1,0 +1,25 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "5329",
+  "invoice_date": "9/16/2025",
+  "total": "129.00",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "Comfort H/S NG",
+      "Quantity": "N/A",
+      "unit_price": "99.00",
+      "line_item_total": "99.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "3D Model Printing (2 x $15.00)",
+      "Quantity": "N/A",
+      "unit_price": "30.00",
+      "line_item_total": "30.00"
+    }
+  ],
+  "due_date": "10/16/2025"
+}

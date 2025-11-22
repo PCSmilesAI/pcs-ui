@@ -1,0 +1,102 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "49945240",
+  "invoice_date": "11/20/25",
+  "due_date": "12/20/25",
+  "invoice_total": "1103.10",
+  "office_location": "Salem",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "100-4263",
+      "product_name": "EA Tartar & Stain Remover 1Gal",
+      "Quantity": "1",
+      "unit_price": "10.50",
+      "line_item_total": "10.50"
+    },
+    {
+      "product_number": "900-4577",
+      "product_name": "100/PK Pre Bent Dispensing Tips 19G Black",
+      "Quantity": "3",
+      "unit_price": "6.18",
+      "line_item_total": "18.54"
+    },
+    {
+      "product_number": "129-6011",
+      "product_name": "110PK/BX GUM Soft-Picks Advanced 2/PK",
+      "Quantity": "2",
+      "unit_price": "45.05",
+      "line_item_total": "90.10"
+    },
+    {
+      "product_number": "777-0376",
+      "product_name": "2/PK Paradigm VPS Fast Set Regular Body",
+      "Quantity": "2",
+      "unit_price": "24.47",
+      "line_item_total": "48.94"
+    },
+    {
+      "product_number": "601-0819",
+      "product_name": "100/BG Steam Sterilization Integrator",
+      "Quantity": "5",
+      "unit_price": "24.95",
+      "line_item_total": "124.75"
+    },
+    {
+      "product_number": "712-0154",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Tight",
+      "Quantity": "2",
+      "unit_price": "24.32",
+      "line_item_total": "48.64"
+    },
+    {
+      "product_number": "570-2042",
+      "product_name": "50/BX Criterion Earloop Mask L3 TWN Teal",
+      "Quantity": "12",
+      "unit_price": "8.23",
+      "line_item_total": "98.76"
+    },
+    {
+      "product_number": "281-0117",
+      "product_name": "EA Reach Dentotape Wax",
+      "Quantity": "100",
+      "unit_price": "5.88",
+      "line_item_total": "11.76"
+    },
+    {
+      "product_number": "143-0516",
+      "product_name": "50/CA Fixodent Professional Gravity Box",
+      "Quantity": "2",
+      "unit_price": "32.08",
+      "line_item_total": "64.16"
+    },
+    {
+      "product_number": "112-5029",
+      "product_name": "200/BX Acclean Prophy Paste Coarse ST/TNG/VAN",
+      "Quantity": "2",
+      "unit_price": "19.76",
+      "line_item_total": "39.52"
+    },
+    {
+      "product_number": "102-3597",
+      "product_name": "2/BX Blu-Bite HP Fast Set Unflavored",
+      "Quantity": "10",
+      "unit_price": "18.12",
+      "line_item_total": "181.20"
+    },
+    {
+      "product_number": "112-6862",
+      "product_name": "48/BG Maxima HP Mixing Tips Green 6.5mm",
+      "Quantity": "5",
+      "unit_price": "25.22",
+      "line_item_total": "126.10"
+    },
+    {
+      "product_number": "543-0219",
+      "product_name": "3.4OZ/BT PreviDent",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "233.64"
+    }
+  ]
+}

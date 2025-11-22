@@ -1,10 +1,46 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "49582754",
+  "invoice_date": "11/12/25",
+  "due_date": "12/12/25",
+  "invoice_total": "323.36",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "811-0843",
+      "product_name": "50/PK Schick AimRight Adhes Anterior Holder Wh",
+      "Quantity": "6",
+      "unit_price": "18.75",
+      "line_item_total": "112.50"
+    },
+    {
+      "product_number": "136-3741",
+      "product_name": "20/BX DryShield Disp Mouthpiece Medium",
+      "Quantity": "1",
+      "unit_price": "36.96",
+      "line_item_total": "36.96"
+    },
+    {
+      "product_number": "136-3740",
+      "product_name": "20/BX DryShield Disp Mouthpiece Small",
+      "Quantity": "1",
+      "unit_price": "36.96",
+      "line_item_total": "36.96"
+    },
+    {
+      "product_number": "325-0493",
+      "product_name": "150/BX Oral-B Threader Floss",
+      "Quantity": "30",
+      "unit_price": "32.30",
+      "line_item_total": "32.30"
+    },
+    {
+      "product_number": "112-5165",
+      "product_name": "5/PK Diamond FG 859-010F",
+      "Quantity": "5",
+      "unit_price": "19.63",
+      "line_item_total": "98.15"
+    }
+  ]
 }

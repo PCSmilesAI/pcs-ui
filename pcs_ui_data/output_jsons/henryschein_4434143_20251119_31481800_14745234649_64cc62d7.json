@@ -1,0 +1,18 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "49810886",
+  "invoice_date": "11/18/25",
+  "due_date": "12/18/25",
+  "invoice_total": "40.39",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "897-0023",
+      "product_name": "4/PK Locator Black Processing Male",
+      "Quantity": "1",
+      "unit_price": "40.39",
+      "line_item_total": "40.39"
+    }
+  ]
+}

@@ -1,10 +1,25 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
+  "vendor": "Henry schein",
+  "invoice_number": "62075425",
   "invoice_date": "",
   "due_date": "",
-  "total": "366.28",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "invoice_total": "",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "043-6808",
+      "product_name": "POUCH STER 3.5 X 5.25 200/BX $ 10.55 $ 42.20",
+      "Quantity": "70436816",
+      "unit_price": "5.000",
+      "line_item_total": "5.000"
+    },
+    {
+      "product_number": "043-6816",
+      "product_name": "POUCH STER 3.5 X",
+      "Quantity": "9",
+      "unit_price": "1.000",
+      "line_item_total": "1.000"
+    }
+  ]
 }

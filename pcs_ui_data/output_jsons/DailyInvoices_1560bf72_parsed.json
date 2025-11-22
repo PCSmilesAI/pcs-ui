@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN777539",
+  "invoice_date": "10/23/2025",
+  "due_date": "11/22/2025",
+  "total": "0.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1185",
+      "product_name": "Z360 ANTERIOR",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "173.00"
+    }
+  ]
+}

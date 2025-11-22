@@ -22,6 +22,7 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters, invoices 
   const [dueWithin, setDueWithin] = React.useState('');
   const [category, setCategory] = React.useState('');
   const [ach, setAch] = React.useState('');
+  const [hasAttachment, setHasAttachment] = React.useState('');
 
   // Dynamically extract unique vendors, offices, and categories from invoices
   const { vendors, offices, categories } = useMemo(() => {
@@ -196,6 +197,20 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters, invoices 
           </select>
         </div>
 
+        {/* PDF Attachment */}
+        <div>
+          <label style={labelStyle}>PDF Attachment</label>
+          <select
+            style={inputStyle}
+            value={hasAttachment}
+            onChange={(e) => setHasAttachment(e.target.value)}
+          >
+            <option value="">Choose options</option>
+            <option value="yes">Includes Attachment</option>
+            <option value="no">No Attachment</option>
+          </select>
+        </div>
+
         {/* Apply button */}
         <div style={{ marginTop: '16px' }}>
           <button
@@ -209,6 +224,7 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters, invoices 
                 dueWithin,
                 category,
                 ach,
+                hasAttachment,
               };
               if (onApplyFilters) {
                 onApplyFilters(criteria);

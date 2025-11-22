@@ -1,0 +1,32 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "5776",
+  "invoice_date": "10/27/2025",
+  "total": "117.00",
+  "office_location": "Vancouver",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "Full-Contour Zirconia #8",
+      "Quantity": "N/A",
+      "unit_price": "69.00",
+      "line_item_total": "69.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Custom Anterior finish #8",
+      "Quantity": "N/A",
+      "unit_price": "18.00",
+      "line_item_total": "18.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "3D Model Printing (2 x $15.00)",
+      "Quantity": "N/A",
+      "unit_price": "30.00",
+      "line_item_total": "30.00"
+    }
+  ],
+  "due_date": "11/26/2025"
+}

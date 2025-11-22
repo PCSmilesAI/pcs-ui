@@ -1,10 +1,95 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48944347",
+  "invoice_date": "10/30/25",
+  "due_date": "11/29/25",
+  "invoice_total": "983.14",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "606-0660",
+      "product_name": "EA Dia-Root Bio Sealer Regular Kit",
+      "Quantity": "1",
+      "unit_price": "60.80",
+      "line_item_total": "60.80"
+    },
+    {
+      "product_number": "145-8785",
+      "product_name": "100/BG Ivory Releaf Leaves Refill",
+      "Quantity": "1",
+      "unit_price": "78.64",
+      "line_item_total": "78.64"
+    },
+    {
+      "product_number": "112-6830",
+      "product_name": "300/BX Criterion N300 Glove Ice Blue Nitrile S",
+      "Quantity": "10",
+      "unit_price": "11.61",
+      "line_item_total": "116.10"
+    },
+    {
+      "product_number": "570-2249",
+      "product_name": "16OZ/BT Acclean Chlorhexidine Rinse Mint",
+      "Quantity": "5",
+      "unit_price": "3.26",
+      "line_item_total": "16.30"
+    },
+    {
+      "product_number": "153-0372",
+      "product_name": "100/BG Halyard CSR Wrap 15\" x 15\"",
+      "Quantity": "3",
+      "unit_price": "8.82",
+      "line_item_total": "26.46"
+    },
+    {
+      "product_number": "900-7449",
+      "product_name": "500/CA Dri-Gard CSR Wrap 20\"x20\"",
+      "Quantity": "3",
+      "unit_price": "117.59",
+      "line_item_total": "352.77"
+    },
+    {
+      "product_number": "123-5762",
+      "product_name": "2/PK Tempbond Automix Syringe Eugenol",
+      "Quantity": "1",
+      "unit_price": "115.10",
+      "line_item_total": "115.10"
+    },
+    {
+      "product_number": "102-9023",
+      "product_name": "25/PK Aspirator Tip Surgical Green 1/4\"D",
+      "Quantity": "2",
+      "unit_price": "8.04",
+      "line_item_total": "16.08"
+    },
+    {
+      "product_number": "127-0122",
+      "product_name": "100/BX Pinnacle Sensor Sheath Dexis Platinum",
+      "Quantity": "2",
+      "unit_price": "19.91",
+      "line_item_total": "39.82"
+    },
+    {
+      "product_number": "100-4612",
+      "product_name": "EA Aspirating Syringe Type A Standard",
+      "Quantity": "4",
+      "unit_price": "15.95",
+      "line_item_total": "63.80"
+    },
+    {
+      "product_number": "777-0300",
+      "product_name": "EA RelyX Fiber Post Drills Size",
+      "Quantity": "0",
+      "unit_price": "31.85",
+      "line_item_total": "63.70"
+    },
+    {
+      "product_number": "570-3191",
+      "product_name": "100/BX Acclean Prophy Angle Tapered Brush",
+      "Quantity": "1",
+      "unit_price": "27.08",
+      "line_item_total": "27.08"
+    }
+  ]
 }

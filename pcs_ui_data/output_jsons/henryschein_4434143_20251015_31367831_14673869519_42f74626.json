@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48225899",
+  "invoice_date": "10/14/25",
+  "due_date": "11/13/25",
+  "invoice_total": "71.15",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "600-2277",
+      "product_name": "EA Probe PCP26",
+      "Quantity": "2",
+      "unit_price": "27.83",
+      "line_item_total": "55.66"
+    }
+  ]
 }

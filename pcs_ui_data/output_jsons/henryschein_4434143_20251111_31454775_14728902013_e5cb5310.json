@@ -1,10 +1,53 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
+  "vendor": "Henry schein",
+  "invoice_number": "49257532",
+  "invoice_date": "11/10/25",
+  "due_date": "12/10/25",
+  "invoice_total": "1359.64",
   "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "945-5041",
+      "product_name": "20/BX Tetric EvoCeram Cavifil 0.2gm Bleach XL",
+      "Quantity": "1",
+      "unit_price": "94.74",
+      "line_item_total": "94.74"
+    },
+    {
+      "product_number": "721-2858",
+      "product_name": "10/BX Foundation Bone Material Small",
+      "Quantity": "2",
+      "unit_price": "356.59",
+      "line_item_total": "713.18"
+    },
+    {
+      "product_number": "900-7463",
+      "product_name": "12/BX Suture Pga Undyed C-6 4-0 27\"",
+      "Quantity": "2",
+      "unit_price": "49.85",
+      "line_item_total": "99.70"
+    },
+    {
+      "product_number": "570-2249",
+      "product_name": "16OZ/BT Acclean Chlorhexidine Rinse Mint",
+      "Quantity": "12",
+      "unit_price": "3.26",
+      "line_item_total": "39.12"
+    },
+    {
+      "product_number": "543-0219",
+      "product_name": "3.4OZ/BT PreviDent",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "233.64"
+    },
+    {
+      "product_number": "190-0154",
+      "product_name": "EA Lumibrite Chairside Whitening Kit",
+      "Quantity": "3",
+      "unit_price": "57.59",
+      "line_item_total": "172.77"
+    }
+  ]
 }

@@ -1,0 +1,25 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "5029",
+  "invoice_date": "9/11/2025",
+  "total": "14.99",
+  "office_location": "Vancouver",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "Semi Precious + W (2 x $0.00)",
+      "Quantity": "N/A",
+      "unit_price": "0.00",
+      "line_item_total": "0.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "Shipping & Handling: Warranty Coverage: Waived Parts and Labor",
+      "Quantity": "N/A",
+      "unit_price": "14.99",
+      "line_item_total": "14.99"
+    }
+  ],
+  "due_date": "10/11/2025"
+}

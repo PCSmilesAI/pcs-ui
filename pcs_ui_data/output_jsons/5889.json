@@ -1,0 +1,25 @@
+{
+  "vendor": "exodus_dental_solutions",
+  "vendor_name": "Exodus Dental Solutions",
+  "invoice_number": "5889",
+  "invoice_date": "11/10/2025",
+  "total": "124.00",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "N/A",
+      "product_name": "IPS e.maxTM CAD #12",
+      "Quantity": "N/A",
+      "unit_price": "99.00",
+      "line_item_total": "99.00"
+    },
+    {
+      "product_number": "N/A",
+      "product_name": "3D Model Printing - Half Arch (2 x $12.50)",
+      "Quantity": "N/A",
+      "unit_price": "25.00",
+      "line_item_total": "25.00"
+    }
+  ],
+  "due_date": "12/10/2025"
+}

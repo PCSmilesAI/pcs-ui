@@ -1,0 +1,25 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN772353",
+  "invoice_date": "09/19/2025",
+  "due_date": "10/19/2025",
+  "total": "978.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "7297",
+      "product_name": "Megagen Abutment",
+      "Quantity": "2.00",
+      "unit_price": "N/A",
+      "line_item_total": "450.00"
+    },
+    {
+      "product_number": "1011",
+      "product_name": "z360 Implant Bridge",
+      "Quantity": "2.00",
+      "unit_price": "N/A",
+      "line_item_total": "528.00"
+    }
+  ]
+}

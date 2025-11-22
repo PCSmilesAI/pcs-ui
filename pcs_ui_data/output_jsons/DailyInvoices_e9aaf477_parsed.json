@@ -1,0 +1,25 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN779410",
+  "invoice_date": "11/05/2025",
+  "due_date": "12/05/2025",
+  "total": "477.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "4027",
+      "product_name": "1.00 3.00 3331 1183 Digital Mandibular Frame Large Repair Z360 Bridge 296.00 131.00",
+      "Quantity": "1.00",
+      "unit_price": "131.00",
+      "line_item_total": "477.00"
+    },
+    {
+      "product_number": "3053",
+      "product_name": "Set-up & Wax Denture",
+      "Quantity": "2.00",
+      "unit_price": "N/A",
+      "line_item_total": "0.00"
+    }
+  ]
+}

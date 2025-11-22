@@ -1,0 +1,25 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN770946",
+  "invoice_date": "09/12/2025",
+  "due_date": "10/12/2025",
+  "total": "153.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "3136",
+      "product_name": "2.00 1.00 1.00 3097 2111 3016 Digital Base plate and Wax Rim Artisan Digital Bruxguard (ADB) Add Diag Wax Tooth Flipper 2-3 Teeth 102.00 185.00 170.00",
+      "Quantity": "17.00",
+      "unit_price": "170.00",
+      "line_item_total": "153.00"
+    },
+    {
+      "product_number": "4247",
+      "product_name": "2.00 2110 Survey & Design, Only Digital Diagnostic Wax Up 80.00",
+      "Quantity": "1.00",
+      "unit_price": "80.00",
+      "line_item_total": "0.00"
+    }
+  ]
+}

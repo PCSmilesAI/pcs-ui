@@ -1,10 +1,123 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "47645942",
+  "invoice_date": "10/01/25",
+  "due_date": "10/31/25",
+  "invoice_total": "631.47",
+  "office_location": "Riddle",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "173-3810",
+      "product_name": "50/BX Dry Tips Adult Large",
+      "Quantity": "1",
+      "unit_price": "14.62",
+      "line_item_total": "14.62"
+    },
+    {
+      "product_number": "173-3061",
+      "product_name": "50/BX Dry Tips Child Small",
+      "Quantity": "1",
+      "unit_price": "14.62",
+      "line_item_total": "14.62"
+    },
+    {
+      "product_number": "570-3375",
+      "product_name": "12/PK Denture Boxes Assorted Assorted",
+      "Quantity": "1",
+      "unit_price": "7.85",
+      "line_item_total": "7.85"
+    },
+    {
+      "product_number": "333-7058",
+      "product_name": "6GM/BT GC Cavity Conditioner",
+      "Quantity": "1",
+      "unit_price": "64.09",
+      "line_item_total": "64.09"
+    },
+    {
+      "product_number": "586-4339",
+      "product_name": "EA Burnisher DE Ball Lg4&Md3 D/l Rnd",
+      "Quantity": "2",
+      "unit_price": "32.78",
+      "line_item_total": "65.56"
+    },
+    {
+      "product_number": "222-0863",
+      "product_name": "15/PK SDR flow+ Refill A2",
+      "Quantity": "1",
+      "unit_price": "85.79",
+      "line_item_total": "85.79"
+    },
+    {
+      "product_number": "164-1444",
+      "product_name": "25/PK Super Etch Tips-Blue",
+      "Quantity": "23",
+      "unit_price": "10.92",
+      "line_item_total": "21.84"
+    },
+    {
+      "product_number": "101-7437",
+      "product_name": "50/BX Evacuator Tips Multi-Tip White D-3 Combo",
+      "Quantity": "3",
+      "unit_price": "12.47",
+      "line_item_total": "37.41"
+    },
+    {
+      "product_number": "112-7149",
+      "product_name": "EA Sharps Container Sliding Lid 1qt Red",
+      "Quantity": "4",
+      "unit_price": "2.89",
+      "line_item_total": "11.56"
+    },
+    {
+      "product_number": "112-6857",
+      "product_name": "100/BX Criterion Glove Chloroprene XS Green",
+      "Quantity": "6",
+      "unit_price": "9.94",
+      "line_item_total": "59.64"
+    },
+    {
+      "product_number": "102-6332",
+      "product_name": "250/BX MaxiTest Indicator Strips Sterilizer",
+      "Quantity": "1",
+      "unit_price": "15.45",
+      "line_item_total": "15.45"
+    },
+    {
+      "product_number": "543-0304",
+      "product_name": "6/BX Colgate",
+      "Quantity": "360",
+      "unit_price": "9.99",
+      "line_item_total": "19.98"
+    },
+    {
+      "product_number": "543-3743",
+      "product_name": "72/BX Whole Mouth Clean Bundle",
+      "Quantity": "1",
+      "unit_price": "59.76",
+      "line_item_total": "59.76"
+    },
+    {
+      "product_number": "570-1319",
+      "product_name": "250/BX X-ray Barrier Sleeve 26\"Lx15\"W",
+      "Quantity": "3",
+      "unit_price": "21.67",
+      "line_item_total": "65.01"
+    },
+    {
+      "product_number": "801-0179",
+      "product_name": "10/PK Isolite Posterior Mouthpiece Small",
+      "Quantity": "1",
+      "unit_price": "29.95",
+      "line_item_total": "29.95"
+    },
+    {
+      "product_number": "384-4521",
+      "product_name": "4/PK Multi-Cal Calcium Hydroxide Syringes",
+      "Quantity": "1",
+      "unit_price": "51.85",
+      "line_item_total": "51.85"
+    }
+  ]
 }

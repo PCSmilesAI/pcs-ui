@@ -1,10 +1,46 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "49611290",
+  "invoice_date": "11/13/25",
+  "due_date": "12/13/25",
+  "invoice_total": "312.71",
+  "office_location": "Lebanon",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "107-8686",
+      "product_name": "12/BG Impression Tray Disp \"E\" #3 Med-Upr",
+      "Quantity": "2",
+      "unit_price": "5.82",
+      "line_item_total": "11.64"
+    },
+    {
+      "product_number": "123-7410",
+      "product_name": "24/BX Kwik-Tray",
+      "Quantity": "1",
+      "unit_price": "62.39",
+      "line_item_total": "62.39"
+    },
+    {
+      "product_number": "712-4416",
+      "product_name": "12/PK End Tuft Toothbrush Tapered",
+      "Quantity": "1",
+      "unit_price": "11.05",
+      "line_item_total": "11.05"
+    },
+    {
+      "product_number": "123-5762",
+      "product_name": "2/PK Tempbond Automix Syringe Eugenol",
+      "Quantity": "1",
+      "unit_price": "115.10",
+      "line_item_total": "115.10"
+    },
+    {
+      "product_number": "112-6239",
+      "product_name": "500/BX Essentials Prophy Angles Soft",
+      "Quantity": "1",
+      "unit_price": "106.04",
+      "line_item_total": "106.04"
+    }
+  ]
 }

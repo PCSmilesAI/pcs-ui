@@ -1,0 +1,25 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "49803978",
+  "invoice_date": "11/19/25",
+  "due_date": "12/19/25",
+  "invoice_total": "189.93",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "905-4347",
+      "product_name": "80/PK Tissue Bath Od 2-Ply 80/Rolls",
+      "Quantity": "2",
+      "unit_price": "81.55",
+      "line_item_total": "163.10"
+    },
+    {
+      "product_number": "906-6410",
+      "product_name": "24/PK Super Sticky Post-it Note 3x3Neon",
+      "Quantity": "1",
+      "unit_price": "26.83",
+      "line_item_total": "26.83"
+    }
+  ]
+}

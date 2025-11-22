@@ -1,10 +1,74 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48210465",
+  "invoice_date": "10/14/25",
+  "due_date": "11/13/25",
+  "invoice_total": "497.70",
+  "office_location": "Riddle",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "104-3525",
+      "product_name": "200/BX Acclean Prophy Paste Coarse CH/MT/RSP",
+      "Quantity": "1",
+      "unit_price": "19.76",
+      "line_item_total": "19.76"
+    },
+    {
+      "product_number": "222-0693",
+      "product_name": "90/BX Palodent Plus EZ Coat Matrices 5.5mm",
+      "Quantity": "1",
+      "unit_price": "136.79",
+      "line_item_total": "136.79"
+    },
+    {
+      "product_number": "112-6865",
+      "product_name": "50/PK MaxiTemp HP Mixing Tips Lt Blue",
+      "Quantity": "1",
+      "unit_price": "29.68",
+      "line_item_total": "29.68"
+    },
+    {
+      "product_number": "164-1444",
+      "product_name": "25/PK Super Etch Tips-Blue",
+      "Quantity": "23",
+      "unit_price": "10.92",
+      "line_item_total": "21.84"
+    },
+    {
+      "product_number": "222-0391",
+      "product_name": "100/BX Palodent Plus Wedge Refill Small",
+      "Quantity": "1",
+      "unit_price": "52.34",
+      "line_item_total": "52.34"
+    },
+    {
+      "product_number": "945-0423",
+      "product_name": "EA Ivoclean Cleaning Paste 5Gm",
+      "Quantity": "1",
+      "unit_price": "35.90",
+      "line_item_total": "35.90"
+    },
+    {
+      "product_number": "107-4752",
+      "product_name": "400/PK Microbrush Plus Refill Regular Purple",
+      "Quantity": "1",
+      "unit_price": "58.15",
+      "line_item_total": "58.15"
+    },
+    {
+      "product_number": "378-0687",
+      "product_name": "24/PK Traxodent Hemos Retr Past Syst",
+      "Quantity": "1",
+      "unit_price": "96.99",
+      "line_item_total": "96.99"
+    },
+    {
+      "product_number": "112-6858",
+      "product_name": "100/BX Criterion Glove Chloroprene S Green",
+      "Quantity": "4",
+      "unit_price": "9.94",
+      "line_item_total": "39.76"
+    }
+  ]
 }

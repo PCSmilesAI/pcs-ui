@@ -219,6 +219,13 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           if (status !== String(effectiveFilters.ach).toLowerCase()) return false;
         }
 
+        // PDF Attachment filter
+        if (effectiveFilters.hasAttachment) {
+          const hasPdf = !!(row.pdf_path || row.pdfPath);
+          if (effectiveFilters.hasAttachment === 'yes' && !hasPdf) return false;
+          if (effectiveFilters.hasAttachment === 'no' && hasPdf) return false;
+        }
+
         const amount = parseAmount(row.amount);
         if (effectiveFilters.minAmount && amount < Number(effectiveFilters.minAmount)) return false;
         if (effectiveFilters.maxAmount && amount > Number(effectiveFilters.maxAmount)) return false;

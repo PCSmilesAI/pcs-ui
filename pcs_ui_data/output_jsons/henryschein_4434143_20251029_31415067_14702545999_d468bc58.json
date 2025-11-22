@@ -1,10 +1,32 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48873557",
+  "invoice_date": "10/29/25",
+  "due_date": "11/28/25",
+  "invoice_total": "555.39",
+  "office_location": "Ridgefield",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "255-5746",
+      "product_name": "100/PK Tongue Scraper Assorted Color",
+      "Quantity": "1",
+      "unit_price": "63.99",
+      "line_item_total": "63.99"
+    },
+    {
+      "product_number": "100-2735",
+      "product_name": "100/BX Dispos-A-Bite #7060C",
+      "Quantity": "1",
+      "unit_price": "64.48",
+      "line_item_total": "64.48"
+    },
+    {
+      "product_number": "201-0712",
+      "product_name": "EA Luxator L2S Titanium 2mm Strai Green",
+      "Quantity": "2",
+      "unit_price": "187.99",
+      "line_item_total": "375.98"
+    }
+  ]
 }

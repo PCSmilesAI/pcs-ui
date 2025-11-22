@@ -1,0 +1,18 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "49699292",
+  "invoice_date": "11/19/25",
+  "due_date": "12/19/25",
+  "invoice_total": "109.58",
+  "office_location": "Riddle",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "701-0943",
+      "product_name": "5/PK Diamond RA Medium 835-010",
+      "Quantity": "2",
+      "unit_price": "54.79",
+      "line_item_total": "109.58"
+    }
+  ]
+}

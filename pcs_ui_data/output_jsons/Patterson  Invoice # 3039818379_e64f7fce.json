@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
+  "vendor": "Henry schein",
+  "invoice_number": "62077211",
   "invoice_date": "",
   "due_date": "",
-  "total": "1187.81",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "invoice_total": "",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "144-7259",
+      "product_name": "STERI POUCH SELF-SEALING 3.5 X 9\" 500/B $ 17.67 $ 17.67 T",
+      "Quantity": "70467282",
+      "unit_price": "10.000",
+      "line_item_total": "10.000"
+    }
+  ]
 }

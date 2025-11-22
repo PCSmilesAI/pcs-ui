@@ -1,0 +1,18 @@
+{
+  "vendor": "Henry schein",
+  "invoice_number": "49886416",
+  "invoice_date": "11/19/25",
+  "due_date": "12/19/25",
+  "invoice_total": "620.49",
+  "office_location": "Eugene",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "422-4790",
+      "product_name": "2X12/BX Arestin Minocycline 1mg",
+      "Quantity": "1",
+      "unit_price": "614.00",
+      "line_item_total": "614.00"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "invoice_number": "48049871",
+  "invoice_date": "",
+  "invoice_total": "19.76",
+  "office_location": "",
+  "vendor": "Henry schein",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "302-1291",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0.47",
+      "line_item_total": "2.43"
+    },
+    {
+      "product_number": "112-5029",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "19.76",
+      "line_item_total": "19.76"
+    }
+  ],
+  "due_date": ""
+}

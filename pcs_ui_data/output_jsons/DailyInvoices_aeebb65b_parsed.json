@@ -1,0 +1,39 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN776839",
+  "invoice_date": "10/20/2025",
+  "due_date": "11/19/2025",
+  "total": "480.50",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "1185",
+      "product_name": "1.00 1.00 1171 3331 Z360 ANTERIOR Z360 ANTERIOR BR Large Repair 965.00 185.00",
+      "Quantity": "5.00",
+      "unit_price": "185.00",
+      "line_item_total": "131.00"
+    },
+    {
+      "product_number": "1171",
+      "product_name": "2.00 2.00 1183 1185 Z360 ANTERIOR BR Z360 Bridge Z360 ANTERIOR 185.00 318.00",
+      "Quantity": "1.00",
+      "unit_price": "318.00",
+      "line_item_total": "346.00"
+    },
+    {
+      "product_number": "1183",
+      "product_name": "1.00 8025 Z360 Bridge Artic 1x1 Ant 318.00",
+      "Quantity": "2.00",
+      "unit_price": "318.00",
+      "line_item_total": "3.50"
+    },
+    {
+      "product_number": "1180",
+      "product_name": "Z360 Zirconia Crown",
+      "Quantity": "2.00",
+      "unit_price": "N/A",
+      "line_item_total": "270.00"
+    }
+  ]
+}

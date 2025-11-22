@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "47340374",
+  "invoice_date": "09/24/25",
+  "due_date": "10/24/25",
+  "invoice_total": "20.75",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "189-0115",
+      "product_name": "250/BX Cuff Keyboard Cover 22x14",
+      "Quantity": "1",
+      "unit_price": "20.75",
+      "line_item_total": "20.75"
+    }
+  ]
 }

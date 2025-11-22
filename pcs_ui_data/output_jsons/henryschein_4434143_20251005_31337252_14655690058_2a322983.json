@@ -1,10 +1,88 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "47740280",
+  "invoice_date": "10/03/25",
+  "due_date": "11/02/25",
+  "invoice_total": "814.12",
+  "office_location": "Lebanon",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "123-7410",
+      "product_name": "24/BX Kwik-Tray",
+      "Quantity": "2",
+      "unit_price": "62.39",
+      "line_item_total": "124.78"
+    },
+    {
+      "product_number": "311-5453",
+      "product_name": "100/JR Soft Shine Polish Paste Unidose",
+      "Quantity": "1",
+      "unit_price": "89.30",
+      "line_item_total": "89.30"
+    },
+    {
+      "product_number": "102-6332",
+      "product_name": "250/BX MaxiTest Indicator Strips Sterilizer",
+      "Quantity": "1",
+      "unit_price": "15.45",
+      "line_item_total": "15.45"
+    },
+    {
+      "product_number": "100-4372",
+      "product_name": "10/PK Carbide Bur FG",
+      "Quantity": "1558",
+      "unit_price": "13.12",
+      "line_item_total": "26.24"
+    },
+    {
+      "product_number": "228-8210",
+      "product_name": "50/BX Septocaine 4% w/EPI 1.7 mL INJ 1:100M Go",
+      "Quantity": "3",
+      "unit_price": "61.41",
+      "line_item_total": "184.23"
+    },
+    {
+      "product_number": "135-6058",
+      "product_name": "EA PowerScrub Vaccum Line Cleaner",
+      "Quantity": "64",
+      "unit_price": "45.34",
+      "line_item_total": "45.34"
+    },
+    {
+      "product_number": "107-4896",
+      "product_name": "400/PK Microbrush Applicator Fine Yellow",
+      "Quantity": "1",
+      "unit_price": "47.39",
+      "line_item_total": "47.39"
+    },
+    {
+      "product_number": "368-3272",
+      "product_name": "150/BG Lollipop Dr. Johns Tooth Fruit Xylitol",
+      "Quantity": "1",
+      "unit_price": "101.69",
+      "line_item_total": "101.69"
+    },
+    {
+      "product_number": "145-8784",
+      "product_name": "100/BG ReLeaf Mini Leaves",
+      "Quantity": "1",
+      "unit_price": "74.94",
+      "line_item_total": "74.94"
+    },
+    {
+      "product_number": "145-8785",
+      "product_name": "100/BG Ivory Releaf Leaves Refill",
+      "Quantity": "1",
+      "unit_price": "78.64",
+      "line_item_total": "78.64"
+    },
+    {
+      "product_number": "112-5166",
+      "product_name": "5/PK Diamond FG 859-014F",
+      "Quantity": "1",
+      "unit_price": "19.63",
+      "line_item_total": "19.63"
+    }
+  ]
 }

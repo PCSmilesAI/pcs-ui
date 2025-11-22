@@ -1,10 +1,60 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "49582707",
+  "invoice_date": "11/12/25",
+  "due_date": "12/12/25",
+  "invoice_total": "369.96",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "112-4864",
+      "product_name": "100/BX Self Seal Sterilization Pouch 8x13",
+      "Quantity": "2",
+      "unit_price": "13.44",
+      "line_item_total": "26.88"
+    },
+    {
+      "product_number": "100-5205",
+      "product_name": "100/PK Saliva Ejector White Opaque",
+      "Quantity": "2",
+      "unit_price": "3.15",
+      "line_item_total": "6.30"
+    },
+    {
+      "product_number": "570-3542",
+      "product_name": "300/BX Criterion N300 Glove Elec Blue Nitrile M",
+      "Quantity": "8",
+      "unit_price": "15.89",
+      "line_item_total": "127.12"
+    },
+    {
+      "product_number": "112-6830",
+      "product_name": "300/BX Criterion N300 Glove Ice Blue Nitrile S",
+      "Quantity": "4",
+      "unit_price": "11.61",
+      "line_item_total": "46.44"
+    },
+    {
+      "product_number": "112-7144",
+      "product_name": "200/BX Criterion Glove Aloe Magenta Nitrile S",
+      "Quantity": "4",
+      "unit_price": "14.84",
+      "line_item_total": "59.36"
+    },
+    {
+      "product_number": "133-7442",
+      "product_name": "50/BX CitriSil Waterline Cleaner Blue",
+      "Quantity": "1",
+      "unit_price": "41.88",
+      "line_item_total": "41.88"
+    },
+    {
+      "product_number": "100-9405",
+      "product_name": "6/BX Articulating Paper Horseshoe Blue/Red",
+      "Quantity": "3",
+      "unit_price": "8.52",
+      "line_item_total": "25.56"
+    }
+  ]
 }

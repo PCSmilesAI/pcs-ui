@@ -1,0 +1,18 @@
+{
+  "vendor": "artisan dental laboratory",
+  "vendor_name": "Artisan Dental",
+  "invoice_number": "IN776775",
+  "invoice_date": "10/17/2025",
+  "due_date": "11/16/2025",
+  "total": "131.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "3331",
+      "product_name": "Large Repair",
+      "Quantity": "1.00",
+      "unit_price": "N/A",
+      "line_item_total": "131.00"
+    }
+  ]
+}

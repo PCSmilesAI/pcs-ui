@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48225883",
+  "invoice_date": "10/24/25",
+  "due_date": "11/23/25",
+  "invoice_total": "7.59",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "107-0347",
+      "product_name": "12/BX Retainer Boxes Assorted Chroma",
+      "Quantity": "1",
+      "unit_price": "6.98",
+      "line_item_total": "6.98"
+    }
+  ]
 }

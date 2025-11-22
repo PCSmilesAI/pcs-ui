@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "48629946",
+  "invoice_date": "10/23/25",
+  "due_date": "11/22/25",
+  "invoice_total": "31.15",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "147-1746",
+      "product_name": "250/CA Aspirator Tips 1/8\"x6.25\" White",
+      "Quantity": "1",
+      "unit_price": "28.63",
+      "line_item_total": "28.63"
+    }
+  ]
 }

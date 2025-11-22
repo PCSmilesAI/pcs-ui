@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
+  "vendor": "Henry schein",
+  "invoice_number": "62075131",
   "invoice_date": "",
   "due_date": "",
-  "total": "1431.77",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "invoice_total": "",
+  "office_location": "",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "040-6306",
+      "product_name": "MIRROR CONE SOCKET",
+      "Quantity": "4",
+      "unit_price": "1.000",
+      "line_item_total": "1.000"
+    }
+  ]
 }

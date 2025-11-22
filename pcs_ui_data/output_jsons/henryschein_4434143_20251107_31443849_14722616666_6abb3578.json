@@ -1,10 +1,242 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "49257543",
+  "invoice_date": "11/06/25",
+  "due_date": "12/06/25",
+  "invoice_total": "1830.31",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "468-0512",
+      "product_name": "6/PK Edge SSteel K-File 25mm #08",
+      "Quantity": "2",
+      "unit_price": "4.85",
+      "line_item_total": "9.70"
+    },
+    {
+      "product_number": "468-0482",
+      "product_name": "6/PK Edge SSteel K-File 25mm #30",
+      "Quantity": "2",
+      "unit_price": "4.85",
+      "line_item_total": "9.70"
+    },
+    {
+      "product_number": "468-0479",
+      "product_name": "6/PK Edge SSteel K-File 25mm #25",
+      "Quantity": "2",
+      "unit_price": "4.85",
+      "line_item_total": "9.70"
+    },
+    {
+      "product_number": "468-0476",
+      "product_name": "6/PK Edge SSteel K-File 25mm #20",
+      "Quantity": "2",
+      "unit_price": "4.85",
+      "line_item_total": "9.70"
+    },
+    {
+      "product_number": "468-0473",
+      "product_name": "6/PK Edge SSteel K-File 25mm #15",
+      "Quantity": "2",
+      "unit_price": "4.85",
+      "line_item_total": "9.70"
+    },
+    {
+      "product_number": "468-0470",
+      "product_name": "6/PK Edge SSteel K-File 25mm #10",
+      "Quantity": "2",
+      "unit_price": "4.85",
+      "line_item_total": "9.70"
+    },
+    {
+      "product_number": "468-0503",
+      "product_name": "6/PK Edge SSteel K-File 25mm #06",
+      "Quantity": "2",
+      "unit_price": "4.85",
+      "line_item_total": "9.70"
+    },
+    {
+      "product_number": "468-0109",
+      "product_name": "100/PK Slim Fit EdgeOne PP Primary",
+      "Quantity": "2",
+      "unit_price": "7.53",
+      "line_item_total": "15.06"
+    },
+    {
+      "product_number": "468-1591",
+      "product_name": "3/PK EdgeOne Blaze Utopia R35 25MM R35 - 25mm",
+      "Quantity": "6",
+      "unit_price": "24.40",
+      "line_item_total": "146.40"
+    },
+    {
+      "product_number": "468-1588",
+      "product_name": "3/PK EdgeOne Blaze Utopia R25 25MM R25 - 25mm",
+      "Quantity": "5",
+      "unit_price": "24.40",
+      "line_item_total": "122.00"
+    },
+    {
+      "product_number": "114-5308",
+      "product_name": "EA Dexis Platinum Holder Post Yellow",
+      "Quantity": "4",
+      "unit_price": "20.20",
+      "line_item_total": "80.80"
+    },
+    {
+      "product_number": "378-0178",
+      "product_name": "50/PK Traxodent Applicator Tips",
+      "Quantity": "1",
+      "unit_price": "38.21",
+      "line_item_total": "38.21"
+    },
+    {
+      "product_number": "131-3943",
+      "product_name": "3.4OZ/BT Prevident",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "64.90"
+    },
+    {
+      "product_number": "543-0219",
+      "product_name": "3.4OZ/BT PreviDent",
+      "Quantity": "5000",
+      "unit_price": "6.49",
+      "line_item_total": "129.80"
+    },
+    {
+      "product_number": "114-0290",
+      "product_name": "EA Dexis Platinum Holder Anterior Blue",
+      "Quantity": "4",
+      "unit_price": "22.63",
+      "line_item_total": "90.52"
+    },
+    {
+      "product_number": "900-1892",
+      "product_name": "100/BX Standard Needles 30Ga Short Plastic Hub",
+      "Quantity": "1",
+      "unit_price": "11.12",
+      "line_item_total": "11.12"
+    },
+    {
+      "product_number": "127-0122",
+      "product_name": "100/BX Pinnacle Sensor Sheath Dexis Platinum",
+      "Quantity": "2",
+      "unit_price": "19.91",
+      "line_item_total": "39.82"
+    },
+    {
+      "product_number": "465-1205",
+      "product_name": "50/BX Lidocaine 2% w/EPI 1.7 mL INJ 1:100 Red",
+      "Quantity": "1",
+      "unit_price": "34.56",
+      "line_item_total": "34.56"
+    },
+    {
+      "product_number": "811-1088",
+      "product_name": "300/PK Schick Sensor Universal Sheath Size",
+      "Quantity": "2",
+      "unit_price": "59.73",
+      "line_item_total": "179.19"
+    },
+    {
+      "product_number": "712-0154",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Tight",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    },
+    {
+      "product_number": "606-0660",
+      "product_name": "EA Dia-Root Bio Sealer Regular Kit",
+      "Quantity": "1",
+      "unit_price": "60.80",
+      "line_item_total": "60.80"
+    },
+    {
+      "product_number": "107-0546",
+      "product_name": "35/BX Polybite Tray Quadrant",
+      "Quantity": "1",
+      "unit_price": "15.55",
+      "line_item_total": "15.55"
+    },
+    {
+      "product_number": "107-6840",
+      "product_name": "35/BX Polybite Tray Anterior",
+      "Quantity": "1",
+      "unit_price": "15.55",
+      "line_item_total": "15.55"
+    },
+    {
+      "product_number": "123-4847",
+      "product_name": "EA Tempbond Clear Automix Syringe 6gm",
+      "Quantity": "1",
+      "unit_price": "81.29",
+      "line_item_total": "81.29"
+    },
+    {
+      "product_number": "543-0308",
+      "product_name": "24/CA Colgate Total Clean Mint TP 0.88 oz",
+      "Quantity": "5",
+      "unit_price": "11.99",
+      "line_item_total": "59.95"
+    },
+    {
+      "product_number": "543-0293",
+      "product_name": "6/BX Colgate",
+      "Quantity": "360",
+      "unit_price": "9.49",
+      "line_item_total": "284.70"
+    },
+    {
+      "product_number": "100-8765",
+      "product_name": "10/PK Carbide Bur RA",
+      "Quantity": "6",
+      "unit_price": "13.12",
+      "line_item_total": "13.12"
+    },
+    {
+      "product_number": "100-1847",
+      "product_name": "10/PK Carbide Bur RA",
+      "Quantity": "4",
+      "unit_price": "13.12",
+      "line_item_total": "13.12"
+    },
+    {
+      "product_number": "707-1122",
+      "product_name": "144/PK Prophy Cups Webbed Screw Type Soft Gray",
+      "Quantity": "1",
+      "unit_price": "113.54",
+      "line_item_total": "113.54"
+    },
+    {
+      "product_number": "134-0727",
+      "product_name": "1000/BOX Mylar Matrix Strips Strait",
+      "Quantity": "2",
+      "unit_price": "12.84",
+      "line_item_total": "25.68"
+    },
+    {
+      "product_number": "731-0604",
+      "product_name": "EA PDT Scaler DE 23S",
+      "Quantity": "1",
+      "unit_price": "34.20",
+      "line_item_total": "34.20"
+    },
+    {
+      "product_number": "712-0068",
+      "product_name": "48PK/BX Gum Eez-Thru Angle Flossers 2/Pk",
+      "Quantity": "2",
+      "unit_price": "15.03",
+      "line_item_total": "30.06"
+    },
+    {
+      "product_number": "543-0291",
+      "product_name": "6/BX Colgate Slimsoft Toothbrush Compact",
+      "Quantity": "1",
+      "unit_price": "9.99",
+      "line_item_total": "9.99"
+    }
+  ]
 }
