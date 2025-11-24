@@ -224,7 +224,16 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           // Check if pdf_path exists and is not empty
           const pdfPath = row.pdf_path || row.pdfPath;
           const hasPdf = !!(pdfPath && String(pdfPath).trim() !== '');
-          // Debug logging (remove after testing)
+          // Debug logging
+          if (row.invoice_number === invoices[0]?.invoice_number) {
+            console.log('[PDF FILTER DEBUG]', {
+              invoice: row.invoice_number,
+              pdfPath,
+              hasPdf,
+              filterValue: effectiveFilters.hasAttachment,
+              rowKeys: Object.keys(row)
+            });
+          }
           if (effectiveFilters.hasAttachment === 'yes' && !hasPdf) {
             return false;
           }
