@@ -272,7 +272,9 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
 
       // PDF Attachment filter
       if (filters.hasAttachment) {
-        const hasPdf = !!(row.pdf_path || row.pdfPath);
+        // Check if pdf_path exists and is not empty
+        const pdfPath = row.pdf_path || row.pdfPath;
+        const hasPdf = !!(pdfPath && pdfPath.trim() !== '');
         if (filters.hasAttachment === 'yes' && !hasPdf) return false;
         if (filters.hasAttachment === 'no' && hasPdf) return false;
       }

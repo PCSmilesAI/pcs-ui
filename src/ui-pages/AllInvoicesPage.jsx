@@ -221,9 +221,15 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
 
         // PDF Attachment filter
         if (effectiveFilters.hasAttachment) {
-          const hasPdf = !!(row.pdf_path || row.pdfPath);
-          if (effectiveFilters.hasAttachment === 'yes' && !hasPdf) return false;
-          if (effectiveFilters.hasAttachment === 'no' && hasPdf) return false;
+          // Check if pdf_path exists and is not empty
+          const pdfPath = row.pdf_path || row.pdfPath;
+          const hasPdf = !!(pdfPath && String(pdfPath).trim() !== '');
+          if (effectiveFilters.hasAttachment === 'yes' && !hasPdf) {
+            return false;
+          }
+          if (effectiveFilters.hasAttachment === 'no' && hasPdf) {
+            return false;
+          }
         }
 
         const amount = parseAmount(row.amount);
