@@ -25,6 +25,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
     maxAmount: searchParams.get('maxAmount') || undefined,
     dueWithin: searchParams.get('dueWithin') || undefined,
     ach: searchParams.get('ach') || undefined,
+    hasAttachment: searchParams.get('hasAttachment') || undefined,
   };
 
   const [invoices, setInvoices] = useState([]);

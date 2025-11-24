@@ -168,6 +168,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     maxAmount: searchParams.get('maxAmount') || undefined,
     dueWithin: searchParams.get('dueWithin') || undefined,
     ach: searchParams.get('ach') || undefined,
+    hasAttachment: searchParams.get('hasAttachment') || undefined,
   }), [searchParams]);
 
   const effectiveQuery = useMemo(() => (spQuery || searchQuery || '').trim().toLowerCase(), [spQuery, searchQuery]);
