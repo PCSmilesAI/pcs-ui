@@ -42,7 +42,7 @@ export async function GET(
   }
 
   // Security check - only allow PDF files
-  if (!filename.endsWith('.pdf')) {
+  if (!filename.toLowerCase().endsWith('.pdf')) {
     return new NextResponse('Only PDF files are allowed', { status: 400 });
   }
 
