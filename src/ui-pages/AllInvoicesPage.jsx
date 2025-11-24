@@ -202,6 +202,14 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
       return Number.isNaN(parsed.getTime()) ? null : parsed;
     };
 
+    // Debug: Log filter state
+    if (effectiveFilters.hasAttachment) {
+      console.log('[PDF FILTER] Filter active:', effectiveFilters.hasAttachment);
+      const withPdf = invoices.filter(r => !!(r.pdf_path || r.pdfPath)).length;
+      const withoutPdf = invoices.length - withPdf;
+      console.log('[PDF FILTER] Invoices with PDF:', withPdf, 'without PDF:', withoutPdf);
+    }
+
     return invoices.filter((row) => {
       try {
         if (effectiveQuery) {
