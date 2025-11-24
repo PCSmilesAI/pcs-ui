@@ -242,7 +242,9 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
 
         // PDF Attachment filter
         if (filterConfig.hasAttachment) {
-          const hasPdf = !!(row.pdf_path || row.pdfPath);
+          // Check if pdf_path exists and is not empty
+          const pdfPath = row.pdf_path || row.pdfPath;
+          const hasPdf = !!(pdfPath && pdfPath.trim() !== '');
           if (filterConfig.hasAttachment === 'yes' && !hasPdf) return false;
           if (filterConfig.hasAttachment === 'no' && hasPdf) return false;
         }
