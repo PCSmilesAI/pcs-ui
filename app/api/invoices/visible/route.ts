@@ -36,6 +36,15 @@ function matchesStatus(invoice: any, status: string): boolean {
   return (invoice.status || '').toLowerCase() === status.toLowerCase();
 }
 
+function matchesAttachment(invoice: any, hasAttachment: string): boolean {
+  if (!hasAttachment) return true;
+  const pdfPath = invoice.pdf_path || invoice.pdfPath || '';
+  const hasPdf = !!(pdfPath && pdfPath.trim() !== '');
+  if (hasAttachment === 'yes') return hasPdf;
+  if (hasAttachment === 'no') return !hasPdf;
+  return true;
+}
+
 function getOffice(invoice: any): string {
   return (invoice.office_location || invoice.office || invoice.clinic_id || '').trim();
 }
@@ -49,7 +58,8 @@ export async function GET(req: NextRequest) {
   const search = parseSearchParam(req, 'search');
   const status = parseSearchParam(req, 'status');
   const vendor = parseSearchParam(req, 'vendor');
-  console.log('[API][INVOICES]', 'visible_request', { userEmail: user.email, limit, offset, search, status, vendor });
+  const hasAttachment = parseSearchParam(req, 'hasAttachment');
+  console.log('[API][INVOICES]', 'visible_request', { userEmail: user.email, limit, offset, search, status, vendor, hasAttachment });
 
   try {
     const db = getDatabase();
@@ -116,7 +126,7 @@ export async function GET(req: NextRequest) {
 
     // Apply filters
     const filtered = invoices.filter((invoice) =>
-      matchesSearch(invoice, search) && matchesStatus(invoice, status) && matchesVendor(invoice, vendor)
+      matchesSearch(invoice, search) && matchesStatus(invoice, status) && matchesVendor(invoice, vendor) && matchesAttachment(invoice, hasAttachment)
     );
 
     // Paginate
