@@ -14,11 +14,16 @@ EMAIL_PASS = "Inv!PCSAI"
 IMAP_SERVER = "imap.secureserver.net"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SAVE_DIR = os.path.join(BASE_DIR, "email_invoices")  # Changed to email_invoices
+DATA_DIR = os.environ.get("PCS_DATA_DIR", os.path.join(BASE_DIR, "pcs_ui_data"))
+if not os.path.isabs(DATA_DIR):
+    DATA_DIR = os.path.abspath(DATA_DIR)
+
+# Keep saved PDFs under PCS_DATA_DIR so API can resolve them reliably
+SAVE_DIR = os.path.join(DATA_DIR, "email_invoices")  # Changed to email_invoices
 VENDOR_ROUTER_PATH = os.path.join(BASE_DIR, "vendor_router.py")
-LOG_PATH = os.path.join(BASE_DIR, "log.txt")
-EMAIL_TRACKING_DB = os.path.join(BASE_DIR, "email_tracking.json")  # NEW: Track all emails
-PDF_PROCESSING_DB = os.path.join(BASE_DIR, "pdf_processing.json")  # Track processed PDFs by content hash
+LOG_PATH = os.path.join(DATA_DIR, "log.txt")
+EMAIL_TRACKING_DB = os.path.join(DATA_DIR, "email_tracking.json")  # NEW: Track all emails
+PDF_PROCESSING_DB = os.path.join(DATA_DIR, "pdf_processing.json")  # Track processed PDFs by content hash
 
 os.makedirs(SAVE_DIR, exist_ok=True)
 
