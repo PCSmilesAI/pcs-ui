@@ -10,6 +10,7 @@ import glob
 import requests
 from datetime import datetime
 from deleted_invoice_guard import compute_file_hash, should_skip_deleted_invoice
+from filename_utils import sanitize_filename, api_pdf_path
 
 BASE_DIR = os.path.dirname(__file__)
 DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
@@ -50,23 +51,31 @@ def save_invoice_queue(queue):
         json.dump(queue, f, indent=2)
 
 def find_corresponding_pdf(json_filename):
-    """Find the PDF file that corresponds to a JSON file"""
-    # Remove .json extension
+    """Find the PDF file that corresponds to a JSON file and return (fs_path, api_path)."""
     base_name = json_filename.replace('.json', '')
-    
-    # First try exact match
-    exact_pdf = os.path.join(EMAIL_INVOICES_PATH, base_name + '.pdf')
-    if os.path.exists(exact_pdf):
-        return exact_pdf
-    
-    # If no exact match, look for PDFs that contain the base name
-    # This handles cases where the JSON and PDF have different prefixes/suffixes
-    for pdf_file in os.listdir(EMAIL_INVOICES_PATH):
-        if pdf_file.endswith('.pdf') and base_name in pdf_file:
-            return os.path.join(EMAIL_INVOICES_PATH, pdf_file)
-    
-    # If still no match, return the expected path (for debugging)
-    return os.path.join(EMAIL_INVOICES_PATH, base_name + '.pdf')
+
+    candidates = []
+    # Prefer the sanitized version of the base name
+    sanitized_pdf = sanitize_filename(base_name + '.pdf')
+    candidates.append(os.path.join(EMAIL_INVOICES_PATH, sanitized_pdf))
+    candidates.append(os.path.join(EMAIL_INVOICES_PATH, base_name + '.pdf'))
+
+    # Fallback: look for PDFs that contain the base name
+    try:
+        for pdf_file in os.listdir(EMAIL_INVOICES_PATH):
+            if pdf_file.lower().endswith('.pdf') and base_name in pdf_file:
+                candidates.append(os.path.join(EMAIL_INVOICES_PATH, pdf_file))
+    except FileNotFoundError:
+        pass
+
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            pdf_basename = os.path.basename(candidate)
+            return candidate, api_pdf_path(pdf_basename)
+
+    # If still no match, return the expected sanitized path (for debugging)
+    fallback = os.path.join(EMAIL_INVOICES_PATH, sanitized_pdf)
+    return fallback, api_pdf_path(os.path.basename(fallback))
 
 def detect_vendor_from_filename(filename):
     """Detect vendor from filename"""
@@ -109,13 +118,13 @@ def add_invoice_to_queue(json_file_path):
 
         # Find the correct PDF path
         json_filename = os.path.basename(json_file_path)
-        pdf_path = find_corresponding_pdf(json_filename)
+        pdf_fs_path, pdf_api_path = find_corresponding_pdf(json_filename)
 
-        file_hash = compute_file_hash(pdf_path)
+        file_hash = compute_file_hash(pdf_fs_path)
         skip_deleted, skip_reason = should_skip_deleted_invoice(
             vendor=vendor,
             invoice_number=invoice_number,
-            pdf_path=pdf_path,
+            pdf_path=pdf_fs_path,
             file_hash=file_hash,
             source_file=invoice_data.get('source_file') or json_filename,
         )
@@ -133,7 +142,8 @@ def add_invoice_to_queue(json_file_path):
             "clinic_id": office_location,
             "source_file": invoice_data.get('source_file') or json_filename,
             "json_path": json_file_path,
-            "pdf_path": pdf_path,
+            "pdf_path": pdf_api_path,
+            "pdf_fs_path": pdf_fs_path,
         }
 
         # Call API to ingest invoice
@@ -171,6 +181,7 @@ def add_invoice_to_queue_file(json_file_path, payload):
             "status": "new",
             "json_path": json_file_path,
             "pdf_path": payload.get('pdf_path'),
+            "pdf_fs_path": payload.get('pdf_fs_path'),
             "timestamp": datetime.now().isoformat(),
             "assigned_to": None,
             "approved": False,

@@ -14,6 +14,7 @@ import logging
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from deduplicate_invoices import deduplicate_invoices
+from filename_utils import sanitize_filename
 
 EMAIL_USER = "invoices@pcsmilesai.com"
 EMAIL_PASS = "Inv!PCSAI"
@@ -341,6 +342,7 @@ def extract_and_save_pdfs(msg, email_subject, source_message_id):
                 name_without_ext = os.path.splitext(filename)[0]
                 unique_filename = f"{name_without_ext}_{timestamp}.pdf"
 
+            unique_filename = sanitize_filename(unique_filename)
             filepath = os.path.join(SAVE_DIR, unique_filename)
 
             # CRITICAL: Always save the PDF, even if filename exists

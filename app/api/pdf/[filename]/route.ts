@@ -2,24 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { resolveDataPath } from '../../../../lib/workflow/dataDir';
-
-/**
- * Validates filename to prevent path traversal attacks
- * Only allows alphanumeric characters, dots, dashes, and underscores
- */
-function validateFilename(filename: string): boolean {
-  // Check for path traversal attempts
-  if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-    return false;
-  }
-
-  // Only allow safe characters: alphanumeric, dot, dash, underscore
-  if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
-    return false;
-  }
-
-  return true;
-}
+import { isSafeFilename } from '../../../../lib/security/filename';
 
 /**
  * Ensures resolved path is within the base directory
@@ -37,7 +20,7 @@ export async function GET(
   const { filename } = params;
 
   // Security check - validate filename format
-  if (!validateFilename(filename)) {
+  if (!isSafeFilename(filename)) {
     return new NextResponse('Invalid filename', { status: 400 });
   }
 

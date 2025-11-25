@@ -3,6 +3,7 @@ import { getDatabase } from '../../../../lib/db/client';
 import { applyParserUpdate } from '../../../../lib/invoices/write';
 import { isTombstoned } from '../../../../lib/invoices/tombstoneService';
 import { normalizeVendorNameForStorage } from '../../../../lib/invoices/vendorNormalization';
+import { buildApiPdfPath, normalizePdfFilename } from '../../../../lib/security/filename';
 import { randomUUID } from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -52,7 +53,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if invoice already exists - use source_file as primary check, fallback to invoice_number
-    const sourceFile = body.source_file || body.json_path || body.pdf_path;
+    const normalizedPdfFilename = body.pdf_path ? normalizePdfFilename(body.pdf_path) : undefined;
+    const normalizedPdfPath = normalizedPdfFilename ? buildApiPdfPath(normalizedPdfFilename) : undefined;
+
+    const sourceFile = body.source_file || body.json_path || normalizedPdfFilename;
     let existing: { id: string } | undefined = undefined;
     
     if (sourceFile) {
@@ -115,7 +119,7 @@ export async function POST(req: NextRequest) {
     `).run(
       id,
       invoice_number,
-      body.source_file || body.json_path,
+      body.source_file || body.json_path || normalizedPdfFilename,
       normalizedVendor,  // parsed (normalized)
       body.office_location || body.clinic_id,
       amountCents,
@@ -129,7 +133,7 @@ export async function POST(req: NextRequest) {
       '',
       body.clinic_id,
       body.office_location,
-      body.pdf_path
+      normalizedPdfPath
     );
 
     // Audit event
@@ -167,4 +171,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
