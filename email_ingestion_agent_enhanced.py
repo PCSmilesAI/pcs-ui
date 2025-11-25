@@ -25,9 +25,10 @@ DATA_DIR = os.environ.get("PCS_DATA_DIR", os.path.join(BASE_DIR, "pcs_ui_data"))
 if not os.path.isabs(DATA_DIR):
     DATA_DIR = os.path.abspath(DATA_DIR)
 
-SAVE_DIR = os.path.join(BASE_DIR, "email_invoices")
+# Persist all artifacts under PCS_DATA_DIR to keep API/file access aligned
+SAVE_DIR = os.path.join(DATA_DIR, "email_invoices")
 VENDOR_ROUTER_PATH = os.path.join(BASE_DIR, "vendor_router.py")
-LOG_PATH = os.path.join(BASE_DIR, "log.txt")
+LOG_PATH = os.path.join(DATA_DIR, "log.txt")
 INVOICE_QUEUE_PATH = os.path.join(BASE_DIR, "pcs_ai_data", "invoice_queue.json")
 DB_PATH = os.path.join(DATA_DIR, "pcs.db")
 
