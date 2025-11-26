@@ -70,6 +70,20 @@ export function runMigrations(): void {
   }
 
   console.log('[DB][MIGRATE] Creating tables...');
+
+  const columnExists = (table: string, column: string): boolean => {
+    const rows = db
+      ?.prepare(`PRAGMA table_info(${table})`)
+      .all() as { name: string }[];
+    return !!rows?.some((r) => r.name === column);
+  };
+
+  const ensureColumn = (table: string, column: string, definition: string) => {
+    if (!columnExists(table, column)) {
+      db?.exec(`ALTER TABLE ${table} ADD COLUMN ${definition};`);
+    }
+  };
+
   // Create invoices table with all fields
   db.exec(`
     CREATE TABLE IF NOT EXISTS invoices (
@@ -240,21 +254,10 @@ export function runMigrations(): void {
   `);
 
   // Extend invoices table with multi-location fields
-  db.exec(`
-    ALTER TABLE invoices ADD COLUMN IF NOT EXISTS is_multi_location INTEGER DEFAULT 0;
-  `);
-
-  db.exec(`
-    ALTER TABLE invoices ADD COLUMN IF NOT EXISTS coding_template_id TEXT;
-  `);
-
-  db.exec(`
-    ALTER TABLE invoices ADD COLUMN IF NOT EXISTS coded_by_user_id TEXT;
-  `);
-
-  db.exec(`
-    ALTER TABLE invoices ADD COLUMN IF NOT EXISTS coded_at TEXT;
-  `);
+  ensureColumn('invoices', 'is_multi_location', 'is_multi_location INTEGER DEFAULT 0');
+  ensureColumn('invoices', 'coding_template_id', 'coding_template_id TEXT');
+  ensureColumn('invoices', 'coded_by_user_id', 'coded_by_user_id TEXT');
+  ensureColumn('invoices', 'coded_at', 'coded_at TEXT');
 
   // NEW: Create invoice_categories table for invoice-level categories
   db.exec(`
@@ -271,9 +274,7 @@ export function runMigrations(): void {
   `);
 
   // NEW: Invoice reassignment field - tracks current owner/assignee
-  db.exec(`
-    ALTER TABLE invoices ADD COLUMN IF NOT EXISTS current_assigned_user_email TEXT;
-  `);
+  ensureColumn('invoices', 'current_assigned_user_email', 'current_assigned_user_email TEXT');
   // Create indexes for new tables
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_coding_templates_vendor_id ON coding_templates(vendor_id);
@@ -309,4 +310,3 @@ export function runMigrations(): void {
 
   console.log('[DB] Migrations completed successfully');
 }
-
