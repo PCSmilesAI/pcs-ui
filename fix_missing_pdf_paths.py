@@ -8,6 +8,7 @@ import sqlite3
 import glob
 import re
 from pathlib import Path
+from filename_utils import sanitize_filename, api_pdf_path
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
@@ -23,21 +24,12 @@ PDF_DIRS = [
     os.path.join(BASE_DIR, 'email_invoices'),
 ]
 
-def find_pdf_file(filename):
-    """Find PDF file in any of the possible directories"""
-    for pdf_dir in PDF_DIRS:
-        if os.path.exists(pdf_dir):
-            pdf_path = os.path.join(pdf_dir, filename)
-            if os.path.exists(pdf_path):
-                return pdf_path
-    return None
-
 def get_all_pdf_filenames():
     """Get all PDF filenames from all possible directories"""
     pdfs = {}
     for pdf_dir in PDF_DIRS:
         if os.path.exists(pdf_dir):
-            for pdf_file in glob.glob(os.path.join(pdf_dir, '*.pdf')):
+            for pdf_file in glob.glob(os.path.join(pdf_dir, '*.pdf')) + glob.glob(os.path.join(pdf_dir, '*.PDF')):
                 filename = os.path.basename(pdf_file)
                 pdfs[filename.lower()] = filename  # Store lowercase key for matching
     return pdfs
@@ -114,7 +106,9 @@ def main():
         matching_pdf = find_matching_pdf(invoice_number, source_file, all_pdfs)
         
         if matching_pdf:
-            new_pdf_path = f"/api/pdf/{matching_pdf}"
+            # Normalize filename for future safety and build API path
+            safe_filename = sanitize_filename(matching_pdf)
+            new_pdf_path = api_pdf_path(safe_filename)
             cursor.execute("""
                 UPDATE invoices
                 SET pdf_path = ?

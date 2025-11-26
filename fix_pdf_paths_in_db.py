@@ -7,6 +7,7 @@ import os
 import sqlite3
 import glob
 from pathlib import Path
+from filename_utils import sanitize_filename, api_pdf_path
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
@@ -29,6 +30,10 @@ def find_pdf_file(filename):
             pdf_path = os.path.join(pdf_dir, filename)
             if os.path.exists(pdf_path):
                 return pdf_path
+            # Try case-insensitive extension
+            alt_path = os.path.join(pdf_dir, filename.replace('.pdf', '.PDF'))
+            if os.path.exists(alt_path):
+                return alt_path
     return None
 
 def get_all_pdf_filenames():
@@ -36,7 +41,7 @@ def get_all_pdf_filenames():
     pdfs = set()
     for pdf_dir in PDF_DIRS:
         if os.path.exists(pdf_dir):
-            for pdf_file in glob.glob(os.path.join(pdf_dir, '*.pdf')):
+            for pdf_file in glob.glob(os.path.join(pdf_dir, '*.pdf')) + glob.glob(os.path.join(pdf_dir, '*.PDF')):
                 pdfs.add(os.path.basename(pdf_file))
     return pdfs
 
@@ -96,8 +101,9 @@ def main():
             actual_pdf_path = find_pdf_file(filename)
             
             if actual_pdf_path:
-                # PDF exists - update path to use API endpoint format
-                new_pdf_path = f"/api/pdf/{filename}"
+                # PDF exists - update path to use API endpoint format with sanitized name
+                safe_filename = sanitize_filename(filename)
+                new_pdf_path = api_pdf_path(safe_filename)
                 
                 # Only update if different
                 if pdf_path != new_pdf_path:
