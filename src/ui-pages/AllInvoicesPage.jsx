@@ -47,6 +47,10 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
       ? new URLSearchParams(window.location.search)
       : new URLSearchParams();
     params.set('limit', '5000');
+    // Ensure hasAttachment filter is passed to API if present
+    if (spFilters.hasAttachment) {
+      params.set('hasAttachment', spFilters.hasAttachment);
+    }
     const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store', credentials: 'include' });
     if (!res.ok) throw new Error(`Failed to load invoices (HTTP ${res.status})`);
     const payload = await res.json();
@@ -233,21 +237,18 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           // Check if pdf_path exists and is not empty
           const pdfPath = row.pdf_path || row.pdfPath;
           const hasPdf = !!(pdfPath && String(pdfPath).trim() !== '');
-          // Debug logging
-          if (row.invoice_number === invoices[0]?.invoice_number) {
-            console.log('[PDF FILTER DEBUG]', {
-              invoice: row.invoice_number,
-              pdfPath,
-              hasPdf,
-              filterValue: effectiveFilters.hasAttachment,
-              rowKeys: Object.keys(row)
-            });
-          }
-          if (effectiveFilters.hasAttachment === 'yes' && !hasPdf) {
-            return false;
-          }
-          if (effectiveFilters.hasAttachment === 'no' && hasPdf) {
-            return false;
+          
+          // Apply filter logic
+          if (effectiveFilters.hasAttachment === 'yes') {
+            // Show only invoices WITH PDFs
+            if (!hasPdf) {
+              return false;
+            }
+          } else if (effectiveFilters.hasAttachment === 'no') {
+            // Show only invoices WITHOUT PDFs
+            if (hasPdf) {
+              return false;
+            }
           }
         }
 
