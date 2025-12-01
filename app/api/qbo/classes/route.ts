@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
 
     const qboClient = new QBOClient();
     await qboClient.initialize();
-    qboClient.setTokens(tokens);
 
     const classes = await qboClient.getClasses();
 
