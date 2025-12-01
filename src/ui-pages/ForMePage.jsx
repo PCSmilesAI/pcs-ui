@@ -352,7 +352,38 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
         body: JSON.stringify({ email, full_scan: true }),
       });
 
-      const result = await res.json();
+      // Check if response is OK before parsing JSON
+      if (!res.ok) {
+        // Handle timeout and other errors
+        if (res.status === 504 || res.status === 408) {
+          showToast('Inbox refresh is taking longer than expected. The scan is running in the background. Please check back in a few minutes.', 'info');
+          // Still reload the list in case some invoices were added before timeout
+          await reloadList();
+          return;
+        }
+        
+        // Try to parse error response, but handle non-JSON gracefully
+        let errorMessage = `Server error (${res.status})`;
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (e) {
+          // Response is not JSON, use status text
+          errorMessage = res.statusText || errorMessage;
+        }
+        showToast(errorMessage || 'Failed to refresh inbox', 'error');
+        return;
+      }
+
+      // Parse JSON response
+      let result;
+      try {
+        result = await res.json();
+      } catch (parseErr) {
+        console.error('Failed to parse JSON response:', parseErr);
+        showToast('Received invalid response from server', 'error');
+        return;
+      }
 
       if (!result.ok) {
         showToast(result.message || result.error || 'Failed to refresh inbox', 'error');
@@ -368,7 +399,12 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       await reloadList();
     } catch (err) {
       console.error('Error refreshing inbox:', err);
-      showToast('Failed to refresh inbox', 'error');
+      // Handle network errors, timeouts, etc.
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        showToast('Network error: Could not connect to server', 'error');
+      } else {
+        showToast('Failed to refresh inbox: ' + (err.message || 'Unknown error'), 'error');
+      }
     } finally {
       setRefreshing(false);
     }
