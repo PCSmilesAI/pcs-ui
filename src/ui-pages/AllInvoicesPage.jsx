@@ -84,7 +84,10 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
             amount: `$${numericTotal.toFixed(2)}`,
             office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
             status: formatStatusForDisplay(invoice.status),
-            category: invoice.category || 'Other',
+            category:
+              (Array.isArray(invoice.invoice_categories) && invoice.invoice_categories[0]?.category_name) ||
+              invoice.category ||
+              'Other',
             invoiceDate: formatDate(invoice.invoice_date || null),
             dueDate: formatDate(invoice.due_date || invoice.invoice_date || null),
             invoice_date: invoice.invoice_date,
