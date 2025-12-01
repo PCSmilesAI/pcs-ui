@@ -147,8 +147,10 @@ function mapAccounts(data: any) {
   return list.map((a: any) => ({
     id: a.Id,
     name: a.Name,
+    fullName: a.FullyQualifiedName || a.Name,
     type: a.AccountType,
     subtype: a.AccountSubType,
+    classification: a.Classification,
   }))
 }
 
@@ -165,7 +167,7 @@ export async function GET(req: Request) {
 
     // 1) Preferred: AccountType filter (typical expense coding)
     const sql1 = `
-      select Id, Name, AccountType, AccountSubType
+      select Id, Name, FullyQualifiedName, AccountType, AccountSubType, Classification
       from Account
       where AccountType in ('Expense','Cost of Goods Sold','Other Expense')
       order by Name
@@ -178,7 +180,7 @@ export async function GET(req: Request) {
     // 2) If empty, try Classification (some ledgers expose via Classification)
     if (categories.length === 0) {
       const sql2 = `
-        select Id, Name, AccountType, AccountSubType
+        select Id, Name, FullyQualifiedName, AccountType, AccountSubType, Classification
         from Account
         where Classification = 'Expense'
         order by Name
@@ -191,7 +193,7 @@ export async function GET(req: Request) {
     // 3) If still empty, return ALL Accounts (so we can see something)
     if (categories.length === 0) {
       const sql3 = `
-        select Id, Name, AccountType, AccountSubType
+        select Id, Name, FullyQualifiedName, AccountType, AccountSubType, Classification
         from Account
         order by Name
       `.trim()

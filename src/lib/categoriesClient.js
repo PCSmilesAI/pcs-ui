@@ -23,8 +23,8 @@ export async function fetchQboCategories() {
       throw new Error(`Invalid JSON response: ${text}`);
     }
     
-    // Extract categories from our API response format
-    const categories = data?.payload?.categories ?? data?.categories ?? [];
+    // Extract categories from our API response format (exact QBO names)
+    const categories = data?.categories ?? data?.payload?.categories ?? [];
     
     if (!Array.isArray(categories)) {
       throw new Error(`Invalid categories format: ${JSON.stringify(categories)}`);
