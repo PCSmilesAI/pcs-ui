@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
@@ -158,6 +158,8 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
   }, [fetchVisibleInvoices, showToast]);
 
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const { getStatusForVendor } = useVendorAchMap();
 
   const spQuery = useMemo(() => (searchParams.get('search') || '').trim().toLowerCase(), [searchParams]);
@@ -171,6 +173,24 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     ach: searchParams.get('ach') || undefined,
     hasAttachment: searchParams.get('hasAttachment') || undefined,
   }), [searchParams]);
+
+  // Check if any filters are active
+  const hasActiveFilters = useMemo(() => {
+    return Object.values(spFilters).some(value => value !== undefined && value !== null && value !== '');
+  }, [spFilters]);
+
+  // Reset filters function
+  const handleResetFilters = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    // Remove all filter params but keep other params like 'email', 'search', etc.
+    const filterKeys = ['vendor', 'office', 'category', 'minAmount', 'maxAmount', 'dueWithin', 'ach', 'hasAttachment'];
+    filterKeys.forEach(key => params.delete(key));
+    
+    // Update URL without filter params
+    router.replace(`${pathname}?${params.toString()}`);
+    // Also clear local filters state
+    setFilters({});
+  }, [searchParams, router, pathname]);
 
   const effectiveQuery = useMemo(() => (spQuery || searchQuery || '').trim().toLowerCase(), [spQuery, searchQuery]);
   const effectiveFilters = useMemo(() => ({
@@ -480,6 +500,49 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
           </div>
         </div>
       </div>
+
+      {/* Reset Filters Button - Only shows when filters are active */}
+      {hasActiveFilters && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 50,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          <button
+            onClick={handleResetFilters}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              backgroundColor: '#dc2626',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#b91c1c';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#dc2626';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+            title="Clear all active filters"
+          >
+            <i className="fas fa-times-circle"></i>
+            Reset Filters
+          </button>
+        </div>
+      )}
 
       {selectedIds.size > 0 && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
