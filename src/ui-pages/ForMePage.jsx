@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import InvoiceTable from '../components/InvoiceTable.jsx';
@@ -112,6 +112,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
   }, []);
 
   const [refreshing, setRefreshing] = useState(false);
+  const isRefreshingRef = useRef(false); // Track refreshing state without causing re-renders
 
   const fetchVisibleInvoices = useCallback(async () => {
     // Propagate any query params from the page (e.g., ?email=...) to the API call
@@ -337,8 +338,14 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     await reloadList();
   }, [selectedIds, filteredRows, getRowId, showToast, reloadList]);
 
-  // Define all handlers BEFORE any conditional returns
-  const handleRefreshInbox = useCallback(async () => {
+  // Automatic inbox checker - runs every 10 seconds in the background
+  const checkInboxAutomatically = useCallback(async () => {
+    // Skip if already refreshing to avoid overlapping requests
+    if (isRefreshingRef.current) {
+      return;
+    }
+
+    isRefreshingRef.current = true;
     setRefreshing(true);
     try {
       const params = typeof window !== 'undefined'
@@ -349,29 +356,19 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       const res = await fetch('/api/inbox/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, full_scan: true }),
+        body: JSON.stringify({ email, full_scan: false }), // Use incremental scan, not full scan
       });
 
-      // Check if response is OK before parsing JSON
+      // Silently handle errors - don't show toasts for automatic checks
       if (!res.ok) {
-        // Handle timeout and other errors
+        // Handle timeout gracefully - scan might still be running
         if (res.status === 504 || res.status === 408) {
-          showToast('Inbox refresh is taking longer than expected. The scan is running in the background. Please check back in a few minutes.', 'info');
           // Still reload the list in case some invoices were added before timeout
           await reloadList();
           return;
         }
-        
-        // Try to parse error response, but handle non-JSON gracefully
-        let errorMessage = `Server error (${res.status})`;
-        try {
-          const errorData = await res.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (e) {
-          // Response is not JSON, use status text
-          errorMessage = res.statusText || errorMessage;
-        }
-        showToast(errorMessage || 'Failed to refresh inbox', 'error');
+        // For other errors, just reload the list silently
+        await reloadList();
         return;
       }
 
@@ -380,35 +377,54 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       try {
         result = await res.json();
       } catch (parseErr) {
-        console.error('Failed to parse JSON response:', parseErr);
-        showToast('Received invalid response from server', 'error');
+        // Silently fail and reload list
+        await reloadList();
         return;
       }
 
-      if (!result.ok) {
-        showToast(result.message || result.error || 'Failed to refresh inbox', 'error');
-        return;
+      // If scan was successful and added new invoices, reload the list
+      if (result.ok && (result.added > 0 || result.skipped > 0)) {
+        await reloadList();
       }
-
-      showToast(
-        `Inbox refreshed! Added ${result.added || 0} new invoice(s), skipped ${result.skipped || 0}`,
-        'success'
-      );
-
-      // Reload the invoice list
-      await reloadList();
     } catch (err) {
-      console.error('Error refreshing inbox:', err);
-      // Handle network errors, timeouts, etc.
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        showToast('Network error: Could not connect to server', 'error');
-      } else {
-        showToast('Failed to refresh inbox: ' + (err.message || 'Unknown error'), 'error');
+      // Silently handle errors - don't spam user with error messages
+      console.log('[Auto Inbox Check] Background check failed:', err.message);
+      // Still try to reload list in case of network errors
+      try {
+        await reloadList();
+      } catch (reloadErr) {
+        // Ignore reload errors
       }
     } finally {
+      isRefreshingRef.current = false;
       setRefreshing(false);
     }
-  }, [reloadList, showToast]);
+  }, [reloadList]);
+
+  // Set up automatic inbox checking every 10 seconds
+  useEffect(() => {
+    // Only run if component is mounted and page is visible
+    if (typeof window === 'undefined') return;
+
+    // Initial check after 2 seconds (give page time to load)
+    const initialTimeout = setTimeout(() => {
+      checkInboxAutomatically();
+    }, 2000);
+
+    // Then check every 10 seconds
+    const interval = setInterval(() => {
+      // Only check if page is visible (don't waste resources on hidden tabs)
+      if (document.visibilityState === 'visible') {
+        checkInboxAutomatically();
+      }
+    }, 10000); // 10 seconds
+
+    // Cleanup
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [checkInboxAutomatically]);
 
   // Now do conditional returns AFTER all handlers are defined
   if (loading) {
@@ -455,15 +471,13 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
             <i className="fas fa-plus"></i>
             Create Invoice
           </button>
-          <button
-            onClick={handleRefreshInbox}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-            title="Check inbox for new invoices"
+          <div
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg"
+            title="Inbox is automatically checked every 10 seconds"
           >
-            <i className={`fas fa-sync-alt ${refreshing ? 'fa-spin' : ''}`}></i>
-            {refreshing ? 'Refreshing...' : 'Refresh Inbox'}
-          </button>
+            <i className="fas fa-sync-alt fa-spin text-blue-600"></i>
+            <span className="text-sm">Auto-refreshing inbox...</span>
+          </div>
         </div>
       </div>
 
