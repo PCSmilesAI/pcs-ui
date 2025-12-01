@@ -1,21 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { QBOClient } from '@/lib/qbo/qboClient';
-import { getLatestTokens, ensureAccessToken } from '@/lib/qbo/tokenStorage';
+import { tokenStorage } from '@/lib/qbo/tokenStorage';
 
 export async function GET(req: NextRequest) {
   try {
-    const tokens = await getLatestTokens();
-    if (!tokens?.realm_id) {
+    const tokens = await tokenStorage.getLatestTokens();
+    if (!tokens?.realmId) {
       return NextResponse.json(
-        { error: 'not_connected', detail: 'No realm_id/tokens found.' },
+        { error: 'not_connected', detail: 'No realmId/tokens found.' },
         { status: 401 }
       );
     }
 
-    const valid = await ensureAccessToken(tokens);
     const qboClient = new QBOClient();
     await qboClient.initialize();
-    qboClient.setTokens(valid);
+    qboClient.setTokens(tokens);
 
     const classes = await qboClient.getClasses();
 
