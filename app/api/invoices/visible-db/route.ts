@@ -105,18 +105,32 @@ export async function GET(req: NextRequest) {
 
     // Paginate
     const paginated = filtered.slice(offset, offset + limit);
-    
+
+    // Fetch categories for each invoice
+    const getCategoriesStmt = db.prepare(`
+      SELECT category_name, class_name, confidence_score, source
+      FROM invoice_categories
+      WHERE invoice_id = ?
+      ORDER BY created_at
+      LIMIT 1
+    `);
+
+    const paginatedWithCategories = paginated.map(invoice => ({
+      ...invoice,
+      invoice_categories: getCategoriesStmt.all(invoice.id) as any[]
+    }));
+
     console.log('[API][INVOICES][DB]', 'visible_response', {
       userEmail: user.email,
       total: invoices.length,
       filtered: filtered.length,
-      returned: paginated.length,
+      returned: paginatedWithCategories.length,
     });
 
     return NextResponse.json({
       ok: true,
       count: filtered.length,
-      invoices: paginated,
+      invoices: paginatedWithCategories,
     });
   } catch (err: any) {
     console.error('[API][INVOICES][DB]', 'visible_error', { 
