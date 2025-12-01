@@ -117,6 +117,14 @@ function runInboxScanOnce(fullScan: boolean = false): Promise<RefreshResult> {
     const startTime = Date.now();
     let stdout = '';
     let stderr = '';
+    let resolved = false;
+
+    const safeResolve = (result: RefreshResult) => {
+      if (!resolved) {
+        resolved = true;
+        resolve(result);
+      }
+    };
 
     // Run the Python script's check_inbox function once
     const pythonBool = fullScan ? 'True' : 'False'; // Python uses True/False, not true/false
@@ -136,7 +144,7 @@ print(json.dumps(email_ingestion_agent_enhanced._last_scan_result))
         PYTHONUNBUFFERED: '1',
         PCS_DATA_DIR: DATA_DIR,
       },
-      timeout: 120000, // 2 minute timeout
+      timeout: 240000, // 4 minute timeout (less than maxDuration)
     });
     
     proc.stdout.on('data', (data) => {
@@ -146,13 +154,35 @@ print(json.dumps(email_ingestion_agent_enhanced._last_scan_result))
     proc.stderr.on('data', (data) => {
       stderr += data.toString();
     });
+
+    // Handle timeout explicitly
+    const timeoutId = setTimeout(() => {
+      if (!proc.killed && !resolved) {
+        console.warn('[INBOX][REFRESH][TIMEOUT]', 'Process exceeded timeout, killing...');
+        proc.kill('SIGTERM');
+        // Give it a moment to clean up, then force kill
+        setTimeout(() => {
+          if (!proc.killed) {
+            proc.kill('SIGKILL');
+          }
+        }, 5000);
+        safeResolve({
+          ok: false,
+          error: 'Inbox scan timed out after 4 minutes',
+          duration_ms: Date.now() - startTime,
+        });
+      }
+    }, 240000); // 4 minutes
     
     proc.on('close', (code) => {
+      clearTimeout(timeoutId);
+      if (resolved) return; // Already resolved due to timeout
+
       const duration_ms = Date.now() - startTime;
 
       if (code !== 0) {
         console.error('[INBOX][REFRESH][ERROR]', { code, stderr, stdout });
-        resolve({
+        safeResolve({
           ok: false,
           error: `Scan failed with code ${code}`,
           details: stderr || stdout,
@@ -167,7 +197,7 @@ print(json.dumps(email_ingestion_agent_enhanced._last_scan_result))
       
       try {
         const result = JSON.parse(lastLine);
-        resolve({
+        safeResolve({
           ok: true,
           added: result.added || 0,
           skipped: result.skipped || 0,
@@ -175,7 +205,7 @@ print(json.dumps(email_ingestion_agent_enhanced._last_scan_result))
         });
       } catch (e) {
         // Couldn't parse result, return generic success
-        resolve({
+        safeResolve({
           ok: true,
           added: 0,
           skipped: 0,
@@ -185,10 +215,11 @@ print(json.dumps(email_ingestion_agent_enhanced._last_scan_result))
     });
     
     proc.on('error', (err) => {
+      clearTimeout(timeoutId);
       // Log full error server-side only
       console.error('[INBOX][REFRESH][ERROR]', err);
       // Return safe error message to client
-      resolve({
+      safeResolve({
         ok: false,
         error: 'Inbox scan failed',
         duration_ms: Date.now() - startTime,
@@ -198,6 +229,7 @@ print(json.dumps(email_ingestion_agent_enhanced._last_scan_result))
 }
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 300; // 5 minutes (Next.js 14+)
 
 export async function POST(req: NextRequest) {
   try {
