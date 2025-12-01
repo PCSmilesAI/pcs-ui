@@ -20,14 +20,18 @@ export function loadVendorCategoriesFromExcel(): VendorCategoryMapping[] {
   if (cachedMappings) return cachedMappings;
 
   const excelPath = path.join(process.cwd(), 'pcs_qbo_transactions.xlsx');
-  if (!fs.existsSync(excelPath)) {
-    console.warn('[QBO][EXCEL_LOADER] Excel file not found:', excelPath);
-    cachedMappings = [];
-    return cachedMappings;
-  }
 
   try {
-    const workbook = XLSX.readFile(excelPath);
+    if (!fs.existsSync(excelPath)) {
+      console.warn('[QBO][EXCEL_LOADER] Excel file not found:', excelPath);
+      cachedMappings = [];
+      return cachedMappings;
+    }
+
+    // Read file as buffer first
+    const fileBuffer = fs.readFileSync(excelPath);
+    const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+
     const sheetName = workbook.SheetNames[0];
     if (!sheetName) {
       console.warn('[QBO][EXCEL_LOADER] No sheets found in Excel file');
