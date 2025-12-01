@@ -147,6 +147,26 @@ export async function POST(req: NextRequest) {
       source: 'parser'
     }));
 
+    // Auto-categorize invoice based on vendor
+    try {
+      const { categorizeInvoice, storeInvoiceCategories } = await import('@/lib/invoices/categoryParser');
+      const categories = await categorizeInvoice(
+        {
+          vendor_name: vendor,
+          line_items: body.line_items || [],
+        },
+        vendor
+      );
+      await storeInvoiceCategories(id, categories);
+      console.log('[API][INGEST] Auto-categorized invoice', {
+        invoiceId: id,
+        categories: categories.map(c => c.categoryName),
+      });
+    } catch (err: any) {
+      console.warn('[API][INGEST] Failed to auto-categorize invoice:', err?.message);
+      // Don't fail the ingest if categorization fails
+    }
+
     console.log('[API][INGEST]', 'invoice_ingested', {
       invoiceNumber: invoice_number,
       vendor: vendor,
