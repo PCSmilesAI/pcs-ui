@@ -258,6 +258,10 @@ export function runMigrations(): void {
   ensureColumn('invoices', 'coding_template_id', 'coding_template_id TEXT');
   ensureColumn('invoices', 'coded_by_user_id', 'coded_by_user_id TEXT');
   ensureColumn('invoices', 'coded_at', 'coded_at TEXT');
+  ensureColumn('invoices', 'template_type', 'template_type TEXT'); // 'even_split' or 'table_template'
+
+  // Add template_type to coding_templates table
+  ensureColumn('coding_templates', 'template_type', 'template_type TEXT DEFAULT "even_split"');
 
   // NEW: Create invoice_categories table for invoice-level categories
   db.exec(`
@@ -266,15 +270,39 @@ export function runMigrations(): void {
       invoice_id TEXT NOT NULL,
       category_id TEXT NOT NULL,
       category_name TEXT NOT NULL,
+      class_name TEXT,
+      confidence_score REAL DEFAULT 0,
+      flagged_for_review INTEGER DEFAULT 0,
+      reason TEXT,
       source TEXT DEFAULT 'manual',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (invoice_id) REFERENCES invoices(id),
       UNIQUE(invoice_id, category_id)
     );
   `);
+  ensureColumn('invoice_categories', 'class_name', 'class_name TEXT');
+  ensureColumn('invoice_categories', 'confidence_score', 'confidence_score REAL DEFAULT 0');
+  ensureColumn('invoice_categories', 'flagged_for_review', 'flagged_for_review INTEGER DEFAULT 0');
+  ensureColumn('invoice_categories', 'reason', 'reason TEXT');
 
   // NEW: Invoice reassignment field - tracks current owner/assignee
   ensureColumn('invoices', 'current_assigned_user_email', 'current_assigned_user_email TEXT');
+
+  // Create table_template_rows table for table template type
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS table_template_rows (
+      id TEXT PRIMARY KEY,
+      invoice_id TEXT NOT NULL,
+      gl_account_path TEXT NOT NULL,
+      category_name TEXT,
+      class_name TEXT,
+      location_name TEXT,
+      amount_cents INTEGER NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (invoice_id) REFERENCES invoices(id)
+    );
+  `);
+
   // Create indexes for new tables
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_coding_templates_vendor_id ON coding_templates(vendor_id);
@@ -284,6 +312,7 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_invoices_is_multi_location ON invoices(is_multi_location);
     CREATE INDEX IF NOT EXISTS idx_invoices_coding_template_id ON invoices(coding_template_id);
     CREATE INDEX IF NOT EXISTS idx_invoice_categories_invoice_id ON invoice_categories(invoice_id);
+    CREATE INDEX IF NOT EXISTS idx_table_template_rows_invoice_id ON table_template_rows(invoice_id);
   `);
 
   // Seed clinics table with all 9 locations
