@@ -83,6 +83,13 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [reassignmentTargets, setReassignmentTargets] = useState([]); // NEW: Reassignment targets
   const [selectedReassignmentTarget, setSelectedReassignmentTarget] = useState(null); // NEW: Selected target
   const [reassigningInvoice, setReassigningInvoice] = useState(false); // NEW: Reassignment loading state
+  const [notes, setNotes] = useState(''); // NEW: Notes field for LLM feedback
+  const [notesHistory, setNotesHistory] = useState([]); // NEW: Notes history
+  const [isChatOpen, setIsChatOpen] = useState(false); // NEW: Chat interface visibility
+  const [chatMessages, setChatMessages] = useState([]); // NEW: Chat messages
+  const [chatInput, setChatInput] = useState(''); // NEW: Chat input
+  const [sendingChat, setSendingChat] = useState(false); // NEW: Chat sending state
+  const [isAdminOrAP, setIsAdminOrAP] = useState(false); // NEW: User authorization check
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -601,13 +608,37 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }
   }
 
-  // Load invoice categories when component mounts
+  // Check if user is admin or AP manager
+  useEffect(() => {
+    const checkAuth = async () => {
+      const email = getUserEmail();
+      if (!email) return;
+      
+      try {
+        const response = await fetch('/api/workflow/config');
+        if (response.ok) {
+          const config = await response.json();
+          const admins = config?.admins || [];
+          const apManagers = config?.ap_managers || [];
+          const normalizedEmail = email.trim().toLowerCase();
+          const isAdmin = admins.map(e => e.trim().toLowerCase()).includes(normalizedEmail);
+          const isAP = apManagers.map(e => e.trim().toLowerCase()).includes(normalizedEmail);
+          setIsAdminOrAP(isAdmin || isAP);
+        }
+      } catch (error) {
+        console.error('Failed to check auth status:', error);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  // Load invoice categories when component mounts (using new endpoint)
   useEffect(() => {
     const loadInvoiceCategories = async () => {
       if (!invoiceIdentifier) return;
 
       try {
-        const response = await fetch(`/api/invoices/${invoiceIdentifier}/invoice-categories`);
+        const response = await fetch(`/api/invoices/${invoiceIdentifier}/categorize`);
         if (response.ok) {
           const data = await response.json();
           setInvoiceCategories(data.categories || []);
@@ -620,6 +651,26 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
     loadInvoiceCategories();
   }, [invoiceIdentifier]);
+
+  // Load notes history
+  useEffect(() => {
+    const loadNotes = async () => {
+      if (!invoiceIdentifier || !isAdminOrAP) return;
+
+      try {
+        const response = await fetch(`/api/invoices/${invoiceIdentifier}/notes`);
+        if (response.ok) {
+          const data = await response.json();
+          setNotes(data.currentNote || '');
+          setNotesHistory(data.history || []);
+        }
+      } catch (error) {
+        console.error('❌ Error loading notes:', error);
+      }
+    };
+
+    loadNotes();
+  }, [invoiceIdentifier, isAdminOrAP]);
 
   // NEW: Load reassignment targets when component mounts
   useEffect(() => {
@@ -942,6 +993,53 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       }
 
       console.log('✅ Invoice updated successfully');
+      
+      // Trigger LLM training if user is admin/AP and fields changed
+      if (isAdminOrAP) {
+        try {
+          const originalValues = {
+            vendor_name: invoice?.vendor_name || invoice?.vendor || '',
+            office_id: invoice?.office_id || invoice?.office || '',
+            amount_cents: invoice?.amount_cents || 0,
+          };
+          
+          const correctedValues = {
+            vendor_name: details.vendor,
+            office_id: details.office,
+            amount_cents: amountCents,
+          };
+
+          // Check if any values changed
+          const changedFields = Object.keys(correctedValues).filter(
+            key => originalValues[key] !== correctedValues[key]
+          );
+
+          if (changedFields.length > 0) {
+            // Send training data to LLM
+            const trainingResponse = await fetch('/api/ai/train-parser', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                invoiceId: invoiceId,
+                originalValues,
+                correctedValues,
+                vendorName: details.vendor,
+                lineItems: items,
+              }),
+            });
+
+            if (trainingResponse.ok) {
+              console.log('✅ Training data sent to LLM');
+            } else {
+              console.warn('⚠️ Failed to send training data to LLM');
+            }
+          }
+        } catch (trainingError) {
+          console.warn('⚠️ Error sending training data:', trainingError);
+          // Don't fail the update if training fails
+        }
+      }
+
       showToast('Invoice updated successfully! Changes are now reflected across the system.', 'success');
 
       // Refresh the page after a short delay to show the toast
@@ -955,6 +1053,44 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       showToast(`Error updating invoice: ${errorMsg}`, 'error');
     } finally {
       setProcessing(false);
+    }
+  }
+
+  // NEW: Handle chat send
+  async function handleChatSend() {
+    if (!chatInput.trim() || sendingChat || !invoiceIdentifier) return;
+
+    const userMessage = chatInput.trim();
+    setChatInput('');
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setSendingChat(true);
+
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invoiceId: invoiceIdentifier,
+          message: userMessage,
+          conversationHistory: chatMessages,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get LLM response');
+      }
+
+      const data = await response.json();
+      setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      setChatMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.',
+      }]);
+      showToast('Failed to get AI response', 'error');
+    } finally {
+      setSendingChat(false);
     }
   }
 
@@ -1693,6 +1829,200 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               </button>
             </div>
           </div>
+
+          {/* NEW: Notes Field (Admin/AP only) */}
+          {isAdminOrAP && (
+            <div style={sectionStyle}>
+              <h2 style={sectionTitleStyle}>Notes</h2>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add notes about this invoice parsing, categorization, or any feedback for the LLM..."
+                rows={4}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  border: '1px solid #cbd5e0',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  boxSizing: 'border-box',
+                  marginBottom: '12px',
+                }}
+              />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  onClick={async () => {
+                    if (!invoiceIdentifier) return;
+                    try {
+                      const response = await fetch(`/api/invoices/${invoiceIdentifier}/notes`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ note: notes }),
+                      });
+                      if (response.ok) {
+                        showToast('Notes saved and sent to LLM', 'success');
+                        // Reload notes history
+                        const data = await response.json();
+                        setNotesHistory(data.history || []);
+                      } else {
+                        showToast('Failed to save notes', 'error');
+                      }
+                    } catch (error) {
+                      console.error('Error saving notes:', error);
+                      showToast('Failed to save notes', 'error');
+                    }
+                  }}
+                  disabled={processing}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: processing ? 'not-allowed' : 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    opacity: processing ? 0.6 : 1,
+                  }}
+                >
+                  Save Notes
+                </button>
+              </div>
+              {notesHistory.length > 0 && (
+                <div style={{ marginTop: '16px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Notes History</h3>
+                  {notesHistory.map((note, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        padding: '8px',
+                        marginBottom: '8px',
+                        backgroundColor: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                      }}
+                    >
+                      <div style={{ color: '#666', marginBottom: '4px' }}>
+                        {note.created_at ? new Date(note.created_at).toLocaleString() : 'Unknown date'}
+                      </div>
+                      <div>{note.note}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* NEW: Chat Interface (Admin/AP only) */}
+          {isAdminOrAP && (
+            <div style={sectionStyle}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h2 style={sectionTitleStyle}>AI Assistant</h2>
+                <button
+                  onClick={() => setIsChatOpen(!isChatOpen)}
+                  style={{
+                    padding: '6px 12px',
+                    backgroundColor: isChatOpen ? '#dc2626' : '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                  }}
+                >
+                  {isChatOpen ? 'Close Chat' : 'Open Chat'}
+                </button>
+              </div>
+              {isChatOpen && (
+                <div
+                  style={{
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '4px',
+                    backgroundColor: '#f8fafc',
+                    height: '400px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <div
+                    style={{
+                      flex: 1,
+                      overflowY: 'auto',
+                      padding: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    {chatMessages.length === 0 ? (
+                      <div style={{ textAlign: 'center', color: '#666', padding: '20px' }}>
+                        Ask questions about invoice parsing, categories, or vendor-specific rules.
+                      </div>
+                    ) : (
+                      chatMessages.map((msg, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                            maxWidth: '80%',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            backgroundColor: msg.role === 'user' ? '#3b82f6' : 'white',
+                            color: msg.role === 'user' ? 'white' : '#333',
+                            fontSize: '14px',
+                            border: msg.role === 'assistant' ? '1px solid #e2e8f0' : 'none',
+                          }}
+                        >
+                          {msg.content}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div style={{ borderTop: '1px solid #e2e8f0', padding: '12px', display: 'flex', gap: '8px' }}>
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && chatInput.trim()) {
+                          e.preventDefault();
+                          handleChatSend();
+                        }
+                      }}
+                      placeholder="Ask a question..."
+                      disabled={sendingChat}
+                      style={{
+                        flex: 1,
+                        padding: '8px',
+                        border: '1px solid #cbd5e0',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                      }}
+                    />
+                    <button
+                      onClick={handleChatSend}
+                      disabled={sendingChat || !chatInput.trim()}
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: sendingChat || !chatInput.trim() ? 'not-allowed' : 'pointer',
+                        fontSize: '14px',
+                        opacity: sendingChat || !chatInput.trim() ? 0.6 : 1,
+                      }}
+                    >
+                      {sendingChat ? 'Sending...' : 'Send'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {/* Right column: PDF viewer */}
         <div style={rightColumnStyle}>

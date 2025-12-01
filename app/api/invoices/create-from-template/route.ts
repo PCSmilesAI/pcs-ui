@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
 
     // Parse FormData to handle both JSON and file uploads
     const formData = await req.formData();
+    const template_type = (formData.get('template_type') as string) || 'even_split';
     const template_id = formData.get('template_id') as string;
     const invoice_number = formData.get('invoice_number') as string;
     const vendor_name = formData.get('vendor_name') as string;
@@ -46,22 +47,58 @@ export async function POST(req: NextRequest) {
     const due_date = formData.get('due_date') as string;
     const description = formData.get('description') as string;
     const pdfFileInput = formData.get('pdf_file') as File | null;
+    const tableRowsJson = formData.get('table_rows') as string | null;
 
     // Validate required fields
-    if (!template_id || !invoice_number || !vendor_name || !amount_cents) {
+    if (!invoice_number || !vendor_name || !amount_cents) {
       return NextResponse.json(
-        { error: 'Missing required fields: template_id, invoice_number, vendor_name, amount_cents' },
+        { error: 'Missing required fields: invoice_number, vendor_name, amount_cents' },
         { status: 400 }
       );
     }
 
-    // Verify template exists
-    const template = db.prepare('SELECT * FROM coding_templates WHERE id = ?').get(template_id) as any;
-    if (!template) {
-      return NextResponse.json(
-        { error: 'Coding template not found' },
-        { status: 404 }
-      );
+    // For even_split, template_id is optional
+    // For table_template, template_id is not used
+    let template: any = null;
+    if (template_type === 'even_split' && template_id) {
+      template = db.prepare('SELECT * FROM coding_templates WHERE id = ?').get(template_id) as any;
+      if (!template) {
+        return NextResponse.json(
+          { error: 'Coding template not found' },
+          { status: 404 }
+        );
+      }
+    }
+
+    // Parse table rows for table_template
+    let tableRows: Array<{
+      glAccountPath: string;
+      categoryName: string;
+      className: string;
+      locationName: string;
+      amount: string;
+    }> = [];
+    if (template_type === 'table_template') {
+      if (!tableRowsJson) {
+        return NextResponse.json(
+          { error: 'Missing table_rows for table_template type' },
+          { status: 400 }
+        );
+      }
+      try {
+        tableRows = JSON.parse(tableRowsJson);
+        if (!Array.isArray(tableRows) || tableRows.length === 0) {
+          return NextResponse.json(
+            { error: 'table_rows must be a non-empty array' },
+            { status: 400 }
+          );
+        }
+      } catch (err) {
+        return NextResponse.json(
+          { error: 'Invalid table_rows JSON' },
+          { status: 400 }
+        );
+      }
     }
 
     // Check if invoice number already exists
@@ -128,8 +165,9 @@ export async function POST(req: NextRequest) {
         updated_at,
         is_multi_location,
         coding_template_id,
+        template_type,
         pdf_path
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       invoiceId,
       invoice_number,
@@ -144,32 +182,128 @@ export async function POST(req: NextRequest) {
       now,
       now,
       1,  // is_multi_location = true
-      template_id,
+      template_id || null,
+      template_type,
       pdfPath
     );
 
-    // Apply the coding template to generate allocations
-    const result = applyCodingTemplate(invoiceId, template_id, user.email);
+    let allocations: any[] = [];
+    let tableRowsCreated: any[] = [];
 
-    if (!result.success) {
-      // Rollback invoice creation
-      db.prepare('DELETE FROM invoices WHERE id = ?').run(invoiceId);
-      return NextResponse.json(
-        { error: result.error || 'Failed to apply coding template' },
-        { status: 400 }
-      );
+    if (template_type === 'even_split') {
+      // Apply the coding template to generate allocations (even split across all offices)
+      if (template_id) {
+        const result = applyCodingTemplate(invoiceId, template_id, user.email);
+        if (!result.success) {
+          // Rollback invoice creation
+          db.prepare('DELETE FROM invoices WHERE id = ?').run(invoiceId);
+          return NextResponse.json(
+            { error: result.error || 'Failed to apply coding template' },
+            { status: 400 }
+          );
+        }
+        allocations = db.prepare('SELECT * FROM invoice_allocations WHERE invoice_id = ?').all(invoiceId) as any[];
+      } else {
+        // Even split without template - create allocations for all 8 offices
+        const { getAllClinics } = await import('@/lib/invoices/coding-template-service');
+        const clinics = getAllClinics() as any[];
+        const numClinics = clinics.length;
+        const baseAmount = Math.floor(amount_cents / numClinics);
+        const remainder = amount_cents % numClinics;
+
+        for (let i = 0; i < clinics.length; i++) {
+          const clinic = clinics[i];
+          const allocationId = uuidv4();
+          const amount = i === clinics.length - 1 ? baseAmount + remainder : baseAmount;
+
+          db.prepare(`
+            INSERT INTO invoice_allocations (
+              id, invoice_id, clinic_id, amount_cents, gl_account_name,
+              created_by_user_id, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          `).run(
+            allocationId, invoiceId, clinic.id, amount,
+            null, // No GL account specified
+            user.email, now
+          );
+
+          allocations.push({
+            id: allocationId,
+            clinic_id: clinic.id,
+            amount_cents: amount,
+            gl_account_name: null,
+          });
+        }
+      }
+    } else if (template_type === 'table_template') {
+      // Create table template rows and allocations
+      for (const row of tableRows) {
+        const rowId = uuidv4();
+        const rowAmountCents = Math.round(parseFloat(row.amount) * 100);
+
+        // Insert table template row
+        db.prepare(`
+          INSERT INTO table_template_rows (
+            id, invoice_id, gl_account_path, category_name, class_name, location_name, amount_cents, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          rowId,
+          invoiceId,
+          row.glAccountPath,
+          row.categoryName || null,
+          row.className || null,
+          row.locationName || null,
+          rowAmountCents,
+          now
+        );
+
+        tableRowsCreated.push({
+          id: rowId,
+          gl_account_path: row.glAccountPath,
+          category_name: row.categoryName,
+          class_name: row.className,
+          location_name: row.locationName,
+          amount_cents: rowAmountCents,
+        });
+
+        // Create allocation for each row (if location specified, find clinic_id)
+        // For now, create a generic allocation entry
+        const allocationId = uuidv4();
+        db.prepare(`
+          INSERT INTO invoice_allocations (
+            id, invoice_id, clinic_id, amount_cents, gl_account_name,
+            created_by_user_id, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          allocationId,
+          invoiceId,
+          null, // clinic_id will be determined later based on location_name
+          rowAmountCents,
+          row.glAccountPath,
+          user.email,
+          now
+        );
+
+        allocations.push({
+          id: allocationId,
+          clinic_id: null,
+          amount_cents: rowAmountCents,
+          gl_account_name: row.glAccountPath,
+        });
+      }
     }
 
-    // Fetch the created invoice with allocations
+    // Fetch the created invoice
     const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as any;
-    const allocations = db.prepare('SELECT * FROM invoice_allocations WHERE invoice_id = ?').all(invoiceId) as any[];
 
     console.log('[API][CREATE_FROM_TEMPLATE]', 'invoice_created', {
       invoiceId,
       invoiceNumber: invoice_number,
-      templateId: template_id,
+      templateType: template_type,
+      templateId: template_id || null,
       userEmail: user.email,
       numAllocations: allocations.length,
+      numTableRows: tableRowsCreated.length,
     });
 
     return NextResponse.json({
@@ -181,6 +315,7 @@ export async function POST(req: NextRequest) {
         amount_cents: invoice.amount_cents,
         status: invoice.status,
         is_multi_location: invoice.is_multi_location,
+        template_type: invoice.template_type,
       },
       allocations: allocations.map((a: any) => ({
         id: a.id,
@@ -188,6 +323,7 @@ export async function POST(req: NextRequest) {
         amount_cents: a.amount_cents,
         gl_account_name: a.gl_account_name,
       })),
+      tableRows: tableRowsCreated,
     });
   } catch (error: any) {
     console.error('[API][CREATE_FROM_TEMPLATE]', 'error', error);

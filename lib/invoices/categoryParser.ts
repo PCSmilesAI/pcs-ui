@@ -29,8 +29,9 @@ export async function categorizeInvoice(
         categoryId: '',
         categoryName: primary.accountFullName,
         className: primary.class || undefined,
-        confidenceScore: 0.95,
+        confidenceScore: primary.confidence,
         flaggedForReview: false,
+        reason: `Matched vendor: ${primary.source}`,
         source: 'vendor_mapping',
       }];
     }
