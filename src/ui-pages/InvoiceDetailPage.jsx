@@ -1721,67 +1721,79 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                   {invoiceCategories.map((cat, index) => (
                     <div key={index} style={{
                       display: 'flex',
-                      gap: '12px',
-                      alignItems: 'center',
+                      flexDirection: 'column',
+                      gap: '8px',
                       marginBottom: '12px',
                       padding: '12px',
                       border: '1px solid #e2e8f0',
                       borderRadius: '4px',
                       backgroundColor: '#f8fafc'
                     }}>
-                      <select
-                        value={cat.id || ''}
-                        onChange={(e) => {
-                          const selectedCat = categories.find(c => c.id === e.target.value);
-                          if (selectedCat) {
-                            updateInvoiceCategory(index, selectedCat.id, selectedCat.name);
-                          }
-                        }}
-                        style={{
-                          flex: 1,
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                          padding: '8px',
-                          fontSize: '14px',
-                          backgroundColor: 'white'
-                        }}
-                      >
-                        <option value="">{cat.name || 'Select category...'}</option>
-                        {categories.map((c) => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                      </select>
+                      {/* Category name and class */}
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
+                            {cat.categoryName || cat.name || 'Uncategorized'}
+                          </div>
+                          {cat.className && (
+                            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                              Class: {cat.className}
+                            </div>
+                          )}
+                          {cat.confidenceScore !== undefined && (
+                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                              Confidence: {(cat.confidenceScore * 100).toFixed(0)}%
+                            </div>
+                          )}
+                        </div>
 
-                      {/* Source badge */}
-                      {cat.source && (
-                        <span style={{
-                          fontSize: '12px',
-                          padding: '4px 8px',
-                          borderRadius: '3px',
-                          backgroundColor: cat.source === 'parser' ? '#e0f2fe' : '#fef3c7',
-                          color: cat.source === 'parser' ? '#0369a1' : '#b45309',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {cat.source === 'parser' ? '🔍 Parser' : '✏️ Manual'}
-                        </span>
-                      )}
+                        {/* Source badge */}
+                        {cat.source && (
+                          <span style={{
+                            fontSize: '11px',
+                            padding: '4px 8px',
+                            borderRadius: '3px',
+                            backgroundColor: cat.source === 'vendor_mapping' ? '#dbeafe' : cat.source === 'keyword_matching' ? '#fef3c7' : '#fee2e2',
+                            color: cat.source === 'vendor_mapping' ? '#0369a1' : cat.source === 'keyword_matching' ? '#b45309' : '#991b1b',
+                            whiteSpace: 'nowrap',
+                            fontWeight: '500'
+                          }}>
+                            {cat.source === 'vendor_mapping' ? '🎯 Vendor' : cat.source === 'keyword_matching' ? '🔍 Keywords' : '✏️ Manual'}
+                          </span>
+                        )}
 
-                      {/* Remove button */}
-                      <button
-                        onClick={() => removeInvoiceCategory(index)}
-                        style={{
-                          padding: '6px 10px',
-                          backgroundColor: '#fee2e2',
-                          color: '#991b1b',
-                          border: '1px solid #fca5a5',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        ✕
-                      </button>
+                        {/* Flagged badge */}
+                        {cat.flaggedForReview && (
+                          <span style={{
+                            fontSize: '11px',
+                            padding: '4px 8px',
+                            borderRadius: '3px',
+                            backgroundColor: '#fef3c7',
+                            color: '#b45309',
+                            whiteSpace: 'nowrap',
+                            fontWeight: '500'
+                          }}>
+                            ⚠️ Review
+                          </span>
+                        )}
+
+                        {/* Remove button */}
+                        <button
+                          onClick={() => removeInvoiceCategory(index)}
+                          style={{
+                            padding: '4px 8px',
+                            backgroundColor: '#fee2e2',
+                            color: '#991b1b',
+                            border: '1px solid #fca5a5',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
