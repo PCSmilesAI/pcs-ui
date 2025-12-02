@@ -34,21 +34,61 @@ const HARDCODED_VENDOR_CLASSES: Record<string, string> = {
 };
 
 /**
+ * Hardcoded vendor-to-account mappings for vendors with 100% consistent account categories
+ * These vendors always use the same account across all transactions
+ */
+const HARDCODED_VENDOR_ACCOUNTS: Record<string, string> = {
+  'american express': '10010 Checking - CTR Services Northwest',
+  'stampli': '53334 Software',
+  'bio-tek medical': '52120 Medical Gases',
+  'avista': '53323 Natural Gas',
+  'syed umer': '10010 Checking - CTR Services Northwest',
+  'dr dennis perala': '10010 Checking - CTR Services Northwest',
+  'julieanne stone': '10010 Checking - CTR Services Northwest',
+  'laura georlett-': '10010 Checking - CTR Services Northwest',
+  "builder's electric, inc": '11040 Leasehold Improvements',
+  'south umpaqua disposal': '53225 Hazardous Disposal',
+  'culligan': '53220 Office Expenses',
+  'dexis': '53334 Software',
+  'cintas': '53361 Contract Services',
+  'crest+oral-b': '10210 Dental Supplies Inventory',
+  'dr reza safari': '51180 Doctor-Contract Labor',
+  'dr reid donakey': '51140 Doctor-Training & Continuing Education',
+  'darko marusnik': '10010 Checking - CTR Services Northwest',
+  'lapriel gilpatrick': '10010 Checking - CTR Services Northwest',
+};
+
+/**
  * Get vendor category candidates with exact and fuzzy matching
  * Returns candidates sorted by confidence score
- * Prioritizes hardcoded vendor classes for vendors with 100% consistent assignments
+ * Prioritizes hardcoded vendor classes/accounts for vendors with 100% consistent assignments
  */
 export function getVendorCategoryCandidates(vendorName: string): VendorCategoryCandidate[] {
   if (!vendorName) return [];
 
   const normalized = vendorName.trim().toLowerCase();
 
-  // Check hardcoded vendor classes first (highest confidence)
-  if (HARDCODED_VENDOR_CLASSES[normalized] !== undefined) {
-    const hardcodedClass = HARDCODED_VENDOR_CLASSES[normalized];
-    const mappings = loadVendorCategoriesFromExcel();
+  // Check if vendor has any hardcoded values (class or account)
+  const hasHardcodedClass = HARDCODED_VENDOR_CLASSES[normalized] !== undefined;
+  const hasHardcodedAccount = HARDCODED_VENDOR_ACCOUNTS[normalized] !== undefined;
 
-    // Find the account mapping for this vendor to get the account full name
+  if (hasHardcodedClass || hasHardcodedAccount) {
+    const hardcodedClass = hasHardcodedClass ? HARDCODED_VENDOR_CLASSES[normalized] : null;
+    const hardcodedAccount = hasHardcodedAccount ? HARDCODED_VENDOR_ACCOUNTS[normalized] : null;
+
+    // If we have a hardcoded account, use it directly
+    if (hardcodedAccount) {
+      return [{
+        vendor: normalized,
+        class: hardcodedClass || null,
+        accountFullName: hardcodedAccount,
+        confidence: 1.0, // 100% confidence for hardcoded values
+        source: 'hardcoded' as const,
+      }];
+    }
+
+    // If only hardcoded class, get account from Excel
+    const mappings = loadVendorCategoriesFromExcel();
     const vendorMappings = mappings.filter(m => m.vendor === normalized);
     if (vendorMappings.length > 0) {
       const mapping = vendorMappings[0];
