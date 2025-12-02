@@ -65,13 +65,18 @@ export async function GET(req: NextRequest) {
     const db = getDatabase();
     const [admin, ap] = await Promise.all([isAdmin(user.email), isAP(user.email)]);
 
-    // Check if current_assigned_user_email column exists
+    // Determine user role for sorting behavior
+    const userRole = admin ? 'admin' : ap ? 'ap' : 'office_manager';
+
+    // Check if columns exist
     let hasReassignmentColumn = false;
+    let hasAssignedToOfficeAt = false;
     try {
       const columns = db.prepare(`PRAGMA table_info(invoices)`).all() as any[];
       hasReassignmentColumn = columns.some(col => col.name === 'current_assigned_user_email');
+      hasAssignedToOfficeAt = columns.some(col => col.name === 'assigned_to_office_at');
     } catch (e) {
-      console.warn('[API][INVOICES]', 'Could not check for reassignment column:', e);
+      console.warn('[API][INVOICES]', 'Could not check for columns:', e);
     }
 
     let query = 'SELECT * FROM invoices WHERE deleted = 0';
@@ -85,7 +90,7 @@ export async function GET(req: NextRequest) {
       const offices = await officesForManager(user.email);
       if (offices.length === 0) {
         console.log('[API][INVOICES]', 'visible_no_offices', { userEmail: user.email });
-        return NextResponse.json({ ok: true, count: 0, invoices: [] });
+        return NextResponse.json({ ok: true, count: 0, invoices: [], userRole });
       }
 
       // Show invoices either:
@@ -129,10 +134,28 @@ export async function GET(req: NextRequest) {
       matchesSearch(invoice, search) && matchesStatus(invoice, status) && matchesVendor(invoice, vendor) && matchesAttachment(invoice, hasAttachment)
     );
 
+    // Sort based on user role:
+    // - Admins/AP: Sort by created_at DESC (newest ingested invoices first)
+    // - Office Managers: Sort by assigned_to_office_at DESC (newest assigned invoices first)
+    const sorted = [...filtered].sort((a, b) => {
+      if (admin || ap) {
+        // Admins and AP see newest ingested invoices first
+        const dateA = new Date(a.created_at || 0).getTime();
+        const dateB = new Date(b.created_at || 0).getTime();
+        return dateB - dateA; // DESC order (newest first)
+      } else {
+        // Office managers see newest assigned invoices first
+        const dateA = new Date(a.assigned_to_office_at || a.created_at || 0).getTime();
+        const dateB = new Date(b.assigned_to_office_at || b.created_at || 0).getTime();
+        return dateB - dateA; // DESC order (newest first)
+      }
+    });
+
     // Paginate
-    const paginated = filtered.slice(offset, offset + limit);
+    const paginated = sorted.slice(offset, offset + limit);
     console.log('[API][INVOICES]', 'visible_response', {
       userEmail: user.email,
+      userRole,
       total: invoices.length,
       filtered: filtered.length,
       returned: paginated.length,
@@ -142,6 +165,7 @@ export async function GET(req: NextRequest) {
       ok: true,
       count: filtered.length,
       invoices: paginated,
+      userRole, // Include role for frontend to know user's context
     });
   } catch (err: any) {
     console.error('[API][INVOICES]', 'visible_error', { userEmail: user.email, error: err?.message, stack: err?.stack });

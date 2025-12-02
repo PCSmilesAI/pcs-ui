@@ -50,28 +50,63 @@ export function getInvoiceById(id: string): InvoiceRecord | undefined {
  */
 export function saveInvoice(invoice: InvoiceRecord): void {
   const db = getDatabase();
-  
-  db.prepare(`
-    UPDATE invoices SET
-      vendor_name = ?,
-      office_id = ?,
-      amount_cents = ?,
-      status = ?,
-      approvals = ?,
-      field_locks = ?,
-      status_version = ?,
-      updated_at = CURRENT_TIMESTAMP
-    WHERE id = ?
-  `).run(
-    invoice.vendor_name,
-    invoice.office_id,
-    invoice.amount_cents,
-    invoice.status,
-    JSON.stringify(invoice.approvals || {}),
-    JSON.stringify(invoice.field_locks || {}),
-    invoice.status_version,
-    invoice.id
-  );
+
+  // Check if assigned_to_office_at column exists
+  let hasAssignedToOfficeAt = false;
+  try {
+    const columns = db.prepare(`PRAGMA table_info(invoices)`).all() as any[];
+    hasAssignedToOfficeAt = columns.some(col => col.name === 'assigned_to_office_at');
+  } catch (e) {
+    // Column doesn't exist yet
+  }
+
+  if (hasAssignedToOfficeAt && invoice.assigned_to_office_at) {
+    db.prepare(`
+      UPDATE invoices SET
+        vendor_name = ?,
+        office_id = ?,
+        amount_cents = ?,
+        status = ?,
+        approvals = ?,
+        field_locks = ?,
+        status_version = ?,
+        assigned_to_office_at = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(
+      invoice.vendor_name,
+      invoice.office_id,
+      invoice.amount_cents,
+      invoice.status,
+      JSON.stringify(invoice.approvals || {}),
+      JSON.stringify(invoice.field_locks || {}),
+      invoice.status_version,
+      invoice.assigned_to_office_at,
+      invoice.id
+    );
+  } else {
+    db.prepare(`
+      UPDATE invoices SET
+        vendor_name = ?,
+        office_id = ?,
+        amount_cents = ?,
+        status = ?,
+        approvals = ?,
+        field_locks = ?,
+        status_version = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(
+      invoice.vendor_name,
+      invoice.office_id,
+      invoice.amount_cents,
+      invoice.status,
+      JSON.stringify(invoice.approvals || {}),
+      JSON.stringify(invoice.field_locks || {}),
+      invoice.status_version,
+      invoice.id
+    );
+  }
 }
 
 /**
