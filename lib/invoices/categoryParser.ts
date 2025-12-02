@@ -13,6 +13,21 @@ export interface InvoiceCategoryAssignment {
   source: 'vendor_mapping' | 'keyword_matching' | 'smart_guess' | 'manual';
 }
 
+/**
+ * Extract the most specific category from a hierarchical account path
+ * Example: "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
+ * Returns: "52210 Dental Lab Fees"
+ */
+function extractMostSpecificCategory(hierarchicalPath: string): string {
+  if (!hierarchicalPath) return '';
+
+  // Split by colon to get the hierarchy levels
+  const parts = hierarchicalPath.split(':');
+
+  // Return the last (most specific) part, trimmed
+  return parts[parts.length - 1].trim();
+}
+
 export async function categorizeInvoice(
   invoiceData: InvoiceData,
   vendorName: string
@@ -25,9 +40,11 @@ export async function categorizeInvoice(
     const candidates = getVendorCategoryCandidates(normalizedVendor);
     if (candidates.length > 0) {
       const primary = candidates[0];
+      // Extract the most specific category from hierarchical path
+      const specificCategory = extractMostSpecificCategory(primary.accountFullName);
       return [{
         categoryId: '',
-        categoryName: primary.accountFullName,
+        categoryName: specificCategory,
         className: primary.class || undefined,
         confidenceScore: primary.confidence,
         flaggedForReview: false,
