@@ -52,7 +52,10 @@ export function loadVendorCategoriesFromExcel(): VendorCategoryMapping[] {
       // Handle different column name variations
       const vendor = (row.Vendor || row.vendor || row['Vendor'] || '').toString().trim();
       const qboClass = (row['Class full name'] || row['Class'] || row.class || row['class_full_name'] || '').toString().trim();
-      const accountFullName = (row['Account full name_1'] || row['Account Full Name'] || row['account_full_name'] || '').toString().trim();
+
+      // Use "Account full name" (hierarchical) as primary, fall back to "Account full name_1"
+      // This ensures we get the most specific category (e.g., "52210 Dental Lab Fees" instead of "20000 Accounts Payable")
+      const accountFullName = (row['Account full name'] || row['Account full name_1'] || row['Account Full Name'] || row['account_full_name'] || '').toString().trim();
 
       if (!vendor || !accountFullName) {
         continue; // Skip incomplete rows
