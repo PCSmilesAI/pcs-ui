@@ -288,6 +288,9 @@ export function runMigrations(): void {
   // NEW: Invoice reassignment field - tracks current owner/assignee
   ensureColumn('invoices', 'current_assigned_user_email', 'current_assigned_user_email TEXT');
 
+  // Track when invoice was assigned to office manager (for sorting "For Me" page)
+  ensureColumn('invoices', 'assigned_to_office_at', 'assigned_to_office_at TEXT');
+
   // Create table_template_rows table for table template type
   db.exec(`
     CREATE TABLE IF NOT EXISTS table_template_rows (
