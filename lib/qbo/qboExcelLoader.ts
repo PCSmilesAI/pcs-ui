@@ -53,9 +53,21 @@ export function loadVendorCategoriesFromExcel(): VendorCategoryMapping[] {
       const vendor = (row.Vendor || row.vendor || row['Vendor'] || '').toString().trim();
       const qboClass = (row['Class full name'] || row['Class'] || row.class || row['class_full_name'] || '').toString().trim();
 
-      // Use "Account full name" (hierarchical) as primary, fall back to "Account full name_1"
-      // This ensures we get the most specific category (e.g., "52210 Dental Lab Fees" instead of "20000 Accounts Payable")
-      const accountFullName = (row['Account full name'] || row['Account full name_1'] || row['Account Full Name'] || row['account_full_name'] || '').toString().trim();
+      // Get both potential account columns
+      const accountCol1 = (row['Account full name'] || '').toString().trim();
+      const accountCol2 = (row['Account full name_1'] || row['Account Full Name'] || row['account_full_name'] || '').toString().trim();
+
+      // Use whichever column contains the hierarchical path (has colons)
+      // This handles inconsistent column usage in the Excel file
+      let accountFullName = '';
+      if (accountCol1.includes(':')) {
+        accountFullName = accountCol1;
+      } else if (accountCol2.includes(':')) {
+        accountFullName = accountCol2;
+      } else {
+        // Fall back to whichever is not empty
+        accountFullName = accountCol1 || accountCol2;
+      }
 
       if (!vendor || !accountFullName) {
         continue; // Skip incomplete rows
