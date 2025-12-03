@@ -234,14 +234,15 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
+  // 7 columns evenly distributed
   const columns = [
-    { key: 'invoice', label: 'Invoice' },
-    { key: 'vendor', label: 'Vendor' },
-    { key: 'amount', label: 'Amount', align: 'right' },
-    { key: 'office', label: 'Office' },
-    { key: 'invoiceDate', label: 'Invoice Date' },
-    { key: 'dueDate', label: 'Due Date' },
-    { key: 'status', label: 'Status' },
+    { key: 'invoice', label: 'Invoice', width: '14%' },
+    { key: 'vendor', label: 'Vendor', width: '14%' },
+    { key: 'amount', label: 'Amount', align: 'right', width: '10%' },
+    { key: 'office', label: 'Office', width: '12%' },
+    { key: 'invoiceDate', label: 'Invoice Date', width: '12%' },
+    { key: 'dueDate', label: 'Due Date', width: '12%' },
+    { key: 'status', label: 'Status', width: '22%' },
   ];
 
   const wrapperStyle = { padding: '24px' };

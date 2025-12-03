@@ -467,14 +467,15 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     );
   }
 
+  // 7 columns at ~14% each = 98%, checkbox gets the remaining ~2%
   const columns = [
-    { key: 'invoice', label: 'Invoice' },
-    { key: 'vendor', label: 'Vendor' },
-    { key: 'amount', label: 'Amount', align: 'right' },
-    { key: 'office', label: 'Office' },
-    { key: 'invoiceDate', label: 'Invoice Date' },
-    { key: 'dueDate', label: 'Due Date' },
-    { key: 'category', label: 'Category' },
+    { key: 'invoice', label: 'Invoice', width: '14%' },
+    { key: 'vendor', label: 'Vendor', width: '14%' },
+    { key: 'amount', label: 'Amount', align: 'right', width: '10%' },
+    { key: 'office', label: 'Office', width: '12%' },
+    { key: 'invoiceDate', label: 'Invoice Date', width: '12%' },
+    { key: 'dueDate', label: 'Due Date', width: '12%' },
+    { key: 'category', label: 'Category', width: '22%' },
   ];
 
   return (
