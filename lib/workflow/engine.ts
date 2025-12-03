@@ -122,16 +122,8 @@ export function approveAP(invoice: any, actor: Actor, roles: RolesConfig): void 
   invoice.coded_at = now;
   invoice.coded_by_user_id = normaliseEmail(actor.email);
 
-  const nextStatus = routeAfterAP(invoice, roles);
-  invoice.status = nextStatus;
-
-  // Track when invoice is assigned to office manager (for "For Me" sorting)
-  if (nextStatus === 'awaiting_office_approval') {
-    invoice.assigned_to_office_at = now;
-    logEngine('approveAP_assigned_to_office', { invoiceId: getInvoiceId(invoice), assignedAt: now });
-  }
-
-  logEngine('approveAP', { invoiceId: getInvoiceId(invoice), userEmail: normaliseEmail(actor.email), nextStatus });
+  invoice.status = routeAfterAP(invoice, roles);
+  logEngine('approveAP', { invoiceId: getInvoiceId(invoice), userEmail: normaliseEmail(actor.email) });
 }
 
 export function approveOffice(invoice: any, actor: Actor, threshold: number): void {
