@@ -151,8 +151,8 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
             </th>
           )}
           {columns.map((col) => {
-            // Determine alignment; default left
-            let textAlign = col.align || 'left';
+            // Center all columns by default
+            let textAlign = col.align || 'center';
             const sortArrow = getSortArrow(col.key);
             return (
               <th
@@ -212,7 +212,8 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
                 </td>
               )}
               {columns.map((col) => {
-                let textAlign = col.align || 'left';
+                // Center all columns by default
+                let textAlign = col.align || 'center';
                 return (
                   <td
                     key={col.key}

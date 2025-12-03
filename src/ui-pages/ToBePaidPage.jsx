@@ -234,11 +234,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // 7 columns evenly distributed
+  // 7 columns evenly distributed, all centered
   const columns = [
     { key: 'invoice', label: 'Invoice', width: '14%' },
     { key: 'vendor', label: 'Vendor', width: '14%' },
-    { key: 'amount', label: 'Amount', align: 'right', width: '10%' },
+    { key: 'amount', label: 'Amount', width: '10%' },
     { key: 'office', label: 'Office', width: '12%' },
     { key: 'invoiceDate', label: 'Invoice Date', width: '12%' },
     { key: 'dueDate', label: 'Due Date', width: '12%' },
