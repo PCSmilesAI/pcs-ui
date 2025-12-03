@@ -36,6 +36,7 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
     borderCollapse: 'collapse',
     borderLeft: '1px solid #357ab2',
     borderTop: '1px solid #357ab2',
+    tableLayout: 'fixed',
   };
   const headerCellBase = {
     padding: '12px 16px',
@@ -163,6 +164,7 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
                   userSelect: 'none',
                   backgroundColor: sortConfig.key === col.key ? '#f0f7fc' : '#ffffff',
                   fontWeight: sortConfig.key === col.key ? 600 : 500,
+                  ...(col.width ? { width: col.width } : {}),
                 }}
                 onClick={() => handleHeaderClick(col.key)}
                 title="Click to sort"

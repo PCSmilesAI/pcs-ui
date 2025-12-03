@@ -190,13 +190,14 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
     await reloadList();
   }
 
+  // 6 columns evenly distributed
   const columns = [
-    { key: 'invoice', label: 'Invoice' },
-    { key: 'vendor', label: 'Vendor' },
-    { key: 'amount', label: 'Amount', align: 'right' },
-    { key: 'office', label: 'Office' },
-    { key: 'category', label: 'Category' },
-    { key: 'status', label: 'Status' },
+    { key: 'invoice', label: 'Invoice', width: '16%' },
+    { key: 'vendor', label: 'Vendor', width: '16%' },
+    { key: 'amount', label: 'Amount', align: 'right', width: '12%' },
+    { key: 'office', label: 'Office', width: '14%' },
+    { key: 'category', label: 'Category', width: '24%' },
+    { key: 'status', label: 'Status', width: '14%' },
   ];
 
   const effectiveQuery = (spQuery || searchQuery || '').trim().toLowerCase();
