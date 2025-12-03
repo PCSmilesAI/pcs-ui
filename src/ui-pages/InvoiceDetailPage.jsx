@@ -1747,35 +1747,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                           )}
                         </div>
 
-                        {/* Source badge */}
-                        {cat.source && (
-                          <span style={{
-                            fontSize: '11px',
-                            padding: '4px 8px',
-                            borderRadius: '3px',
-                            backgroundColor: cat.source === 'vendor_mapping' ? '#dbeafe' : cat.source === 'keyword_matching' ? '#fef3c7' : '#fee2e2',
-                            color: cat.source === 'vendor_mapping' ? '#0369a1' : cat.source === 'keyword_matching' ? '#b45309' : '#991b1b',
-                            whiteSpace: 'nowrap',
-                            fontWeight: '500'
-                          }}>
-                            {cat.source === 'vendor_mapping' ? '🎯 Vendor' : cat.source === 'keyword_matching' ? '🔍 Keywords' : '✏️ Manual'}
-                          </span>
-                        )}
 
-                        {/* Flagged badge */}
-                        {cat.flaggedForReview && (
-                          <span style={{
-                            fontSize: '11px',
-                            padding: '4px 8px',
-                            borderRadius: '3px',
-                            backgroundColor: '#fef3c7',
-                            color: '#b45309',
-                            whiteSpace: 'nowrap',
-                            fontWeight: '500'
-                          }}>
-                            ⚠️ Review
-                          </span>
-                        )}
 
                         {/* Remove button */}
                         <button
