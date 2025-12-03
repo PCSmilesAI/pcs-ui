@@ -190,11 +190,11 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
     await reloadList();
   }
 
-  // 6 columns evenly distributed
+  // 6 columns evenly distributed, all centered
   const columns = [
     { key: 'invoice', label: 'Invoice', width: '16%' },
     { key: 'vendor', label: 'Vendor', width: '16%' },
-    { key: 'amount', label: 'Amount', align: 'right', width: '12%' },
+    { key: 'amount', label: 'Amount', width: '12%' },
     { key: 'office', label: 'Office', width: '14%' },
     { key: 'category', label: 'Category', width: '24%' },
     { key: 'status', label: 'Status', width: '14%' },
