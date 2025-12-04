@@ -5,6 +5,7 @@ import ACHBadge from '../ui/ach/ACHBadge';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 import { csrfClient } from '../lib/api/csrfClient';
+import { CodingTemplateSelector } from '../../components/invoices/CodingTemplateSelector';
 
 // Helper function to get user email from localStorage/cookie
 function getUserEmail() {
@@ -90,6 +91,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [chatInput, setChatInput] = useState(''); // NEW: Chat input
   const [sendingChat, setSendingChat] = useState(false); // NEW: Chat sending state
   const [isAdminOrAP, setIsAdminOrAP] = useState(false); // NEW: User authorization check
+  const [allocations, setAllocations] = useState([]); // NEW: Template allocations
+  const [template, setTemplate] = useState(null); // NEW: Applied template info
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -209,6 +212,30 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       due_date: invoice?.due_date || '',
     });
   }, [invoice]);
+
+  // Load allocations when invoice loads
+  useEffect(() => {
+    async function loadAllocations() {
+      if (!invoiceIdentifier) return;
+      
+      try {
+        const response = await fetch(`/api/invoices/${invoiceIdentifier}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.allocations) {
+            setAllocations(data.allocations);
+          }
+          if (data.template) {
+            setTemplate(data.template);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading allocations:', error);
+      }
+    }
+    
+    loadAllocations();
+  }, [invoiceIdentifier]);
 
   // Load line items from JSON data
   useEffect(() => {
@@ -1813,6 +1840,91 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               </button>
             </div>
           </div>
+
+          {/* Apply Coding Template Section (Admin/AP only) */}
+          {isAdminOrAP && !invoice?.is_multi_location && (
+            <div style={sectionStyle}>
+              <h2 style={sectionTitleStyle}>Apply Coding Template</h2>
+              <CodingTemplateSelector
+                invoiceId={invoiceIdentifier}
+                vendorName={invoice?.vendor || invoice?.vendor_name}
+                isMultiLocation={invoice?.is_multi_location}
+                onApplied={async () => {
+                  // Reload invoice to get allocations
+                  const response = await fetch(`/api/invoices/${invoiceIdentifier}`);
+                  if (response.ok) {
+                    const data = await response.json();
+                    if (data.invoice) {
+                      // Update invoice state
+                      setAllocations(data.allocations || []);
+                      setTemplate(data.template || null);
+                      showToast('Template applied successfully!', 'success');
+                    }
+                  }
+                }}
+              />
+            </div>
+          )}
+
+          {/* Template Allocations Section */}
+          {(invoice?.is_multi_location || allocations.length > 0) && (
+            <div style={sectionStyle}>
+              <h2 style={sectionTitleStyle}>
+                {template ? `Coding Template Applied: ${template.name}` : 'Template Allocations'}
+              </h2>
+              {allocations.length > 0 ? (
+                <div>
+                  <table style={{
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '14px',
+                    backgroundColor: '#ffffff',
+                  }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#f5f5f5' }}>
+                        <th style={{ ...cellHeaderStyle, border: '1px solid #e2e8f0' }}>Category</th>
+                        <th style={{ ...cellHeaderStyle, border: '1px solid #e2e8f0' }}>Description</th>
+                        <th style={{ ...cellHeaderStyle, border: '1px solid #e2e8f0' }}>Amount</th>
+                        <th style={{ ...cellHeaderStyle, border: '1px solid #e2e8f0' }}>Class</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allocations.map((alloc, index) => (
+                        <tr key={alloc.id || index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9fafb' }}>
+                          <td style={{ ...cellStyle, border: '1px solid #e2e8f0' }}>
+                            {alloc.gl_account_name || '—'}
+                          </td>
+                          <td style={{ ...cellStyle, border: '1px solid #e2e8f0' }}>
+                            {alloc.description || '—'}
+                          </td>
+                          <td style={{ ...cellStyle, border: '1px solid #e2e8f0', fontWeight: '500' }}>
+                            ${((alloc.amount_cents || 0) / 100).toFixed(2)}
+                          </td>
+                          <td style={{ ...cellStyle, border: '1px solid #e2e8f0' }}>
+                            {alloc.clinic_name || alloc.class_name || '—'}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr style={{ backgroundColor: '#f5f5f5', fontWeight: '600' }}>
+                        <td colSpan={2} style={{ ...cellStyle, border: '1px solid #e2e8f0', textAlign: 'right' }}>
+                          Total:
+                        </td>
+                        <td style={{ ...cellStyle, border: '1px solid #e2e8f0' }}>
+                          ${(allocations.reduce((sum, alloc) => sum + (alloc.amount_cents || 0), 0) / 100).toFixed(2)}
+                        </td>
+                        <td style={{ ...cellStyle, border: '1px solid #e2e8f0' }}></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                  No allocations found
+                </div>
+              )}
+            </div>
+          )}
 
           {/* NEW: Notes Field (Admin/AP only) */}
           {isAdminOrAP && (

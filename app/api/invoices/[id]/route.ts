@@ -40,9 +40,32 @@ export async function GET(
       parsed.status = 'incoming';
     }
 
+    // Fetch allocations if invoice is multi-location
+    let allocations: any[] = [];
+    if (invoice.is_multi_location || invoice.coding_template_id) {
+      allocations = db.prepare(`
+        SELECT 
+          ia.*,
+          c.name as clinic_name,
+          c.id as clinic_id
+        FROM invoice_allocations ia
+        LEFT JOIN clinics c ON ia.clinic_id = c.id
+        WHERE ia.invoice_id = ?
+        ORDER BY ia.created_at
+      `).all(invoice.id || invoiceId) as any[];
+    }
+
+    // Fetch template info if exists
+    let template: any = null;
+    if (invoice.coding_template_id) {
+      template = db.prepare('SELECT * FROM coding_templates WHERE id = ?').get(invoice.coding_template_id) as any;
+    }
+
     return NextResponse.json({
       ok: true,
-      invoice: parsed
+      invoice: parsed,
+      allocations: allocations,
+      template: template
     });
 
   } catch (error) {
