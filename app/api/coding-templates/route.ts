@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch created template
-    const template = db.prepare('SELECT * FROM coding_templates WHERE id = ?').get(templateId);
+    const template: any = db.prepare('SELECT * FROM coding_templates WHERE id = ?').get(templateId);
 
     console.log('[API][CODING_TEMPLATES]', 'created', {
       templateId: template.id,
