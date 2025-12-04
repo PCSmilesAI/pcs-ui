@@ -37,14 +37,22 @@ export async function GET(req: NextRequest) {
   
   const { QBO_STATE_SECRET, QBO_REDIRECT_URI, QBO_CLIENT_ID, QBO_CLIENT_SECRET } = process.env;
   
-  console.log('[QBO][CALLBACK] incoming', {
-    got_code: !!code, 
-    got_state: !!state, 
-    state_len: state?.length,
-    realmId,
-    redirect_uri: QBO_REDIRECT_URI,
-    environment: process.env.QBO_ENVIRONMENT
-  });
+  // Log the actual callback URL received
+  const actualCallbackUrl = url.toString();
+  const callbackPath = url.pathname + url.search;
+  
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log('[QBO][CALLBACK] Incoming Request Debug Info:');
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log('Full Callback URL:', actualCallbackUrl);
+  console.log('Callback Path + Query:', callbackPath);
+  console.log('Expected Redirect URI:', QBO_REDIRECT_URI);
+  console.log('Got Code:', !!code, code ? `(${code.substring(0, 20)}...)` : 'NO');
+  console.log('Got State:', !!state, state ? `(${state.substring(0, 30)}...)` : 'NO');
+  console.log('State Length:', state?.length);
+  console.log('Realm ID:', realmId);
+  console.log('Environment:', process.env.QBO_ENVIRONMENT);
+  console.log('═══════════════════════════════════════════════════════════');
 
   if (!code || !state) {
     return NextResponse.json({ 
@@ -74,8 +82,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Exchange code for tokens with PKCE - use correct endpoint based on environment
-    const { QBO_ENVIRONMENT = 'production' } = process.env;
+    // Exchange code for tokens - use correct endpoint based on environment
+    const { QBO_ENVIRONMENT = 'sandbox' } = process.env;
     const tokenUrl = QBO_ENVIRONMENT === 'sandbox'
       ? 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
       : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
@@ -85,8 +93,7 @@ export async function GET(req: NextRequest) {
     const tokenData = new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: QBO_REDIRECT_URI,
-      code_verifier: payload.code_verifier
+      redirect_uri: QBO_REDIRECT_URI
     });
 
     console.log('🔄 Exchanging code for tokens...');

@@ -29,12 +29,6 @@ function base64url(b: Buffer) {
   return b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function genPkce() {
-  const code_verifier = base64url(crypto.randomBytes(32));
-  const code_challenge = base64url(crypto.createHash('sha256').update(code_verifier).digest());
-  return { code_verifier, code_challenge };
-}
-
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const debug = url.searchParams.get('debug') === '1' || url.searchParams.get('debug') === 'true';
@@ -43,7 +37,7 @@ export async function GET(request: Request) {
     QBO_REDIRECT_URI,
     QBO_SCOPES = 'com.intuit.quickbooks.accounting',
     QBO_STATE_SECRET,
-    QBO_ENVIRONMENT = 'production'
+    QBO_ENVIRONMENT = 'sandbox'
   } = process.env as Record<string, string | undefined>;
 
   const missing: string[] = [];
@@ -72,20 +66,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
   }
 
-  const { code_verifier, code_challenge } = genPkce();
   const now = Math.floor(Date.now() / 1000);
 
   const payload = {
     iat: now,
     exp: now + 10 * 60, // 10 minutes
     nonce: base64url(crypto.randomBytes(16)),
-    code_verifier,
     redirect_uri: QBO_REDIRECT_URI,
   };
 
   const state = signState(payload, QBO_STATE_SECRET as string);
-
-  console.log('[QBO][AUTH] redirecting to Intuit', { redirect_uri: QBO_REDIRECT_URI, scopes: QBO_SCOPES, has_state_secret: !!QBO_STATE_SECRET, environment: QBO_ENVIRONMENT });
 
   // Use correct OAuth endpoint based on environment
   const oauthEndpoint = QBO_ENVIRONMENT === 'sandbox' 
@@ -99,11 +89,37 @@ export async function GET(request: Request) {
   authUrl.searchParams.set('redirect_uri', QBO_REDIRECT_URI as string);
   authUrl.searchParams.set('state', state);
   authUrl.searchParams.set('access_type', 'offline');
-  authUrl.searchParams.set('code_challenge', code_challenge);
-  authUrl.searchParams.set('code_challenge_method', 'S256');
 
-  console.log('[QBO][AUTH] FULL OAuth URL:', authUrl.toString());
-  console.log('[QBO][AUTH] Client ID being used:', QBO_CLIENT_ID);
+  // Extract and decode redirect_uri for verification
+  const encodedRedirectUri = authUrl.searchParams.get('redirect_uri') || '';
+  const decodedRedirectUri = decodeURIComponent(encodedRedirectUri);
+
+  // Comprehensive logging for debugging
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log('[QBO][AUTH] OAuth Configuration Debug Info:');
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log('Environment:', QBO_ENVIRONMENT);
+  console.log('Client ID:', QBO_CLIENT_ID);
+  console.log('Client ID Length:', QBO_CLIENT_ID?.length);
+  console.log('Redirect URI (raw from env):', QBO_REDIRECT_URI);
+  console.log('Redirect URI (encoded in URL):', encodedRedirectUri);
+  console.log('Redirect URI (decoded):', decodedRedirectUri);
+  console.log('Redirect URI Length:', decodedRedirectUri.length);
+  console.log('Redirect URI Characters:', JSON.stringify(decodedRedirectUri.split('')));
+  console.log('Has trailing slash:', decodedRedirectUri.endsWith('/'));
+  console.log('Protocol:', decodedRedirectUri.startsWith('https://') ? 'HTTPS' : decodedRedirectUri.startsWith('http://') ? 'HTTP' : 'UNKNOWN');
+  console.log('Scopes:', QBO_SCOPES);
+  console.log('OAuth Endpoint:', oauthEndpoint);
+  console.log('Full Auth URL:', authUrl.toString());
+  console.log('═══════════════════════════════════════════════════════════');
+  console.log('');
+  console.log('⚠️  VERIFICATION CHECKLIST:');
+  console.log('1. Copy the "Redirect URI (decoded)" value above');
+  console.log('2. Go to Intuit Developer Portal → Your App → Keys & OAuth → DEVELOPMENT tab');
+  console.log('3. Compare character-by-character with registered redirect URI');
+  console.log('4. Ensure Client ID matches Development Client ID (not Production)');
+  console.log('5. Check for: trailing slashes, http vs https, port numbers, exact path');
+  console.log('═══════════════════════════════════════════════════════════');
 
   return NextResponse.redirect(authUrl.toString(), 302);
 }
