@@ -32,3 +32,4 @@ processed_invoices/
 .aider*
 *.tar.gz
 env
+pcs_ui_data/pcs.db*
