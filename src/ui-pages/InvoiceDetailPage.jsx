@@ -77,6 +77,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [lineCategories, setLineCategories] = useState({});
   const [loadingLineCategories, setLoadingLineCategories] = useState(false);
   const [invoiceCategories, setInvoiceCategories] = useState([]); // NEW: Invoice-level categories
+  const [qboClasses, setQboClasses] = useState([]); // QBO Classes for dropdown
+  const [loadingClasses, setLoadingClasses] = useState(false);
   const [toast, setToast] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [loadingPaymentDetails, setLoadingPaymentDetails] = useState(false);
@@ -96,6 +98,12 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
+  }, []);
+
+  // Load QBO categories and classes on mount
+  useEffect(() => {
+    fetchCategories();
+    fetchQboClasses();
   }, []);
   const dismissToast = useCallback(() => setToast(null), []);
   const STATUS_META = {
@@ -518,6 +526,25 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }
   }
 
+  // Fetch QBO Classes for dropdown
+  async function fetchQboClasses() {
+    setLoadingClasses(true);
+    try {
+      const response = await fetch('/api/qbo/classes');
+      if (response.ok) {
+        const data = await response.json();
+        setQboClasses(data.classes || []);
+        console.log('✅ QBO Classes loaded:', data.classes?.length || 0);
+      } else {
+        console.warn('Failed to load QBO classes:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching QBO classes:', error);
+    } finally {
+      setLoadingClasses(false);
+    }
+  }
+
   // Load line categories for this invoice
   // Auto-categorize line items
   async function autoCategorize() {
@@ -590,17 +617,39 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
   // NEW: Invoice-level category handlers
   function addInvoiceCategory() {
-    setInvoiceCategories(prev => [...prev, { id: '', name: '', source: 'manual' }]);
+    setInvoiceCategories(prev => [...prev, { 
+      categoryId: '', 
+      categoryName: '', 
+      classId: '',
+      className: '',
+      source: 'manual',
+      isEditing: true 
+    }]);
   }
 
   function removeInvoiceCategory(index) {
     setInvoiceCategories(prev => prev.filter((_, i) => i !== index));
   }
 
-  function updateInvoiceCategory(index, categoryId, categoryName) {
+  function updateInvoiceCategory(index, field, value, displayValue) {
     setInvoiceCategories(prev => {
       const updated = [...prev];
-      updated[index] = { id: categoryId, name: categoryName, source: 'manual' };
+      const current = updated[index] || {};
+      if (field === 'category') {
+        updated[index] = { ...current, categoryId: value, categoryName: displayValue, source: 'manual' };
+      } else if (field === 'class') {
+        updated[index] = { ...current, classId: value, className: displayValue, source: 'manual' };
+      }
+      return updated;
+    });
+  }
+
+  function confirmInvoiceCategory(index) {
+    setInvoiceCategories(prev => {
+      const updated = [...prev];
+      if (updated[index]) {
+        updated[index] = { ...updated[index], isEditing: false };
+      }
       return updated;
     });
   }
@@ -1756,25 +1805,92 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                       borderRadius: '4px',
                       backgroundColor: '#f8fafc'
                     }}>
-                      {/* Category name and class */}
+                      {/* Category name and class - show dropdowns if editing */}
                       <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
-                            {cat.categoryName || cat.name || 'Uncategorized'}
-                          </div>
-                          {cat.className && (
-                            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-                              Class: {cat.className}
+                          {cat.isEditing ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {/* Category dropdown */}
+                              <select
+                                value={cat.categoryId || ''}
+                                onChange={(e) => {
+                                  const selected = categories.find(c => c.id === e.target.value);
+                                  updateInvoiceCategory(index, 'category', e.target.value, selected?.fullName || selected?.name || '');
+                                }}
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '4px',
+                                  border: '1px solid #cbd5e0',
+                                  fontSize: '14px',
+                                  backgroundColor: '#ffffff',
+                                  cursor: 'pointer',
+                                  width: '100%'
+                                }}
+                              >
+                                <option value="">-- Select Account --</option>
+                                {categories.map(c => (
+                                  <option key={c.id} value={c.id}>{c.fullName || c.name}</option>
+                                ))}
+                              </select>
+                              {/* Class dropdown */}
+                              <select
+                                value={cat.classId || ''}
+                                onChange={(e) => {
+                                  const selected = qboClasses.find(c => c.id === e.target.value);
+                                  updateInvoiceCategory(index, 'class', e.target.value, selected?.fullName || selected?.name || '');
+                                }}
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '4px',
+                                  border: '1px solid #cbd5e0',
+                                  fontSize: '14px',
+                                  backgroundColor: '#ffffff',
+                                  cursor: 'pointer',
+                                  width: '100%'
+                                }}
+                              >
+                                <option value="">-- Select Class (Location) --</option>
+                                {qboClasses.map(c => (
+                                  <option key={c.id} value={c.id}>{c.fullName || c.name}</option>
+                                ))}
+                              </select>
+                              {/* Confirm button */}
+                              <button
+                                onClick={() => confirmInvoiceCategory(index)}
+                                disabled={!cat.categoryId}
+                                style={{
+                                  padding: '6px 12px',
+                                  backgroundColor: cat.categoryId ? '#10b981' : '#9ca3af',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  cursor: cat.categoryId ? 'pointer' : 'not-allowed',
+                                  fontSize: '12px',
+                                  fontWeight: '500',
+                                  alignSelf: 'flex-start'
+                                }}
+                              >
+                                ✓ Confirm
+                              </button>
                             </div>
-                          )}
-                          {cat.confidenceScore !== undefined && (
-                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                              Confidence: {(cat.confidenceScore * 100).toFixed(0)}%
-                            </div>
+                          ) : (
+                            <>
+                              <div style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
+                                {cat.categoryName || cat.name || 'Uncategorized'}
+                              </div>
+                              {cat.className && (
+                                <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                                  Class: {cat.className}
+                                </div>
+                              )}
+                              {cat.confidenceScore !== undefined && (
+                                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                                  Confidence: {(cat.confidenceScore * 100).toFixed(0)}%
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
-
-
 
                         {/* Remove button */}
                         <button
