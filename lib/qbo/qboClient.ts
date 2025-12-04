@@ -59,6 +59,13 @@ export interface QBOItem {
 export class QBOClient {
   private tokens: QBOTokens | null = null;
 
+  private getBaseUrl(): string {
+    const environment = process.env.QBO_ENVIRONMENT || 'sandbox';
+    return environment === 'sandbox'
+      ? 'https://sandbox-quickbooks.api.intuit.com'
+      : 'https://quickbooks.api.intuit.com';
+  }
+
   async initialize(): Promise<void> {
     if (!this.tokens) {
       this.tokens = await tokenStorage.getLatestTokens();
@@ -154,7 +161,8 @@ export class QBOClient {
   private async makeRequest(endpoint: string, method: string = 'GET', data?: any): Promise<any> {
     await this.ensureValidToken();
 
-    const url = `https://quickbooks.api.intuit.com/v3/company/${this.tokens!.realmId}/${endpoint}`;
+    const baseUrl = this.getBaseUrl();
+    const url = `${baseUrl}/v3/company/${this.tokens!.realmId}/${endpoint}`;
 
     const headers: Record<string, string> = {
       Authorization: `Bearer ${this.tokens!.accessToken}`,
@@ -270,7 +278,8 @@ export class QBOClient {
   async uploadAttachment(billId: string, fileName: string, fileContent: ArrayBuffer | Uint8Array | Buffer, mimeType: string): Promise<any> {
     await this.ensureValidToken();
 
-    const url = `https://quickbooks.api.intuit.com/v3/company/${this.tokens!.realmId}/upload?minorversion=65`;
+    const baseUrl = this.getBaseUrl();
+    const url = `${baseUrl}/v3/company/${this.tokens!.realmId}/upload?minorversion=65`;
 
     const formData = new FormData();
     const metadata = {
