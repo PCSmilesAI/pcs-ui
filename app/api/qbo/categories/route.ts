@@ -58,7 +58,13 @@ async function saveTokens(t: Tokens): Promise<void> {
 /* ----------------------------------------------------------- */
 
 const INTUIT_TOKEN_URL = 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
-const QBO_BASE = 'https://quickbooks.api.intuit.com/v3/company'
+
+function getQboBaseUrl(): string {
+  const environment = process.env.QBO_ENVIRONMENT || 'sandbox';
+  return environment === 'sandbox'
+    ? 'https://sandbox-quickbooks.api.intuit.com/v3/company'
+    : 'https://quickbooks.api.intuit.com/v3/company';
+}
 
 function j(body: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
   return new Response(JSON.stringify(body), {
@@ -113,7 +119,8 @@ async function ensureAccessToken(tokens: Tokens): Promise<Tokens> {
 }
 
 async function qboQuery(tokens: Tokens, sql: string, minor = '65'): Promise<any> {
-  const url = `${QBO_BASE}/${tokens.realm_id}/query?query=${encodeURIComponent(sql)}&minorversion=${minor}`
+  const qboBase = getQboBaseUrl();
+  const url = `${qboBase}/${tokens.realm_id}/query?query=${encodeURIComponent(sql)}&minorversion=${minor}`
   const doFetch = async (accessToken: string) =>
     fetch(url, {
       headers: {
