@@ -10,6 +10,7 @@ export interface CodingTemplate {
   apply_to_locations: 'all_locations';
   gl_account_id?: string;
   gl_account_name?: string;
+  template_type?: string; // 'even_split' or 'table_template'
   created_by_user_id?: string;
   is_active: number;
   created_at: string;
@@ -124,17 +125,8 @@ export function applyCodingTemplate(
       return { success: false, error: 'Coding template not found' };
     }
 
-    // Get all clinics
-    const clinics = getAllClinics() as any[];
-    if (clinics.length === 0) {
-      return { success: false, error: 'No clinics found' };
-    }
-
-    // Calculate allocation amounts
+    const templateType = (template as any).template_type || 'even_split';
     const totalAmountCents = invoice.amount_cents || 0;
-    const numClinics = clinics.length;
-    const baseAmount = Math.floor(totalAmountCents / numClinics);
-    const remainder = totalAmountCents % numClinics;
 
     // Delete existing allocations
     db.prepare('DELETE FROM invoice_allocations WHERE invoice_id = ?').run(invoiceId);
@@ -143,33 +135,152 @@ export function applyCodingTemplate(
     const allocations: InvoiceAllocation[] = [];
     const now = new Date().toISOString();
 
-    for (let i = 0; i < clinics.length; i++) {
-      const clinic = clinics[i];
-      const allocationId = uuidv4();
-      
-      // Add remainder to last allocation to ensure exact total
-      const amount = i === clinics.length - 1 ? baseAmount + remainder : baseAmount;
+    if (templateType === 'table_template') {
+      // Load template rows
+      const templateRows = db.prepare(`
+        SELECT * FROM table_template_rows 
+        WHERE template_id = ?
+        ORDER BY created_at
+      `).all(templateId) as any[];
 
-      db.prepare(`
-        INSERT INTO invoice_allocations (
-          id, invoice_id, clinic_id, amount_cents, gl_account_name,
-          template_id, created_by_user_id, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        allocationId, invoiceId, clinic.id, amount,
-        template.gl_account_name, templateId, actingUserId, now
-      );
+      if (templateRows.length === 0) {
+        return { success: false, error: 'Template has no rows defined' };
+      }
 
-      allocations.push({
-        id: allocationId,
-        invoice_id: invoiceId,
-        clinic_id: clinic.id,
-        amount_cents: amount,
-        gl_account_name: template.gl_account_name,
-        template_id: templateId,
-        created_by_user_id: actingUserId,
-        created_at: now
+      // Get all clinics for mapping
+      const clinics = getAllClinics() as any[];
+      const clinicMap = new Map<string, any>();
+      clinics.forEach(clinic => {
+        // Map by name variations
+        const nameLower = clinic.name.toLowerCase();
+        clinicMap.set(nameLower, clinic);
+        // Also map by location name patterns
+        if (nameLower.includes('columbia')) clinicMap.set('general-columbia', clinic);
+        if (nameLower.includes('ridgefield')) clinicMap.set('general-ridgefield', clinic);
+        if (nameLower.includes('milwaukie')) clinicMap.set('general-milwaukie', clinic);
+        if (nameLower.includes('salem')) clinicMap.set('general-salem', clinic);
+        if (nameLower.includes('lebanon')) clinicMap.set('general-lebanon', clinic);
+        if (nameLower.includes('eugene')) clinicMap.set('general-eugene', clinic);
+        if (nameLower.includes('roseburg')) clinicMap.set('general-roseburg', clinic);
+        if (nameLower.includes('riddle')) clinicMap.set('general-riddle', clinic);
       });
+
+      // Calculate total from template rows (may be relative percentages)
+      const templateTotalCents = templateRows.reduce((sum, row) => sum + (row.amount_cents || 0), 0);
+      const isRelative = templateTotalCents !== totalAmountCents && templateTotalCents > 0;
+
+      let allocatedTotal = 0;
+      for (let i = 0; i < templateRows.length; i++) {
+        const row = templateRows[i];
+        const rowId = uuidv4();
+
+        // Find clinic by class_name or location_name
+        let clinic: any = null;
+        if (row.class_name) {
+          const classLower = row.class_name.toLowerCase();
+          clinic = clinicMap.get(classLower) || 
+                   Array.from(clinicMap.values()).find(c => 
+                     c.name.toLowerCase().includes(classLower.replace('general-', ''))
+                   );
+        }
+        if (!clinic && row.location_name) {
+          const locLower = row.location_name.toLowerCase();
+          clinic = clinicMap.get(locLower) ||
+                   Array.from(clinicMap.values()).find(c => 
+                     c.name.toLowerCase().includes(locLower)
+                   );
+        }
+
+        if (!clinic) {
+          console.warn(`[CODING_TEMPLATE] Could not find clinic for class "${row.class_name}" or location "${row.location_name}"`);
+          // Skip this row if clinic not found
+          continue;
+        }
+
+        // Calculate amount (adjust if relative percentages)
+        let amountCents = row.amount_cents || 0;
+        if (isRelative && templateTotalCents > 0) {
+          // Convert to percentage and apply to invoice total
+          const percentage = amountCents / templateTotalCents;
+          amountCents = Math.round(totalAmountCents * percentage);
+        }
+
+        // Adjust last allocation to ensure exact total
+        if (i === templateRows.length - 1) {
+          const remaining = totalAmountCents - allocatedTotal;
+          if (remaining > 0) {
+            amountCents = remaining;
+          }
+        }
+
+        allocatedTotal += amountCents;
+
+        db.prepare(`
+          INSERT INTO invoice_allocations (
+            id, invoice_id, clinic_id, amount_cents, gl_account_name,
+            template_id, created_by_user_id, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          rowId,
+          invoiceId,
+          clinic.id,
+          amountCents,
+          row.category_name || row.gl_account_path || template.gl_account_name,
+          templateId,
+          actingUserId,
+          now
+        );
+
+        allocations.push({
+          id: rowId,
+          invoice_id: invoiceId,
+          clinic_id: clinic.id,
+          amount_cents: amountCents,
+          gl_account_name: row.category_name || row.gl_account_path || template.gl_account_name,
+          template_id: templateId,
+          created_by_user_id: actingUserId,
+          created_at: now
+        });
+      }
+    } else {
+      // Even split logic (existing)
+      const clinics = getAllClinics() as any[];
+      if (clinics.length === 0) {
+        return { success: false, error: 'No clinics found' };
+      }
+
+      const numClinics = clinics.length;
+      const baseAmount = Math.floor(totalAmountCents / numClinics);
+      const remainder = totalAmountCents % numClinics;
+
+      for (let i = 0; i < clinics.length; i++) {
+        const clinic = clinics[i];
+        const allocationId = uuidv4();
+        
+        // Add remainder to last allocation to ensure exact total
+        const amount = i === clinics.length - 1 ? baseAmount + remainder : baseAmount;
+
+        db.prepare(`
+          INSERT INTO invoice_allocations (
+            id, invoice_id, clinic_id, amount_cents, gl_account_name,
+            template_id, created_by_user_id, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          allocationId, invoiceId, clinic.id, amount,
+          template.gl_account_name, templateId, actingUserId, now
+        );
+
+        allocations.push({
+          id: allocationId,
+          invoice_id: invoiceId,
+          clinic_id: clinic.id,
+          amount_cents: amount,
+          gl_account_name: template.gl_account_name,
+          template_id: templateId,
+          created_by_user_id: actingUserId,
+          created_at: now
+        });
+      }
     }
 
     // Update invoice

@@ -7,6 +7,7 @@ import {
   createCodingTemplate,
   getAllClinics
 } from '../../../lib/invoices/coding-template-service';
+import { getDatabase } from '../../../lib/db/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,7 +88,14 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { name, vendor_name, gl_account_name } = body;
+    const { 
+      name, 
+      vendor_name, 
+      gl_account_name, 
+      template_type = 'even_split',
+      company_code,
+      table_rows 
+    } = body;
 
     // Validate required fields
     if (!name || typeof name !== 'string') {
@@ -104,25 +112,65 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!gl_account_name || typeof gl_account_name !== 'string') {
-      return NextResponse.json(
-        { error: 'gl_account_name is required and must be a string' },
-        { status: 400 }
-      );
-    }
+    const db = getDatabase();
+    const { v4: uuidv4 } = require('uuid');
+    const templateId = uuidv4();
+    const now = new Date().toISOString();
 
-    // Create template
-    const template = createCodingTemplate(
+    // Insert template
+    db.prepare(`
+      INSERT INTO coding_templates (
+        id, name, vendor_name, allocation_type, apply_to_locations,
+        gl_account_name, created_by_user_id, is_active, created_at, updated_at,
+        template_type, company_code
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      templateId,
       name,
       vendor_name,
-      gl_account_name,
-      user.email
+      'equal_split',
+      'all_locations',
+      gl_account_name || null,
+      user.email,
+      1,
+      now,
+      now,
+      template_type,
+      company_code || null
     );
+
+    // If table template, insert rows
+    if (template_type === 'table_template' && Array.isArray(table_rows) && table_rows.length > 0) {
+      for (const row of table_rows) {
+        const rowId = uuidv4();
+        const amountCents = Math.round((parseFloat(row.amount) || 0) * 100);
+        
+        db.prepare(`
+          INSERT INTO table_template_rows (
+            id, template_id, gl_account_path, category_name, class_name,
+            location_name, amount_cents, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          rowId,
+          templateId,
+          row.gl_account_path || '',
+          row.category_name || '',
+          row.class_name || '',
+          row.location_name || '',
+          amountCents,
+          now
+        );
+      }
+    }
+
+    // Fetch created template
+    const template = db.prepare('SELECT * FROM coding_templates WHERE id = ?').get(templateId);
 
     console.log('[API][CODING_TEMPLATES]', 'created', {
       templateId: template.id,
       name,
       vendor_name,
+      template_type,
       createdBy: user.email
     });
 
@@ -133,7 +181,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('[API][CODING_TEMPLATES]', 'POST error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error?.message || 'Internal server error' },
       { status: 500 }
     );
   }

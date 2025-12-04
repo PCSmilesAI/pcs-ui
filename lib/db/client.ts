@@ -292,16 +292,21 @@ export function runMigrations(): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS table_template_rows (
       id TEXT PRIMARY KEY,
-      invoice_id TEXT NOT NULL,
+      invoice_id TEXT,
+      template_id TEXT,
       gl_account_path TEXT NOT NULL,
       category_name TEXT,
       class_name TEXT,
       location_name TEXT,
       amount_cents INTEGER NOT NULL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (invoice_id) REFERENCES invoices(id)
+      FOREIGN KEY (invoice_id) REFERENCES invoices(id),
+      FOREIGN KEY (template_id) REFERENCES coding_templates(id)
     );
   `);
+  
+  // Ensure template_id column exists (for existing databases)
+  ensureColumn('table_template_rows', 'template_id', 'template_id TEXT');
 
   // Create indexes for new tables
   db.exec(`

@@ -53,6 +53,9 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
     borderBottom: '1px solid #357ab2',
     fontSize: '14px',
     color: '#1f1f1f',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    whiteSpace: 'normal',
   };
 
   const getId = (row, index) => {

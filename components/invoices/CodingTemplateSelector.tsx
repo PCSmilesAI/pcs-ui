@@ -95,8 +95,13 @@ export function CodingTemplateSelector({
 
   if (isMultiLocation) {
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
+      <div style={{
+        backgroundColor: '#eff6ff',
+        border: '1px solid #bfdbfe',
+        borderRadius: '6px',
+        padding: '16px',
+      }}>
+        <p style={{ fontSize: '14px', color: '#1e40af' }}>
           ✓ This invoice is already coded as multi-location
         </p>
       </div>
@@ -104,40 +109,72 @@ export function CodingTemplateSelector({
   }
 
   return (
-    <div className="space-y-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-sm text-red-800">{error}</p>
+        <div style={{
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '6px',
+          padding: '16px',
+        }}>
+          <p style={{ fontSize: '14px', color: '#991b1b' }}>{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-sm text-green-800">{success}</p>
+        <div style={{
+          backgroundColor: '#f0fdf4',
+          border: '1px solid #bbf7d0',
+          borderRadius: '6px',
+          padding: '16px',
+        }}>
+          <p style={{ fontSize: '14px', color: '#166534' }}>{success}</p>
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Apply Coding Template</h3>
+      <div style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #e5e7eb',
+        borderRadius: '6px',
+        padding: '16px',
+      }}>
+        <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginBottom: '12px' }}>
+          Apply Coding Template
+        </h3>
         
         {loading ? (
-          <p className="text-sm text-gray-600">Loading templates...</p>
+          <p style={{ fontSize: '14px', color: '#6b7280' }}>Loading templates...</p>
         ) : templates.length === 0 ? (
-          <p className="text-sm text-gray-600">
+          <p style={{ fontSize: '14px', color: '#6b7280' }}>
             {vendorName
               ? `No templates available for vendor "${vendorName}"`
               : 'No coding templates available'}
           </p>
         ) : (
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '8px',
+              }}>
                 Select Template
               </label>
               <select
                 value={selectedTemplateId}
                 onChange={(e) => setSelectedTemplateId(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  backgroundColor: '#ffffff',
+                  cursor: 'pointer',
+                }}
               >
                 <option value="">-- Choose a template --</option>
                 {templates.map((template) => (
@@ -149,15 +186,24 @@ export function CodingTemplateSelector({
             </div>
 
             {selectedTemplateId && (
-              <div className="bg-gray-50 rounded p-3 text-sm">
+              <div style={{
+                backgroundColor: '#f9fafb',
+                borderRadius: '6px',
+                padding: '12px',
+                fontSize: '14px',
+              }}>
                 {(() => {
                   const template = templates.find(t => t.id === selectedTemplateId);
                   return (
                     <>
-                      <p className="font-medium text-gray-900">{template?.name}</p>
-                      <p className="text-gray-600">GL Account: {template?.gl_account_name}</p>
-                      <p className="text-gray-600 mt-2">
-                        This will create 9 equal allocations across all clinic locations.
+                      <p style={{ fontWeight: '500', color: '#111827', marginBottom: '4px' }}>
+                        {template?.name}
+                      </p>
+                      <p style={{ color: '#6b7280', marginBottom: '8px' }}>
+                        GL Account: {template?.gl_account_name}
+                      </p>
+                      <p style={{ color: '#6b7280' }}>
+                        This will create allocations based on the template configuration.
                       </p>
                     </>
                   );
@@ -168,7 +214,18 @@ export function CodingTemplateSelector({
             <button
               onClick={handleApplyTemplate}
               disabled={!selectedTemplateId || applying}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              style={{
+                width: '100%',
+                padding: '10px 16px',
+                backgroundColor: '#2563eb',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: (!selectedTemplateId || applying) ? 'not-allowed' : 'pointer',
+                opacity: (!selectedTemplateId || applying) ? 0.5 : 1,
+              }}
             >
               {applying ? 'Applying...' : 'Apply Template'}
             </button>
@@ -176,8 +233,13 @@ export function CodingTemplateSelector({
         )}
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-xs text-blue-800">
+      <div style={{
+        backgroundColor: '#eff6ff',
+        border: '1px solid #bfdbfe',
+        borderRadius: '6px',
+        padding: '16px',
+      }}>
+        <p style={{ fontSize: '12px', color: '#1e40af' }}>
           <strong>Note:</strong> Applying a coding template will mark this invoice as multi-location and route it directly to McKay for approval, bypassing office manager review.
         </p>
       </div>
