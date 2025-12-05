@@ -1,4 +1,5 @@
 import { qboClient } from './qboClient';
+import { PCS_CLASSES } from './pcsClasses';
 
 interface AccountLookupResult {
   id: string;
@@ -107,8 +108,20 @@ async function ensureClassCache(): Promise<typeof classCache> {
     return classCache;
   }
 
-  await qboClient.initialize();
-  const classes = await qboClient.getClasses();
+  let classes: Array<{ id: string; name: string; fullName: string }> = [];
+  
+  try {
+    await qboClient.initialize();
+    classes = await qboClient.getClasses();
+  } catch (error) {
+    console.warn('[QBO][LOOKUP] Failed to fetch classes from QBO, using hardcoded:', error);
+  }
+
+  // Fallback to hardcoded PCS classes if QBO returns empty
+  if (classes.length === 0) {
+    console.log('[QBO][LOOKUP] Using hardcoded PCS classes');
+    classes = [...PCS_CLASSES];
+  }
 
   const map = new Map<string, ClassLookupResult>();
   for (const item of classes) {
@@ -140,8 +153,20 @@ async function ensureLocationCache(): Promise<typeof locationCache> {
     return locationCache;
   }
 
-  await qboClient.initialize();
-  const locations = await qboClient.getLocations();
+  let locations: Array<{ id: string; name: string; fullName: string }> = [];
+  
+  try {
+    await qboClient.initialize();
+    locations = await qboClient.getLocations();
+  } catch (error) {
+    console.warn('[QBO][LOOKUP] Failed to fetch locations from QBO, using hardcoded:', error);
+  }
+
+  // Fallback to hardcoded PCS classes as locations if QBO returns empty
+  if (locations.length === 0) {
+    console.log('[QBO][LOOKUP] Using hardcoded PCS classes as locations');
+    locations = [...PCS_CLASSES];
+  }
 
   const map = new Map<string, LocationLookupResult>();
   for (const item of locations) {
