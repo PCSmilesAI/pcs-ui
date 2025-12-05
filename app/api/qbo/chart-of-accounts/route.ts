@@ -47,19 +47,21 @@ function parseAccountPath(fullPath: string): { name: string; number?: string; pa
 }
 
 function formatDisplayText(account: AccountDisplay): string {
-  // Format: "Account Name, Account Number, Sub-account of Parent"
-  // Example: "Aligner Lab Fees, 52220, Sub-account of Lab Fees"
-  const parts: string[] = [account.name];
+  // Format: "52220 - Account Name" or "Account Name" if no number
+  // Example: "52220 - Aligner Lab Fees" or "52220 - Aligner Lab Fees (Sub-account of Lab Fees)"
+  let text = '';
   
   if (account.number) {
-    parts.push(account.number);
+    text = `${account.number} - ${account.name}`;
+  } else {
+    text = account.name;
   }
   
   if (account.parentName) {
-    parts.push(`Sub-account of ${account.parentName}`);
+    text += ` (Sub-account of ${account.parentName})`;
   }
   
-  return parts.join(', ');
+  return text;
 }
 
 export async function GET(req: NextRequest) {
@@ -85,14 +87,17 @@ export async function GET(req: NextRequest) {
         // Use getAllAccounts method which returns accounts with fullName
         const qboAccounts = await qboClient.getAllAccounts();
         
-        accounts = qboAccounts.map((acc) => {
+        accounts = qboAccounts.map((acc: any) => {
           const fullPath = acc.fullName || acc.name;
           const parsed = parseAccountPath(fullPath);
+          
+          // Use AcctNum from QBO if available, otherwise try to parse from path
+          const accountNumber = acc.acctNum || parsed.number;
           
           const account: AccountDisplay = {
             id: acc.id,
             name: acc.name,
-            number: parsed.number,
+            number: accountNumber,
             fullPath: fullPath,
             parentName: parsed.parentName,
             displayText: '', // Will be set below
