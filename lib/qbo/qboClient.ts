@@ -410,16 +410,17 @@ export class QBOClient {
     }
   }
 
-  async getAllAccounts(): Promise<Array<{ id: string; name: string; fullName: string; type: string; subType?: string }>> {
+  async getAllAccounts(): Promise<Array<{ id: string; name: string; fullName: string; type: string; subType?: string; acctNum?: string }>> {
     try {
       const response = await this.query(
-        'SELECT Id, Name, AccountType, AccountSubType, FullyQualifiedName FROM Account WHERE Active = true'
+        'SELECT Id, Name, AcctNum, AccountType, AccountSubType, FullyQualifiedName FROM Account WHERE Active = true'
       );
       const accounts = response.QueryResponse?.Account || [];
 
       return accounts.map((account: any) => ({
         id: account.Id,
         name: account.Name,
+        acctNum: account.AcctNum || undefined,
         fullName: account.FullyQualifiedName || account.Name,
         type: account.AccountType,
         subType: account.AccountSubType,
