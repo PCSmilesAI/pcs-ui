@@ -1109,6 +1109,14 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         key => originalValues[key] !== correctedValues[key]
       );
 
+      console.log('🔍 AI Mechanic check:', {
+        originalValues,
+        correctedValues,
+        changedFields,
+        hasComment: !!updateComment.trim(),
+        willSend: changedFields.length > 0 || !!updateComment.trim()
+      });
+
       // Always send to AI Mechanic with the user comment (if provided or fields changed)
       if (changedFields.length > 0 || updateComment.trim()) {
         setImprovingParser(true);
