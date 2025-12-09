@@ -826,9 +826,10 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       // Check if the user is an admin
       const userEmail = getUserEmail();
       const isAdmin = await checkIfAdmin(userEmail);
-      
-      const officeValue = (details?.office || invoice.office || invoice.office_location || invoice.clinic_id || '').trim();
-      
+
+      // Use office_id first (effective value from 3-layer system), then fallback to legacy fields
+      const officeValue = (details?.office || invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '').trim();
+
       // Only require office for non-admin users
       if (!isAdmin && (!officeValue || officeValue.toLowerCase() === 'unknown')) {
         showToast('Office is required before approval.', 'error');
@@ -841,7 +842,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       const response = await csrfClient.post('/api/invoices/transition', {
         id: invoiceId,
         action,
-        ...(action === 'approve' ? { office: details?.office || invoice.office || invoice.office_location || invoice.clinic_id || '' } : {}),
+        // Use office_id first (effective value from 3-layer system)
+        ...(action === 'approve' ? { office: details?.office || invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '' } : {}),
         ...(action === 'reject' ? { reason: 'Rejected from invoice detail' } : {}),
       });
       const payload = response.data || {};
@@ -862,16 +864,21 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           ...prev,
           invoice: updated.invoice_number || updated.invoice || prev.invoice,
           vendor: updated.vendor_name || updated.vendor || prev.vendor,
+          // Use office_id first (effective value from 3-layer system), then fallback to legacy fields
           office:
-            updated.office_location ||
+            updated.office_id ||
             updated.office ||
+            updated.office_location ||
             updated.clinic_id ||
             prev.office,
           category: updated.category || prev.category,
           invoice_date: updated.invoice_date || prev.invoice_date,
           due_date: updated.due_date || prev.due_date,
         }));
-        if (updated.total || updated.invoice_total) {
+        // Use amount_cents first (database field), then fallback to legacy
+        if (updated.amount_cents != null) {
+          setPaymentAmount(`$${(updated.amount_cents / 100).toFixed(2)}`);
+        } else if (updated.total || updated.invoice_total) {
           const amountValue = updated.total ?? updated.invoice_total;
           const parsed =
             typeof amountValue === 'number'
