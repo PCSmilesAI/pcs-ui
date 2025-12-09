@@ -205,9 +205,11 @@ export function toSafeInteger(value: unknown, defaultValue: number = 0): number 
  */
 export function isValidInvoiceId(value: unknown): boolean {
   if (!isString(value)) return false;
-  // Allow UUIDs or numeric invoice numbers (1-20 digits)
+  // Allow UUIDs, numeric invoice numbers, or alphanumeric with hyphens (e.g., 251-008, INV-12345)
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const numericRegex = /^\d{1,20}$/;
-  return uuidRegex.test(value) || numericRegex.test(value);
+  // Allow alphanumeric invoice numbers with hyphens/underscores (max 50 chars)
+  const alphanumericRegex = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,48}[a-zA-Z0-9]$|^[a-zA-Z0-9]$/;
+  return uuidRegex.test(value) || numericRegex.test(value) || alphanumericRegex.test(value);
 }
 
