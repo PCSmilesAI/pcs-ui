@@ -1125,10 +1125,13 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       });
 
       // Always send to AI Mechanic with the user comment (if provided or fields changed)
-      if (changedFields.length > 0 || updateComment.trim()) {
+      const shouldSend = changedFields.length > 0 || updateComment.trim();
+      console.log('🤖 Will send to AI Mechanic?', shouldSend, '- changedFields:', changedFields.length, 'hasComment:', !!updateComment.trim());
+
+      if (shouldSend) {
         setImprovingParser(true);
         try {
-          console.log('🤖 Sending corrections to AI Mechanic...');
+          console.log('🤖 Sending corrections to AI Mechanic... invoiceId:', invoiceId);
           const mechanicResponse = await csrfClient.post(
             `/api/invoices/${encodeURIComponent(invoiceId)}/report-parser-issue`,
             {
