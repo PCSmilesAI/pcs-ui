@@ -72,7 +72,8 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     const vendorName = getDisplayVendorName(invoice.vendor_name || invoice.vendor);
     const rawInvoiceDate = invoice.invoice_date || null;
     const rawDueDate = invoice.due_date || null;
-    const officeRaw = invoice.office_location || invoice.office || invoice.clinic_id || '';
+    // Use office_id first (effective value from 3-layer system)
+    const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
     const formatDate = (dateString) => {
       if (!dateString) return 'N/A';
       const parsed = new Date(dateString);

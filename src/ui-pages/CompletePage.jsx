@@ -66,7 +66,8 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
             invoice_number: invoice.invoice_number,
             vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
             amount: `$${numericTotal.toFixed(2)}`,
-            office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
+            // Use office_id first (effective value from 3-layer system)
+            office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
             dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
@@ -132,7 +133,8 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
           invoice_number: invoice.invoice_number,
           vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
           amount: `$${numericTotal.toFixed(2)}`,
-          office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
+          // Use office_id first (effective value from 3-layer system)
+          office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
           dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
           invoice_date: invoice.invoice_date,
           due_date: invoice.due_date,
