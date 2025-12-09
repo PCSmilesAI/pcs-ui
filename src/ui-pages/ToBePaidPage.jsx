@@ -66,7 +66,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           invoice_number: invoice.invoice_number,
           vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
           amount: `$${numericTotal.toFixed(2)}`,
-          office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
+          // Use office_id first (effective value from 3-layer system)
+          office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
           dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A'),
           invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
           displayStatus: 'Pending Payment',
@@ -173,7 +174,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             invoice_number: invoice.invoice_number, // needed by detail view
             vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
             amount: `$${numericTotal.toFixed(2)}`,
-            office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
+            // Use office_id first (effective value from 3-layer system)
+            office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
             dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',

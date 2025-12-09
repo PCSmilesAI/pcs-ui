@@ -82,7 +82,8 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
             invoice_number: invoice.invoice_number,
             vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
             amount: `$${numericTotal.toFixed(2)}`,
-            office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
+            // Use office_id first (effective value from 3-layer system)
+            office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
             status: formatStatusForDisplay(invoice.status),
             category:
               (Array.isArray(invoice.invoice_categories) && invoice.invoice_categories[0]?.category_name) ||
@@ -151,7 +152,8 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           invoice_number: invoice.invoice_number,
           vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
           amount: `$${numericTotal.toFixed(2)}`,
-          office: invoice.office_location || invoice.office || invoice.clinic_id || 'Unknown',
+          // Use office_id first (effective value from 3-layer system)
+          office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
           status: formatStatusForDisplay(invoice.status),
           category: invoice.category || 'Other',
           invoiceDate: formatDate(invoice.invoice_date || null),
