@@ -79,7 +79,7 @@ export async function POST(
 
   try {
     const body = await req.json();
-    const { corrected_fields } = body;
+    const { corrected_fields, user_comment, original_fields: clientOriginalFields, changed_fields } = body;
 
     if (!corrected_fields || typeof corrected_fields !== 'object') {
       return NextResponse.json(
@@ -110,23 +110,36 @@ export async function POST(
     const parser = inferParserFromVendor(vendor);
     const candidate_files = deriveCandidateFiles(vendor);
 
+    // Build description with user comment if provided
+    let description = `User corrected invoice #${invoiceId} from vendor ${vendor}. Parser ${parser} failed to match corrected fields.`;
+    if (user_comment) {
+      description += `\n\nUser Comment: ${user_comment}`;
+    }
+    if (changed_fields && changed_fields.length > 0) {
+      description += `\n\nChanged Fields: ${changed_fields.join(', ')}`;
+    }
+
     // Build the payload for the mechanic
     const payload = {
-      error_type: 'invoice_field_correction',
-      description: `User corrected invoice #${invoiceId} from vendor ${vendor}. Parser ${parser} failed to match corrected fields.`,
+      error_type: user_comment ? 'user_feedback' : 'invoice_field_correction',
+      description,
       invoice_id: invoiceId,
       vendor,
       parser,
       candidate_files,
       original_fields,
       corrected_fields,
+      user_comment: user_comment || null,
+      changed_fields: changed_fields || [],
+      user_email: user.email,
     };
 
-    console.log('[AI-MECHANIC][REPORT]', 'sending', { 
-      invoiceId, 
-      vendor, 
-      parser, 
-      userEmail: user.email 
+    console.log('[AI-MECHANIC][REPORT]', 'sending', {
+      invoiceId,
+      vendor,
+      parser,
+      userEmail: user.email,
+      hasComment: !!user_comment,
     });
 
     // Send to mechanic

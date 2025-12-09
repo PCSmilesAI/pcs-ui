@@ -46,9 +46,20 @@ def init_audit_db():
             diff_text TEXT,
             commit_hash TEXT,
             revert_commit TEXT,
-            error_message TEXT
+            error_message TEXT,
+            user_comment TEXT,
+            user_email TEXT
         )
     """)
+    # Add user_comment and user_email columns if they don't exist (migration)
+    try:
+        cursor.execute("ALTER TABLE mechanic_runs ADD COLUMN user_comment TEXT")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
+    try:
+        cursor.execute("ALTER TABLE mechanic_runs ADD COLUMN user_email TEXT")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
     conn.commit()
     conn.close()
     app.logger.info(f"Audit database initialized at {AUDIT_DB_PATH}")
@@ -68,6 +79,8 @@ def log_run(
     diff_text: str = None,
     commit_hash: str = None,
     error_message: str = None,
+    user_comment: str = None,
+    user_email: str = None,
 ) -> int:
     """Log a mechanic run to the audit database. Returns the run ID."""
     conn = sqlite3.connect(str(AUDIT_DB_PATH))
@@ -76,8 +89,8 @@ def log_run(
         INSERT INTO mechanic_runs
         (timestamp, error_type, description, invoice_id, vendor, parser,
          candidate_files, original_fields, corrected_fields, status,
-         files_touched, diff_text, commit_hash, error_message)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         files_touched, diff_text, commit_hash, error_message, user_comment, user_email)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         datetime.utcnow().isoformat(),
         error_type,
@@ -93,6 +106,8 @@ def log_run(
         diff_text,
         commit_hash,
         error_message,
+        user_comment,
+        user_email,
     ))
     run_id = cursor.lastrowid
     conn.commit()
@@ -273,9 +288,34 @@ def build_deepseek_prompt(payload, normalized_candidate_files):
     error_type = payload.get("error_type", "")
     example_input = payload.get("example_input", "")
     expected_output = payload.get("expected_output", "")
+    user_comment = payload.get("user_comment", "")
+    original_fields = payload.get("original_fields", {})
+    corrected_fields = payload.get("corrected_fields", {})
 
     # Make the file list explicit for the model
     parser_file_list = "\n".join(f"- {name}" for name in normalized_candidate_files)
+
+    # Build field comparison if available
+    field_comparison = ""
+    if original_fields and corrected_fields:
+        field_comparison = "\n    Field Corrections:\n"
+        for key in corrected_fields:
+            orig = original_fields.get(key, "N/A")
+            corr = corrected_fields.get(key)
+            if orig != corr:
+                field_comparison += f"    - {key}: '{orig}' → '{corr}'\n"
+
+    # Include user comment if provided
+    user_comment_section = ""
+    if user_comment:
+        user_comment_section = f"""
+    USER FEEDBACK
+    -------------
+    The user provided the following comment/request:
+    "{user_comment}"
+
+    Please consider this feedback when making your changes.
+    """
 
     task_block = f"""
     You are operating as the PCS AI Mechanic.
@@ -286,6 +326,8 @@ def build_deepseek_prompt(payload, normalized_candidate_files):
 
     Description:
     {description}
+    {field_comparison}
+    {user_comment_section}
 
     Candidate parser files (you are ONLY allowed to modify these):
     {parser_file_list}
@@ -421,6 +463,10 @@ def auto_fix():
     if not candidate_files:
         return jsonify({"status": "error", "error": "candidate_files is required"}), 400
 
+    # Extract user comment and email for audit logging
+    user_comment = payload.get("user_comment")
+    user_email = payload.get("user_email")
+
     # Log the run to audit database
     run_id = log_run(
         error_type=payload.get("error_type", "unknown"),
@@ -432,8 +478,10 @@ def auto_fix():
         original_fields=payload.get("original_fields"),
         corrected_fields=payload.get("corrected_fields"),
         status="pending",
+        user_comment=user_comment,
+        user_email=user_email,
     )
-    app.logger.info(f"[AUDIT] Started run #{run_id}")
+    app.logger.info(f"[AUDIT] Started run #{run_id} (user: {user_email}, comment: {user_comment[:50] if user_comment else 'none'})")
 
     ok, disallowed, normalized = validate_candidate_files(candidate_files)
     if not ok:
