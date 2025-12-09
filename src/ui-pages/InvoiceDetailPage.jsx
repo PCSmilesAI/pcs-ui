@@ -58,13 +58,16 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   // State for editable fields. Payment amount can be modified by the
   // user. Other details and line items could be lifted into state
   // similarly; here we demonstrate for payment and details.
-  // Amount is stored in cents in the database, convert to dollars
-  const initialAmount = invoice?.amount_cents ? (invoice.amount_cents / 100).toFixed(2) : (invoice?.amount || invoice?.total || '');
+  // Amount is stored in cents in the database, convert to dollars with $ prefix
+  const initialAmountCents = invoice?.amount_cents;
+  const initialAmount = initialAmountCents != null
+    ? `$${(initialAmountCents / 100).toFixed(2)}`
+    : (invoice?.amount || invoice?.total || '');
   const [paymentAmount, setPaymentAmount] = useState(initialAmount);
   const [details, setDetails] = useState({
-    invoice: invoice?.invoice || invoice?.invoice_number || '',
-    vendor: invoice?.vendor || '',
-    office: invoice?.office || '',
+    invoice: invoice?.invoice_number || invoice?.invoice || '',
+    vendor: invoice?.vendor_name || invoice?.vendor || '',
+    office: invoice?.office_id || invoice?.office || '',
     category: invoice?.category || 'Dental Lab',
     invoice_date: invoice?.invoice_date || '',
     due_date: invoice?.due_date || '',
@@ -214,11 +217,17 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   };
 
   useEffect(() => {
-    setPaymentAmount(invoice?.amount || invoice?.total || '');
+    // Use database field names (amount_cents, vendor_name, office_id) with fallback to legacy JSON fields
+    const amountCents = invoice?.amount_cents;
+    const amountDisplay = amountCents != null
+      ? `$${(amountCents / 100).toFixed(2)}`
+      : (invoice?.amount || invoice?.total || '');
+    setPaymentAmount(amountDisplay);
+
     setDetails({
-      invoice: invoice?.invoice || invoice?.invoice_number || '',
-      vendor: invoice?.vendor || '',
-      office: invoice?.office || '',
+      invoice: invoice?.invoice_number || invoice?.invoice || '',
+      vendor: invoice?.vendor_name || invoice?.vendor || '',
+      office: invoice?.office_id || invoice?.office || '',
       category: invoice?.category || 'Dental Lab',
       invoice_date: invoice?.invoice_date || '',
       due_date: invoice?.due_date || '',
