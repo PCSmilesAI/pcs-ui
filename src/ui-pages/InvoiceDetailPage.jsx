@@ -95,6 +95,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [isAdminOrAP, setIsAdminOrAP] = useState(false); // NEW: User authorization check
   const [allocations, setAllocations] = useState([]); // NEW: Template allocations
   const [template, setTemplate] = useState(null); // NEW: Applied template info
+  const [improveParser, setImproveParser] = useState(false); // NEW: AI Mechanic checkbox
+  const [improvingParser, setImprovingParser] = useState(false); // NEW: AI Mechanic loading state
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -1109,6 +1111,33 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
             } else {
               console.warn('⚠️ Failed to send training data to LLM');
             }
+
+            // NEW: If "Improve Parser" checkbox is checked, send to AI Mechanic
+            if (improveParser) {
+              setImprovingParser(true);
+              try {
+                console.log('🤖 Sending corrections to AI Mechanic...');
+                const mechanicResponse = await csrfClient.post(
+                  `/api/invoices/${encodeURIComponent(invoiceId)}/report-parser-issue`,
+                  { corrected_fields: correctedValues }
+                );
+
+                if (mechanicResponse.ok) {
+                  const result = await mechanicResponse.json();
+                  console.log('✅ AI Mechanic response:', result);
+                  showToast('Parser improvement request sent to AI Mechanic!', 'success');
+                } else {
+                  const errorData = await mechanicResponse.json().catch(() => ({}));
+                  console.warn('⚠️ AI Mechanic failed:', errorData);
+                  showToast(`AI Mechanic: ${errorData?.error || 'Failed to process'}`, 'warning');
+                }
+              } catch (mechanicError) {
+                console.warn('⚠️ Error calling AI Mechanic:', mechanicError);
+                showToast('AI Mechanic is not available', 'warning');
+              } finally {
+                setImprovingParser(false);
+              }
+            }
           }
         } catch (trainingError) {
           console.warn('⚠️ Error sending training data:', trainingError);
@@ -1515,17 +1544,52 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           <button
             key={button.label}
             onClick={button.onClick}
-            disabled={processing}
+            disabled={processing || improvingParser}
             style={{
               ...button.style,
-              opacity: processing ? 0.6 : 1,
-              cursor: processing ? 'not-allowed' : 'pointer',
+              opacity: (processing || improvingParser) ? 0.6 : 1,
+              cursor: (processing || improvingParser) ? 'not-allowed' : 'pointer',
             }}
           >
-            {processing ? 'Processing...' : button.label}
+            {processing ? 'Processing...' : (improvingParser ? 'Improving Parser...' : button.label)}
           </button>
         ))}
       </div>
+
+      {/* NEW: Improve Parser checkbox - only show for admins/AP */}
+      {isAdminOrAP && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginBottom: '16px',
+          padding: '10px 12px',
+          backgroundColor: '#f0f9ff',
+          borderRadius: '6px',
+          border: '1px solid #bae6fd',
+        }}>
+          <input
+            type="checkbox"
+            id="improveParser"
+            checked={improveParser}
+            onChange={(e) => setImproveParser(e.target.checked)}
+            style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+          />
+          <label htmlFor="improveParser" style={{
+            fontSize: '14px',
+            color: '#0369a1',
+            cursor: 'pointer',
+            fontWeight: '500',
+          }}>
+            🤖 Improve Parser (send corrections to AI Mechanic)
+          </label>
+          {improveParser && (
+            <span style={{ fontSize: '12px', color: '#64748b', marginLeft: '8px' }}>
+              When you click Update, corrections will be sent to improve the parser
+            </span>
+          )}
+        </div>
+      )}
 
       {/* NEW: Send to: Reassignment UI */}
       {reassignmentTargets.length > 0 && (
