@@ -155,7 +155,8 @@ function InvoiceDetailContent() {
         }
         if (filterParams.office) {
           queue = queue.filter(inv => {
-            const invOffice = inv.office_location || inv.office || inv.clinic_id || '';
+            // Use office_id first (effective value from 3-layer system)
+            const invOffice = inv.office_id || inv.office || inv.office_location || inv.clinic_id || '';
             return invOffice === filterParams.office;
           });
         }
@@ -182,7 +183,8 @@ function InvoiceDetailContent() {
             const searchableText = [
               inv.invoice_number,
               inv.vendor_name || inv.vendor,
-              inv.office_location || inv.office || inv.clinic_id,
+              // Use office_id first (effective value from 3-layer system)
+              inv.office_id || inv.office || inv.office_location || inv.clinic_id,
               inv.category,
               String(inv.invoice_total || inv.total || '')
             ].join(' ').toLowerCase();
@@ -202,8 +204,9 @@ function InvoiceDetailContent() {
           // Set the queue and current index for navigation
           setInvoiceQueue(queue);
           setCurrentIndex(currentIndex);
-          
-          const officeRaw = foundInvoice.office_location || foundInvoice.office || foundInvoice.clinic_id || '';
+
+          // Use office_id first (effective value from 3-layer system), then fallback to legacy fields
+          const officeRaw = foundInvoice.office_id || foundInvoice.office || foundInvoice.office_location || foundInvoice.clinic_id || '';
           // Transform the invoice data to match the expected format
           const rawTotal = foundInvoice.invoice_total || foundInvoice.total || '0.00';
           const transformedInvoice = {
@@ -215,6 +218,15 @@ function InvoiceDetailContent() {
             amount: `$${rawTotal}`,
             office: officeRaw || 'Unknown',
             rawOffice: officeRaw,
+            // Pass through the database 3-layer fields for proper state management
+            office_id: foundInvoice.office_id,
+            parsed_office_id: foundInvoice.parsed_office_id,
+            corrected_office_id: foundInvoice.corrected_office_id,
+            amount_cents: foundInvoice.amount_cents,
+            parsed_amount_cents: foundInvoice.parsed_amount_cents,
+            corrected_amount_cents: foundInvoice.corrected_amount_cents,
+            parsed_vendor_name: foundInvoice.parsed_vendor_name,
+            corrected_vendor_name: foundInvoice.corrected_vendor_name,
             dueDate: foundInvoice.due_date ? new Date(foundInvoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
