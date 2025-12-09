@@ -97,6 +97,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [template, setTemplate] = useState(null); // NEW: Applied template info
   const [improveParser, setImproveParser] = useState(false); // NEW: AI Mechanic checkbox
   const [improvingParser, setImprovingParser] = useState(false); // NEW: AI Mechanic loading state
+  const [showUpdateModal, setShowUpdateModal] = useState(false); // NEW: Update confirmation modal
+  const [updateComment, setUpdateComment] = useState(''); // NEW: User comment for AI mechanic
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -1041,10 +1043,18 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     transitionInvoice('reject');
   }
 
-  async function handleUpdate() {
+  // Open the Update confirmation modal
+  function handleUpdateClick() {
+    setShowUpdateModal(true);
+    setUpdateComment('');
+  }
+
+  // Actually perform the update (called from modal confirmation)
+  async function handleUpdateConfirm() {
     try {
       console.log('🔧 Starting invoice update process...');
       setProcessing(true);
+      setShowUpdateModal(false);
 
       const invoiceId = invoice?.id || invoice?.invoice_number;
       if (!invoiceId) {
@@ -1065,83 +1075,63 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         amount_cents: amountCents
       });
 
+      // csrfClient returns { ok, status, data, error } not a Response object
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData?.error || 'Failed to update invoice');
+        throw new Error(response.error || 'Failed to update invoice');
       }
 
       console.log('✅ Invoice updated successfully');
-      
-      // Trigger LLM training if user is admin/AP and fields changed
-      if (isAdminOrAP) {
-        try {
-          const originalValues = {
-            vendor_name: invoice?.vendor_name || invoice?.vendor || '',
-            office_id: invoice?.office_id || invoice?.office || '',
-            amount_cents: invoice?.amount_cents || 0,
-          };
-          
-          const correctedValues = {
-            vendor_name: details.vendor,
-            office_id: details.office,
-            amount_cents: amountCents,
-          };
 
-          // Check if any values changed
-          const changedFields = Object.keys(correctedValues).filter(
-            key => originalValues[key] !== correctedValues[key]
+      // Build corrected values for AI training
+      const originalValues = {
+        vendor_name: invoice?.vendor_name || invoice?.vendor || '',
+        office_id: invoice?.office_id || invoice?.office || '',
+        amount_cents: invoice?.amount_cents || 0,
+      };
+
+      const correctedValues = {
+        vendor_name: details.vendor,
+        office_id: details.office,
+        amount_cents: amountCents,
+      };
+
+      // Check if any values changed
+      const changedFields = Object.keys(correctedValues).filter(
+        key => originalValues[key] !== correctedValues[key]
+      );
+
+      // Always send to AI Mechanic with the user comment (if provided or fields changed)
+      if (changedFields.length > 0 || updateComment.trim()) {
+        setImprovingParser(true);
+        try {
+          console.log('🤖 Sending corrections to AI Mechanic...');
+          const mechanicResponse = await csrfClient.post(
+            `/api/invoices/${encodeURIComponent(invoiceId)}/report-parser-issue`,
+            {
+              corrected_fields: correctedValues,
+              user_comment: updateComment.trim() || null,
+              original_fields: originalValues,
+              changed_fields: changedFields,
+            }
           );
 
-          if (changedFields.length > 0) {
-            // Send training data to LLM
-            const trainingResponse = await fetch('/api/ai/train-parser', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                invoiceId: invoiceId,
-                originalValues,
-                correctedValues,
-                vendorName: details.vendor,
-                lineItems: items,
-              }),
-            });
-
-            if (trainingResponse.ok) {
-              console.log('✅ Training data sent to LLM');
+          // csrfClient returns { ok, data, error } not a Response
+          if (mechanicResponse.ok) {
+            console.log('✅ AI Mechanic response:', mechanicResponse.data);
+            if (updateComment.trim()) {
+              showToast('Update submitted with your comment to AI Mechanic!', 'success');
             } else {
-              console.warn('⚠️ Failed to send training data to LLM');
+              showToast('Parser improvement request sent to AI Mechanic!', 'success');
             }
-
-            // NEW: If "Improve Parser" checkbox is checked, send to AI Mechanic
-            if (improveParser) {
-              setImprovingParser(true);
-              try {
-                console.log('🤖 Sending corrections to AI Mechanic...');
-                const mechanicResponse = await csrfClient.post(
-                  `/api/invoices/${encodeURIComponent(invoiceId)}/report-parser-issue`,
-                  { corrected_fields: correctedValues }
-                );
-
-                if (mechanicResponse.ok) {
-                  const result = await mechanicResponse.json();
-                  console.log('✅ AI Mechanic response:', result);
-                  showToast('Parser improvement request sent to AI Mechanic!', 'success');
-                } else {
-                  const errorData = await mechanicResponse.json().catch(() => ({}));
-                  console.warn('⚠️ AI Mechanic failed:', errorData);
-                  showToast(`AI Mechanic: ${errorData?.error || 'Failed to process'}`, 'warning');
-                }
-              } catch (mechanicError) {
-                console.warn('⚠️ Error calling AI Mechanic:', mechanicError);
-                showToast('AI Mechanic is not available', 'warning');
-              } finally {
-                setImprovingParser(false);
-              }
-            }
+          } else {
+            console.warn('⚠️ AI Mechanic failed:', mechanicResponse.error);
+            showToast(`AI Mechanic: ${mechanicResponse.error || 'Failed to process'}`, 'warning');
           }
-        } catch (trainingError) {
-          console.warn('⚠️ Error sending training data:', trainingError);
-          // Don't fail the update if training fails
+        } catch (mechanicError) {
+          console.warn('⚠️ Error calling AI Mechanic:', mechanicError);
+          showToast('AI Mechanic is not available', 'warning');
+        } finally {
+          setImprovingParser(false);
         }
       }
 
@@ -1365,7 +1355,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       return [
         { label: 'Pay', onClick: handlePaid, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
         { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
-        { label: 'Update', onClick: handleUpdate, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
+        { label: 'Update', onClick: handleUpdateClick, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
       ];
     }
 
@@ -1373,7 +1363,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     const defaultButtons = [
       { label: 'Approve', onClick: handleApprove, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
       { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
-      { label: 'Update', onClick: handleUpdate, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
+      { label: 'Update', onClick: handleUpdateClick, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
     ];
 
     return defaultButtons;
@@ -1555,41 +1545,6 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           </button>
         ))}
       </div>
-
-      {/* NEW: Improve Parser checkbox - only show for admins/AP */}
-      {isAdminOrAP && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          marginBottom: '16px',
-          padding: '10px 12px',
-          backgroundColor: '#f0f9ff',
-          borderRadius: '6px',
-          border: '1px solid #bae6fd',
-        }}>
-          <input
-            type="checkbox"
-            id="improveParser"
-            checked={improveParser}
-            onChange={(e) => setImproveParser(e.target.checked)}
-            style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-          />
-          <label htmlFor="improveParser" style={{
-            fontSize: '14px',
-            color: '#0369a1',
-            cursor: 'pointer',
-            fontWeight: '500',
-          }}>
-            🤖 Improve Parser (send corrections to AI Mechanic)
-          </label>
-          {improveParser && (
-            <span style={{ fontSize: '12px', color: '#64748b', marginLeft: '8px' }}>
-              When you click Update, corrections will be sent to improve the parser
-            </span>
-          )}
-        </div>
-      )}
 
       {/* NEW: Send to: Reassignment UI */}
       {reassignmentTargets.length > 0 && (
@@ -2378,6 +2333,93 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               ✕
             </button>
             <PaymentReceiptModal payment={selectedPayment} invoice={invoice} />
+          </div>
+        </div>
+      )}
+
+      {/* Update Confirmation Modal with Comment */}
+      {showUpdateModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>
+              🤖 Submit Update to AI Mechanic
+            </h3>
+            <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#6b7280' }}>
+              Your changes will be saved and sent to the AI Mechanic for parser improvement.
+              Add an optional comment to provide context or request specific actions.
+            </p>
+            <textarea
+              value={updateComment}
+              onChange={(e) => setUpdateComment(e.target.value)}
+              placeholder="Optional: Add a comment for the AI Mechanic...&#10;&#10;Examples:&#10;• 'The vendor name was parsed incorrectly'&#10;• 'This invoice is missing a PDF, please find it'&#10;• 'The amount should include tax'"
+              rows={5}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontFamily: 'inherit',
+                boxSizing: 'border-box',
+                marginBottom: '16px',
+                resize: 'vertical',
+              }}
+            />
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowUpdateModal(false);
+                  setUpdateComment('');
+                }}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#374151',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateConfirm}
+                disabled={processing}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#d97706',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: processing ? 'not-allowed' : 'pointer',
+                  opacity: processing ? 0.6 : 1,
+                }}
+              >
+                {processing ? 'Submitting...' : 'Confirm Submission'}
+              </button>
+            </div>
           </div>
         </div>
       )}
