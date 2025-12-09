@@ -89,12 +89,21 @@ export async function POST(
     }
 
     // Fetch the invoice from the database
+    // Try to find by id first, then by invoice_number
     const db = getDatabase();
-    const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as any;
+    let invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as any;
+    if (!invoice) {
+      // Fallback: try to find by invoice_number
+      invoice = db.prepare('SELECT * FROM invoices WHERE invoice_number = ?').get(invoiceId) as any;
+    }
 
     if (!invoice) {
+      console.warn('[AI-MECHANIC][REPORT]', 'invoice_not_found', { invoiceId, userEmail: user.email });
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
+
+    // Use the actual database ID for logging
+    const actualInvoiceId = invoice.id;
 
     // Build original parsed fields from the invoice
     const original_fields = {
@@ -123,7 +132,7 @@ export async function POST(
     const payload = {
       error_type: user_comment ? 'user_feedback' : 'invoice_field_correction',
       description,
-      invoice_id: invoiceId,
+      invoice_id: actualInvoiceId,
       vendor,
       parser,
       candidate_files,
@@ -135,7 +144,8 @@ export async function POST(
     };
 
     console.log('[AI-MECHANIC][REPORT]', 'sending', {
-      invoiceId,
+      invoiceId: actualInvoiceId,
+      requestedId: invoiceId,
       vendor,
       parser,
       userEmail: user.email,

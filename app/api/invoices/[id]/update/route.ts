@@ -41,12 +41,21 @@ export async function POST(
 
   try {
     const db = getDatabase();
-    
+
     // Fetch the original invoice before any changes
-    const originalInvoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as any;
+    // Try to find by id first, then by invoice_number
+    let originalInvoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as any;
     if (!originalInvoice) {
+      // Fallback: try to find by invoice_number
+      originalInvoice = db.prepare('SELECT * FROM invoices WHERE invoice_number = ?').get(invoiceId) as any;
+    }
+    if (!originalInvoice) {
+      console.warn('[API][INVOICES][UPDATE]', 'invoice_not_found', { invoiceId, userEmail: user.email });
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
+
+    // Use the actual database ID for all subsequent operations
+    const actualInvoiceId = originalInvoice.id;
 
     const body = await req.json();
     const { vendor_name, office_id, amount_cents, overrideLocks } = body;
@@ -72,11 +81,11 @@ export async function POST(
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
     }
 
-    // Apply corrections to database
-    await applyCorrections(invoiceId, user.email, patch, overrideLocks === true);
+    // Apply corrections to database (use actual database ID)
+    await applyCorrections(actualInvoiceId, user.email, patch, overrideLocks === true);
 
-    // Fetch updated invoice
-    const updatedInvoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as any;
+    // Fetch updated invoice (use actual database ID)
+    const updatedInvoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(actualInvoiceId) as any;
     if (!updatedInvoice) {
       return NextResponse.json({ error: 'Invoice not found after update' }, { status: 404 });
     }
@@ -108,11 +117,11 @@ export async function POST(
         originalInvoice.pdf_path
       );
     } catch (logError) {
-      console.error('[API][INVOICES][UPDATE]', 'Failed to log repair', { invoiceId, error: (logError as any)?.message });
+      console.error('[API][INVOICES][UPDATE]', 'Failed to log repair', { invoiceId: actualInvoiceId, error: (logError as any)?.message });
       // Don't fail the update if logging fails, just log the error
     }
 
-    console.log('[API][INVOICES][UPDATE]', 'success', { invoiceId, userEmail: user.email });
+    console.log('[API][INVOICES][UPDATE]', 'success', { invoiceId: actualInvoiceId, requestedId: invoiceId, userEmail: user.email });
     return NextResponse.json({ ok: true, invoice: updatedInvoice });
   } catch (err: any) {
     // Log full error server-side only
