@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/db/client';
 import { v4 as uuidv4 } from 'uuid';
+import { categorizeInvoice } from '@/lib/invoices/categoryParser';
 
 interface CategoryInput {
   id?: string;
@@ -94,6 +95,10 @@ export async function GET(
       .all(invoiceId) as any[];
 
     // Transform categories to output format
+    // If categories exist but have no amounts (legacy data), distribute amount evenly
+    const hasAmounts = categories.some(cat => cat.amount_cents && cat.amount_cents > 0);
+    const amountPerCategory = hasAmounts ? 0 : (totalAmount / (categories.length || 1));
+    
     const transformedCategories: CategoryOutput[] = categories.map((cat, idx) => ({
       id: cat.id,
       sequence: cat.sequence || (idx + 1),
@@ -102,23 +107,71 @@ export async function GET(
       classId: cat.class_id || null,
       className: cat.class_name || null,
       description: cat.description || null,
-      amount: cat.amount_cents ? cat.amount_cents / 100 : 0,
+      // Use stored amount if available, otherwise distribute evenly for legacy data
+      amount: cat.amount_cents ? cat.amount_cents / 100 : amountPerCategory,
       source: cat.source || 'manual'
     }));
 
-    // If no categories exist, create a default one with the full invoice amount
+    // If no categories exist, auto-categorize based on vendor mapping
     if (transformedCategories.length === 0 && totalAmount > 0) {
-      transformedCategories.push({
-        id: '',
-        sequence: 1,
-        categoryId: '',
-        categoryName: '',
-        classId: null,
-        className: null,
-        description: '',
-        amount: totalAmount,
-        source: 'default'
-      });
+      const vendorName = invoice.vendor_name || '';
+      
+      try {
+        // Use the auto-categorization logic to get suggested category from vendor mapping
+        const suggestedCategories = await categorizeInvoice(
+          { line_items: [], lineItems: [] }, // Empty line items - vendor mapping takes priority
+          vendorName
+        );
+        
+        if (suggestedCategories && suggestedCategories.length > 0) {
+          const suggested = suggestedCategories[0];
+          console.log('[GL_LINES] Auto-categorized from vendor mapping', {
+            invoiceId,
+            vendor: vendorName,
+            category: suggested.categoryName,
+            class: suggested.className,
+            source: suggested.source
+          });
+          
+          transformedCategories.push({
+            id: '',
+            sequence: 1,
+            categoryId: suggested.categoryId || '',
+            categoryName: suggested.categoryName,
+            classId: null,
+            className: suggested.className || null,
+            description: '',
+            amount: totalAmount,
+            source: suggested.source || 'vendor_mapping'
+          });
+        } else {
+          // Fallback to empty category if no mapping found
+          transformedCategories.push({
+            id: '',
+            sequence: 1,
+            categoryId: '',
+            categoryName: '',
+            classId: null,
+            className: null,
+            description: '',
+            amount: totalAmount,
+            source: 'default'
+          });
+        }
+      } catch (error) {
+        console.warn('[GL_LINES] Auto-categorization failed, using empty default', error);
+        transformedCategories.push({
+          id: '',
+          sequence: 1,
+          categoryId: '',
+          categoryName: '',
+          classId: null,
+          className: null,
+          description: '',
+          amount: totalAmount,
+          source: 'default'
+        });
+      }
     }
 
     // Calculate allocation summary
