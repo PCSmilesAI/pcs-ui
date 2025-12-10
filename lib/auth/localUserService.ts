@@ -159,20 +159,30 @@ export async function ensureUserExists(
 
 /**
  * Seed essential users (called on server startup)
+ * Passwords are read from environment variables for security
  */
 export async function seedEssentialUsers(): Promise<void> {
   console.log('[AUTH] Seeding essential users...');
   
+  // Get seed password from environment variable (set on server only)
+  const seedPassword = process.env.ADMIN_SEED_PASSWORD;
+  
+  if (!seedPassword) {
+    console.log('[AUTH] ADMIN_SEED_PASSWORD not set - skipping user seeding');
+    console.log('[AUTH] To seed admin users, set ADMIN_SEED_PASSWORD in server .env');
+    return;
+  }
+  
   // Essential users that should always exist
   const essentialUsers = [
-    { email: 'mckaym@pcsmiles.com', name: 'McKay', role: 'admin', password: 'PCSadmin2024!' },
-    { email: 'business@pcsmilesai.com', name: 'Braxton', role: 'admin', password: 'PCSadmin2024!' },
+    { email: 'mckaym@pcsmiles.com', name: 'McKay', role: 'admin' },
+    { email: 'business@pcsmilesai.com', name: 'Braxton', role: 'admin' },
   ];
   
   for (const user of essentialUsers) {
     const existing = getUserByEmail(user.email);
     if (!existing) {
-      await createUser(user.email, user.name, user.password, user.role);
+      await createUser(user.email, user.name, seedPassword, user.role);
       console.log(`✅ [AUTH] Seeded user: ${user.email}`);
     } else {
       console.log(`ℹ️ [AUTH] User already exists: ${user.email}`);
