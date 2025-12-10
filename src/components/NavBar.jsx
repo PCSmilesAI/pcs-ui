@@ -5,7 +5,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const ADMIN_EMAILS = new Set([
   'business@pcsmilesai.com',
-  'mckaym@pacificcrestsmiles.com',
+  'mckaym@pcsmiles.com',
 ]);
 
 // Navigation bar implemented with inline styles. This component avoids

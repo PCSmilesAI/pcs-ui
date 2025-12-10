@@ -45,7 +45,7 @@ interface Vendor {
 
 const ADMIN_EMAILS = new Set([
   'business@pcsmilesai.com',
-  'mckaym@pacificcrestsmiles.com',
+  'mckaym@pcsmiles.com',
 ]);
 
 export default function CodingTemplatesPage() {
