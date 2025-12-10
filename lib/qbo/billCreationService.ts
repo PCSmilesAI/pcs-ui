@@ -585,90 +585,72 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
         const invoiceCategories = await import('../invoices/categoryParser').then(m => m.getInvoiceCategories(options.invoiceId!));
         
         if (invoiceCategories && invoiceCategories.length > 0) {
-          // Use invoice-level categories
-          console.log('[QBO][CREATE_BILL] Using invoice-level categories', {
+          // Use invoice-level GL lines with actual amounts (Stampli-style GL line splitting)
+          console.log('[QBO][CREATE_BILL] Using GL line splitting', {
             invoiceId: options.invoiceId,
-            categories: invoiceCategories.map(c => c.categoryName),
+            lineCount: invoiceCategories.length,
+            categories: invoiceCategories.map(c => ({
+              name: c.categoryName,
+              amount: c.amountCents ? c.amountCents / 100 : null,
+              class: c.className || c.classId,
+            })),
           });
 
-          // Resolve category names to QBO account IDs
-          const categoryAccounts: Array<{ id: string; name: string; classId?: string }> = [];
+          // Build QBO Bill lines from GL lines, using actual amounts
+          qboLines = [];
+          categories = [];
+          
           for (const cat of invoiceCategories) {
+            // Resolve account name to QBO account ID
             const resolvedAccount = await resolveAccountByFullName(cat.categoryName);
-            const resolvedClass = cat.className ? await resolveClassByFullName(cat.className) : undefined;
-            if (resolvedAccount) {
-              categoryAccounts.push({
-                id: resolvedAccount.id,
-                name: resolvedAccount.name,
-                classId: resolvedClass?.id,
-              });
-            } else {
-              // Fallback to preferred account if category can't be resolved
-              categoryAccounts.push({ id: preferredAccount.id, name: preferredAccount.name, classId: resolvedClass?.id });
+            // Resolve class from classId or className
+            let resolvedClass = cat.classId ? await resolveClassByFullName(cat.classId) : undefined;
+            if (!resolvedClass && cat.className) {
+              resolvedClass = await resolveClassByFullName(cat.className);
             }
-          }
-
-          // Create lines based on invoice-level categories
-          if (categoryAccounts.length === 1) {
-            // Single category - one line with full amount
-            qboLines = [{
-              Description: invoiceCategories[0].categoryName,
-              Amount: totalAmount,
+            
+            // Use actual amount from GL line, or fallback to proportional split
+            const lineAmount = cat.amountCents 
+              ? cat.amountCents / 100 
+              : totalAmount / invoiceCategories.length;
+            
+            // Use description from GL line, fallback to category name
+            const lineDescription = cat.description || cat.categoryName || '';
+            
+            const accountId = resolvedAccount?.id || preferredAccount.id;
+            const accountName = resolvedAccount?.name || preferredAccount.name;
+            const classId = resolvedClass?.id || overrideClassId;
+            
+            qboLines.push({
+              Description: lineDescription,
+              Amount: lineAmount,
               DetailType: 'AccountBasedExpenseLineDetail',
               AccountBasedExpenseLineDetail: {
                 AccountRef: {
-                  value: categoryAccounts[0].id,
-                  name: categoryAccounts[0].name,
+                  value: accountId,
+                  name: accountName,
                 },
-                ...(categoryAccounts[0].classId
-                  ? { ClassRef: { value: categoryAccounts[0].classId } }
-                  : overrideClassId
-                  ? { ClassRef: { value: overrideClassId } }
-                  : {}),
+                ...(classId ? { ClassRef: { value: classId } } : {}),
               },
-            }];
-            categories = [{
-              description: invoiceCategories[0].categoryName,
-              category: invoiceCategories[0].categoryName,
-              className: invoiceCategories[0].className || null,
-              flaggedForReview: invoiceCategories[0].flaggedForReview,
-            }];
-          } else if (categoryAccounts.length === 2) {
-            // Dual category - split amount equally
-            const amountPerCategory = totalAmount / 2;
-            qboLines = categoryAccounts.map((account, idx) => ({
-              Description: invoiceCategories[idx].categoryName,
-              Amount: amountPerCategory,
-              DetailType: 'AccountBasedExpenseLineDetail',
-              AccountBasedExpenseLineDetail: {
-                AccountRef: {
-                  value: account.id,
-                  name: account.name,
-                },
-                ...(account.classId
-                  ? { ClassRef: { value: account.classId } }
-                  : overrideClassId
-                  ? { ClassRef: { value: overrideClassId } }
-                  : {}),
-              },
-            }));
-            categories = invoiceCategories.map(cat => ({
-              description: cat.categoryName,
+            });
+            
+            categories.push({
+              description: lineDescription,
               category: cat.categoryName,
               className: cat.className || null,
               flaggedForReview: cat.flaggedForReview,
-            }));
-          } else {
-            // Fallback to line-item based if unexpected number of categories
-            const { qboLines: fallbackLines, categories: fallbackCategories } = ensureAccountLines(lineItems, totalAmount, {
-              id: preferredAccount.id,
-              name: preferredAccount.name,
             });
-            qboLines = fallbackLines;
-            categories = fallbackCategories;
           }
 
+          // Apply any account mappings
           qboLines = applyAccountMappings(qboLines, expenseAccounts, preferredAccount, overrideAccount, overrideClassId);
+          
+          console.log('[QBO][CREATE_BILL] GL lines built', {
+            invoiceId: options.invoiceId,
+            lineCount: qboLines.length,
+            totalLineAmount: qboLines.reduce((sum, l) => sum + l.Amount, 0),
+            invoiceTotal: totalAmount,
+          });
         } else {
           // No invoice-level categories - use line-item based approach
           const { qboLines: initialLines, categories: lineCategories } = ensureAccountLines(lineItems, totalAmount, {
