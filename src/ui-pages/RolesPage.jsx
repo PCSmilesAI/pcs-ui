@@ -3,7 +3,7 @@ import Toast from '../components/Toast.jsx';
 
 const ADMIN_EMAILS = new Set([
   'business@pcsmilesai.com',
-  'mckaym@pacificcrestsmiles.com',
+  'mckaym@pcsmiles.com',
 ]);
 
 function parseEmailList(value) {
