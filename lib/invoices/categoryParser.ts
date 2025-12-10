@@ -6,7 +6,11 @@ import { getVendorCategoryCandidates } from '../qbo/vendorCategoryMap';
 export interface InvoiceCategoryAssignment {
   categoryId: string;
   categoryName: string;
+  classId?: string | null;
   className?: string | null;
+  description?: string | null;
+  amountCents?: number | null;
+  sequence?: number;
   confidenceScore: number;
   flaggedForReview?: boolean;
   reason?: string;
@@ -176,17 +180,24 @@ export async function storeInvoiceCategories(
 
   db.prepare('DELETE FROM invoice_categories WHERE invoice_id = ?').run(invoiceId);
 
-  for (const category of categories) {
+  for (let i = 0; i < categories.length; i++) {
+    const category = categories[i];
     const categoryId = category.categoryId || `cat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const sequence = category.sequence ?? (i + 1);
+    
     db.prepare(`
-      INSERT INTO invoice_categories (id, invoice_id, category_id, category_name, class_name, confidence_score, flagged_for_review, reason, source, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO invoice_categories (id, invoice_id, category_id, category_name, class_id, class_name, description, amount_cents, sequence, confidence_score, flagged_for_review, reason, source, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       `${invoiceId}_${categoryId}`,
       invoiceId,
       categoryId,
       category.categoryName,
+      category.classId || null,
       category.className || null,
+      category.description || null,
+      category.amountCents || null,
+      sequence,
       category.confidenceScore ?? 0,
       category.flaggedForReview ? 1 : 0,
       category.reason || null,
@@ -199,14 +210,18 @@ export async function storeInvoiceCategories(
 export function getInvoiceCategories(invoiceId: string): InvoiceCategoryAssignment[] {
   const db = getDatabase();
   const rows = db.prepare(`
-    SELECT category_id, category_name, class_name, confidence_score, flagged_for_review, reason, source
+    SELECT category_id, category_name, class_id, class_name, description, amount_cents, sequence, confidence_score, flagged_for_review, reason, source
     FROM invoice_categories
     WHERE invoice_id = ?
-    ORDER BY created_at
+    ORDER BY sequence ASC, created_at ASC
   `).all(invoiceId) as Array<{
     category_id: string;
     category_name: string;
+    class_id: string | null;
     class_name: string | null;
+    description: string | null;
+    amount_cents: number | null;
+    sequence: number | null;
     confidence_score: number | null;
     flagged_for_review: number | null;
     reason: string | null;
@@ -216,7 +231,11 @@ export function getInvoiceCategories(invoiceId: string): InvoiceCategoryAssignme
   return rows.map(row => ({
     categoryId: row.category_id,
     categoryName: row.category_name,
+    classId: row.class_id || undefined,
     className: row.class_name || undefined,
+    description: row.description || undefined,
+    amountCents: row.amount_cents || undefined,
+    sequence: row.sequence || 1,
     confidenceScore: row.confidence_score ?? 0.8,
     flaggedForReview: !!row.flagged_for_review,
     reason: row.reason || undefined,

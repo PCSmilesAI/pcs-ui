@@ -80,6 +80,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [lineCategories, setLineCategories] = useState({});
   const [loadingLineCategories, setLoadingLineCategories] = useState(false);
   const [invoiceCategories, setInvoiceCategories] = useState([]); // NEW: Invoice-level categories
+  const [invoiceTotalAmount, setInvoiceTotalAmount] = useState(0); // Invoice total for allocation tracking
+  const [allocationSummary, setAllocationSummary] = useState({ totalAmount: 0, allocated: 0, unallocated: 0 });
   const [qboClasses, setQboClasses] = useState([]); // QBO Classes for dropdown
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [toast, setToast] = useState(null);
@@ -628,13 +630,33 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }));
   }
 
-  // NEW: Invoice-level category handlers
+  // NEW: Invoice-level category handlers with GL line splitting
+  
+  // Calculate allocation summary whenever categories change
+  useEffect(() => {
+    const allocated = invoiceCategories.reduce((sum, cat) => sum + (parseFloat(cat.amount) || 0), 0);
+    const roundedAllocated = Math.round(allocated * 100) / 100;
+    const unallocated = Math.round((invoiceTotalAmount - roundedAllocated) * 100) / 100;
+    setAllocationSummary({
+      totalAmount: invoiceTotalAmount,
+      allocated: roundedAllocated,
+      unallocated: unallocated
+    });
+  }, [invoiceCategories, invoiceTotalAmount]);
+
   function addInvoiceCategory() {
+    // Default new category amount to the unallocated amount
+    const currentAllocated = invoiceCategories.reduce((sum, cat) => sum + (parseFloat(cat.amount) || 0), 0);
+    const unallocatedAmount = Math.max(0, Math.round((invoiceTotalAmount - currentAllocated) * 100) / 100);
+    
     setInvoiceCategories(prev => [...prev, { 
       categoryId: '', 
       categoryName: '', 
       classId: '',
       className: '',
+      description: '',
+      amount: unallocatedAmount,
+      sequence: prev.length + 1,
       source: 'manual',
       isEditing: true 
     }]);
@@ -652,6 +674,12 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         updated[index] = { ...current, categoryId: value, categoryName: displayValue, source: 'manual' };
       } else if (field === 'class') {
         updated[index] = { ...current, classId: value, className: displayValue, source: 'manual' };
+      } else if (field === 'description') {
+        updated[index] = { ...current, description: value };
+      } else if (field === 'amount') {
+        // Parse amount, allow empty string for clearing
+        const numValue = value === '' ? 0 : parseFloat(value) || 0;
+        updated[index] = { ...current, amount: numValue };
       }
       return updated;
     });
@@ -670,6 +698,25 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   async function saveInvoiceCategories() {
     if (!invoiceIdentifier) return;
 
+    // Client-side validation: check if unallocated is zero
+    const tolerance = 0.01;
+    if (Math.abs(allocationSummary.unallocated) > tolerance) {
+      showToast(`Cannot save: Unallocated amount must be $0.00 (currently $${allocationSummary.unallocated.toFixed(2)})`, 'error');
+      return;
+    }
+
+    // Validate all categories have required fields
+    for (const cat of invoiceCategories) {
+      if (!cat.categoryId && !cat.categoryName) {
+        showToast('All GL lines must have an account selected', 'error');
+        return;
+      }
+      if (!cat.amount || cat.amount <= 0) {
+        showToast('All GL lines must have a positive amount', 'error');
+        return;
+      }
+    }
+
     setProcessing(true);
     try {
       const response = await fetch(`/api/invoices/${invoiceIdentifier}/invoice-categories`, {
@@ -680,18 +727,28 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         body: JSON.stringify({ categories: invoiceCategories })
       });
 
+      const responseData = await response.json();
+
       if (response.ok) {
-        showToast('Categories saved successfully', 'success');
-        console.log('✅ Invoice categories saved');
+        showToast('GL lines saved successfully', 'success');
+        console.log('✅ Invoice GL lines saved');
+        // Update local state with server response
+        if (responseData.categories) {
+          setInvoiceCategories(responseData.categories);
+        }
+        if (responseData.summary) {
+          setAllocationSummary(responseData.summary);
+        }
+        // Exit edit mode for all categories
+        setInvoiceCategories(prev => prev.map(cat => ({ ...cat, isEditing: false })));
       } else {
-        const errorData = await response.json();
-        const errorMsg = errorData.detail || errorData.error || 'Failed to save categories';
+        const errorMsg = responseData.message || responseData.error || 'Failed to save GL lines';
         showToast(errorMsg, 'error');
-        console.error('❌ Failed to save invoice categories:', errorMsg);
+        console.error('❌ Failed to save invoice GL lines:', errorMsg);
       }
     } catch (error) {
-      console.error('❌ Error saving invoice categories:', error);
-      showToast(`Failed to save categories: ${error.message}`, 'error');
+      console.error('❌ Error saving invoice GL lines:', error);
+      showToast(`Failed to save GL lines: ${error.message}`, 'error');
     } finally {
       setProcessing(false);
     }
@@ -721,20 +778,36 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     checkAuth();
   }, []);
 
-  // Load invoice categories when component mounts (using new endpoint)
+  // Load invoice categories when component mounts (using GL line splitting endpoint)
   useEffect(() => {
     const loadInvoiceCategories = async () => {
       if (!invoiceIdentifier) return;
 
       try {
-        const response = await fetch(`/api/invoices/${invoiceIdentifier}/categorize`);
+        // Use the enhanced endpoint that returns amounts and allocation summary
+        const response = await fetch(`/api/invoices/${invoiceIdentifier}/invoice-categories`);
         if (response.ok) {
           const data = await response.json();
-          setInvoiceCategories(data.categories || []);
-          console.log('✅ Invoice categories loaded:', data.categories?.length || 0);
+          
+          // Set invoice total for allocation tracking
+          if (data.invoice?.totalAmount !== undefined) {
+            setInvoiceTotalAmount(data.invoice.totalAmount);
+          }
+          
+          // Set categories with amounts
+          if (data.categories) {
+            setInvoiceCategories(data.categories);
+          }
+          
+          // Set allocation summary
+          if (data.summary) {
+            setAllocationSummary(data.summary);
+          }
+          
+          console.log('✅ Invoice GL lines loaded:', data.categories?.length || 0, 'Total:', data.invoice?.totalAmount);
         }
       } catch (error) {
-        console.error('❌ Error loading invoice categories:', error);
+        console.error('❌ Error loading invoice GL lines:', error);
       }
     };
 
@@ -1832,11 +1905,57 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               </tbody>
             </table>
           </div>
-          {/* NEW: Categories section (replaces Line Items) */}
+          {/* GL Line Splitting Section */}
           <div style={sectionStyle}>
-            <h2 style={sectionTitleStyle}>Categories</h2>
+            <h2 style={sectionTitleStyle}>GL Lines ({invoiceCategories.length})</h2>
 
-            {/* Categories list */}
+            {/* Allocation Summary Bar */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '12px 16px',
+              backgroundColor: Math.abs(allocationSummary.unallocated) <= 0.01 ? '#ecfdf5' : '#fef2f2',
+              border: `1px solid ${Math.abs(allocationSummary.unallocated) <= 0.01 ? '#10b981' : '#ef4444'}`,
+              borderRadius: '6px',
+              marginBottom: '16px'
+            }}>
+              <div style={{ display: 'flex', gap: '24px', fontSize: '14px' }}>
+                <span><strong>Invoice Total:</strong> ${allocationSummary.totalAmount.toFixed(2)}</span>
+                <span><strong>Allocated:</strong> ${allocationSummary.allocated.toFixed(2)}</span>
+                <span style={{ 
+                  color: Math.abs(allocationSummary.unallocated) <= 0.01 ? '#059669' : '#dc2626',
+                  fontWeight: '600'
+                }}>
+                  <strong>Unallocated:</strong> ${allocationSummary.unallocated.toFixed(2)}
+                </span>
+              </div>
+              {Math.abs(allocationSummary.unallocated) <= 0.01 ? (
+                <span style={{ 
+                  backgroundColor: '#10b981', 
+                  color: 'white', 
+                  padding: '4px 12px', 
+                  borderRadius: '12px', 
+                  fontSize: '12px',
+                  fontWeight: '600'
+                }}>
+                  ✓ Fully Allocated
+                </span>
+              ) : (
+                <span style={{ 
+                  backgroundColor: '#ef4444', 
+                  color: 'white', 
+                  padding: '4px 12px', 
+                  borderRadius: '12px', 
+                  fontSize: '12px',
+                  fontWeight: '600'
+                }}>
+                  Unallocated: ${Math.abs(allocationSummary.unallocated).toFixed(2)}
+                </span>
+              )}
+            </div>
+
+            {/* GL Lines list */}
             <div style={{ marginBottom: '16px' }}>
               {invoiceCategories && invoiceCategories.length > 0 ? (
                 <div>
@@ -1844,128 +1963,159 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                     <div key={index} style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '8px',
+                      gap: '10px',
                       marginBottom: '12px',
-                      padding: '12px',
+                      padding: '14px',
                       border: '1px solid #e2e8f0',
-                      borderRadius: '4px',
+                      borderRadius: '6px',
                       backgroundColor: '#f8fafc'
                     }}>
-                      {/* Category name and class - show dropdowns if editing */}
-                      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                        <div style={{ flex: 1 }}>
-                          {cat.isEditing ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                              {/* Category dropdown */}
-                              <select
-                                value={cat.categoryId || ''}
-                                onChange={(e) => {
-                                  const selected = categories.find(c => c.id === e.target.value);
-                                  updateInvoiceCategory(index, 'category', e.target.value, selected?.fullName || selected?.name || '');
-                                }}
-                                style={{
-                                  padding: '8px 12px',
-                                  borderRadius: '4px',
-                                  border: '1px solid #cbd5e0',
-                                  fontSize: '14px',
-                                  backgroundColor: '#ffffff',
-                                  cursor: 'pointer',
-                                  width: '100%'
-                                }}
-                              >
-                                <option value="">-- Select Account --</option>
-                                {categories.map(c => (
-                                  <option key={c.id} value={c.id}>{c.fullName || c.name}</option>
-                                ))}
-                              </select>
-                              {/* Class dropdown */}
-                              <select
-                                value={cat.classId || ''}
-                                onChange={(e) => {
-                                  const selected = qboClasses.find(c => c.id === e.target.value);
-                                  updateInvoiceCategory(index, 'class', e.target.value, selected?.fullName || selected?.name || '');
-                                }}
-                                style={{
-                                  padding: '8px 12px',
-                                  borderRadius: '4px',
-                                  border: '1px solid #cbd5e0',
-                                  fontSize: '14px',
-                                  backgroundColor: '#ffffff',
-                                  cursor: 'pointer',
-                                  width: '100%'
-                                }}
-                              >
-                                <option value="">-- Select Class (Location) --</option>
-                                {qboClasses.map(c => (
-                                  <option key={c.id} value={c.id}>{c.fullName || c.name}</option>
-                                ))}
-                              </select>
-                              {/* Confirm button */}
-                              <button
-                                onClick={() => confirmInvoiceCategory(index)}
-                                disabled={!cat.categoryId}
-                                style={{
-                                  padding: '6px 12px',
-                                  backgroundColor: cat.categoryId ? '#10b981' : '#9ca3af',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: cat.categoryId ? 'pointer' : 'not-allowed',
-                                  fontSize: '12px',
-                                  fontWeight: '500',
-                                  alignSelf: 'flex-start'
-                                }}
-                              >
-                                ✓ Confirm
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <div style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
-                                {cat.categoryName || cat.name || 'Uncategorized'}
-                              </div>
-                              {cat.className && (
-                                <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-                                  Class: {cat.className}
-                                </div>
-                              )}
-                              {cat.confidenceScore !== undefined && (
-                                <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                                  Confidence: {(cat.confidenceScore * 100).toFixed(0)}%
-                                </div>
-                              )}
-                            </>
-                          )}
+                      {/* Header row with line number and remove button */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                          GL Line {index + 1}
+                        </span>
+                        {invoiceCategories.length > 1 && (
+                          <button
+                            onClick={() => removeInvoiceCategory(index)}
+                            style={{
+                              padding: '4px 8px',
+                              backgroundColor: '#fee2e2',
+                              color: '#991b1b',
+                              border: '1px solid #fca5a5',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              fontWeight: 'bold'
+                            }}
+                          >
+                            ✕ Remove
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Account dropdown (always editable) */}
+                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{ flex: '1 1 300px' }}>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                            Account *
+                          </label>
+                          <select
+                            value={cat.categoryId || ''}
+                            onChange={(e) => {
+                              const selected = categories.find(c => c.id === e.target.value);
+                              updateInvoiceCategory(index, 'category', e.target.value, selected?.fullName || selected?.name || '');
+                            }}
+                            style={{
+                              padding: '8px 12px',
+                              borderRadius: '4px',
+                              border: '1px solid #cbd5e0',
+                              fontSize: '14px',
+                              backgroundColor: '#ffffff',
+                              cursor: 'pointer',
+                              width: '100%'
+                            }}
+                          >
+                            <option value="">-- Select Account --</option>
+                            {categories.map(c => (
+                              <option key={c.id} value={c.id}>{c.displayText || c.fullName || c.name}</option>
+                            ))}
+                          </select>
                         </div>
 
-                        {/* Remove button */}
-                        <button
-                          onClick={() => removeInvoiceCategory(index)}
+                        {/* Class dropdown */}
+                        <div style={{ flex: '1 1 200px' }}>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                            Class (Location)
+                          </label>
+                          <select
+                            value={cat.classId || ''}
+                            onChange={(e) => {
+                              const selected = qboClasses.find(c => c.id === e.target.value);
+                              updateInvoiceCategory(index, 'class', e.target.value, selected?.fullName || selected?.name || '');
+                            }}
+                            style={{
+                              padding: '8px 12px',
+                              borderRadius: '4px',
+                              border: '1px solid #cbd5e0',
+                              fontSize: '14px',
+                              backgroundColor: '#ffffff',
+                              cursor: 'pointer',
+                              width: '100%'
+                            }}
+                          >
+                            <option value="">-- Select Class --</option>
+                            {qboClasses.map(c => (
+                              <option key={c.id} value={c.id}>{c.fullName || c.name}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Amount input */}
+                        <div style={{ flex: '0 0 140px' }}>
+                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                            Amount *
+                          </label>
+                          <div style={{ position: 'relative' }}>
+                            <span style={{ 
+                              position: 'absolute', 
+                              left: '12px', 
+                              top: '50%', 
+                              transform: 'translateY(-50%)', 
+                              color: '#6b7280',
+                              fontSize: '14px'
+                            }}>$</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={cat.amount || ''}
+                              onChange={(e) => updateInvoiceCategory(index, 'amount', e.target.value)}
+                              style={{
+                                padding: '8px 12px 8px 24px',
+                                borderRadius: '4px',
+                                border: '1px solid #cbd5e0',
+                                fontSize: '14px',
+                                width: '100%',
+                                boxSizing: 'border-box'
+                              }}
+                              placeholder="0.00"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description input */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                          Description (optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={cat.description || ''}
+                          onChange={(e) => updateInvoiceCategory(index, 'description', e.target.value)}
                           style={{
-                            padding: '4px 8px',
-                            backgroundColor: '#fee2e2',
-                            color: '#991b1b',
-                            border: '1px solid #fca5a5',
+                            padding: '8px 12px',
                             borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '12px',
-                            fontWeight: 'bold'
+                            border: '1px solid #cbd5e0',
+                            fontSize: '14px',
+                            width: '100%',
+                            boxSizing: 'border-box'
                           }}
-                        >
-                          ✕
-                        </button>
+                          placeholder="Enter description for this line..."
+                        />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                  No categories assigned yet
+                  No GL lines assigned yet. Click "Add GL Line" to split this invoice.
                 </div>
               )}
             </div>
 
-            {/* Add category button */}
+            {/* Add GL Line and Save buttons */}
             <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
               <button
                 onClick={addInvoiceCategory}
@@ -1980,25 +2130,26 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                   fontWeight: '500'
                 }}
               >
-                + Add Category
+                + Add GL Line
               </button>
 
               <button
                 onClick={saveInvoiceCategories}
-                disabled={processing}
+                disabled={processing || Math.abs(allocationSummary.unallocated) > 0.01}
                 style={{
                   padding: '8px 16px',
-                  backgroundColor: '#3b82f6',
+                  backgroundColor: (processing || Math.abs(allocationSummary.unallocated) > 0.01) ? '#9ca3af' : '#3b82f6',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: processing ? 'not-allowed' : 'pointer',
+                  cursor: (processing || Math.abs(allocationSummary.unallocated) > 0.01) ? 'not-allowed' : 'pointer',
                   fontSize: '14px',
                   fontWeight: '500',
-                  opacity: processing ? 0.6 : 1
+                  opacity: (processing || Math.abs(allocationSummary.unallocated) > 0.01) ? 0.6 : 1
                 }}
+                title={Math.abs(allocationSummary.unallocated) > 0.01 ? 'Cannot save: Unallocated amount must be $0.00' : ''}
               >
-                {processing ? 'Saving...' : 'Save Categories'}
+                {processing ? 'Saving...' : 'Save GL Lines'}
               </button>
             </div>
           </div>

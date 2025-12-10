@@ -284,6 +284,12 @@ export function runMigrations(): void {
   ensureColumn('invoice_categories', 'confidence_score', 'confidence_score REAL DEFAULT 0');
   ensureColumn('invoice_categories', 'flagged_for_review', 'flagged_for_review INTEGER DEFAULT 0');
   ensureColumn('invoice_categories', 'reason', 'reason TEXT');
+  
+  // GL Line Splitting: Add amount, description, sequence, class_id columns
+  ensureColumn('invoice_categories', 'description', 'description TEXT');
+  ensureColumn('invoice_categories', 'amount_cents', 'amount_cents INTEGER');
+  ensureColumn('invoice_categories', 'sequence', 'sequence INTEGER DEFAULT 1');
+  ensureColumn('invoice_categories', 'class_id', 'class_id TEXT');
 
   // NEW: Invoice reassignment field - tracks current owner/assignee
   ensureColumn('invoices', 'current_assigned_user_email', 'current_assigned_user_email TEXT');
