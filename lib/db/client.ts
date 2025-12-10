@@ -348,5 +348,25 @@ export function runMigrations(): void {
     insertClinic.run(clinic.id, clinic.name, clinic.address, clinic.ship_to_reference, clinic.contact_name);
   }
 
+  // Create users table for local authentication (hybrid with Gist)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      password_hash TEXT NOT NULL,
+      role TEXT DEFAULT 'user',
+      is_active INTEGER DEFAULT 1,
+      last_login_at TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
+  `);
+
   console.log('[DB] Migrations completed successfully');
 }
