@@ -2001,7 +2001,23 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                             Account *
                           </label>
                           <select
-                            value={cat.categoryId || ''}
+                            value={(() => {
+                              // First try to match by categoryId
+                              if (cat.categoryId && categories.find(c => c.id === cat.categoryId)) {
+                                return cat.categoryId;
+                              }
+                              // Fallback: match by categoryName against fullName or name
+                              if (cat.categoryName) {
+                                const nameMatch = categories.find(c => 
+                                  c.fullName === cat.categoryName || 
+                                  c.name === cat.categoryName ||
+                                  (c.fullName && cat.categoryName.includes(c.fullName)) ||
+                                  (c.name && cat.categoryName.includes(c.name))
+                                );
+                                if (nameMatch) return nameMatch.id;
+                              }
+                              return '';
+                            })()}
                             onChange={(e) => {
                               const selected = categories.find(c => c.id === e.target.value);
                               updateInvoiceCategory(index, 'category', e.target.value, selected?.fullName || selected?.name || '');
@@ -2029,7 +2045,22 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                             Class (Location)
                           </label>
                           <select
-                            value={cat.classId || ''}
+                            value={(() => {
+                              // First try to match by classId
+                              if (cat.classId && qboClasses.find(c => c.id === cat.classId)) {
+                                return cat.classId;
+                              }
+                              // Fallback: match by className against fullName or name
+                              if (cat.className) {
+                                const nameMatch = qboClasses.find(c => 
+                                  c.fullName === cat.className || 
+                                  c.name === cat.className ||
+                                  c.id === cat.className
+                                );
+                                if (nameMatch) return nameMatch.id;
+                              }
+                              return '';
+                            })()}
                             onChange={(e) => {
                               const selected = qboClasses.find(c => c.id === e.target.value);
                               updateInvoiceCategory(index, 'class', e.target.value, selected?.fullName || selected?.name || '');
