@@ -794,9 +794,12 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
             setInvoiceTotalAmount(data.invoice.totalAmount);
           }
           
-          // Set categories with amounts
+          // Set categories with amounts - loaded categories are NOT in edit mode
           if (data.categories) {
-            setInvoiceCategories(data.categories);
+            setInvoiceCategories(data.categories.map(cat => ({
+              ...cat,
+              isEditing: false // Loaded categories show as confirmed
+            })));
           }
           
           // Set allocation summary
@@ -1966,176 +1969,244 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                       gap: '10px',
                       marginBottom: '12px',
                       padding: '14px',
-                      border: '1px solid #e2e8f0',
+                      border: cat.isEditing ? '2px solid #3b82f6' : '1px solid #e2e8f0',
                       borderRadius: '6px',
-                      backgroundColor: '#f8fafc'
+                      backgroundColor: cat.isEditing ? '#f0f9ff' : '#f8fafc'
                     }}>
-                      {/* Header row with line number and remove button */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                          GL Line {index + 1}
-                        </span>
-                        {invoiceCategories.length > 1 && (
-                          <button
-                            onClick={() => removeInvoiceCategory(index)}
-                            style={{
-                              padding: '4px 8px',
-                              backgroundColor: '#fee2e2',
-                              color: '#991b1b',
-                              border: '1px solid #fca5a5',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '12px',
-                              fontWeight: 'bold'
-                            }}
-                          >
-                            ✕ Remove
-                          </button>
-                        )}
-                      </div>
+                      {cat.isEditing ? (
+                        /* EDIT MODE - Show dropdowns and inputs */
+                        <>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#3b82f6' }}>
+                              GL Line {index + 1} (Editing)
+                            </span>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button
+                                onClick={() => confirmInvoiceCategory(index)}
+                                style={{
+                                  padding: '4px 12px',
+                                  backgroundColor: '#10b981',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  fontSize: '12px',
+                                  fontWeight: '600'
+                                }}
+                              >
+                                ✓ Done
+                              </button>
+                              {invoiceCategories.length > 1 && (
+                                <button
+                                  onClick={() => removeInvoiceCategory(index)}
+                                  style={{
+                                    padding: '4px 8px',
+                                    backgroundColor: '#fee2e2',
+                                    color: '#991b1b',
+                                    border: '1px solid #fca5a5',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                  }}
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          </div>
 
-                      {/* Account dropdown (always editable) */}
-                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                        <div style={{ flex: '1 1 300px' }}>
-                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
-                            Account *
-                          </label>
-                          <select
-                            value={(() => {
-                              // First try to match by categoryId
-                              if (cat.categoryId && categories.find(c => c.id === cat.categoryId)) {
-                                return cat.categoryId;
-                              }
-                              // Fallback: match by categoryName against fullName or name
-                              if (cat.categoryName) {
-                                const nameMatch = categories.find(c => 
-                                  c.fullName === cat.categoryName || 
-                                  c.name === cat.categoryName ||
-                                  (c.fullName && cat.categoryName.includes(c.fullName)) ||
-                                  (c.name && cat.categoryName.includes(c.name))
-                                );
-                                if (nameMatch) return nameMatch.id;
-                              }
-                              return '';
-                            })()}
-                            onChange={(e) => {
-                              const selected = categories.find(c => c.id === e.target.value);
-                              updateInvoiceCategory(index, 'category', e.target.value, selected?.fullName || selected?.name || '');
-                            }}
-                            style={{
-                              padding: '8px 12px',
-                              borderRadius: '4px',
-                              border: '1px solid #cbd5e0',
-                              fontSize: '14px',
-                              backgroundColor: '#ffffff',
-                              cursor: 'pointer',
-                              width: '100%'
-                            }}
-                          >
-                            <option value="">-- Select Account --</option>
-                            {categories.map(c => (
-                              <option key={c.id} value={c.id}>{c.displayText || c.fullName || c.name}</option>
-                            ))}
-                          </select>
-                        </div>
+                          {/* Account dropdown */}
+                          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                            <div style={{ flex: '1 1 300px' }}>
+                              <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                                Account *
+                              </label>
+                              <select
+                                value={cat.categoryId || ''}
+                                onChange={(e) => {
+                                  const selected = categories.find(c => c.id === e.target.value);
+                                  updateInvoiceCategory(index, 'category', e.target.value, selected?.fullName || selected?.name || '');
+                                }}
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '4px',
+                                  border: '1px solid #cbd5e0',
+                                  fontSize: '14px',
+                                  backgroundColor: '#ffffff',
+                                  cursor: 'pointer',
+                                  width: '100%'
+                                }}
+                              >
+                                <option value="">-- Select Account --</option>
+                                {categories.map(c => (
+                                  <option key={c.id} value={c.id}>{c.displayText || c.fullName || c.name}</option>
+                                ))}
+                              </select>
+                            </div>
 
-                        {/* Class dropdown */}
-                        <div style={{ flex: '1 1 200px' }}>
-                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
-                            Class (Location)
-                          </label>
-                          <select
-                            value={(() => {
-                              // First try to match by classId
-                              if (cat.classId && qboClasses.find(c => c.id === cat.classId)) {
-                                return cat.classId;
-                              }
-                              // Fallback: match by className against fullName or name
-                              if (cat.className) {
-                                const nameMatch = qboClasses.find(c => 
-                                  c.fullName === cat.className || 
-                                  c.name === cat.className ||
-                                  c.id === cat.className
-                                );
-                                if (nameMatch) return nameMatch.id;
-                              }
-                              return '';
-                            })()}
-                            onChange={(e) => {
-                              const selected = qboClasses.find(c => c.id === e.target.value);
-                              updateInvoiceCategory(index, 'class', e.target.value, selected?.fullName || selected?.name || '');
-                            }}
-                            style={{
-                              padding: '8px 12px',
-                              borderRadius: '4px',
-                              border: '1px solid #cbd5e0',
-                              fontSize: '14px',
-                              backgroundColor: '#ffffff',
-                              cursor: 'pointer',
-                              width: '100%'
-                            }}
-                          >
-                            <option value="">-- Select Class --</option>
-                            {qboClasses.map(c => (
-                              <option key={c.id} value={c.id}>{c.fullName || c.name}</option>
-                            ))}
-                          </select>
-                        </div>
+                            {/* Class dropdown */}
+                            <div style={{ flex: '1 1 200px' }}>
+                              <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                                Class (Location)
+                              </label>
+                              <select
+                                value={cat.classId || ''}
+                                onChange={(e) => {
+                                  const selected = qboClasses.find(c => c.id === e.target.value);
+                                  updateInvoiceCategory(index, 'class', e.target.value, selected?.fullName || selected?.name || '');
+                                }}
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '4px',
+                                  border: '1px solid #cbd5e0',
+                                  fontSize: '14px',
+                                  backgroundColor: '#ffffff',
+                                  cursor: 'pointer',
+                                  width: '100%'
+                                }}
+                              >
+                                <option value="">-- Select Class --</option>
+                                {qboClasses.map(c => (
+                                  <option key={c.id} value={c.id}>{c.fullName || c.name}</option>
+                                ))}
+                              </select>
+                            </div>
 
-                        {/* Amount input */}
-                        <div style={{ flex: '0 0 140px' }}>
-                          <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
-                            Amount *
-                          </label>
-                          <div style={{ position: 'relative' }}>
-                            <span style={{ 
-                              position: 'absolute', 
-                              left: '12px', 
-                              top: '50%', 
-                              transform: 'translateY(-50%)', 
-                              color: '#6b7280',
-                              fontSize: '14px'
-                            }}>$</span>
+                            {/* Amount input */}
+                            <div style={{ flex: '0 0 140px' }}>
+                              <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                                Amount *
+                              </label>
+                              <div style={{ position: 'relative' }}>
+                                <span style={{ 
+                                  position: 'absolute', 
+                                  left: '12px', 
+                                  top: '50%', 
+                                  transform: 'translateY(-50%)', 
+                                  color: '#6b7280',
+                                  fontSize: '14px'
+                                }}>$</span>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={cat.amount || ''}
+                                  onChange={(e) => updateInvoiceCategory(index, 'amount', e.target.value)}
+                                  style={{
+                                    padding: '8px 12px 8px 24px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #cbd5e0',
+                                    fontSize: '14px',
+                                    width: '100%',
+                                    boxSizing: 'border-box'
+                                  }}
+                                  placeholder="0.00"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Description input */}
+                          <div>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                              Description (optional)
+                            </label>
                             <input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={cat.amount || ''}
-                              onChange={(e) => updateInvoiceCategory(index, 'amount', e.target.value)}
+                              type="text"
+                              value={cat.description || ''}
+                              onChange={(e) => updateInvoiceCategory(index, 'description', e.target.value)}
                               style={{
-                                padding: '8px 12px 8px 24px',
+                                padding: '8px 12px',
                                 borderRadius: '4px',
                                 border: '1px solid #cbd5e0',
                                 fontSize: '14px',
                                 width: '100%',
                                 boxSizing: 'border-box'
                               }}
-                              placeholder="0.00"
+                              placeholder="Enter description for this line..."
                             />
                           </div>
-                        </div>
-                      </div>
-
-                      {/* Description input */}
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
-                          Description (optional)
-                        </label>
-                        <input
-                          type="text"
-                          value={cat.description || ''}
-                          onChange={(e) => updateInvoiceCategory(index, 'description', e.target.value)}
-                          style={{
-                            padding: '8px 12px',
-                            borderRadius: '4px',
-                            border: '1px solid #cbd5e0',
-                            fontSize: '14px',
-                            width: '100%',
-                            boxSizing: 'border-box'
-                          }}
-                          placeholder="Enter description for this line..."
-                        />
-                      </div>
+                        </>
+                      ) : (
+                        /* READ MODE - Show confirmed values as text */
+                        <>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                                <span style={{ 
+                                  fontSize: '11px', 
+                                  fontWeight: '600', 
+                                  color: '#10b981',
+                                  backgroundColor: '#ecfdf5',
+                                  padding: '2px 8px',
+                                  borderRadius: '4px'
+                                }}>
+                                  GL Line {index + 1}
+                                </span>
+                                <span style={{ 
+                                  fontSize: '16px', 
+                                  fontWeight: '700', 
+                                  color: '#059669'
+                                }}>
+                                  ${(cat.amount || 0).toFixed(2)}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
+                                {cat.categoryName || 'No account selected'}
+                              </div>
+                              {cat.className && (
+                                <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '2px' }}>
+                                  <strong>Class:</strong> {cat.className}
+                                </div>
+                              )}
+                              {cat.description && (
+                                <div style={{ fontSize: '13px', color: '#6b7280', fontStyle: 'italic' }}>
+                                  {cat.description}
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button
+                                onClick={() => setInvoiceCategories(prev => {
+                                  const updated = [...prev];
+                                  updated[index] = { ...updated[index], isEditing: true };
+                                  return updated;
+                                })}
+                                style={{
+                                  padding: '4px 12px',
+                                  backgroundColor: '#f3f4f6',
+                                  color: '#374151',
+                                  border: '1px solid #d1d5db',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  fontSize: '12px',
+                                  fontWeight: '500'
+                                }}
+                              >
+                                Edit
+                              </button>
+                              {invoiceCategories.length > 1 && (
+                                <button
+                                  onClick={() => removeInvoiceCategory(index)}
+                                  style={{
+                                    padding: '4px 8px',
+                                    backgroundColor: '#fee2e2',
+                                    color: '#991b1b',
+                                    border: '1px solid #fca5a5',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                  }}
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
