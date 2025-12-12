@@ -119,7 +119,7 @@ export async function POST(
       return NextResponse.json({ error: 'Invoice not found after update' }, { status: 404 });
     }
 
-    // Log the repair for AI training
+    // Log the repair for AI training (includes amount change for LLM re-analysis)
     try {
       await logRepair(
         originalInvoice.invoice_number,
@@ -142,16 +142,33 @@ export async function POST(
           parsed_vendor_name: updatedInvoice.parsed_vendor_name,
           parsed_office_id: updatedInvoice.parsed_office_id,
           parsed_amount_cents: updatedInvoice.parsed_amount_cents,
+          // Include allocation reset info for LLM training
+          allocations_were_reset: amount_cents !== undefined,
+          update_type: amount_cents !== undefined ? 'amount_correction' : 'field_correction',
         },
         originalInvoice.pdf_path
       );
+      
+      // If amount was changed, log this specifically for LLM training
+      if (amount_cents !== undefined) {
+        console.log('[API][INVOICES][UPDATE]', 'amount_change_logged_for_llm', {
+          invoiceId: actualInvoiceId,
+          oldAmount: originalInvoice.amount_cents,
+          newAmount: amount_cents,
+          difference: amount_cents - (originalInvoice.amount_cents || 0)
+        });
+      }
     } catch (logError) {
       console.error('[API][INVOICES][UPDATE]', 'Failed to log repair', { invoiceId: actualInvoiceId, error: (logError as any)?.message });
       // Don't fail the update if logging fails, just log the error
     }
 
     console.log('[API][INVOICES][UPDATE]', 'success', { invoiceId: actualInvoiceId, requestedId: invoiceId, userEmail: user.email });
-    return NextResponse.json({ ok: true, invoice: updatedInvoice });
+    return NextResponse.json({ 
+      ok: true, 
+      invoice: updatedInvoice,
+      allocations_reset: amount_cents !== undefined
+    });
   } catch (err: any) {
     // Log full error server-side only
     console.error('[API][INVOICES][UPDATE]', 'error', { invoiceId, error: err?.message });

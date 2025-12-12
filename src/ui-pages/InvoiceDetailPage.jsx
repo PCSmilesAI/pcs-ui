@@ -1409,6 +1409,12 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
       console.log('✅ Invoice updated successfully');
 
+      // Check if allocations were reset due to amount change
+      const updateResult = response.data || {};
+      if (updateResult.allocations_reset) {
+        showToast('Invoice amount updated. GL line allocations have been reset to $0 - please re-allocate.', 'warning');
+      }
+
       // Build corrected values for AI training
       const originalValues = {
         vendor_name: invoice?.vendor_name || invoice?.vendor || '',
@@ -1473,12 +1479,15 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         }
       }
 
-      showToast('Invoice updated successfully! Changes are now reflected across the system.', 'success');
+      // Show final success message (allocation reset message may have already been shown)
+      if (!updateResult.allocations_reset) {
+        showToast('Invoice updated successfully! Changes are now reflected across the system.', 'success');
+      }
 
       // Refresh the page after a short delay to show the toast
       setTimeout(() => {
         window.location.reload();
-      }, 1500);
+      }, 2000);
 
     } catch (error) {
       console.error('❌ Error during invoice update:', error);
