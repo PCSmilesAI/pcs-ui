@@ -72,19 +72,37 @@ export async function POST(request: NextRequest) {
           if (isValid) {
             console.log(`✅ [AUTH] Gist login successful for: ${email}`);
             
-            // Migrate user to local database for future logins
-            const { createUser } = await import('@/lib/auth/localUserService');
-            await createUser(gistUser.email, gistUser.name, password, 'user');
-            console.log(`🔄 [AUTH] Migrated Gist user to local DB: ${email}`);
+            // Sync user to local database for future logins
+            const { createUser, getUserByEmail: getLocalUser, updatePassword } = await import('@/lib/auth/localUserService');
+            const existingLocal = getLocalUser(email);
             
-            return NextResponse.json({
-              success: true,
-              user: {
-                name: gistUser.name,
-                email: gistUser.email,
-                role: 'user'
-              }
-            });
+            if (existingLocal) {
+              // User exists locally but password was wrong - sync password from Gist
+              await updatePassword(email, password);
+              console.log(`🔄 [AUTH] Synced Gist password to local DB: ${email}`);
+              
+              return NextResponse.json({
+                success: true,
+                user: {
+                  name: existingLocal.name,
+                  email: existingLocal.email,
+                  role: existingLocal.role
+                }
+              });
+            } else {
+              // New user - create in local database
+              await createUser(gistUser.email, gistUser.name, password, 'user');
+              console.log(`🔄 [AUTH] Created Gist user in local DB: ${email}`);
+              
+              return NextResponse.json({
+                success: true,
+                user: {
+                  name: gistUser.name,
+                  email: gistUser.email,
+                  role: 'user'
+                }
+              });
+            }
           }
         }
       }
