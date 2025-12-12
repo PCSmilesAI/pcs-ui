@@ -907,6 +907,28 @@ export default function CodingTemplatesPage() {
                           Remove
                         </button>
                       )}
+                      {tableRows.length > 1 && allocationMode === 'split_evenly_all_classes' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Remove this row and switch to regular split_evenly mode
+                            setTableRows(tableRows.filter(r => r.id !== row.id));
+                            setAllocationMode('split_evenly');
+                          }}
+                          style={{ 
+                            background: 'none', 
+                            border: 'none', 
+                            color: '#e53e3e', 
+                            fontSize: '16px', 
+                            cursor: 'pointer',
+                            padding: '0 4px',
+                            lineHeight: 1,
+                          }}
+                          title="Remove this class and switch to Split Evenly mode"
+                        >
+                          ✕
+                        </button>
+                      )}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
