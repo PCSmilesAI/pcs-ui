@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
   "invoice_number": "5533976",
-  "invoice_date": "",
-  "due_date": "",
+  "invoice_date": "08/29/25",
+  "due_date": "09/28/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Roseburg",
+  "line_items": [],
+  "source_file": "8 29 25 Statement 37012243100 Pacific Crest Smiles -Vancouver_9b0af4a9.pdf",
+  "parsed_at": "2025-12-12T15:53:58.713711+00:00"
 }

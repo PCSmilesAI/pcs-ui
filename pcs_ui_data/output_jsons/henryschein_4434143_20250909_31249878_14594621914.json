@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "46397099",
+  "invoice_date": "09/08/25",
+  "due_date": "10/08/25",
+  "invoice_total": "59.83",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "707-2812",
+      "product_name": "200/BX D-Lish Prophy Paste Coarse Assorted",
+      "Quantity": "1",
+      "unit_price": "59.83",
+      "line_item_total": "59.83"
+    }
+  ]
 }

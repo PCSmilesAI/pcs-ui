@@ -1,10 +1,184 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "99461-0830-051",
+  "invoice_date": "11/01/2025",
+  "due_date": "11/08/2025",
+  "invoice_total": "20330.00",
+  "office_location": "Riddle",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for Jeff Carnes",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Herlinda Gonzalez",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Barbara Whetzel",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/28/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Trudi Moore",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/28/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for charles shockley",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/28/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Oscar Salazar",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "10/27/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Mitch Vincent",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/22/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Alllena Wilson",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/21/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Robert glen Henry",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "105.00",
+      "line_item_total": "105.00",
+      "service_date": "10/17/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for wayne carnes",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/17/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for nancy henderson",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/16/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kambree Lee",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/16/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for hugh cheeseman",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "125.00",
+      "line_item_total": "125.00",
+      "service_date": "10/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Brian Black",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Lisa Leming",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "10/14/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Gina Kincaid",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/10/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Ryan Jephson",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "10/08/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Sandra Egleston",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "253.00",
+      "line_item_total": "253.00",
+      "service_date": "10/08/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for kasey James",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/06/25"
+    }
+  ],
+  "source_file": "Smiles Dental Services Riddle_Oct 2025_78fc7e2d.pdf",
+  "parsed_at": "2025-12-12T16:03:05.727034+00:00"
 }

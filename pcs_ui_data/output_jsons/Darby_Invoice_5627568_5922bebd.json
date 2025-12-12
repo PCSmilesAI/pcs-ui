@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5627568",
+  "invoice_date": "10/31/25",
+  "due_date": "11/30/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Eugene",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "| 257908 : INDIVIDUAL ADH H BT BL 131119 19.75 19.",
+      "Quantity": "257908",
+      "unit_price": "19.75",
+      "line_item_total": "19.75"
+    }
+  ],
+  "source_file": "Darby_Invoice_5627568_5922bebd.pdf",
+  "parsed_at": "2025-12-12T15:54:57.852667+00:00"
 }

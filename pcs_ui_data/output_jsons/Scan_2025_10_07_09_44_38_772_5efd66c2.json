@@ -1,10 +1,34 @@
 {
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
   "invoice_number": "",
-  "invoice_date": "",
+  "invoice_date": "15 25 1109",
+  "due_date": "",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Milwaukie",
+  "line_items": [
+    {
+      "product_number": "97206",
+      "product_name": "Statement of SEP",
+      "Quantity": "2",
+      "unit_price": "25",
+      "line_item_total": "25"
+    },
+    {
+      "product_number": "",
+      "product_name": "AUG 26 25 Brenda Schrei",
+      "Quantity": "49111",
+      "unit_price": "100.00",
+      "line_item_total": "315.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "100.00 129.00 86.00 $",
+      "Quantity": "1",
+      "unit_price": "315.00",
+      "line_item_total": "315.00"
+    }
+  ],
+  "source_file": "Scan_2025_10_07_09_44_38_772_5efd66c2.pdf",
+  "parsed_at": "2025-12-12T15:56:49.834140+00:00"
 }

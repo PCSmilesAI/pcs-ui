@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "499458-1",
+  "invoice_date": "09/25/2025",
+  "due_date": "10/25/2025",
+  "invoice_total": "6.52",
+  "office_location": "Ridgefield",
+  "line_items": [],
+  "source_file": "Invoice 499458-1_0c5a95ed.pdf",
+  "parsed_at": "2025-12-12T15:55:45.298580+00:00"
 }

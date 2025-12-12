@@ -1,10 +1,27 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "INV248337",
+  "invoice_date": "10/31/2025",
+  "due_date": "10/31/2025",
+  "invoice_total": "97.56",
+  "office_location": "Columbia",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "12th Avenue Unit",
+      "Quantity": "1000",
+      "unit_price": "10",
+      "line_item_total": "3"
+    },
+    {
+      "product_number": "",
+      "product_name": "SE 15th Street Ste",
+      "Quantity": "16415",
+      "unit_price": "10",
+      "line_item_total": "5"
+    }
+  ],
+  "source_file": "Invoice_INV248337_1762275000242_a5d649f9.pdf",
+  "parsed_at": "2025-12-12T15:56:05.391965+00:00"
 }

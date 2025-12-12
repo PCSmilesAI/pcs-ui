@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5618541",
+  "invoice_date": "10/22/25",
+  "due_date": "11/21/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "EA| SEAL-TIGHT CONVERSION KIT P 77024 20.27 60.81",
+      "Quantity": "77024",
+      "unit_price": "20.27",
+      "line_item_total": "60.81"
+    }
+  ],
+  "source_file": "Darby_Invoice_5618541_f93f3a76.pdf",
+  "parsed_at": "2025-12-12T15:54:51.524251+00:00"
 }

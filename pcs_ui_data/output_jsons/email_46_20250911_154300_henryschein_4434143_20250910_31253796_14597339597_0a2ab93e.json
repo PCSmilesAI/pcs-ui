@@ -1,10 +1,67 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "46597163",
+  "invoice_date": "09/09/25",
+  "due_date": "10/09/25",
+  "invoice_total": "264.95",
+  "office_location": "Milwaukie",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "570-2249",
+      "product_name": "16OZ/BT Acclean Chlorhexidine Rinse Mint",
+      "Quantity": "10",
+      "unit_price": "3.26",
+      "line_item_total": "32.60"
+    },
+    {
+      "product_number": "107-1889",
+      "product_name": "200/BX Nada Pumice Paste Medium Grit",
+      "Quantity": "1",
+      "unit_price": "47.59",
+      "line_item_total": "47.59"
+    },
+    {
+      "product_number": "900-1890",
+      "product_name": "100/BX Standard Needles 27Ga Long Plastic Hub",
+      "Quantity": "1",
+      "unit_price": "11.12",
+      "line_item_total": "11.12"
+    },
+    {
+      "product_number": "107-8441",
+      "product_name": "50/BX Polybite Tray Posterior",
+      "Quantity": "1",
+      "unit_price": "15.55",
+      "line_item_total": "15.55"
+    },
+    {
+      "product_number": "712-0164",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Ultra Tight",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    },
+    {
+      "product_number": "712-0154",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Tight",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    },
+    {
+      "product_number": "145-8785",
+      "product_name": "100/BG Ivory Releaf Leaves Refill",
+      "Quantity": "1",
+      "unit_price": "78.64",
+      "line_item_total": "78.64"
+    },
+    {
+      "product_number": "712-0155",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Moderate",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    }
+  ]
 }

@@ -1,10 +1,12 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "Roseburg",
+  "invoice_date": "8/22/2025",
+  "due_date": "09/21/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
+  "office_location": "Roseburg",
   "line_items": [],
-  "due_date": ""
+  "source_file": "Invoice 27170_057c0200.pdf",
+  "parsed_at": "2025-12-12T15:55:44.379616+00:00"
 }

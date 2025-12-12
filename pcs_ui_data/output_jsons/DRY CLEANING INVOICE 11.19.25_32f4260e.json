@@ -1,10 +1,12 @@
 {
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
   "invoice_number": "",
   "invoice_date": "",
+  "due_date": "",
   "invoice_total": "",
   "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
   "line_items": [],
-  "due_date": ""
+  "source_file": "DRY CLEANING INVOICE 11.19.25_32f4260e.pdf",
+  "parsed_at": "2025-12-12T15:54:02.478683+00:00"
 }

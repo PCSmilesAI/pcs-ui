@@ -1,10 +1,97 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "Tomato",
+  "invoice_date": "September 10, 2025",
+  "due_date": "10/10/2025",
+  "invoice_total": "120.01",
+  "office_location": "Vancouver",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SE 15th St September",
+      "Quantity": "16415",
+      "unit_price": "10",
+      "line_item_total": "2025"
+    },
+    {
+      "product_number": "",
+      "product_name": "Turkey Ciabatta Melt",
+      "Quantity": "1",
+      "unit_price": "13.99",
+      "line_item_total": "13.99"
+    },
+    {
+      "product_number": "",
+      "product_name": "Pesto Primo",
+      "Quantity": "1",
+      "unit_price": "11.49",
+      "line_item_total": "11.49"
+    },
+    {
+      "product_number": "",
+      "product_name": "Chipotle Turkey",
+      "Quantity": "1",
+      "unit_price": "12.99",
+      "line_item_total": "12.99"
+    },
+    {
+      "product_number": "",
+      "product_name": "Turkey Ciabatta Melt",
+      "Quantity": "1",
+      "unit_price": "12.49",
+      "line_item_total": "12.49"
+    },
+    {
+      "product_number": "",
+      "product_name": "Chicken, Bacon & Ranch",
+      "Quantity": "1",
+      "unit_price": "11.99",
+      "line_item_total": "11.99"
+    },
+    {
+      "product_number": "",
+      "product_name": "Mac & Cheese (Vegetarian)",
+      "Quantity": "1",
+      "unit_price": "16.98",
+      "line_item_total": "16.98"
+    },
+    {
+      "product_number": "",
+      "product_name": "Burrata Caprese (Vegetarian)",
+      "Quantity": "1",
+      "unit_price": "11.99",
+      "line_item_total": "11.99"
+    },
+    {
+      "product_number": "",
+      "product_name": "American Express 1050 (Chip)",
+      "Quantity": "1",
+      "unit_price": "120.01",
+      "line_item_total": "120.01"
+    },
+    {
+      "product_number": "",
+      "product_name": "Liquid Sunshine x 5",
+      "Quantity": "1",
+      "unit_price": "32.45",
+      "line_item_total": "32.45"
+    },
+    {
+      "product_number": "",
+      "product_name": "Strawberry Acal Lemonade",
+      "Quantity": "1",
+      "unit_price": "5.45",
+      "line_item_total": "5.45"
+    },
+    {
+      "product_number": "",
+      "product_name": "Visa 9519 (Chip)",
+      "Quantity": "1",
+      "unit_price": "45.36",
+      "line_item_total": "45.36"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-171145.pdf",
+  "parsed_at": "2025-12-12T15:58:18.085978+00:00"
 }

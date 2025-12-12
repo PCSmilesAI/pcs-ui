@@ -1,10 +1,27 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "oic",
+  "invoice_date": "9/15/2025",
+  "due_date": "10/15/2025",
+  "invoice_total": "877.0",
+  "office_location": "Columbia",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SE 15th Street, Suite",
+      "Quantity": "16415",
+      "unit_price": "10",
+      "line_item_total": "5"
+    },
+    {
+      "product_number": "",
+      "product_name": "PO Box 3067",
+      "Quantity": "1",
+      "unit_price": "390.00",
+      "line_item_total": "390.00"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product10-02-2025-141202_8c7a299b.pdf",
+  "parsed_at": "2025-12-12T15:59:21.626934+00:00"
 }

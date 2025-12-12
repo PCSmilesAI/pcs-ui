@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5629422",
+  "invoice_date": "11/03/25",
+  "due_date": "12/03/2025",
   "invoice_total": "",
   "office_location": "Milwaukie",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "line_items": [
+    {
+      "product_number": "28990",
+      "product_name": "AIR/WATR SYR CRYSTL/FLSH TYPE DARBY",
+      "Quantity": "95",
+      "unit_price": "13.21",
+      "line_item_total": "13.21"
+    }
+  ],
+  "source_file": "Darby_Invoice_5629422_c36d0efa.pdf",
+  "parsed_at": "2025-12-12T15:55:01.648577+00:00"
 }

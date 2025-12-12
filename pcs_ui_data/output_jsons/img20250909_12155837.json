@@ -1,10 +1,62 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "4631811",
+  "invoice_date": "09/03/25",
+  "due_date": "10/03/2025",
+  "invoice_total": "559.09",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "55236",
+      "product_name": "EA| MESH BUR/DIAMOND HOLDER SMALL 65-29 |",
+      "Quantity": "95",
+      "unit_price": "8.99",
+      "line_item_total": "17.98"
+    },
+    {
+      "product_number": "",
+      "product_name": "1 228-8210 50/BX Septocaine 4% w/EPI 1.7 mL INJ 1:",
+      "Quantity": "1",
+      "unit_price": "61.41",
+      "line_item_total": "184.23"
+    },
+    {
+      "product_number": "",
+      "product_name": "2 = 123-5762 2/PK Tempbond Automix Syringe Eugenol",
+      "Quantity": "2",
+      "unit_price": "115.10",
+      "line_item_total": "230.20"
+    },
+    {
+      "product_number": "",
+      "product_name": "3 900-0766 48/BG HP Mixing Tips Large Green 6.5mm",
+      "Quantity": "3",
+      "unit_price": "32.53",
+      "line_item_total": "32.53"
+    },
+    {
+      "product_number": "",
+      "product_name": "4 133-9626 50/BX Polybite Tray Wide Posterior 1 1",
+      "Quantity": "4",
+      "unit_price": "15.55",
+      "line_item_total": "15.55"
+    },
+    {
+      "product_number": "",
+      "product_name": "5 195-0590 12/BX Brownie FG Mini Point 2 2 26.55 5",
+      "Quantity": "5",
+      "unit_price": "26.55",
+      "line_item_total": "53.10"
+    },
+    {
+      "product_number": "",
+      "product_name": "6 543-0252 72ICA Colgate Floss Mint 3yd 1 1 36.99",
+      "Quantity": "6",
+      "unit_price": "36.99",
+      "line_item_total": "36.99"
+    }
+  ],
+  "source_file": "img20250909_12155837.pdf",
+  "parsed_at": "2025-12-12T16:06:15.998904+00:00"
 }

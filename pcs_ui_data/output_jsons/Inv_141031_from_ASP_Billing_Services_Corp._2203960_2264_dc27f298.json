@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "oice",
+  "invoice_date": "11/1/2025",
+  "due_date": "12/01/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SE 15th Street Unit",
+      "Quantity": "16415",
+      "unit_price": "10",
+      "line_item_total": "5"
+    }
+  ],
+  "source_file": "Inv_141031_from_ASP_Billing_Services_Corp._2203960_2264_dc27f298.pdf",
+  "parsed_at": "2025-12-12T15:55:39.523276+00:00"
 }

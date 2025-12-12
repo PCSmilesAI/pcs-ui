@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "CTR Services",
+  "vendor_name": "CTR Services Northwest / Campbell Commercial",
+  "invoice_number": "CTR-BOX1006",
+  "invoice_date": "11/19/2025",
   "due_date": "",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Eugene",
+  "line_items": [],
+  "source_file": "tenant_unpaid_charges_ctr_services_northwest_llc_111925_5ebf028f.pdf",
+  "parsed_at": "2025-12-12T16:07:07.441674+00:00"
 }

@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5572473",
+  "invoice_date": "09/09/25",
+  "due_date": "10/09/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "5251566",
+      "product_name": "1) A* |5251566 1KT DIN=ROOT\u201cBIOMSEALERFREGULART100",
+      "Quantity": "5251566",
+      "unit_price": "55.74",
+      "line_item_total": "55.74"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-16-2025-083244_828fc383.pdf",
+  "parsed_at": "2025-12-12T15:58:27.788778+00:00"
 }

@@ -1,10 +1,12 @@
 {
-  "invoice_number": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "on",
   "invoice_date": "",
+  "due_date": "",
   "invoice_total": "",
   "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
   "line_items": [],
-  "due_date": ""
+  "source_file": "Photo_c8070f32.pdf",
+  "parsed_at": "2025-12-12T15:56:29.210235+00:00"
 }

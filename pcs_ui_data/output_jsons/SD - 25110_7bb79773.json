@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "should",
+  "invoice_date": "10/01/25",
+  "due_date": "10/01/25",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "W Harvard Ave, Roseburg, OR",
+      "Quantity": "1683",
+      "unit_price": "9747",
+      "line_item_total": "1"
+    }
+  ],
+  "source_file": "SD - 25110_7bb79773.pdf",
+  "parsed_at": "2025-12-12T15:56:29.903695+00:00"
 }

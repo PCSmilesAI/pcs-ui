@@ -1,10 +1,55 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "6e25f222e6c8",
+  "invoice_date": "Oct 7, 2025",
   "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "invoice_total": "904.66",
+  "office_location": "Milwaukie",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SE Oak St, Milwaukie, OR,",
+      "Quantity": "11084",
+      "unit_price": "9722",
+      "line_item_total": "2"
+    },
+    {
+      "product_number": "",
+      "product_name": "Worked hours 9.25/h * $68/h",
+      "Quantity": "1",
+      "unit_price": "629.00",
+      "line_item_total": "629.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "Workers Comp Insurance @ 0.38%",
+      "Quantity": "1",
+      "unit_price": "2.39",
+      "line_item_total": "2.39"
+    },
+    {
+      "product_number": "",
+      "product_name": "Employee wages:",
+      "Quantity": "1",
+      "unit_price": "629.00",
+      "line_item_total": "629.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "Employee Labor Investment Costs:",
+      "Quantity": "1",
+      "unit_price": "50.51",
+      "line_item_total": "50.51"
+    },
+    {
+      "product_number": "",
+      "product_name": "Volume-based Service Charge:",
+      "Quantity": "1",
+      "unit_price": "220.15",
+      "line_item_total": "220.15"
+    }
+  ],
+  "source_file": "Invoice #6e25f222e6c8_1cc27e7c.pdf",
+  "parsed_at": "2025-12-12T15:55:40.623215+00:00"
 }

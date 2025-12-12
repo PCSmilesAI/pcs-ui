@@ -1,10 +1,27 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "B",
+  "invoice_date": "10/31/25",
+  "due_date": "11/30/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Eugene",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "1312.00",
+      "Quantity": "1",
+      "unit_price": "40.62",
+      "line_item_total": "40.62"
+    },
+    {
+      "product_number": "",
+      "product_name": "10/31/25 0002493102 1",
+      "Quantity": "1",
+      "unit_price": "40.62",
+      "line_item_total": "40.62"
+    }
+  ],
+  "source_file": "billing01_5943_c_aa1b3762.pdf",
+  "parsed_at": "2025-12-12T16:03:24.902721+00:00"
 }

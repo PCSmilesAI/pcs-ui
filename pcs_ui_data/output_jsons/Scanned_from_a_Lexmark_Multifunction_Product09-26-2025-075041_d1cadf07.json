@@ -1,10 +1,48 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "Debit",
+  "invoice_date": "09-08-2025",
+  "due_date": "10/08/2025",
+  "invoice_total": "445.95",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "02-27-25 | 03-14-25 [Rr 498230 397137 $106.90 $.00",
+      "Quantity": "1",
+      "unit_price": "106.90",
+      "line_item_total": "106.90"
+    },
+    {
+      "product_number": "",
+      "product_name": "03-05-25 | 03-20-25 [RI 498985 397871 $490.95 $.00",
+      "Quantity": "1",
+      "unit_price": "490.95",
+      "line_item_total": "490.95"
+    },
+    {
+      "product_number": "",
+      "product_name": "04-03-25 | rr 500918 399737 $500.00 $.00",
+      "Quantity": "1",
+      "unit_price": "500.00",
+      "line_item_total": "500.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "05-29-25 | 06-13-25 | RI 509884 408580 $193.90 $.00",
+      "Quantity": "1",
+      "unit_price": "193.90",
+      "line_item_total": "193.90"
+    },
+    {
+      "product_number": "",
+      "product_name": "SHP: 10 Futar Fast Normal Pack Cart",
+      "Quantity": "10",
+      "unit_price": "44.00",
+      "line_item_total": "440.00"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-26-2025-075041_d1cadf07.pdf",
+  "parsed_at": "2025-12-12T15:59:03.069776+00:00"
 }

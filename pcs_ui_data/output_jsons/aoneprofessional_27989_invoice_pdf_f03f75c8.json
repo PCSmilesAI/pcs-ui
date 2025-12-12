@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "A-1 Professional",
+  "vendor_name": "A-1 Professional Exterminating",
+  "invoice_number": "1683",
+  "invoice_date": "10/01/2025",
+  "due_date": "Upon Receipt",
+  "invoice_total": "40.00",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Monthly Service",
+      "Quantity": "1",
+      "unit_price": "40.00",
+      "line_item_total": "40.00"
+    }
+  ],
+  "source_file": "aoneprofessional_27989_invoice_pdf_f03f75c8.pdf",
+  "parsed_at": "2025-12-12T16:03:24.514784+00:00"
 }

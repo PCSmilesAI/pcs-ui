@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "s",
+  "invoice_date": "10/01/2025",
+  "due_date": "10/31/2025",
+  "invoice_total": "539.94",
   "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "line_items": [],
+  "source_file": "01.10.2025 PACIFIC CREST SMILES_bd669787.pdf",
+  "parsed_at": "2025-12-12T15:53:46.429431+00:00"
 }

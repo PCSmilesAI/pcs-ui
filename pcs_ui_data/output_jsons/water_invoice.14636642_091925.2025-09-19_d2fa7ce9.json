@@ -1,10 +1,41 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "14636642",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "oice",
+  "invoice_date": "09-19-25",
+  "due_date": "10/19/2025",
+  "invoice_total": "4421.36",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "162012 02978274146366422 0442136 9 0091296",
+      "Quantity": "022010",
+      "unit_price": "6",
+      "line_item_total": "8"
+    },
+    {
+      "product_number": "",
+      "product_name": "OCEAN BEACH HWY STE",
+      "Quantity": "820",
+      "unit_price": "11",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "S 65TH AVE STE",
+      "Quantity": "109",
+      "unit_price": "10",
+      "line_item_total": "4"
+    },
+    {
+      "product_number": "",
+      "product_name": "SE 15TH ST UNIT",
+      "Quantity": "16415",
+      "unit_price": "10",
+      "line_item_total": "5"
+    }
+  ],
+  "source_file": "water_invoice.14636642_091925.2025-09-19_d2fa7ce9.pdf",
+  "parsed_at": "2025-12-12T16:07:07.785798+00:00"
 }

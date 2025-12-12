@@ -1,10 +1,27 @@
 {
-  "vendor": "Henry schein",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
   "invoice_number": "1824394",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "5.00",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "invoice_date": "09/30/25",
+  "due_date": "10/30/2025",
+  "invoice_total": "9.0",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Riverway, Ste",
+      "Quantity": "3",
+      "unit_price": "105",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "S 65th Ave Suite",
+      "Quantity": "109",
+      "unit_price": "10",
+      "line_item_total": "4"
+    }
+  ],
+  "source_file": "invoice_1824394_6fbacc0c.pdf",
+  "parsed_at": "2025-12-12T16:06:58.018284+00:00"
 }

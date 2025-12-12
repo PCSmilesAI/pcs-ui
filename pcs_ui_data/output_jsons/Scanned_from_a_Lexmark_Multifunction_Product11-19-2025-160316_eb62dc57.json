@@ -1,10 +1,27 @@
 {
-  "invoice_number": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "AMOUNT",
   "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "due_date": "",
+  "invoice_total": "221.24",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "4638-US Opalescence GO 15% Mint Patient Kit 6pk - US",
+      "Quantity": "1",
+      "unit_price": "203.34",
+      "line_item_total": "203.34"
+    },
+    {
+      "product_number": "",
+      "product_name": "Saved Amount:",
+      "Quantity": "1",
+      "unit_price": "87.15",
+      "line_item_total": "87.15"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product11-19-2025-160316_eb62dc57.pdf",
+  "parsed_at": "2025-12-12T16:02:44.346976+00:00"
 }

@@ -1,10 +1,27 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "PLEASE",
+  "invoice_date": "11-06-2025",
+  "due_date": "12/06/2025",
+  "invoice_total": "428548.0",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SHP: 2 Pic X-Light Normal Pack Cart",
+      "Quantity": "2",
+      "unit_price": "53.00",
+      "line_item_total": "106.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "Futar Fast Normal Pack Cart",
+      "Quantity": "10",
+      "unit_price": "44.00",
+      "line_item_total": "440.00"
+    }
+  ],
+  "source_file": "428548_b1edb986.pdf",
+  "parsed_at": "2025-12-12T15:53:57.180831+00:00"
 }

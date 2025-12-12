@@ -1,18 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "T117502",
+  "invoice_date": "10/22/2025",
+  "due_date": "11/21/2025",
+  "invoice_total": "200.0",
+  "office_location": "Roseburg",
   "line_items": [
     {
-      "product_number": "407-995847",
-      "product_name": ".Ordered By: Jennifer/MB 10/22/2025 P10389 Net",
-      "Quantity": "30",
-      "unit_price": "50.000ea",
-      "line_item_total": "200.00"
+      "product_number": "",
+      "product_name": "South Main Street, Dayton, Ohio",
+      "Quantity": "349",
+      "unit_price": "4540",
+      "line_item_total": "2"
     }
-  ]
+  ],
+  "source_file": "I1007808_OMINV#INVOICES@PACIFICCRESTSMILES.COM_251023_151411_1df75101.pdf",
+  "parsed_at": "2025-12-12T15:55:20.734254+00:00"
 }

@@ -1,10 +1,27 @@
 {
-  "vendor": "Henry schein",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
   "invoice_number": "1839734",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "59.30",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "invoice_date": "10/22/25",
+  "due_date": "11/21/2025",
+  "invoice_total": "3429288.0",
+  "office_location": "Vancouver",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Riverway, Ste",
+      "Quantity": "3",
+      "unit_price": "105",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "SE 15th St Suite",
+      "Quantity": "16415",
+      "unit_price": "10",
+      "line_item_total": "5"
+    }
+  ],
+  "source_file": "invoice_1839734_a80a1800.pdf",
+  "parsed_at": "2025-12-12T16:06:58.155583+00:00"
 }

@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "Invoice",
+  "invoice_date": "Oct 10, 2025",
   "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "invoice_total": "872.0",
+  "office_location": "Roseburg",
+  "line_items": [],
+  "source_file": "invoice_1102025-132162_b11fa5f3.pdf",
+  "parsed_at": "2025-12-12T16:06:57.204189+00:00"
 }

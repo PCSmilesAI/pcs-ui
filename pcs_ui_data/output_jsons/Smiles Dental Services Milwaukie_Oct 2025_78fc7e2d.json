@@ -1,10 +1,139 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "99733-1252-050",
+  "invoice_date": "11/01/2025",
+  "due_date": "11/08/2025",
+  "invoice_total": "4431.00",
+  "office_location": "Milwaukie",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for Laura Schmit",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "125.00",
+      "line_item_total": "125.00",
+      "service_date": "10/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Ralph Williams",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/28/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Laure Sainton",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "10/23/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Philip Amodeo",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/22/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Vineet Kapur",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/22/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Lizbeth Bravo",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "85.00",
+      "line_item_total": "85.00",
+      "service_date": "10/19/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Nicholas Camp",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "175.00",
+      "line_item_total": "175.00",
+      "service_date": "10/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Abby Bravo",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Judith Green",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "140.00",
+      "line_item_total": "140.00",
+      "service_date": "10/14/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Jennifer Blasko",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "1599.00",
+      "line_item_total": "1599.00",
+      "service_date": "10/14/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Geoffrey Ledbetter",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "10/08/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Michael Nguyen",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/02/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Hayden Meriwether",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "1599.00",
+      "line_item_total": "1599.00",
+      "service_date": "10/01/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Justin Wark",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "140.00",
+      "line_item_total": "140.00",
+      "service_date": "10/01/25"
+    }
+  ],
+  "source_file": "Smiles Dental Services Milwaukie_Oct 2025_78fc7e2d.pdf",
+  "parsed_at": "2025-12-12T16:03:05.164749+00:00"
 }

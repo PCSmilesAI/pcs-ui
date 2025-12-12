@@ -72,8 +72,14 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     const vendorName = getDisplayVendorName(invoice.vendor_name || invoice.vendor);
     const rawInvoiceDate = invoice.invoice_date || null;
     const rawDueDate = invoice.due_date || null;
-    // Use office_id first (effective value from 3-layer system)
+    // Get locations from GL Lines (invoice_categories classes)
+    const locations = invoice.locations || [];
+    // Fallback to legacy office fields if no GL Line locations
     const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
+    // Display locations from GL Lines, fallback to legacy office
+    const locationDisplay = locations.length > 0 
+      ? locations.join(', ') 
+      : (officeRaw || 'Unknown');
     const formatDate = (dateString) => {
       if (!dateString) return 'N/A';
       const parsed = new Date(dateString);
@@ -93,8 +99,9 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       invoice_number: invoice.invoice_number,
       vendor: vendorName,
       amount: `$${parsedAmount.toFixed(2)}`,
-      office: officeRaw || 'Unknown',
+      location: locationDisplay,
       rawOffice: officeRaw,
+      locations: locations, // Keep array for filtering
       dueDate: formatDate(rawDueDate || rawInvoiceDate),
       invoiceDate: formatDate(rawInvoiceDate),
       // Prefer invoice-level categories if present
@@ -258,7 +265,11 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
         }
 
         if (filterConfig.vendor && row.vendor !== filterConfig.vendor) return false;
-        if (filterConfig.office && row.office !== filterConfig.office) return false;
+        // Check if any location matches the filter (supports multiple GL Line locations)
+        if (filterConfig.office) {
+          const matchesLocation = row.locations?.includes(filterConfig.office) || row.location === filterConfig.office;
+          if (!matchesLocation) return false;
+        }
         if (filterConfig.category && row.category !== filterConfig.category) return false;
 
         // Vendor ACH Status filter
@@ -473,7 +484,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     { key: 'invoice', label: 'Invoice', width: '14%' },
     { key: 'vendor', label: 'Vendor', width: '14%' },
     { key: 'amount', label: 'Amount', width: '10%' },
-    { key: 'office', label: 'Office', width: '12%' },
+    { key: 'location', label: 'Location', width: '12%' },
     { key: 'invoiceDate', label: 'Invoice Date', width: '12%' },
     { key: 'dueDate', label: 'Due Date', width: '12%' },
     { key: 'category', label: 'Category', width: '22%' },

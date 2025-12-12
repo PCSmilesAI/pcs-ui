@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "509992-1",
+  "invoice_date": "10/13/2025",
+  "due_date": "11/12/2025",
+  "invoice_total": "8.42",
+  "office_location": "Columbia",
+  "line_items": [],
+  "source_file": "Invoice 509992-1_bf17758e.pdf",
+  "parsed_at": "2025-12-12T15:55:45.760988+00:00"
 }

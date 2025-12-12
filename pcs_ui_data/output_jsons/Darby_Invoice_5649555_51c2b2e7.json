@@ -1,10 +1,27 @@
 {
-  "invoice_number": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5649555",
   "invoice_date": "",
+  "due_date": "",
   "invoice_total": "",
-  "office_location": "Ridgefield",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "54848",
+      "product_name": "ORCA FOAM STANDARD OF-101010",
+      "Quantity": "2",
+      "unit_price": "177.38",
+      "line_item_total": "177.38"
+    },
+    {
+      "product_number": "",
+      "product_name": "SUTURE CHRM 3/8 FS-2 3/0 18\" DARBY 27.66 27.66 TX",
+      "Quantity": "8",
+      "unit_price": "27.66",
+      "line_item_total": "27.66"
+    }
+  ],
+  "source_file": "Darby_Invoice_5649555_51c2b2e7.pdf",
+  "parsed_at": "2025-12-12T15:55:17.868292+00:00"
 }

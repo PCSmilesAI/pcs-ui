@@ -1,10 +1,55 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5615421",
+  "invoice_date": "21/04/25",
+  "due_date": "",
+  "invoice_total": "343.1",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "1 = 107-6840 35/BX Polybite Tray Anterior 1 1 15.5",
+      "Quantity": "1",
+      "unit_price": "15.55",
+      "line_item_total": "15.55"
+    },
+    {
+      "product_number": "",
+      "product_name": "1 900-1281 EA MaxiTemp HP C&B Kit 4:1 A2 1 1 * 82.",
+      "Quantity": "1",
+      "unit_price": "82.15",
+      "line_item_total": "82.15"
+    },
+    {
+      "product_number": "",
+      "product_name": "3 429-0005 20/BX SafeGauze HemoStat 1 1 81.38 81.3",
+      "Quantity": "3",
+      "unit_price": "81.38",
+      "line_item_total": "81.38"
+    },
+    {
+      "product_number": "",
+      "product_name": "4 555-0626 20/BX Oragix Periodontal Gel 2.5% 1 1 P",
+      "Quantity": "4",
+      "unit_price": "153.51",
+      "line_item_total": "153.51"
+    },
+    {
+      "product_number": "021590",
+      "product_name": "U0 8855M.32.016 FGMINI (F) RD 5P PK",
+      "Quantity": "1",
+      "unit_price": "73.55",
+      "line_item_total": "76.50"
+    },
+    {
+      "product_number": "021592",
+      "product_name": "U0 5855M.32.016 FGMINI (SC) RD 5P PK",
+      "Quantity": "2",
+      "unit_price": "80.85",
+      "line_item_total": "70.90"
+    }
+  ],
+  "source_file": "img20251111_11132335_69e127a8.pdf",
+  "parsed_at": "2025-12-12T16:06:55.776280+00:00"
 }

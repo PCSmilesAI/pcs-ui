@@ -1,10 +1,34 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "PLEASE",
+  "invoice_date": "07-29-2025",
+  "due_date": "08/28/2025",
+  "invoice_total": "415805.0",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SHP: 10 Futar Fast Normal Pack Cart",
+      "Quantity": "10",
+      "unit_price": "44.00",
+      "line_item_total": "440.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "SHP: 2 Panasil Tray Fast Heavy Np Cart",
+      "Quantity": "2",
+      "unit_price": "45.00",
+      "line_item_total": "90.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "Pic X-Light Normal Pack Cart",
+      "Quantity": "1",
+      "unit_price": "53.00",
+      "line_item_total": "53.00"
+    }
+  ],
+  "source_file": "415805_6c402938.pdf",
+  "parsed_at": "2025-12-12T15:53:56.295450+00:00"
 }

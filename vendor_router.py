@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
 Vendor Router - Routes PDF invoices to appropriate vendor parsers
+
+This version uses confidence-based vendor detection via vendor_detector.py
+for smarter routing decisions.
 """
 
 import os
@@ -22,25 +25,59 @@ if not os.path.isabs(DATA_DIR):
 OUTPUT_FOLDER = os.path.join(DATA_DIR, "output_jsons/")
 QUEUE_WRITER = os.path.join(PARSER_FOLDER, "invoice_queue_writer.py")
 
-# Vendor parser mappings
+# Complete vendor parser mappings (including new parsers)
 VENDOR_PARSERS = {
     'epic': 'epic_parser.py',
     'patterson': 'patterson_invoice_parser_FINAL_WITH_JSON_SAFE.py',
     'henry': 'henry_parser.py',
     'exodus': 'exodus_parser.py',
     'artisan': 'parse_artisan_dental_exporting_fixed.py',
-    'tc': 'parse_tc_dental_invoice.py'
+    'tc': 'parse_tc_dental_invoice.py',
+    'darby': 'darby_parser.py',
+    'dandy': 'dandy_parser.py',
+    'brasseler': 'brasseler_parser.py',
+    'ctr_services': 'ctr_services_parser.py',
+    'a1_professional': 'a1_professional_parser.py',
+    'comcast': 'comcast_parser.py',
+    'bridgeford': 'bridgeford_parser.py',
+    'general': 'general_invoice_parser.py',
 }
 
-def detect_vendor_from_pdf(filepath):
-    """Detect vendor by running all parsers and seeing which one succeeds"""
+# Confidence threshold for routing (0-1)
+CONFIDENCE_THRESHOLD = 0.5
+
+
+def detect_vendor_smart(filepath):
+    """
+    Use vendor_detector.py for confidence-based vendor detection.
+    Returns (vendor, confidence) tuple.
+    """
+    try:
+        from vendor_detector import detect_vendor
+        result = detect_vendor(filepath, CONFIDENCE_THRESHOLD)
+        return result.vendor, result.confidence, result.parser_file
+    except ImportError:
+        # Fallback to legacy detection if vendor_detector not available
+        return detect_vendor_legacy(filepath), 0.5, None
+    except Exception as e:
+        print(f"⚠️ Smart detection error: {e}", file=sys.stderr)
+        return None, 0.0, None
+
+
+def detect_vendor_legacy(filepath):
+    """
+    Legacy vendor detection - runs parsers sequentially.
+    Kept for backward compatibility.
+    """
     for vendor, parser in VENDOR_PARSERS.items():
+        if vendor == 'general':
+            continue  # Skip general parser in detection
+            
         parser_path = os.path.join(PARSER_FOLDER, parser)
         if not os.path.exists(parser_path):
             continue
             
         try:
-            # Pass environment variables to parser subprocess
             env = os.environ.copy()
             env['PCS_DATA_DIR'] = DATA_DIR
 
@@ -52,22 +89,12 @@ def detect_vendor_from_pdf(filepath):
                 env=env
             )
 
-            # Check for successful parsing based on vendor-specific indicators
             if result.returncode == 0:
-                if vendor == 'epic' and "Extracted" in result.stdout:
+                # Check for successful parsing indicators
+                stdout_lower = result.stdout.lower()
+                if vendor in stdout_lower or "invoice parsed" in stdout_lower:
                     return vendor
-                elif vendor == 'henry' and ("Henry schein" in result.stdout or "Henry Schein" in result.stdout):
-                    return vendor
-                elif vendor == 'patterson' and ("Patterson" in result.stdout):
-                    return vendor
-                elif vendor == 'exodus' and ("Exodus" in result.stdout):
-                    return vendor
-                elif vendor == 'artisan' and ("Artisan" in result.stdout):
-                    return vendor
-                elif vendor == 'tc' and ("TC" in result.stdout or "T.C." in result.stdout):
-                    return vendor
-                # For other vendors, check if they output valid JSON
-                elif "vendor" in result.stdout and "invoice_number" in result.stdout:
+                if "vendor" in result.stdout and "invoice_number" in result.stdout:
                     return vendor
                     
         except subprocess.TimeoutExpired:
@@ -77,18 +104,20 @@ def detect_vendor_from_pdf(filepath):
     
     return None
 
+
 def run_parser(filepath, vendor):
     """Run the appropriate vendor parser"""
     parser = VENDOR_PARSERS.get(vendor)
     if not parser:
+        print(f"⚠️ No parser found for vendor: {vendor}", file=sys.stderr)
         return False
 
     parser_path = os.path.join(PARSER_FOLDER, parser)
     if not os.path.exists(parser_path):
+        print(f"⚠️ Parser file not found: {parser_path}", file=sys.stderr)
         return False
 
     try:
-        # Pass environment variables to parser subprocess
         env = os.environ.copy()
         env['PCS_DATA_DIR'] = DATA_DIR
 
@@ -96,12 +125,23 @@ def run_parser(filepath, vendor):
             ["python3", parser_path, filepath],
             capture_output=True,
             text=True,
-            timeout=30,
+            timeout=60,
             env=env
         )
-        return result.returncode == 0
-    except Exception:
+        
+        if result.returncode == 0:
+            print(f"✅ {vendor} parser succeeded", file=sys.stderr)
+            return True
+        else:
+            print(f"❌ {vendor} parser failed: {result.stderr}", file=sys.stderr)
+            return False
+    except subprocess.TimeoutExpired:
+        print(f"⏱️ {vendor} parser timed out", file=sys.stderr)
         return False
+    except Exception as e:
+        print(f"❌ Error running {vendor} parser: {e}", file=sys.stderr)
+        return False
+
 
 def find_latest_json_file():
     """Find the most recently created JSON file in output_jsons"""
@@ -113,11 +153,11 @@ def find_latest_json_file():
         if not json_files:
             return None
 
-        # Sort by modification time, most recent first
         json_files.sort(key=lambda f: os.path.getmtime(os.path.join(OUTPUT_FOLDER, f)), reverse=True)
         return os.path.join(OUTPUT_FOLDER, json_files[0])
     except Exception:
         return None
+
 
 def call_queue_writer(filepath, vendor):
     """Call invoice_queue_writer to add invoice to queue"""
@@ -125,10 +165,7 @@ def call_queue_writer(filepath, vendor):
         return False
 
     try:
-        # Wait a moment for the JSON file to be created
         time.sleep(0.5)
-
-        # Find the most recently created JSON file
         json_path = find_latest_json_file()
         if json_path:
             result = subprocess.run(
@@ -141,6 +178,7 @@ def call_queue_writer(filepath, vendor):
         return False
     except Exception:
         return False
+
 
 def handle_multi_invoice_pdf(filepath, vendor, source_message_id):
     """
@@ -161,13 +199,13 @@ def handle_multi_invoice_pdf(filepath, vendor, source_message_id):
         if result.returncode == 0:
             invoices = json.loads(result.stdout.strip())
             if isinstance(invoices, list) and len(invoices) > 1:
-                print(f"📦 Processing {len(invoices)} invoices from multi-invoice PDF")
-                # Each invoice will be ingested separately by queue_writer
+                print(f"📦 Processing {len(invoices)} invoices from multi-invoice PDF", file=sys.stderr)
                 return True
     except Exception:
         pass
 
     return False
+
 
 def main():
     if len(sys.argv) < 2:
@@ -183,51 +221,53 @@ def main():
         sys.exit(1)
 
     vendor = None
+    confidence = 0.0
 
-    # If vendor was detected from email, try that first
+    # Step 1: If vendor was pre-detected from email, try that first
     if detected_vendor and detected_vendor in VENDOR_PARSERS:
+        print(f"🔄 Trying pre-detected vendor: {detected_vendor}", file=sys.stderr)
         if run_parser(filepath, detected_vendor):
             vendor = detected_vendor
+            confidence = 0.9  # High confidence since email detection + parser success
 
-    # Otherwise, try to detect vendor from PDF content
+    # Step 2: Use smart vendor detection
     if not vendor:
-        vendor = detect_vendor_from_pdf(filepath)
+        print(f"🔍 Running smart vendor detection...", file=sys.stderr)
+        vendor, confidence, parser_file = detect_vendor_smart(filepath)
+        
+        if vendor and vendor != 'unknown' and confidence >= CONFIDENCE_THRESHOLD:
+            print(f"📊 Detected: {vendor} (confidence: {confidence:.0%})", file=sys.stderr)
+            if run_parser(filepath, vendor):
+                pass  # Success, vendor is set
+            else:
+                # Parser failed, try fallback
+                print(f"⚠️ {vendor} parser failed, trying fallback...", file=sys.stderr)
+                vendor = None
 
-    # If no vendor detected, run general parser fallback
-    if not vendor:
-        general_parser = os.path.join(PARSER_FOLDER, 'general_invoice_parser.py')
-        if os.path.exists(general_parser):
-            try:
-                # Pass environment variables to parser subprocess
-                env = os.environ.copy()
-                env['PCS_DATA_DIR'] = DATA_DIR
+    # Step 3: Fallback to general parser
+    if not vendor or vendor == 'unknown':
+        print(f"📄 Using general parser fallback...", file=sys.stderr)
+        if run_parser(filepath, 'general'):
+            vendor = "general"
+            confidence = 0.3
+        else:
+            print("unknown", file=sys.stderr)
+            sys.exit(1)
 
-                result = subprocess.run(
-                    ["python3", general_parser, filepath],
-                    capture_output=True,
-                    text=True,
-                    timeout=90,
-                    env=env
-                )
-                if result.returncode == 0:
-                    vendor = "general"
-            except Exception:
-                pass
-
-    # If we found a vendor, check for multi-invoice PDFs first
+    # Step 4: Handle multi-invoice PDFs
     if vendor:
-        # Try to handle as multi-invoice PDF
         if handle_multi_invoice_pdf(filepath, vendor, source_message_id):
             print(vendor)
             sys.exit(0)
 
-        # Otherwise, process as single invoice
+        # Step 5: Add to queue
         call_queue_writer(filepath, vendor)
         print(vendor)
         sys.exit(0)
     else:
         print("unknown", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

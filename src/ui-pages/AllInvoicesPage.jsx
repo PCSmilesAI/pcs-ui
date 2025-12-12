@@ -77,13 +77,19 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
               ? rawTotal
               : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.-]/g, '')) || 0;
 
+          // Get locations from GL Lines (invoice_categories classes)
+          const locations = invoice.locations || [];
+          const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
+          const locationDisplay = locations.length > 0 
+            ? locations.join(', ') 
+            : (officeRaw || 'Unknown');
           return {
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
             vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
             amount: `$${numericTotal.toFixed(2)}`,
-            // Use office_id first (effective value from 3-layer system)
-            office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
+            location: locationDisplay,
+            locations: locations, // Keep array for filtering
             status: formatStatusForDisplay(invoice.status),
             category:
               (Array.isArray(invoice.invoice_categories) && invoice.invoice_categories[0]?.category_name) ||
@@ -147,13 +153,19 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           typeof amountCents === 'number'
             ? amountCents / 100  // Convert cents to dollars
             : parseFloat(String(amountCents ?? '0').replace(/[^0-9.-]/g, '')) / 100;
+        // Get locations from GL Lines (invoice_categories classes)
+        const locations = invoice.locations || [];
+        const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
+        const locationDisplay = locations.length > 0 
+          ? locations.join(', ') 
+          : (officeRaw || 'Unknown');
         return {
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
           vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
           amount: `$${numericTotal.toFixed(2)}`,
-          // Use office_id first (effective value from 3-layer system)
-          office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
+          location: locationDisplay,
+          locations: locations, // Keep array for filtering
           status: formatStatusForDisplay(invoice.status),
           category: invoice.category || 'Other',
           invoiceDate: formatDate(invoice.invoice_date || null),
@@ -197,7 +209,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
     { key: 'invoice', label: 'Invoice', width: '16%' },
     { key: 'vendor', label: 'Vendor', width: '16%' },
     { key: 'amount', label: 'Amount', width: '12%' },
-    { key: 'office', label: 'Office', width: '14%' },
+    { key: 'location', label: 'Location', width: '14%' },
     { key: 'category', label: 'Category', width: '24%' },
     { key: 'status', label: 'Status', width: '14%' },
   ];
@@ -229,7 +241,11 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
         }
 
         if (effectiveFilters.vendor && row.vendor !== effectiveFilters.vendor) return false;
-        if (effectiveFilters.office && row.office !== effectiveFilters.office) return false;
+        // Check if any location matches the filter (supports multiple GL Line locations)
+        if (effectiveFilters.office) {
+          const matchesLocation = row.locations?.includes(effectiveFilters.office) || row.location === effectiveFilters.office;
+          if (!matchesLocation) return false;
+        }
         if (effectiveFilters.category && row.category !== effectiveFilters.category) return false;
 
         // Vendor ACH Status filter

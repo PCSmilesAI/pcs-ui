@@ -1,10 +1,20 @@
 {
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
   "invoice_number": "",
-  "invoice_date": "",
+  "invoice_date": "09/23/25",
+  "due_date": "10/23/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Eugene",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "@@ SIG DISTILLD WATER 9.64",
+      "Quantity": "2119007518",
+      "unit_price": "9.54",
+      "line_item_total": "5"
+    }
+  ],
+  "source_file": "Scan_2025_09_23_16_25_21_155_35de43e0.pdf",
+  "parsed_at": "2025-12-12T15:56:44.678669+00:00"
 }

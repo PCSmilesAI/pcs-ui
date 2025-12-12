@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "82872-2090-043",
+  "invoice_date": "03/01/2025",
+  "due_date": "03/08/2025",
+  "invoice_total": "4686.10",
+  "office_location": "Eugene",
+  "line_items": [],
+  "source_file": "Smiles Dental Services Eugene_Feb 2025_78fc7e2d.pdf",
+  "parsed_at": "2025-12-12T16:03:03.488006+00:00"
 }

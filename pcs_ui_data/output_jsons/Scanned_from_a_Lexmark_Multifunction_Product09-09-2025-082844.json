@@ -1,10 +1,55 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "RTHWEST",
+  "invoice_date": "08/31/2025",
+  "due_date": "09/30/2025",
+  "invoice_total": "",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "W HARVARD AVE 270-2240-01",
+      "Quantity": "1683",
+      "unit_price": "501599",
+      "line_item_total": "1"
+    },
+    {
+      "product_number": "",
+      "product_name": "WATER CHARGE",
+      "Quantity": "1",
+      "unit_price": "469.45",
+      "line_item_total": "469.45"
+    },
+    {
+      "product_number": "",
+      "product_name": "BASE CHARGE",
+      "Quantity": "1",
+      "unit_price": "37.82",
+      "line_item_total": "37.82"
+    },
+    {
+      "product_number": "",
+      "product_name": "STORM DRAIN",
+      "Quantity": "1",
+      "unit_price": "113.16",
+      "line_item_total": "113.16"
+    },
+    {
+      "product_number": "",
+      "product_name": "Current Charges",
+      "Quantity": "1",
+      "unit_price": "620.43",
+      "line_item_total": "620.43"
+    },
+    {
+      "product_number": "",
+      "product_name": "SF Nonalas Avenite \u00ab Rasehiira OR",
+      "Quantity": "900",
+      "unit_price": "4747",
+      "line_item_total": "0"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082844.pdf",
+  "parsed_at": "2025-12-12T15:57:34.213052+00:00"
 }

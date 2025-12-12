@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
+  "vendor": "CTR Services",
+  "vendor_name": "CTR Services Northwest / Campbell Commercial",
+  "invoice_number": "CTR-DAT6093",
   "invoice_date": "",
   "due_date": "",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Roseburg",
+  "line_items": [],
+  "source_file": "Invoice 9008841226_d4ccae94.pdf",
+  "parsed_at": "2025-12-12T15:55:46.271702+00:00"
 }

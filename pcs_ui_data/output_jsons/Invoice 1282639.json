@@ -1,10 +1,12 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "CONTRACT",
+  "invoice_date": "9/10/2025",
+  "due_date": "10/10/2025",
+  "invoice_total": "",
+  "office_location": "Roseburg",
+  "line_items": [],
+  "source_file": "Invoice 1282639.pdf",
+  "parsed_at": "2025-12-12T15:55:40.756487+00:00"
 }

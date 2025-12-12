@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "240",
+  "invoice_date": "10/3/25",
+  "due_date": "11/02/2025",
+  "invoice_total": "900.0",
+  "office_location": "Salem",
+  "line_items": [],
+  "source_file": "invoice_240_7a1d8cf0.pdf",
+  "parsed_at": "2025-12-12T16:06:58.295971+00:00"
 }

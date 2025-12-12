@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5634549",
+  "invoice_date": "11/05/25",
+  "due_date": "12/05/2025",
   "invoice_total": "",
   "office_location": "Eugene",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "line_items": [
+    {
+      "product_number": "55415",
+      "product_name": "TEMP C\u00e9&B 10:1 SOML W/TIPS Al DARBY",
+      "Quantity": "2",
+      "unit_price": "46.06",
+      "line_item_total": "46.06"
+    }
+  ],
+  "source_file": "Darby_Invoice_5634549_ef30c429.pdf",
+  "parsed_at": "2025-12-12T15:55:06.411385+00:00"
 }

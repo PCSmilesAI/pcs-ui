@@ -61,13 +61,19 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
               typeof amountCents === 'number'
                 ? amountCents / 100  // Convert cents to dollars
                 : parseFloat(String(amountCents ?? '0').replace(/[^0-9.\-]/g, '')) / 100;
+            // Get locations from GL Lines (invoice_categories classes)
+            const locations = invoice.locations || [];
+            const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
+            const locationDisplay = locations.length > 0 
+              ? locations.join(', ') 
+              : (officeRaw || 'Unknown');
             return ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
             vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
             amount: `$${numericTotal.toFixed(2)}`,
-            // Use office_id first (effective value from 3-layer system)
-            office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
+            location: locationDisplay,
+            locations: locations, // Keep array for filtering
             dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
@@ -128,13 +134,19 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
             typeof rawTotal === 'number'
               ? rawTotal
               : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+          // Get locations from GL Lines (invoice_categories classes)
+          const locations = invoice.locations || [];
+          const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
+          const locationDisplay = locations.length > 0 
+            ? locations.join(', ') 
+            : (officeRaw || 'Unknown');
           return ({
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
           vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
           amount: `$${numericTotal.toFixed(2)}`,
-          // Use office_id first (effective value from 3-layer system)
-          office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
+          location: locationDisplay,
+          locations: locations, // Keep array for filtering
           dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
           invoice_date: invoice.invoice_date,
           due_date: invoice.due_date,
@@ -176,7 +188,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
     { key: 'invoice', label: 'Invoice' },
     { key: 'vendor', label: 'Vendor' },
     { key: 'amount', label: 'Amount', align: 'right' },
-    { key: 'office', label: 'Office' },
+    { key: 'location', label: 'Location' },
     { key: 'dateCompleted', label: 'Date Completed' },
   ];
 
@@ -193,8 +205,11 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
     }
     // vendor filter
     if (filters.vendor && row.vendor !== filters.vendor) return false;
-    // office filter
-    if (filters.office && row.office !== filters.office) return false;
+    // location filter (supports multiple GL Line locations)
+    if (filters.office) {
+      const matchesLocation = row.locations?.includes(filters.office) || row.location === filters.office;
+      if (!matchesLocation) return false;
+    }
     // PDF Attachment filter
     if (filters.hasAttachment) {
       // Check if pdf_path exists and is not empty

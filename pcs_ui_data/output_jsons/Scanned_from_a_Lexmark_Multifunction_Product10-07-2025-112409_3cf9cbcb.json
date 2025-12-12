@@ -1,18 +1,12 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [
-    {
-      "product_number": "863-3363",
-      "product_name": "",
-      "Quantity": "1",
-      "unit_price": "0.00",
-      "line_item_total": "115.65"
-    }
-  ],
-  "due_date": ""
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "t",
+  "invoice_date": "09/10/25",
+  "due_date": "10/10/2025",
+  "invoice_total": "648196.0",
+  "office_location": "Roseburg",
+  "line_items": [],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product10-07-2025-112409_3cf9cbcb.pdf",
+  "parsed_at": "2025-12-12T15:59:30.190668+00:00"
 }

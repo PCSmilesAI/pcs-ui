@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "number",
+  "invoice_date": "10/01/2025",
+  "due_date": "10/31/2025",
   "invoice_total": "",
   "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "West\u00a0Diehl\u00a0STE",
+      "Quantity": "1751",
+      "unit_price": "40",
+      "line_item_total": "0"
+    }
+  ],
+  "source_file": "Monthly Statement - October 2025_58303b8a.pdf",
+  "parsed_at": "2025-12-12T15:56:12.542173+00:00"
 }

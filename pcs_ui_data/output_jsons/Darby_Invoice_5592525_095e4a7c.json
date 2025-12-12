@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5599525",
+  "invoice_date": "09/29/25",
+  "due_date": "10/29/2025",
   "invoice_total": "",
   "office_location": "Roseburg",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "line_items": [
+    {
+      "product_number": "57303",
+      "product_name": "ASPIRATING SYRNGE 1.8CC TPE CW DARBY",
+      "Quantity": "2",
+      "unit_price": "11.07",
+      "line_item_total": "11.07"
+    }
+  ],
+  "source_file": "Darby_Invoice_5592525_095e4a7c.pdf",
+  "parsed_at": "2025-12-12T15:54:23.489695+00:00"
 }

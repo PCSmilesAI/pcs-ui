@@ -1,10 +1,27 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Brasseler",
+  "vendor_name": "Brasseler USA Dental",
+  "invoice_number": "6403360",
+  "invoice_date": "10/22/25",
+  "due_date": "11/21/2025",
+  "invoice_total": "80.97",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "021590U0",
+      "product_name": "8855M.32.016 FGMINI (F) RD 5P",
+      "Quantity": "1",
+      "unit_price": "76.50",
+      "line_item_total": "17.25"
+    },
+    {
+      "product_number": "021592U0",
+      "product_name": "5855M.32.016 FGMINI (SC) RD 5P",
+      "Quantity": "2",
+      "unit_price": "70.90",
+      "line_item_total": "47.00"
+    }
+  ],
+  "source_file": "INV-06403360_fcc96a21.pdf",
+  "parsed_at": "2025-12-12T15:55:21.723582+00:00"
 }

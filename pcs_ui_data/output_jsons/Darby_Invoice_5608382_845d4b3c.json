@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "0921885",
+  "invoice_date": "10/13/25",
+  "due_date": "11/12/2025",
   "invoice_total": "",
-  "office_location": "Ridgefield",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "8096159",
+      "product_name": "8096159, 12PK| TRAY AWAY PERFORATD #5 S UP 0921886",
+      "Quantity": "5",
+      "unit_price": "9.14",
+      "line_item_total": "9.14"
+    }
+  ],
+  "source_file": "Darby_Invoice_5608382_845d4b3c.pdf",
+  "parsed_at": "2025-12-12T15:54:33.801321+00:00"
 }

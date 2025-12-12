@@ -1,10 +1,112 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "31624-4781-050",
+  "invoice_date": "10/01/2025",
+  "due_date": "10/08/2025",
+  "invoice_total": "984.00",
+  "office_location": "Riddle",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for john wright",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/29/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Rustie Brown",
+      "description": "Doctor: Maggie Cote",
+      "Quantity": "1",
+      "unit_price": "150.00",
+      "line_item_total": "150.00",
+      "service_date": "09/25/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Janet Syperda",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "169.00",
+      "line_item_total": "169.00",
+      "service_date": "09/17/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Rick Chapman",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kenneth Hays",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Rex Edfinger",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for arlene carleton",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Marrie Hodges",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/10/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for william meyer",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "105.00",
+      "line_item_total": "105.00",
+      "service_date": "09/04/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Fred Herinckx",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/03/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Sharon Cason",
+      "description": "Doctor: Bernard McGraw DDS",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/03/25"
+    }
+  ],
+  "source_file": "Dandy_82273d32.pdf",
+  "parsed_at": "2025-12-12T15:54:05.735768+00:00"
 }

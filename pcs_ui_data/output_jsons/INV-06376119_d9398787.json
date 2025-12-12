@@ -1,10 +1,83 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Brasseler",
+  "vendor_name": "Brasseler USA Dental",
+  "invoice_number": "6376119",
+  "invoice_date": "09/18/25",
+  "due_date": "10/18/2025",
+  "invoice_total": "368.15",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "001097T0",
+      "product_name": "2 RA ROUND H1.21.010 10P",
+      "Quantity": "1",
+      "unit_price": "50.40",
+      "line_item_total": "16.00"
+    },
+    {
+      "product_number": "024422U0",
+      "product_name": "FLDC5M DIACOMP MED GRN 14MM 3P",
+      "Quantity": "1",
+      "unit_price": "47.60",
+      "line_item_total": "40.29"
+    },
+    {
+      "product_number": "013158U0",
+      "product_name": "ET9F 16BLD (EF) H135F.31.014 5P",
+      "Quantity": "1",
+      "unit_price": "56.50",
+      "line_item_total": "35.00"
+    },
+    {
+      "product_number": "019080U0",
+      "product_name": "W16DCHP.21 BLUE DIALITE HP PT",
+      "Quantity": "1",
+      "unit_price": "47.60",
+      "line_item_total": "52.10"
+    },
+    {
+      "product_number": "000541U2",
+      "product_name": "BRIO202.21.050 RA BRN BLT 10P",
+      "Quantity": "1",
+      "unit_price": "0.00",
+      "line_item_total": "40.40"
+    },
+    {
+      "product_number": "016207U0",
+      "product_name": "H2DFHP DIALITE HP FINE 1P",
+      "Quantity": "1",
+      "unit_price": "47.60",
+      "line_item_total": "21.31"
+    },
+    {
+      "product_number": "012925U0",
+      "product_name": "5811.31.037 (SC) BARREL 5P",
+      "Quantity": "1",
+      "unit_price": "70.90",
+      "line_item_total": "23.50"
+    },
+    {
+      "product_number": "000724U0",
+      "product_name": "7901 FG FLAME H246.31.009 5P",
+      "Quantity": "1",
+      "unit_price": "62.00",
+      "line_item_total": "25.00"
+    },
+    {
+      "product_number": "024424U0",
+      "product_name": "FLDC5-5M DIACOMP ASST MED/FN 6P",
+      "Quantity": "1",
+      "unit_price": "47.60",
+      "line_item_total": "80.58"
+    },
+    {
+      "product_number": "015506U0",
+      "product_name": "8845KR.31.018 (F) MOD FLT TP 5P",
+      "Quantity": "1",
+      "unit_price": "76.50",
+      "line_item_total": "17.25"
+    }
+  ],
+  "source_file": "INV-06376119_d9398787.pdf",
+  "parsed_at": "2025-12-12T15:55:21.589269+00:00"
 }

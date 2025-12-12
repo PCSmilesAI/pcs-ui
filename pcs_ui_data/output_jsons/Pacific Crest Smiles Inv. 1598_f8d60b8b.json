@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "INVOICE",
+  "invoice_date": "8/15/2025",
+  "due_date": "9/14/2025",
+  "invoice_total": "8806.64",
+  "office_location": "Ridgefield",
+  "line_items": [],
+  "source_file": "Pacific Crest Smiles Inv. 1598_f8d60b8b.pdf",
+  "parsed_at": "2025-12-12T15:56:13.271822+00:00"
 }

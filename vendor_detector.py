@@ -1,0 +1,326 @@
+#!/usr/bin/env python3
+"""
+Vendor Detector - Confidence-based vendor detection for invoice PDFs
+
+This module provides a smart vendor detection system that:
+1. Extracts text from PDFs (digital or OCR)
+2. Matches against known vendor patterns
+3. Returns vendor with confidence score
+4. Only routes to vendor parser if confidence > threshold
+"""
+
+import os
+import re
+from dataclasses import dataclass
+from typing import Optional, List, Tuple
+
+# Vendor patterns with weighted keywords
+# Format: vendor_key -> list of (pattern, weight) tuples
+# Higher weight = stronger indicator
+VENDOR_PATTERNS = {
+    'henry': [
+        (r'henry\s*schein', 1.0),
+        (r'henryschein', 1.0),
+        (r'Ship/Sold-To:', 0.3),  # Henry-specific format
+        (r'Invoice Total', 0.2),
+        (r'\d{3}-\d{4}', 0.1),  # Product number format
+    ],
+    'patterson': [
+        (r'patterson', 1.0),
+        (r'patterson\s*dental', 1.0),
+        (r'patterson companies', 0.8),
+    ],
+    'epic': [
+        (r'epic\s*dental', 1.0),
+        (r'epic dental lab', 1.0),
+        (r'epicdentallab', 0.9),
+    ],
+    'tc': [
+        (r't\.?c\.?\s*dental', 1.0),
+        (r'tc dental lab', 1.0),
+    ],
+    'artisan': [
+        (r'artisan\s*dental', 1.0),
+        (r'artisan dental lab', 1.0),
+    ],
+    'exodus': [
+        (r'exodus', 0.9),
+        (r'exodus dental', 1.0),
+    ],
+    'darby': [
+        (r'darby\s*dental', 1.0),
+        (r'darbydental\.com', 1.0),
+        (r'darby dental supply', 1.0),
+        (r'Darby_Invoice', 0.9),
+    ],
+    'dandy': [
+        (r'dandy', 0.7),
+        (r'meetdandy', 1.0),
+        (r'zima international', 0.8),  # Dandy's parent company
+        (r'Powered by Dandy', 1.0),
+    ],
+    'brasseler': [
+        (r'brasseler', 1.0),
+        (r'brasseler\s*usa', 1.0),
+    ],
+    'ctr_services': [
+        (r'ctr\s*services', 1.0),
+        (r'campbell\s*commercial', 0.9),
+        (r'campbellre\.com', 1.0),
+        (r'campbellcre\.appfolio', 0.9),
+    ],
+    'a1_professional': [
+        (r'a-?1\s*professional', 1.0),
+        (r'aoneprofessional', 1.0),
+        (r'A-1 Professional Exterminating', 1.0),
+    ],
+    'comcast': [
+        (r'comcast', 1.0),
+        (r'comcast\s*business', 1.0),
+        (r'xfinity', 0.7),
+    ],
+    'bridgeford': [
+        (r'bridgeford', 1.0),
+        (r'BFV Invoice', 1.0),
+    ],
+}
+
+# Parser file mappings
+VENDOR_PARSERS = {
+    'epic': 'epic_parser.py',
+    'patterson': 'patterson_invoice_parser_FINAL_WITH_JSON_SAFE.py',
+    'henry': 'henry_parser.py',
+    'exodus': 'exodus_parser.py',
+    'artisan': 'parse_artisan_dental_exporting_fixed.py',
+    'tc': 'parse_tc_dental_invoice.py',
+    'darby': 'darby_parser.py',
+    'dandy': 'dandy_parser.py',
+    'brasseler': 'brasseler_parser.py',
+    'ctr_services': 'ctr_services_parser.py',
+    'a1_professional': 'a1_professional_parser.py',
+    'comcast': 'comcast_parser.py',
+    'bridgeford': 'bridgeford_parser.py',
+    'general': 'general_invoice_parser.py',
+}
+
+
+@dataclass
+class VendorMatch:
+    """Result of vendor detection"""
+    vendor: str
+    confidence: float
+    matched_patterns: List[str]
+    parser_file: Optional[str]
+
+
+def extract_text_from_pdf(pdf_path: str) -> str:
+    """Extract text from PDF, with OCR fallback"""
+    text = ""
+    
+    # Try PyMuPDF first
+    try:
+        import fitz
+        doc = fitz.open(pdf_path)
+        for page in doc:
+            text += page.get_text('text')
+        doc.close()
+        
+        if text.strip():
+            return text
+    except Exception:
+        pass
+    
+    # OCR fallback
+    try:
+        import fitz
+        import pytesseract
+        from PIL import Image
+        
+        doc = fitz.open(pdf_path)
+        texts = []
+        for i, page in enumerate(doc):
+            if i >= 2:  # Only OCR first 2 pages
+                break
+            pix = page.get_pixmap(dpi=200)
+            img = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
+            texts.append(pytesseract.image_to_string(img))
+        doc.close()
+        return '\n'.join(texts)
+    except Exception:
+        pass
+    
+    return text
+
+
+def detect_vendor_from_filename(filename: str) -> Tuple[Optional[str], float]:
+    """Quick vendor detection from filename only"""
+    filename_lower = filename.lower()
+    
+    # High-confidence filename patterns
+    patterns = {
+        'darby': (['darby', 'darby_invoice'], 0.9),
+        'dandy': (['dandy'], 0.9),
+        'henry': (['henry', 'henryschein'], 0.9),
+        'patterson': (['patterson'], 0.9),
+        'epic': (['epic'], 0.8),
+        'tc': (['tc_dental', 'tc dental'], 0.9),
+        'artisan': (['artisan'], 0.9),
+        'exodus': (['exodus'], 0.9),
+        'brasseler': (['brasseler'], 0.9),
+        'ctr_services': (['ctr'], 0.7),
+        'a1_professional': (['a-1', 'aoneprofessional', 'a1_professional'], 0.9),
+        'comcast': (['comcast'], 0.9),
+        'bridgeford': (['bridgeford', 'bfv'], 0.8),
+    }
+    
+    for vendor, (keywords, confidence) in patterns.items():
+        for kw in keywords:
+            if kw in filename_lower:
+                return vendor, confidence
+    
+    return None, 0.0
+
+
+def detect_vendor_from_text(text: str) -> VendorMatch:
+    """
+    Detect vendor from PDF text content using weighted pattern matching.
+    Returns the best match with confidence score.
+    """
+    text_lower = text.lower()
+    
+    best_match = None
+    best_score = 0.0
+    best_patterns = []
+    
+    for vendor, patterns in VENDOR_PATTERNS.items():
+        score = 0.0
+        matched = []
+        
+        for pattern, weight in patterns:
+            matches = re.findall(pattern, text_lower, re.IGNORECASE)
+            if matches:
+                # Score based on number of matches and weight
+                pattern_score = min(1.0, len(matches) * 0.3) * weight
+                score += pattern_score
+                matched.append(pattern)
+        
+        # Normalize score (cap at 1.0)
+        score = min(1.0, score)
+        
+        if score > best_score:
+            best_score = score
+            best_match = vendor
+            best_patterns = matched
+    
+    if best_match:
+        parser_file = VENDOR_PARSERS.get(best_match)
+        return VendorMatch(
+            vendor=best_match,
+            confidence=best_score,
+            matched_patterns=best_patterns,
+            parser_file=parser_file
+        )
+    
+    return VendorMatch(
+        vendor='unknown',
+        confidence=0.0,
+        matched_patterns=[],
+        parser_file=None
+    )
+
+
+def detect_vendor(pdf_path: str, confidence_threshold: float = 0.5) -> VendorMatch:
+    """
+    Main vendor detection function.
+    
+    Args:
+        pdf_path: Path to the PDF file
+        confidence_threshold: Minimum confidence to return a match (default 0.5)
+        
+    Returns:
+        VendorMatch with vendor info and confidence score
+    """
+    filename = os.path.basename(pdf_path)
+    
+    # Quick check from filename first
+    filename_vendor, filename_confidence = detect_vendor_from_filename(filename)
+    if filename_vendor and filename_confidence >= confidence_threshold:
+        return VendorMatch(
+            vendor=filename_vendor,
+            confidence=filename_confidence,
+            matched_patterns=[f"filename:{filename}"],
+            parser_file=VENDOR_PARSERS.get(filename_vendor)
+        )
+    
+    # Extract text and analyze
+    text = extract_text_from_pdf(pdf_path)
+    if not text.strip():
+        return VendorMatch(
+            vendor='unknown',
+            confidence=0.0,
+            matched_patterns=[],
+            parser_file=None
+        )
+    
+    # Detect from text content
+    match = detect_vendor_from_text(text)
+    
+    # Boost confidence if filename also matches
+    if filename_vendor and filename_vendor == match.vendor:
+        match.confidence = min(1.0, match.confidence + 0.2)
+        match.matched_patterns.append(f"filename_confirmed:{filename}")
+    
+    # If below threshold, return as unknown
+    if match.confidence < confidence_threshold:
+        return VendorMatch(
+            vendor='unknown',
+            confidence=match.confidence,
+            matched_patterns=match.matched_patterns,
+            parser_file=VENDOR_PARSERS.get('general')
+        )
+    
+    return match
+
+
+def get_parser_for_vendor(vendor: str) -> Optional[str]:
+    """Get parser filename for a vendor"""
+    return VENDOR_PARSERS.get(vendor)
+
+
+def get_all_vendors() -> List[str]:
+    """Get list of all known vendors"""
+    return list(VENDOR_PARSERS.keys())
+
+
+if __name__ == "__main__":
+    import sys
+    import json
+    
+    if len(sys.argv) < 2:
+        print("Usage: python3 vendor_detector.py <pdf_path> [confidence_threshold]")
+        sys.exit(1)
+    
+    pdf_path = sys.argv[1]
+    threshold = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
+    
+    if not os.path.exists(pdf_path):
+        print(f"File not found: {pdf_path}")
+        sys.exit(1)
+    
+    result = detect_vendor(pdf_path, threshold)
+    
+    print(f"📄 File: {os.path.basename(pdf_path)}")
+    print(f"🏢 Vendor: {result.vendor}")
+    print(f"📊 Confidence: {result.confidence:.2%}")
+    print(f"🔍 Matched: {', '.join(result.matched_patterns)}")
+    print(f"📦 Parser: {result.parser_file or 'N/A'}")
+    
+    # Output JSON for programmatic use
+    output = {
+        'vendor': result.vendor,
+        'confidence': result.confidence,
+        'matched_patterns': result.matched_patterns,
+        'parser_file': result.parser_file,
+    }
+    print(f"\n{json.dumps(output, indent=2)}")
+

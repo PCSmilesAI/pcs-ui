@@ -1,10 +1,58 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "99148-1011-051",
+  "invoice_date": "11/01/2025",
+  "due_date": "11/08/2025",
+  "invoice_total": "1360.00",
+  "office_location": "Lebanon",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for Vanja Autry",
+      "description": "Doctor: Bob Friess",
+      "Quantity": "1",
+      "unit_price": "169.00",
+      "line_item_total": "169.00",
+      "service_date": "10/23/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Elizabeth Lotspeich",
+      "description": "Doctor: Bob Friess",
+      "Quantity": "1",
+      "unit_price": "204.00",
+      "line_item_total": "204.00",
+      "service_date": "10/17/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Carol Durrant",
+      "description": "Doctor: Bob Friess",
+      "Quantity": "1",
+      "unit_price": "80.00",
+      "line_item_total": "80.00",
+      "service_date": "10/09/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for robyn williams",
+      "description": "Doctor: Bob Friess",
+      "Quantity": "1",
+      "unit_price": "169.00",
+      "line_item_total": "169.00",
+      "service_date": "10/08/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Shaunna Vaughan",
+      "description": "Doctor: Bob Friess",
+      "Quantity": "1",
+      "unit_price": "738.00",
+      "line_item_total": "738.00",
+      "service_date": "10/08/25"
+    }
+  ],
+  "source_file": "Smiles Dental Services Lebanon_Oct 2025_78fc7e2d.pdf",
+  "parsed_at": "2025-12-12T16:03:04.394890+00:00"
 }

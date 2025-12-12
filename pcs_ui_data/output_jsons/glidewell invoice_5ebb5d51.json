@@ -1,10 +1,27 @@
 {
-  "invoice_number": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "No",
   "invoice_date": "11/17/2025",
+  "due_date": "12/17/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": "12/17/2025"
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "MacArthur Blvd. \u00a2 Newport Beach, CA",
+      "Quantity": "4141",
+      "unit_price": "9266",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "Mission St SE Ste",
+      "Quantity": "2245",
+      "unit_price": "10",
+      "line_item_total": "0"
+    }
+  ],
+  "source_file": "glidewell invoice_5ebb5d51.pdf",
+  "parsed_at": "2025-12-12T16:04:56.405007+00:00"
 }

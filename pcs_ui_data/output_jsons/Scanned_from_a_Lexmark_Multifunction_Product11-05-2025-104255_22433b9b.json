@@ -1,10 +1,27 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "s",
+  "invoice_date": "10-14-2025",
+  "due_date": "11/13/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "1001005795} 10-14-2025 | osiors |",
+      "Quantity": "1",
+      "unit_price": "54.25",
+      "line_item_total": "54.25"
+    },
+    {
+      "product_number": "100000",
+      "product_name": "02 02",
+      "Quantity": "000678",
+      "unit_price": "001356",
+      "line_item_total": "001356"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product11-05-2025-104255_22433b9b.pdf",
+  "parsed_at": "2025-12-12T16:01:42.034460+00:00"
 }

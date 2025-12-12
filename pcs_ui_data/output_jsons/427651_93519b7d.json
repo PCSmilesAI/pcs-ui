@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "PLEASE",
+  "invoice_date": "10-30-2025",
+  "due_date": "11/29/2025",
+  "invoice_total": "427651.0",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SHP: 2 VIS CORE D25",
+      "Quantity": "2",
+      "unit_price": "155.00",
+      "line_item_total": "310.00"
+    }
+  ],
+  "source_file": "427651_93519b7d.pdf",
+  "parsed_at": "2025-12-12T15:53:57.106541+00:00"
 }

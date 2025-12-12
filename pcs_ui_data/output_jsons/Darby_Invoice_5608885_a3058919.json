@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5609885",
+  "invoice_date": "10/14/25",
+  "due_date": "11/13/2025",
   "invoice_total": "",
   "office_location": "Roseburg",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "line_items": [
+    {
+      "product_number": "9533590",
+      "product_name": "1 9533590/100BX|PROPHY ANGLE DISP SOFT CUP DARBY 2",
+      "Quantity": "1",
+      "unit_price": "22.88",
+      "line_item_total": "22.88"
+    }
+  ],
+  "source_file": "Darby_Invoice_5608885_a3058919.pdf",
+  "parsed_at": "2025-12-12T15:54:37.789664+00:00"
 }

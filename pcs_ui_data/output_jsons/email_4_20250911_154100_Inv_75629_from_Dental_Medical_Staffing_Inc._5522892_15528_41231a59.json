@@ -1,10 +1,12 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "75629",
+  "invoice_date": "9/8/2025",
+  "due_date": "10/08/2025",
+  "invoice_total": "",
+  "office_location": "Eugene",
+  "line_items": [],
+  "source_file": "email_4_20250911_154100_Inv_75629_from_Dental_Medical_Staffing_Inc._5522892_15528_41231a59.pdf",
+  "parsed_at": "2025-12-12T16:04:16.625348+00:00"
 }

@@ -1,10 +1,62 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "INVOICE",
+  "invoice_date": "11/03/25",
+  "due_date": "12/03/2025",
+  "invoice_total": "432.73",
+  "office_location": "Milwaukie",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "NE HAZEL DELL AVE. #501              MILWAUKIE OR",
+      "Quantity": "10013",
+      "unit_price": "9726",
+      "line_item_total": "7"
+    },
+    {
+      "product_number": "ROUTE",
+      "product_name": "",
+      "Quantity": "000609",
+      "unit_price": "000655",
+      "line_item_total": "000655"
+    },
+    {
+      "product_number": "06661103N2OUSPE",
+      "product_name": "4    0",
+      "Quantity": "4",
+      "unit_price": "4",
+      "line_item_total": "4"
+    },
+    {
+      "product_number": "30206661103OX",
+      "product_name": "USPE",
+      "Quantity": "4",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "6661103RF2HAZ13",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "61103RF3FUELSUR",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "0.00",
+      "Quantity": "1",
+      "unit_price": "456.73",
+      "line_item_total": "456.73"
+    }
+  ],
+  "source_file": "billing01_A0760_c_d2f8082a.pdf",
+  "parsed_at": "2025-12-12T16:03:28.624709+00:00"
 }

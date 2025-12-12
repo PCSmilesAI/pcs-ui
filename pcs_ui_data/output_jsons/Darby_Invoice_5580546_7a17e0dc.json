@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5580546",
+  "invoice_date": "09/17/25",
+  "due_date": "10/17/2025",
   "invoice_total": "",
-  "office_location": "Lebanon",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "9550100",
+      "product_name": "EA|EXPLORER 5 DE 04-850 DARBY",
+      "Quantity": "2",
+      "unit_price": "4.90",
+      "line_item_total": "8.00"
+    }
+  ],
+  "source_file": "Darby_Invoice_5580546_7a17e0dc.pdf",
+  "parsed_at": "2025-12-12T15:54:16.811943+00:00"
 }

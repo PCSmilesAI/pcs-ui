@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Brasseler",
+  "vendor_name": "Brasseler USA Dental",
+  "invoice_number": "6350171",
+  "invoice_date": "08/15/25",
+  "due_date": "09/14/2025",
+  "invoice_total": "121.72",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "013158U0",
+      "product_name": "ET9F 16BLD (EF) H135F.31.014 5P",
+      "Quantity": "3",
+      "unit_price": "54.40",
+      "line_item_total": "105.00"
+    }
+  ],
+  "source_file": "INV-06350171_4b1428b7.pdf",
+  "parsed_at": "2025-12-12T15:55:21.451491+00:00"
 }

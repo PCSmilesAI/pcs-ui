@@ -1,10 +1,20 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "oice",
+  "invoice_date": "4/25/2025",
+  "due_date": "5/15/2025",
+  "invoice_total": "",
+  "office_location": "Columbia",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SE 15th Street, Suite",
+      "Quantity": "16415",
+      "unit_price": "10",
+      "line_item_total": "5"
+    }
+  ],
+  "source_file": "email_1_20250911_154049_ColumbiaSmiles12855_14a67f54.pdf",
+  "parsed_at": "2025-12-12T16:03:43.313989+00:00"
 }

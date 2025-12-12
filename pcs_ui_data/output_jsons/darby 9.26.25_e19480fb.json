@@ -1,10 +1,12 @@
 {
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
   "invoice_number": "",
   "invoice_date": "",
+  "due_date": "",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
+  "office_location": "Roseburg",
   "line_items": [],
-  "due_date": ""
+  "source_file": "darby 9.26.25_e19480fb.pdf",
+  "parsed_at": "2025-12-12T16:03:32.815366+00:00"
 }

@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "S",
+  "invoice_date": "09/20/2025",
+  "due_date": "10/20/2025",
   "invoice_total": "",
   "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "line_items": [],
+  "source_file": "Ultradent  Payment Receipt_202509200900579521034451_f4790971.pdf",
+  "parsed_at": "2025-12-12T16:03:06.588253+00:00"
 }

@@ -1,10 +1,34 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "4434148",
+  "invoice_date": "09/30/25",
+  "due_date": "10/30/2025",
+  "invoice_total": "86.91",
+  "office_location": "Lebanon",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "1 543-0221 = 3.4OZ/BT PreviDent 5000 Sensitive Min",
+      "Quantity": "1",
+      "unit_price": "6.49",
+      "line_item_total": "38.94"
+    },
+    {
+      "product_number": "",
+      "product_name": "2 543-0219 3.40Z/BT PreviDent 5000 Booster Plus Sp",
+      "Quantity": "2",
+      "unit_price": "6.49",
+      "line_item_total": "25.96"
+    },
+    {
+      "product_number": "",
+      "product_name": "3 570-2249 160Z/BT Acclean Chlorhexidine Rinse Min",
+      "Quantity": "3",
+      "unit_price": "3.26",
+      "line_item_total": "6.52"
+    }
+  ],
+  "source_file": "img20251007_12513374_821e7e5b.pdf",
+  "parsed_at": "2025-12-12T16:06:38.453015+00:00"
 }

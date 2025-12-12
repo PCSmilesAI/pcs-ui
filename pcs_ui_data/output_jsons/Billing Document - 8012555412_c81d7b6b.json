@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "8012555412",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "OICE",
+  "invoice_date": "12-03-2025",
+  "due_date": "01/02/2026",
+  "invoice_total": "53.95",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "1001005795 0000008012555412",
+      "Quantity": "028883",
+      "unit_price": "0000005395",
+      "line_item_total": "3"
+    }
+  ],
+  "source_file": "Billing Document - 8012555412_c81d7b6b.pdf",
+  "parsed_at": "2025-12-12T15:53:59.194794+00:00"
 }

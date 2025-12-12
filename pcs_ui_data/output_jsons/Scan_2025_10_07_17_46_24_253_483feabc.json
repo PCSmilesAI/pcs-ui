@@ -1,10 +1,20 @@
 {
-  "invoice_number": "2197880",
-  "invoice_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "NO",
+  "invoice_date": "09/30/2025",
+  "due_date": "10/30/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "S 65th Ave Suite",
+      "Quantity": "109",
+      "unit_price": "10",
+      "line_item_total": "4"
+    }
+  ],
+  "source_file": "Scan_2025_10_07_17_46_24_253_483feabc.pdf",
+  "parsed_at": "2025-12-12T15:56:53.636734+00:00"
 }

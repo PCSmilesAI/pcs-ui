@@ -1,10 +1,49 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "00094-8082-050",
+  "invoice_date": "11/01/2025",
+  "due_date": "11/08/2025",
+  "invoice_total": "1979.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for Hanna Hayden",
+      "description": "Doctor: Rosalynn Mumpower",
+      "Quantity": "1",
+      "unit_price": "1599.00",
+      "line_item_total": "1599.00",
+      "service_date": "10/08/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Andrea Hoard",
+      "description": "Doctor: Galen Kellenberger",
+      "Quantity": "1",
+      "unit_price": "120.00",
+      "line_item_total": "120.00",
+      "service_date": "10/07/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Libby Wagner",
+      "description": "Doctor: Rosalynn Mumpower",
+      "Quantity": "1",
+      "unit_price": "120.00",
+      "line_item_total": "120.00",
+      "service_date": "09/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Ramiro Briones Lopez",
+      "description": "Doctor: Rosalynn Mumpower",
+      "Quantity": "1",
+      "unit_price": "140.00",
+      "line_item_total": "140.00",
+      "service_date": "09/25/25"
+    }
+  ],
+  "source_file": "Smiles Dental Services Salem_Oct 2025_78fc7e2d.pdf",
+  "parsed_at": "2025-12-12T16:03:05.942417+00:00"
 }

@@ -1,18 +1,20 @@
 {
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
   "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
+  "invoice_date": "08/26/25",
+  "due_date": "09/25/2025",
+  "invoice_total": "115.65",
+  "office_location": "Roseburg",
   "line_items": [
     {
-      "product_number": "863-3363",
-      "product_name": "",
+      "product_number": "",
+      "product_name": "PACIFIC CREST SMILES Current Charges:",
       "Quantity": "1",
-      "unit_price": "0.00",
-      "line_item_total": "231.30"
+      "unit_price": "115.65",
+      "line_item_total": "115.65"
     }
   ],
-  "due_date": ""
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082700_edadf083.pdf",
+  "parsed_at": "2025-12-12T15:57:20.033390+00:00"
 }

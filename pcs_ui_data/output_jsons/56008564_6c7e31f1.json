@@ -1,10 +1,20 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "NUMBER",
+  "invoice_date": "10/07/2025",
+  "due_date": "11/06/2025",
+  "invoice_total": "",
+  "office_location": "Vancouver",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SE 15TH ST STE",
+      "Quantity": "16415",
+      "unit_price": "50",
+      "line_item_total": "1"
+    }
+  ],
+  "source_file": "56008564_6c7e31f1.pdf",
+  "parsed_at": "2025-12-12T15:53:57.723124+00:00"
 }

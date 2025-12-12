@@ -85,9 +85,11 @@ export async function PUT(
     const body = await req.json();
     const {
       name,
+      description,
       vendor_name,
       gl_account_name,
-      template_type = 'even_split',
+      template_type = 'table_template',
+      allocation_mode = 'split_evenly',
       company_code,
       table_rows
     } = body;
@@ -107,56 +109,80 @@ export async function PUT(
       );
     }
 
+    // Validate allocation_mode
+    const validModes = ['split_evenly', 'fixed_amount', 'percentage'];
+    if (!validModes.includes(allocation_mode)) {
+      return NextResponse.json(
+        { error: 'allocation_mode must be split_evenly, fixed_amount, or percentage' },
+        { status: 400 }
+      );
+    }
+
+    // Validate percentage total if percentage mode
+    if (allocation_mode === 'percentage' && Array.isArray(table_rows)) {
+      const percentTotal = table_rows.reduce((sum, row) => sum + (parseFloat(row.percentage) || 0), 0);
+      if (Math.abs(percentTotal - 100) > 0.01) {
+        return NextResponse.json(
+          { error: `Percentage allocation must equal 100%. Current total: ${percentTotal.toFixed(1)}%` },
+          { status: 400 }
+        );
+      }
+    }
+
     const db = getDatabase();
     const now = new Date().toISOString();
 
-    // Update template
+    // Update template with new fields
     db.prepare(`
       UPDATE coding_templates SET
         name = ?,
+        description = ?,
         vendor_name = ?,
         gl_account_name = ?,
         template_type = ?,
+        allocation_mode = ?,
         company_code = ?,
         updated_at = ?
       WHERE id = ?
     `).run(
       name,
+      description || null,
       vendor_name,
       gl_account_name || null,
       template_type,
+      allocation_mode,
       company_code || null,
       now,
       templateId
     );
 
-    // Delete existing rows and insert new ones for table templates
-    if (template_type === 'table_template' && Array.isArray(table_rows) && table_rows.length > 0) {
-      db.prepare('DELETE FROM table_template_rows WHERE template_id = ?').run(templateId);
+    // Delete existing rows and insert new ones
+    db.prepare('DELETE FROM table_template_rows WHERE template_id = ?').run(templateId);
 
+    if (Array.isArray(table_rows) && table_rows.length > 0) {
       for (const row of table_rows) {
         const rowId = uuidv4();
-        const amountCents = Math.round((parseFloat(row.amount) || 0) * 100);
+        const amountCents = row.amount ? Math.round((parseFloat(row.amount) || 0) * 100) : null;
+        const percentage = row.percentage ? parseFloat(row.percentage) : null;
 
         db.prepare(`
           INSERT INTO table_template_rows (
-            id, template_id, gl_account_path, category_name, class_name,
-            location_name, amount_cents, created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            id, template_id, gl_account_path, category_name, description, class_name,
+            location_name, amount_cents, percentage, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
           rowId,
           templateId,
           row.gl_account_path || '',
           row.category_name || '',
+          row.description || '',
           row.class_name || '',
           row.location_name || '',
           amountCents,
+          percentage,
           now
         );
       }
-    } else if (template_type === 'even_split') {
-      // Delete table rows if switching from table to even split
-      db.prepare('DELETE FROM table_template_rows WHERE template_id = ?').run(templateId);
     }
 
     // Fetch updated template

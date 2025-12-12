@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5608383",
+  "invoice_date": "10/13/25",
+  "due_date": "11/12/2025",
   "invoice_total": "",
   "office_location": "Roseburg",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "line_items": [
+    {
+      "product_number": "9500410",
+      "product_name": "2) A* (9500410 1LB|ALGINATE DUSTLESS FAST 1LB DARB",
+      "Quantity": "9500410",
+      "unit_price": "11.62",
+      "line_item_total": "23.24"
+    }
+  ],
+  "source_file": "Darby_Invoice_5608383_dab3f5be.pdf",
+  "parsed_at": "2025-12-12T15:54:36.875906+00:00"
 }

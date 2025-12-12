@@ -1,10 +1,55 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "INDUSTRIAL",
+  "invoice_date": "09/22/25",
+  "due_date": "10/22/2025",
+  "invoice_total": "155.23",
+  "office_location": "Milwaukie",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "NE HAZEL DELL AVE. #501 MILWAUKIE OR",
+      "Quantity": "10013",
+      "unit_price": "9726",
+      "line_item_total": "7"
+    },
+    {
+      "product_number": "",
+      "product_name": "3006253(09220x USPE 3 0} 3 1) MEDICAL OXYGEN CYL 19.50)",
+      "Quantity": "1",
+      "unit_price": "58.50",
+      "line_item_total": "58.50"
+    },
+    {
+      "product_number": "",
+      "product_name": "2N20USPE 1 ti) J MEDICAL NITROUS OXIDE CYL 86.00)",
+      "Quantity": "3006253092",
+      "unit_price": "86.0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "30062530922RF2HAZ13 al ti) HAZMAT/HANDLING FEE EA 4.00)",
+      "Quantity": "1",
+      "unit_price": "4.00",
+      "line_item_total": "4.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "2RF3FUELSUR 1 ti) FUEL COST SURCHARGE ROUTE EACH",
+      "Quantity": "3006253092",
+      "unit_price": "6.73",
+      "line_item_total": "6.73"
+    },
+    {
+      "product_number": "",
+      "product_name": "Under Current Tariff Conditipns Delivery Charge",
+      "Quantity": "1",
+      "unit_price": "24.00",
+      "line_item_total": "24.00"
+    }
+  ],
+  "source_file": "billing01_A0760_c_4ed009da.pdf",
+  "parsed_at": "2025-12-12T16:03:28.422296+00:00"
 }
