@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
+import { parseInvoiceAmount } from '../lib/vendorUtils';
 
 /**
  * Reports page summarises invoice data into charts and tables. The
@@ -52,18 +53,8 @@ export default function ReportsPage() {
             }
           }
 
-          // Parse amount - EXACTLY matching VendorsPage logic (lines 64-74)
-          // Handle both cents and dollar formats
-          let amountNum = 0;
-          const amountStr = String(inv.amount_cents ?? inv.invoice_total ?? inv.total ?? '0');
-          if (amountStr.includes('.')) {
-            // Dollar format
-            amountNum = parseFloat(amountStr);
-          } else {
-            // Cents format - convert to dollars
-            amountNum = parseInt(amountStr, 10) / 100;
-          }
-          amountNum = isNaN(amountNum) ? 0 : amountNum;
+          // Use helper to properly parse amount (handles cents vs dollars)
+          const amountNum = parseInvoiceAmount(inv);
 
           // Only include outstanding (unpaid) invoices
           // EXACTLY matching VendorsPage logic (lines 78-79)

@@ -3,7 +3,7 @@ import InvoiceTable from '../components/InvoiceTable.jsx';
 import PaymentHistoryTable from '../components/PaymentHistoryTable.jsx';
 import ACHBadge from '../ui/ach/ACHBadge';
 import { fetchInvoiceQueue } from '../lib/fetchQueue';
-import { normalizeVendorName, getDisplayVendorName, vendorNamesMatch } from '../lib/vendorUtils';
+import { normalizeVendorName, getDisplayVendorName, vendorNamesMatch, parseInvoiceAmount } from '../lib/vendorUtils';
 import { notifyAchUpdate } from '../ui/ach/achEventBus';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
 
@@ -74,16 +74,8 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
         console.log('✅ VendorDetailPage: Found', filtered.length, 'invoices for vendor');
 
         const mapped = filtered.map((invoice) => {
-          // Parse amount - handle both cents and dollar formats
-          let amountNum = 0;
-          const amountStr = String(invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? '0');
-          if (amountStr.includes('.')) {
-            // Dollar format
-            amountNum = parseFloat(amountStr);
-          } else {
-            // Cents format - convert to dollars
-            amountNum = parseInt(amountStr, 10) / 100;
-          }
+          // Use helper to properly parse amount (handles cents vs dollars)
+          const amountNum = parseInvoiceAmount(invoice);
 
           return {
             invoice: invoice.invoice_number || 'Unknown',

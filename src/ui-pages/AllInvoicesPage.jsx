@@ -7,7 +7,7 @@ import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
-import { getDisplayVendorName } from '../lib/vendorUtils';
+import { getDisplayVendorName, parseInvoiceAmount } from '../lib/vendorUtils';
 
 export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
   const searchParams = useSearchParams();
@@ -147,12 +147,8 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           if (Number.isNaN(parsed.getTime())) return 'N/A';
           return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
         };
-        // Amount is stored in cents in the database, convert to dollars
-        const amountCents = invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? 0;
-        const numericTotal =
-          typeof amountCents === 'number'
-            ? amountCents / 100  // Convert cents to dollars
-            : parseFloat(String(amountCents ?? '0').replace(/[^0-9.-]/g, '')) / 100;
+        // Use helper to properly parse amount (handles cents vs dollars)
+        const numericTotal = parseInvoiceAmount(invoice);
         // Get locations from GL Lines (invoice_categories classes)
         const locations = invoice.locations || [];
         const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';

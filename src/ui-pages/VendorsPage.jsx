@@ -5,7 +5,7 @@ import { fetchInvoiceQueue } from '../lib/fetchQueue';
 import { useInvoiceData } from '../context/InvoiceDataContext';
 import ACHBadge from '../ui/ach/ACHBadge';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
-import { normalizeVendorName, getDisplayVendorName, getNormalizedVendorFromInvoice } from '../lib/vendorUtils';
+import { normalizeVendorName, getDisplayVendorName, getNormalizedVendorFromInvoice, parseInvoiceAmount } from '../lib/vendorUtils';
 
 // Helper function to get user email from localStorage/cookie
 function getUserEmail() {
@@ -61,17 +61,8 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
           const normalizedName = getNormalizedVendorFromInvoice(invoice);
           const displayName = getDisplayVendorName(invoice.vendor_name || invoice.vendor);
 
-          // Parse amount - handle both cents and dollar formats
-          let amountNum = 0;
-          const amountStr = String(invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? '0');
-          if (amountStr.includes('.')) {
-            // Dollar format
-            amountNum = parseFloat(amountStr);
-          } else {
-            // Cents format - convert to dollars
-            amountNum = parseInt(amountStr, 10) / 100;
-          }
-          amountNum = isNaN(amountNum) ? 0 : amountNum;
+          // Use helper to properly parse amount (handles cents vs dollars)
+          const amountNum = parseInvoiceAmount(invoice);
 
           // Only count outstanding (unpaid) invoices for the outstanding amount
           // Paid invoices should not be included in the outstanding total

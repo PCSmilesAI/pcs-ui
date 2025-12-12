@@ -4,7 +4,7 @@ import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useInvoiceData } from '../context/InvoiceDataContext';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
-import { getDisplayVendorName } from '../lib/vendorUtils';
+import { getDisplayVendorName, parseInvoiceAmount } from '../lib/vendorUtils';
 
 /**
  * Page for the "Complete" view. Lists invoices that have been
@@ -55,12 +55,8 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
         const transformedData = data
           .filter((invoice) => ['paid', 'completed'].includes(String(invoice.status || '').toLowerCase()))
           .map((invoice) => {
-            // Amount is stored in cents in the database, convert to dollars
-            const amountCents = invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? 0;
-            const numericTotal =
-              typeof amountCents === 'number'
-                ? amountCents / 100  // Convert cents to dollars
-                : parseFloat(String(amountCents ?? '0').replace(/[^0-9.\-]/g, '')) / 100;
+            // Use helper to properly parse amount (handles cents vs dollars)
+            const numericTotal = parseInvoiceAmount(invoice);
             // Get locations from GL Lines (invoice_categories classes)
             const locations = invoice.locations || [];
             const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
