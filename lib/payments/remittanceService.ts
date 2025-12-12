@@ -3,6 +3,8 @@
 import sgMail from '@sendgrid/mail';
 import Mailjet from 'node-mailjet';
 import nodemailer from 'nodemailer';
+import fs from 'fs/promises';
+import path from 'path';
 
 // SECURITY: HTML escaping function to prevent XSS
 function escapeHtml(text: string | number | undefined): string {
@@ -21,6 +23,100 @@ export interface RemittanceInvoice {
   invoiceNumber: string;
   amount: number;
   dueDate: string;
+  pdfPath?: string; // Path to original invoice PDF for attachment
+}
+
+// Attachment structure for email attachments
+interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+}
+
+/**
+ * SECURITY: Validate that a file path is within the allowed base directory
+ * Prevents directory traversal attacks
+ */
+function isPathWithinBase(filePath: string, baseDir: string): boolean {
+  const resolvedPath = path.resolve(baseDir, filePath);
+  const resolvedBase = path.resolve(baseDir);
+  return resolvedPath.startsWith(resolvedBase + path.sep) || resolvedPath === resolvedBase;
+}
+
+/**
+ * Securely read invoice PDF files from the filesystem
+ * Returns array of attachments for email
+ */
+async function loadInvoicePDFAttachments(
+  invoices: RemittanceInvoice[]
+): Promise<EmailAttachment[]> {
+  const attachments: EmailAttachment[] = [];
+  const baseDir = process.cwd();
+
+  for (const invoice of invoices) {
+    if (!invoice.pdfPath) continue;
+
+    try {
+      // Normalize the path - remove leading slash if present
+      const normalizedPath = invoice.pdfPath.replace(/^\//, '');
+
+      // Try multiple possible locations for the PDF
+      const candidates = [
+        path.join(baseDir, normalizedPath),
+        path.join(baseDir, 'public', normalizedPath),
+        path.join(baseDir, 'pcs_ui_data', normalizedPath),
+        invoice.pdfPath.startsWith('/') ? invoice.pdfPath : path.join(baseDir, invoice.pdfPath),
+      ];
+
+      let pdfBuffer: Buffer | null = null;
+      let foundPath: string | null = null;
+
+      for (const candidate of candidates) {
+        // SECURITY: Validate path is within allowed directory
+        if (!isPathWithinBase(candidate, baseDir)) {
+          console.warn('[REMITTANCE] Path traversal attempt detected', { 
+            invoice: invoice.invoiceNumber,
+            path: candidate 
+          });
+          continue;
+        }
+
+        try {
+          pdfBuffer = await fs.readFile(candidate);
+          foundPath = candidate;
+          break;
+        } catch {
+          // File not found at this location, try next
+        }
+      }
+
+      if (pdfBuffer && foundPath) {
+        const filename = `invoice-${invoice.invoiceNumber.replace(/[^a-zA-Z0-9-_]/g, '_')}.pdf`;
+        attachments.push({
+          filename,
+          content: pdfBuffer,
+          contentType: 'application/pdf',
+        });
+        console.log('[REMITTANCE] Invoice PDF loaded', { 
+          invoice: invoice.invoiceNumber,
+          path: foundPath,
+          size: pdfBuffer.length 
+        });
+      } else {
+        console.warn('[REMITTANCE] Invoice PDF not found', { 
+          invoice: invoice.invoiceNumber,
+          pdfPath: invoice.pdfPath 
+        });
+      }
+    } catch (err: any) {
+      console.warn('[REMITTANCE] Error loading invoice PDF', { 
+        invoice: invoice.invoiceNumber,
+        error: err?.message 
+      });
+    }
+  }
+
+  return attachments;
 }
 
 export interface RemittanceData {
@@ -215,11 +311,12 @@ function generateRemittanceHTML(data: RemittanceData): string {
 
 /**
  * Send remittance email via SendGrid, Mailjet, or SMTP
+ * Includes the remittance receipt PDF and original invoice PDFs as attachments
  */
 export async function sendRemittanceEmail(
   data: RemittanceData,
   pdfBuffer: Buffer
-): Promise<{ ok: boolean; provider?: string; error?: string }> {
+): Promise<{ ok: boolean; provider?: string; error?: string; attachmentCount?: number }> {
   const fromEmail = process.env.PCS_FROM_EMAIL || process.env.EMAIL_FROM || 'no-reply@pcsmilesai.com';
   const fromName = process.env.PCS_FROM_NAME || 'PCS AI';
 
@@ -227,28 +324,56 @@ export async function sendRemittanceEmail(
   const htmlBody = generateEmailHTML(data);
   const textBody = generateEmailText(data);
 
+  // Load invoice PDF attachments
+  const invoiceAttachments = await loadInvoicePDFAttachments(data.invoices);
+  const totalAttachments = 1 + invoiceAttachments.length; // remittance + invoices
+  
+  console.log('[REMITTANCE] Preparing email', {
+    vendor: data.vendorName,
+    invoiceCount: data.invoices.length,
+    attachedInvoicePDFs: invoiceAttachments.length,
+  });
+
   // Try SendGrid first
   const sgKey = process.env.SENDGRID_API_KEY || '';
   if (sgKey) {
     try {
       sgMail.setApiKey(sgKey);
+      
+      // Build attachments array: remittance receipt + invoice PDFs
+      const sgAttachments: Array<{
+        content: string;
+        filename: string;
+        type: string;
+        disposition: string;
+      }> = [
+        {
+          content: pdfBuffer.toString('base64'),
+          filename: `remittance-${data.transferId}.pdf`,
+          type: 'application/pdf',
+          disposition: 'attachment',
+        },
+        ...invoiceAttachments.map((att) => ({
+          content: att.content.toString('base64'),
+          filename: att.filename,
+          type: 'application/pdf',
+          disposition: 'attachment',
+        })),
+      ];
+
       await sgMail.send({
         to: data.vendorEmail,
         from: { email: fromEmail, name: fromName },
         subject,
         text: textBody,
         html: htmlBody,
-        attachments: [
-          {
-            content: pdfBuffer.toString('base64'),
-            filename: `remittance-${data.transferId}.pdf`,
-            type: 'application/pdf',
-            disposition: 'attachment',
-          },
-        ],
+        attachments: sgAttachments,
       });
-      console.log('[REMITTANCE][SendGrid] Email sent successfully', { vendor: data.vendorName });
-      return { ok: true, provider: 'sendgrid' };
+      console.log('[REMITTANCE][SendGrid] Email sent successfully', { 
+        vendor: data.vendorName,
+        attachmentCount: totalAttachments,
+      });
+      return { ok: true, provider: 'sendgrid', attachmentCount: totalAttachments };
     } catch (e: any) {
       console.warn('[REMITTANCE][SendGrid] Failed', e?.message);
     }
@@ -260,6 +385,21 @@ export async function sendRemittanceEmail(
   if (mjKey && mjSecret) {
     try {
       const mj = Mailjet.apiConnect(mjKey, mjSecret);
+      
+      // Build attachments array for Mailjet
+      const mjAttachments = [
+        {
+          ContentType: 'application/pdf',
+          Filename: `remittance-${data.transferId}.pdf`,
+          Base64Content: pdfBuffer.toString('base64'),
+        },
+        ...invoiceAttachments.map((att) => ({
+          ContentType: 'application/pdf',
+          Filename: att.filename,
+          Base64Content: att.content.toString('base64'),
+        })),
+      ];
+
       await mj.post('send', { version: 'v3.1' }).request({
         Messages: [
           {
@@ -268,18 +408,15 @@ export async function sendRemittanceEmail(
             Subject: subject,
             TextPart: textBody,
             HTMLPart: htmlBody,
-            Attachments: [
-              {
-                ContentType: 'application/pdf',
-                Filename: `remittance-${data.transferId}.pdf`,
-                Base64Content: pdfBuffer.toString('base64'),
-              },
-            ],
+            Attachments: mjAttachments,
           },
         ],
       });
-      console.log('[REMITTANCE][Mailjet] Email sent successfully', { vendor: data.vendorName });
-      return { ok: true, provider: 'mailjet' };
+      console.log('[REMITTANCE][Mailjet] Email sent successfully', { 
+        vendor: data.vendorName,
+        attachmentCount: totalAttachments,
+      });
+      return { ok: true, provider: 'mailjet', attachmentCount: totalAttachments };
     } catch (e: any) {
       console.warn('[REMITTANCE][Mailjet] Failed', e?.message);
     }
@@ -300,23 +437,34 @@ export async function sendRemittanceEmail(
         auth: { user: smtpUser, pass: smtpPass },
       });
 
+      // Build attachments array for nodemailer
+      const smtpAttachments = [
+        {
+          filename: `remittance-${data.transferId}.pdf`,
+          content: pdfBuffer,
+          contentType: 'application/pdf',
+        },
+        ...invoiceAttachments.map((att) => ({
+          filename: att.filename,
+          content: att.content,
+          contentType: att.contentType,
+        })),
+      ];
+
       await transporter.sendMail({
         from: `${fromName} <${fromEmail}>`,
         to: data.vendorEmail,
         subject,
         text: textBody,
         html: htmlBody,
-        attachments: [
-          {
-            filename: `remittance-${data.transferId}.pdf`,
-            content: pdfBuffer,
-            contentType: 'application/pdf',
-          },
-        ],
+        attachments: smtpAttachments,
       });
 
-      console.log('[REMITTANCE][SMTP] Email sent successfully', { vendor: data.vendorName });
-      return { ok: true, provider: 'smtp' };
+      console.log('[REMITTANCE][SMTP] Email sent successfully', { 
+        vendor: data.vendorName,
+        attachmentCount: totalAttachments,
+      });
+      return { ok: true, provider: 'smtp', attachmentCount: totalAttachments };
     } catch (e: any) {
       console.warn('[REMITTANCE][SMTP] Failed', e?.message);
     }
