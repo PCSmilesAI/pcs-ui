@@ -76,12 +76,17 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   const user = getCurrentUser(req);
+  const roles = await readRoles();
 
-  // Only admins can create templates
+  // Admins and AP Managers can create templates
   const userIsAdmin = await isAdmin(user.email);
-  if (!userIsAdmin) {
+  const isAPManager = roles.ap_authorizers.some(
+    (email: string) => email.toLowerCase() === user.email.toLowerCase()
+  );
+  
+  if (!userIsAdmin && !isAPManager) {
     return NextResponse.json(
-      { error: 'Only admins can create coding templates' },
+      { error: 'Only admins and AP managers can create coding templates' },
       { status: 403 }
     );
   }
