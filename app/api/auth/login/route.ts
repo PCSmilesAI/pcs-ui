@@ -41,9 +41,22 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // If local auth fails, try Gist as fallback (for legacy users)
+    // Check if user exists in local DB - if so, local DB is source of truth
+    const localUser = getUserByEmail(email);
+    
+    if (localUser) {
+      // User exists locally - DO NOT fall back to Gist
+      // This prevents Gist from overwriting password changes made in local DB
+      console.log(`❌ [AUTH] Local auth failed for existing user: ${email}`);
+      return NextResponse.json(
+        { success: false, message: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+    
+    // User doesn't exist locally - try Gist as fallback (for migration only)
     try {
-      console.log(`🔄 [AUTH] Trying Gist fallback for: ${email}`);
+      console.log(`🔄 [AUTH] User not in local DB, trying Gist for: ${email}`);
       const gistResponse = await fetch(`${request.nextUrl.origin}/api/gist-users`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -72,37 +85,19 @@ export async function POST(request: NextRequest) {
           if (isValid) {
             console.log(`✅ [AUTH] Gist login successful for: ${email}`);
             
-            // Sync user to local database for future logins
-            const { createUser, getUserByEmail: getLocalUser, updatePassword } = await import('@/lib/auth/localUserService');
-            const existingLocal = getLocalUser(email);
+            // Create user in local database (one-time migration)
+            const { createUser } = await import('@/lib/auth/localUserService');
+            await createUser(gistUser.email, gistUser.name, password, 'user');
+            console.log(`🔄 [AUTH] Migrated Gist user to local DB: ${email}`);
             
-            if (existingLocal) {
-              // User exists locally but password was wrong - sync password from Gist
-              await updatePassword(email, password);
-              console.log(`🔄 [AUTH] Synced Gist password to local DB: ${email}`);
-              
-              return NextResponse.json({
-                success: true,
-                user: {
-                  name: existingLocal.name,
-                  email: existingLocal.email,
-                  role: existingLocal.role
-                }
-              });
-            } else {
-              // New user - create in local database
-              await createUser(gistUser.email, gistUser.name, password, 'user');
-              console.log(`🔄 [AUTH] Created Gist user in local DB: ${email}`);
-              
-              return NextResponse.json({
-                success: true,
-                user: {
-                  name: gistUser.name,
-                  email: gistUser.email,
-                  role: 'user'
-                }
-              });
-            }
+            return NextResponse.json({
+              success: true,
+              user: {
+                name: gistUser.name,
+                email: gistUser.email,
+                role: 'user'
+              }
+            });
           }
         }
       }
