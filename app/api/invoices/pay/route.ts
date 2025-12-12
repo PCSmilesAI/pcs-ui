@@ -228,6 +228,7 @@ export async function POST(req: NextRequest) {
           invoiceNumber: p.invoice.invoice_number || p.invoice.invoice || p.invoiceId,
           amount: p.amount,
           dueDate: p.invoice.due_date || p.invoice.dueDate || 'N/A',
+          pdfPath: p.invoice.pdf_path || p.invoice.pdfPath, // Include invoice PDF for attachment
         }));
 
         // Generate PDF
