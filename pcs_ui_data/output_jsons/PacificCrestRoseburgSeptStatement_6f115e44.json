@@ -1,10 +1,146 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Patterson Dental",
+  "vendor_name": "Patterson Dental",
+  "invoice_number": "s",
+  "invoice_date": "09/20/25",
+  "due_date": "10/20/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "05/24/25 | Service Charge 1800007047 19.21 0.00",
+      "Quantity": "1",
+      "unit_price": "19.21",
+      "line_item_total": "19.21"
+    },
+    {
+      "product_number": "",
+      "product_name": "05/29/25 3037166562 3,055.95 0.00",
+      "Quantity": "1",
+      "unit_price": "3055.95",
+      "line_item_total": "3055.95"
+    },
+    {
+      "product_number": "P10022",
+      "product_name": "30374",
+      "Quantity": "9040",
+      "unit_price": "2508.95",
+      "line_item_total": "2508.95"
+    },
+    {
+      "product_number": "",
+      "product_name": "O6/21/25 | Service Charge 1600019452 92.412 0.00",
+      "Quantity": "1",
+      "unit_price": "52.12",
+      "line_item_total": "52.12"
+    },
+    {
+      "product_number": "",
+      "product_name": "07/22/25 | P0120 3038086394 2,082.60 0.00",
+      "Quantity": "1",
+      "unit_price": "2082.60",
+      "line_item_total": "2082.60"
+    },
+    {
+      "product_number": "",
+      "product_name": "OF/26/25 | Service Charge 1800036370 359.32 0.00",
+      "Quantity": "1",
+      "unit_price": "359.32",
+      "line_item_total": "359.32"
+    },
+    {
+      "product_number": "",
+      "product_name": "O8N2/25 |Eaglesot Sc 3038392981 281.79 0.00",
+      "Quantity": "1",
+      "unit_price": "261.79",
+      "line_item_total": "261.79"
+    },
+    {
+      "product_number": "",
+      "product_name": "O8N4/25 | Pidig2 3038490366 93.52 0.00",
+      "Quantity": "1",
+      "unit_price": "93.52",
+      "line_item_total": "93.52"
+    },
+    {
+      "product_number": "O8N425",
+      "product_name": "|P10192",
+      "Quantity": "3038490367",
+      "unit_price": "1158.39",
+      "line_item_total": "1158.39"
+    },
+    {
+      "product_number": "",
+      "product_name": "O8/22/25 | P101g92 3039619542 31.50 0.00",
+      "Quantity": "1",
+      "unit_price": "31.50",
+      "line_item_total": "31.50"
+    },
+    {
+      "product_number": "",
+      "product_name": "08/23/25 | Service Charge 1800043993 365.17 0.00",
+      "Quantity": "1",
+      "unit_price": "369.17",
+      "line_item_total": "369.17"
+    },
+    {
+      "product_number": "",
+      "product_name": "08/29/25 | P1028 3038728224 1218.91 0.00",
+      "Quantity": "1",
+      "unit_price": "1218.31",
+      "line_item_total": "1218.31"
+    },
+    {
+      "product_number": "",
+      "product_name": "09/03/25 | Ordered by Jennife 3038784733 705.42 0.00",
+      "Quantity": "1",
+      "unit_price": "705.42",
+      "line_item_total": "705.42"
+    },
+    {
+      "product_number": "",
+      "product_name": "08/04/25 S038792726 303.55 0.00",
+      "Quantity": "1",
+      "unit_price": "303.55",
+      "line_item_total": "303.55"
+    },
+    {
+      "product_number": "",
+      "product_name": "0911/25 |Eaglesot Sc 3038926644 281.79 0.00",
+      "Quantity": "1",
+      "unit_price": "261.79",
+      "line_item_total": "261.79"
+    },
+    {
+      "product_number": "",
+      "product_name": "OSN7/25 | Padars 3039054987 588.67 0.00",
+      "Quantity": "1",
+      "unit_price": "88.67",
+      "line_item_total": "88.67"
+    },
+    {
+      "product_number": "",
+      "product_name": "OSM7/25 |P10273 3039055924 85.29 0.00",
+      "Quantity": "1",
+      "unit_price": "85.29",
+      "line_item_total": "85.29"
+    },
+    {
+      "product_number": "",
+      "product_name": "Oo g/25 3039062879 303.55 0.00",
+      "Quantity": "1",
+      "unit_price": "303.55",
+      "line_item_total": "303.55"
+    },
+    {
+      "product_number": "",
+      "product_name": "09/20/25 | Service Charge 1800055246 122.00 0.00",
+      "Quantity": "1",
+      "unit_price": "122.00",
+      "line_item_total": "122.00"
+    }
+  ],
+  "source_file": "PacificCrestRoseburgSeptStatement_6f115e44.pdf",
+  "parsed_at": "2025-12-12T18:56:45.374615+00:00"
 }

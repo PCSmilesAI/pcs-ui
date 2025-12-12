@@ -1,12 +1,27 @@
 {
   "vendor": "Darby Dental",
-  "vendor_name": "Darby Dental Supply",
-  "invoice_number": "5533976",
+  "vendor_name": "Darby Dental",
+  "invoice_number": "NUMBER",
   "invoice_date": "08/29/25",
   "due_date": "09/28/2025",
   "invoice_total": "",
   "office_location": "Roseburg",
-  "line_items": [],
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Darby Dental Supply LLC",
+      "Quantity": "1",
+      "unit_price": "2038.67",
+      "line_item_total": "2038.67"
+    },
+    {
+      "product_number": "",
+      "product_name": "9997  4 777737841",
+      "Quantity": "3701224317",
+      "unit_price": "0000203867",
+      "line_item_total": "6"
+    }
+  ],
   "source_file": "8 29 25 Statement 37012243100 Pacific Crest Smiles -Vancouver_9b0af4a9.pdf",
-  "parsed_at": "2025-12-12T15:53:58.713711+00:00"
+  "parsed_at": "2025-12-12T18:54:28.413673+00:00"
 }

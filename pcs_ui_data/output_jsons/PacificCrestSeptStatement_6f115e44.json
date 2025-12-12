@@ -1,10 +1,230 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Patterson Dental",
+  "vendor_name": "Patterson Dental",
+  "invoice_number": "s",
+  "invoice_date": "09/20/25",
+  "due_date": "10/20/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "0494/25 3036403192 102.96 0.00",
+      "Quantity": "1",
+      "unit_price": "102.96",
+      "line_item_total": "102.96"
+    },
+    {
+      "product_number": "",
+      "product_name": "05/24/25 | Service Charge q1e00007044 12.83 0.00",
+      "Quantity": "1",
+      "unit_price": "12.83",
+      "line_item_total": "12.83"
+    },
+    {
+      "product_number": "",
+      "product_name": "06/21/25 | Service Charge 1800019449 65.18 0.00",
+      "Quantity": "1",
+      "unit_price": "65.16",
+      "line_item_total": "65.16"
+    },
+    {
+      "product_number": "",
+      "product_name": "06/23/25 | P1004 3037594555 46.00 0.00",
+      "Quantity": "1",
+      "unit_price": "46.00",
+      "line_item_total": "46.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "0624/25 | P1004 3037596553 445.53 0.00",
+      "Quantity": "1",
+      "unit_price": "449.83",
+      "line_item_total": "449.83"
+    },
+    {
+      "product_number": "",
+      "product_name": "06/24/25 3037602970 275.00 0.00",
+      "Quantity": "1",
+      "unit_price": "279.00",
+      "line_item_total": "279.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "0625/25 |P 10048 3037637815 15.69 0.00",
+      "Quantity": "1",
+      "unit_price": "19.69",
+      "line_item_total": "19.69"
+    },
+    {
+      "product_number": "",
+      "product_name": "Or0125 | Pi0064 3037714050 70.38 0.00",
+      "Quantity": "1",
+      "unit_price": "70.36",
+      "line_item_total": "70.36"
+    },
+    {
+      "product_number": "",
+      "product_name": "O75 | Pa1dd64 3037722018 8.23 0.00",
+      "Quantity": "1",
+      "unit_price": "8.23",
+      "line_item_total": "8.23"
+    },
+    {
+      "product_number": "",
+      "product_name": "07/25/25 |P10133 3038138098 18.55 0.00",
+      "Quantity": "1",
+      "unit_price": "16.55",
+      "line_item_total": "16.55"
+    },
+    {
+      "product_number": "",
+      "product_name": "O7r/25/25 |PIdis1 3039746028 324.18 0.00",
+      "Quantity": "1",
+      "unit_price": "324.16",
+      "line_item_total": "324.16"
+    },
+    {
+      "product_number": "",
+      "product_name": "O7/25/25 | P10133 3038146367 296.53 0.00",
+      "Quantity": "1",
+      "unit_price": "296.53",
+      "line_item_total": "296.53"
+    },
+    {
+      "product_number": "",
+      "product_name": "O7/26/25 | Service Charge 1800036367 100.54 0.00",
+      "Quantity": "1",
+      "unit_price": "100.54",
+      "line_item_total": "100.54"
+    },
+    {
+      "product_number": "P10748",
+      "product_name": "303821",
+      "Quantity": "7793",
+      "unit_price": "30.31",
+      "line_item_total": "30.31"
+    },
+    {
+      "product_number": "",
+      "product_name": "O805/25 | PI0162 S038296724 1425.73 0.00",
+      "Quantity": "1",
+      "unit_price": "1429.79",
+      "line_item_total": "1429.79"
+    },
+    {
+      "product_number": "DGI25",
+      "product_name": "| PI0162",
+      "Quantity": "3038317138",
+      "unit_price": "142.35",
+      "line_item_total": "142.35"
+    },
+    {
+      "product_number": "",
+      "product_name": "OBN1/25 | PAdt?S 3038375164 515.07 0.00",
+      "Quantity": "1",
+      "unit_price": "515.07",
+      "line_item_total": "515.07"
+    },
+    {
+      "product_number": "",
+      "product_name": "0815/25 |P10193 3038507528 178.50 0.00",
+      "Quantity": "1",
+      "unit_price": "179.50",
+      "line_item_total": "179.50"
+    },
+    {
+      "product_number": "",
+      "product_name": "S038607833 3,414.46",
+      "Quantity": "082225",
+      "unit_price": "0.00",
+      "line_item_total": "3414.46"
+    },
+    {
+      "product_number": "",
+      "product_name": "303861 2657 30.60",
+      "Quantity": "082225",
+      "unit_price": "0.00",
+      "line_item_total": "30.60"
+    },
+    {
+      "product_number": "O82325",
+      "product_name": "| Service Charge",
+      "Quantity": "1800043990",
+      "unit_price": "69.53",
+      "line_item_total": "69.53"
+    },
+    {
+      "product_number": "",
+      "product_name": "|P10210 3038647799 70.35",
+      "Quantity": "082525",
+      "unit_price": "0.00",
+      "line_item_total": "70.35"
+    },
+    {
+      "product_number": "O82525",
+      "product_name": "|P10210",
+      "Quantity": "3038647500",
+      "unit_price": "835.97",
+      "line_item_total": "835.97"
+    },
+    {
+      "product_number": "O9325",
+      "product_name": "|P10236",
+      "Quantity": "3038776512",
+      "unit_price": "71.60",
+      "line_item_total": "71.60"
+    },
+    {
+      "product_number": "O90325",
+      "product_name": "|P10236 S0387",
+      "Quantity": "76513",
+      "unit_price": "45.00",
+      "line_item_total": "45.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "|P10236 3038783429 41,077.05",
+      "Quantity": "090325",
+      "unit_price": "0.00",
+      "line_item_total": "4071.05"
+    },
+    {
+      "product_number": "",
+      "product_name": "O90e25 |Pid249 3038040977 2771.99 0.00",
+      "Quantity": "1",
+      "unit_price": "271.99",
+      "line_item_total": "271.99"
+    },
+    {
+      "product_number": "O9NT25",
+      "product_name": "|P10276",
+      "Quantity": "3039054965",
+      "unit_price": "1133.08",
+      "line_item_total": "1133.08"
+    },
+    {
+      "product_number": "",
+      "product_name": "OATS |P10276 3039055922 79.02 0.00",
+      "Quantity": "1",
+      "unit_price": "79.02",
+      "line_item_total": "79.02"
+    },
+    {
+      "product_number": "",
+      "product_name": "O9Nge5 |P10289 3039094057 226.60 0.00",
+      "Quantity": "1",
+      "unit_price": "226.60",
+      "line_item_total": "226.60"
+    },
+    {
+      "product_number": "",
+      "product_name": "|Service Charge 1800055243 52.46",
+      "Quantity": "092025",
+      "unit_price": "0.00",
+      "line_item_total": "52.48"
+    }
+  ],
+  "source_file": "PacificCrestSeptStatement_6f115e44.pdf",
+  "parsed_at": "2025-12-12T18:56:47.367506+00:00"
 }
