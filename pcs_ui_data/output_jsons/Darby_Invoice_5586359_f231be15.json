@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5586359",
+  "invoice_date": "09/23/25",
+  "due_date": "10/23/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "8697000",
+      "product_name": "BX|ALLCEZON WAX PINK 1LB SHEET 6160190",
+      "Quantity": "1",
+      "unit_price": "16.03",
+      "line_item_total": "16.93"
+    }
+  ],
+  "source_file": "Darby_Invoice_5586359_f231be15.pdf",
+  "parsed_at": "2025-12-12T15:54:20.934667+00:00"
 }

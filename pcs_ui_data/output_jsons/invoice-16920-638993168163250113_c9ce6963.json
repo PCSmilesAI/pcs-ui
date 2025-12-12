@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
+  "vendor": "Comcast",
+  "vendor_name": "Comcast Business",
+  "invoice_number": "16920",
   "invoice_date": "",
   "due_date": "",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Lebanon",
+  "line_items": [],
+  "source_file": "invoice-16920-638993168163250113_c9ce6963.pdf",
+  "parsed_at": "2025-12-12T16:06:56.724794+00:00"
 }

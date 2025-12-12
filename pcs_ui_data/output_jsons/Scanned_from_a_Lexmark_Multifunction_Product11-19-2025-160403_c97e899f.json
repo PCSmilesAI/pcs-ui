@@ -1,10 +1,27 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "Gy",
+  "invoice_date": "97\n1 1826",
+  "due_date": "",
+  "invoice_total": "363.96",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "685 Ultra-Etch IndiSpense Refill",
+      "Quantity": "3",
+      "unit_price": "7.99",
+      "line_item_total": "173.97"
+    },
+    {
+      "product_number": "",
+      "product_name": "1826-U OpalDam Green Econo Refill",
+      "Quantity": "1",
+      "unit_price": "189.99",
+      "line_item_total": "189.99"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product11-19-2025-160403_c97e899f.pdf",
+  "parsed_at": "2025-12-12T16:02:48.706963+00:00"
 }

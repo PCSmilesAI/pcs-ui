@@ -1,10 +1,146 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "ED",
+  "invoice_date": "4-31-24",
+  "due_date": "",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "98666",
+      "product_name": "CLARK-COWLITZ FIRE RESCUE - .-",
+      "Quantity": "3",
+      "unit_price": "86.88",
+      "line_item_total": "86.88"
+    },
+    {
+      "product_number": "",
+      "product_name": "564.397.2252 $D122 RIDGEFIELD SCHOOL",
+      "Quantity": "1",
+      "unit_price": "485.52",
+      "line_item_total": "485.52"
+    },
+    {
+      "product_number": "STATE",
+      "product_name": "SCHOOLS PART",
+      "Quantity": "2",
+      "unit_price": "155.84",
+      "line_item_total": "155.84"
+    },
+    {
+      "product_number": "",
+      "product_name": "CLARK COUNTY",
+      "Quantity": "1",
+      "unit_price": "136.68",
+      "line_item_total": "136.68"
+    },
+    {
+      "product_number": "",
+      "product_name": "CONSERVATION FUTURES",
+      "Quantity": "1",
+      "unit_price": "5.02",
+      "line_item_total": "5.02"
+    },
+    {
+      "product_number": "",
+      "product_name": "CLARK-COWLITZ FIRE RESCUE",
+      "Quantity": "1",
+      "unit_price": "274.29",
+      "line_item_total": "274.29"
+    },
+    {
+      "product_number": "",
+      "product_name": "CITY RIDGEFIELD Nosy 4 oe",
+      "Quantity": "1",
+      "unit_price": "112.38",
+      "line_item_total": "112.38"
+    },
+    {
+      "product_number": "",
+      "product_name": ": COLLECTION. FEE : :",
+      "Quantity": "1",
+      "unit_price": "25.00",
+      "line_item_total": "25.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "% CHANGE 2025. $1,653.15 $145.54",
+      "Quantity": "1",
+      "unit_price": "1798.69",
+      "line_item_total": "1798.69"
+    },
+    {
+      "product_number": "",
+      "product_name": "$173,576 8.2944808719 2023 $0.00...",
+      "Quantity": "2024",
+      "unit_price": "0.00",
+      "line_item_total": "0.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "& Prior $0.00",
+      "Quantity": "2022",
+      "unit_price": "000",
+      "line_item_total": "0.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "NE HAZEL DELL AVE PMB 501 PO BOX",
+      "Quantity": "10013",
+      "unit_price": "3515",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "COWLITZ",
+      "product_name": "FIRE. RESCUE 4742594349 :",
+      "Quantity": "4",
+      "unit_price": "0.47",
+      "line_item_total": "0.47"
+    },
+    {
+      "product_number": "CLARK",
+      "product_name": "COUNTY | 0,7443484119..",
+      "Quantity": "2",
+      "unit_price": "0.74",
+      "line_item_total": "0.74"
+    },
+    {
+      "product_number": "FUTURES",
+      "product_name": "\u00ab 0:0273782390 00 es 0.0274953995 \u00a7.02",
+      "Quantity": "4",
+      "unit_price": "0.43",
+      "line_item_total": "0.43"
+    },
+    {
+      "product_number": "COWLITZ",
+      "product_name": "FIRE RESCUE \u00e9 \u2018 ian",
+      "Quantity": "15000000000",
+      "unit_price": "27429",
+      "line_item_total": "27429"
+    },
+    {
+      "product_number": "",
+      "product_name": "FVR LIBRARY ( Bo 48.48. 0.2685838090 49.14 Fo",
+      "Quantity": "1",
+      "unit_price": "0.30",
+      "line_item_total": "0.30"
+    },
+    {
+      "product_number": "",
+      "product_name": "CITY RIDGEFIELD a : 29\u00b0 0.6145751523",
+      "Quantity": "1",
+      "unit_price": "112.38",
+      "line_item_total": "112.38"
+    },
+    {
+      "product_number": "STATE",
+      "product_name": "SCHOOLS i BC OBA",
+      "Quantity": "15789049125",
+      "unit_price": "288.72",
+      "line_item_total": "288.72"
+    }
+  ],
+  "source_file": "INVOICE 2_b2d2c275.pdf",
+  "parsed_at": "2025-12-12T15:55:31.074888+00:00"
 }

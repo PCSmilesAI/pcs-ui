@@ -1,10 +1,55 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Brasseler",
+  "vendor_name": "Brasseler USA Dental",
+  "invoice_number": "6394387",
+  "invoice_date": "10/10/25",
+  "due_date": "11/09/2025",
+  "invoice_total": "136.72",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "001107U0",
+      "product_name": "2 RASURG ROUND H1.24.010 5P",
+      "Quantity": "1",
+      "unit_price": "66.00",
+      "line_item_total": "11.25"
+    },
+    {
+      "product_number": "001109U0",
+      "product_name": "6 RASURG ROUND H1.24.018 5P",
+      "Quantity": "1",
+      "unit_price": "66.00",
+      "line_item_total": "11.25"
+    },
+    {
+      "product_number": "001108U0",
+      "product_name": "4 RASURG ROUND H1.24.014 5P",
+      "Quantity": "1",
+      "unit_price": "66.00",
+      "line_item_total": "11.25"
+    },
+    {
+      "product_number": "004324U0",
+      "product_name": "830.31.010 (M) PEAR 5P",
+      "Quantity": "2",
+      "unit_price": "76.50",
+      "line_item_total": "34.50"
+    },
+    {
+      "product_number": "004965U0",
+      "product_name": "8379.31.016 (F) FOOTBALL 5P",
+      "Quantity": "2",
+      "unit_price": "76.50",
+      "line_item_total": "34.50"
+    },
+    {
+      "product_number": "015506U0",
+      "product_name": "8845KR.31.018 (F) MOD FLT TP 5P",
+      "Quantity": "1",
+      "unit_price": "76.50",
+      "line_item_total": "17.25"
+    }
+  ],
+  "source_file": "Brasseler-6394387_7e223fdf.pdf",
+  "parsed_at": "2025-12-12T15:53:59.276574+00:00"
 }

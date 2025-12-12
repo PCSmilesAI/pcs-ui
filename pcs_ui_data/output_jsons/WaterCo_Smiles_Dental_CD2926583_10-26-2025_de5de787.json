@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "s",
+  "invoice_date": "10/26/2025",
+  "due_date": "10/26/2025",
+  "invoice_total": "7304104223.0",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "MISSION ST SE, SALEM, OR",
+      "Quantity": "2245",
+      "unit_price": "9730",
+      "line_item_total": "2"
+    }
+  ],
+  "source_file": "WaterCo_Smiles_Dental_CD2926583_10-26-2025_de5de787.pdf",
+  "parsed_at": "2025-12-12T16:03:23.398229+00:00"
 }

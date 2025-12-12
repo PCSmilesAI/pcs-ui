@@ -1,10 +1,31 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "31309-9340-050",
+  "invoice_date": "10/01/2025",
+  "due_date": "10/08/2025",
+  "invoice_total": "249.00",
+  "office_location": "Lebanon",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for ehrin ruby",
+      "description": "Doctor: Bob Friess",
+      "Quantity": "1",
+      "unit_price": "169.00",
+      "line_item_total": "169.00",
+      "service_date": "09/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Michelle Evans",
+      "description": "Doctor: Bob Friess",
+      "Quantity": "1",
+      "unit_price": "80.00",
+      "line_item_total": "80.00",
+      "service_date": "09/04/25"
+    }
+  ],
+  "source_file": "Dandy_99403fd2.pdf",
+  "parsed_at": "2025-12-12T15:54:06.130063+00:00"
 }

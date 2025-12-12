@@ -1,10 +1,27 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "NEA4068978",
+  "invoice_date": "10/31/2025",
+  "due_date": "10/31/2025",
+  "invoice_total": "263.75",
+  "office_location": "Columbia",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Telecom Drive, Suite",
+      "Quantity": "6510",
+      "unit_price": "30",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "SE 15th St Suite",
+      "Quantity": "16415",
+      "unit_price": "10",
+      "line_item_total": "5"
+    }
+  ],
+  "source_file": "Invoice_NEA4068978_3e2ef7da.pdf",
+  "parsed_at": "2025-12-12T15:56:06.455296+00:00"
 }

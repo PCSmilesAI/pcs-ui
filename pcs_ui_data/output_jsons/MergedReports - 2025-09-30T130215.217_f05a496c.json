@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "11318851",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "1131885187",
+  "invoice_date": "7/7/2025",
+  "due_date": "08/06/2025",
+  "invoice_total": "124.0",
+  "office_location": "Eugene",
+  "line_items": [],
+  "source_file": "MergedReports - 2025-09-30T130215.217_f05a496c.pdf",
+  "parsed_at": "2025-12-12T15:56:12.311287+00:00"
 }

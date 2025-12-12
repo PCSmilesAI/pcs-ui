@@ -1,10 +1,20 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "number",
+  "invoice_date": "06/01/2025",
+  "due_date": "07/01/2025",
+  "invoice_total": "",
+  "office_location": "",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "West\u00a0Diehl\u00a0STE",
+      "Quantity": "1751",
+      "unit_price": "40",
+      "line_item_total": "0"
+    }
+  ],
+  "source_file": "Med Pro Inv.pdf",
+  "parsed_at": "2025-12-12T15:56:12.163461+00:00"
 }

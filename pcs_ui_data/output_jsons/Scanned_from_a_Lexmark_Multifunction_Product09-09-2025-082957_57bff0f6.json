@@ -1,10 +1,34 @@
 {
-  "invoice_number": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "9501598",
   "invoice_date": "",
+  "due_date": "",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "2} 15251075! 10K STMPLISHADE UNI COMP UNID DRK 370",
+      "Quantity": "37008",
+      "unit_price": "66.37",
+      "line_item_total": "132.74"
+    },
+    {
+      "product_number": "9508212",
+      "product_name": "LZ 9508212; 200Bx STERILIZATION POUCH 4.25 X 11 DA",
+      "Quantity": "25",
+      "unit_price": "11.75",
+      "line_item_total": "11.75"
+    },
+    {
+      "product_number": "9518658",
+      "product_name": "1 9518658) 200Bx PROPHY PASTE 1.23% MINT CRS DARBY",
+      "Quantity": "1",
+      "unit_price": "16.66",
+      "line_item_total": "16.66"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082957_57bff0f6.pdf",
+  "parsed_at": "2025-12-12T15:57:43.991931+00:00"
 }

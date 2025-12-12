@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "NEA4042711",
+  "invoice_date": "10/8/2025",
+  "due_date": "10/8/2025",
+  "invoice_total": "249.0",
+  "office_location": "Lebanon",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Telecom Drive, Suite",
+      "Quantity": "6510",
+      "unit_price": "30",
+      "line_item_total": "0"
+    }
+  ],
+  "source_file": "Invoice_NEA4042711_da1e3f0b.pdf",
+  "parsed_at": "2025-12-12T15:56:06.285600+00:00"
 }

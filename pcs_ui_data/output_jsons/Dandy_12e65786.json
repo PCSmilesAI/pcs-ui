@@ -1,10 +1,40 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "32257-9405-049",
+  "invoice_date": "10/01/2025",
+  "due_date": "10/08/2025",
+  "invoice_total": "804.00",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for Joel Strasser",
+      "description": "Doctor: Rosalynn Mumpower",
+      "Quantity": "1",
+      "unit_price": "175.00",
+      "line_item_total": "175.00",
+      "service_date": "09/23/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Megan Foster",
+      "description": "Doctor: Rosalynn Mumpower",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "09/22/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Gabriela Smith",
+      "description": "Doctor: Grant Smith",
+      "Quantity": "1",
+      "unit_price": "520.00",
+      "line_item_total": "520.00",
+      "service_date": "09/05/25"
+    }
+  ],
+  "source_file": "Dandy_12e65786.pdf",
+  "parsed_at": "2025-12-12T15:54:05.173977+00:00"
 }

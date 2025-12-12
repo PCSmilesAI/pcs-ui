@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "0F80551174",
+  "invoice_date": "7/01/2025",
+  "due_date": "07/31/2025",
+  "invoice_total": "235.27",
+  "office_location": "Ridgefield",
+  "line_items": [],
+  "source_file": "Fire Invoice 551174 (1)_1ed6e892.pdf",
+  "parsed_at": "2025-12-12T15:55:20.377321+00:00"
 }

@@ -1,10 +1,90 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": "10/15/2025"
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "ING",
+  "invoice_date": "8/20/2025",
+  "due_date": "09/19/2025",
+  "invoice_total": "1484.87",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "ADJUSTMENTS",
+      "Quantity": "24",
+      "unit_price": "0.0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "9/5/2025 T,223 8/7/2025, 7,124 71 WATER CONSUMPTION",
+      "Quantity": "1",
+      "unit_price": "329.44",
+      "line_item_total": "329.44"
+    },
+    {
+      "product_number": "",
+      "product_name": "9/5/2025 672 8/7/2025 644 28 WATER CONSUMPTION",
+      "Quantity": "1",
+      "unit_price": "129.92",
+      "line_item_total": "129.92"
+    },
+    {
+      "product_number": "",
+      "product_name": "WATER BASE RATE",
+      "Quantity": "1",
+      "unit_price": "16.06",
+      "line_item_total": "16.06"
+    },
+    {
+      "product_number": "",
+      "product_name": "STREET MAINTENANCE",
+      "Quantity": "1",
+      "unit_price": "43.08",
+      "line_item_total": "43.08"
+    },
+    {
+      "product_number": "",
+      "product_name": "STORM MAINTENANCE",
+      "Quantity": "1",
+      "unit_price": "88.41",
+      "line_item_total": "88.41"
+    },
+    {
+      "product_number": "",
+      "product_name": "SEWER TREATMENT",
+      "Quantity": "1",
+      "unit_price": "530.23",
+      "line_item_total": "530.23"
+    },
+    {
+      "product_number": "",
+      "product_name": "SEWER CONSUMPTION",
+      "Quantity": "71",
+      "unit_price": "283.2",
+      "line_item_total": "9"
+    },
+    {
+      "product_number": "",
+      "product_name": "SEWER BASE RATE",
+      "Quantity": "1",
+      "unit_price": "18.74",
+      "line_item_total": "18.74"
+    },
+    {
+      "product_number": "",
+      "product_name": "CURRENT BILL",
+      "Quantity": "1",
+      "unit_price": "1484.87",
+      "line_item_total": "1484.87"
+    },
+    {
+      "product_number": "",
+      "product_name": "05-1610-01",
+      "Quantity": "1",
+      "unit_price": "1484.87",
+      "line_item_total": "1484.87"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product10-07-2025-112346_4d50eeed.pdf",
+  "parsed_at": "2025-12-12T15:59:28.601320+00:00"
 }

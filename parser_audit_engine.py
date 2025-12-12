@@ -24,7 +24,7 @@ DATA_DIR = os.environ.get('PCS_DATA_DIR', os.path.join(BASE_DIR, 'pcs_ui_data'))
 EMAIL_INVOICES_DIR = os.path.join(BASE_DIR, 'email_invoices')
 OUTPUT_DIR = os.path.join(DATA_DIR, 'output_jsons')
 
-# Known vendor parsers
+# Known vendor parsers (complete list with new parsers)
 KNOWN_PARSERS = {
     'epic': 'epic_parser.py',
     'patterson': 'patterson_invoice_parser_FINAL_WITH_JSON_SAFE.py',
@@ -32,6 +32,13 @@ KNOWN_PARSERS = {
     'exodus': 'exodus_parser.py',
     'artisan': 'parse_artisan_dental_exporting_fixed.py',
     'tc': 'parse_tc_dental_invoice.py',
+    'darby': 'darby_parser.py',
+    'dandy': 'dandy_parser.py',
+    'brasseler': 'brasseler_parser.py',
+    'ctr_services': 'ctr_services_parser.py',
+    'a1_professional': 'a1_professional_parser.py',
+    'comcast': 'comcast_parser.py',
+    'bridgeford': 'bridgeford_parser.py',
     'general': 'general_invoice_parser.py'
 }
 

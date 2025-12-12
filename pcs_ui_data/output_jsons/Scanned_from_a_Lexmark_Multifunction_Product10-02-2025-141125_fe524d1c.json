@@ -1,10 +1,27 @@
 {
-  "invoice_number": "30746288",
-  "invoice_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "online",
+  "invoice_date": "6/18/2025",
+  "due_date": "07/18/2025",
   "invoice_total": "",
   "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Credit Limit:",
+      "Quantity": "1",
+      "unit_price": "2000.00",
+      "line_item_total": "2000.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "0.70 1.40 0.70 0.70 0.00 0.00",
+      "Quantity": "1",
+      "unit_price": "46.63",
+      "line_item_total": "46.63"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product10-02-2025-141125_fe524d1c.pdf",
+  "parsed_at": "2025-12-12T15:59:20.070267+00:00"
 }

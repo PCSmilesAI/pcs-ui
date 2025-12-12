@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5616648",
+  "invoice_date": "10/21/25",
+  "due_date": "11/20/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "09063159",
+      "product_name": "STERILE WATER-IRRIG BIL 2F7112",
+      "Quantity": "6",
+      "unit_price": "6.99",
+      "line_item_total": "41.94"
+    }
+  ],
+  "source_file": "Darby_Invoice_5616648_f20bb9e1.pdf",
+  "parsed_at": "2025-12-12T15:54:49.864130+00:00"
 }

@@ -53,15 +53,42 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     console.log('🔧 Repair API: Processing repair for invoice:', invoice_number);
 
-    // Determine the parser name based on vendor (whitelist approach)
-    let parser_name = 'generic_parser.py';
+    // Determine the parser name based on vendor (complete whitelist approach)
+    let parser_name = 'general_invoice_parser.py';
     const vendorLower = vendor_name.toLowerCase();
-    if (vendorLower.includes('henry')) {
-      parser_name = 'henry_parser.py';
-    } else if (vendorLower.includes('patterson')) {
-      parser_name = 'patterson_parser.py';
-    } else if (vendorLower.includes('tc dental')) {
-      parser_name = 'multipage_invoice_processor.py';
+    
+    // Complete parser mapping
+    const parserMap: Record<string, string> = {
+      'henry': 'henry_parser.py',
+      'henry schein': 'henry_parser.py',
+      'patterson': 'patterson_invoice_parser_FINAL_WITH_JSON_SAFE.py',
+      'patterson dental': 'patterson_invoice_parser_FINAL_WITH_JSON_SAFE.py',
+      'epic': 'epic_parser.py',
+      'epic dental': 'epic_parser.py',
+      'exodus': 'exodus_parser.py',
+      'artisan': 'parse_artisan_dental_exporting_fixed.py',
+      'artisan dental': 'parse_artisan_dental_exporting_fixed.py',
+      'tc': 'parse_tc_dental_invoice.py',
+      'tc dental': 'parse_tc_dental_invoice.py',
+      'darby': 'darby_parser.py',
+      'darby dental': 'darby_parser.py',
+      'dandy': 'dandy_parser.py',
+      'dandy dental': 'dandy_parser.py',
+      'brasseler': 'brasseler_parser.py',
+      'ctr services': 'ctr_services_parser.py',
+      'ctr_services': 'ctr_services_parser.py',
+      'a1 professional': 'a1_professional_parser.py',
+      'a-1 professional': 'a1_professional_parser.py',
+      'comcast': 'comcast_parser.py',
+      'bridgeford': 'bridgeford_parser.py',
+    };
+    
+    // Find matching parser
+    for (const [key, value] of Object.entries(parserMap)) {
+      if (vendorLower.includes(key)) {
+        parser_name = value;
+        break;
+      }
     }
 
     // Create temporary files for the repair logging
@@ -97,14 +124,14 @@ export async function POST(request: NextRequest): Promise<Response> {
     // lgtm[js/path-injection] - Paths validated with isPathWithinBase
     fs.writeFileSync(correctedJsonPath, JSON.stringify(corrected_data, null, 2));
 
-    // Determine the PDF path
+    // Determine the PDF path - check multiple locations
     let actualPdfPath = pdf_path;
     if (pdf_path?.startsWith('/api/pdf/')) {
       // Convert API path to actual file path
       const filename = pdf_path.replace('/api/pdf/', '');
 
-      // SECURITY: Validate filename to prevent path traversal
-      if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
+      // SECURITY: Validate filename to prevent path traversal (allow spaces and common chars)
+      if (!/^[a-zA-Z0-9._\-\s()]+$/.test(filename)) {
         console.error('❌ Invalid PDF filename format:', filename);
         return NextResponse.json(
           { error: 'Invalid PDF filename format' },
@@ -112,10 +139,22 @@ export async function POST(request: NextRequest): Promise<Response> {
         );
       }
 
-      actualPdfPath = path.join(process.cwd(), 'pcs_ai_data', 'pdfs', filename);
+      // Try multiple locations for the PDF
+      const possiblePaths = [
+        path.join(process.cwd(), 'pcs_ai_data', 'pdfs', filename),
+        path.join(process.cwd(), 'email_invoices', filename),
+      ];
+      
+      actualPdfPath = possiblePaths.find(p => fs.existsSync(p)) || possiblePaths[0];
 
-      // SECURITY: Validate PDF path is within safe directory
-      if (!isPathWithinBase(actualPdfPath, path.join(process.cwd(), 'pcs_ai_data', 'pdfs'))) {
+      // SECURITY: Validate PDF path is within safe directories
+      const safeDirs = [
+        path.join(process.cwd(), 'pcs_ai_data', 'pdfs'),
+        path.join(process.cwd(), 'email_invoices'),
+      ];
+      
+      const isWithinSafeDir = safeDirs.some(dir => isPathWithinBase(actualPdfPath, dir));
+      if (!isWithinSafeDir) {
         console.error('❌ Path traversal attempt detected in PDF path');
         return NextResponse.json(
           { error: 'Invalid PDF path' },

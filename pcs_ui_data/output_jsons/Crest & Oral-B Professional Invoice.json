@@ -1,10 +1,27 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "number",
   "invoice_date": "09/16/2025",
   "due_date": "10/16/2025",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "invoice_total": "",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "$",
+      "Quantity": "1",
+      "unit_price": "269.97",
+      "line_item_total": "269.97"
+    },
+    {
+      "product_number": "",
+      "product_name": "$",
+      "Quantity": "1",
+      "unit_price": "539.94",
+      "line_item_total": "539.94"
+    }
+  ],
+  "source_file": "Crest & Oral-B Professional Invoice.PDF",
+  "parsed_at": "2025-12-12T15:54:00.545627+00:00"
 }

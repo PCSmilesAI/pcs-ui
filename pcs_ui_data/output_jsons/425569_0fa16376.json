@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "PLEASE",
+  "invoice_date": "10-15-2025",
+  "due_date": "11/14/2025",
+  "invoice_total": "425569.0",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SHP: 10 Futar Fast Normal Pack Cart",
+      "Quantity": "10",
+      "unit_price": "44.00",
+      "line_item_total": "440.00"
+    }
+  ],
+  "source_file": "425569_0fa16376.pdf",
+  "parsed_at": "2025-12-12T15:53:57.033297+00:00"
 }

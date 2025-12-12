@@ -1,10 +1,48 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "s",
+  "invoice_date": "10/31/2025",
+  "due_date": "11/30/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Lebanon",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "1     1",
+      "Quantity": "2",
+      "unit_price": "0",
+      "line_item_total": "2"
+    },
+    {
+      "product_number": "",
+      "product_name": "- 10/20/2025        1",
+      "Quantity": "8157378296",
+      "unit_price": "1",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "1     1",
+      "Quantity": "4",
+      "unit_price": "0",
+      "line_item_total": "4"
+    },
+    {
+      "product_number": "",
+      "product_name": "2     2     0",
+      "Quantity": "6",
+      "unit_price": "6",
+      "line_item_total": "424.08"
+    },
+    {
+      "product_number": "",
+      "product_name": "Hazmat:",
+      "Quantity": "1",
+      "unit_price": "52.25",
+      "line_item_total": "52.25"
+    }
+  ],
+  "source_file": "we00_5520504519_rental_20251101_082534_8442c099.pdf",
+  "parsed_at": "2025-12-12T16:07:07.938067+00:00"
 }

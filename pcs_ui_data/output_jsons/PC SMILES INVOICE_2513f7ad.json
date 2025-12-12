@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "INVOICE",
   "invoice_date": "",
   "due_date": "",
-  "invoice_total": "",
+  "invoice_total": "1500.0",
   "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "line_items": [],
+  "source_file": "PC SMILES INVOICE_2513f7ad.pdf",
+  "parsed_at": "2025-12-12T15:56:12.853476+00:00"
 }

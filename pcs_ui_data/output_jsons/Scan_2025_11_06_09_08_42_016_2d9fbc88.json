@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "V",
+  "invoice_date": "15 25 1137",
+  "due_date": "",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Milwaukie",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "OCT 23 25 Kelly Mcfarland",
+      "Quantity": "49539",
+      "unit_price": "129.00",
+      "line_item_total": "129.00"
+    }
+  ],
+  "source_file": "Scan_2025_11_06_09_08_42_016_2d9fbc88.pdf",
+  "parsed_at": "2025-12-12T15:57:09.260694+00:00"
 }

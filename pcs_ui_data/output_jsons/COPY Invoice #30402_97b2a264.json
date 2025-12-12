@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "oice",
+  "invoice_date": "06/23/25",
+  "due_date": "07/23/2025",
+  "invoice_total": "240.0",
+  "office_location": "Milwaukie",
+  "line_items": [],
+  "source_file": "COPY Invoice #30402_97b2a264.pdf",
+  "parsed_at": "2025-12-12T15:53:59.626841+00:00"
 }

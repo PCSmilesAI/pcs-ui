@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "PLEASE",
+  "invoice_date": "08-27-2025",
+  "due_date": "09/26/2025",
+  "invoice_total": "419775.0",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Pic X-Light Normal Pack Cart",
+      "Quantity": "2",
+      "unit_price": "37.00",
+      "line_item_total": "74.00"
+    }
+  ],
+  "source_file": "419775_6c402938.pdf",
+  "parsed_at": "2025-12-12T15:53:56.516251+00:00"
 }

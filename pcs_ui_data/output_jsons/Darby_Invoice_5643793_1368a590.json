@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5643793",
   "invoice_date": "",
+  "due_date": "",
   "invoice_total": "",
-  "office_location": "Lebanon",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "51738",
+      "product_name": "SML|NEXTEMP CLEAR TEMP CEMENT 3001472",
+      "Quantity": "2",
+      "unit_price": "43.18",
+      "line_item_total": "43.18"
+    }
+  ],
+  "source_file": "Darby_Invoice_5643793_1368a590.pdf",
+  "parsed_at": "2025-12-12T15:55:15.446019+00:00"
 }

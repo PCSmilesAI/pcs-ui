@@ -1,10 +1,12 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5613309",
+  "invoice_date": "10/17/25",
+  "due_date": "11/16/2025",
   "invoice_total": "",
-  "office_location": "Vancouver",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
+  "office_location": "Roseburg",
   "line_items": [],
-  "due_date": ""
+  "source_file": "Darby_Invoice_5613309_a2bfca9c.pdf",
+  "parsed_at": "2025-12-12T15:54:47.401036+00:00"
 }

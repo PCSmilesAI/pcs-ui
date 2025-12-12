@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "Page",
+  "invoice_date": "06/30/2025",
+  "due_date": "07/30/2025",
+  "invoice_total": "1444.65",
+  "office_location": "Vancouver",
+  "line_items": [],
+  "source_file": "invoice_KMKJ122_b2cbdad6.pdf",
+  "parsed_at": "2025-12-12T16:06:58.789858+00:00"
 }

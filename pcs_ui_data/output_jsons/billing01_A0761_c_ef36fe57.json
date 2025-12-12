@@ -1,10 +1,69 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "INVOICE",
+  "invoice_date": "11/05/25",
+  "due_date": "12/05/2025",
+  "invoice_total": "307.73",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "NE HAZEL DELL AVE. #501              RIDGEFIELD WA",
+      "Quantity": "10013",
+      "unit_price": "9864",
+      "line_item_total": "2"
+    },
+    {
+      "product_number": "ROUTE",
+      "product_name": "",
+      "Quantity": "000609",
+      "unit_price": "000655",
+      "line_item_total": "000655"
+    },
+    {
+      "product_number": "30232671105OX",
+      "product_name": "USPE ALUM",
+      "Quantity": "2",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "32671105N2OUSPE",
+      "product_name": "ALUM",
+      "Quantity": "3",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "2671105RF2HAZ13",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "71105RF3FUELSUR",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "32671105N2OUSPE",
+      "product_name": "0    0",
+      "Quantity": "0",
+      "unit_price": "1",
+      "line_item_total": "1"
+    },
+    {
+      "product_number": "",
+      "product_name": "357.73",
+      "Quantity": "1",
+      "unit_price": "388.85",
+      "line_item_total": "388.85"
+    }
+  ],
+  "source_file": "billing01_A0761_c_ef36fe57.pdf",
+  "parsed_at": "2025-12-12T16:03:28.981781+00:00"
 }

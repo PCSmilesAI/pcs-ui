@@ -1,10 +1,175 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "99466-6765-052",
+  "invoice_date": "11/01/2025",
+  "due_date": "11/08/2025",
+  "invoice_total": "3498.00",
+  "office_location": "Milwaukie",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for Deanne Molenkamp",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "134.00",
+      "line_item_total": "134.00",
+      "service_date": "10/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for David Sanford",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "64.00",
+      "line_item_total": "64.00",
+      "service_date": "10/29/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Brian Baragona",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/24/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Carol Wamhoff",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "125.00",
+      "line_item_total": "125.00",
+      "service_date": "10/23/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Patricia Owens",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "10/23/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kristin Stein",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "10/22/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Amanda Green",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/22/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Fidel Francisco Santia",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "125.00",
+      "line_item_total": "125.00",
+      "service_date": "10/21/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Jeremy Morales",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "10/21/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Mark Pavlicek",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "125.00",
+      "line_item_total": "125.00",
+      "service_date": "10/16/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Barbara Cox",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "64.00",
+      "line_item_total": "64.00",
+      "service_date": "10/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kendall Gronvald",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "64.00",
+      "line_item_total": "64.00",
+      "service_date": "10/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Patrick Key",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "1599.00",
+      "line_item_total": "1599.00",
+      "service_date": "10/09/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for sandra scott",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "362.00",
+      "line_item_total": "362.00",
+      "service_date": "10/07/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Peter Turney",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "64.00",
+      "line_item_total": "64.00",
+      "service_date": "10/06/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Jessica Hunter",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "140.00",
+      "line_item_total": "140.00",
+      "service_date": "10/02/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Fanta Means",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "10/01/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Thomas Hardwicke",
+      "description": "Doctor: Hayden Meriwether",
+      "Quantity": "1",
+      "unit_price": "100.00",
+      "line_item_total": "100.00",
+      "service_date": "10/01/25"
+    }
+  ],
+  "source_file": "Smiles Dental Services Milwaukie (Formerly Pearl District)_Oct 2025_78fc7e2d.pdf",
+  "parsed_at": "2025-12-12T16:03:04.672280+00:00"
 }

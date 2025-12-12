@@ -1,10 +1,27 @@
 {
-  "invoice_number": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "a",
   "invoice_date": "",
+  "due_date": "",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "OPL1020-10 OsteoGen Plug - Large 10pk [N |",
+      "Quantity": "1",
+      "unit_price": "564.00",
+      "line_item_total": "564.00"
+    },
+    {
+      "product_number": "HANGE",
+      "product_name": "OF ADDRESS:",
+      "Quantity": "26125632",
+      "unit_price": "564.00",
+      "line_item_total": "564.00"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product11-11-2025-101005_11831bda.pdf",
+  "parsed_at": "2025-12-12T16:02:18.384436+00:00"
 }

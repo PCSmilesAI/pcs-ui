@@ -1,10 +1,34 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "Number",
+  "invoice_date": "09/01-10",
+  "due_date": "",
+  "invoice_total": "51.41",
+  "office_location": "Lebanon",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Recycling Processing Surcharge 09/01-10/31 $4.00",
+      "Quantity": "1",
+      "unit_price": "4.00",
+      "line_item_total": "4.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "95/96 Gallon Cart Service 09/01-10/31 2.0000 $86.30",
+      "Quantity": "1",
+      "unit_price": "172.60",
+      "line_item_total": "172.60"
+    },
+    {
+      "product_number": "",
+      "product_name": "Late Fee 08/31",
+      "Quantity": "1",
+      "unit_price": "1.17",
+      "line_item_total": "1.17"
+    }
+  ],
+  "source_file": "Invoice_20250930_0001_da345f60.pdf",
+  "parsed_at": "2025-12-12T15:56:05.197802+00:00"
 }

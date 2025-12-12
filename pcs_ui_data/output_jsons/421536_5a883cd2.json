@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "PLEASE",
+  "invoice_date": "09-11-2025",
+  "due_date": "10/11/2025",
+  "invoice_total": "421536.0",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Mixing Tips, blue, 6.0mm",
+      "Quantity": "1",
+      "unit_price": "32.00",
+      "line_item_total": "32.00"
+    }
+  ],
+  "source_file": "421536_5a883cd2.pdf",
+  "parsed_at": "2025-12-12T15:53:56.885446+00:00"
 }

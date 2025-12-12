@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "INV248343",
+  "invoice_date": "10/31/2025",
+  "due_date": "10/31/2025",
+  "invoice_total": "90.0",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "12th Ave Unit",
+      "Quantity": "1000",
+      "unit_price": "10",
+      "line_item_total": "3"
+    }
+  ],
+  "source_file": "Invoice_INV248343_1762275344931_c321f628.pdf",
+  "parsed_at": "2025-12-12T15:56:05.932645+00:00"
 }

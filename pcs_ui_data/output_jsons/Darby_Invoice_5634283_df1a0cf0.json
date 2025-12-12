@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5634283",
+  "invoice_date": "11/05/25",
+  "due_date": "12/05/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "9501598",
+      "product_name": "ic 9501598 4.16 12.48",
+      "Quantity": "9501598",
+      "unit_price": "4.16",
+      "line_item_total": "12.48"
+    }
+  ],
+  "source_file": "Darby_Invoice_5634283_df1a0cf0.pdf",
+  "parsed_at": "2025-12-12T15:55:05.663009+00:00"
 }

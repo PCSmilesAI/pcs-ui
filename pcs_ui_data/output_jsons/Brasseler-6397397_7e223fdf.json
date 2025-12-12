@@ -1,10 +1,76 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Brasseler",
+  "vendor_name": "Brasseler USA Dental",
+  "invoice_number": "6397397",
+  "invoice_date": "10/15/25",
+  "due_date": "11/14/2025",
+  "invoice_total": "379.32",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "004906U0",
+      "product_name": "6909.31.040 (C) WHEEL 5P",
+      "Quantity": "1",
+      "unit_price": "60.60",
+      "line_item_total": "29.00"
+    },
+    {
+      "product_number": "001099T0",
+      "product_name": "4 RA ROUND H1.21.014 10P",
+      "Quantity": "1",
+      "unit_price": "50.40",
+      "line_item_total": "16.00"
+    },
+    {
+      "product_number": "001101T0",
+      "product_name": "6 RA ROUND H1.21.018 10P",
+      "Quantity": "1",
+      "unit_price": "50.40",
+      "line_item_total": "16.00"
+    },
+    {
+      "product_number": "004730U0",
+      "product_name": "5847.31.018 (SC) FLT TAP 5P",
+      "Quantity": "4",
+      "unit_price": "70.90",
+      "line_item_total": "94.00"
+    },
+    {
+      "product_number": "013158U0",
+      "product_name": "ET9F 16BLD (EF) H135F.31.014 5P",
+      "Quantity": "1",
+      "unit_price": "56.50",
+      "line_item_total": "35.00"
+    },
+    {
+      "product_number": "000724U0",
+      "product_name": "7901 FG FLAME H246.31.009 5P",
+      "Quantity": "1",
+      "unit_price": "62.00",
+      "line_item_total": "25.00"
+    },
+    {
+      "product_number": "004734U0",
+      "product_name": "5848.31.016 (SC) FLT TAP 5P",
+      "Quantity": "2",
+      "unit_price": "70.90",
+      "line_item_total": "47.00"
+    },
+    {
+      "product_number": "005056U0",
+      "product_name": "8863.31.012 (F) FLAME 5P",
+      "Quantity": "4",
+      "unit_price": "76.50",
+      "line_item_total": "69.00"
+    },
+    {
+      "product_number": "022860U0",
+      "product_name": "310.21 SNAP ON RA MANDREL 5P",
+      "Quantity": "1",
+      "unit_price": "47.60",
+      "line_item_total": "31.60"
+    }
+  ],
+  "source_file": "Brasseler-6397397_7e223fdf.pdf",
+  "parsed_at": "2025-12-12T15:53:59.358490+00:00"
 }

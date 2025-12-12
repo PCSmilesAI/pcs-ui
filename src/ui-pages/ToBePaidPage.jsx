@@ -61,13 +61,19 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             typeof amountCents === 'number'
               ? amountCents / 100  // Convert cents to dollars
               : parseFloat(String(amountCents ?? '0').replace(/[^0-9.\-]/g, '')) / 100;
+          // Get locations from GL Lines (invoice_categories classes)
+          const locations = invoice.locations || [];
+          const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
+          const locationDisplay = locations.length > 0 
+            ? locations.join(', ') 
+            : (officeRaw || 'Unknown');
           return ({
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
           vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
           amount: `$${numericTotal.toFixed(2)}`,
-          // Use office_id first (effective value from 3-layer system)
-          office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
+          location: locationDisplay,
+          locations: locations, // Keep array for filtering
           dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A'),
           invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
           displayStatus: 'Pending Payment',
@@ -169,13 +175,19 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               typeof rawTotal === 'number'
                 ? rawTotal
                 : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+            // Get locations from GL Lines (invoice_categories classes)
+            const locations = invoice.locations || [];
+            const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
+            const locationDisplay = locations.length > 0 
+              ? locations.join(', ') 
+              : (officeRaw || 'Unknown');
             return ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number, // needed by detail view
             vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
             amount: `$${numericTotal.toFixed(2)}`,
-            // Use office_id first (effective value from 3-layer system)
-            office: invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || 'Unknown',
+            location: locationDisplay,
+            locations: locations, // Keep array for filtering
             dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
@@ -241,7 +253,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     { key: 'invoice', label: 'Invoice', width: '14%' },
     { key: 'vendor', label: 'Vendor', width: '14%' },
     { key: 'amount', label: 'Amount', width: '10%' },
-    { key: 'office', label: 'Office', width: '12%' },
+    { key: 'location', label: 'Location', width: '12%' },
     { key: 'invoiceDate', label: 'Invoice Date', width: '12%' },
     { key: 'dueDate', label: 'Due Date', width: '12%' },
     { key: 'status', label: 'Status', width: '22%' },
@@ -262,8 +274,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
       }
       // vendor
       if (filters.vendor && row.vendor !== filters.vendor) return false;
-      // office
-      if (filters.office && row.office !== filters.office) return false;
+      // location (supports multiple GL Line locations)
+      if (filters.office) {
+        const matchesLocation = row.locations?.includes(filters.office) || row.location === filters.office;
+        if (!matchesLocation) return false;
+      }
       // amount filters
       const amt = parseFloat(row.amount.replace(/[^0-9.]/g, ''));
       if (filters.minAmount && amt < parseFloat(filters.minAmount)) return false;

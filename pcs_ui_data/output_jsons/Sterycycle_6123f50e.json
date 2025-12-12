@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "OICE",
+  "invoice_date": "11-02-2025",
+  "due_date": "12/02/2025",
+  "invoice_total": "54.25",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "1001005795 0000008012257775",
+      "Quantity": "028883",
+      "unit_price": "0000005425",
+      "line_item_total": "0"
+    }
+  ],
+  "source_file": "Sterycycle_6123f50e.pdf",
+  "parsed_at": "2025-12-12T16:03:06.445372+00:00"
 }

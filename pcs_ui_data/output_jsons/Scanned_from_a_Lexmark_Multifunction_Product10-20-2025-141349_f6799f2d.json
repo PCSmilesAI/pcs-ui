@@ -1,10 +1,62 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "OICE",
+  "invoice_date": "10/14/25",
+  "due_date": "11/13/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Vancouver",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "B/W PRINTR",
+      "Quantity": "1",
+      "unit_price": "41.38",
+      "line_item_total": "41.38"
+    },
+    {
+      "product_number": "",
+      "product_name": "B/W PRINTR",
+      "Quantity": "1",
+      "unit_price": "41.37",
+      "line_item_total": "41.37"
+    },
+    {
+      "product_number": "",
+      "product_name": "LOCATION TOTA:",
+      "Quantity": "1",
+      "unit_price": "206.88",
+      "line_item_total": "206.88"
+    },
+    {
+      "product_number": "",
+      "product_name": "SPLBOL LEXMARK B/W PRINTR CK KIT",
+      "Quantity": "1",
+      "unit_price": "41.3",
+      "line_item_total": "8"
+    },
+    {
+      "product_number": "",
+      "product_name": "LOCATION TOTA",
+      "Quantity": "1",
+      "unit_price": "41.38",
+      "line_item_total": "41.38"
+    },
+    {
+      "product_number": "",
+      "product_name": "2. 5PLBOL LEXMARK B/W PRINTR CK KI\u2018",
+      "Quantity": "1",
+      "unit_price": "41.37",
+      "line_item_total": "41.37"
+    },
+    {
+      "product_number": "",
+      "product_name": "a, 5PLBO LEXMARK B/W PRINTR CK KIT",
+      "Quantity": "1",
+      "unit_price": "41.37",
+      "line_item_total": "41.37"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product10-20-2025-141349_f6799f2d.pdf",
+  "parsed_at": "2025-12-12T16:00:42.828831+00:00"
 }

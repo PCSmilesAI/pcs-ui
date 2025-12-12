@@ -1,10 +1,41 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5630327",
+  "invoice_date": "11/03/25",
+  "due_date": "12/03/2025",
   "invoice_total": "",
-  "office_location": "Ridgefield",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "72622",
+      "product_name": "GLOVE NIT PREMIUM MD DARBY",
+      "Quantity": "2",
+      "unit_price": "8.55",
+      "line_item_total": "34.20"
+    },
+    {
+      "product_number": "42408",
+      "product_name": "SPRY GUM CINNAMON G6c1900",
+      "Quantity": "82",
+      "unit_price": "9.11",
+      "line_item_total": "9.11"
+    },
+    {
+      "product_number": "",
+      "product_name": "100PK|SPRY GUM FRESH FRUIT GFF100 9.11 9.11 TX",
+      "Quantity": "100",
+      "unit_price": "9.11",
+      "line_item_total": "9.11"
+    },
+    {
+      "product_number": "05290",
+      "product_name": "Ww",
+      "Quantity": "6",
+      "unit_price": "36.06",
+      "line_item_total": "36.06"
+    }
+  ],
+  "source_file": "Darby_Invoice_5630327_e04f086a.pdf",
+  "parsed_at": "2025-12-12T15:55:03.274837+00:00"
 }

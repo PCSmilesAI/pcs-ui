@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "005568795",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "Number",
+  "invoice_date": "08/12/25",
+  "due_date": "09/11/2025",
+  "invoice_total": "220.78",
+  "office_location": "Lebanon",
+  "line_items": [],
+  "source_file": "304526902013_0452005581952_20250912_4a786492.pdf",
+  "parsed_at": "2025-12-12T15:53:47.641980+00:00"
 }

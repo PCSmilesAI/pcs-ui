@@ -1,10 +1,20 @@
 {
-  "vendor": "tc dental laboratory, inc.",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
   "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "invoice_date": "09/03/25",
+  "due_date": "10/03/2025",
+  "invoice_total": "",
+  "office_location": "Columbia",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "CenterPoint Bivd * PO Box",
+      "Quantity": "295",
+      "unit_price": "49",
+      "line_item_total": "1"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170835.pdf",
+  "parsed_at": "2025-12-12T15:58:09.094901+00:00"
 }

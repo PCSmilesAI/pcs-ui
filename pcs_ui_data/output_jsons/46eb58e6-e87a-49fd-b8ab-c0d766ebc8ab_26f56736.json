@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "BILL",
+  "invoice_date": "11/14/2025",
+  "due_date": "12/14/2025",
+  "invoice_total": "170.0",
+  "office_location": "Lebanon",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Park St Lebanon, OR",
+      "Quantity": "175",
+      "unit_price": "9735",
+      "line_item_total": "5"
+    }
+  ],
+  "source_file": "46eb58e6-e87a-49fd-b8ab-c0d766ebc8ab_26f56736.pdf",
+  "parsed_at": "2025-12-12T15:53:57.246583+00:00"
 }

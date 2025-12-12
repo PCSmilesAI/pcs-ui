@@ -1,10 +1,62 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "B",
+  "invoice_date": "09/30/25",
+  "due_date": "10/30/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Milwaukie",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SE 101ST AVE                      PO BOX",
+      "Quantity": "6330",
+      "unit_price": "757",
+      "line_item_total": "7"
+    },
+    {
+      "product_number": "",
+      "product_name": "NE HAZEL DELL AVE. #501        MILWAUKIE OR",
+      "Quantity": "10013",
+      "unit_price": "9726",
+      "line_item_total": "7"
+    },
+    {
+      "product_number": "HYDRO",
+      "product_name": "TEST",
+      "Quantity": "0",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "4264.00",
+      "Quantity": "1",
+      "unit_price": "10.00",
+      "line_item_total": "10.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "08/31/25 0002470144 1",
+      "Quantity": "1",
+      "unit_price": "10.00",
+      "line_item_total": "10.00"
+    },
+    {
+      "product_number": "",
+      "product_name": "09/22/25 0002477192 1",
+      "Quantity": "1",
+      "unit_price": "179.23",
+      "line_item_total": "179.23"
+    },
+    {
+      "product_number": "",
+      "product_name": "09/30/25 0002482419 1",
+      "Quantity": "1",
+      "unit_price": "10.00",
+      "line_item_total": "10.00"
+    }
+  ],
+  "source_file": "billing01_A0760_c_f20c5e7c.pdf",
+  "parsed_at": "2025-12-12T16:03:28.721127+00:00"
 }

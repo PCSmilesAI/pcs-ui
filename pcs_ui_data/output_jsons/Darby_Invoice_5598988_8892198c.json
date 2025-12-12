@@ -1,10 +1,27 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5598988",
+  "invoice_date": "10/03/25",
+  "due_date": "11/02/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "HEADREST COVER PLAS 11.5X10 HRCS250 9.62 9.62",
+      "Quantity": "10",
+      "unit_price": "9.62",
+      "line_item_total": "9.62"
+    },
+    {
+      "product_number": "",
+      "product_name": "C&B MIX TIP 10:1/4:1 (110351)DARBY 17.04 17.04",
+      "Quantity": "1",
+      "unit_price": "17.04",
+      "line_item_total": "17.04"
+    }
+  ],
+  "source_file": "Darby_Invoice_5598988_8892198c.pdf",
+  "parsed_at": "2025-12-12T15:54:28.274312+00:00"
 }

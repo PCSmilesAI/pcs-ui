@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "Pavloff",
+  "invoice_date": "09/09/2025",
+  "due_date": "09/24/2025",
+  "invoice_total": "121.0",
+  "office_location": "Roseburg",
+  "line_items": [],
+  "source_file": "Invoice 464_ded33a5e.pdf",
+  "parsed_at": "2025-12-12T15:55:44.719134+00:00"
 }

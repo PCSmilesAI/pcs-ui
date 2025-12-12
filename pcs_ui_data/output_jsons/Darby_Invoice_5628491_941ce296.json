@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5628491",
   "invoice_date": "",
+  "due_date": "",
   "invoice_total": "",
-  "office_location": "Vancouver",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "43151",
+      "product_name": "IPA-HP IPROPHY AIR M1020005",
+      "Quantity": "95",
+      "unit_price": "144.06",
+      "line_item_total": "144.06"
+    }
+  ],
+  "source_file": "Darby_Invoice_5628491_941ce296.pdf",
+  "parsed_at": "2025-12-12T15:55:00.002907+00:00"
 }

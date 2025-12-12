@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5611891",
+  "invoice_date": "10/16/25",
+  "due_date": "11/15/2025",
   "invoice_total": "",
   "office_location": "Eugene",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "line_items": [
+    {
+      "product_number": "8780190",
+      "product_name": "8780190 |/100IN|/ KNIT-PAK RETRACT CORD 82000 9007",
+      "Quantity": "8780190",
+      "unit_price": "11.81",
+      "line_item_total": "35.43"
+    }
+  ],
+  "source_file": "Darby_Invoice_5611891_42317521.pdf",
+  "parsed_at": "2025-12-12T15:54:44.367972+00:00"
 }

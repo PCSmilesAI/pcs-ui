@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "s",
+  "invoice_date": "10/31/2025",
+  "due_date": "11/30/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Vancouver",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "SE 15TH ST STE",
+      "Quantity": "16415",
+      "unit_price": "50",
+      "line_item_total": "1"
+    }
+  ],
+  "source_file": "52963480_ab4360ba.pdf",
+  "parsed_at": "2025-12-12T15:53:57.514843+00:00"
 }

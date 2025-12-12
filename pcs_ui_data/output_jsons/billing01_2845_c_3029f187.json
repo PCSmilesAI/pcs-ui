@@ -1,10 +1,55 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "INVOICE",
+  "invoice_date": "10/29/25",
+  "due_date": "11/28/2025",
+  "invoice_total": "434.68",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "ROUTE",
+      "product_name": "",
+      "Quantity": "000700",
+      "unit_price": "000700",
+      "line_item_total": "000700"
+    },
+    {
+      "product_number": "0471029N2OPUSPE",
+      "product_name": "3    0",
+      "Quantity": "3",
+      "unit_price": "3",
+      "line_item_total": "3"
+    },
+    {
+      "product_number": "30200471029OX",
+      "product_name": "PUSPE ALUM",
+      "Quantity": "4",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "0471029RF2HAZ10",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "71029RF3FUELSUR",
+      "product_name": "",
+      "Quantity": "1",
+      "unit_price": "0",
+      "line_item_total": "0"
+    },
+    {
+      "product_number": "",
+      "product_name": "0.00",
+      "Quantity": "1",
+      "unit_price": "470.18",
+      "line_item_total": "470.18"
+    }
+  ],
+  "source_file": "billing01_2845_c_3029f187.pdf",
+  "parsed_at": "2025-12-12T16:03:24.668307+00:00"
 }

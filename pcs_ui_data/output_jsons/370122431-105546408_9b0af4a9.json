@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5546408",
+  "invoice_date": "08/15/25",
+  "due_date": "09/14/2025",
   "invoice_total": "",
-  "office_location": "Vancouver",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "STERILIZATION POUCH 3.5 X 9 DARBY 14.31 28.62 TX",
+      "Quantity": "5",
+      "unit_price": "14.31",
+      "line_item_total": "28.62"
+    }
+  ],
+  "source_file": "370122431-105546408_9b0af4a9.pdf",
+  "parsed_at": "2025-12-12T15:53:50.906484+00:00"
 }

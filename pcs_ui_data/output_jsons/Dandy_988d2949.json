@@ -1,10 +1,40 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "31963-5372-052",
+  "invoice_date": "10/01/2025",
+  "due_date": "10/08/2025",
+  "invoice_total": "288.00",
+  "office_location": "Ridgefield",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for Toni Garza",
+      "description": "Doctor: Reid Donakey",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Deann Liska",
+      "description": "Doctor: Reid Donakey",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "09/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Bill Krieger",
+      "description": "Doctor: Reid Donakey",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "09/03/25"
+    }
+  ],
+  "source_file": "Dandy_988d2949.pdf",
+  "parsed_at": "2025-12-12T15:54:05.997258+00:00"
 }

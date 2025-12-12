@@ -1,10 +1,20 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "OICE",
   "invoice_date": "",
   "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "invoice_total": "",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Micro Capillary Tips, 5mm 100pk",
+      "Quantity": "1802",
+      "unit_price": "47.19",
+      "line_item_total": "47.19"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082630.pdf",
+  "parsed_at": "2025-12-12T15:57:14.534036+00:00"
 }

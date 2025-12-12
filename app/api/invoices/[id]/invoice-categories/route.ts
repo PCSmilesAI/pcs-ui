@@ -3,6 +3,36 @@ import { getDatabase } from '@/lib/db/client';
 import { v4 as uuidv4 } from 'uuid';
 import { categorizeInvoice } from '@/lib/invoices/categoryParser';
 
+/**
+ * Map parsed location names to PCS class names
+ * Used to auto-populate GL Line class from invoice's parsed office_location
+ */
+function mapLocationToClass(location: string): string {
+  if (!location) return '';
+  
+  const locationLower = location.toLowerCase().trim();
+  
+  // Map common location names/variations to PCS classes
+  if (locationLower.includes('columbia')) return 'General-Columbia';
+  if (locationLower.includes('eugene')) return 'General-Eugene';
+  if (locationLower.includes('lebanon')) return 'General-Lebanon';
+  if (locationLower.includes('milwaukie') || locationLower.includes('milwaukee')) return 'General-Milwaukie';
+  if (locationLower.includes('riddle')) return 'General-Riddle';
+  if (locationLower.includes('ridgefield')) return 'General-Ridgefield';
+  if (locationLower.includes('roseburg')) return 'General-Roseburg';
+  if (locationLower.includes('salem')) return 'General-Salem';
+  if (locationLower.includes('insurance')) return 'General-Insurance';
+  if (locationLower.includes('executive') || locationLower.includes('corp-exec')) return 'Corp-Executive';
+  if (locationLower.includes('finance') || locationLower.includes('corp-fin')) return 'Corp-Finance';
+  if (locationLower.includes('corp-hr') || locationLower.includes('human resources')) return 'Corp-HR';
+  if (locationLower.includes('corp-it') || locationLower.includes('information tech')) return 'Corp-IT';
+  if (locationLower.includes('rcm') || locationLower.includes('corp-rcm')) return 'Corp-RCM';
+  if (locationLower.includes('marketing') || locationLower.includes('div-market')) return 'Div-Marketing';
+  if (locationLower.includes('operations') || locationLower.includes('div-op')) return 'Div-Operations';
+  
+  return '';
+}
+
 interface CategoryInput {
   id?: string;
   categoryId?: string;
@@ -116,6 +146,10 @@ export async function GET(
     if (transformedCategories.length === 0 && totalAmount > 0) {
       const vendorName = invoice.vendor_name || '';
       
+      // Get class from parsed location (office_location field)
+      const parsedLocation = invoice.office_location || invoice.office_id || invoice.office || '';
+      const classFromLocation = mapLocationToClass(parsedLocation);
+      
       try {
         // Use the auto-categorization logic to get suggested category from vendor mapping
         const suggestedCategories = await categorizeInvoice(
@@ -125,11 +159,16 @@ export async function GET(
         
         if (suggestedCategories && suggestedCategories.length > 0) {
           const suggested = suggestedCategories[0];
+          // Use class from vendor mapping, or fall back to parsed location
+          const finalClass = suggested.className || classFromLocation;
+          
           console.log('[GL_LINES] Auto-categorized from vendor mapping', {
             invoiceId,
             vendor: vendorName,
             category: suggested.categoryName,
-            class: suggested.className,
+            classFromVendor: suggested.className,
+            classFromLocation,
+            finalClass,
             source: suggested.source
           });
           
@@ -138,38 +177,44 @@ export async function GET(
             sequence: 1,
             categoryId: suggested.categoryId || '',
             categoryName: suggested.categoryName,
-            classId: null,
-            className: suggested.className || null,
+            classId: finalClass || null,
+            className: finalClass || null,
             description: '',
             amount: totalAmount,
             source: suggested.source || 'vendor_mapping'
           });
         } else {
-          // Fallback to empty category if no mapping found
+          // Fallback - use class from parsed location if available
+          console.log('[GL_LINES] No vendor mapping, using parsed location class', {
+            invoiceId,
+            parsedLocation,
+            classFromLocation
+          });
+          
           transformedCategories.push({
             id: '',
             sequence: 1,
             categoryId: '',
             categoryName: '',
-            classId: null,
-            className: null,
+            classId: classFromLocation || null,
+            className: classFromLocation || null,
             description: '',
             amount: totalAmount,
-            source: 'default'
+            source: classFromLocation ? 'parsed_location' : 'default'
           });
         }
       } catch (error) {
-        console.warn('[GL_LINES] Auto-categorization failed, using empty default', error);
+        console.warn('[GL_LINES] Auto-categorization failed, using parsed location class', { error, classFromLocation });
         transformedCategories.push({
           id: '',
           sequence: 1,
           categoryId: '',
           categoryName: '',
-          classId: null,
-          className: null,
+          classId: classFromLocation || null,
+          className: classFromLocation || null,
           description: '',
           amount: totalAmount,
-          source: 'default'
+          source: classFromLocation ? 'parsed_location' : 'default'
         });
       }
     }

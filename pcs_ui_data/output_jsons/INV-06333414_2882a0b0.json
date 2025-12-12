@@ -1,10 +1,160 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Brasseler",
+  "vendor_name": "Brasseler USA Dental",
+  "invoice_number": "6333414",
+  "invoice_date": "07/25/25",
+  "due_date": "08/24/2025",
+  "invoice_total": "594.42",
+  "office_location": "Milwaukie",
+  "line_items": [
+    {
+      "product_number": "000724U0",
+      "product_name": "7901 FG FLAME H246.31.009 5P",
+      "Quantity": "1",
+      "unit_price": "60.10",
+      "line_item_total": "25.00"
+    },
+    {
+      "product_number": "000933U0",
+      "product_name": "H375.31.014 FG FLT TAP 5P",
+      "Quantity": "1",
+      "unit_price": "60.10",
+      "line_item_total": "25.00"
+    },
+    {
+      "product_number": "001108U0",
+      "product_name": "4 RASURG ROUND H1.24.014 5P",
+      "Quantity": "1",
+      "unit_price": "64.30",
+      "line_item_total": "11.25"
+    },
+    {
+      "product_number": "004712U0",
+      "product_name": "5801.31.016 (SC) ROUND 5P",
+      "Quantity": "1",
+      "unit_price": "69.50",
+      "line_item_total": "23.50"
+    },
+    {
+      "product_number": "004809U0",
+      "product_name": "6835.31.010 (C) FLT CYLN 5P",
+      "Quantity": "1",
+      "unit_price": "75.40",
+      "line_item_total": "17.25"
+    },
+    {
+      "product_number": "004810U0",
+      "product_name": "6835.31.012 (C) FLT CYLN 5P",
+      "Quantity": "1",
+      "unit_price": "75.40",
+      "line_item_total": "17.25"
+    },
+    {
+      "product_number": "004969U0",
+      "product_name": "8392.31.016 (F) INTERPRXMAL 5P",
+      "Quantity": "2",
+      "unit_price": "75.40",
+      "line_item_total": "34.50"
+    },
+    {
+      "product_number": "011734U0",
+      "product_name": "8856.31.018 (F) RD TAP 5P",
+      "Quantity": "1",
+      "unit_price": "75.40",
+      "line_item_total": "17.25"
+    },
+    {
+      "product_number": "011994U0",
+      "product_name": "8862.31.010 (F) FLAME 5P",
+      "Quantity": "1",
+      "unit_price": "75.40",
+      "line_item_total": "17.25"
+    },
+    {
+      "product_number": "013389U0",
+      "product_name": "5801.31.018 (SC) ROUND 5P",
+      "Quantity": "1",
+      "unit_price": "69.50",
+      "line_item_total": "23.50"
+    },
+    {
+      "product_number": "017278U0",
+      "product_name": "6811.31.037 (C) BARREL 5P",
+      "Quantity": "1",
+      "unit_price": "67.90",
+      "line_item_total": "22.50"
+    },
+    {
+      "product_number": "018173U0",
+      "product_name": "H34.31.012 FG MTL CTR 5P",
+      "Quantity": "1",
+      "unit_price": "60.90",
+      "line_item_total": "22.50"
+    },
+    {
+      "product_number": "019207U0",
+      "product_name": "KS0 (M) RD CYLN 30005.31.077 5P",
+      "Quantity": "1",
+      "unit_price": "75.40",
+      "line_item_total": "17.25"
+    },
+    {
+      "product_number": "021419U0",
+      "product_name": "8856.31.021 (F) RD TAP 5P",
+      "Quantity": "1",
+      "unit_price": "75.40",
+      "line_item_total": "17.25"
+    },
+    {
+      "product_number": "000511U0",
+      "product_name": "661.31.420 ARKANSAS FLAME 10P",
+      "Quantity": "1",
+      "unit_price": "44.90",
+      "line_item_total": "32.00"
+    },
+    {
+      "product_number": "022860U0",
+      "product_name": "310.21 SNAP ON RA MANDREL 5P",
+      "Quantity": "1",
+      "unit_price": "45.00",
+      "line_item_total": "31.60"
+    },
+    {
+      "product_number": "026795T0",
+      "product_name": "330C FG PEAR H7C.31.008 10P",
+      "Quantity": "1",
+      "unit_price": "55.20",
+      "line_item_total": "13.75"
+    },
+    {
+      "product_number": "004746U0",
+      "product_name": "5856.31.018 (SC) RD TAP 5P",
+      "Quantity": "1",
+      "unit_price": "69.50",
+      "line_item_total": "23.50"
+    },
+    {
+      "product_number": "024424U0",
+      "product_name": "FLDC5-5M DIACOMP ASST MED/FN 6P",
+      "Quantity": "1",
+      "unit_price": "45.00",
+      "line_item_total": "80.58"
+    },
+    {
+      "product_number": "024423U0",
+      "product_name": "FLDC5 DIACOMP FINE GRAY 14MM 3P",
+      "Quantity": "1",
+      "unit_price": "45.00",
+      "line_item_total": "40.29"
+    },
+    {
+      "product_number": "028715U0",
+      "product_name": "WOSC6 (SC) OCCLUSAL 5P",
+      "Quantity": "1",
+      "unit_price": "45.00",
+      "line_item_total": "64.73"
+    }
+  ],
+  "source_file": "INV-06333414_2882a0b0.pdf",
+  "parsed_at": "2025-12-12T15:55:21.383332+00:00"
 }

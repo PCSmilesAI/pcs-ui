@@ -1,10 +1,12 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "76099",
+  "invoice_date": "11/19/2025",
+  "due_date": "12/19/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Eugene",
+  "line_items": [],
+  "source_file": "Inv_76099_from_Dental_Medical_Staffing_Inc._5562044_13636_2cfb18f2.pdf",
+  "parsed_at": "2025-12-12T15:55:40.202592+00:00"
 }

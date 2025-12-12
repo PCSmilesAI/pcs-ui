@@ -1,10 +1,436 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "31497-0114-048",
+  "invoice_date": "10/01/2025",
+  "due_date": "10/08/2025",
+  "invoice_total": "5667.00",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kayla Rush",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Trevor Loyd",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Luella Cox",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "105.00",
+      "line_item_total": "105.00",
+      "service_date": "09/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Carol McKee",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for James Dumas",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Patti Rogers",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "80.00",
+      "line_item_total": "80.00",
+      "service_date": "09/29/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Tammy Cuebas",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/29/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for William Wiles",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/29/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Brandi Loop",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "09/29/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Theresa Elias",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "654.00",
+      "line_item_total": "654.00",
+      "service_date": "09/26/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Ryan Stevens",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "105.00",
+      "line_item_total": "105.00",
+      "service_date": "09/26/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Sherry Dodd",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "175.00",
+      "line_item_total": "175.00",
+      "service_date": "09/25/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Susan Crawford",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "90.00",
+      "line_item_total": "90.00",
+      "service_date": "09/25/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Alan Page",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/25/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Brittany Church",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/25/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Deborah Miles",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/24/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Pat Salnick",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/23/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kylie Godwin",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "95.00",
+      "line_item_total": "95.00",
+      "service_date": "09/23/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kirk Tyler",
+      "description": "Doctor: Assistant Page",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/23/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Nicholas Popejoy",
+      "description": "Doctor: Dale Mcnutt",
+      "Quantity": "1",
+      "unit_price": "819.00",
+      "line_item_total": "819.00",
+      "service_date": "09/19/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Erica Kimrey",
+      "description": "Doctor: Dale Mcnutt",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/19/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for David Fears",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/18/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Richard Murphy",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/18/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Ceresse Harris",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "280.00",
+      "line_item_total": "280.00",
+      "service_date": "09/18/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Michelle Wilson",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/17/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Nichon Wilz",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "210.00",
+      "line_item_total": "210.00",
+      "service_date": "09/16/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Laura Wiles",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/16/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Aubrey Schumacher",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "09/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for John Standley",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/15/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Michael Stonesifer",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/12/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Karianne Walkden",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Arthur Brock",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Cassandra Rodriguez",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Natalie Pruitt",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kiona Villegas",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Torry Casavan",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "25.00",
+      "line_item_total": "25.00",
+      "service_date": "09/10/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Hugh Heinrichsen",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/09/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Johnathan Harder",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/09/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for James Dumas",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/09/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Jessica Grant",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/09/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Paul Eastman",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/08/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Nick Nunez",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "144.00",
+      "line_item_total": "144.00",
+      "service_date": "09/05/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Dalton Aske",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "105.00",
+      "line_item_total": "105.00",
+      "service_date": "09/05/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Patricia Hennings",
+      "description": "Doctor: Jordon Endres",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/04/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Lorrettea Schulz",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "09/03/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Pamela Kantola",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "218.00",
+      "line_item_total": "218.00",
+      "service_date": "09/02/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Sasha Ringen",
+      "description": "Doctor: Casey Kariya",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/02/25"
+    }
+  ],
+  "source_file": "Dandy_ccd79887.pdf",
+  "parsed_at": "2025-12-12T15:54:06.711731+00:00"
 }

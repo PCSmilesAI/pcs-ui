@@ -1,10 +1,193 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "46631524",
+  "invoice_date": "09/09/25",
+  "due_date": "10/09/25",
+  "invoice_total": "721.22",
+  "office_location": "Roseburg",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "161-4901",
+      "product_name": "12/PK Endogel Microdose Tube 1mL/Tb",
+      "Quantity": "1",
+      "unit_price": "21.82",
+      "line_item_total": "21.82"
+    },
+    {
+      "product_number": "900-1892",
+      "product_name": "100/BX Standard Needles 30Ga Short Plastic Hub",
+      "Quantity": "1",
+      "unit_price": "11.12",
+      "line_item_total": "11.12"
+    },
+    {
+      "product_number": "107-0546",
+      "product_name": "35/BX Polybite Tray Quadrant",
+      "Quantity": "1",
+      "unit_price": "15.55",
+      "line_item_total": "15.55"
+    },
+    {
+      "product_number": "112-7254",
+      "product_name": "12/BX Maxima Suture PTFE FS-2 19mm 3-0 18\"",
+      "Quantity": "1",
+      "unit_price": "84.46",
+      "line_item_total": "84.46"
+    },
+    {
+      "product_number": "712-4416",
+      "product_name": "12/PK End Tuft Toothbrush Tapered",
+      "Quantity": "2",
+      "unit_price": "11.05",
+      "line_item_total": "22.10"
+    },
+    {
+      "product_number": "114-5308",
+      "product_name": "EA Dexis Platinum Holder Post Yellow",
+      "Quantity": "4",
+      "unit_price": "20.20",
+      "line_item_total": "80.80"
+    },
+    {
+      "product_number": "465-1205",
+      "product_name": "50/BX Lidocaine 2% w/EPI 1.7 mL INJ 1:100 Red",
+      "Quantity": "1",
+      "unit_price": "34.56",
+      "line_item_total": "34.56"
+    },
+    {
+      "product_number": "712-0164",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Ultra Tight",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    },
+    {
+      "product_number": "712-0154",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Tight",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    },
+    {
+      "product_number": "712-0155",
+      "product_name": "36/BX GUM Go-Betweens Proxabrush Moderate",
+      "Quantity": "1",
+      "unit_price": "24.32",
+      "line_item_total": "24.32"
+    },
+    {
+      "product_number": "195-1020",
+      "product_name": "EA Beautifil Flow Plus F00 A2",
+      "Quantity": "2",
+      "unit_price": "32.20",
+      "line_item_total": "64.40"
+    },
+    {
+      "product_number": "543-6467",
+      "product_name": "50/BX Peroxyl Packets Alcohol Free 10mL",
+      "Quantity": "1",
+      "unit_price": "29.39",
+      "line_item_total": "29.39"
+    },
+    {
+      "product_number": "468-1704",
+      "product_name": "100/PK EdgeOne Fire Paper Points PRI Primary",
+      "Quantity": "1",
+      "unit_price": "8.37",
+      "line_item_total": "8.37"
+    },
+    {
+      "product_number": "468-1594",
+      "product_name": "3/PK EdgeOne Blaze Utopia R45 25MM R45 - 25mm",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "468-1588",
+      "product_name": "3/PK EdgeOne Blaze Utopia R25 25MM R25 - 25mm",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "468-1593",
+      "product_name": "3/PK EdgeOne Blaze Utopia R45 21MM R45 - 21mm",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "468-1587",
+      "product_name": "3/PK EdgeOne Blaze Utopia R25 21MM R25 - 21mm",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "468-1585",
+      "product_name": "3/PK EdgeOne Blaze Utopia R20 25MM R20 - 25mm",
+      "Quantity": "1",
+      "unit_price": "27.11",
+      "line_item_total": "27.11"
+    },
+    {
+      "product_number": "468-0476",
+      "product_name": "6/PK Edge SSteel K-File 25mm #20",
+      "Quantity": "2",
+      "unit_price": "5.39",
+      "line_item_total": "10.78"
+    },
+    {
+      "product_number": "468-0473",
+      "product_name": "6/PK Edge SSteel K-File 25mm #15",
+      "Quantity": "2",
+      "unit_price": "5.39",
+      "line_item_total": "10.78"
+    },
+    {
+      "product_number": "468-0470",
+      "product_name": "6/PK Edge SSteel K-File 25mm #10",
+      "Quantity": "2",
+      "unit_price": "5.39",
+      "line_item_total": "10.78"
+    },
+    {
+      "product_number": "468-0478",
+      "product_name": "6/PK Edge SSteel K-File 21mm #25",
+      "Quantity": "1",
+      "unit_price": "5.39",
+      "line_item_total": "5.39"
+    },
+    {
+      "product_number": "468-0475",
+      "product_name": "6/PK Edge SSteel K-File 21mm #20",
+      "Quantity": "1",
+      "unit_price": "5.39",
+      "line_item_total": "5.39"
+    },
+    {
+      "product_number": "468-0480",
+      "product_name": "6/PK Edge SSteel K-File 31mm #25",
+      "Quantity": "1",
+      "unit_price": "5.39",
+      "line_item_total": "5.39"
+    },
+    {
+      "product_number": "107-1190",
+      "product_name": "50/BX Polybite Tray Sideless",
+      "Quantity": "1",
+      "unit_price": "15.55",
+      "line_item_total": "15.55"
+    },
+    {
+      "product_number": "136-4694",
+      "product_name": "100/PK OK-Sonic Ultrasonic Monitor",
+      "Quantity": "1",
+      "unit_price": "69.59",
+      "line_item_total": "69.59"
+    }
+  ]
 }

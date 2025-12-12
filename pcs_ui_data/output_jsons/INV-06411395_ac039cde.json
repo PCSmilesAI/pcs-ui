@@ -1,10 +1,97 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Brasseler",
+  "vendor_name": "Brasseler USA Dental",
+  "invoice_number": "6411395",
+  "invoice_date": "10/31/25",
+  "due_date": "11/30/2025",
+  "invoice_total": "490.11",
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "004965U0",
+      "product_name": "8379.31.016 (F) FOOTBALL 5P",
+      "Quantity": "4",
+      "unit_price": "76.50",
+      "line_item_total": "69.00"
+    },
+    {
+      "product_number": "012925U0",
+      "product_name": "5811.31.037 (SC) BARREL 5P",
+      "Quantity": "1",
+      "unit_price": "70.90",
+      "line_item_total": "23.50"
+    },
+    {
+      "product_number": "000952U0",
+      "product_name": "7406 FG FOOTBALL H379.31.018 5P",
+      "Quantity": "1",
+      "unit_price": "62.00",
+      "line_item_total": "25.00"
+    },
+    {
+      "product_number": "000511U0",
+      "product_name": "661.31.420 ARKANSAS FLAME 10P",
+      "Quantity": "1",
+      "unit_price": "47.50",
+      "line_item_total": "32.00"
+    },
+    {
+      "product_number": "000724U0",
+      "product_name": "7901 FG FLAME H246.31.009 5P",
+      "Quantity": "1",
+      "unit_price": "62.00",
+      "line_item_total": "25.00"
+    },
+    {
+      "product_number": "024422U0",
+      "product_name": "FLDC5M DIACOMP MED GRN 14MM 3P",
+      "Quantity": "1",
+      "unit_price": "47.60",
+      "line_item_total": "40.29"
+    },
+    {
+      "product_number": "005056U0",
+      "product_name": "8863.31.012 (F) FLAME 5P",
+      "Quantity": "4",
+      "unit_price": "76.50",
+      "line_item_total": "69.00"
+    },
+    {
+      "product_number": "004906U0",
+      "product_name": "6909.31.040 (C) WHEEL 5P",
+      "Quantity": "1",
+      "unit_price": "60.60",
+      "line_item_total": "29.00"
+    },
+    {
+      "product_number": "004730U0",
+      "product_name": "5847.31.018 (SC) FLT TAP 5P",
+      "Quantity": "2",
+      "unit_price": "70.90",
+      "line_item_total": "47.00"
+    },
+    {
+      "product_number": "022860U0",
+      "product_name": "310.21 SNAP ON RA MANDREL 5P",
+      "Quantity": "1",
+      "unit_price": "47.60",
+      "line_item_total": "31.60"
+    },
+    {
+      "product_number": "013158U0",
+      "product_name": "ET9F 16BLD (EF) H135F.31.014 5P",
+      "Quantity": "1",
+      "unit_price": "56.50",
+      "line_item_total": "35.00"
+    },
+    {
+      "product_number": "004734U0",
+      "product_name": "5848.31.016 (SC) FLT TAP 5P",
+      "Quantity": "2",
+      "unit_price": "70.90",
+      "line_item_total": "47.00"
+    }
+  ],
+  "source_file": "INV-06411395_ac039cde.pdf",
+  "parsed_at": "2025-12-12T15:55:21.794990+00:00"
 }

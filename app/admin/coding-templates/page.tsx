@@ -9,6 +9,8 @@ interface CodingTemplate {
   vendor_name: string;
   gl_account_name: string;
   template_type?: string;
+  allocation_mode?: string;
+  description?: string;
   is_active: number;
   created_at: string;
   row_count?: number;
@@ -22,6 +24,7 @@ interface TableTemplateRow {
   className: string;
   locationName: string;
   amount: string;
+  percentage: string;
 }
 
 interface QBOCategory {
@@ -43,10 +46,18 @@ interface Vendor {
   name: string;
 }
 
+type AllocationMode = 'split_evenly' | 'fixed_amount' | 'percentage';
+
 const ADMIN_EMAILS = new Set([
   'business@pcsmilesai.com',
   'mckaym@pcsmiles.com',
 ]);
+
+const ALLOCATION_MODE_LABELS: Record<AllocationMode, string> = {
+  split_evenly: 'Split Evenly',
+  fixed_amount: 'Specific Dollar Amount',
+  percentage: 'Percent Split',
+};
 
 export default function CodingTemplatesPage() {
   const router = useRouter();
@@ -60,17 +71,17 @@ export default function CodingTemplatesPage() {
 
   // Template form state
   const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
   const [companyCode, setCompanyCode] = useState('Pacific Crest Smiles');
   const [vendorName, setVendorName] = useState('');
   const [vendorSearchQuery, setVendorSearchQuery] = useState('');
   const [vendorSuggestions, setVendorSuggestions] = useState<Vendor[]>([]);
   const [showVendorSuggestions, setShowVendorSuggestions] = useState(false);
-  const [templateType, setTemplateType] = useState<'even_split' | 'table_template'>('table_template');
-  const [glAccountName, setGlAccountName] = useState(''); // For even split
+  const [allocationMode, setAllocationMode] = useState<AllocationMode>('split_evenly');
 
-  // Table template state
+  // GL Line rows state
   const [tableRows, setTableRows] = useState<TableTemplateRow[]>([
-    { id: '1', glAccountPath: '', categoryName: '', description: '', className: '', locationName: '', amount: '' }
+    { id: '1', glAccountPath: '', categoryName: '', description: '', className: '', locationName: '', amount: '', percentage: '' }
   ]);
   const [qboCategories, setQboCategories] = useState<QBOCategory[]>([]);
   const [qboLocations, setQboLocations] = useState<QBOLocation[]>([]);
@@ -86,10 +97,14 @@ export default function CodingTemplatesPage() {
   }, []);
 
   useEffect(() => {
-    if (showModal && templateType === 'table_template') {
+    if (showModal) {
       loadQBOData();
     }
-  }, [showModal, templateType]);
+  }, [showModal]);
+
+  // Calculate percentage total for validation
+  const percentageTotal = tableRows.reduce((sum, row) => sum + (parseFloat(row.percentage) || 0), 0);
+  const isPercentageValid = Math.abs(percentageTotal - 100) < 0.01;
 
   async function checkAdminAccess() {
     try {
@@ -121,22 +136,19 @@ export default function CodingTemplatesPage() {
         throw new Error('Failed to fetch templates');
       }
       const data = await response.json();
-      // Fetch row counts for table templates
+      // Fetch row counts for templates
       const templatesWithCounts = await Promise.all(
         (data.templates || []).map(async (template: CodingTemplate) => {
-          if (template.template_type === 'table_template') {
-            try {
-              const rowsResponse = await fetch(`/api/coding-templates/${template.id}/rows`);
-              if (rowsResponse.ok) {
-                const rowsData = await rowsResponse.json();
-                return { ...template, row_count: rowsData.rows?.length || 0 };
-              }
-            } catch (e) {
-              console.warn('Failed to fetch row count for template:', template.id, e);
+          try {
+            const rowsResponse = await fetch(`/api/coding-templates/${template.id}/rows`);
+            if (rowsResponse.ok) {
+              const rowsData = await rowsResponse.json();
+              return { ...template, row_count: rowsData.rows?.length || 0 };
             }
-            return { ...template, row_count: 0 };
+          } catch (e) {
+            console.warn('Failed to fetch row count for template:', template.id, e);
           }
-          return { ...template, row_count: 9 }; // Even split = 9 locations
+          return { ...template, row_count: 0 };
         })
       );
       setTemplates(templatesWithCounts);
@@ -199,7 +211,8 @@ export default function CodingTemplatesPage() {
       description: '',
       className: '',
       locationName: '',
-      amount: ''
+      amount: '',
+      percentage: ''
     }]);
   }
 
@@ -218,7 +231,8 @@ export default function CodingTemplatesPage() {
         description: '',
         className: '',
         locationName: '',
-        amount: ''
+        amount: '',
+        percentage: ''
       }]);
     }
   }
@@ -231,7 +245,7 @@ export default function CodingTemplatesPage() {
 
   function getFilteredCategories(rowId: string): QBOCategory[] {
     const query = categorySearchQueries[rowId] || '';
-    if (!query) return qboCategories.slice(0, 20); // Show first 20 if no search
+    if (!query) return qboCategories.slice(0, 20);
     
     const queryLower = query.toLowerCase();
     return qboCategories.filter(cat =>
@@ -266,42 +280,35 @@ export default function CodingTemplatesPage() {
     setClassDropdownOpen({ ...classDropdownOpen, [rowId]: false });
   }
 
-  // Get the best matching category for autocomplete (prioritize starts-with matches)
   function getAutocompleteCategorySuggestion(rowId: string): QBOCategory | null {
     const query = categorySearchQueries[rowId];
     if (!query) return null;
     
     const queryLower = query.toLowerCase();
-    // First try to find one that starts with the query for better autocomplete
     const startsWithMatch = qboCategories.find(cat =>
       cat.displayText.toLowerCase().startsWith(queryLower) ||
       cat.name.toLowerCase().startsWith(queryLower)
     );
     if (startsWithMatch) return startsWithMatch;
     
-    // Fall back to any match
     const filtered = getFilteredCategories(rowId);
     return filtered.length > 0 ? filtered[0] : null;
   }
 
-  // Get the best matching location for autocomplete (prioritize starts-with matches)
   function getAutocompleteLocationSuggestion(rowId: string): QBOLocation | null {
     const query = classSearchQueries[rowId];
     if (!query) return null;
     
     const queryLower = query.toLowerCase();
-    // First try to find one that starts with the query for better autocomplete
     const startsWithMatch = qboLocations.find(loc =>
       loc.name.toLowerCase().startsWith(queryLower)
     );
     if (startsWithMatch) return startsWithMatch;
     
-    // Fall back to any match
     const filtered = getFilteredLocations(rowId);
     return filtered.length > 0 ? filtered[0] : null;
   }
 
-  // Get the completion text for category autocomplete
   function getCategoryCompletionText(rowId: string): string {
     const query = categorySearchQueries[rowId];
     if (!query) return '';
@@ -311,14 +318,12 @@ export default function CodingTemplatesPage() {
     const displayText = suggestion.displayText;
     const queryLower = query.toLowerCase();
     
-    // Check if displayText starts with the query (case-insensitive)
     if (displayText.toLowerCase().startsWith(queryLower)) {
       return displayText.slice(query.length);
     }
     return '';
   }
 
-  // Get the completion text for class autocomplete
   function getClassCompletionText(rowId: string): string {
     const query = classSearchQueries[rowId];
     if (!query) return '';
@@ -328,14 +333,12 @@ export default function CodingTemplatesPage() {
     const name = suggestion.name;
     const queryLower = query.toLowerCase();
     
-    // Check if name starts with the query (case-insensitive)
     if (name.toLowerCase().startsWith(queryLower)) {
       return name.slice(query.length);
     }
     return '';
   }
 
-  // Handle keyboard events for category field
   function handleCategoryKeyDown(e: React.KeyboardEvent<HTMLInputElement>, rowId: string) {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -355,7 +358,6 @@ export default function CodingTemplatesPage() {
     }
   }
 
-  // Handle keyboard events for class field
   function handleClassKeyDown(e: React.KeyboardEvent<HTMLInputElement>, rowId: string) {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -381,7 +383,7 @@ export default function CodingTemplatesPage() {
 
     // Validation
     if (!templateName.trim()) {
-      setError('Missing Template Name');
+      setError('Template Name is required');
       return;
     }
 
@@ -390,24 +392,33 @@ export default function CodingTemplatesPage() {
       return;
     }
 
-    if (templateType === 'even_split') {
-      if (!glAccountName.trim()) {
-        setError('GL Account Name is required for even split templates');
-        return;
-      }
-    } else {
-      // Table template validation
-      if (tableRows.length === 0) {
-        setError('At least one table row is required');
+    if (tableRows.length === 0) {
+      setError('At least one GL line is required');
+      return;
+    }
+
+    // Validate based on allocation mode
+    for (const row of tableRows) {
+      if (!row.glAccountPath) {
+        setError('All GL lines must have a Category selected');
         return;
       }
 
-      for (const row of tableRows) {
-        if (!row.glAccountPath || !row.amount) {
-          setError('All rows must have Category and Amount');
-          return;
-        }
+      if (allocationMode === 'fixed_amount' && !row.amount) {
+        setError('All GL lines must have an Amount for Specific Dollar Amount mode');
+        return;
       }
+
+      if (allocationMode === 'percentage' && !row.percentage) {
+        setError('All GL lines must have a Percentage for Percent Split mode');
+        return;
+      }
+    }
+
+    // Validate percentage total
+    if (allocationMode === 'percentage' && !isPercentageValid) {
+      setError(`Percentage allocation must equal 100%. Current total: ${percentageTotal.toFixed(1)}%`);
+      return;
     }
 
     try {
@@ -415,23 +426,21 @@ export default function CodingTemplatesPage() {
 
       const payload: any = {
         name: templateName,
+        description: templateDescription,
         company_code: companyCode,
         vendor_name: vendorName,
-        template_type: templateType,
-      };
-
-      if (templateType === 'even_split') {
-        payload.gl_account_name = glAccountName;
-      } else {
-        payload.table_rows = tableRows.map(row => ({
+        template_type: 'table_template',
+        allocation_mode: allocationMode,
+        table_rows: tableRows.map(row => ({
           gl_account_path: row.glAccountPath,
           category_name: row.categoryName,
           description: row.description || '',
           class_name: row.className,
           location_name: row.locationName,
-          amount: row.amount,
-        }));
-      }
+          amount: allocationMode === 'fixed_amount' ? row.amount : null,
+          percentage: allocationMode === 'percentage' ? row.percentage : null,
+        })),
+      };
 
       const url = editingTemplate 
         ? `/api/coding-templates/${editingTemplate.id}`
@@ -446,67 +455,66 @@ export default function CodingTemplatesPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Failed to create template');
+        throw new Error(data.error || 'Failed to save template');
       }
 
       // Reset form and close modal
-      setTemplateName('');
-      setVendorName('');
-      setVendorSearchQuery('');
-      setGlAccountName('');
-      setTableRows([{ id: '1', glAccountPath: '', categoryName: '', description: '', className: '', locationName: '', amount: '' }]);
-      setEditingTemplate(null);
+      resetForm();
       setShowModal(false);
       await fetchTemplates();
       showToast(editingTemplate ? 'Template updated successfully!' : 'Template created successfully!', 'success');
     } catch (err: any) {
       setError(err.message);
-      console.error('Error creating template:', err);
+      console.error('Error saving template:', err);
     } finally {
       setSubmitting(false);
     }
   }
 
-  function closeModal() {
-    setShowModal(false);
-    setEditingTemplate(null);
+  function resetForm() {
     setTemplateName('');
+    setTemplateDescription('');
     setVendorName('');
     setVendorSearchQuery('');
-    setGlAccountName('');
-    setTableRows([{ id: '1', glAccountPath: '', categoryName: '', description: '', className: '', locationName: '', amount: '' }]);
+    setAllocationMode('split_evenly');
+    setTableRows([{ id: '1', glAccountPath: '', categoryName: '', description: '', className: '', locationName: '', amount: '', percentage: '' }]);
+    setEditingTemplate(null);
     setError(null);
+  }
+
+  function closeModal() {
+    setShowModal(false);
+    resetForm();
   }
 
   async function handleEditTemplate(template: CodingTemplate) {
     setEditingTemplate(template);
     setTemplateName(template.name);
+    setTemplateDescription(template.description || '');
     setVendorName(template.vendor_name);
     setVendorSearchQuery(template.vendor_name);
-    setTemplateType((template.template_type as 'even_split' | 'table_template') || 'even_split');
-    setGlAccountName(template.gl_account_name || '');
+    setAllocationMode((template.allocation_mode as AllocationMode) || 'split_evenly');
 
-    // Load template rows if table template
-    if (template.template_type === 'table_template') {
-      try {
-        const response = await fetch(`/api/coding-templates/${template.id}/rows`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.rows && data.rows.length > 0) {
-            setTableRows(data.rows.map((row: any, index: number) => ({
-              id: row.id || `row-${index}`,
-              glAccountPath: row.gl_account_path || '',
-              categoryName: row.category_name || '',
-              description: row.description || '',
-              className: row.class_name || '',
-              locationName: row.location_name || '',
-              amount: row.amount_cents ? (row.amount_cents / 100).toFixed(2) : '',
-            })));
-          }
+    // Load template rows
+    try {
+      const response = await fetch(`/api/coding-templates/${template.id}/rows`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.rows && data.rows.length > 0) {
+          setTableRows(data.rows.map((row: any, index: number) => ({
+            id: row.id || `row-${index}`,
+            glAccountPath: row.gl_account_path || '',
+            categoryName: row.category_name || '',
+            description: row.description || '',
+            className: row.class_name || '',
+            locationName: row.location_name || '',
+            amount: row.amount_cents ? (row.amount_cents / 100).toFixed(2) : '',
+            percentage: row.percentage ? row.percentage.toString() : '',
+          })));
         }
-      } catch (err) {
-        console.error('Failed to load template rows:', err);
       }
+    } catch (err) {
+      console.error('Failed to load template rows:', err);
     }
 
     setShowModal(true);
@@ -536,7 +544,6 @@ export default function CodingTemplatesPage() {
   }
 
   function showToast(message: string, variant: 'success' | 'error' = 'success') {
-    // Simple toast implementation
     const toast = document.createElement('div');
     toast.style.cssText = `
       position: fixed;
@@ -554,6 +561,11 @@ export default function CodingTemplatesPage() {
     setTimeout(() => {
       document.body.removeChild(toast);
     }, 3000);
+  }
+
+  function getAllocationModeLabel(mode?: string): string {
+    if (!mode) return 'Split Evenly';
+    return ALLOCATION_MODE_LABELS[mode as AllocationMode] || mode;
   }
 
   if (!isAdmin && loading) {
@@ -581,8 +593,6 @@ export default function CodingTemplatesPage() {
     );
   }
 
-  const totalAmount = tableRows.reduce((sum, row) => sum + (parseFloat(row.amount) || 0), 0);
-
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -591,9 +601,9 @@ export default function CodingTemplatesPage() {
             <h1 className="text-2xl font-bold text-gray-900">Coding Templates</h1>
             <button
               onClick={() => setShowModal(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
             >
-              Add Template
+              <span>+</span> Add Template
             </button>
           </div>
 
@@ -620,13 +630,10 @@ export default function CodingTemplatesPage() {
                         Vendor
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        GL Account
+                        Allocation
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Type
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Rows
+                        GL Lines
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
@@ -642,20 +649,22 @@ export default function CodingTemplatesPage() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {templates.map((template) => (
                       <tr key={template.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {template.name}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{template.name}</div>
+                          {template.description && (
+                            <div className="text-xs text-gray-500 truncate max-w-xs">{template.description}</div>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                           {template.vendor_name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {template.gl_account_name || '-'}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {getAllocationModeLabel(template.allocation_mode)}
+                          </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {template.template_type === 'table_template' ? 'Table Template' : 'Even Split'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {template.row_count !== undefined ? template.row_count : (template.template_type === 'even_split' ? 9 : '—')}
+                          {template.row_count || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -695,28 +704,27 @@ export default function CodingTemplatesPage() {
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h2 className="text-lg font-semibold text-blue-900 mb-2">How Coding Templates Work</h2>
           <ul className="text-sm text-blue-800 space-y-2">
-            <li>• Templates define how invoices from specific vendors are split across all 9 clinic locations</li>
-            <li>• When an AP Manager applies a template to an invoice, it creates allocations for each clinic</li>
-            <li>• Multi-location invoices bypass office manager approval and route directly to McKay (admin)</li>
-            <li>• QuickBooks bills are generated with one line item per clinic location</li>
-            <li>• All allocations are audited and tracked in the invoice event log</li>
+            <li><strong>Split Evenly:</strong> Divides the invoice total equally among all GL lines</li>
+            <li><strong>Specific Dollar Amount:</strong> Applies fixed dollar amounts to each GL line</li>
+            <li><strong>Percent Split:</strong> Allocates based on percentage (must equal 100%)</li>
+            <li>Templates can be applied from the invoice view page to auto-populate GL lines</li>
           </ul>
         </div>
       </div>
 
-      {/* Template Creation Modal */}
+      {/* Template Creation/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto m-4">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center z-10">
               <h2 className="text-xl font-bold text-gray-900">
-                {editingTemplate ? 'Edit Template' : 'Template'}
+                {editingTemplate ? 'Edit Template' : 'Create Template'}
               </h2>
               <button
                 onClick={closeModal}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
+                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
               >
-                ×
+                &times;
               </button>
             </div>
 
@@ -737,332 +745,343 @@ export default function CodingTemplatesPage() {
                   value={templateName}
                   onChange={(e) => setTemplateName(e.target.value)}
                   className={`w-full px-3 py-2 border rounded-md ${
-                    !templateName.trim() ? 'border-red-500' : 'border-gray-300'
+                    !templateName.trim() ? 'border-red-300' : 'border-gray-300'
                   } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  placeholder="e.g., IT Monthly 9 LOCATIONS"
+                  placeholder="e.g., Monthly IT Split - 3 Locations"
                 />
-                {!templateName.trim() && (
-                  <p className="mt-1 text-sm text-red-600">▲ Missing Template Name</p>
-                )}
               </div>
 
-              {/* Company Code */}
+              {/* Template Description */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Company Code
+                  Description (optional)
                 </label>
-                <select
-                  value={companyCode}
-                  onChange={(e) => setCompanyCode(e.target.value)}
+                <textarea
+                  value={templateDescription}
+                  onChange={(e) => setTemplateDescription(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Pacific Crest Smiles">Pacific Crest Smiles</option>
-                </select>
+                  placeholder="Describe when to use this template..."
+                  rows={2}
+                />
               </div>
 
-              {/* Vendor Search */}
-              <div className="mb-4 relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Vendor *
-                </label>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                {/* Vendor Search */}
                 <div className="relative">
-                  <input
-                    type="text"
-                    value={vendorSearchQuery}
-                    onChange={(e) => {
-                      setVendorSearchQuery(e.target.value);
-                      searchVendors(e.target.value);
-                    }}
-                    onFocus={() => {
-                      if (vendorSearchQuery.length >= 2) {
-                        setShowVendorSuggestions(true);
-                      }
-                    }}
-                    className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Search Vendor"
-                  />
-                  <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
-                  {showVendorSuggestions && vendorSuggestions.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                      {vendorSuggestions.map((vendor) => (
-                        <div
-                          key={vendor.id}
-                          onClick={() => {
-                            setVendorName(vendor.name);
-                            setVendorSearchQuery(vendor.name);
-                            setShowVendorSuggestions(false);
-                          }}
-                          className="px-4 py-2 hover:bg-blue-50 cursor-pointer"
-                        >
-                          {vendor.name}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Template Type */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Template Type
-                </label>
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="even_split"
-                      checked={templateType === 'even_split'}
-                      onChange={(e) => setTemplateType(e.target.value as 'even_split' | 'table_template')}
-                      className="mr-2"
-                    />
-                    Even Split
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="table_template"
-                      checked={templateType === 'table_template'}
-                      onChange={(e) => setTemplateType(e.target.value as 'even_split' | 'table_template')}
-                      className="mr-2"
-                    />
-                    Table Template
-                  </label>
-                </div>
-              </div>
-
-              {/* Even Split Form */}
-              {templateType === 'even_split' && (
-                <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    GL Account Name *
+                    Vendor *
                   </label>
-                  <input
-                    type="text"
-                    value={glAccountName}
-                    onChange={(e) => setGlAccountName(e.target.value)}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={vendorSearchQuery}
+                      onChange={(e) => {
+                        setVendorSearchQuery(e.target.value);
+                        searchVendors(e.target.value);
+                      }}
+                      onFocus={() => {
+                        if (vendorSearchQuery.length >= 2) {
+                          setShowVendorSuggestions(true);
+                        }
+                      }}
+                      className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Search Vendor"
+                    />
+                    <span className="absolute left-3 top-2.5 text-gray-400">&#128269;</span>
+                    {showVendorSuggestions && vendorSuggestions.length > 0 && (
+                      <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        {vendorSuggestions.map((vendor) => (
+                          <div
+                            key={vendor.id}
+                            onClick={() => {
+                              setVendorName(vendor.name);
+                              setVendorSearchQuery(vendor.name);
+                              setShowVendorSuggestions(false);
+                            }}
+                            className="px-4 py-2 hover:bg-blue-50 cursor-pointer"
+                          >
+                            {vendor.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Allocation Mode Dropdown */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Allocation *
+                  </label>
+                  <select
+                    value={allocationMode}
+                    onChange={(e) => setAllocationMode(e.target.value as AllocationMode)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., IT Support Services"
-                  />
+                  >
+                    <option value="split_evenly">Split Evenly</option>
+                    <option value="fixed_amount">Specific Dollar Amount</option>
+                    <option value="percentage">Percent Split</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Percent Distribution Indicator */}
+              {allocationMode === 'percentage' && (
+                <div className={`mb-4 p-3 rounded-md ${
+                  isPercentageValid ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <span className={`font-medium ${isPercentageValid ? 'text-green-800' : 'text-red-800'}`}>
+                      % Distribution
+                    </span>
+                    <span className={`text-lg font-bold ${isPercentageValid ? 'text-green-700' : 'text-red-700'}`}>
+                      {percentageTotal.toFixed(1)}% / 100%
+                    </span>
+                  </div>
+                  {!isPercentageValid && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {percentageTotal < 100 
+                        ? `Missing ${(100 - percentageTotal).toFixed(1)}% allocation`
+                        : `Over-allocated by ${(percentageTotal - 100).toFixed(1)}%`
+                      }
+                    </p>
+                  )}
                 </div>
               )}
 
-              {/* Table Template */}
-              {templateType === 'table_template' && (
-                <div className="mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Line Items *
-                    </label>
-                    <button
-                      type="button"
-                      onClick={clearTable}
-                      className="text-sm text-gray-600 hover:text-gray-800"
+              {/* GL Lines Section */}
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    GL Lines ({tableRows.length})
+                  </label>
+                  <button
+                    type="button"
+                    onClick={clearTable}
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Clear all
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  {tableRows.map((row, index) => (
+                    <div 
+                      key={row.id} 
+                      className="p-4 border border-gray-200 rounded-lg bg-gray-50"
                     >
-                      Clear table
-                    </button>
-                  </div>
-                  
-                  <div className="border border-gray-300 rounded-md overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">Category</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">Description</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">Amount</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase">Class</th>
-                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-700 uppercase w-10"></th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {tableRows.map((row) => (
-                          <tr key={row.id}>
-                            <td className="px-3 py-2">
-                              <div className="relative">
-                                {/* Ghost text layer showing autocomplete suggestion */}
-                                {categoryDropdownOpen[row.id] && categorySearchQueries[row.id] && getCategoryCompletionText(row.id) && (
-                                  <div className="absolute inset-0 px-2 py-1 pl-8 text-sm pointer-events-none">
-                                    <span className="invisible">{categorySearchQueries[row.id]}</span>
-                                    <span className="text-gray-400">
-                                      {getCategoryCompletionText(row.id)}
-                                    </span>
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-xs font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                          GL Line {index + 1}
+                        </span>
+                        {tableRows.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeTableRow(row.id)}
+                            className="text-red-500 hover:text-red-700 text-sm font-medium"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        {/* Category Dropdown */}
+                        <div className="relative">
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Account *
+                          </label>
+                          <div className="relative">
+                            {categoryDropdownOpen[row.id] && categorySearchQueries[row.id] && getCategoryCompletionText(row.id) && (
+                              <div className="absolute inset-0 px-3 py-2 text-sm pointer-events-none">
+                                <span className="invisible">{categorySearchQueries[row.id]}</span>
+                                <span className="text-gray-400">{getCategoryCompletionText(row.id)}</span>
+                              </div>
+                            )}
+                            <input
+                              type="text"
+                              value={categoryDropdownOpen[row.id] ? categorySearchQueries[row.id] || '' : row.categoryName || ''}
+                              onChange={(e) => {
+                                setCategorySearchQueries({ ...categorySearchQueries, [row.id]: e.target.value });
+                                setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
+                                if (!e.target.value) {
+                                  updateTableRow(row.id, 'categoryName', '');
+                                  updateTableRow(row.id, 'glAccountPath', '');
+                                }
+                              }}
+                              onFocus={() => {
+                                setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
+                                setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
+                              }}
+                              onBlur={() => {
+                                setTimeout(() => {
+                                  setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: false });
+                                  setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
+                                }, 200);
+                              }}
+                              onKeyDown={(e) => handleCategoryKeyDown(e, row.id)}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                              placeholder="Search account..."
+                            />
+                            {categoryDropdownOpen[row.id] && (
+                              <div className="absolute z-30 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                                {getFilteredCategories(row.id).map((cat, idx) => (
+                                  <div
+                                    key={cat.id}
+                                    onClick={() => handleCategorySelect(row.id, cat)}
+                                    className={`px-3 py-2 text-sm cursor-pointer ${
+                                      idx === 0 ? 'bg-blue-100 text-blue-900' : 'hover:bg-blue-50'
+                                    }`}
+                                  >
+                                    {cat.displayText}
                                   </div>
-                                )}
-                                <input
-                                  type="text"
-                                  value={categoryDropdownOpen[row.id] ? categorySearchQueries[row.id] || '' : row.categoryName || ''}
-                                  onChange={(e) => {
-                                    setCategorySearchQueries({ ...categorySearchQueries, [row.id]: e.target.value });
-                                    setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
-                                    if (!e.target.value) {
-                                      updateTableRow(row.id, 'categoryName', '');
-                                      updateTableRow(row.id, 'glAccountPath', '');
-                                    }
-                                  }}
-                                  onFocus={() => {
-                                    setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
-                                    setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
-                                  }}
-                                  onBlur={() => {
-                                    // Delay to allow click on dropdown item
-                                    setTimeout(() => {
-                                      setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: false });
-                                      setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
-                                    }, 200);
-                                  }}
-                                  onKeyDown={(e) => handleCategoryKeyDown(e, row.id)}
-                                  className="w-full px-2 py-1 pl-8 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-transparent relative z-10"
-                                  placeholder="Type to search list"
-                                />
-                                <span className="absolute left-2 top-1.5 text-gray-400 text-xs z-10">🔍</span>
-                                {categoryDropdownOpen[row.id] && (
-                                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                    {getFilteredCategories(row.id).map((cat, index) => (
-                                      <div
-                                        key={cat.id}
-                                        onClick={() => handleCategorySelect(row.id, cat)}
-                                        className={`px-3 py-2 text-sm cursor-pointer ${
-                                          index === 0 ? 'bg-blue-100 text-blue-900' : 'hover:bg-blue-50'
-                                        }`}
-                                      >
-                                        {cat.displayText}
-                                      </div>
-                                    ))}
-                                    {getFilteredCategories(row.id).length === 0 && (
-                                      <div className="px-3 py-2 text-sm text-gray-500">No results</div>
-                                    )}
-                                    {getFilteredCategories(row.id).length > 0 && (
-                                      <div className="px-3 py-1.5 text-xs text-gray-400 border-t bg-gray-50">
-                                        Press Enter to select • Esc to close
-                                      </div>
-                                    )}
-                                  </div>
+                                ))}
+                                {getFilteredCategories(row.id).length === 0 && (
+                                  <div className="px-3 py-2 text-sm text-gray-500">No results</div>
                                 )}
                               </div>
-                            </td>
-                            <td className="px-3 py-2">
-                              <input
-                                type="text"
-                                value={row.description}
-                                onChange={(e) => updateTableRow(row.id, 'description', e.target.value)}
-                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                placeholder=""
-                              />
-                            </td>
-                            <td className="px-3 py-2">
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Class Dropdown */}
+                        <div className="relative">
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Class (Location)
+                          </label>
+                          <div className="relative">
+                            {classDropdownOpen[row.id] && classSearchQueries[row.id] && getClassCompletionText(row.id) && (
+                              <div className="absolute inset-0 px-3 py-2 text-sm pointer-events-none">
+                                <span className="invisible">{classSearchQueries[row.id]}</span>
+                                <span className="text-gray-400">{getClassCompletionText(row.id)}</span>
+                              </div>
+                            )}
+                            <input
+                              type="text"
+                              value={classDropdownOpen[row.id] ? classSearchQueries[row.id] || '' : row.className || ''}
+                              onChange={(e) => {
+                                setClassSearchQueries({ ...classSearchQueries, [row.id]: e.target.value });
+                                setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
+                                if (!e.target.value) {
+                                  updateTableRow(row.id, 'className', '');
+                                  updateTableRow(row.id, 'locationName', '');
+                                }
+                              }}
+                              onFocus={() => {
+                                setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
+                                setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
+                              }}
+                              onBlur={() => {
+                                setTimeout(() => {
+                                  setClassDropdownOpen({ ...classDropdownOpen, [row.id]: false });
+                                  setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
+                                }, 200);
+                              }}
+                              onKeyDown={(e) => handleClassKeyDown(e, row.id)}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                              placeholder="Search class..."
+                            />
+                            {classDropdownOpen[row.id] && (
+                              <div className="absolute z-30 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                                {getFilteredLocations(row.id).map((loc, idx) => (
+                                  <div
+                                    key={loc.id}
+                                    onClick={() => handleLocationSelect(row.id, loc)}
+                                    className={`px-3 py-2 text-sm cursor-pointer ${
+                                      idx === 0 ? 'bg-blue-100 text-blue-900' : 'hover:bg-blue-50'
+                                    }`}
+                                  >
+                                    {loc.name}
+                                  </div>
+                                ))}
+                                {getFilteredLocations(row.id).length === 0 && (
+                                  <div className="px-3 py-2 text-sm text-gray-500">No results</div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-4">
+                        {/* Description */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Description
+                          </label>
+                          <input
+                            type="text"
+                            value={row.description}
+                            onChange={(e) => updateTableRow(row.id, 'description', e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            placeholder="Optional"
+                          />
+                        </div>
+
+                        {/* Amount (only for fixed_amount mode) */}
+                        {allocationMode === 'fixed_amount' && (
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              Amount *
+                            </label>
+                            <div className="relative">
+                              <span className="absolute left-3 top-2 text-gray-500 text-sm">$</span>
                               <input
                                 type="number"
                                 step="0.01"
                                 min="0"
                                 value={row.amount}
                                 onChange={(e) => updateTableRow(row.id, 'amount', e.target.value)}
-                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                placeholder="Numerical value"
+                                className="w-full px-3 py-2 pl-7 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                placeholder="0.00"
                               />
-                            </td>
-                            <td className="px-3 py-2">
-                              <div className="relative">
-                                {/* Ghost text layer showing autocomplete suggestion */}
-                                {classDropdownOpen[row.id] && classSearchQueries[row.id] && getClassCompletionText(row.id) && (
-                                  <div className="absolute inset-0 px-2 py-1 pl-8 text-sm pointer-events-none">
-                                    <span className="invisible">{classSearchQueries[row.id]}</span>
-                                    <span className="text-gray-400">
-                                      {getClassCompletionText(row.id)}
-                                    </span>
-                                  </div>
-                                )}
-                                <input
-                                  type="text"
-                                  value={classDropdownOpen[row.id] ? classSearchQueries[row.id] || '' : row.className || ''}
-                                  onChange={(e) => {
-                                    setClassSearchQueries({ ...classSearchQueries, [row.id]: e.target.value });
-                                    setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
-                                    if (!e.target.value) {
-                                      updateTableRow(row.id, 'className', '');
-                                      updateTableRow(row.id, 'locationName', '');
-                                    }
-                                  }}
-                                  onFocus={() => {
-                                    setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
-                                    setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
-                                  }}
-                                  onBlur={() => {
-                                    // Delay to allow click on dropdown item
-                                    setTimeout(() => {
-                                      setClassDropdownOpen({ ...classDropdownOpen, [row.id]: false });
-                                      setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
-                                    }, 200);
-                                  }}
-                                  onKeyDown={(e) => handleClassKeyDown(e, row.id)}
-                                  className="w-full px-2 py-1 pl-8 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-transparent relative z-10"
-                                  placeholder="Type to search list"
-                                />
-                                <span className="absolute left-2 top-1.5 text-gray-400 text-xs z-10">🔍</span>
-                                {classDropdownOpen[row.id] && (
-                                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                    {getFilteredLocations(row.id).map((loc, index) => (
-                                      <div
-                                        key={loc.id}
-                                        onClick={() => handleLocationSelect(row.id, loc)}
-                                        className={`px-3 py-2 text-sm cursor-pointer ${
-                                          index === 0 ? 'bg-blue-100 text-blue-900' : 'hover:bg-blue-50'
-                                        }`}
-                                      >
-                                        {loc.name}
-                                      </div>
-                                    ))}
-                                    {getFilteredLocations(row.id).length === 0 && (
-                                      <div className="px-3 py-2 text-sm text-gray-500">No results</div>
-                                    )}
-                                    {getFilteredLocations(row.id).length > 0 && (
-                                      <div className="px-3 py-1.5 text-xs text-gray-400 border-t bg-gray-50">
-                                        Press Enter to select • Esc to close
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-3 py-2 text-center">
-                              {tableRows.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => removeTableRow(row.id)}
-                                  className="text-red-600 hover:text-red-800 text-lg"
-                                >
-                                  ×
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                            </div>
+                          </div>
+                        )}
 
-                  <button
-                    type="button"
-                    onClick={addTableRow}
-                    className="mt-2 text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    Add a new line
-                  </button>
-
-                  <div className="mt-3 flex items-start gap-2 text-sm text-gray-600">
-                    <span>→</span>
-                    <span>Amounts set here will be applied relatively to the invoice's total</span>
-                  </div>
+                        {/* Percentage (only for percentage mode) */}
+                        {allocationMode === 'percentage' && (
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              Percentage *
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="100"
+                                value={row.percentage}
+                                onChange={(e) => updateTableRow(row.id, 'percentage', e.target.value)}
+                                className="w-full px-3 py-2 pr-7 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                placeholder="0"
+                              />
+                              <span className="absolute right-3 top-2 text-gray-500 text-sm">%</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
+
+                <button
+                  type="button"
+                  onClick={addTableRow}
+                  className="mt-3 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium flex items-center gap-2"
+                >
+                  <span>+</span> Add GL Line
+                </button>
+              </div>
 
               {/* Action Buttons */}
-              <div className="mt-6 flex gap-3">
+              <div className="mt-6 pt-4 border-t border-gray-200 flex gap-3">
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  disabled={submitting || (allocationMode === 'percentage' && !isPercentageValid)}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                 >
-                  {submitting ? 'Saving...' : editingTemplate ? 'Update and Close' : 'Save and Close'}
+                  {submitting ? 'Saving...' : editingTemplate ? 'Update Template' : 'Save Template'}
                 </button>
                 {editingTemplate && (
                   <button

@@ -1,10 +1,18 @@
 {
-  "vendor": "tc dental laboratory, inc.",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "total": "",
-  "office_location": "Salem",
-  "vendor_name": "TC Dental",
-  "line_items": []
+  "vendor": "Henry schein",
+  "invoice_number": "46561093",
+  "invoice_date": "09/08/25",
+  "due_date": "10/08/25",
+  "invoice_total": "107.88",
+  "office_location": "Ridgefield",
+  "vendor_name": "Henry Schein",
+  "line_items": [
+    {
+      "product_number": "133-7442",
+      "product_name": "50/BX CitriSil Waterline Cleaner Blue",
+      "Quantity": "2",
+      "unit_price": "41.88",
+      "line_item_total": "83.76"
+    }
+  ]
 }

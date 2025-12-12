@@ -1,10 +1,12 @@
 {
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
   "invoice_number": "",
-  "invoice_date": "",
+  "invoice_date": "Evgene 62 9740",
+  "due_date": "",
   "invoice_total": "",
   "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
   "line_items": [],
-  "due_date": ""
+  "source_file": "Photo_240b03a0.pdf",
+  "parsed_at": "2025-12-12T15:56:24.697366+00:00"
 }

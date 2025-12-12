@@ -1,10 +1,256 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "31836-6766-050",
+  "invoice_date": "10/01/2025",
+  "due_date": "10/08/2025",
+  "invoice_total": "4017.55",
+  "office_location": "Eugene",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for Edward Hamilton",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "229.00",
+      "line_item_total": "229.00",
+      "service_date": "09/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for William Woods",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "578.55",
+      "line_item_total": "578.55",
+      "service_date": "09/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Honesty Gruener",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/29/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Alice Parman",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "09/29/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Janine De Ryckman",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "140.00",
+      "line_item_total": "140.00",
+      "service_date": "09/25/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Melissa Mattick",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "175.00",
+      "line_item_total": "175.00",
+      "service_date": "09/24/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Sharon Beverley",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "95.00",
+      "line_item_total": "95.00",
+      "service_date": "09/23/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kailee Bell",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/22/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Anthony Konig",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "95.00",
+      "line_item_total": "95.00",
+      "service_date": "09/18/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kevin Coad",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "235.00",
+      "line_item_total": "235.00",
+      "service_date": "09/16/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Margaret Rust",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "349.00",
+      "line_item_total": "349.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Mary Veech",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Larita Berry",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Holly Kingsford",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "95.00",
+      "line_item_total": "95.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Shelley Alameda",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "95.00",
+      "line_item_total": "95.00",
+      "service_date": "09/10/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Johana Vazquez",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "95.00",
+      "line_item_total": "95.00",
+      "service_date": "09/09/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Stephanie bulger",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "175.00",
+      "line_item_total": "175.00",
+      "service_date": "09/08/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Jaylene Stevens",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "165.00",
+      "line_item_total": "165.00",
+      "service_date": "09/04/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Larry Kruger",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/04/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Ava Weinreb",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "135.00",
+      "line_item_total": "135.00",
+      "service_date": "09/04/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Sandra Price",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "134.00",
+      "line_item_total": "134.00",
+      "service_date": "09/04/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Samantha Duvall",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "95.00",
+      "line_item_total": "95.00",
+      "service_date": "09/04/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Ryan Adams",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "95.00",
+      "line_item_total": "95.00",
+      "service_date": "09/03/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Linda Powell",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "169.00",
+      "line_item_total": "169.00",
+      "service_date": "09/03/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for David Chihorek",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "95.00",
+      "line_item_total": "95.00",
+      "service_date": "09/03/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Elizabeth Graham",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "244.00",
+      "line_item_total": "244.00",
+      "service_date": "08/27/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Michael raabe",
+      "description": "Doctor: Dale McNutt",
+      "Quantity": "1",
+      "unit_price": "95.00",
+      "line_item_total": "95.00",
+      "service_date": "08/26/25"
+    }
+  ],
+  "source_file": "Dandy_3276caa1.pdf",
+  "parsed_at": "2025-12-12T15:54:05.470454+00:00"
 }

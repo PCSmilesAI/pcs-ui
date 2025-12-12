@@ -105,6 +105,21 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [showUpdateModal, setShowUpdateModal] = useState(false); // NEW: Update confirmation modal
   const [updateComment, setUpdateComment] = useState(''); // NEW: User comment for AI mechanic
   const [showAllocationErrorModal, setShowAllocationErrorModal] = useState(false); // NEW: Allocation error modal
+  
+  // Coding Template Creation State
+  const [glLinesModified, setGlLinesModified] = useState(false); // Track when GL lines are modified
+  const [showCreateTemplateModal, setShowCreateTemplateModal] = useState(false); // Create Template modal
+  const [newTemplateName, setNewTemplateName] = useState('');
+  const [newTemplateDescription, setNewTemplateDescription] = useState('');
+  const [newTemplateAllocationMode, setNewTemplateAllocationMode] = useState('percentage'); // Default to percentage since we have amounts
+  const [creatingTemplate, setCreatingTemplate] = useState(false);
+  
+  // Templates Dropdown State
+  const [availableTemplates, setAvailableTemplates] = useState([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [applyingTemplate, setApplyingTemplate] = useState(false);
+  
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -661,6 +676,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       source: 'manual',
       isEditing: true 
     }]);
+    setGlLinesModified(true); // Track modification
   }
 
   function removeInvoiceCategory(index) {
@@ -684,6 +700,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       }
       return updated;
     });
+    setGlLinesModified(true); // Track modification
   }
 
   function confirmInvoiceCategory(index) {
@@ -754,6 +771,216 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       setProcessing(false);
     }
   }
+
+  // Fetch available coding templates
+  async function fetchAvailableTemplates() {
+    try {
+      setLoadingTemplates(true);
+      const response = await fetch('/api/coding-templates');
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableTemplates(data.templates || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch templates:', error);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  }
+
+  // Create template from current GL lines
+  async function handleCreateTemplateFromInvoice() {
+    if (!newTemplateName.trim()) {
+      showToast('Please enter a template name', 'error');
+      return;
+    }
+
+    if (invoiceCategories.length === 0) {
+      showToast('No GL lines to save as template', 'error');
+      return;
+    }
+
+    // Validate all categories have required fields
+    for (const cat of invoiceCategories) {
+      if (!cat.categoryId && !cat.categoryName) {
+        showToast('All GL lines must have an account selected', 'error');
+        return;
+      }
+    }
+
+    setCreatingTemplate(true);
+    try {
+      // Calculate percentages from current amounts
+      const totalAmount = invoiceCategories.reduce((sum, cat) => sum + (parseFloat(cat.amount) || 0), 0);
+      
+      const templateRows = invoiceCategories.map(cat => {
+        const amount = parseFloat(cat.amount) || 0;
+        const percentage = totalAmount > 0 ? ((amount / totalAmount) * 100).toFixed(1) : 0;
+        
+        return {
+          gl_account_path: cat.categoryName || '',
+          category_name: cat.categoryName || '',
+          description: cat.description || '',
+          class_name: cat.className || '',
+          location_name: cat.className || '',
+          amount: newTemplateAllocationMode === 'fixed_amount' ? amount.toFixed(2) : null,
+          percentage: newTemplateAllocationMode === 'percentage' ? percentage : null,
+        };
+      });
+
+      const response = await fetch('/api/coding-templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newTemplateName,
+          description: newTemplateDescription,
+          vendor_name: details.vendor || invoice?.vendor_name || 'Unknown Vendor',
+          template_type: 'table_template',
+          allocation_mode: newTemplateAllocationMode,
+          table_rows: templateRows,
+        })
+      });
+
+      if (response.ok) {
+        showToast('Template created successfully!', 'success');
+        setShowCreateTemplateModal(false);
+        setNewTemplateName('');
+        setNewTemplateDescription('');
+        setNewTemplateAllocationMode('percentage');
+        setGlLinesModified(false);
+        // Refresh templates list
+        fetchAvailableTemplates();
+      } else {
+        const data = await response.json();
+        showToast(data.error || 'Failed to create template', 'error');
+      }
+    } catch (error) {
+      console.error('Error creating template:', error);
+      showToast('Failed to create template', 'error');
+    } finally {
+      setCreatingTemplate(false);
+    }
+  }
+
+  // Apply a template to the invoice
+  async function handleApplyTemplate() {
+    if (!selectedTemplateId) {
+      showToast('Please select a template', 'error');
+      return;
+    }
+
+    setApplyingTemplate(true);
+    try {
+      // First, fetch the template details
+      const templateResponse = await fetch(`/api/coding-templates/${selectedTemplateId}/rows`);
+      if (!templateResponse.ok) {
+        throw new Error('Failed to load template');
+      }
+      const templateData = await templateResponse.json();
+      const templateRows = templateData.rows || [];
+      const template = (await (await fetch(`/api/coding-templates/${selectedTemplateId}`)).json()).template;
+      
+      if (templateRows.length === 0) {
+        showToast('Template has no GL lines defined', 'error');
+        return;
+      }
+
+      // Calculate amounts based on allocation mode
+      const totalAmount = invoiceTotalAmount || 0;
+      const allocationMode = template?.allocation_mode || 'split_evenly';
+      
+      let newCategories = [];
+      
+      if (allocationMode === 'split_evenly') {
+        // Split evenly among all lines
+        const evenAmount = totalAmount / templateRows.length;
+        newCategories = templateRows.map((row, index) => ({
+          categoryId: '',
+          categoryName: row.category_name || row.gl_account_path || '',
+          classId: '',
+          className: row.class_name || row.location_name || '',
+          description: row.description || '',
+          amount: index === templateRows.length - 1 
+            ? Math.round((totalAmount - evenAmount * (templateRows.length - 1)) * 100) / 100
+            : Math.round(evenAmount * 100) / 100,
+          sequence: index + 1,
+          source: 'template',
+          isEditing: false
+        }));
+      } else if (allocationMode === 'percentage') {
+        // Apply percentage allocation
+        let allocated = 0;
+        newCategories = templateRows.map((row, index) => {
+          const percentage = parseFloat(row.percentage) || 0;
+          let amount = Math.round((totalAmount * percentage / 100) * 100) / 100;
+          
+          // Adjust last line for rounding
+          if (index === templateRows.length - 1) {
+            amount = Math.round((totalAmount - allocated) * 100) / 100;
+          } else {
+            allocated += amount;
+          }
+          
+          return {
+            categoryId: '',
+            categoryName: row.category_name || row.gl_account_path || '',
+            classId: '',
+            className: row.class_name || row.location_name || '',
+            description: row.description || '',
+            amount: amount,
+            sequence: index + 1,
+            source: 'template',
+            isEditing: false
+          };
+        });
+      } else if (allocationMode === 'fixed_amount') {
+        // Use fixed amounts from template
+        const templateTotal = templateRows.reduce((sum, row) => sum + ((row.amount_cents || 0) / 100), 0);
+        const scale = templateTotal > 0 ? totalAmount / templateTotal : 1;
+        
+        let allocated = 0;
+        newCategories = templateRows.map((row, index) => {
+          let amount = Math.round(((row.amount_cents || 0) / 100 * scale) * 100) / 100;
+          
+          // Adjust last line for rounding
+          if (index === templateRows.length - 1) {
+            amount = Math.round((totalAmount - allocated) * 100) / 100;
+          } else {
+            allocated += amount;
+          }
+          
+          return {
+            categoryId: '',
+            categoryName: row.category_name || row.gl_account_path || '',
+            classId: '',
+            className: row.class_name || row.location_name || '',
+            description: row.description || '',
+            amount: amount,
+            sequence: index + 1,
+            source: 'template',
+            isEditing: false
+          };
+        });
+      }
+
+      setInvoiceCategories(newCategories);
+      setGlLinesModified(true);
+      setSelectedTemplateId('');
+      showToast(`Template "${template?.name || 'Unknown'}" applied! Review and save the GL lines.`, 'success');
+    } catch (error) {
+      console.error('Error applying template:', error);
+      showToast('Failed to apply template', 'error');
+    } finally {
+      setApplyingTemplate(false);
+    }
+  }
+
+  // Load templates when component mounts
+  useEffect(() => {
+    if (isAdminOrAP) {
+      fetchAvailableTemplates();
+    }
+  }, [isAdminOrAP]);
 
   // Check if user is admin or AP manager
   useEffect(() => {
@@ -1894,24 +2121,6 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                     />
                   </td>
                 </tr>
-                <tr>
-                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Office</td>
-                  <td style={cellStyle}>
-                    <input
-                      type="text"
-                      value={details.office}
-                      onChange={(e) => handleDetailChange('office', e.target.value)}
-                      style={{
-                        border: '1px solid #cbd5e0',
-                        borderRadius: '4px',
-                        padding: '4px 8px',
-                        fontSize: '14px',
-                        width: 'calc(100% - 16px)',
-                        boxSizing: 'border-box',
-                      }}
-                    />
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -2224,8 +2433,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               )}
             </div>
 
-            {/* Add GL Line and Save buttons */}
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+            {/* Add GL Line, Save, and Create Template buttons */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
               <button
                 onClick={addInvoiceCategory}
                 style={{
@@ -2260,7 +2469,83 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               >
                 {processing ? 'Saving...' : 'Save GL Lines'}
               </button>
+
+              {/* Create Template button - appears when GL lines are modified */}
+              {isAdminOrAP && glLinesModified && invoiceCategories.length > 0 && Math.abs(allocationSummary.unallocated) <= 0.01 && (
+                <button
+                  onClick={() => setShowCreateTemplateModal(true)}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#8b5cf6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}
+                >
+                  Create Template
+                </button>
+              )}
             </div>
+
+            {/* Templates Dropdown - for applying existing templates */}
+            {isAdminOrAP && (
+              <div style={{
+                padding: '12px 16px',
+                backgroundColor: '#f3f4f6',
+                borderRadius: '6px',
+                marginBottom: '16px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                    Templates:
+                  </label>
+                  <select
+                    value={selectedTemplateId}
+                    onChange={(e) => setSelectedTemplateId(e.target.value)}
+                    disabled={loadingTemplates || applyingTemplate}
+                    style={{
+                      padding: '8px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      backgroundColor: 'white',
+                      minWidth: '200px',
+                      cursor: loadingTemplates ? 'wait' : 'pointer'
+                    }}
+                  >
+                    <option value="">-- Select a template --</option>
+                    {availableTemplates.map(t => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} ({t.allocation_mode === 'percentage' ? 'Percent' : t.allocation_mode === 'fixed_amount' ? 'Fixed' : 'Even Split'})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleApplyTemplate}
+                    disabled={!selectedTemplateId || applyingTemplate}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: (!selectedTemplateId || applyingTemplate) ? '#9ca3af' : '#2563eb',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: (!selectedTemplateId || applyingTemplate) ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      opacity: (!selectedTemplateId || applyingTemplate) ? 0.6 : 1
+                    }}
+                  >
+                    {applyingTemplate ? 'Applying...' : 'Apply Template'}
+                  </button>
+                  <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                    Apply a saved template to auto-fill GL lines
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Apply Coding Template Section (Admin/AP only) */}
@@ -2796,6 +3081,197 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                 }}
               >
                 Got It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Template Modal */}
+      {showCreateTemplateModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#1f2937' }}>
+                Create Template from GL Lines
+              </h2>
+              <button
+                onClick={() => {
+                  setShowCreateTemplateModal(false);
+                  setNewTemplateName('');
+                  setNewTemplateDescription('');
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#9ca3af',
+                  padding: '0',
+                  lineHeight: '1',
+                }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
+                Template Name *
+              </label>
+              <input
+                type="text"
+                value={newTemplateName}
+                onChange={(e) => setNewTemplateName(e.target.value)}
+                placeholder="e.g., Monthly IT Split - 3 Locations"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
+                Description (optional)
+              </label>
+              <textarea
+                value={newTemplateDescription}
+                onChange={(e) => setNewTemplateDescription(e.target.value)}
+                placeholder="Describe when to use this template..."
+                rows={2}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
+                Allocation Mode
+              </label>
+              <select
+                value={newTemplateAllocationMode}
+                onChange={(e) => setNewTemplateAllocationMode(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  backgroundColor: 'white',
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <option value="split_evenly">Split Evenly - Divide total equally among lines</option>
+                <option value="percentage">Percent Split - Use percentages from current amounts</option>
+                <option value="fixed_amount">Fixed Amount - Save exact dollar amounts</option>
+              </select>
+            </div>
+
+            <div style={{
+              backgroundColor: '#f3f4f6',
+              borderRadius: '6px',
+              padding: '12px',
+              marginBottom: '20px',
+            }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                Template Preview ({invoiceCategories.length} GL Lines)
+              </div>
+              {invoiceCategories.map((cat, index) => {
+                const totalAmount = invoiceCategories.reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
+                const percentage = totalAmount > 0 ? ((parseFloat(cat.amount) || 0) / totalAmount * 100).toFixed(1) : 0;
+                return (
+                  <div key={index} style={{ fontSize: '12px', color: '#6b7280', padding: '4px 0', borderBottom: index < invoiceCategories.length - 1 ? '1px solid #e5e7eb' : 'none' }}>
+                    <span style={{ fontWeight: '500' }}>{cat.categoryName || 'No account'}</span>
+                    {cat.className && <span> - {cat.className}</span>}
+                    <span style={{ float: 'right', color: '#059669' }}>
+                      {newTemplateAllocationMode === 'percentage' ? `${percentage}%` : `$${(cat.amount || 0).toFixed(2)}`}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '6px',
+              padding: '12px',
+              marginBottom: '20px',
+              fontSize: '13px',
+              color: '#1e40af',
+            }}>
+              <strong>Note:</strong> This template will save the GL line structure with the selected allocation mode. When applied to a new invoice, amounts will be calculated based on that invoice's total.
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowCreateTemplateModal(false);
+                  setNewTemplateName('');
+                  setNewTemplateDescription('');
+                }}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#374151',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateTemplateFromInvoice}
+                disabled={!newTemplateName.trim() || creatingTemplate}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: (!newTemplateName.trim() || creatingTemplate) ? '#9ca3af' : '#8b5cf6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: (!newTemplateName.trim() || creatingTemplate) ? 'not-allowed' : 'pointer',
+                  opacity: (!newTemplateName.trim() || creatingTemplate) ? 0.6 : 1,
+                }}
+              >
+                {creatingTemplate ? 'Creating...' : 'Save Template'}
               </button>
             </div>
           </div>

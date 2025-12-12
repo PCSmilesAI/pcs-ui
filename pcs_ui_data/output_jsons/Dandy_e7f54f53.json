@@ -1,10 +1,247 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Dandy",
+  "vendor_name": "Dandy Dental Lab",
+  "invoice_number": "32388-4729-053",
+  "invoice_date": "10/01/2025",
+  "due_date": "10/08/2025",
+  "invoice_total": "1992.30",
+  "office_location": "Columbia City",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Lab work for Lori Keller",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "09/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kristina Platonoff",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "80.00",
+      "line_item_total": "80.00",
+      "service_date": "09/30/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Susan Safran",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/25/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Shane Bauer",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/25/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for William Cafourek",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/22/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Christian robinson",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/22/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Catherine Trang",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/19/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Dorothea Peavy",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "105.00",
+      "line_item_total": "105.00",
+      "service_date": "09/19/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Benjamin esplin",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "140.00",
+      "line_item_total": "140.00",
+      "service_date": "09/18/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Tia Hansen",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "140.00",
+      "line_item_total": "140.00",
+      "service_date": "09/18/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Connie Hennessey",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/18/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kevin Sheptock",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/16/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Gigi Trinidad",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/16/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kenedi Di Pietra",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "09/16/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kristina Platonoff",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "109.00",
+      "line_item_total": "109.00",
+      "service_date": "09/11/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Ismael Castaneda",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "135.00",
+      "line_item_total": "135.00",
+      "service_date": "09/10/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Crystal Mayes",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/10/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Eric Fidler",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/09/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for stuart asbury",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/08/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Glenn King",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/04/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Kellie Bighaus",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/04/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Belinda Richardson",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/04/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Shay Garcia",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "80.00",
+      "line_item_total": "80.00",
+      "service_date": "09/02/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for karen stinebeck",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/02/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Daryl Beck",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/02/25"
+    },
+    {
+      "product_number": "",
+      "product_name": "Lab work for Theresa Huggins",
+      "description": "Doctor: Kenneth Do",
+      "Quantity": "1",
+      "unit_price": "70.00",
+      "line_item_total": "70.00",
+      "service_date": "09/02/25"
+    }
+  ],
+  "source_file": "Dandy_e7f54f53.pdf",
+  "parsed_at": "2025-12-12T15:54:06.876363+00:00"
 }

@@ -1,10 +1,20 @@
 {
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
   "invoice_number": "",
-  "invoice_date": "",
+  "invoice_date": "09/03/25",
+  "due_date": "10/03/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Columbia",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "CenterPoint Bivd * PO Box",
+      "Quantity": "295",
+      "unit_price": "49",
+      "line_item_total": "1"
+    }
+  ],
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product09-11-2025-170835_29b20a03.pdf",
+  "parsed_at": "2025-12-12T15:58:10.986029+00:00"
 }

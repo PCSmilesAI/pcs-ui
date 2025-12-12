@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5588500",
+  "invoice_date": "09/25/25",
+  "due_date": "10/25/2025",
   "invoice_total": "",
   "office_location": "Eugene",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "line_items": [
+    {
+      "product_number": "8543412",
+      "product_name": "8543412 6PK|K-FILES .06 30MM SS 6/PK 62251 14.14 5",
+      "Quantity": "8543412",
+      "unit_price": "14.14",
+      "line_item_total": "56.56"
+    }
+  ],
+  "source_file": "Darby_Invoice_5588500_02ba538e.pdf",
+  "parsed_at": "2025-12-12T15:54:21.811656+00:00"
 }

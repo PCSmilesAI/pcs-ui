@@ -1,10 +1,12 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "OICE",
+  "invoice_date": "10/1/2025",
+  "due_date": "10/31/2025",
+  "invoice_total": "48.95",
+  "office_location": "Roseburg",
   "line_items": [],
-  "due_date": ""
+  "source_file": "Scanned_from_a_Lexmark_Multifunction_Product10-07-2025-112526_a8f16eee.pdf",
+  "parsed_at": "2025-12-12T15:59:35.727673+00:00"
 }

@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "",
-  "invoice_date": "",
-  "due_date": "",
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "INVOICE",
+  "invoice_date": "10/31/25",
+  "due_date": "11/30/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "10/29/25 0002491493 1",
+      "Quantity": "1",
+      "unit_price": "470.18",
+      "line_item_total": "470.18"
+    }
+  ],
+  "source_file": "billing01_2845_c_3b13a3f9.pdf",
+  "parsed_at": "2025-12-12T16:03:24.743060+00:00"
 }

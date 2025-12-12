@@ -1,10 +1,20 @@
 {
-  "vendor": "Henry schein",
-  "invoice_number": "33588950",
-  "invoice_date": "",
-  "due_date": "",
-  "invoice_total": "",
-  "office_location": "",
-  "vendor_name": "Henry Schein",
-  "line_items": []
+  "vendor": "Unknown",
+  "vendor_name": "Unknown",
+  "invoice_number": "335889502",
+  "invoice_date": "9/22/2025",
+  "due_date": "9/22/2025",
+  "invoice_total": "3753.0",
+  "office_location": "Salem",
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Vista Ave SE #150, Salem, OR",
+      "Quantity": "2060",
+      "unit_price": "9730",
+      "line_item_total": "2"
+    }
+  ],
+  "source_file": "Invoice #335889502_c4120bdc.pdf",
+  "parsed_at": "2025-12-12T15:55:40.423442+00:00"
 }

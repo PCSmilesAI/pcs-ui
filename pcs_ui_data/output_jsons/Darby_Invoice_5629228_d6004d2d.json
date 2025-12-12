@@ -1,10 +1,20 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Darby Dental",
+  "vendor_name": "Darby Dental Supply",
+  "invoice_number": "5629228",
+  "invoice_date": "11/03/25",
+  "due_date": "12/03/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Eugene",
+  "line_items": [
+    {
+      "product_number": "9902912",
+      "product_name": "9902912) 10PK) SURGICAL BUR LENGTH FG557 DFG557sSu",
+      "Quantity": "557",
+      "unit_price": "28.60",
+      "line_item_total": "28.60"
+    }
+  ],
+  "source_file": "Darby_Invoice_5629228_d6004d2d.pdf",
+  "parsed_at": "2025-12-12T15:55:00.770827+00:00"
 }

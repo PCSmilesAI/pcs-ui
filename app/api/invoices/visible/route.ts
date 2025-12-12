@@ -140,14 +140,28 @@ export async function GET(req: NextRequest) {
       SELECT category_name, class_name, confidence_score, source
       FROM invoice_categories
       WHERE invoice_id = ?
-      ORDER BY created_at DESC
-      LIMIT 1
+      ORDER BY sequence ASC, created_at ASC
+    `);
+    
+    // Fetch all distinct locations (class names) for each invoice
+    const getLocationsStmt = db.prepare(`
+      SELECT DISTINCT class_name
+      FROM invoice_categories
+      WHERE invoice_id = ? AND class_name IS NOT NULL AND class_name != ''
+      ORDER BY sequence ASC
     `);
 
-    const paginatedWithCategories = paginated.map(invoice => ({
-      ...invoice,
-      invoice_categories: getCategoriesStmt.all(invoice.id) as any[]
-    }));
+    const paginatedWithCategories = paginated.map(invoice => {
+      const categories = getCategoriesStmt.all(invoice.id) as any[];
+      const locationRows = getLocationsStmt.all(invoice.id) as { class_name: string }[];
+      const locations = locationRows.map(r => r.class_name);
+      
+      return {
+        ...invoice,
+        invoice_categories: categories,
+        locations: locations, // Array of all class names from GL Lines
+      };
+    });
 
     console.log('[API][INVOICES]', 'visible_response', {
       userEmail: user.email,

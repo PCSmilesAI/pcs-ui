@@ -1,0 +1,198 @@
+{
+  "generated_at": "2025-12-12T10:45:35.599877",
+  "total_pdfs": 1283,
+  "vendors_with_parsers": [
+    "patterson",
+    "henry",
+    "darby",
+    "exodus",
+    "artisan",
+    "tc",
+    "dandy",
+    "ctr_services",
+    "brasseler",
+    "comcast",
+    "bridgeford",
+    "a1_professional"
+  ],
+  "vendors_needing_parsers": [],
+  "unknown_pdfs": [
+    "V6102702 - 78004.pdf",
+    "Inv_12483221_from_Umpqua_Valley_Fire_Services_Inc._14572_e24f4a8e.pdf",
+    "Scan_2025_09_15_15_21_05_897_d614c85c.pdf",
+    "Sales Invoice - PS-INV182778_3d1ea76f.pdf",
+    "email_1_20250911_154049_ColumbiaSmiles12855_14a67f54.pdf",
+    "INVOICE_32c5f4aa.pdf",
+    "1205709_e7dad2d7.pdf",
+    "Scanned_from_a_Lexmark_Multifunction_Product10-20-2025-141303_7aeb537a.pdf",
+    "Cash Sale_264431_1761001135396_ad9fa886.pdf",
+    "billing01_5943_c_aa1b3762.pdf",
+    "we00_sl06780845_dunning_20251008_000046_46c363f5.pdf",
+    "INV110 PC Smiles _564259dc.pdf",
+    "Med Pro Inv.pdf",
+    "304526902013_0452005581952_20250912_a60783dd.pdf",
+    "Invoice 1282639.pdf",
+    "Invoice 510103-1_59280bbc.pdf",
+    "304500120691_0450004311513_20250531.pdf",
+    "V6060603 -78004.pdf",
+    "_7A40Z0HUQ_f2952be8.pdf",
+    "Scan_2025_10_16_08_24_48_254_defe992e.pdf"
+  ],
+  "vendor_details": {
+    "patterson": {
+      "vendor": "patterson",
+      "file_count": 220,
+      "has_parser": true,
+      "parser_name": "patterson_invoice_parser_FINAL_WITH_JSON_SAFE.py",
+      "sample_files": [
+        "Patterson  Invoice # 3039055923_e2b33369.pdf",
+        "Patterson  Invoice # 3040182545_f6252783.pdf",
+        "Patterson  Invoice # 3040023822_578b1944.pdf",
+        "Patterson  Invoice # 3039341254_1851a2d5.pdf",
+        "Patterson  Invoice # 3039224956_2e7144e5.pdf"
+      ]
+    },
+    "henry": {
+      "vendor": "henry",
+      "file_count": 209,
+      "has_parser": true,
+      "parser_name": "henry_parser.py",
+      "sample_files": [
+        "email_3_20250805_231609_henryschein_4434143_20250718_31080183_14484025460.pdf",
+        "email_10_20250805_231253_henryschein_4434143_20250725_31102443_14497454391.pdf",
+        "henryschein_4434143_20250718_31080183_14484025460.pdf",
+        "V6694394_a4af436d.pdf",
+        "henryschein_4434143_20250925_31303019_14629674903_60e5c33e.pdf"
+      ]
+    },
+    "darby": {
+      "vendor": "darby",
+      "file_count": 96,
+      "has_parser": true,
+      "parser_name": "darby_parser.py",
+      "sample_files": [
+        "Darby_Invoice_5611891_42317521.pdf",
+        "darby 10.10.25_a91cc43a.pdf",
+        "Darby_Invoice_5571812.pdf",
+        "Darby_Invoice_5627568_5922bebd.pdf",
+        "Darby_Invoice_5641370_92e1e5e8.pdf"
+      ]
+    },
+    "exodus": {
+      "vendor": "exodus",
+      "file_count": 75,
+      "has_parser": true,
+      "parser_name": "exodus_parser.py",
+      "sample_files": [
+        "Invoices_5779_48b20dbb.pdf",
+        "Invoices_5889_103cd58f.pdf",
+        "Invoices_5455_0f2486e5.pdf",
+        "Invoices_5818_09f2e60e.pdf",
+        "Invoices_5527_c46bc267.pdf"
+      ]
+    },
+    "artisan": {
+      "vendor": "artisan",
+      "file_count": 38,
+      "has_parser": true,
+      "parser_name": "parse_artisan_dental_exporting_fixed.py",
+      "sample_files": [
+        "DailyInvoices_d4b392c5.pdf",
+        "DailyInvoices_72d4ace2.pdf",
+        "DailyInvoices_aebacffc.pdf",
+        "DailyInvoices_5d86e5d2.pdf",
+        "DailyInvoices_a836538d.pdf"
+      ]
+    },
+    "tc": {
+      "vendor": "tc",
+      "file_count": 30,
+      "has_parser": true,
+      "parser_name": "parse_tc_dental_invoice.py",
+      "sample_files": [
+        "tc 9.17.25_66ae24ab.pdf",
+        "Scan_2025_11_13_12_25_33_025_81d5209c.pdf",
+        "tc dental 9.26.256_bf911474.pdf",
+        "Scanned_from_a_Lexmark_Multifunction_Product10-02-2025-095724_6f6baf7f.pdf",
+        "email_67_20250911_154352_Scan_2025_09_11_08_27_37_550_0ffec07a.pdf"
+      ]
+    },
+    "dandy": {
+      "vendor": "dandy",
+      "file_count": 27,
+      "has_parser": true,
+      "parser_name": "dandy_parser.py",
+      "sample_files": [
+        "Dandy_12e65786.pdf",
+        "Dandy_e7f54f53.pdf",
+        "Dandy_ccd79887.pdf",
+        "Smiles Dental Services Columbia_Oct 2025_78fc7e2d.pdf",
+        "Dandy_2de7f234.pdf"
+      ]
+    },
+    "ctr_services": {
+      "vendor": "ctr_services",
+      "file_count": 25,
+      "has_parser": true,
+      "parser_name": "ctr_services_parser.py",
+      "sample_files": [
+        "CTR Services Northwest November 2025 Statement_7685be7c.pdf",
+        "email_68_20250911_154357_Scan_2025_09_11_08_27_19_236_aeff4158.pdf",
+        "Property Tax & Insurance Invoice_898d744a.pdf",
+        "receipt_for_ctr_services_northwest_llc_a06d7b1b.pdf",
+        "Scan_2025_09_11_08_39_14_325_7d568dfc.pdf"
+      ]
+    },
+    "brasseler": {
+      "vendor": "brasseler",
+      "file_count": 21,
+      "has_parser": true,
+      "parser_name": "brasseler_parser.py",
+      "sample_files": [
+        "INV-06397595_1cd57171.pdf",
+        "Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082907_ebb703cd.pdf",
+        "email_19_20250911_154135_Scanned_from_a_Lexmark_Multifunction_Product09-09-2025-082907_cecf996b.pdf",
+        "INV-06353963_84f3977c.pdf",
+        "Scanned_from_a_Lexmark_Multifunction_Product10-24-2025-071711_35ae4b79.pdf"
+      ]
+    },
+    "comcast": {
+      "vendor": "comcast",
+      "file_count": 18,
+      "has_parser": true,
+      "parser_name": "comcast_parser.py",
+      "sample_files": [
+        "email_74_20250911_154422_invoice-13970-638931909850717798_aaccc5cb.pdf",
+        "invoice-15177-638957765900475083_0c0adf99.pdf",
+        "invoice-13970-638931909850717798.pdf",
+        "invoice-16066-638977694125156932_34472c00.pdf",
+        "Scan_2025_10_15_12_32_43_363_10da1f9b.pdf"
+      ]
+    },
+    "bridgeford": {
+      "vendor": "bridgeford",
+      "file_count": 5,
+      "has_parser": true,
+      "parser_name": "bridgeford_parser.py",
+      "sample_files": [
+        "Bridgeford Pacific Crest Smiles Invoice #1515 2025-Jul and\r\n Aug_4803c433.pdf",
+        "148239_4877ffe8.pdf",
+        "150053_36b1c62f.pdf",
+        "BFV Invoice - Pacific Crest_4803c433.pdf",
+        "150053_1cee7a93.pdf"
+      ]
+    },
+    "a1_professional": {
+      "vendor": "a1_professional",
+      "file_count": 4,
+      "has_parser": true,
+      "parser_name": "a1_professional_parser.py",
+      "sample_files": [
+        "A-1_Professional_Exterminating_customer_12434_statement_pdf_d95179b0.pdf",
+        "aoneprofessional_27989_invoice_pdf_f03f75c8.pdf",
+        "aoneprofessional_28370_invoice_pdf_7663b724.pdf",
+        "A-1_Professional_Exterminating_25759_invoice_pdf_3ea8517c.pdf"
+      ]
+    }
+  }
+}
