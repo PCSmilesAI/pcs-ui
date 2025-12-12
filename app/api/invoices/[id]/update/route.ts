@@ -84,6 +84,35 @@ export async function POST(
     // Apply corrections to database (use actual database ID)
     await applyCorrections(actualInvoiceId, user.email, patch, overrideLocks === true);
 
+    // If amount was changed, reset all category allocations to $0
+    if (amount_cents !== undefined) {
+      const resetResult = db.prepare(`
+        UPDATE invoice_categories 
+        SET amount_cents = 0 
+        WHERE invoice_id = ?
+      `).run(actualInvoiceId);
+
+      // Log the allocation reset
+      db.prepare(`
+        INSERT INTO invoice_events (invoice_id, action, actor_email, payload_json)
+        VALUES (?, 'ALLOCATIONS_RESET', ?, ?)
+      `).run(
+        actualInvoiceId,
+        user.email,
+        JSON.stringify({
+          reason: 'Invoice amount changed',
+          new_amount_cents: amount_cents,
+          categories_reset: resetResult.changes
+        })
+      );
+
+      console.log('[API][INVOICES][UPDATE]', 'allocations_reset', {
+        invoiceId: actualInvoiceId,
+        categoriesReset: resetResult.changes,
+        newAmountCents: amount_cents
+      });
+    }
+
     // Fetch updated invoice (use actual database ID)
     const updatedInvoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(actualInvoiceId) as any;
     if (!updatedInvoice) {

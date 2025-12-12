@@ -142,10 +142,12 @@ export async function applyParserUpdate(
 /**
  * Rematerialize effective fields from corrected/parsed values.
  * Effective value = corrected_* if not null, else parsed_*
+ * Also synchronizes amount_cents with invoice_total and total fields for consistency.
  */
 function rematerializeSync(invoiceId: string): void {
   const db = getDatabase();
   
+  // First, rematerialize the effective fields
   db.prepare(`
     UPDATE invoices
     SET
@@ -154,6 +156,22 @@ function rematerializeSync(invoiceId: string): void {
       amount_cents = COALESCE(corrected_amount_cents, parsed_amount_cents),
       status_version = status_version + 1,
       updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(invoiceId);
+  
+  // Now synchronize invoice_total and total fields with amount_cents
+  // This ensures all amount fields are consistent across the system
+  db.prepare(`
+    UPDATE invoices
+    SET
+      invoice_total = CASE 
+        WHEN amount_cents IS NOT NULL THEN CAST(amount_cents AS REAL) / 100.0
+        ELSE invoice_total
+      END,
+      total = CASE 
+        WHEN amount_cents IS NOT NULL THEN CAST(amount_cents AS REAL) / 100.0
+        ELSE total
+      END
     WHERE id = ?
   `).run(invoiceId);
 }
