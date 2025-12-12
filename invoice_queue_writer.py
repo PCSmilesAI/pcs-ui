@@ -78,23 +78,45 @@ def find_corresponding_pdf(json_filename):
     return fallback, api_pdf_path(os.path.basename(fallback))
 
 def detect_vendor_from_filename(filename):
-    """Detect vendor from filename"""
+    """Detect vendor from filename - improved to avoid false positives"""
     filename_lower = filename.lower()
     
+    # Order matters - check more specific patterns first
     if 'henry' in filename_lower or 'henryschein' in filename_lower:
-        return 'henry'
-    elif 'epic' in filename_lower:
-        return 'epic'
+        return 'Henry Schein'
     elif 'patterson' in filename_lower:
-        return 'patterson'
+        return 'Patterson Dental'
+    elif 'epic' in filename_lower and 'dental' in filename_lower:
+        return 'Epic Dental Lab'
+    elif 'darby' in filename_lower:
+        return 'Darby Dental'
+    elif 'dandy' in filename_lower:
+        return 'Dandy'
     elif 'exodus' in filename_lower:
-        return 'exodus'
+        return 'Exodus'
     elif 'artisan' in filename_lower:
-        return 'artisan'
-    elif 'tc' in filename_lower:
-        return 'tc'
+        return 'Artisan Dental'
+    elif 'brasseler' in filename_lower:
+        return 'Brasseler USA'
+    elif 'ctr' in filename_lower and 'services' in filename_lower:
+        return 'CTR Services'
+    elif 'a-1' in filename_lower or 'a1_professional' in filename_lower:
+        return 'A-1 Professional'
+    elif 'comcast' in filename_lower:
+        return 'Comcast'
+    elif 'bridgeford' in filename_lower or 'bfv' in filename_lower:
+        return 'Bridgeford'
+    elif 'waterco' in filename_lower:
+        return 'WaterCo'
+    elif 'crest' in filename_lower or 'oral-b' in filename_lower:
+        return 'Crest & Oral-B'
+    elif 'staffing' in filename_lower and 'dental' in filename_lower:
+        return 'Dental Medical Staffing'
+    # TC Dental must be very specific to avoid false positives
+    elif 'tc dental' in filename_lower or 'tc_dental' in filename_lower:
+        return 'TC Dental'
     else:
-        return 'unknown'
+        return 'Unknown'  # Changed from 'tc' to 'Unknown'
 
 def add_invoice_to_queue(json_file_path):
     """Ingest invoice to database via API"""
@@ -110,11 +132,41 @@ def add_invoice_to_queue(json_file_path):
         office_location = invoice_data.get('office_location', '')
         invoice_date = invoice_data.get('invoice_date', '')
 
-        # Normalize vendor name
-        if vendor.lower() in ['henry schein', 'henry schein']:
-            vendor = 'Henry Schein'
-        elif vendor.lower() == 'epic dental lab':
-            vendor = 'Epic Dental Lab'
+        # Normalize vendor name - map all variations to standard names
+        vendor_lower = vendor.lower().strip()
+        vendor_map = {
+            'henry schein': 'Henry Schein',
+            'henry': 'Henry Schein',
+            'henryschein': 'Henry Schein',
+            'epic dental lab': 'Epic Dental Lab',
+            'epic': 'Epic Dental Lab',
+            'patterson': 'Patterson Dental',
+            'patterson dental': 'Patterson Dental',
+            'tc dental': 'TC Dental',
+            'tc': 'TC Dental',
+            'tc dental laboratory': 'TC Dental',
+            'darby': 'Darby Dental',
+            'darby dental': 'Darby Dental',
+            'dandy': 'Dandy',
+            'exodus': 'Exodus',
+            'exodus dental': 'Exodus',
+            'artisan': 'Artisan Dental',
+            'artisan dental': 'Artisan Dental',
+            'brasseler': 'Brasseler USA',
+            'brasseler usa': 'Brasseler USA',
+            'ctr services': 'CTR Services',
+            'ctr': 'CTR Services',
+            'a-1 professional': 'A-1 Professional',
+            'a1 professional': 'A-1 Professional',
+            'comcast': 'Comcast',
+            'bridgeford': 'Bridgeford',
+            'waterco': 'WaterCo',
+            'crest': 'Crest & Oral-B',
+            'oral-b': 'Crest & Oral-B',
+            'unknown': 'Unknown',
+            '': 'Unknown',
+        }
+        vendor = vendor_map.get(vendor_lower, vendor or 'Unknown')
 
         # Find the correct PDF path
         json_filename = os.path.basename(json_file_path)

@@ -1,55 +1,12 @@
 {
-  "vendor": "Unknown",
-  "vendor_name": "Unknown",
-  "invoice_number": "s",
+  "vendor": "Linde Gas & Equipment",
+  "vendor_name": "Linde Gas & Equipment",
+  "invoice_number": "",
   "invoice_date": "09/30/2025",
   "due_date": "10/30/2025",
-  "invoice_total": "",
+  "invoice_total": "944.70",
   "office_location": "Roseburg",
-  "line_items": [
-    {
-      "product_number": "",
-      "product_name": "0     1",
-      "Quantity": "6",
-      "unit_price": "0",
-      "line_item_total": "5"
-    },
-    {
-      "product_number": "",
-      "product_name": "- 09/19/2025        0",
-      "Quantity": "8156434263",
-      "unit_price": "1",
-      "line_item_total": "0"
-    },
-    {
-      "product_number": "",
-      "product_name": "4     3",
-      "Quantity": "7",
-      "unit_price": "0",
-      "line_item_total": "8"
-    },
-    {
-      "product_number": "",
-      "product_name": "- 09/19/2025        4",
-      "Quantity": "8156434263",
-      "unit_price": "3",
-      "line_item_total": "0"
-    },
-    {
-      "product_number": "",
-      "product_name": "4     4     0",
-      "Quantity": "13",
-      "unit_price": "13",
-      "line_item_total": "889.20"
-    },
-    {
-      "product_number": "",
-      "product_name": "Hazmat:",
-      "Quantity": "1",
-      "unit_price": "55.50",
-      "line_item_total": "55.50"
-    }
-  ],
+  "line_items": [],
   "source_file": "we00_5519822721_rental_20251002_004558_0f9a967e.pdf",
-  "parsed_at": "2025-12-12T19:02:37.424977+00:00"
+  "parsed_at": "2025-12-12T19:35:53.541590+00:00"
 }

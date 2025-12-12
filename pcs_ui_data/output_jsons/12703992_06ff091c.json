@@ -1,20 +1,12 @@
 {
-  "vendor": "Unknown",
-  "vendor_name": "Unknown",
-  "invoice_number": "NUMBER",
+  "vendor": "Linde Gas & Equipment",
+  "vendor_name": "Linde Gas & Equipment",
+  "invoice_number": "56008564",
   "invoice_date": "09/30/2025",
   "due_date": "10/30/2025",
-  "invoice_total": "",
+  "invoice_total": "390.62",
   "office_location": "Vancouver",
-  "line_items": [
-    {
-      "product_number": "",
-      "product_name": "SE 15TH ST STE",
-      "Quantity": "16415",
-      "unit_price": "50",
-      "line_item_total": "1"
-    }
-  ],
+  "line_items": [],
   "source_file": "12703992_06ff091c.pdf",
-  "parsed_at": "2025-12-12T18:54:13.560060+00:00"
+  "parsed_at": "2025-12-12T19:33:19.540575+00:00"
 }

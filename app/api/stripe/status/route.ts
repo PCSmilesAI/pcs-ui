@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
@@ -8,7 +10,8 @@ export async function GET(req: NextRequest) {
     
     // Check if Stripe environment variables are configured
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    // Use consistent env var name: PCS_STRIPE_WEBHOOK_SECRET
+    const stripeWebhookSecret = process.env.PCS_STRIPE_WEBHOOK_SECRET;
     
     if (!stripeSecretKey) {
       // Log full error server-side only
@@ -25,7 +28,7 @@ export async function GET(req: NextRequest) {
 
     // Try to make a simple API call to verify the connection
     try {
-      const stripe = require('stripe')(stripeSecretKey);
+      const stripe = new Stripe(stripeSecretKey, { apiVersion: '2024-06-20' });
       
       // Make a simple API call to check if the key is valid
       const account = await stripe.accounts.retrieve();
@@ -46,7 +49,7 @@ export async function GET(req: NextRequest) {
       });
     } catch (stripeError: any) {
       // Log full error server-side only
-      console.error('Stripe API error:', stripeError);
+      console.error('[STRIPE][STATUS] Stripe API error:', stripeError?.message);
       // Return safe error message to client
       return NextResponse.json({
         connected: false,
@@ -59,7 +62,7 @@ export async function GET(req: NextRequest) {
 
   } catch (error: any) {
     // Log full error server-side only
-    console.error('Stripe status check error:', error);
+    console.error('[STRIPE][STATUS] Status check error:', error?.message);
     // Return safe error message to client
     return NextResponse.json({
       connected: false,

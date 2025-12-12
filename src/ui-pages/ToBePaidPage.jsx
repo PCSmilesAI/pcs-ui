@@ -64,6 +64,41 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             total: invoice.total,
             parsedAmount: numericTotal
           });
+          
+          // Format date helper
+          const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            const parsed = new Date(dateString);
+            if (Number.isNaN(parsed.getTime())) return 'N/A';
+            return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+          };
+          
+          // Calculate due date: use provided value or invoice_date + 30 days
+          const calculateDueDate = (invoiceDate, dueDate) => {
+            if (dueDate && dueDate.trim()) return dueDate;
+            if (!invoiceDate || !invoiceDate.trim()) return null;
+            try {
+              let date = null;
+              if (/^\d{4}-\d{2}-\d{2}/.test(invoiceDate)) {
+                date = new Date(invoiceDate);
+              } else if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(invoiceDate)) {
+                const parts = invoiceDate.split('/');
+                const month = parseInt(parts[0], 10) - 1;
+                const day = parseInt(parts[1], 10);
+                let year = parseInt(parts[2], 10);
+                if (year < 100) year += 2000;
+                date = new Date(year, month, day);
+              }
+              if (!date || isNaN(date.getTime())) return null;
+              date.setDate(date.getDate() + 30);
+              return date.toISOString();
+            } catch (e) {
+              return null;
+            }
+          };
+          
+          const effectiveDueDate = calculateDueDate(invoice.invoice_date, invoice.due_date);
+          
           // Get locations from GL Lines (invoice_categories classes)
           const locations = invoice.locations || [];
           const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
@@ -77,8 +112,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           amount: `$${numericTotal.toFixed(2)}`,
           location: locationDisplay,
           locations: locations, // Keep array for filtering
-          dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A'),
-          invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
+          dueDate: formatDate(effectiveDueDate),
+          invoiceDate: formatDate(invoice.invoice_date),
           displayStatus: 'Pending Payment',
           category: (Array.isArray(invoice.invoice_categories) && invoice.invoice_categories[0]?.category_name) || invoice.category || 'Other',
           invoice_date: invoice.invoice_date,
@@ -182,6 +217,41 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               total: invoice.total,
               parsedAmount: numericTotal
             });
+            
+            // Format date helper
+            const formatDate = (dateString) => {
+              if (!dateString) return 'N/A';
+              const parsed = new Date(dateString);
+              if (Number.isNaN(parsed.getTime())) return 'N/A';
+              return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+            };
+            
+            // Calculate due date: use provided value or invoice_date + 30 days
+            const calculateDueDate = (invoiceDate, dueDate) => {
+              if (dueDate && dueDate.trim()) return dueDate;
+              if (!invoiceDate || !invoiceDate.trim()) return null;
+              try {
+                let date = null;
+                if (/^\d{4}-\d{2}-\d{2}/.test(invoiceDate)) {
+                  date = new Date(invoiceDate);
+                } else if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(invoiceDate)) {
+                  const parts = invoiceDate.split('/');
+                  const month = parseInt(parts[0], 10) - 1;
+                  const day = parseInt(parts[1], 10);
+                  let year = parseInt(parts[2], 10);
+                  if (year < 100) year += 2000;
+                  date = new Date(year, month, day);
+                }
+                if (!date || isNaN(date.getTime())) return null;
+                date.setDate(date.getDate() + 30);
+                return date.toISOString();
+              } catch (e) {
+                return null;
+              }
+            };
+            
+            const effectiveDueDate = calculateDueDate(invoice.invoice_date, invoice.due_date);
+            
             // Get locations from GL Lines (invoice_categories classes)
             const locations = invoice.locations || [];
             const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
@@ -195,20 +265,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             amount: `$${numericTotal.toFixed(2)}`,
             location: locationDisplay,
             locations: locations, // Keep array for filtering
-            dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
-              month: 'numeric',
-              day: 'numeric',
-              year: '2-digit'
-            }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
-              month: 'numeric',
-              day: 'numeric',
-              year: '2-digit'
-            }) : 'N/A'),
-            invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
-              month: 'numeric',
-              day: 'numeric',
-              year: '2-digit'
-            }) : 'N/A',
+            dueDate: formatDate(effectiveDueDate),
+            invoiceDate: formatDate(invoice.invoice_date),
             displayStatus: 'Pending Payment',
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,

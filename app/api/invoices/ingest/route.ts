@@ -14,11 +14,71 @@ interface IngestPayload {
   total?: string | number;
   office_location?: string;
   invoice_date?: string;
+  due_date?: string;
   clinic_id?: string;
   source_file?: string;
   json_path?: string;
   pdf_path?: string;
   [key: string]: any;
+}
+
+/**
+ * Calculate due date as invoice_date + 30 days if not provided
+ */
+function calculateDueDate(invoiceDate: string | undefined, providedDueDate: string | undefined): string | null {
+  // If due_date is provided, use it
+  if (providedDueDate && providedDueDate.trim()) {
+    return providedDueDate;
+  }
+  
+  // If no invoice_date, can't calculate
+  if (!invoiceDate || !invoiceDate.trim()) {
+    return null;
+  }
+  
+  try {
+    // Parse various date formats
+    let date: Date | null = null;
+    
+    // Try ISO format first (2025-07-31)
+    if (/^\d{4}-\d{2}-\d{2}/.test(invoiceDate)) {
+      date = new Date(invoiceDate);
+    }
+    // Try MM/DD/YYYY or M/D/YYYY format
+    else if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(invoiceDate)) {
+      const parts = invoiceDate.split('/');
+      const month = parseInt(parts[0], 10) - 1;
+      const day = parseInt(parts[1], 10);
+      let year = parseInt(parts[2], 10);
+      if (year < 100) year += 2000; // Convert 25 to 2025
+      date = new Date(year, month, day);
+    }
+    // Try MM/DD/YY format (like 09/09/25)
+    else if (/^\d{2}\/\d{2}\/\d{2}$/.test(invoiceDate)) {
+      const parts = invoiceDate.split('/');
+      const month = parseInt(parts[0], 10) - 1;
+      const day = parseInt(parts[1], 10);
+      const year = 2000 + parseInt(parts[2], 10);
+      date = new Date(year, month, day);
+    }
+    
+    if (!date || isNaN(date.getTime())) {
+      return null;
+    }
+    
+    // Add 30 days
+    date.setDate(date.getDate() + 30);
+    
+    // Format as MM/DD/YYYY
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${month}/${day}/${year}`;
+  } catch (e) {
+    console.warn('[API][INGEST] Failed to calculate due_date from invoice_date:', invoiceDate, e);
+    return null;
+  }
 }
 
 /**
@@ -95,6 +155,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Calculate due_date: use provided value or invoice_date + 30 days
+    const due_date = calculateDueDate(body.invoice_date, body.due_date);
+
     // Insert invoice with parsed_* fields
     db.prepare(`
       INSERT INTO invoices (
@@ -111,11 +174,12 @@ export async function POST(req: NextRequest) {
         approvals,
         deleted,
         invoice_date,
+        due_date,
         description,
         clinic_id,
         office_location,
         pdf_path
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       invoice_number,
@@ -130,6 +194,7 @@ export async function POST(req: NextRequest) {
       JSON.stringify({}),
       0,
       body.invoice_date,
+      due_date,
       '',
       body.clinic_id,
       body.office_location,

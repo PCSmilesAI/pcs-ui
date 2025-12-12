@@ -44,6 +44,24 @@ VENDOR_PARSERS = {
     'comcast': 'comcast_parser.py',
     'bridgeford': 'bridgeford_parser.py',
     'general': 'general_invoice_parser.py',
+    # New parsers from Unknown invoice review
+    'linde_gas': 'linde_gas_parser.py',
+    'kettenbach': 'kettenbach_parser.py',
+    'republic_services': 'republic_services_parser.py',
+    'clipboard_health': 'clipboard_health_parser.py',
+    'airgas': 'linde_gas_parser.py',
+    # Vendors using general parser
+    'waterco': 'general_invoice_parser.py',
+    'dental_medical_staffing': 'general_invoice_parser.py',
+    'crest_oralb': 'general_invoice_parser.py',
+    'physicians_resource': 'general_invoice_parser.py',
+    'oral_biotech': 'general_invoice_parser.py',
+    'oregon_linen': 'general_invoice_parser.py',
+    'cintas': 'general_invoice_parser.py',
+    'trilogy_medwaste': 'general_invoice_parser.py',
+    'glidewell': 'general_invoice_parser.py',
+    'do_good_cleaning': 'general_invoice_parser.py',
+    'ultradent': 'general_invoice_parser.py',
 }
 
 # Vendor display names
@@ -66,6 +84,21 @@ VENDOR_DISPLAY_NAMES = {
     'dental_medical_staffing': 'Dental Medical Staffing',
     'crest_oralb': 'Crest & Oral-B',
     'physicians_resource': "Physician's Resource",
+    # New vendors from Unknown invoice review
+    'linde_gas': 'Linde Gas & Equipment',
+    'kettenbach': 'Kettenbach LP',
+    'republic_services': 'Republic Services',
+    'clipboard_health': 'Clipboard Health',
+    'airgas': 'Airgas USA',
+    'oral_biotech': 'Oral BioTech',
+    'oregon_linen': 'Oregon Linen',
+    'cintas': 'Cintas',
+    'trilogy_medwaste': 'Trilogy Medwaste',
+    'glidewell': 'Glidewell',
+    'do_good_cleaning': 'Do Good Cleaning',
+    'ultradent': 'Ultradent Products',
+    'shred_it': 'Shred-It',
+    'pacific_office': 'Pacific Office Automation',
 }
 
 
@@ -202,18 +235,34 @@ def update_invoice_in_db(conn: sqlite3.Connection, invoice_id: str,
         if new_invoice_number:
             # Remove any file path or extension
             new_invoice_number = str(new_invoice_number).strip()
+            # Skip generic/bad invoice numbers
+            if new_invoice_number.lower() in ['number', 'invoice', 'n/a', 'unknown', '', 'sap']:
+                new_invoice_number = None
             # If it still looks like a filename, try to extract number
-            if '_' in new_invoice_number and len(new_invoice_number) > 30:
+            elif '_' in new_invoice_number and len(new_invoice_number) > 30:
                 extracted = extract_invoice_number_from_filename(new_invoice_number)
                 if extracted:
                     new_invoice_number = extracted
-        else:
+                else:
+                    new_invoice_number = None
+        
+        if not new_invoice_number:
             # Try to extract from original invoice_number (filename)
-            new_invoice_number = extract_invoice_number_from_filename(invoice_number)
+            extracted = extract_invoice_number_from_filename(invoice_number)
+            if extracted:
+                new_invoice_number = extracted
         
         # Use original if we couldn't find a better one
         if not new_invoice_number:
             new_invoice_number = invoice_number
+        
+        # Check if new invoice_number would cause a conflict
+        if new_invoice_number != invoice_number:
+            cur.execute("SELECT id FROM invoices WHERE invoice_number = ? AND invoice_number != ?", 
+                       (new_invoice_number, invoice_number))
+            if cur.fetchone():
+                # Would conflict, keep original
+                new_invoice_number = invoice_number
         
         cur.execute("""
             UPDATE invoices SET

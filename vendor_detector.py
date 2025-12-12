@@ -73,6 +73,9 @@ VENDOR_PATTERNS = {
         (r'a-?1\s*professional', 1.0),
         (r'aoneprofessional', 1.0),
         (r'A-1 Professional Exterminating', 1.0),
+        # Also matches A-1 Fire Protection / Umpqua Valley Fire Services
+        (r'a-?1\s*fire', 1.0),
+        (r'umpqua\s*valley\s*fire', 1.0),
     ],
     'comcast': [
         (r'comcast', 1.0),
@@ -116,6 +119,71 @@ VENDOR_PATTERNS = {
         (r'columbia\s*smiles', 1.0),
         (r'ColumbiaSmiles', 1.0),
     ],
+    # NEW: Vendors identified from Unknown invoice review
+    'linde_gas': [
+        (r'linde\s*gas', 1.0),
+        (r'linde\s*plc', 0.9),
+        (r'linde gas & equipment', 1.0),
+    ],
+    'kettenbach': [
+        (r'kettenbach', 1.0),
+        (r'kettenbach\s*lp', 1.0),
+    ],
+    'republic_services': [
+        (r'republic\s*services', 1.0),
+        (r'albany.*sanitation', 0.9),
+        (r'republic services #', 1.0),
+    ],
+    'clipboard_health': [
+        (r'clipboard\s*health', 1.0),
+        (r'clipboardhealth\.com', 1.0),
+    ],
+    'oral_biotech': [
+        (r'oral\s*biotech', 1.0),
+        (r'carifree', 1.0),
+        (r'carifree\.com', 1.0),
+    ],
+    'oregon_linen': [
+        (r'oregon\s*linen', 1.0),
+        (r'oregonlinen\.com', 1.0),
+    ],
+    'cintas': [
+        (r'cintas', 1.0),
+        (r'cintas\s*corporation', 1.0),
+    ],
+    'trilogy_medwaste': [
+        (r'trilogy\s*medwaste', 1.0),
+        (r'trilogymedwaste\.com', 1.0),
+    ],
+    'glidewell': [
+        (r'glidewell', 1.0),
+        (r'bruxzir', 0.9),
+        (r'glidewell\s*dental', 1.0),
+    ],
+    'do_good_cleaning': [
+        (r'do\s*good\s*clean', 1.0),
+        (r'dogoodcleans\.com', 1.0),
+    ],
+    'airgas': [
+        (r'airgas', 1.0),
+        (r'airgas\s*usa', 1.0),
+        (r'airgas\.com', 0.9),
+    ],
+    'shred_it': [
+        (r'shred-?it', 1.0),
+        (r'stericycle', 0.8),  # Shred-it parent company
+    ],
+    'pacific_office': [
+        (r'pacific\s*office\s*automation', 1.0),
+        (r'pacificoffice\.com', 1.0),
+    ],
+    'ultradent': [
+        (r'ultradent', 1.0),
+        (r'ultradent\s*products', 1.0),
+    ],
+    'safeway': [
+        (r'safeway', 1.0),
+    ],
 }
 
 # Parser file mappings
@@ -134,7 +202,7 @@ VENDOR_PARSERS = {
     'comcast': 'comcast_parser.py',
     'bridgeford': 'bridgeford_parser.py',
     'general': 'general_invoice_parser.py',
-    # NEW: Map new vendors to general parser initially
+    # NEW: Map new vendors to their parsers (general or dedicated)
     'waterco': 'general_invoice_parser.py',
     'dental_medical_staffing': 'general_invoice_parser.py',
     'crest_oralb': 'general_invoice_parser.py',
@@ -142,6 +210,23 @@ VENDOR_PARSERS = {
     'trustworkz': 'general_invoice_parser.py',
     'medpro': 'general_invoice_parser.py',
     'columbia_smiles': 'general_invoice_parser.py',
+    # Vendors identified from Unknown invoice review
+    'linde_gas': 'linde_gas_parser.py',
+    'kettenbach': 'kettenbach_parser.py',
+    'republic_services': 'republic_services_parser.py',
+    'clipboard_health': 'clipboard_health_parser.py',
+    'airgas': 'linde_gas_parser.py',  # Similar format to Linde (medical gases)
+    'ultradent': 'general_invoice_parser.py',
+    'safeway': 'general_invoice_parser.py',
+    'oral_biotech': 'general_invoice_parser.py',
+    'oregon_linen': 'general_invoice_parser.py',
+    'cintas': 'general_invoice_parser.py',
+    'trilogy_medwaste': 'general_invoice_parser.py',
+    'glidewell': 'general_invoice_parser.py',
+    'do_good_cleaning': 'general_invoice_parser.py',
+    'airgas': 'general_invoice_parser.py',
+    'shred_it': 'general_invoice_parser.py',
+    'pacific_office': 'general_invoice_parser.py',
 }
 
 
@@ -220,6 +305,21 @@ def detect_vendor_from_filename(filename: str) -> Tuple[Optional[str], float]:
         'trustworkz': (['trustworkz'], 0.9),
         'medpro': (['med pro', 'medpro'], 0.9),
         'columbia_smiles': (['columbiasmiles'], 0.9),
+        # Vendors from Unknown invoice review
+        'linde_gas': (['linde'], 0.9),
+        'kettenbach': (['kettenbach'], 0.9),
+        'republic_services': (['republic'], 0.8),
+        'clipboard_health': (['clipboard'], 0.9),
+        'oral_biotech': (['carifree', 'biotech'], 0.9),
+        'oregon_linen': (['oregon linen', 'oregonlinen'], 0.9),
+        'cintas': (['cintas'], 0.9),
+        'trilogy_medwaste': (['trilogy'], 0.9),
+        'glidewell': (['glidewell', 'bruxzir'], 0.9),
+        'do_good_cleaning': (['dogood', 'do good'], 0.9),
+        'airgas': (['airgas'], 0.9),
+        'shred_it': (['shred-it', 'shredit'], 0.9),
+        'pacific_office': (['pacific office'], 0.9),
+        'a1_professional': (['a-1 fire', 'fire protection', 'umpqua'], 0.9),  # Extended for fire services
     }
     
     for vendor, (keywords, confidence) in patterns.items():
