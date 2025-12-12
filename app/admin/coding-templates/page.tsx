@@ -59,6 +59,12 @@ const ALLOCATION_MODE_LABELS: Record<AllocationMode, string> = {
   percentage: 'Percent Split',
 };
 
+const ALLOCATION_MODE_COLORS: Record<AllocationMode, { bg: string; text: string }> = {
+  split_evenly: { bg: '#dbeafe', text: '#1e40af' },
+  fixed_amount: { bg: '#fef3c7', text: '#92400e' },
+  percentage: { bg: '#f3e8ff', text: '#6b21a8' },
+};
+
 export default function CodingTemplatesPage() {
   const router = useRouter();
   const [templates, setTemplates] = useState<CodingTemplate[]>([]);
@@ -549,17 +555,21 @@ export default function CodingTemplatesPage() {
       position: fixed;
       top: 20px;
       right: 20px;
-      padding: 12px 24px;
-      background-color: ${variant === 'success' ? '#10b981' : '#ef4444'};
+      padding: 16px 24px;
+      background-color: ${variant === 'success' ? '#059669' : '#dc2626'};
       color: white;
-      border-radius: 6px;
-      z-index: 1000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-radius: 8px;
+      z-index: 9999;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      font-weight: 500;
+      font-size: 14px;
+      animation: slideIn 0.3s ease-out;
     `;
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => {
-      document.body.removeChild(toast);
+      toast.style.animation = 'slideOut 0.3s ease-in';
+      setTimeout(() => document.body.removeChild(toast), 300);
     }, 3000);
   }
 
@@ -568,12 +578,262 @@ export default function CodingTemplatesPage() {
     return ALLOCATION_MODE_LABELS[mode as AllocationMode] || mode;
   }
 
+  function getAllocationModeColors(mode?: string): { bg: string; text: string } {
+    if (!mode) return ALLOCATION_MODE_COLORS.split_evenly;
+    return ALLOCATION_MODE_COLORS[mode as AllocationMode] || ALLOCATION_MODE_COLORS.split_evenly;
+  }
+
+  // Styles
+  const styles = {
+    page: {
+      minHeight: '100vh',
+      backgroundColor: '#f8fafc',
+      padding: '32px 24px',
+    } as React.CSSProperties,
+    container: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+    } as React.CSSProperties,
+    card: {
+      backgroundColor: '#ffffff',
+      borderRadius: '12px',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
+      overflow: 'hidden',
+    } as React.CSSProperties,
+    cardHeader: {
+      padding: '20px 24px',
+      borderBottom: '1px solid #e5e7eb',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: '#ffffff',
+    } as React.CSSProperties,
+    title: {
+      fontSize: '24px',
+      fontWeight: '700',
+      color: '#111827',
+      margin: 0,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+    } as React.CSSProperties,
+    primaryBtn: {
+      padding: '10px 20px',
+      backgroundColor: '#2563eb',
+      color: '#ffffff',
+      border: 'none',
+      borderRadius: '8px',
+      fontSize: '14px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      transition: 'all 0.2s',
+    } as React.CSSProperties,
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse' as const,
+    } as React.CSSProperties,
+    th: {
+      padding: '14px 20px',
+      textAlign: 'left' as const,
+      fontSize: '12px',
+      fontWeight: '600',
+      color: '#6b7280',
+      textTransform: 'uppercase' as const,
+      letterSpacing: '0.05em',
+      backgroundColor: '#f9fafb',
+      borderBottom: '1px solid #e5e7eb',
+    } as React.CSSProperties,
+    td: {
+      padding: '16px 20px',
+      fontSize: '14px',
+      color: '#374151',
+      borderBottom: '1px solid #f3f4f6',
+      verticalAlign: 'middle' as const,
+    } as React.CSSProperties,
+    badge: {
+      padding: '4px 12px',
+      borderRadius: '9999px',
+      fontSize: '12px',
+      fontWeight: '600',
+      display: 'inline-block',
+    } as React.CSSProperties,
+    actionBtn: {
+      padding: '6px 14px',
+      borderRadius: '6px',
+      fontSize: '13px',
+      fontWeight: '500',
+      cursor: 'pointer',
+      border: 'none',
+      transition: 'all 0.2s',
+    } as React.CSSProperties,
+    infoBox: {
+      marginTop: '24px',
+      backgroundColor: '#eff6ff',
+      border: '1px solid #bfdbfe',
+      borderRadius: '12px',
+      padding: '20px 24px',
+    } as React.CSSProperties,
+    modalOverlay: {
+      position: 'fixed' as const,
+      inset: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: '20px',
+      backdropFilter: 'blur(4px)',
+    } as React.CSSProperties,
+    modal: {
+      backgroundColor: '#ffffff',
+      borderRadius: '16px',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      width: '100%',
+      maxWidth: '900px',
+      maxHeight: '90vh',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column' as const,
+    } as React.CSSProperties,
+    modalHeader: {
+      padding: '20px 24px',
+      borderBottom: '1px solid #e5e7eb',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: '#f9fafb',
+    } as React.CSSProperties,
+    modalBody: {
+      padding: '24px',
+      overflowY: 'auto' as const,
+      flex: 1,
+    } as React.CSSProperties,
+    formGroup: {
+      marginBottom: '20px',
+    } as React.CSSProperties,
+    label: {
+      display: 'block',
+      fontSize: '13px',
+      fontWeight: '600',
+      color: '#374151',
+      marginBottom: '6px',
+    } as React.CSSProperties,
+    input: {
+      width: '100%',
+      padding: '10px 14px',
+      fontSize: '14px',
+      border: '1px solid #d1d5db',
+      borderRadius: '8px',
+      outline: 'none',
+      transition: 'border-color 0.2s, box-shadow 0.2s',
+      backgroundColor: '#ffffff',
+      boxSizing: 'border-box' as const,
+    } as React.CSSProperties,
+    select: {
+      width: '100%',
+      padding: '10px 14px',
+      fontSize: '14px',
+      border: '1px solid #d1d5db',
+      borderRadius: '8px',
+      outline: 'none',
+      backgroundColor: '#ffffff',
+      cursor: 'pointer',
+      appearance: 'none' as const,
+      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+      backgroundPosition: 'right 10px center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: '20px',
+    } as React.CSSProperties,
+    glLineCard: {
+      padding: '20px',
+      backgroundColor: '#f9fafb',
+      borderRadius: '10px',
+      border: '1px solid #e5e7eb',
+      marginBottom: '12px',
+    } as React.CSSProperties,
+    glLineHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '16px',
+    } as React.CSSProperties,
+    glLineBadge: {
+      padding: '4px 10px',
+      backgroundColor: '#e5e7eb',
+      borderRadius: '6px',
+      fontSize: '12px',
+      fontWeight: '600',
+      color: '#374151',
+    } as React.CSSProperties,
+    removeBtn: {
+      padding: '4px 12px',
+      backgroundColor: 'transparent',
+      color: '#dc2626',
+      border: '1px solid #fecaca',
+      borderRadius: '6px',
+      fontSize: '12px',
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+    } as React.CSSProperties,
+    grid2: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gap: '16px',
+    } as React.CSSProperties,
+    grid3: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: '16px',
+    } as React.CSSProperties,
+    dropdown: {
+      position: 'absolute' as const,
+      top: '100%',
+      left: 0,
+      right: 0,
+      backgroundColor: '#ffffff',
+      border: '1px solid #e5e7eb',
+      borderRadius: '8px',
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+      maxHeight: '200px',
+      overflowY: 'auto' as const,
+      zIndex: 50,
+      marginTop: '4px',
+    } as React.CSSProperties,
+    dropdownItem: {
+      padding: '10px 14px',
+      fontSize: '14px',
+      cursor: 'pointer',
+      transition: 'background-color 0.15s',
+    } as React.CSSProperties,
+    percentIndicator: {
+      padding: '12px 16px',
+      borderRadius: '8px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '20px',
+    } as React.CSSProperties,
+    modalFooter: {
+      padding: '16px 24px',
+      borderTop: '1px solid #e5e7eb',
+      display: 'flex',
+      gap: '12px',
+      backgroundColor: '#f9fafb',
+    } as React.CSSProperties,
+  };
+
   if (!isAdmin && loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-gray-600">Verifying access...</p>
+      <div style={styles.page}>
+        <div style={styles.container}>
+          <div style={styles.card}>
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+              <div style={{ fontSize: '18px', color: '#6b7280' }}>Verifying access...</div>
+            </div>
           </div>
         </div>
       </div>
@@ -582,11 +842,13 @@ export default function CodingTemplatesPage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-red-600 font-semibold">Access Denied</p>
-            <p className="text-gray-600 mt-2">Only admins can access this page. Redirecting...</p>
+      <div style={styles.page}>
+        <div style={styles.container}>
+          <div style={styles.card}>
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+              <div style={{ fontSize: '18px', color: '#dc2626', fontWeight: '600' }}>Access Denied</div>
+              <div style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>Only admins can access this page. Redirecting...</div>
+            </div>
           </div>
         </div>
       </div>
@@ -594,184 +856,232 @@ export default function CodingTemplatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Coding Templates</h1>
+    <div style={styles.page}>
+      <div style={styles.container}>
+        {/* Main Card */}
+        <div style={styles.card}>
+          <div style={styles.cardHeader}>
+            <h1 style={styles.title}>
+              <span style={{ fontSize: '28px' }}>📋</span>
+              Coding Templates
+            </h1>
             <button
               onClick={() => setShowModal(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+              style={styles.primaryBtn}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#1d4ed8'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#2563eb'; }}
             >
-              <span>+</span> Add Template
+              <span style={{ fontSize: '18px' }}>+</span>
+              New Template
             </button>
           </div>
 
           {error && !showModal && (
-            <div className="px-6 py-4 bg-red-50 border-b border-red-200">
-              <p className="text-red-800">{error}</p>
+            <div style={{ padding: '16px 24px', backgroundColor: '#fef2f2', borderBottom: '1px solid #fecaca' }}>
+              <p style={{ color: '#dc2626', fontSize: '14px', margin: 0 }}>{error}</p>
             </div>
           )}
 
-          <div className="px-6 py-4">
+          <div style={{ padding: '0' }}>
             {loading ? (
-              <p className="text-gray-600">Loading templates...</p>
+              <div style={{ padding: '60px', textAlign: 'center' }}>
+                <div style={{ fontSize: '16px', color: '#6b7280' }}>Loading templates...</div>
+              </div>
             ) : templates.length === 0 ? (
-              <p className="text-gray-600">No coding templates yet. Create one to get started.</p>
+              <div style={{ padding: '60px', textAlign: 'center' }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
+                <div style={{ fontSize: '18px', color: '#374151', fontWeight: '600' }}>No templates yet</div>
+                <div style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>Create your first coding template to get started</div>
+              </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Template Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Vendor
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Allocation
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        GL Lines
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Created
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {templates.map((template) => (
-                      <tr key={template.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{template.name}</div>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>Template Name</th>
+                    <th style={styles.th}>Vendor</th>
+                    <th style={styles.th}>Allocation</th>
+                    <th style={styles.th}>GL Lines</th>
+                    <th style={styles.th}>Status</th>
+                    <th style={styles.th}>Created</th>
+                    <th style={styles.th}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {templates.map((template) => {
+                    const modeColors = getAllocationModeColors(template.allocation_mode);
+                    return (
+                      <tr key={template.id} style={{ transition: 'background-color 0.15s' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f9fafb'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
+                      >
+                        <td style={styles.td}>
+                          <div style={{ fontWeight: '600', color: '#111827' }}>{template.name}</div>
                           {template.description && (
-                            <div className="text-xs text-gray-500 truncate max-w-xs">{template.description}</div>
+                            <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {template.description}
+                            </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {template.vendor_name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <td style={styles.td}>{template.vendor_name || '—'}</td>
+                        <td style={styles.td}>
+                          <span style={{
+                            ...styles.badge,
+                            backgroundColor: modeColors.bg,
+                            color: modeColors.text,
+                          }}>
                             {getAllocationModeLabel(template.allocation_mode)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {template.row_count || 0}
+                        <td style={styles.td}>
+                          <span style={{
+                            ...styles.badge,
+                            backgroundColor: '#f3f4f6',
+                            color: '#374151',
+                          }}>
+                            {template.row_count || 0} lines
+                          </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            template.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                          }`}>
+                        <td style={styles.td}>
+                          <span style={{
+                            ...styles.badge,
+                            backgroundColor: template.is_active ? '#dcfce7' : '#f3f4f6',
+                            color: template.is_active ? '#166534' : '#6b7280',
+                          }}>
                             {template.is_active ? 'Active' : 'Inactive'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {new Date(template.created_at).toLocaleDateString()}
+                        <td style={styles.td}>
+                          {new Date(template.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <div className="flex gap-2">
+                        <td style={styles.td}>
+                          <div style={{ display: 'flex', gap: '8px' }}>
                             <button
                               onClick={() => handleEditTemplate(template)}
-                              className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs"
+                              style={{ ...styles.actionBtn, backgroundColor: '#eff6ff', color: '#2563eb' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#dbeafe'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#eff6ff'; }}
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDeleteTemplate(template.id)}
-                              className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
+                              style={{ ...styles.actionBtn, backgroundColor: '#fef2f2', color: '#dc2626' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fee2e2'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#fef2f2'; }}
                             >
                               Delete
                             </button>
                           </div>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    );
+                  })}
+                </tbody>
+              </table>
             )}
           </div>
         </div>
 
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-blue-900 mb-2">How Coding Templates Work</h2>
-          <ul className="text-sm text-blue-800 space-y-2">
-            <li><strong>Split Evenly:</strong> Divides the invoice total equally among all GL lines</li>
-            <li><strong>Specific Dollar Amount:</strong> Applies fixed dollar amounts to each GL line</li>
-            <li><strong>Percent Split:</strong> Allocates based on percentage (must equal 100%)</li>
-            <li>Templates can be applied from the invoice view page to auto-populate GL lines</li>
-          </ul>
+        {/* Info Box */}
+        <div style={styles.infoBox}>
+          <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1e40af', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>💡</span> How Coding Templates Work
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <div style={{ fontSize: '14px', color: '#1e40af', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <span style={{ color: '#3b82f6' }}>•</span>
+              <span><strong>Split Evenly:</strong> Divides the invoice total equally among all GL lines</span>
+            </div>
+            <div style={{ fontSize: '14px', color: '#1e40af', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <span style={{ color: '#3b82f6' }}>•</span>
+              <span><strong>Specific Dollar Amount:</strong> Applies fixed dollar amounts to each GL line</span>
+            </div>
+            <div style={{ fontSize: '14px', color: '#1e40af', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <span style={{ color: '#3b82f6' }}>•</span>
+              <span><strong>Percent Split:</strong> Allocates based on percentage (must equal 100%)</span>
+            </div>
+            <div style={{ fontSize: '14px', color: '#1e40af', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <span style={{ color: '#3b82f6' }}>•</span>
+              <span>Templates can be applied from the invoice view page to auto-populate GL lines</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Template Creation/Edit Modal */}
+      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto m-4">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center z-10">
-              <h2 className="text-xl font-bold text-gray-900">
-                {editingTemplate ? 'Edit Template' : 'Create Template'}
+        <div style={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
+          <div style={styles.modal}>
+            <div style={styles.modalHeader}>
+              <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#111827', margin: 0 }}>
+                {editingTemplate ? '✏️ Edit Template' : '✨ Create New Template'}
               </h2>
               <button
                 onClick={closeModal}
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  color: '#9ca3af',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  lineHeight: 1,
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#6b7280'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = '#9ca3af'; }}
               >
-                &times;
+                ×
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6">
+            <form onSubmit={handleSubmit} style={styles.modalBody}>
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-800 text-sm">
-                  {error}
+                <div style={{
+                  padding: '12px 16px',
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '8px',
+                  marginBottom: '20px',
+                }}>
+                  <p style={{ color: '#dc2626', fontSize: '14px', margin: 0 }}>{error}</p>
                 </div>
               )}
 
               {/* Template Name */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Template Name *
-                </label>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Template Name *</label>
                 <input
                   type="text"
                   value={templateName}
                   onChange={(e) => setTemplateName(e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md ${
-                    !templateName.trim() ? 'border-red-300' : 'border-gray-300'
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  style={{
+                    ...styles.input,
+                    borderColor: !templateName.trim() && error ? '#fca5a5' : '#d1d5db',
+                  }}
                   placeholder="e.g., Monthly IT Split - 3 Locations"
+                  onFocus={(e) => { e.target.style.borderColor = '#2563eb'; e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)'; }}
+                  onBlur={(e) => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none'; }}
                 />
               </div>
 
-              {/* Template Description */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description (optional)
-                </label>
+              {/* Description */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Description (optional)</label>
                 <textarea
                   value={templateDescription}
                   onChange={(e) => setTemplateDescription(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ ...styles.input, minHeight: '70px', resize: 'vertical' as const }}
                   placeholder="Describe when to use this template..."
-                  rows={2}
+                  onFocus={(e) => { e.target.style.borderColor = '#2563eb'; e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)'; }}
+                  onBlur={(e) => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none'; }}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div style={styles.grid2}>
                 {/* Vendor Search */}
-                <div className="relative">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vendor *
-                  </label>
-                  <div className="relative">
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Vendor *</label>
+                  <div style={{ position: 'relative' }}>
                     <input
                       type="text"
                       value={vendorSearchQuery}
@@ -784,12 +1094,13 @@ export default function CodingTemplatesPage() {
                           setShowVendorSuggestions(true);
                         }
                       }}
-                      className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Search Vendor"
+                      onBlur={() => setTimeout(() => setShowVendorSuggestions(false), 200)}
+                      style={{ ...styles.input, paddingLeft: '38px' }}
+                      placeholder="Search for a vendor..."
                     />
-                    <span className="absolute left-3 top-2.5 text-gray-400">&#128269;</span>
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: '16px' }}>🔍</span>
                     {showVendorSuggestions && vendorSuggestions.length > 0 && (
-                      <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                      <div style={styles.dropdown}>
                         {vendorSuggestions.map((vendor) => (
                           <div
                             key={vendor.id}
@@ -798,7 +1109,9 @@ export default function CodingTemplatesPage() {
                               setVendorSearchQuery(vendor.name);
                               setShowVendorSuggestions(false);
                             }}
-                            className="px-4 py-2 hover:bg-blue-50 cursor-pointer"
+                            style={styles.dropdownItem}
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
                           >
                             {vendor.name}
                           </div>
@@ -808,15 +1121,13 @@ export default function CodingTemplatesPage() {
                   </div>
                 </div>
 
-                {/* Allocation Mode Dropdown */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Allocation *
-                  </label>
+                {/* Allocation Mode */}
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Allocation Method *</label>
                   <select
                     value={allocationMode}
                     onChange={(e) => setAllocationMode(e.target.value as AllocationMode)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={styles.select}
                   >
                     <option value="split_evenly">Split Evenly</option>
                     <option value="fixed_amount">Specific Dollar Amount</option>
@@ -825,299 +1136,325 @@ export default function CodingTemplatesPage() {
                 </div>
               </div>
 
-              {/* Percent Distribution Indicator */}
+              {/* Percentage Indicator */}
               {allocationMode === 'percentage' && (
-                <div className={`mb-4 p-3 rounded-md ${
-                  isPercentageValid ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <span className={`font-medium ${isPercentageValid ? 'text-green-800' : 'text-red-800'}`}>
-                      % Distribution
+                <div style={{
+                  ...styles.percentIndicator,
+                  backgroundColor: isPercentageValid ? '#dcfce7' : '#fef2f2',
+                  border: `1px solid ${isPercentageValid ? '#86efac' : '#fecaca'}`,
+                }}>
+                  <span style={{ fontWeight: '600', color: isPercentageValid ? '#166534' : '#dc2626' }}>
+                    % Distribution
+                  </span>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '20px', fontWeight: '700', color: isPercentageValid ? '#166534' : '#dc2626' }}>
+                      {percentageTotal.toFixed(1)}%
                     </span>
-                    <span className={`text-lg font-bold ${isPercentageValid ? 'text-green-700' : 'text-red-700'}`}>
-                      {percentageTotal.toFixed(1)}% / 100%
-                    </span>
+                    <span style={{ color: isPercentageValid ? '#166534' : '#dc2626', marginLeft: '4px' }}> / 100%</span>
+                    {!isPercentageValid && (
+                      <div style={{ fontSize: '12px', color: '#dc2626', marginTop: '2px' }}>
+                        {percentageTotal < 100 ? `Missing ${(100 - percentageTotal).toFixed(1)}%` : `Over by ${(percentageTotal - 100).toFixed(1)}%`}
+                      </div>
+                    )}
                   </div>
-                  {!isPercentageValid && (
-                    <p className="text-sm text-red-600 mt-1">
-                      {percentageTotal < 100 
-                        ? `Missing ${(100 - percentageTotal).toFixed(1)}% allocation`
-                        : `Over-allocated by ${(percentageTotal - 100).toFixed(1)}%`
-                      }
-                    </p>
-                  )}
                 </div>
               )}
 
-              {/* GL Lines Section */}
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-3">
-                  <label className="block text-sm font-medium text-gray-700">
+              {/* GL Lines */}
+              <div style={styles.formGroup}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <label style={{ ...styles.label, marginBottom: 0 }}>
                     GL Lines ({tableRows.length})
                   </label>
                   <button
                     type="button"
                     onClick={clearTable}
-                    className="text-sm text-gray-500 hover:text-gray-700"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#6b7280',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                    }}
                   >
                     Clear all
                   </button>
                 </div>
-                
-                <div className="space-y-3">
-                  {tableRows.map((row, index) => (
-                    <div 
-                      key={row.id} 
-                      className="p-4 border border-gray-200 rounded-lg bg-gray-50"
-                    >
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-xs font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                          GL Line {index + 1}
-                        </span>
-                        {tableRows.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeTableRow(row.id)}
-                            className="text-red-500 hover:text-red-700 text-sm font-medium"
-                          >
-                            Remove
-                          </button>
+
+                {tableRows.map((row, index) => (
+                  <div key={row.id} style={styles.glLineCard}>
+                    <div style={styles.glLineHeader}>
+                      <span style={styles.glLineBadge}>GL Line {index + 1}</span>
+                      {tableRows.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeTableRow(row.id)}
+                          style={styles.removeBtn}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fef2f2'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={styles.grid2}>
+                      {/* Account */}
+                      <div style={{ position: 'relative' }}>
+                        <label style={{ ...styles.label, fontSize: '12px' }}>Account *</label>
+                        <input
+                          type="text"
+                          value={categoryDropdownOpen[row.id] ? categorySearchQueries[row.id] || '' : row.categoryName || ''}
+                          onChange={(e) => {
+                            setCategorySearchQueries({ ...categorySearchQueries, [row.id]: e.target.value });
+                            setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
+                            if (!e.target.value) {
+                              updateTableRow(row.id, 'categoryName', '');
+                              updateTableRow(row.id, 'glAccountPath', '');
+                            }
+                          }}
+                          onFocus={() => {
+                            setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
+                            setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => {
+                              setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: false });
+                              setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
+                            }, 200);
+                          }}
+                          onKeyDown={(e) => handleCategoryKeyDown(e, row.id)}
+                          style={styles.input}
+                          placeholder="Search accounts..."
+                        />
+                        {categoryDropdownOpen[row.id] && (
+                          <div style={styles.dropdown}>
+                            {getFilteredCategories(row.id).map((cat, idx) => (
+                              <div
+                                key={cat.id}
+                                onClick={() => handleCategorySelect(row.id, cat)}
+                                style={{
+                                  ...styles.dropdownItem,
+                                  backgroundColor: idx === 0 ? '#eff6ff' : '#ffffff',
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = idx === 0 ? '#eff6ff' : '#ffffff'; }}
+                              >
+                                {cat.displayText}
+                              </div>
+                            ))}
+                            {getFilteredCategories(row.id).length === 0 && (
+                              <div style={{ ...styles.dropdownItem, color: '#9ca3af' }}>No results found</div>
+                            )}
+                          </div>
                         )}
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-3">
-                        {/* Category Dropdown */}
-                        <div className="relative">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Account *
-                          </label>
-                          <div className="relative">
-                            {categoryDropdownOpen[row.id] && categorySearchQueries[row.id] && getCategoryCompletionText(row.id) && (
-                              <div className="absolute inset-0 px-3 py-2 text-sm pointer-events-none">
-                                <span className="invisible">{categorySearchQueries[row.id]}</span>
-                                <span className="text-gray-400">{getCategoryCompletionText(row.id)}</span>
+                      {/* Class */}
+                      <div style={{ position: 'relative' }}>
+                        <label style={{ ...styles.label, fontSize: '12px' }}>Class (Location)</label>
+                        <input
+                          type="text"
+                          value={classDropdownOpen[row.id] ? classSearchQueries[row.id] || '' : row.className || ''}
+                          onChange={(e) => {
+                            setClassSearchQueries({ ...classSearchQueries, [row.id]: e.target.value });
+                            setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
+                            if (!e.target.value) {
+                              updateTableRow(row.id, 'className', '');
+                              updateTableRow(row.id, 'locationName', '');
+                            }
+                          }}
+                          onFocus={() => {
+                            setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
+                            setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => {
+                              setClassDropdownOpen({ ...classDropdownOpen, [row.id]: false });
+                              setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
+                            }, 200);
+                          }}
+                          onKeyDown={(e) => handleClassKeyDown(e, row.id)}
+                          style={styles.input}
+                          placeholder="Search classes..."
+                        />
+                        {classDropdownOpen[row.id] && (
+                          <div style={styles.dropdown}>
+                            {getFilteredLocations(row.id).map((loc, idx) => (
+                              <div
+                                key={loc.id}
+                                onClick={() => handleLocationSelect(row.id, loc)}
+                                style={{
+                                  ...styles.dropdownItem,
+                                  backgroundColor: idx === 0 ? '#eff6ff' : '#ffffff',
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = idx === 0 ? '#eff6ff' : '#ffffff'; }}
+                              >
+                                {loc.name}
                               </div>
+                            ))}
+                            {getFilteredLocations(row.id).length === 0 && (
+                              <div style={{ ...styles.dropdownItem, color: '#9ca3af' }}>No results found</div>
                             )}
-                            <input
-                              type="text"
-                              value={categoryDropdownOpen[row.id] ? categorySearchQueries[row.id] || '' : row.categoryName || ''}
-                              onChange={(e) => {
-                                setCategorySearchQueries({ ...categorySearchQueries, [row.id]: e.target.value });
-                                setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
-                                if (!e.target.value) {
-                                  updateTableRow(row.id, 'categoryName', '');
-                                  updateTableRow(row.id, 'glAccountPath', '');
-                                }
-                              }}
-                              onFocus={() => {
-                                setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
-                                setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
-                              }}
-                              onBlur={() => {
-                                setTimeout(() => {
-                                  setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: false });
-                                  setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
-                                }, 200);
-                              }}
-                              onKeyDown={(e) => handleCategoryKeyDown(e, row.id)}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                              placeholder="Search account..."
-                            />
-                            {categoryDropdownOpen[row.id] && (
-                              <div className="absolute z-30 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                {getFilteredCategories(row.id).map((cat, idx) => (
-                                  <div
-                                    key={cat.id}
-                                    onClick={() => handleCategorySelect(row.id, cat)}
-                                    className={`px-3 py-2 text-sm cursor-pointer ${
-                                      idx === 0 ? 'bg-blue-100 text-blue-900' : 'hover:bg-blue-50'
-                                    }`}
-                                  >
-                                    {cat.displayText}
-                                  </div>
-                                ))}
-                                {getFilteredCategories(row.id).length === 0 && (
-                                  <div className="px-3 py-2 text-sm text-gray-500">No results</div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Class Dropdown */}
-                        <div className="relative">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Class (Location)
-                          </label>
-                          <div className="relative">
-                            {classDropdownOpen[row.id] && classSearchQueries[row.id] && getClassCompletionText(row.id) && (
-                              <div className="absolute inset-0 px-3 py-2 text-sm pointer-events-none">
-                                <span className="invisible">{classSearchQueries[row.id]}</span>
-                                <span className="text-gray-400">{getClassCompletionText(row.id)}</span>
-                              </div>
-                            )}
-                            <input
-                              type="text"
-                              value={classDropdownOpen[row.id] ? classSearchQueries[row.id] || '' : row.className || ''}
-                              onChange={(e) => {
-                                setClassSearchQueries({ ...classSearchQueries, [row.id]: e.target.value });
-                                setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
-                                if (!e.target.value) {
-                                  updateTableRow(row.id, 'className', '');
-                                  updateTableRow(row.id, 'locationName', '');
-                                }
-                              }}
-                              onFocus={() => {
-                                setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
-                                setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
-                              }}
-                              onBlur={() => {
-                                setTimeout(() => {
-                                  setClassDropdownOpen({ ...classDropdownOpen, [row.id]: false });
-                                  setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
-                                }, 200);
-                              }}
-                              onKeyDown={(e) => handleClassKeyDown(e, row.id)}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                              placeholder="Search class..."
-                            />
-                            {classDropdownOpen[row.id] && (
-                              <div className="absolute z-30 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                {getFilteredLocations(row.id).map((loc, idx) => (
-                                  <div
-                                    key={loc.id}
-                                    onClick={() => handleLocationSelect(row.id, loc)}
-                                    className={`px-3 py-2 text-sm cursor-pointer ${
-                                      idx === 0 ? 'bg-blue-100 text-blue-900' : 'hover:bg-blue-50'
-                                    }`}
-                                  >
-                                    {loc.name}
-                                  </div>
-                                ))}
-                                {getFilteredLocations(row.id).length === 0 && (
-                                  <div className="px-3 py-2 text-sm text-gray-500">No results</div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-4">
-                        {/* Description */}
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Description
-                          </label>
-                          <input
-                            type="text"
-                            value={row.description}
-                            onChange={(e) => updateTableRow(row.id, 'description', e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder="Optional"
-                          />
-                        </div>
-
-                        {/* Amount (only for fixed_amount mode) */}
-                        {allocationMode === 'fixed_amount' && (
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                              Amount *
-                            </label>
-                            <div className="relative">
-                              <span className="absolute left-3 top-2 text-gray-500 text-sm">$</span>
-                              <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={row.amount}
-                                onChange={(e) => updateTableRow(row.id, 'amount', e.target.value)}
-                                className="w-full px-3 py-2 pl-7 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                placeholder="0.00"
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Percentage (only for percentage mode) */}
-                        {allocationMode === 'percentage' && (
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                              Percentage *
-                            </label>
-                            <div className="relative">
-                              <input
-                                type="number"
-                                step="0.1"
-                                min="0"
-                                max="100"
-                                value={row.percentage}
-                                onChange={(e) => updateTableRow(row.id, 'percentage', e.target.value)}
-                                className="w-full px-3 py-2 pr-7 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                placeholder="0"
-                              />
-                              <span className="absolute right-3 top-2 text-gray-500 text-sm">%</span>
-                            </div>
                           </div>
                         )}
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    <div style={{ ...styles.grid3, marginTop: '12px' }}>
+                      {/* Description */}
+                      <div>
+                        <label style={{ ...styles.label, fontSize: '12px' }}>Description</label>
+                        <input
+                          type="text"
+                          value={row.description}
+                          onChange={(e) => updateTableRow(row.id, 'description', e.target.value)}
+                          style={styles.input}
+                          placeholder="Optional"
+                        />
+                      </div>
+
+                      {/* Amount (fixed_amount mode) */}
+                      {allocationMode === 'fixed_amount' && (
+                        <div>
+                          <label style={{ ...styles.label, fontSize: '12px' }}>Amount *</label>
+                          <div style={{ position: 'relative' }}>
+                            <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }}>$</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={row.amount}
+                              onChange={(e) => updateTableRow(row.id, 'amount', e.target.value)}
+                              style={{ ...styles.input, paddingLeft: '28px' }}
+                              placeholder="0.00"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Percentage (percentage mode) */}
+                      {allocationMode === 'percentage' && (
+                        <div>
+                          <label style={{ ...styles.label, fontSize: '12px' }}>Percentage *</label>
+                          <div style={{ position: 'relative' }}>
+                            <input
+                              type="number"
+                              step="0.1"
+                              min="0"
+                              max="100"
+                              value={row.percentage}
+                              onChange={(e) => updateTableRow(row.id, 'percentage', e.target.value)}
+                              style={{ ...styles.input, paddingRight: '32px' }}
+                              placeholder="0"
+                            />
+                            <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }}>%</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
 
                 <button
                   type="button"
                   onClick={addTableRow}
-                  className="mt-3 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium flex items-center gap-2"
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#059669',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginTop: '8px',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#047857'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#059669'; }}
                 >
-                  <span>+</span> Add GL Line
-                </button>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="mt-6 pt-4 border-t border-gray-200 flex gap-3">
-                <button
-                  type="submit"
-                  disabled={submitting || (allocationMode === 'percentage' && !isPercentageValid)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                >
-                  {submitting ? 'Saving...' : editingTemplate ? 'Update Template' : 'Save Template'}
-                </button>
-                {editingTemplate && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!confirm('Are you sure you want to delete this template?')) return;
-                      try {
-                        const response = await fetch(`/api/coding-templates/${editingTemplate.id}`, {
-                          method: 'DELETE',
-                        });
-                        if (response.ok) {
-                          closeModal();
-                          await fetchTemplates();
-                          showToast('Template deleted successfully', 'success');
-                        } else {
-                          const data = await response.json();
-                          setError(data.error || 'Failed to delete template');
-                        }
-                      } catch (err: any) {
-                        setError(err.message);
-                      }
-                    }}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-                >
-                  Cancel
+                  <span style={{ fontSize: '18px' }}>+</span>
+                  Add GL Line
                 </button>
               </div>
             </form>
+
+            <div style={styles.modalFooter}>
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={submitting || (allocationMode === 'percentage' && !isPercentageValid)}
+                style={{
+                  ...styles.primaryBtn,
+                  opacity: (submitting || (allocationMode === 'percentage' && !isPercentageValid)) ? 0.5 : 1,
+                  cursor: (submitting || (allocationMode === 'percentage' && !isPercentageValid)) ? 'not-allowed' : 'pointer',
+                  flex: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                {submitting ? 'Saving...' : (editingTemplate ? 'Update Template' : 'Save Template')}
+              </button>
+              {editingTemplate && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!confirm('Are you sure you want to delete this template?')) return;
+                    try {
+                      const response = await fetch(`/api/coding-templates/${editingTemplate.id}`, {
+                        method: 'DELETE',
+                      });
+                      if (response.ok) {
+                        closeModal();
+                        await fetchTemplates();
+                        showToast('Template deleted successfully', 'success');
+                      } else {
+                        const data = await response.json();
+                        setError(data.error || 'Failed to delete template');
+                      }
+                    } catch (err: any) {
+                      setError(err.message);
+                    }
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#dc2626',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#b91c1c'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#dc2626'; }}
+                >
+                  Delete
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={closeModal}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#374151',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#e5e7eb'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
