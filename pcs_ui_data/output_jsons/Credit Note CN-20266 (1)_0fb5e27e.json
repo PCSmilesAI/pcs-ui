@@ -1,12 +1,20 @@
 {
-  "vendor": "Unknown",
-  "vendor_name": "Unknown",
-  "invoice_number": "462889-1",
+  "vendor": "Clipboard Health",
+  "vendor_name": "Clipboard Health",
+  "invoice_number": "CN-20266",
   "invoice_date": "08/13/2025",
   "due_date": "09/12/2025",
-  "invoice_total": "",
+  "invoice_total": "235.56",
   "office_location": "Columbia",
-  "line_items": [],
+  "line_items": [
+    {
+      "product_number": "",
+      "product_name": "Item\nQuantity\nRate\nAmount\nOverpayment on invoice 462889-1",
+      "Quantity": "1",
+      "unit_price": "235.56",
+      "line_item_total": "235.56"
+    }
+  ],
   "source_file": "Credit Note CN-20266 (1)_0fb5e27e.pdf",
-  "parsed_at": "2025-12-12T18:54:30.366319+00:00"
+  "parsed_at": "2025-12-12T19:32:34.641830+00:00"
 }

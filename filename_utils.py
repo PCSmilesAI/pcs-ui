@@ -48,3 +48,4 @@ def sanitize_filename(raw: str, default_ext: str = ".pdf") -> str:
 def api_pdf_path(filename: str) -> str:
     """Return the API path for a PDF filename."""
     return f"/api/pdf/{sanitize_filename(filename)}"
+

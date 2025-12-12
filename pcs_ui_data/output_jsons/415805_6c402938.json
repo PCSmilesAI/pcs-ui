@@ -1,10 +1,10 @@
 {
-  "vendor": "Unknown",
-  "vendor_name": "Unknown",
-  "invoice_number": "PLEASE",
-  "invoice_date": "07-29-2025",
-  "due_date": "08/28/2025",
-  "invoice_total": "415805.0",
+  "vendor": "Kettenbach LP",
+  "vendor_name": "Kettenbach LP",
+  "invoice_number": "415805",
+  "invoice_date": "07/29/2025",
+  "due_date": "08/13/2025",
+  "invoice_total": "583.00",
   "office_location": "Roseburg",
   "line_items": [
     {
@@ -20,15 +20,8 @@
       "Quantity": "2",
       "unit_price": "45.00",
       "line_item_total": "90.00"
-    },
-    {
-      "product_number": "",
-      "product_name": "Pic X-Light Normal Pack Cart",
-      "Quantity": "1",
-      "unit_price": "53.00",
-      "line_item_total": "53.00"
     }
   ],
   "source_file": "415805_6c402938.pdf",
-  "parsed_at": "2025-12-12T18:54:24.239202+00:00"
+  "parsed_at": "2025-12-12T19:26:53.218615+00:00"
 }

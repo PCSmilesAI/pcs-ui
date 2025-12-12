@@ -46,7 +46,7 @@ interface Vendor {
   name: string;
 }
 
-type AllocationMode = 'split_evenly' | 'fixed_amount' | 'percentage';
+type AllocationMode = 'split_evenly' | 'split_evenly_all_classes' | 'fixed_amount' | 'percentage';
 
 const ADMIN_EMAILS = new Set([
   'business@pcsmilesai.com',
@@ -55,6 +55,7 @@ const ADMIN_EMAILS = new Set([
 
 const ALLOCATION_MODE_LABELS: Record<AllocationMode, string> = {
   split_evenly: 'Split Evenly',
+  split_evenly_all_classes: 'Split Evenly Across All Classes',
   fixed_amount: 'Specific Dollar Amount',
   percentage: 'Percent Split',
 };
