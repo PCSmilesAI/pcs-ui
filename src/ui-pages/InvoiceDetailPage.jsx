@@ -104,6 +104,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [improvingParser, setImprovingParser] = useState(false); // NEW: AI Mechanic loading state
   const [showUpdateModal, setShowUpdateModal] = useState(false); // NEW: Update confirmation modal
   const [updateComment, setUpdateComment] = useState(''); // NEW: User comment for AI mechanic
+  const [showAllocationErrorModal, setShowAllocationErrorModal] = useState(false); // NEW: Allocation error modal
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -1128,6 +1129,12 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
   // Button click handlers
   function handleApprove() {
+    // Check if allocation is fully matched before allowing approval
+    const tolerance = 0.01;
+    if (Math.abs(allocationSummary.unallocated) > tolerance) {
+      setShowAllocationErrorModal(true);
+      return;
+    }
     transitionInvoice('approve');
   }
 
@@ -2698,6 +2705,97 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                 }}
               >
                 {processing ? 'Submitting...' : 'Confirm Submission'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Allocation Error Modal */}
+      {showAllocationErrorModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '450px',
+            width: '90%',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            border: '2px solid #ef4444',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#fee2e2',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px',
+              }}>
+                ⚠️
+              </div>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#dc2626' }}>
+                Cannot Approve Invoice
+              </h3>
+            </div>
+            
+            <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
+              The GL Lines allocation does not match the invoice total. All amounts must be fully allocated before approval.
+            </p>
+            
+            <div style={{
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              marginBottom: '20px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
+                <span style={{ color: '#6b7280' }}>Invoice Total:</span>
+                <span style={{ fontWeight: '600', color: '#1f2937' }}>${allocationSummary.totalAmount.toFixed(2)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
+                <span style={{ color: '#6b7280' }}>Allocated:</span>
+                <span style={{ fontWeight: '600', color: '#1f2937' }}>${allocationSummary.allocated.toFixed(2)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', paddingTop: '8px', borderTop: '1px solid #fecaca' }}>
+                <span style={{ color: '#dc2626', fontWeight: '600' }}>Unallocated:</span>
+                <span style={{ fontWeight: '700', color: '#dc2626' }}>${Math.abs(allocationSummary.unallocated).toFixed(2)}</span>
+              </div>
+            </div>
+            
+            <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#6b7280' }}>
+              Please adjust the GL Lines in the section above to ensure the total allocated amount equals the invoice total.
+            </p>
+            
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowAllocationErrorModal(false)}
+                style={{
+                  padding: '10px 24px',
+                  backgroundColor: '#dc2626',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                }}
+              >
+                Got It
               </button>
             </div>
           </div>
