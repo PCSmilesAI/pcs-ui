@@ -77,6 +77,8 @@ export default function CodingTemplatesPage() {
   const [loadingQBOData, setLoadingQBOData] = useState(false);
   const [categorySearchQueries, setCategorySearchQueries] = useState<Record<string, string>>({});
   const [classSearchQueries, setClassSearchQueries] = useState<Record<string, string>>({});
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState<Record<string, boolean>>({});
+  const [classDropdownOpen, setClassDropdownOpen] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     checkAdminAccess();
@@ -254,12 +256,123 @@ export default function CodingTemplatesPage() {
     updateTableRow(rowId, 'glAccountPath', category.fullPath);
     updateTableRow(rowId, 'categoryName', category.displayText);
     setCategorySearchQueries({ ...categorySearchQueries, [rowId]: '' });
+    setCategoryDropdownOpen({ ...categoryDropdownOpen, [rowId]: false });
   }
 
   function handleLocationSelect(rowId: string, location: QBOLocation) {
     updateTableRow(rowId, 'className', location.name);
     updateTableRow(rowId, 'locationName', location.name);
     setClassSearchQueries({ ...classSearchQueries, [rowId]: '' });
+    setClassDropdownOpen({ ...classDropdownOpen, [rowId]: false });
+  }
+
+  // Get the best matching category for autocomplete (prioritize starts-with matches)
+  function getAutocompleteCategorySuggestion(rowId: string): QBOCategory | null {
+    const query = categorySearchQueries[rowId];
+    if (!query) return null;
+    
+    const queryLower = query.toLowerCase();
+    // First try to find one that starts with the query for better autocomplete
+    const startsWithMatch = qboCategories.find(cat =>
+      cat.displayText.toLowerCase().startsWith(queryLower) ||
+      cat.name.toLowerCase().startsWith(queryLower)
+    );
+    if (startsWithMatch) return startsWithMatch;
+    
+    // Fall back to any match
+    const filtered = getFilteredCategories(rowId);
+    return filtered.length > 0 ? filtered[0] : null;
+  }
+
+  // Get the best matching location for autocomplete (prioritize starts-with matches)
+  function getAutocompleteLocationSuggestion(rowId: string): QBOLocation | null {
+    const query = classSearchQueries[rowId];
+    if (!query) return null;
+    
+    const queryLower = query.toLowerCase();
+    // First try to find one that starts with the query for better autocomplete
+    const startsWithMatch = qboLocations.find(loc =>
+      loc.name.toLowerCase().startsWith(queryLower)
+    );
+    if (startsWithMatch) return startsWithMatch;
+    
+    // Fall back to any match
+    const filtered = getFilteredLocations(rowId);
+    return filtered.length > 0 ? filtered[0] : null;
+  }
+
+  // Get the completion text for category autocomplete
+  function getCategoryCompletionText(rowId: string): string {
+    const query = categorySearchQueries[rowId];
+    if (!query) return '';
+    const suggestion = getAutocompleteCategorySuggestion(rowId);
+    if (!suggestion) return '';
+    
+    const displayText = suggestion.displayText;
+    const queryLower = query.toLowerCase();
+    
+    // Check if displayText starts with the query (case-insensitive)
+    if (displayText.toLowerCase().startsWith(queryLower)) {
+      return displayText.slice(query.length);
+    }
+    return '';
+  }
+
+  // Get the completion text for class autocomplete
+  function getClassCompletionText(rowId: string): string {
+    const query = classSearchQueries[rowId];
+    if (!query) return '';
+    const suggestion = getAutocompleteLocationSuggestion(rowId);
+    if (!suggestion) return '';
+    
+    const name = suggestion.name;
+    const queryLower = query.toLowerCase();
+    
+    // Check if name starts with the query (case-insensitive)
+    if (name.toLowerCase().startsWith(queryLower)) {
+      return name.slice(query.length);
+    }
+    return '';
+  }
+
+  // Handle keyboard events for category field
+  function handleCategoryKeyDown(e: React.KeyboardEvent<HTMLInputElement>, rowId: string) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const suggestion = getAutocompleteCategorySuggestion(rowId);
+      if (suggestion) {
+        handleCategorySelect(rowId, suggestion);
+      }
+    } else if (e.key === 'Escape') {
+      setCategoryDropdownOpen({ ...categoryDropdownOpen, [rowId]: false });
+      setCategorySearchQueries({ ...categorySearchQueries, [rowId]: '' });
+    } else if (e.key === 'Tab') {
+      const suggestion = getAutocompleteCategorySuggestion(rowId);
+      if (suggestion && categoryDropdownOpen[rowId]) {
+        e.preventDefault();
+        handleCategorySelect(rowId, suggestion);
+      }
+    }
+  }
+
+  // Handle keyboard events for class field
+  function handleClassKeyDown(e: React.KeyboardEvent<HTMLInputElement>, rowId: string) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const suggestion = getAutocompleteLocationSuggestion(rowId);
+      if (suggestion) {
+        handleLocationSelect(rowId, suggestion);
+      }
+    } else if (e.key === 'Escape') {
+      setClassDropdownOpen({ ...classDropdownOpen, [rowId]: false });
+      setClassSearchQueries({ ...classSearchQueries, [rowId]: '' });
+    } else if (e.key === 'Tab') {
+      const suggestion = getAutocompleteLocationSuggestion(rowId);
+      if (suggestion && classDropdownOpen[rowId]) {
+        e.preventDefault();
+        handleLocationSelect(rowId, suggestion);
+      }
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -766,36 +879,62 @@ export default function CodingTemplatesPage() {
                           <tr key={row.id}>
                             <td className="px-3 py-2">
                               <div className="relative">
+                                {/* Ghost text layer showing autocomplete suggestion */}
+                                {categoryDropdownOpen[row.id] && categorySearchQueries[row.id] && getCategoryCompletionText(row.id) && (
+                                  <div className="absolute inset-0 px-2 py-1 pl-8 text-sm pointer-events-none">
+                                    <span className="invisible">{categorySearchQueries[row.id]}</span>
+                                    <span className="text-gray-400">
+                                      {getCategoryCompletionText(row.id)}
+                                    </span>
+                                  </div>
+                                )}
                                 <input
                                   type="text"
-                                  value={row.categoryName || categorySearchQueries[row.id] || ''}
+                                  value={categoryDropdownOpen[row.id] ? categorySearchQueries[row.id] || '' : row.categoryName || ''}
                                   onChange={(e) => {
                                     setCategorySearchQueries({ ...categorySearchQueries, [row.id]: e.target.value });
+                                    setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
                                     if (!e.target.value) {
                                       updateTableRow(row.id, 'categoryName', '');
                                       updateTableRow(row.id, 'glAccountPath', '');
                                     }
                                   }}
                                   onFocus={() => {
-                                    setCategorySearchQueries({ ...categorySearchQueries, [row.id]: row.categoryName || '' });
+                                    setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
+                                    setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
                                   }}
-                                  className="w-full px-2 py-1 pl-8 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  onBlur={() => {
+                                    // Delay to allow click on dropdown item
+                                    setTimeout(() => {
+                                      setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: false });
+                                      setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
+                                    }, 200);
+                                  }}
+                                  onKeyDown={(e) => handleCategoryKeyDown(e, row.id)}
+                                  className="w-full px-2 py-1 pl-8 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-transparent relative z-10"
                                   placeholder="Type to search list"
                                 />
-                                <span className="absolute left-2 top-1.5 text-gray-400 text-xs">🔍</span>
-                                {categorySearchQueries[row.id] !== undefined && categorySearchQueries[row.id] !== row.categoryName && (
+                                <span className="absolute left-2 top-1.5 text-gray-400 text-xs z-10">🔍</span>
+                                {categoryDropdownOpen[row.id] && (
                                   <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                    {getFilteredCategories(row.id).map((cat) => (
+                                    {getFilteredCategories(row.id).map((cat, index) => (
                                       <div
                                         key={cat.id}
                                         onClick={() => handleCategorySelect(row.id, cat)}
-                                        className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer"
+                                        className={`px-3 py-2 text-sm cursor-pointer ${
+                                          index === 0 ? 'bg-blue-100 text-blue-900' : 'hover:bg-blue-50'
+                                        }`}
                                       >
                                         {cat.displayText}
                                       </div>
                                     ))}
                                     {getFilteredCategories(row.id).length === 0 && (
                                       <div className="px-3 py-2 text-sm text-gray-500">No results</div>
+                                    )}
+                                    {getFilteredCategories(row.id).length > 0 && (
+                                      <div className="px-3 py-1.5 text-xs text-gray-400 border-t bg-gray-50">
+                                        Press Enter to select • Esc to close
+                                      </div>
                                     )}
                                   </div>
                                 )}
@@ -823,36 +962,62 @@ export default function CodingTemplatesPage() {
                             </td>
                             <td className="px-3 py-2">
                               <div className="relative">
+                                {/* Ghost text layer showing autocomplete suggestion */}
+                                {classDropdownOpen[row.id] && classSearchQueries[row.id] && getClassCompletionText(row.id) && (
+                                  <div className="absolute inset-0 px-2 py-1 pl-8 text-sm pointer-events-none">
+                                    <span className="invisible">{classSearchQueries[row.id]}</span>
+                                    <span className="text-gray-400">
+                                      {getClassCompletionText(row.id)}
+                                    </span>
+                                  </div>
+                                )}
                                 <input
                                   type="text"
-                                  value={row.className || classSearchQueries[row.id] || ''}
+                                  value={classDropdownOpen[row.id] ? classSearchQueries[row.id] || '' : row.className || ''}
                                   onChange={(e) => {
                                     setClassSearchQueries({ ...classSearchQueries, [row.id]: e.target.value });
+                                    setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
                                     if (!e.target.value) {
                                       updateTableRow(row.id, 'className', '');
                                       updateTableRow(row.id, 'locationName', '');
                                     }
                                   }}
                                   onFocus={() => {
-                                    setClassSearchQueries({ ...classSearchQueries, [row.id]: row.className || '' });
+                                    setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
+                                    setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
                                   }}
-                                  className="w-full px-2 py-1 pl-8 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  onBlur={() => {
+                                    // Delay to allow click on dropdown item
+                                    setTimeout(() => {
+                                      setClassDropdownOpen({ ...classDropdownOpen, [row.id]: false });
+                                      setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
+                                    }, 200);
+                                  }}
+                                  onKeyDown={(e) => handleClassKeyDown(e, row.id)}
+                                  className="w-full px-2 py-1 pl-8 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-transparent relative z-10"
                                   placeholder="Type to search list"
                                 />
-                                <span className="absolute left-2 top-1.5 text-gray-400 text-xs">🔍</span>
-                                {classSearchQueries[row.id] !== undefined && classSearchQueries[row.id] !== row.className && (
+                                <span className="absolute left-2 top-1.5 text-gray-400 text-xs z-10">🔍</span>
+                                {classDropdownOpen[row.id] && (
                                   <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                    {getFilteredLocations(row.id).map((loc) => (
+                                    {getFilteredLocations(row.id).map((loc, index) => (
                                       <div
                                         key={loc.id}
                                         onClick={() => handleLocationSelect(row.id, loc)}
-                                        className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer"
+                                        className={`px-3 py-2 text-sm cursor-pointer ${
+                                          index === 0 ? 'bg-blue-100 text-blue-900' : 'hover:bg-blue-50'
+                                        }`}
                                       >
                                         {loc.name}
                                       </div>
                                     ))}
                                     {getFilteredLocations(row.id).length === 0 && (
                                       <div className="px-3 py-2 text-sm text-gray-500">No results</div>
+                                    )}
+                                    {getFilteredLocations(row.id).length > 0 && (
+                                      <div className="px-3 py-1.5 text-xs text-gray-400 border-t bg-gray-50">
+                                        Press Enter to select • Esc to close
+                                      </div>
                                     )}
                                   </div>
                                 )}
