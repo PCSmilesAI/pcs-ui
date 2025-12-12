@@ -260,8 +260,17 @@ export default function CodingTemplatesPage() {
   }
 
   function handleCategorySelect(rowId: string, category: QBOCategory) {
-    updateTableRow(rowId, 'glAccountPath', category.fullPath);
-    updateTableRow(rowId, 'categoryName', category.displayText);
+    // In "split_evenly_all_classes" mode, propagate category to all rows
+    if (allocationMode === 'split_evenly_all_classes') {
+      setTableRows(tableRows.map(row => ({
+        ...row,
+        glAccountPath: category.fullPath,
+        categoryName: category.displayText,
+      })));
+    } else {
+      updateTableRow(rowId, 'glAccountPath', category.fullPath);
+      updateTableRow(rowId, 'categoryName', category.displayText);
+    }
     setCategorySearchQueries({ ...categorySearchQueries, [rowId]: '' });
     setCategoryDropdownOpen({ ...categoryDropdownOpen, [rowId]: false });
   }
@@ -329,6 +338,42 @@ export default function CodingTemplatesPage() {
         e.preventDefault();
         handleLocationSelect(rowId, suggestion);
       }
+    }
+  }
+
+  function handleAllocationModeChange(newMode: AllocationMode) {
+    setAllocationMode(newMode);
+    
+    // If switching to "Split Evenly Across All Classes", auto-populate GL lines for each class
+    if (newMode === 'split_evenly_all_classes') {
+      if (qboLocations.length === 0) {
+        // If locations haven't loaded yet, show a message
+        setError('Loading classes... please wait and try again.');
+        loadQBOData().then(() => {
+          setError(null);
+        });
+        return;
+      }
+      
+      // Get the category from the first row (if it exists)
+      const firstRow = tableRows[0];
+      const categoryPath = firstRow?.glAccountPath || '';
+      const categoryName = firstRow?.categoryName || '';
+      const description = firstRow?.description || '';
+      
+      // Create a GL line for each class/location
+      const newRows: TableTemplateRow[] = qboLocations.map((loc, index) => ({
+        id: `auto-${Date.now()}-${index}`,
+        glAccountPath: categoryPath,
+        categoryName: categoryName,
+        description: description,
+        className: loc.name,
+        locationName: loc.name,
+        amount: '',
+        percentage: '',
+      }));
+      
+      setTableRows(newRows);
     }
   }
 
@@ -805,6 +850,24 @@ export default function CodingTemplatesPage() {
                 }}>
                   <span>% Distribution</span>
                   <span style={{ fontWeight: 600 }}>{percentageTotal.toFixed(1)}% / 100%</span>
+                </div>
+              )}
+
+              {/* Split Evenly Across All Classes Indicator */}
+              {allocationMode === 'split_evenly_all_classes' && (
+                <div style={{
+                  padding: '10px 14px',
+                  backgroundColor: '#ebf8ff',
+                  color: '#2b6cb0',
+                  borderRadius: '4px',
+                  marginBottom: '16px',
+                  fontSize: '14px',
+                }}>
+                  <div style={{ fontWeight: 600, marginBottom: '4px' }}>Auto-Generated GL Lines</div>
+                  <div style={{ fontSize: '13px' }}>
+                    {tableRows.length} classes detected. Invoice amounts will be split evenly ({(100 / tableRows.length).toFixed(1)}% each).
+                    Set the Account on the first line — it will apply to all lines.
+                  </div>
                 </div>
               )}
 
