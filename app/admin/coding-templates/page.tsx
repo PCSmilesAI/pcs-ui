@@ -139,16 +139,16 @@ export default function CodingTemplatesPage() {
       const data = await response.json();
       const templatesWithCounts = await Promise.all(
         (data.templates || []).map(async (template: CodingTemplate) => {
-          try {
-            const rowsResponse = await fetch(`/api/coding-templates/${template.id}/rows`);
-            if (rowsResponse.ok) {
-              const rowsData = await rowsResponse.json();
-              return { ...template, row_count: rowsData.rows?.length || 0 };
+            try {
+              const rowsResponse = await fetch(`/api/coding-templates/${template.id}/rows`);
+              if (rowsResponse.ok) {
+                const rowsData = await rowsResponse.json();
+                return { ...template, row_count: rowsData.rows?.length || 0 };
+              }
+            } catch (e) {
+              console.warn('Failed to fetch row count for template:', template.id, e);
             }
-          } catch (e) {
-            console.warn('Failed to fetch row count for template:', template.id, e);
-          }
-          return { ...template, row_count: 0 };
+            return { ...template, row_count: 0 };
         })
       );
       setTemplates(templatesWithCounts);
@@ -268,8 +268,8 @@ export default function CodingTemplatesPage() {
         categoryName: category.displayText,
       })));
     } else {
-      updateTableRow(rowId, 'glAccountPath', category.fullPath);
-      updateTableRow(rowId, 'categoryName', category.displayText);
+    updateTableRow(rowId, 'glAccountPath', category.fullPath);
+    updateTableRow(rowId, 'categoryName', category.displayText);
     }
     setCategorySearchQueries({ ...categorySearchQueries, [rowId]: '' });
     setCategoryDropdownOpen({ ...categoryDropdownOpen, [rowId]: false });
@@ -389,16 +389,16 @@ export default function CodingTemplatesPage() {
       setError('Vendor is required');
       return;
     }
-    if (tableRows.length === 0) {
+      if (tableRows.length === 0) {
       setError('At least one GL line is required');
-      return;
-    }
-
-    for (const row of tableRows) {
-      if (!row.glAccountPath) {
-        setError('All GL lines must have a Category selected');
         return;
       }
+
+      for (const row of tableRows) {
+      if (!row.glAccountPath) {
+        setError('All GL lines must have a Category selected');
+          return;
+        }
       if (allocationMode === 'fixed_amount' && !row.amount) {
         setError('All GL lines must have an Amount for Specific Dollar Amount mode');
         return;
@@ -486,26 +486,26 @@ export default function CodingTemplatesPage() {
     setVendorSearchQuery(template.vendor_name);
     setAllocationMode((template.allocation_mode as AllocationMode) || 'split_evenly');
 
-    try {
-      const response = await fetch(`/api/coding-templates/${template.id}/rows`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.rows && data.rows.length > 0) {
-          setTableRows(data.rows.map((row: any, index: number) => ({
-            id: row.id || `row-${index}`,
-            glAccountPath: row.gl_account_path || '',
-            categoryName: row.category_name || '',
-            description: row.description || '',
-            className: row.class_name || '',
-            locationName: row.location_name || '',
-            amount: row.amount_cents ? (row.amount_cents / 100).toFixed(2) : '',
+      try {
+        const response = await fetch(`/api/coding-templates/${template.id}/rows`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.rows && data.rows.length > 0) {
+            setTableRows(data.rows.map((row: any, index: number) => ({
+              id: row.id || `row-${index}`,
+              glAccountPath: row.gl_account_path || '',
+              categoryName: row.category_name || '',
+              description: row.description || '',
+              className: row.class_name || '',
+              locationName: row.location_name || '',
+              amount: row.amount_cents ? (row.amount_cents / 100).toFixed(2) : '',
             percentage: row.percentage ? row.percentage.toString() : '',
-          })));
+            })));
+          }
         }
+      } catch (err) {
+        console.error('Failed to load template rows:', err);
       }
-    } catch (err) {
-      console.error('Failed to load template rows:', err);
-    }
     setShowModal(true);
   }
 
@@ -597,19 +597,19 @@ export default function CodingTemplatesPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#2d3748', margin: 0 }}>Coding Templates</h1>
-        <button
-          onClick={() => setShowModal(true)}
+            <button
+              onClick={() => setShowModal(true)}
           style={buttonStyle}
-        >
+            >
           + Add Template
-        </button>
-      </div>
+            </button>
+          </div>
 
-      {error && !showModal && (
+          {error && !showModal && (
         <div style={{ padding: '12px 16px', backgroundColor: '#fed7d7', color: '#c53030', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
           {error}
-        </div>
-      )}
+            </div>
+          )}
 
       {/* How Templates Work */}
       <div style={{ marginBottom: '24px' }}>
@@ -626,9 +626,9 @@ export default function CodingTemplatesPage() {
       <h3 style={{ color: '#3182ce', fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>Template Summary</h3>
 
       {/* Templates Table */}
-      {loading ? (
+            {loading ? (
         <p style={{ color: '#718096', fontSize: '14px' }}>Loading templates...</p>
-      ) : templates.length === 0 ? (
+            ) : templates.length === 0 ? (
         <p style={{ color: '#718096', fontSize: '14px' }}>No templates yet. Click &quot;+ Add Template&quot; to create one.</p>
       ) : (
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
@@ -641,17 +641,17 @@ export default function CodingTemplatesPage() {
               <th style={{ textAlign: 'left', padding: '12px 16px', color: '#3182ce', fontWeight: 600 }}>Status</th>
               <th style={{ textAlign: 'left', padding: '12px 16px', color: '#3182ce', fontWeight: 600 }}>Created</th>
               <th style={{ textAlign: 'center', padding: '12px 16px', color: '#3182ce', fontWeight: 600 }}>Actions</th>
-            </tr>
-          </thead>
+                    </tr>
+                  </thead>
           <tbody>
-            {templates.map((template) => (
+                    {templates.map((template) => (
               <tr key={template.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
                 <td style={{ padding: '12px 16px', color: '#2d3748' }}>
                   <div style={{ fontWeight: 500 }}>{template.name}</div>
                   {template.description && (
                     <div style={{ fontSize: '12px', color: '#718096', marginTop: '2px' }}>{template.description}</div>
                   )}
-                </td>
+                        </td>
                 <td style={{ padding: '12px 16px', color: '#4a5568' }}>{template.vendor_name || '—'}</td>
                 <td style={{ padding: '12px 16px', color: '#4a5568' }}>{getAllocationModeLabel(template.allocation_mode)}</td>
                 <td style={{ padding: '12px 16px', color: '#4a5568', textAlign: 'center' }}>{template.row_count || 0}</td>
@@ -663,30 +663,30 @@ export default function CodingTemplatesPage() {
                     backgroundColor: template.is_active ? '#c6f6d5' : '#e2e8f0',
                     color: template.is_active ? '#276749' : '#718096',
                   }}>
-                    {template.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
+                            {template.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
                 <td style={{ padding: '12px 16px', color: '#4a5568' }}>
-                  {new Date(template.created_at).toLocaleDateString()}
-                </td>
+                          {new Date(template.created_at).toLocaleDateString()}
+                        </td>
                 <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                  <button
-                    onClick={() => handleEditTemplate(template)}
+                            <button
+                              onClick={() => handleEditTemplate(template)}
                     style={{ color: '#3182ce', background: 'none', border: 'none', cursor: 'pointer', marginRight: '12px', fontSize: '14px' }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteTemplate(template.id)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTemplate(template.id)}
                     style={{ color: '#e53e3e', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px' }}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                            >
+                              Delete
+                            </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
       )}
 
       {/* Modal */}
@@ -770,8 +770,8 @@ export default function CodingTemplatesPage() {
                 {/* Vendor */}
                 <div style={{ position: 'relative' }}>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#4a5568', marginBottom: '4px' }}>
-                    Vendor *
-                  </label>
+                  Vendor *
+                </label>
                   <input
                     type="text"
                     value={vendorSearchQuery}
@@ -815,13 +815,13 @@ export default function CodingTemplatesPage() {
                       ))}
                     </div>
                   )}
-                </div>
+              </div>
 
                 {/* Allocation */}
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#4a5568', marginBottom: '4px' }}>
                     Allocation Method *
-                  </label>
+                </label>
                   <select
                     value={allocationMode}
                     onChange={(e) => handleAllocationModeChange(e.target.value as AllocationMode)}
@@ -877,15 +877,17 @@ export default function CodingTemplatesPage() {
                   <label style={{ fontSize: '14px', fontWeight: 500, color: '#4a5568' }}>
                     GL Lines ({tableRows.length})
                   </label>
-                  <button
-                    type="button"
-                    onClick={clearTable}
-                    style={{ background: 'none', border: 'none', color: '#718096', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}
-                  >
-                    Clear all
-                  </button>
+                  {allocationMode !== 'split_evenly_all_classes' && (
+                    <button
+                      type="button"
+                      onClick={clearTable}
+                      style={{ background: 'none', border: 'none', color: '#718096', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      Clear all
+                    </button>
+                  )}
                 </div>
-
+                  
                 {tableRows.map((row, index) => (
                   <div key={row.id} style={{
                     padding: '16px',
@@ -896,7 +898,7 @@ export default function CodingTemplatesPage() {
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                       <span style={{ fontSize: '13px', fontWeight: 600, color: '#4a5568' }}>GL Line {index + 1}</span>
-                      {tableRows.length > 1 && (
+                      {tableRows.length > 1 && allocationMode !== 'split_evenly_all_classes' && (
                         <button
                           type="button"
                           onClick={() => removeTableRow(row.id)}
@@ -911,32 +913,32 @@ export default function CodingTemplatesPage() {
                       {/* Account */}
                       <div style={{ position: 'relative' }}>
                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#718096', marginBottom: '4px' }}>Account *</label>
-                        <input
-                          type="text"
-                          value={categoryDropdownOpen[row.id] ? categorySearchQueries[row.id] || '' : row.categoryName || ''}
-                          onChange={(e) => {
-                            setCategorySearchQueries({ ...categorySearchQueries, [row.id]: e.target.value });
-                            setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
-                            if (!e.target.value) {
-                              updateTableRow(row.id, 'categoryName', '');
-                              updateTableRow(row.id, 'glAccountPath', '');
-                            }
-                          }}
-                          onFocus={() => {
-                            setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
-                            setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
-                          }}
-                          onBlur={() => {
-                            setTimeout(() => {
-                              setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: false });
-                              setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
-                            }, 200);
-                          }}
-                          onKeyDown={(e) => handleCategoryKeyDown(e, row.id)}
+                                <input
+                                  type="text"
+                                  value={categoryDropdownOpen[row.id] ? categorySearchQueries[row.id] || '' : row.categoryName || ''}
+                                  onChange={(e) => {
+                                    setCategorySearchQueries({ ...categorySearchQueries, [row.id]: e.target.value });
+                                    setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
+                                    if (!e.target.value) {
+                                      updateTableRow(row.id, 'categoryName', '');
+                                      updateTableRow(row.id, 'glAccountPath', '');
+                                    }
+                                  }}
+                                  onFocus={() => {
+                                    setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
+                                    setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: true });
+                                  }}
+                                  onBlur={() => {
+                                    setTimeout(() => {
+                                      setCategoryDropdownOpen({ ...categoryDropdownOpen, [row.id]: false });
+                                      setCategorySearchQueries({ ...categorySearchQueries, [row.id]: '' });
+                                    }, 200);
+                                  }}
+                                  onKeyDown={(e) => handleCategoryKeyDown(e, row.id)}
                           style={inputStyle}
                           placeholder="Search accounts..."
-                        />
-                        {categoryDropdownOpen[row.id] && (
+                                />
+                                {categoryDropdownOpen[row.id] && (
                           <div style={{
                             position: 'absolute',
                             top: '100%',
@@ -951,52 +953,64 @@ export default function CodingTemplatesPage() {
                             marginTop: '2px',
                           }}>
                             {getFilteredCategories(row.id).map((cat) => (
-                              <div
-                                key={cat.id}
-                                onClick={() => handleCategorySelect(row.id, cat)}
+                                      <div
+                                        key={cat.id}
+                                        onClick={() => handleCategorySelect(row.id, cat)}
                                 style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '13px' }}
                                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#edf2f7'; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#fff'; }}
-                              >
-                                {cat.displayText}
-                              </div>
-                            ))}
-                            {getFilteredCategories(row.id).length === 0 && (
+                                      >
+                                        {cat.displayText}
+                                      </div>
+                                    ))}
+                                    {getFilteredCategories(row.id).length === 0 && (
                               <div style={{ padding: '8px 12px', color: '#a0aec0', fontSize: '13px' }}>No results</div>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                                    )}
+                                      </div>
+                                    )}
+                                  </div>
 
                       {/* Class */}
                       <div style={{ position: 'relative' }}>
                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#718096', marginBottom: '4px' }}>Class (Location)</label>
-                        <input
-                          type="text"
-                          value={classDropdownOpen[row.id] ? classSearchQueries[row.id] || '' : row.className || ''}
-                          onChange={(e) => {
-                            setClassSearchQueries({ ...classSearchQueries, [row.id]: e.target.value });
-                            setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
-                            if (!e.target.value) {
-                              updateTableRow(row.id, 'className', '');
-                              updateTableRow(row.id, 'locationName', '');
-                            }
-                          }}
-                          onFocus={() => {
-                            setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
-                            setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
-                          }}
-                          onBlur={() => {
-                            setTimeout(() => {
-                              setClassDropdownOpen({ ...classDropdownOpen, [row.id]: false });
-                              setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
-                            }, 200);
-                          }}
-                          onKeyDown={(e) => handleClassKeyDown(e, row.id)}
-                          style={inputStyle}
-                          placeholder="Search classes..."
-                        />
-                        {classDropdownOpen[row.id] && (
+                        {allocationMode === 'split_evenly_all_classes' ? (
+                          /* Read-only class display for split_evenly_all_classes mode */
+                          <div style={{
+                            ...inputStyle,
+                            backgroundColor: '#edf2f7',
+                            color: '#4a5568',
+                            cursor: 'not-allowed',
+                          }}>
+                            {row.className || 'All classes auto-populated'}
+                              </div>
+                        ) : (
+                                <input
+                                  type="text"
+                                  value={classDropdownOpen[row.id] ? classSearchQueries[row.id] || '' : row.className || ''}
+                                  onChange={(e) => {
+                                    setClassSearchQueries({ ...classSearchQueries, [row.id]: e.target.value });
+                                    setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
+                                    if (!e.target.value) {
+                                      updateTableRow(row.id, 'className', '');
+                                      updateTableRow(row.id, 'locationName', '');
+                                    }
+                                  }}
+                                  onFocus={() => {
+                                    setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
+                                    setClassDropdownOpen({ ...classDropdownOpen, [row.id]: true });
+                                  }}
+                                  onBlur={() => {
+                                    setTimeout(() => {
+                                      setClassDropdownOpen({ ...classDropdownOpen, [row.id]: false });
+                                      setClassSearchQueries({ ...classSearchQueries, [row.id]: '' });
+                                    }, 200);
+                                  }}
+                                  onKeyDown={(e) => handleClassKeyDown(e, row.id)}
+                            style={inputStyle}
+                            placeholder="Search classes..."
+                          />
+                        )}
+                        {allocationMode !== 'split_evenly_all_classes' && classDropdownOpen[row.id] && (
                           <div style={{
                             position: 'absolute',
                             top: '100%',
@@ -1011,25 +1025,25 @@ export default function CodingTemplatesPage() {
                             marginTop: '2px',
                           }}>
                             {getFilteredLocations(row.id).map((loc) => (
-                              <div
-                                key={loc.id}
-                                onClick={() => handleLocationSelect(row.id, loc)}
+                                      <div
+                                        key={loc.id}
+                                        onClick={() => handleLocationSelect(row.id, loc)}
                                 style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '13px' }}
                                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#edf2f7'; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#fff'; }}
-                              >
-                                {loc.name}
-                              </div>
-                            ))}
-                            {getFilteredLocations(row.id).length === 0 && (
+                                      >
+                                        {loc.name}
+                                      </div>
+                                    ))}
+                                    {getFilteredLocations(row.id).length === 0 && (
                               <div style={{ padding: '8px 12px', color: '#a0aec0', fontSize: '13px' }}>No results</div>
-                            )}
-                          </div>
-                        )}
+                                    )}
+                                      </div>
+                                    )}
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: allocationMode === 'split_evenly' ? '1fr' : '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: (allocationMode === 'split_evenly' || allocationMode === 'split_evenly_all_classes') ? '1fr' : '1fr 1fr', gap: '12px' }}>
                       {/* Description */}
                       <div>
                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#718096', marginBottom: '4px' }}>Description</label>
@@ -1058,8 +1072,8 @@ export default function CodingTemplatesPage() {
                               placeholder="0.00"
                             />
                           </div>
-                        </div>
-                      )}
+                                  </div>
+                                )}
 
                       {/* Percentage */}
                       {allocationMode === 'percentage' && (
@@ -1077,22 +1091,24 @@ export default function CodingTemplatesPage() {
                               placeholder="0"
                             />
                             <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#718096' }}>%</span>
-                          </div>
+                              </div>
                         </div>
                       )}
-                    </div>
+                  </div>
                   </div>
                 ))}
 
-                <button
-                  type="button"
-                  onClick={addTableRow}
-                  style={{ ...outlineButtonStyle, backgroundColor: '#fff' }}
-                >
-                  + Add GL Line
-                </button>
+                {allocationMode !== 'split_evenly_all_classes' && (
+                  <button
+                    type="button"
+                    onClick={addTableRow}
+                    style={{ ...outlineButtonStyle, backgroundColor: '#fff' }}
+                  >
+                    + Add GL Line
+                  </button>
+                )}
               </div>
-            </div>
+                </div>
 
             {/* Modal Footer */}
             <div style={{
@@ -1102,38 +1118,38 @@ export default function CodingTemplatesPage() {
               gap: '12px',
               justifyContent: 'flex-end',
             }}>
-              <button
+                <button
                 type="button"
                 onClick={closeModal}
                 style={outlineButtonStyle}
               >
                 Cancel
-              </button>
-              {editingTemplate && (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!confirm('Delete this template?')) return;
-                    try {
-                      const response = await fetch(`/api/coding-templates/${editingTemplate.id}`, { method: 'DELETE' });
-                      if (response.ok) {
-                        closeModal();
-                        await fetchTemplates();
-                        showToast('Template deleted', 'success');
-                      } else {
-                        const data = await response.json();
-                        setError(data.error || 'Failed to delete');
-                      }
-                    } catch (err: any) {
-                      setError(err.message);
-                    }
-                  }}
-                  style={{ ...buttonStyle, backgroundColor: '#e53e3e', borderColor: '#e53e3e' }}
-                >
-                  Delete
                 </button>
-              )}
-              <button
+                {editingTemplate && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                    if (!confirm('Delete this template?')) return;
+                      try {
+                      const response = await fetch(`/api/coding-templates/${editingTemplate.id}`, { method: 'DELETE' });
+                        if (response.ok) {
+                          closeModal();
+                          await fetchTemplates();
+                        showToast('Template deleted', 'success');
+                        } else {
+                          const data = await response.json();
+                        setError(data.error || 'Failed to delete');
+                        }
+                      } catch (err: any) {
+                        setError(err.message);
+                      }
+                    }}
+                  style={{ ...buttonStyle, backgroundColor: '#e53e3e', borderColor: '#e53e3e' }}
+                  >
+                    Delete
+                  </button>
+                )}
+                <button
                 type="submit"
                 onClick={handleSubmit}
                 disabled={submitting || (allocationMode === 'percentage' && !isPercentageValid)}
@@ -1144,8 +1160,8 @@ export default function CodingTemplatesPage() {
                 }}
               >
                 {submitting ? 'Saving...' : (editingTemplate ? 'Update Template' : 'Save Template')}
-              </button>
-            </div>
+                </button>
+              </div>
           </div>
         </div>
       )}

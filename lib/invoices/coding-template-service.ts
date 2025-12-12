@@ -12,7 +12,7 @@ export interface CodingTemplate {
   gl_account_id?: string;
   gl_account_name?: string;
   template_type?: string; // 'even_split' or 'table_template'
-  allocation_mode?: 'split_evenly' | 'fixed_amount' | 'percentage';
+  allocation_mode?: 'split_evenly' | 'split_evenly_all_classes' | 'fixed_amount' | 'percentage';
   created_by_user_id?: string;
   is_active: number;
   created_at: string;
@@ -138,8 +138,8 @@ function calculateAllocations(
 ): { amountCents: number; row: TemplateRow }[] {
   const numRows = templateRows.length;
   
-  if (allocationMode === 'split_evenly') {
-    // Split evenly among all rows
+  if (allocationMode === 'split_evenly' || allocationMode === 'split_evenly_all_classes') {
+    // Split evenly among all rows (split_evenly_all_classes uses all QBO classes)
     const baseAmount = Math.floor(totalAmountCents / numRows);
     const remainder = totalAmountCents % numRows;
     
