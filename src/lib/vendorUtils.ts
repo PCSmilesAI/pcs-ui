@@ -79,3 +79,49 @@ export function getNormalizedVendorFromInvoice(invoice: any): string {
   return normalizeVendorName(rawName);
 }
 
+/**
+ * Parse invoice amount from multiple possible fields
+ * Handles the fact that amount_cents is in cents, while invoice_total/total are in dollars
+ * @returns amount in dollars as a number
+ */
+export function parseInvoiceAmount(invoice: any): number {
+  // Priority 1: amount_cents (stored in cents, need to divide by 100)
+  if (invoice?.amount_cents != null && invoice.amount_cents !== 0) {
+    const cents = typeof invoice.amount_cents === 'number'
+      ? invoice.amount_cents
+      : parseFloat(String(invoice.amount_cents).replace(/[^0-9.-]/g, '')) || 0;
+    return cents / 100;
+  }
+  
+  // Priority 2: invoice_total (already in dollars)
+  if (invoice?.invoice_total != null && invoice.invoice_total !== 0) {
+    return typeof invoice.invoice_total === 'number'
+      ? invoice.invoice_total
+      : parseFloat(String(invoice.invoice_total).replace(/[^0-9.-]/g, '')) || 0;
+  }
+  
+  // Priority 3: total (already in dollars)
+  if (invoice?.total != null && invoice.total !== 0) {
+    return typeof invoice.total === 'number'
+      ? invoice.total
+      : parseFloat(String(invoice.total).replace(/[^0-9.-]/g, '')) || 0;
+  }
+  
+  // Priority 4: amount field (could be string like "$123.45" or number)
+  if (invoice?.amount != null) {
+    const amountStr = String(invoice.amount).replace(/[^0-9.-]/g, '');
+    return parseFloat(amountStr) || 0;
+  }
+  
+  return 0;
+}
+
+/**
+ * Format an amount as a dollar string
+ * @param amount amount in dollars
+ * @returns formatted string like "$123.45"
+ */
+export function formatDollarAmount(amount: number): string {
+  return `$${amount.toFixed(2)}`;
+}
+
