@@ -263,10 +263,11 @@ export function runMigrations(): void {
   // Add template_type to coding_templates table
   ensureColumn('coding_templates', 'template_type', 'template_type TEXT DEFAULT "even_split"');
   
-  // Add allocation_mode and description to coding_templates table for enhanced template support
+  // Add allocation_mode, description, and company_code to coding_templates table for enhanced template support
   // allocation_mode: 'split_evenly' | 'fixed_amount' | 'percentage'
   ensureColumn('coding_templates', 'allocation_mode', 'allocation_mode TEXT DEFAULT "split_evenly"');
   ensureColumn('coding_templates', 'description', 'description TEXT');
+  ensureColumn('coding_templates', 'company_code', 'company_code TEXT');
 
   // NEW: Create invoice_categories table for invoice-level categories
   db.exec(`
