@@ -978,10 +978,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
   // Load templates when component mounts
   useEffect(() => {
-    if (isAdminOrAP) {
-      fetchAvailableTemplates();
-    }
-  }, [isAdminOrAP]);
+    fetchAvailableTemplates();
+  }, []);
 
   // Check if user is admin or AP manager
   useEffect(() => {
@@ -2458,20 +2456,23 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                 {processing ? 'Saving...' : 'Save GL Lines'}
               </button>
 
-              {/* Create Template button - appears when GL lines are modified */}
-              {isAdminOrAP && glLinesModified && invoiceCategories.length > 0 && Math.abs(allocationSummary.unallocated) <= 0.01 && (
+              {/* Create Template button - always show when there are GL lines */}
+              {invoiceCategories.length > 0 && (
                 <button
                   onClick={() => setShowCreateTemplateModal(true)}
+                  disabled={Math.abs(allocationSummary.unallocated) > 0.01}
                   style={{
                     padding: '8px 16px',
-                    backgroundColor: '#8b5cf6',
+                    backgroundColor: Math.abs(allocationSummary.unallocated) > 0.01 ? '#9ca3af' : '#8b5cf6',
                     color: 'white',
                     border: 'none',
                     borderRadius: '4px',
-                    cursor: 'pointer',
+                    cursor: Math.abs(allocationSummary.unallocated) > 0.01 ? 'not-allowed' : 'pointer',
                     fontSize: '14px',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    opacity: Math.abs(allocationSummary.unallocated) > 0.01 ? 0.6 : 1
                   }}
+                  title={Math.abs(allocationSummary.unallocated) > 0.01 ? 'Allocate all amounts before creating a template' : 'Save current GL lines as a reusable template'}
                 >
                   Create Template
                 </button>
@@ -2479,7 +2480,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
             </div>
 
             {/* Templates Dropdown - for applying existing templates */}
-            {isAdminOrAP && (
+            {availableTemplates.length > 0 && (
               <div style={{
                 padding: '12px 16px',
                 backgroundColor: '#f3f4f6',
