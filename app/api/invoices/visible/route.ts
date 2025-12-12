@@ -114,6 +114,9 @@ export async function GET(req: NextRequest) {
       // If column doesn't exist, show all invoices (no filtering)
     }
 
+    // Add ORDER BY to get most recent invoices first
+    query += ' ORDER BY created_at DESC';
+    
     // Get all matching invoices
     const allInvoices = db.prepare(query).all(...params) as any[];
 
