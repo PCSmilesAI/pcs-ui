@@ -779,10 +779,11 @@ export default function CodingTemplatesPage() {
                   </label>
                   <select
                     value={allocationMode}
-                    onChange={(e) => setAllocationMode(e.target.value as AllocationMode)}
+                    onChange={(e) => handleAllocationModeChange(e.target.value as AllocationMode)}
                     style={selectStyle}
                   >
                     <option value="split_evenly">Split Evenly</option>
+                    <option value="split_evenly_all_classes">Split Evenly Across All Classes</option>
                     <option value="fixed_amount">Specific Dollar Amount</option>
                     <option value="percentage">Percent Split</option>
                   </select>
