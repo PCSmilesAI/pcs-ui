@@ -83,6 +83,39 @@ VENDOR_PATTERNS = {
         (r'bridgeford', 1.0),
         (r'BFV Invoice', 1.0),
     ],
+    # NEW: Additional vendors identified during reprocessing
+    'waterco': [
+        (r'waterco', 1.0),
+        (r'water\s*co', 0.9),
+        (r'WaterCo_Smiles', 1.0),
+    ],
+    'dental_medical_staffing': [
+        (r'dental\s*medical\s*staffing', 1.0),
+        (r'dms\s*inc', 0.8),
+        (r'Dental_Medical_Staffing_Inc', 1.0),
+    ],
+    'crest_oralb': [
+        (r'crest.*oral-?b', 1.0),
+        (r'p&g\s*professional', 0.9),
+        (r'pgpro\.com', 1.0),
+        (r'Crest & Oral-B Professional', 1.0),
+    ],
+    'physicians_resource': [
+        (r"physician'?s?\s*resource", 1.0),
+        (r'Physician\'s Resource', 1.0),
+    ],
+    'trustworkz': [
+        (r'trustworkz', 1.0),
+        (r'TRUSTWORKZ_INC', 1.0),
+    ],
+    'medpro': [
+        (r'med\s*pro', 1.0),
+        (r'Med Pro Inv', 1.0),
+    ],
+    'columbia_smiles': [
+        (r'columbia\s*smiles', 1.0),
+        (r'ColumbiaSmiles', 1.0),
+    ],
 }
 
 # Parser file mappings
@@ -101,6 +134,14 @@ VENDOR_PARSERS = {
     'comcast': 'comcast_parser.py',
     'bridgeford': 'bridgeford_parser.py',
     'general': 'general_invoice_parser.py',
+    # NEW: Map new vendors to general parser initially
+    'waterco': 'general_invoice_parser.py',
+    'dental_medical_staffing': 'general_invoice_parser.py',
+    'crest_oralb': 'general_invoice_parser.py',
+    'physicians_resource': 'general_invoice_parser.py',
+    'trustworkz': 'general_invoice_parser.py',
+    'medpro': 'general_invoice_parser.py',
+    'columbia_smiles': 'general_invoice_parser.py',
 }
 
 
@@ -171,6 +212,14 @@ def detect_vendor_from_filename(filename: str) -> Tuple[Optional[str], float]:
         'a1_professional': (['a-1', 'aoneprofessional', 'a1_professional'], 0.9),
         'comcast': (['comcast'], 0.9),
         'bridgeford': (['bridgeford', 'bfv'], 0.8),
+        # NEW: Additional vendors
+        'waterco': (['waterco'], 0.9),
+        'dental_medical_staffing': (['dental_medical_staffing', 'staffing_inc'], 0.9),
+        'crest_oralb': (['crest', 'oral-b', 'oralb'], 0.9),
+        'physicians_resource': (["physician's resource", 'physicians_resource'], 0.9),
+        'trustworkz': (['trustworkz'], 0.9),
+        'medpro': (['med pro', 'medpro'], 0.9),
+        'columbia_smiles': (['columbiasmiles'], 0.9),
     }
     
     for vendor, (keywords, confidence) in patterns.items():

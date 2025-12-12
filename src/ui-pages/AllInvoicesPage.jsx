@@ -71,11 +71,8 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
             if (Number.isNaN(parsed.getTime())) return 'N/A';
             return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
           };
-          const rawTotal = (invoice.invoice_total ?? invoice.total);
-          const numericTotal =
-            typeof rawTotal === 'number'
-              ? rawTotal
-              : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.-]/g, '')) || 0;
+          // Use parseInvoiceAmount helper - properly handles amount_cents vs dollars
+          const numericTotal = parseInvoiceAmount(invoice);
 
           // Get locations from GL Lines (invoice_categories classes)
           const locations = invoice.locations || [];

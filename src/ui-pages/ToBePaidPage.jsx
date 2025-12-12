@@ -166,11 +166,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         const transformedData = data
           .filter((invoice) => String(invoice.status || '').toLowerCase() === 'to_be_paid')
           .map((invoice) => {
-            const rawTotal = (invoice.invoice_total ?? invoice.total);
-            const numericTotal =
-              typeof rawTotal === 'number'
-                ? rawTotal
-                : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+            // Use parseInvoiceAmount helper - properly handles amount_cents vs dollars
+            const numericTotal = parseInvoiceAmount(invoice);
             // Get locations from GL Lines (invoice_categories classes)
             const locations = invoice.locations || [];
             const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
@@ -180,7 +177,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             return ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number, // needed by detail view
-            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
+            vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
             amount: `$${numericTotal.toFixed(2)}`,
             location: locationDisplay,
             locations: locations, // Keep array for filtering
