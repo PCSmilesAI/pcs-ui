@@ -6,6 +6,7 @@ import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 import { csrfClient } from '../lib/api/csrfClient';
 import { CodingTemplateSelector } from '../../components/invoices/CodingTemplateSelector';
+import SearchableSelect from '../components/SearchableSelect';
 
 // Helper function to get user email from localStorage/cookie
 function getUserEmail() {
@@ -2232,61 +2233,39 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                             </div>
                           </div>
 
-                          {/* Account dropdown */}
+                          {/* Account searchable dropdown */}
                           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                             <div style={{ flex: '1 1 300px' }}>
                               <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
                                 Account *
                               </label>
-                              <select
+                              <SearchableSelect
+                                options={categories}
                                 value={cat.categoryId || ''}
-                                onChange={(e) => {
-                                  const selected = categories.find(c => c.id === e.target.value);
-                                  updateInvoiceCategory(index, 'category', e.target.value, selected?.fullName || selected?.name || '');
+                                onChange={(id, displayText) => {
+                                  updateInvoiceCategory(index, 'category', id, displayText);
                                 }}
-                                style={{
-                                  padding: '8px 12px',
-                                  borderRadius: '4px',
-                                  border: '1px solid #cbd5e0',
-                                  fontSize: '14px',
-                                  backgroundColor: '#ffffff',
-                                  cursor: 'pointer',
-                                  width: '100%'
-                                }}
-                              >
-                                <option value="">-- Select Account --</option>
-                                {categories.map(c => (
-                                  <option key={c.id} value={c.id}>{c.displayText || c.fullName || c.name}</option>
-                                ))}
-                              </select>
+                                placeholder="Type to search accounts..."
+                                valueKey="id"
+                                getDisplayText={(opt) => opt?.displayText || opt?.fullName || opt?.name || ''}
+                              />
                             </div>
 
-                            {/* Class dropdown */}
+                            {/* Class searchable dropdown */}
                             <div style={{ flex: '1 1 200px' }}>
                               <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
                                 Class (Location)
                               </label>
-                              <select
+                              <SearchableSelect
+                                options={qboClasses}
                                 value={cat.classId || ''}
-                                onChange={(e) => {
-                                  const selected = qboClasses.find(c => c.id === e.target.value);
-                                  updateInvoiceCategory(index, 'class', e.target.value, selected?.fullName || selected?.name || '');
+                                onChange={(id, displayText) => {
+                                  updateInvoiceCategory(index, 'class', id, displayText);
                                 }}
-                                style={{
-                                  padding: '8px 12px',
-                                  borderRadius: '4px',
-                                  border: '1px solid #cbd5e0',
-                                  fontSize: '14px',
-                                  backgroundColor: '#ffffff',
-                                  cursor: 'pointer',
-                                  width: '100%'
-                                }}
-                              >
-                                <option value="">-- Select Class --</option>
-                                {qboClasses.map(c => (
-                                  <option key={c.id} value={c.id}>{c.fullName || c.name}</option>
-                                ))}
-                              </select>
+                                placeholder="Type to search classes..."
+                                valueKey="id"
+                                getDisplayText={(opt) => opt?.fullName || opt?.name || ''}
+                              />
                             </div>
 
                             {/* Amount input */}
