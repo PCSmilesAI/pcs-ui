@@ -2,12 +2,49 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import { resolveDataPath } from '../../../../../lib/workflow/dataDir'
 import { isValidInvoiceId } from '../../../../../lib/security/type-validation'
+import { getDatabase } from '../../../../../lib/db/client'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// Load invoice data from JSON file
+// Load invoice data from JSON file (legacy) or database
 async function loadInvoice(invoiceId: string) {
+  // First try database
+  try {
+    const db = getDatabase()
+    const invoice = db.prepare('SELECT * FROM invoices WHERE id = ? OR invoice_number = ?').get(invoiceId, invoiceId)
+    if (invoice) {
+      return { source: 'database', invoice }
+    }
+  } catch (err) {
+    console.log('[categories] Database lookup failed, trying JSON file:', err)
+  }
+
+  // Fallback to JSON file
+  const filePath = resolveDataPath('invoice_queue.json')
+  
+  if (!fs.existsSync(filePath)) {
+    // Return null instead of throwing - let caller handle gracefully
+    return null
+  }
+  
+  try {
+    const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+    const invoices = Array.isArray(raw) ? raw : Array.isArray(raw?.invoices) ? raw.invoices : []
+    const invoice = invoices.find((inv: any) => inv.id === invoiceId || inv.invoice_number === invoiceId)
+    
+    if (invoice) {
+      return { source: 'json', invoice }
+    }
+  } catch (err) {
+    console.log('[categories] JSON file parse failed:', err)
+  }
+  
+  return null
+}
+
+// Save line categories back to the invoice (legacy - for JSON-based invoices)
+async function saveLineCategories(invoiceId: string, categories: any) {
   const filePath = resolveDataPath('invoice_queue.json')
   
   if (!fs.existsSync(filePath)) {
@@ -15,26 +52,12 @@ async function loadInvoice(invoiceId: string) {
   }
   
   const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'))
-  const invoices = Array.isArray(raw) ? raw : Array.isArray(raw?.invoices) ? raw.invoices : []
-  const invoice = invoices.find((inv: any) => inv.id === invoiceId || inv.invoice_number === invoiceId)
-  
-  if (!invoice) {
-    throw new Error(`Invoice ${invoiceId} not found`)
-  }
-  
-  return invoice
-}
-
-// Save line categories back to the invoice
-async function saveLineCategories(invoiceId: string, categories: any) {
-  const filePath = resolveDataPath('invoice_queue.json')
-  const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'))
   const isArray = Array.isArray(raw)
   const data = isArray ? raw : Array.isArray(raw?.invoices) ? raw.invoices : []
   
   const invoiceIndex = data.findIndex((inv: any) => inv.id === invoiceId || inv.invoice_number === invoiceId)
   if (invoiceIndex === -1) {
-    throw new Error(`Invoice ${invoiceId} not found`)
+    throw new Error(`Invoice ${invoiceId} not found in JSON queue`)
   }
   
   // Update line categories
@@ -58,15 +81,42 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 });
     }
 
-    const invoice = await loadInvoice(invoiceId)
+    const result = await loadInvoice(invoiceId)
     
+    // If not found, return empty data gracefully instead of 500 error
+    if (!result) {
+      return NextResponse.json({ 
+        ok: true,
+        invoiceId,
+        lineCategories: {},
+        lineCount: 0,
+        message: 'Invoice not found in legacy queue - use invoice-categories endpoint for database invoices'
+      })
+    }
+    
+    const { source, invoice } = result
+    
+    // For database invoices, return empty line categories (use /invoice-categories for GL lines)
+    if (source === 'database') {
+      return NextResponse.json({ 
+        ok: true,
+        invoiceId,
+        lineCategories: {},
+        lineCount: 0,
+        source: 'database',
+        message: 'Use /invoice-categories endpoint for GL line management'
+      })
+    }
+    
+    // For JSON-based invoices (legacy)
     const lineCategories = invoice.line_categories || {}
     
     return NextResponse.json({ 
       ok: true,
       invoiceId,
       lineCategories,
-      lineCount: (invoice.line_items || []).length
+      lineCount: (invoice.line_items || []).length,
+      source: 'json'
     })
     
   } catch (error: any) {
@@ -102,7 +152,24 @@ export async function PUT(
       )
     }
     
-    // Add timestamps to updated categories
+    // Check if this is a database invoice
+    const result = await loadInvoice(invoiceId)
+    
+    if (!result) {
+      return NextResponse.json(
+        { error: 'Invoice not found', detail: 'Invoice not found in database or JSON queue' },
+        { status: 404 }
+      )
+    }
+    
+    if (result.source === 'database') {
+      return NextResponse.json(
+        { error: 'Use /invoice-categories endpoint', detail: 'This invoice is in the database. Use /api/invoices/{id}/invoice-categories endpoint for GL line management.' },
+        { status: 400 }
+      )
+    }
+    
+    // Add timestamps to updated categories (legacy JSON flow)
     const now = new Date().toISOString()
     const updatedCategories = { ...lineCategories }
     
