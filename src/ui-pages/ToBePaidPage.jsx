@@ -57,6 +57,13 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         .map((invoice) => {
           // Use helper to properly parse amount (handles cents vs dollars)
           const numericTotal = parseInvoiceAmount(invoice);
+          console.log('💰 ToBePaidPage (reload): Invoice amount parsing', {
+            invoice_number: invoice.invoice_number,
+            amount_cents: invoice.amount_cents,
+            invoice_total: invoice.invoice_total,
+            total: invoice.total,
+            parsedAmount: numericTotal
+          });
           // Get locations from GL Lines (invoice_categories classes)
           const locations = invoice.locations || [];
           const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
@@ -168,6 +175,13 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           .map((invoice) => {
             // Use parseInvoiceAmount helper - properly handles amount_cents vs dollars
             const numericTotal = parseInvoiceAmount(invoice);
+            console.log('💰 ToBePaidPage: Invoice amount parsing', {
+              invoice_number: invoice.invoice_number,
+              amount_cents: invoice.amount_cents,
+              invoice_total: invoice.invoice_total,
+              total: invoice.total,
+              parsedAmount: numericTotal
+            });
             // Get locations from GL Lines (invoice_categories classes)
             const locations = invoice.locations || [];
             const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';

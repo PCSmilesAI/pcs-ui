@@ -1,10 +1,188 @@
 {
-  "invoice_number": "",
-  "invoice_date": "",
+  "vendor": "Patterson Dental",
+  "vendor_name": "Patterson Dental",
+  "invoice_number": "s",
+  "invoice_date": "09/20/25",
+  "due_date": "10/20/2025",
   "invoice_total": "",
-  "office_location": "",
-  "vendor": "Henry schein",
-  "vendor_name": "Henry Schein",
-  "line_items": [],
-  "due_date": ""
+  "office_location": "Roseburg",
+  "line_items": [
+    {
+      "product_number": "3036562009",
+      "product_name": "7182.68 0.00",
+      "Quantity": "7",
+      "unit_price": "182.66",
+      "line_item_total": "182.66"
+    },
+    {
+      "product_number": "",
+      "product_name": "05/24/25 | Service Charge 1800007041 24.09 0.00",
+      "Quantity": "1",
+      "unit_price": "24.09",
+      "line_item_total": "24.09"
+    },
+    {
+      "product_number": "",
+      "product_name": "O6/21/25 | Service Charge 1800019446 210.94 0.00",
+      "Quantity": "1",
+      "unit_price": "210.94",
+      "line_item_total": "210.94"
+    },
+    {
+      "product_number": "",
+      "product_name": "06/26/25 3037645700 303.27 0.00",
+      "Quantity": "1",
+      "unit_price": "303.27",
+      "line_item_total": "303.27"
+    },
+    {
+      "product_number": "",
+      "product_name": "OF 02/25 3037743487 76.97 0.00",
+      "Quantity": "1",
+      "unit_price": "76.57",
+      "line_item_total": "76.57"
+    },
+    {
+      "product_number": "",
+      "product_name": "o7m225 |P10054 3037744088 32.72 0.00",
+      "Quantity": "1",
+      "unit_price": "32.72",
+      "line_item_total": "32.72"
+    },
+    {
+      "product_number": "",
+      "product_name": "O7N1/25 | Eaglesot Sc 037860669 201.53 0.00",
+      "Quantity": "1",
+      "unit_price": "251.53",
+      "line_item_total": "251.53"
+    },
+    {
+      "product_number": "",
+      "product_name": "OF 25/25 3038137056 303.27 0.00",
+      "Quantity": "1",
+      "unit_price": "303.27",
+      "line_item_total": "303.27"
+    },
+    {
+      "product_number": "",
+      "product_name": "O7/25/25 | Pi0127 3030737063 150.30 0.00",
+      "Quantity": "1",
+      "unit_price": "150.30",
+      "line_item_total": "150.30"
+    },
+    {
+      "product_number": "1800036363",
+      "product_name": "247.23 0.00",
+      "Quantity": "247",
+      "unit_price": "23",
+      "line_item_total": "23"
+    },
+    {
+      "product_number": "O8DGI25",
+      "product_name": "| PI0159",
+      "Quantity": "3038307176",
+      "unit_price": "222.43",
+      "line_item_total": "222.43"
+    },
+    {
+      "product_number": "DGI25",
+      "product_name": "| PI0166",
+      "Quantity": "303831",
+      "unit_price": "6612",
+      "line_item_total": "6612"
+    },
+    {
+      "product_number": "",
+      "product_name": "O8N2/25 | Eaglesoft SC 3038395986 281.53 0.00",
+      "Quantity": "1",
+      "unit_price": "281.53",
+      "line_item_total": "281.53"
+    },
+    {
+      "product_number": "",
+      "product_name": "O8N14/25 |P10182 3038482556 328.06 0.00",
+      "Quantity": "1",
+      "unit_price": "326.06",
+      "line_item_total": "326.06"
+    },
+    {
+      "product_number": "",
+      "product_name": "OBNG/25 3039509260 339.14 0.00",
+      "Quantity": "1",
+      "unit_price": "339.14",
+      "line_item_total": "339.14"
+    },
+    {
+      "product_number": "",
+      "product_name": "08/20/25 | P1005 3038579521 138.26 0.00",
+      "Quantity": "1",
+      "unit_price": "136.26",
+      "line_item_total": "136.26"
+    },
+    {
+      "product_number": "",
+      "product_name": "0820/25 |P10205 3038581955 38.63 0.00",
+      "Quantity": "1",
+      "unit_price": "86.63",
+      "line_item_total": "86.63"
+    },
+    {
+      "product_number": "",
+      "product_name": "| P1207 3038603440 63.15",
+      "Quantity": "082125",
+      "unit_price": "0.00",
+      "line_item_total": "63.15"
+    },
+    {
+      "product_number": "",
+      "product_name": "|P10159 3038621867 60.33",
+      "Quantity": "082225",
+      "unit_price": "0.00",
+      "line_item_total": "60.33"
+    },
+    {
+      "product_number": "O82325",
+      "product_name": "| Service Charge",
+      "Quantity": "18000439065",
+      "unit_price": "156.96",
+      "line_item_total": "156.96"
+    },
+    {
+      "product_number": "",
+      "product_name": "|P10233 303877 7948 414.94",
+      "Quantity": "090325",
+      "unit_price": "0.00",
+      "line_item_total": "414.94"
+    },
+    {
+      "product_number": "",
+      "product_name": "g9n425 |P10182 3038798723 17.29 0.00",
+      "Quantity": "1",
+      "unit_price": "17.29",
+      "line_item_total": "17.29"
+    },
+    {
+      "product_number": "",
+      "product_name": "g9nees |Pi0247 3038840462 160.26 0.00",
+      "Quantity": "1",
+      "unit_price": "160.28",
+      "line_item_total": "160.28"
+    },
+    {
+      "product_number": "O9N125",
+      "product_name": "|Eaglesot Sc",
+      "Quantity": "3038927096",
+      "unit_price": "261.53",
+      "line_item_total": "261.53"
+    },
+    {
+      "product_number": "",
+      "product_name": "| Service Charge 1800055239 98.63",
+      "Quantity": "092025",
+      "unit_price": "0.00",
+      "line_item_total": "96.63"
+    }
+  ],
+  "source_file": "PacificCrestRoseSeptStatement_6f115e44.pdf",
+  "parsed_at": "2025-12-12T18:56:44.083831+00:00"
 }
