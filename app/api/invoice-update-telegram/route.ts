@@ -224,47 +224,31 @@ function formatUpdateMessage(payload: InvoiceUpdatePayload): string {
 function resolvePdfPath(pdfPath: string): string | null {
   if (!pdfPath) return null;
   
-  // Handle API route paths like /api/pdf/filename.pdf
-  if (pdfPath.startsWith('/api/pdf/')) {
-    const filename = pdfPath.replace('/api/pdf/', '');
-    // Try multiple possible locations
-    const possiblePaths = [
-      path.join(process.cwd(), 'public', 'email_invoices', filename),
-      path.join(process.cwd(), 'email_invoices', filename),
-      path.join(process.cwd(), 'public', filename),
-    ];
-    
-    for (const p of possiblePaths) {
-      if (fs.existsSync(p)) {
-        return p;
-      }
-    }
+  // Extract filename from any path format
+  let filename = pdfPath;
+  
+  // Handle paths with directories: /api/pdf/file.pdf, /email_invoices/file.pdf, /pdfs/file.pdf
+  if (pdfPath.includes('/')) {
+    const parts = pdfPath.split('/');
+    filename = parts[parts.length - 1] || '';
+  }
+  
+  if (!filename || !filename.endsWith('.pdf')) {
     return null;
   }
   
-  // Handle relative paths starting with /
-  if (pdfPath.startsWith('/')) {
-    const relativePath = pdfPath.substring(1);
-    const fullPath = path.join(process.cwd(), 'public', relativePath);
-    if (fs.existsSync(fullPath)) {
-      return fullPath;
-    }
-    // Also try without 'public'
-    const altPath = path.join(process.cwd(), relativePath);
-    if (fs.existsSync(altPath)) {
-      return altPath;
-    }
-  }
+  // Try multiple possible locations (same as PDF API route)
+  const possiblePaths = [
+    path.join(process.cwd(), 'pcs_ui_data', 'email_invoices', filename),
+    path.join(process.cwd(), 'email_invoices', filename),
+    path.join(process.cwd(), 'public', 'email_invoices', filename),
+    path.join(process.cwd(), 'public', 'pdfs', filename),
+  ];
   
-  // Handle paths like email_invoices/filename.pdf
-  const publicPath = path.join(process.cwd(), 'public', pdfPath);
-  if (fs.existsSync(publicPath)) {
-    return publicPath;
-  }
-  
-  // Direct path
-  if (fs.existsSync(pdfPath)) {
-    return pdfPath;
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      return p;
+    }
   }
   
   return null;
