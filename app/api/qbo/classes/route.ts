@@ -3,6 +3,8 @@ import { QBOClient } from '@/lib/qbo/qboClient';
 import { tokenStorage } from '@/lib/qbo/tokenStorage';
 import { PCS_CLASSES } from '@/lib/qbo/pcsClasses';
 
+export const dynamic = 'force-dynamic';
+
 // Cache for classes (5 minute TTL)
 let classesCache: { data: Array<{ id: string; name: string; fullName: string }>; timestamp: number } | null = null;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes

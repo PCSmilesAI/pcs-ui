@@ -14,104 +14,11 @@ interface IngestPayload {
   total?: string | number;
   office_location?: string;
   invoice_date?: string;
-  due_date?: string;
   clinic_id?: string;
   source_file?: string;
   json_path?: string;
   pdf_path?: string;
   [key: string]: any;
-}
-
-/**
- * Parse a date string in various formats and return a Date object
- */
-function parseDate(dateStr: string | undefined): Date | null {
-  if (!dateStr || !dateStr.trim()) return null;
-  
-  const cleanDate = dateStr.trim();
-  
-  try {
-    let date: Date | null = null;
-    
-    // Remove time portion if present (ISO format with T)
-    const datePart = cleanDate.includes('T') ? cleanDate.split('T')[0] : cleanDate;
-    
-    // Try ISO format first (2025-07-31)
-    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
-      const [year, month, day] = datePart.split('-').map(Number);
-      date = new Date(year, month - 1, day);
-    }
-    // Try MM/DD/YYYY format
-    else if (/^\d{2}\/\d{2}\/\d{4}$/.test(datePart)) {
-      const [month, day, year] = datePart.split('/').map(Number);
-      date = new Date(year, month - 1, day);
-    }
-    // Try M/D/YYYY or M/DD/YYYY or MM/D/YYYY (variable leading zeros, 4-digit year)
-    else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(datePart)) {
-      const parts = datePart.split('/');
-      const month = parseInt(parts[0], 10) - 1;
-      const day = parseInt(parts[1], 10);
-      const year = parseInt(parts[2], 10);
-      date = new Date(year, month, day);
-    }
-    // Try MM/DD/YY format (like 09/09/25)
-    else if (/^\d{1,2}\/\d{1,2}\/\d{2}$/.test(datePart)) {
-      const parts = datePart.split('/');
-      const month = parseInt(parts[0], 10) - 1;
-      const day = parseInt(parts[1], 10);
-      let year = parseInt(parts[2], 10);
-      year = year < 50 ? 2000 + year : 1900 + year;
-      date = new Date(year, month, day);
-    }
-    
-    if (date && !isNaN(date.getTime())) {
-      return date;
-    }
-  } catch (e) {
-    // Fall through to return null
-  }
-  
-  return null;
-}
-
-/**
- * Format a Date object as MM/DD/YYYY
- */
-function formatDateMMDDYYYY(date: Date): string {
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${month}/${day}/${year}`;
-}
-
-/**
- * Normalize a date string to MM/DD/YYYY format
- */
-function normalizeDate(dateStr: string | undefined): string | null {
-  const date = parseDate(dateStr);
-  return date ? formatDateMMDDYYYY(date) : null;
-}
-
-/**
- * Calculate due date as invoice_date + 30 days if not provided
- * All dates are normalized to MM/DD/YYYY format
- */
-function calculateDueDate(invoiceDate: string | undefined, providedDueDate: string | undefined): string | null {
-  // If due_date is provided, normalize and return it
-  if (providedDueDate && providedDueDate.trim()) {
-    return normalizeDate(providedDueDate);
-  }
-  
-  // If no invoice_date, can't calculate
-  const invDate = parseDate(invoiceDate);
-  if (!invDate) {
-    return null;
-  }
-  
-  // Add 30 days
-  invDate.setDate(invDate.getDate() + 30);
-  
-  return formatDateMMDDYYYY(invDate);
 }
 
 /**
@@ -188,10 +95,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Normalize dates to MM/DD/YYYY format
-    const invoice_date = normalizeDate(body.invoice_date);
-    const due_date = calculateDueDate(body.invoice_date, body.due_date);
-
     // Insert invoice with parsed_* fields
     db.prepare(`
       INSERT INTO invoices (
@@ -208,12 +111,11 @@ export async function POST(req: NextRequest) {
         approvals,
         deleted,
         invoice_date,
-        due_date,
         description,
         clinic_id,
         office_location,
         pdf_path
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       invoice_number,
@@ -227,8 +129,7 @@ export async function POST(req: NextRequest) {
       'incoming',
       JSON.stringify({}),
       0,
-      invoice_date,
-      due_date,
+      body.invoice_date,
       '',
       body.clinic_id,
       body.office_location,

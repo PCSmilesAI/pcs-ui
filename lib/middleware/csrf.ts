@@ -5,15 +5,25 @@
  * - Generates CSRF tokens for state-changing operations
  * - Validates tokens on POST/PUT/PATCH/DELETE requests
  * - Uses SameSite=Strict cookies to prevent cross-site requests
+ * 
+ * Security: The double-submit pattern requires:
+ * 1. A cookie containing the CSRF token (sent automatically by browser)
+ * 2. A header containing the same token (must be set by JavaScript)
+ * 3. Both values must match for the request to be valid
+ * 
+ * This works because an attacker can't read the cookie value (same-origin policy)
+ * so they can't set the matching header value even if they can trigger requests.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { randomBytes } from 'crypto';
+import { randomBytes, timingSafeEqual } from 'crypto';
 
 const CSRF_TOKEN_HEADER = 'x-csrf-token';
 const CSRF_COOKIE_NAME = 'csrf-token';
 const CSRF_COOKIE_OPTIONS = {
-  httpOnly: true,
+  // httpOnly: false - JS needs to read the cookie to send it in the header
+  // This is safe because same-origin policy prevents cross-site cookie reading
+  httpOnly: false,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict' as const,
   maxAge: 3600, // 1 hour
@@ -28,44 +38,69 @@ export function generateCSRFToken(): string {
 }
 
 /**
- * Extract CSRF token from request
- * Checks both header and cookie
+ * Extract CSRF tokens from request (both header and cookie)
+ * For double-submit pattern, we need BOTH values
  */
-function extractCSRFToken(req: NextRequest): string | null {
-  // Check header first (from form or AJAX)
+function extractCSRFTokens(req: NextRequest): { headerToken: string | null; cookieToken: string | null } {
   const headerToken = req.headers.get(CSRF_TOKEN_HEADER);
-  if (headerToken) return headerToken;
-  
-  // Check cookie (for double-submit pattern)
-  const cookieToken = req.cookies.get(CSRF_COOKIE_NAME)?.value;
-  return cookieToken || null;
+  const cookieToken = req.cookies.get(CSRF_COOKIE_NAME)?.value || null;
+  return { headerToken, cookieToken };
 }
 
 /**
- * Validate CSRF token
+ * Timing-safe string comparison to prevent timing attacks
+ */
+function safeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  try {
+    return timingSafeEqual(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validate CSRF token using double-submit cookie pattern
  * Returns true if valid, false otherwise
+ * 
+ * Security: Both the cookie and header must be present and must match.
+ * This prevents CSRF because an attacker cannot read the cookie value
+ * from another origin to set the header.
  */
 export function validateCSRFToken(req: NextRequest): boolean {
-  // Skip validation for safe methods
+  // Skip validation for safe methods (idempotent, no side effects)
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
     return true;
   }
   
-  // Skip validation for internal API calls (from server)
-  const origin = req.headers.get('origin');
-  const host = req.headers.get('host');
-  if (!origin || origin === `https://${host}` || origin === `http://${host}`) {
-    // Same-origin request - still validate CSRF token
-  }
+  // Extract both tokens
+  const { headerToken, cookieToken } = extractCSRFTokens(req);
   
-  const token = extractCSRFToken(req);
-  if (!token) {
-    console.warn('[CSRF] Missing CSRF token in request');
+  // Both tokens must be present
+  if (!headerToken) {
+    console.warn('[CSRF] Missing CSRF token in header (x-csrf-token)');
     return false;
   }
   
-  // In production, validate token against session
-  // For now, we rely on SameSite=Strict and HttpOnly cookies
+  if (!cookieToken) {
+    console.warn('[CSRF] Missing CSRF token in cookie');
+    return false;
+  }
+  
+  // Tokens must match (use timing-safe comparison)
+  if (!safeCompare(headerToken, cookieToken)) {
+    console.warn('[CSRF] CSRF token mismatch - possible CSRF attack');
+    return false;
+  }
+  
+  // Validate token format (should be 64 hex chars = 32 bytes)
+  if (!/^[a-f0-9]{64}$/i.test(headerToken)) {
+    console.warn('[CSRF] Invalid CSRF token format');
+    return false;
+  }
+  
   return true;
 }
 
@@ -78,17 +113,9 @@ export function csrfMiddleware(req: NextRequest): NextResponse | null {
     return null;
   }
   
-  // Skip validation for public endpoints
+  // Skip validation for exempt paths (webhooks, health checks, etc.)
   const pathname = req.nextUrl.pathname;
-  const publicPaths = [
-    '/api/health',
-    '/api/ready',
-    '/api/stripe/webhook',
-    '/api/qbo/callback',
-    '/api/qbo/webhooks',
-  ];
-  
-  if (publicPaths.some(p => pathname.startsWith(p))) {
+  if (isCSRFExempt(pathname)) {
     return null;
   }
   
@@ -129,7 +156,8 @@ export function getCSRFToken(req: NextRequest): string | null {
 
 /**
  * Exempt paths from CSRF validation
- * These are typically webhooks or public endpoints
+ * These are typically webhooks, public endpoints, or auth endpoints
+ * where no session/cookie exists yet
  */
 export const CSRF_EXEMPT_PATHS = [
   '/api/health',
@@ -139,6 +167,8 @@ export const CSRF_EXEMPT_PATHS = [
   '/api/qbo/webhooks',
   '/api/inbox/refresh',
   '/api/invoices/ingest',
+  '/api/auth/login',      // Login doesn't have CSRF cookie yet
+  '/api/auth/signup',     // Signup doesn't have CSRF cookie yet
 ];
 
 /**
