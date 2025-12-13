@@ -21,6 +21,8 @@ interface ReceiptData {
   generatedAt: string;
 }
 
+// Format datetime with automatic timezone detection
+// Shows user's local timezone (e.g., "December 13, 2024, 9:26 AM PST")
 function formatDateTime(isoString: string | null): string {
   if (!isoString) return 'N/A';
   try {
@@ -33,6 +35,7 @@ function formatDateTime(isoString: string | null): string {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
+      timeZoneName: 'short',  // Automatically shows user's timezone (PST, EST, etc.)
     });
   } catch {
     return 'N/A';
