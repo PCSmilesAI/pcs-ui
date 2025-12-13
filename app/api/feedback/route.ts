@@ -5,6 +5,7 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8510224399:AAE3eSp
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '5269556556';
 
 interface FeedbackPayload {
+  type?: 'bug' | 'feature';
   message: string;
   url: string;
   consoleLogs: string;
@@ -48,9 +49,9 @@ async function sendToTelegram(text: string): Promise<boolean> {
 }
 
 /**
- * Formats the feedback into a readable Telegram message
+ * Formats a bug report into a readable Telegram message
  */
-function formatFeedbackMessage(payload: FeedbackPayload): string {
+function formatBugReport(payload: FeedbackPayload): string {
   const timestamp = new Date(payload.timestamp).toLocaleString('en-US', {
     timeZone: 'America/Los_Angeles',
     dateStyle: 'medium',
@@ -77,7 +78,25 @@ function formatFeedbackMessage(payload: FeedbackPayload): string {
   message += `🕐 <b>Time:</b> ${timestamp}\n`;
   message += `💻 <b>Browser:</b> ${browser} on ${os}\n`;
   message += `📐 <b>Screen:</b> ${payload.screenSize}\n\n`;
-  message += `💬 <b>User Message:</b>\n${escapeHtml(payload.message)}\n`;
+  message += `💬 <b>Description:</b>\n${escapeHtml(payload.message)}\n`;
+
+  return message;
+}
+
+/**
+ * Formats a feature request into a readable Telegram message
+ */
+function formatFeatureRequest(payload: FeedbackPayload): string {
+  const timestamp = new Date(payload.timestamp).toLocaleString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+
+  let message = `💡 <b>FEATURE REQUEST</b>\n\n`;
+  message += `📍 <b>From Page:</b> ${escapeHtml(payload.url)}\n`;
+  message += `🕐 <b>Time:</b> ${timestamp}\n\n`;
+  message += `✨ <b>Request:</b>\n${escapeHtml(payload.message)}\n`;
 
   return message;
 }
@@ -127,8 +146,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send the main feedback message
-    const mainMessage = formatFeedbackMessage(payload);
+    // Determine the type (default to 'bug' for backwards compatibility)
+    const feedbackType = payload.type || 'bug';
+
+    // Format the message based on type
+    const mainMessage = feedbackType === 'feature' 
+      ? formatFeatureRequest(payload)
+      : formatBugReport(payload);
+
     const mainSent = await sendToTelegram(mainMessage);
 
     if (!mainSent) {
@@ -138,15 +163,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send console logs as a separate message if they exist
-    const logsMessage = formatConsoleLogs(payload);
-    if (logsMessage) {
-      // Small delay to ensure messages arrive in order
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await sendToTelegram(logsMessage);
+    // Send console logs as a separate message if they exist (only for bug reports)
+    if (feedbackType === 'bug') {
+      const logsMessage = formatConsoleLogs(payload);
+      if (logsMessage) {
+        // Small delay to ensure messages arrive in order
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await sendToTelegram(logsMessage);
+      }
     }
 
-    console.log(`Feedback sent successfully from ${payload.url}`);
+    console.log(`${feedbackType === 'feature' ? 'Feature request' : 'Bug report'} sent successfully from ${payload.url}`);
 
     return NextResponse.json({ 
       success: true, 
@@ -170,4 +197,3 @@ export async function GET() {
     telegramConfigured: !!(TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID)
   });
 }
-
