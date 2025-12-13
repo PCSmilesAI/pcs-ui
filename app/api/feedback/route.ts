@@ -53,7 +53,7 @@ async function sendToTelegram(text: string): Promise<boolean> {
  */
 function formatBugReport(payload: FeedbackPayload): string {
   const timestamp = new Date(payload.timestamp).toLocaleString('en-US', {
-    timeZone: 'America/Los_Angeles',
+    timeZone: 'America/New_York',
     dateStyle: 'medium',
     timeStyle: 'short',
   });
@@ -88,7 +88,7 @@ function formatBugReport(payload: FeedbackPayload): string {
  */
 function formatFeatureRequest(payload: FeedbackPayload): string {
   const timestamp = new Date(payload.timestamp).toLocaleString('en-US', {
-    timeZone: 'America/Los_Angeles',
+    timeZone: 'America/New_York',
     dateStyle: 'medium',
     timeStyle: 'short',
   });
