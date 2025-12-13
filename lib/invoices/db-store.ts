@@ -53,17 +53,6 @@ export function getInvoiceById(id: string): InvoiceRecord | undefined {
 export function saveInvoice(invoice: InvoiceRecord): void {
   const db = getDatabase();
   
-  console.log('[DB-STORE] saveInvoice called with:', {
-    id: invoice.id,
-    status: invoice.status,
-    coded_at: invoice.coded_at,
-    coded_by_user_id: invoice.coded_by_user_id,
-    approved_at: invoice.approved_at,
-    approved_by_user_id: invoice.approved_by_user_id,
-    paid_at: invoice.paid_at,
-    paid_by_user_id: invoice.paid_by_user_id,
-  });
-  
   db.prepare(`
     UPDATE invoices SET
       vendor_name = ?,
