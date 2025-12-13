@@ -3,6 +3,8 @@ import { loadChartOfAccounts } from '@/lib/qbo/chartOfAccounts';
 import { QBOClient } from '@/lib/qbo/qboClient';
 import { tokenStorage } from '@/lib/qbo/tokenStorage';
 
+export const dynamic = 'force-dynamic';
+
 interface AccountDisplay {
   id: string;
   name: string;
