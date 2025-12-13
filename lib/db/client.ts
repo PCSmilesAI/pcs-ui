@@ -269,6 +269,7 @@ export function runMigrations(): void {
   ensureColumn('invoices', 'om_approved_by', 'om_approved_by TEXT');
   ensureColumn('invoices', 'admin_approved_at', 'admin_approved_at TEXT');
   ensureColumn('invoices', 'admin_approved_by', 'admin_approved_by TEXT');
+  ensureColumn('invoices', 'paid_at', 'paid_at TEXT');
   ensureColumn('invoices', 'paid_by_user_id', 'paid_by_user_id TEXT');
   ensureColumn('invoices', 'approval_stage', 'approval_stage TEXT');
 
