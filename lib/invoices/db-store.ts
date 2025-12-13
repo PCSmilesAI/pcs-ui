@@ -47,6 +47,8 @@ export function getInvoiceById(id: string): InvoiceRecord | undefined {
 
 /**
  * Save invoice to database
+ * Includes three-stage status tracking fields (Coded -> Approved -> Paid)
+ * These timestamps and user IDs are permanently attached to the invoice
  */
 export function saveInvoice(invoice: InvoiceRecord): void {
   const db = getDatabase();
@@ -60,6 +62,13 @@ export function saveInvoice(invoice: InvoiceRecord): void {
       approvals = ?,
       field_locks = ?,
       status_version = ?,
+      coded_at = ?,
+      coded_by_user_id = ?,
+      approved_at = ?,
+      approved_by_user_id = ?,
+      paid_at = ?,
+      paid_by_user_id = ?,
+      stripe_transfer_id = ?,
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `).run(
@@ -70,6 +79,13 @@ export function saveInvoice(invoice: InvoiceRecord): void {
     JSON.stringify(invoice.approvals || {}),
     JSON.stringify(invoice.field_locks || {}),
     invoice.status_version,
+    invoice.coded_at || null,
+    invoice.coded_by_user_id || null,
+    invoice.approved_at || null,
+    invoice.approved_by_user_id || null,
+    invoice.paid_at || null,
+    invoice.paid_by_user_id || null,
+    invoice.stripe_transfer_id || null,
     invoice.id
   );
 }

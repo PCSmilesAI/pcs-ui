@@ -184,6 +184,79 @@ VENDOR_PATTERNS = {
     'safeway': [
         (r'safeway', 1.0),
     ],
+    # Final review vendors
+    'crystal_falls': [
+        (r'crystal\s*falls', 1.0),
+        (r'crystalfalls', 1.0),
+    ],
+    'megagen': [
+        (r'megagen', 1.0),
+        (r'xpeed', 0.9),
+        (r'anyridge', 0.9),
+    ],
+    'method_procurement': [
+        (r'method\s*procurement', 1.0),
+        (r'methodprocure', 1.0),
+    ],
+    'iron_mountain': [
+        (r'iron\s*mountain', 1.0),
+    ],
+    'fyle': [
+        (r'fyle', 1.0),
+        (r'fylehq', 1.0),
+    ],
+    'usps': [
+        (r'usps', 1.0),
+        (r'postal\s*service', 0.8),
+    ],
+    'fedex': [
+        (r'fedex', 1.0),
+    ],
+    'ups': [
+        (r'\bups\b', 0.9),
+        (r'united\s*parcel', 1.0),
+    ],
+    'ne_xcom': [
+        (r'nexcom', 1.0),
+        (r'ne\s*xcom', 1.0),
+    ],
+    'sparkletts': [
+        (r'sparkletts', 1.0),
+        (r'1-800-4-waters', 1.0),
+    ],
+    'passport_languages': [
+        (r'passport\s*to\s*languages', 1.0),
+    ],
+    'asl_interpreting': [
+        (r'asl\s*interpreting', 1.0),
+        (r'sign\s*language\s*interpreting', 0.9),
+    ],
+    'pure_clean': [
+        (r'pure\s*clean', 1.0),
+    ],
+    'medpro_waste': [
+        (r'medpro\s*waste', 1.0),
+    ],
+    'heaths_laundry': [
+        (r"heath'?s?\s*laundry", 1.0),
+    ],
+    'miracle_cleaners': [
+        (r'miracle\s*cleaners?', 1.0),
+    ],
+    'lloyds_dental': [
+        (r"lloyd'?s?\s*dental", 1.0),
+    ],
+    'vyne_dental': [
+        (r'vyne\s*dental', 1.0),
+        (r'vynedental', 1.0),
+    ],
+    'builders_electric': [
+        (r"builder'?s?\s*electric", 1.0),
+    ],
+    'swell': [
+        (r'\bswell\b', 0.8),
+        (r'swell\s*monthly', 1.0),
+    ],
 }
 
 # Parser file mappings
@@ -227,6 +300,27 @@ VENDOR_PARSERS = {
     'airgas': 'general_invoice_parser.py',
     'shred_it': 'general_invoice_parser.py',
     'pacific_office': 'general_invoice_parser.py',
+    # Final review parsers
+    'crystal_falls': 'crystal_falls_parser.py',
+    'megagen': 'megagen_parser.py',
+    'method_procurement': 'general_invoice_parser.py',
+    'iron_mountain': 'general_invoice_parser.py',
+    'fyle': 'general_invoice_parser.py',
+    'usps': 'general_invoice_parser.py',
+    'fedex': 'general_invoice_parser.py',
+    'ups': 'general_invoice_parser.py',
+    'ne_xcom': 'general_invoice_parser.py',
+    'sparkletts': 'general_invoice_parser.py',
+    'passport_languages': 'general_invoice_parser.py',
+    'asl_interpreting': 'general_invoice_parser.py',
+    'pure_clean': 'general_invoice_parser.py',
+    'medpro_waste': 'general_invoice_parser.py',
+    'heaths_laundry': 'general_invoice_parser.py',
+    'miracle_cleaners': 'general_invoice_parser.py',
+    'lloyds_dental': 'general_invoice_parser.py',
+    'vyne_dental': 'general_invoice_parser.py',
+    'builders_electric': 'general_invoice_parser.py',
+    'swell': 'general_invoice_parser.py',
 }
 
 

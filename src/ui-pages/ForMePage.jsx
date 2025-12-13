@@ -352,11 +352,16 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       const userEmail = getUserEmail();
       const isAdmin = await checkIfAdmin(userEmail);
       
-      // Only require office for non-admin users
+      // Only require location for non-admin users
+      // Check both GL Lines locations array AND legacy rawOffice field
       if (!isAdmin) {
-        const missingOffice = selectedRows.find((row) => !row.rawOffice);
-        if (missingOffice) {
-          showToast('Office is required before approval.', 'error');
+        const missingLocation = selectedRows.find((row) => {
+          const hasGLLineLocation = row.locations && row.locations.length > 0 && row.locations.some(loc => loc && loc.trim());
+          const hasLegacyOffice = row.rawOffice && row.rawOffice.trim() && row.rawOffice.toLowerCase() !== 'unknown';
+          return !hasGLLineLocation && !hasLegacyOffice;
+        });
+        if (missingLocation) {
+          showToast('Location (Class) is required before approval. Please set it in GL Lines.', 'error');
           return;
         }
       }

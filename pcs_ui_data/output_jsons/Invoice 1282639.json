@@ -1,12 +1,34 @@
 {
-  "vendor": "Unknown",
-  "vendor_name": "Unknown",
-  "invoice_number": "CONTRACT",
+  "vendor": "Oregon Linen",
+  "vendor_name": "Oregon Linen",
+  "invoice_number": "",
   "invoice_date": "9/10/2025",
   "due_date": "10/10/2025",
   "invoice_total": "",
   "office_location": "Roseburg",
-  "line_items": [],
+  "line_items": [
+    {
+      "product_number": "43",
+      "product_name": "6186\n2\n3X5 SUPER-TREAD",
+      "Quantity": "2",
+      "unit_price": "4.92",
+      "line_item_total": "4.92"
+    },
+    {
+      "product_number": "1",
+      "product_name": "4\n3X4 BLUE SILVER MAT",
+      "Quantity": "6284",
+      "unit_price": "8.43",
+      "line_item_total": "8.43"
+    },
+    {
+      "product_number": "2",
+      "product_name": "2\n4X6 BLUE SILVER MAT",
+      "Quantity": "6286",
+      "unit_price": "7.41",
+      "line_item_total": "7.41"
+    }
+  ],
   "source_file": "Invoice 1282639.pdf",
-  "parsed_at": "2025-12-12T19:32:34.128540+00:00"
+  "parsed_at": "2025-12-12T21:57:27.366093+00:00"
 }
