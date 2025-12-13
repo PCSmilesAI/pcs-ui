@@ -117,14 +117,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Approval failed' }, { status: 400 });
       }
 
-      console.log('[API][INVOICES][TRANSITION]', 'before_save', { 
-        invoiceId: String(invoiceId), 
-        status: invoice.status,
-        coded_at: invoice.coded_at,
-        coded_by_user_id: invoice.coded_by_user_id,
-        approved_at: invoice.approved_at,
-        approved_by_user_id: invoice.approved_by_user_id,
-      });
+      console.log('[API][INVOICES][TRANSITION]', 'before_save', { invoiceId: String(invoiceId), status: invoice.status });
       try {
         saveInvoice(invoice);
         console.log('[API][INVOICES][TRANSITION]', 'approve_success', { invoiceId: String(invoiceId), userEmail: user.email });
