@@ -90,9 +90,9 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
           width: '56px',
           height: '56px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: '#357ab2',
           border: 'none',
-          boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+          boxShadow: '0 4px 15px rgba(53, 122, 178, 0.4)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -102,11 +102,11 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.5)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(53, 122, 178, 0.5)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
+          e.currentTarget.style.boxShadow = '0 4px 15px rgba(53, 122, 178, 0.4)';
         }}
         title="Send Feedback"
         aria-label="Open feedback form"
@@ -162,7 +162,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
             {/* Header */}
             <div
               style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: '#357ab2',
                 padding: '20px 24px',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -260,7 +260,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                     boxSizing: 'border-box',
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#667eea';
+                    e.target.style.borderColor = '#357ab2';
                     e.target.style.outline = 'none';
                   }}
                   onBlur={(e) => {
@@ -312,7 +312,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                   padding: '14px 24px',
                   background: isSubmitting || submitStatus === 'success'
                     ? '#9ca3af'
-                    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    : '#357ab2',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
