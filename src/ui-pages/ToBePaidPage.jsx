@@ -6,7 +6,7 @@ import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
-import { getDisplayVendorName, parseInvoiceAmount } from '../lib/vendorUtils';
+import { getDisplayVendorName } from '../lib/vendorUtils';
 
 /**
  * Page for the "To Be Paid" view. Shows invoices that have been
@@ -55,50 +55,12 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
       const transformedData = data
         .filter((invoice) => (String(invoice.status || '').toLowerCase() === 'to_be_paid'))
         .map((invoice) => {
-          // Use helper to properly parse amount (handles cents vs dollars)
-          const numericTotal = parseInvoiceAmount(invoice);
-          console.log('💰 ToBePaidPage (reload): Invoice amount parsing', {
-            invoice_number: invoice.invoice_number,
-            amount_cents: invoice.amount_cents,
-            invoice_total: invoice.invoice_total,
-            total: invoice.total,
-            parsedAmount: numericTotal
-          });
-          
-          // Format date helper
-          const formatDate = (dateString) => {
-            if (!dateString) return 'N/A';
-            const parsed = new Date(dateString);
-            if (Number.isNaN(parsed.getTime())) return 'N/A';
-            return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
-          };
-          
-          // Calculate due date: use provided value or invoice_date + 30 days
-          const calculateDueDate = (invoiceDate, dueDate) => {
-            if (dueDate && dueDate.trim()) return dueDate;
-            if (!invoiceDate || !invoiceDate.trim()) return null;
-            try {
-              let date = null;
-              if (/^\d{4}-\d{2}-\d{2}/.test(invoiceDate)) {
-                date = new Date(invoiceDate);
-              } else if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(invoiceDate)) {
-                const parts = invoiceDate.split('/');
-                const month = parseInt(parts[0], 10) - 1;
-                const day = parseInt(parts[1], 10);
-                let year = parseInt(parts[2], 10);
-                if (year < 100) year += 2000;
-                date = new Date(year, month, day);
-              }
-              if (!date || isNaN(date.getTime())) return null;
-              date.setDate(date.getDate() + 30);
-              return date.toISOString();
-            } catch (e) {
-              return null;
-            }
-          };
-          
-          const effectiveDueDate = calculateDueDate(invoice.invoice_date, invoice.due_date);
-          
+          // Amount is stored in cents in the database, convert to dollars
+          const amountCents = invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? 0;
+          const numericTotal =
+            typeof amountCents === 'number'
+              ? amountCents / 100  // Convert cents to dollars
+              : parseFloat(String(amountCents ?? '0').replace(/[^0-9.\-]/g, '')) / 100;
           // Get locations from GL Lines (invoice_categories classes)
           const locations = invoice.locations || [];
           const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
@@ -112,8 +74,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           amount: `$${numericTotal.toFixed(2)}`,
           location: locationDisplay,
           locations: locations, // Keep array for filtering
-          dueDate: formatDate(effectiveDueDate),
-          invoiceDate: formatDate(invoice.invoice_date),
+          dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A'),
+          invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
           displayStatus: 'Pending Payment',
           category: (Array.isArray(invoice.invoice_categories) && invoice.invoice_categories[0]?.category_name) || invoice.category || 'Other',
           invoice_date: invoice.invoice_date,
@@ -208,50 +170,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         const transformedData = data
           .filter((invoice) => String(invoice.status || '').toLowerCase() === 'to_be_paid')
           .map((invoice) => {
-            // Use parseInvoiceAmount helper - properly handles amount_cents vs dollars
-            const numericTotal = parseInvoiceAmount(invoice);
-            console.log('💰 ToBePaidPage: Invoice amount parsing', {
-              invoice_number: invoice.invoice_number,
-              amount_cents: invoice.amount_cents,
-              invoice_total: invoice.invoice_total,
-              total: invoice.total,
-              parsedAmount: numericTotal
-            });
-            
-            // Format date helper
-            const formatDate = (dateString) => {
-              if (!dateString) return 'N/A';
-              const parsed = new Date(dateString);
-              if (Number.isNaN(parsed.getTime())) return 'N/A';
-              return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
-            };
-            
-            // Calculate due date: use provided value or invoice_date + 30 days
-            const calculateDueDate = (invoiceDate, dueDate) => {
-              if (dueDate && dueDate.trim()) return dueDate;
-              if (!invoiceDate || !invoiceDate.trim()) return null;
-              try {
-                let date = null;
-                if (/^\d{4}-\d{2}-\d{2}/.test(invoiceDate)) {
-                  date = new Date(invoiceDate);
-                } else if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(invoiceDate)) {
-                  const parts = invoiceDate.split('/');
-                  const month = parseInt(parts[0], 10) - 1;
-                  const day = parseInt(parts[1], 10);
-                  let year = parseInt(parts[2], 10);
-                  if (year < 100) year += 2000;
-                  date = new Date(year, month, day);
-                }
-                if (!date || isNaN(date.getTime())) return null;
-                date.setDate(date.getDate() + 30);
-                return date.toISOString();
-              } catch (e) {
-                return null;
-              }
-            };
-            
-            const effectiveDueDate = calculateDueDate(invoice.invoice_date, invoice.due_date);
-            
+            const rawTotal = (invoice.invoice_total ?? invoice.total);
+            const numericTotal =
+              typeof rawTotal === 'number'
+                ? rawTotal
+                : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
             // Get locations from GL Lines (invoice_categories classes)
             const locations = invoice.locations || [];
             const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
@@ -261,12 +184,24 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             return ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number, // needed by detail view
-            vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
+            vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
             amount: `$${numericTotal.toFixed(2)}`,
             location: locationDisplay,
             locations: locations, // Keep array for filtering
-            dueDate: formatDate(effectiveDueDate),
-            invoiceDate: formatDate(invoice.invoice_date),
+            dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: '2-digit'
+            }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: '2-digit'
+            }) : 'N/A'),
+            invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
+              month: 'numeric',
+              day: 'numeric',
+              year: '2-digit'
+            }) : 'N/A',
             displayStatus: 'Pending Payment',
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
@@ -462,7 +397,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
 
   return (
     <div style={wrapperStyle}>
-      <div style={{ marginBottom: '24px' }} className="flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">To Be Paid</h1>
           <p className="text-gray-600 mt-2">
@@ -472,20 +407,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         <button
           onClick={handleRefreshInbox}
           disabled={refreshing}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '9999px',
-            fontSize: '14px',
-            fontWeight: 500,
-            border: '1px solid #357ab2',
-            backgroundColor: refreshing ? '#e5e7eb' : '#ffffff',
-            color: refreshing ? '#9ca3af' : '#357ab2',
-            cursor: refreshing ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease',
-          }}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           title="Check inbox for new invoices"
         >
           <i className={`fas fa-sync-alt ${refreshing ? 'fa-spin' : ''}`}></i>

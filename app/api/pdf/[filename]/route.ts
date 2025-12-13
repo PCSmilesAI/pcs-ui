@@ -32,10 +32,8 @@ export async function GET(
   // Try multiple locations for PDFs (in order of preference)
   const possibleDirs = [
     resolveDataPath('email_invoices'),  // PCS_DATA_DIR/email_invoices (primary)
-    path.join(process.cwd(), 'email_invoices'),  // root email_invoices
-    path.join(process.cwd(), 'public', 'email_invoices'),  // public/email_invoices (older PDFs)
     path.join(process.cwd(), 'dist', 'email_invoices'),  // dist/email_invoices (build output)
-    path.join(process.cwd(), 'public', 'pdfs'),  // public/pdfs (legacy mock files)
+    path.join(process.cwd(), 'email_invoices'),  // root email_invoices (fallback)
   ];
 
   let filePath: string | null = null;

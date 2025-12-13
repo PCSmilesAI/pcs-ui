@@ -247,8 +247,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     });
   };
 
-  // Format timestamp for three-stage status display with automatic timezone detection
-  // Shows user's local timezone (e.g., "On Dec 13, 9:26 AM PST" for Oregon, "On Dec 13, 12:26 PM EST" for Georgia)
+  // NEW: Format timestamp for three-stage status display (e.g., "On Nov 3 at 9:26am")
   const formatStageTimestamp = (timestamp) => {
     if (!timestamp) return 'Incomplete';
     const date = new Date(timestamp);
@@ -258,7 +257,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-      timeZoneName: 'short',  // Automatically shows user's timezone (PST, EST, etc.)
+      meridiem: 'short',
     });
     return `On ${formatted}`;
   };
@@ -1124,16 +1123,17 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         if (p.startsWith('http://') || p.startsWith('https://')) return p;
         // Already an API path
         if (p.startsWith('/api/pdf/')) return p;
-        // Extract filename from any path that contains a directory
-        // This handles: /email_invoices/file.pdf, /pdfs/file.pdf, email_invoices/file.pdf, etc.
-        if (p.includes('/')) {
+        // Extract filename from email_invoices path
+        if (p.includes('email_invoices/')) {
           const filename = p.split('/').pop();
-          if (filename && filename.endsWith('.pdf')) {
-            return `/api/pdf/${filename}`;
-          }
+          return `/api/pdf/${filename}`;
         }
         // If it's just a filename, use the API endpoint
-        return `/api/pdf/${p}`;
+        if (!p.includes('/')) {
+          return `/api/pdf/${p}`;
+        }
+        // Otherwise treat as relative path
+        return p;
       })();
       link.download = `${invoice?.invoice || invoice?.invoice_number || 'invoice'}_${invoice?.vendor || 'vendor'}.pdf`;
       document.body.appendChild(link);
@@ -1411,26 +1411,10 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       setShowUpdateModal(false);
 
       const invoiceId = invoice?.id || invoice?.invoice_number;
-      const invoiceNumber = invoice?.invoice_number || invoiceId;
       if (!invoiceId) {
         showToast('Missing invoice identifier', 'error');
         return;
       }
-
-      // Capture BEFORE state (original values from the invoice object)
-      const beforeState = {
-        vendor_name: invoice?.vendor_name || invoice?.vendor || '',
-        office_id: invoice?.office_id || invoice?.office || '',
-        amount_cents: invoice?.amount_cents || 0,
-        invoice_date: invoice?.invoice_date || '',
-        due_date: invoice?.due_date || '',
-        glLines: invoiceCategories.map(cat => ({
-          categoryName: cat.categoryName || '',
-          className: cat.className || null,
-          amount: parseFloat(cat.amount) || 0,
-          description: cat.description || null,
-        })),
-      };
 
       // Parse amount from display format
       // SECURITY: Use global regex to replace all occurrences of $ and ,
@@ -1458,71 +1442,65 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         showToast('Invoice amount updated. GL line allocations have been reset to $0 - please re-allocate.', 'warning');
       }
 
-      // Capture AFTER state (corrected values)
-      const afterState = {
+      // Build corrected values for AI training
+      const originalValues = {
+        vendor_name: invoice?.vendor_name || invoice?.vendor || '',
+        office_id: invoice?.office_id || invoice?.office || '',
+        amount_cents: invoice?.amount_cents || 0,
+      };
+
+      const correctedValues = {
         vendor_name: details.vendor,
         office_id: details.office,
         amount_cents: amountCents,
-        invoice_date: details.invoice_date || '',
-        due_date: details.due_date || '',
-        glLines: invoiceCategories.map(cat => ({
-          categoryName: cat.categoryName || '',
-          className: cat.className || null,
-          amount: parseFloat(cat.amount) || 0,
-          description: cat.description || null,
-        })),
       };
 
       // Check if any values changed
-      const changedFields = Object.keys(afterState).filter(
-        key => key !== 'glLines' && beforeState[key] !== afterState[key]
+      const changedFields = Object.keys(correctedValues).filter(
+        key => originalValues[key] !== correctedValues[key]
       );
 
-      console.log('📤 Telegram update check:', {
-        beforeState,
-        afterState,
+      console.log('🔍 AI Mechanic check:', {
+        originalValues,
+        correctedValues,
         changedFields,
         hasComment: !!updateComment.trim(),
         willSend: changedFields.length > 0 || !!updateComment.trim()
       });
 
-      // Send to Telegram with the user comment (if provided or fields changed)
+      // Always send to AI Mechanic with the user comment (if provided or fields changed)
       const shouldSend = changedFields.length > 0 || updateComment.trim();
-      console.log('📱 Will send to Telegram?', shouldSend, '- changedFields:', changedFields.length, 'hasComment:', !!updateComment.trim());
+      console.log('🤖 Will send to AI Mechanic?', shouldSend, '- changedFields:', changedFields.length, 'hasComment:', !!updateComment.trim());
 
       if (shouldSend) {
         setImprovingParser(true);
         try {
-          console.log('📤 Sending update to PCS AI Telegram... invoiceId:', invoiceId);
-          const telegramResponse = await fetch('/api/invoice-update-telegram', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              invoiceId: invoiceId,
-              invoiceNumber: invoiceNumber,
-              userComment: updateComment.trim() || '',
-              pdfPath: invoice?.pdf_path || '',
-              before: beforeState,
-              after: afterState,
-            }),
-          });
+          console.log('🤖 Sending corrections to AI Mechanic... invoiceId:', invoiceId);
+          const mechanicResponse = await csrfClient.post(
+            `/api/invoices/${encodeURIComponent(invoiceId)}/report-parser-issue`,
+            {
+              corrected_fields: correctedValues,
+              user_comment: updateComment.trim() || null,
+              original_fields: originalValues,
+              changed_fields: changedFields,
+            }
+          );
 
-          const telegramResult = await telegramResponse.json();
-
-          if (telegramResponse.ok && telegramResult.success) {
-            console.log('✅ Telegram response:', telegramResult);
-            if (telegramResult.pdfSent) {
-              showToast('Update sent to PCS AI Telegram with PDF!', 'success');
+          // csrfClient returns { ok, data, error } not a Response
+          if (mechanicResponse.ok) {
+            console.log('✅ AI Mechanic response:', mechanicResponse.data);
+            if (updateComment.trim()) {
+              showToast('Update submitted with your comment to AI Mechanic!', 'success');
             } else {
-              showToast('Update sent to PCS AI Telegram! (PDF could not be attached)', 'warning');
+              showToast('Parser improvement request sent to AI Mechanic!', 'success');
             }
           } else {
-            console.warn('⚠️ Telegram send failed:', telegramResult.error);
-            showToast(`Telegram: ${telegramResult.error || 'Failed to send'}`, 'warning');
+            console.warn('⚠️ AI Mechanic failed:', mechanicResponse.error);
+            showToast(`AI Mechanic: ${mechanicResponse.error || 'Failed to process'}`, 'warning');
           }
-        } catch (telegramError) {
-          console.warn('⚠️ Error sending to Telegram:', telegramError);
-          showToast('Could not send update to Telegram', 'warning');
+        } catch (mechanicError) {
+          console.warn('⚠️ Error calling AI Mechanic:', mechanicError);
+          showToast('AI Mechanic is not available', 'warning');
         } finally {
           setImprovingParser(false);
         }
@@ -2878,16 +2856,17 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                 if (p.startsWith('http://') || p.startsWith('https://')) return p;
                 // Already an API path
                 if (p.startsWith('/api/pdf/')) return p;
-                // Extract filename from any path that contains a directory
-                // This handles: /email_invoices/file.pdf, /pdfs/file.pdf, email_invoices/file.pdf, etc.
-                if (p.includes('/')) {
+                // Extract filename from email_invoices path
+                if (p.includes('email_invoices/')) {
                   const filename = p.split('/').pop();
-                  if (filename && filename.endsWith('.pdf')) {
-                    return `/api/pdf/${filename}`;
-                  }
+                  return `/api/pdf/${filename}`;
                 }
                 // If it's just a filename, use the API endpoint
-                return `/api/pdf/${p}`;
+                if (!p.includes('/')) {
+                  return `/api/pdf/${p}`;
+                }
+                // Otherwise treat as relative path
+                return p;
               })()}
               style={{
                 width: '100%',
@@ -2971,12 +2950,16 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           }}>
             <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>
-              Submit Update to PCS AI
+              🤖 Submit Update to AI Mechanic
             </h3>
+            <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#6b7280' }}>
+              Your changes will be saved and sent to the AI Mechanic for parser improvement.
+              Add an optional comment to provide context or request specific actions.
+            </p>
             <textarea
               value={updateComment}
               onChange={(e) => setUpdateComment(e.target.value)}
-              placeholder="Optional: Add a comment explaining the fix...&#10;&#10;Examples:&#10;• 'The vendor name was parsed incorrectly'&#10;• 'Wrong office location - should be Salem'&#10;• 'Amount was missing decimal'"
+              placeholder="Optional: Add a comment for the AI Mechanic...&#10;&#10;Examples:&#10;• 'The vendor name was parsed incorrectly'&#10;• 'This invoice is missing a PDF, please find it'&#10;• 'The amount should include tax'"
               rows={5}
               style={{
                 width: '100%',

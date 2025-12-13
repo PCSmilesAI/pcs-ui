@@ -50,3 +50,4 @@ def api_pdf_path(filename: str) -> str:
     return f"/api/pdf/{sanitize_filename(filename)}"
 
 
+

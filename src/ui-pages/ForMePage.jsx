@@ -7,7 +7,7 @@ import { useInvoiceData } from '../context/InvoiceDataContext';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
-import { getDisplayVendorName, parseInvoiceAmount } from '../lib/vendorUtils';
+import { getDisplayVendorName } from '../lib/vendorUtils';
 
 // Dynamically import the modal to avoid SSR issues
 const CreateInvoiceModal = dynamic(() => import('../../components/invoices/CreateInvoiceModal'), { ssr: false });
@@ -86,42 +86,12 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       if (Number.isNaN(parsed.getTime())) return 'N/A';
       return parsed.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
     };
-    
-    // Calculate due date: use provided value or invoice_date + 30 days
-    const calculateDueDate = (invoiceDate, dueDate) => {
-      if (dueDate && dueDate.trim()) return dueDate;
-      if (!invoiceDate || !invoiceDate.trim()) return null;
-      
-      try {
-        let date = null;
-        // Try ISO format first (2025-07-31)
-        if (/^\d{4}-\d{2}-\d{2}/.test(invoiceDate)) {
-          date = new Date(invoiceDate);
-        }
-        // Try MM/DD/YYYY or M/D/YYYY format
-        else if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(invoiceDate)) {
-          const parts = invoiceDate.split('/');
-          const month = parseInt(parts[0], 10) - 1;
-          const day = parseInt(parts[1], 10);
-          let year = parseInt(parts[2], 10);
-          if (year < 100) year += 2000;
-          date = new Date(year, month, day);
-        }
-        
-        if (!date || isNaN(date.getTime())) return null;
-        
-        // Add 30 days
-        date.setDate(date.getDate() + 30);
-        return date.toISOString();
-      } catch (e) {
-        return null;
-      }
-    };
-    
-    const effectiveDueDate = calculateDueDate(rawInvoiceDate, rawDueDate);
-    
-    // Use helper to properly parse amount (handles cents vs dollars)
-    const parsedAmount = parseInvoiceAmount(invoice);
+    // Amount is stored in cents in the database, convert to dollars
+    const amountCents = invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? invoice.amount ?? 0;
+    const parsedAmount =
+      typeof amountCents === 'number'
+        ? amountCents / 100  // Convert cents to dollars
+        : Number.parseFloat(String(amountCents || '0').replace(/[^0-9.-]/g, '')) / 100;
 
     return {
       id: invoice.id || invoice.invoice_number || invoice.invoice || invoice.source_file || null,
@@ -132,7 +102,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       location: locationDisplay,
       rawOffice: officeRaw,
       locations: locations, // Keep array for filtering
-      dueDate: formatDate(effectiveDueDate),
+      dueDate: formatDate(rawDueDate || rawInvoiceDate),
       invoiceDate: formatDate(rawInvoiceDate),
       // Prefer invoice-level categories if present
       category:
@@ -352,16 +322,11 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       const userEmail = getUserEmail();
       const isAdmin = await checkIfAdmin(userEmail);
       
-      // Only require location for non-admin users
-      // Check both GL Lines locations array AND legacy rawOffice field
+      // Only require office for non-admin users
       if (!isAdmin) {
-        const missingLocation = selectedRows.find((row) => {
-          const hasGLLineLocation = row.locations && row.locations.length > 0 && row.locations.some(loc => loc && loc.trim());
-          const hasLegacyOffice = row.rawOffice && row.rawOffice.trim() && row.rawOffice.toLowerCase() !== 'unknown';
-          return !hasGLLineLocation && !hasLegacyOffice;
-        });
-        if (missingLocation) {
-          showToast('Location (Class) is required before approval. Please set it in GL Lines.', 'error');
+        const missingOffice = selectedRows.find((row) => !row.rawOffice);
+        if (missingOffice) {
+          showToast('Office is required before approval.', 'error');
           return;
         }
       }
@@ -527,7 +492,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div style={{ marginBottom: '24px' }} className="flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">For Me</h1>
           <p className="text-gray-600 mt-2">
@@ -537,20 +502,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '9999px',
-              fontSize: '14px',
-              fontWeight: 500,
-              border: '1px solid #357ab2',
-              backgroundColor: '#ffffff',
-              color: '#357ab2',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease',
-            }}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             title="Create a new invoice from a template"
           >
             <i className="fas fa-plus"></i>

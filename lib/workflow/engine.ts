@@ -56,13 +56,6 @@ function parseAmount(raw: unknown): number {
 }
 
 function getInvoiceOffice(invoice: any): string {
-  // First check GL Lines locations (from invoice_categories class names)
-  if (invoice?.locations && Array.isArray(invoice.locations) && invoice.locations.length > 0) {
-    const firstLocation = invoice.locations.find((loc: string) => loc && loc.trim());
-    if (firstLocation) return firstLocation.trim();
-  }
-  
-  // Fallback to legacy office fields
   const office = invoice?.office_location || invoice?.office || invoice?.clinic_id;
   return typeof office === 'string' ? office.trim() : '';
 }
@@ -152,28 +145,13 @@ export function approveOffice(invoice: any, actor: Actor, threshold: number): vo
 }
 
 export function approveAdmin(invoice: any, actor: Actor): void {
-  const now = new Date().toISOString();
-  const email = normaliseEmail(actor.email);
-  
   invoice.approvals = (invoice.approvals && typeof invoice.approvals === 'object') ? invoice.approvals : {} as InvoiceApprovals;
   invoice.approvals.admin = {
-    by: email,
-    at: now,
+    by: normaliseEmail(actor.email),
+    at: new Date().toISOString(),
   };
-  
-  // Admin approval also sets coded_at and approved_at if not already set
-  // This handles the case where admin approval bypasses intermediate steps
-  if (!invoice.coded_at) {
-    invoice.coded_at = now;
-    invoice.coded_by_user_id = email;
-  }
-  if (!invoice.approved_at) {
-    invoice.approved_at = now;
-    invoice.approved_by_user_id = email;
-  }
-  
   invoice.status = 'to_be_paid';
-  logEngine('approveAdmin', { invoiceId: getInvoiceId(invoice), userEmail: email });
+  logEngine('approveAdmin', { invoiceId: getInvoiceId(invoice), userEmail: normaliseEmail(actor.email) });
 }
 
 export function markPaid(
