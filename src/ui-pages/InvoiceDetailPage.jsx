@@ -1412,10 +1412,26 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       setShowUpdateModal(false);
 
       const invoiceId = invoice?.id || invoice?.invoice_number;
+      const invoiceNumber = invoice?.invoice_number || invoiceId;
       if (!invoiceId) {
         showToast('Missing invoice identifier', 'error');
         return;
       }
+
+      // Capture BEFORE state (original values from the invoice object)
+      const beforeState = {
+        vendor_name: invoice?.vendor_name || invoice?.vendor || '',
+        office_id: invoice?.office_id || invoice?.office || '',
+        amount_cents: invoice?.amount_cents || 0,
+        invoice_date: invoice?.invoice_date || '',
+        due_date: invoice?.due_date || '',
+        glLines: invoiceCategories.map(cat => ({
+          categoryName: cat.categoryName || '',
+          className: cat.className || null,
+          amount: parseFloat(cat.amount) || 0,
+          description: cat.description || null,
+        })),
+      };
 
       // Parse amount from display format
       // SECURITY: Use global regex to replace all occurrences of $ and ,
@@ -1443,65 +1459,71 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         showToast('Invoice amount updated. GL line allocations have been reset to $0 - please re-allocate.', 'warning');
       }
 
-      // Build corrected values for AI training
-      const originalValues = {
-        vendor_name: invoice?.vendor_name || invoice?.vendor || '',
-        office_id: invoice?.office_id || invoice?.office || '',
-        amount_cents: invoice?.amount_cents || 0,
-      };
-
-      const correctedValues = {
+      // Capture AFTER state (corrected values)
+      const afterState = {
         vendor_name: details.vendor,
         office_id: details.office,
         amount_cents: amountCents,
+        invoice_date: details.invoice_date || '',
+        due_date: details.due_date || '',
+        glLines: invoiceCategories.map(cat => ({
+          categoryName: cat.categoryName || '',
+          className: cat.className || null,
+          amount: parseFloat(cat.amount) || 0,
+          description: cat.description || null,
+        })),
       };
 
       // Check if any values changed
-      const changedFields = Object.keys(correctedValues).filter(
-        key => originalValues[key] !== correctedValues[key]
+      const changedFields = Object.keys(afterState).filter(
+        key => key !== 'glLines' && beforeState[key] !== afterState[key]
       );
 
-      console.log('🔍 AI Mechanic check:', {
-        originalValues,
-        correctedValues,
+      console.log('📤 Telegram update check:', {
+        beforeState,
+        afterState,
         changedFields,
         hasComment: !!updateComment.trim(),
         willSend: changedFields.length > 0 || !!updateComment.trim()
       });
 
-      // Always send to AI Mechanic with the user comment (if provided or fields changed)
+      // Send to Telegram with the user comment (if provided or fields changed)
       const shouldSend = changedFields.length > 0 || updateComment.trim();
-      console.log('🤖 Will send to AI Mechanic?', shouldSend, '- changedFields:', changedFields.length, 'hasComment:', !!updateComment.trim());
+      console.log('📱 Will send to Telegram?', shouldSend, '- changedFields:', changedFields.length, 'hasComment:', !!updateComment.trim());
 
       if (shouldSend) {
         setImprovingParser(true);
         try {
-          console.log('🤖 Sending corrections to AI Mechanic... invoiceId:', invoiceId);
-          const mechanicResponse = await csrfClient.post(
-            `/api/invoices/${encodeURIComponent(invoiceId)}/report-parser-issue`,
-            {
-              corrected_fields: correctedValues,
-              user_comment: updateComment.trim() || null,
-              original_fields: originalValues,
-              changed_fields: changedFields,
-            }
-          );
+          console.log('📤 Sending update to PCS AI Telegram... invoiceId:', invoiceId);
+          const telegramResponse = await fetch('/api/invoice-update-telegram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              invoiceId: invoiceId,
+              invoiceNumber: invoiceNumber,
+              userComment: updateComment.trim() || '',
+              pdfPath: invoice?.pdf_path || '',
+              before: beforeState,
+              after: afterState,
+            }),
+          });
 
-          // csrfClient returns { ok, data, error } not a Response
-          if (mechanicResponse.ok) {
-            console.log('✅ AI Mechanic response:', mechanicResponse.data);
-            if (updateComment.trim()) {
-              showToast('Update submitted with your comment to AI Mechanic!', 'success');
+          const telegramResult = await telegramResponse.json();
+
+          if (telegramResponse.ok && telegramResult.success) {
+            console.log('✅ Telegram response:', telegramResult);
+            if (telegramResult.pdfSent) {
+              showToast('Update sent to PCS AI Telegram with PDF!', 'success');
             } else {
-              showToast('Parser improvement request sent to AI Mechanic!', 'success');
+              showToast('Update sent to PCS AI Telegram! (PDF could not be attached)', 'warning');
             }
           } else {
-            console.warn('⚠️ AI Mechanic failed:', mechanicResponse.error);
-            showToast(`AI Mechanic: ${mechanicResponse.error || 'Failed to process'}`, 'warning');
+            console.warn('⚠️ Telegram send failed:', telegramResult.error);
+            showToast(`Telegram: ${telegramResult.error || 'Failed to send'}`, 'warning');
           }
-        } catch (mechanicError) {
-          console.warn('⚠️ Error calling AI Mechanic:', mechanicError);
-          showToast('AI Mechanic is not available', 'warning');
+        } catch (telegramError) {
+          console.warn('⚠️ Error sending to Telegram:', telegramError);
+          showToast('Could not send update to Telegram', 'warning');
         } finally {
           setImprovingParser(false);
         }
@@ -2951,16 +2973,17 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           }}>
             <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>
-              🤖 Submit Update to AI Mechanic
+              📱 Submit Update to PCS AI
             </h3>
             <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#6b7280' }}>
-              Your changes will be saved and sent to the AI Mechanic for parser improvement.
-              Add an optional comment to provide context or request specific actions.
+              Your changes will be saved and sent to Telegram for review.
+              The invoice PDF, before/after details, and GL lines will be included.
+              Add an optional comment to explain what needed fixing.
             </p>
             <textarea
               value={updateComment}
               onChange={(e) => setUpdateComment(e.target.value)}
-              placeholder="Optional: Add a comment for the AI Mechanic...&#10;&#10;Examples:&#10;• 'The vendor name was parsed incorrectly'&#10;• 'This invoice is missing a PDF, please find it'&#10;• 'The amount should include tax'"
+              placeholder="Optional: Add a comment explaining the fix...&#10;&#10;Examples:&#10;• 'The vendor name was parsed incorrectly'&#10;• 'Wrong office location - should be Salem'&#10;• 'Amount was missing decimal'"
               rows={5}
               style={{
                 width: '100%',
