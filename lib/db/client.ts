@@ -269,6 +269,8 @@ export function runMigrations(): void {
   ensureColumn('invoices', 'om_approved_by', 'om_approved_by TEXT');
   ensureColumn('invoices', 'admin_approved_at', 'admin_approved_at TEXT');
   ensureColumn('invoices', 'admin_approved_by', 'admin_approved_by TEXT');
+  ensureColumn('invoices', 'paid_by_user_id', 'paid_by_user_id TEXT');
+  ensureColumn('invoices', 'approval_stage', 'approval_stage TEXT');
 
   // Add template_type to coding_templates table
   ensureColumn('coding_templates', 'template_type', 'template_type TEXT DEFAULT "even_split"');
