@@ -5,6 +5,7 @@ import NavBar from './NavBar';
 import { InvoiceClickProvider } from '../context/InvoiceClickContext';
 import { InvoiceDataProvider, useInvoiceData } from '../context/InvoiceDataContext';
 import FilterPanel from './FilterPanel.jsx'
+import FeedbackButton from './FeedbackButton';
 
 export default function AppLayout({ children }) {
   // Get hooks at top level - these must be called unconditionally
@@ -139,6 +140,9 @@ export default function AppLayout({ children }) {
       <main style={{ flex: 1, padding: (isAuthPage || isVendorOnboardingSuccess) ? '0' : '20px' }}>
         {React.isValidElement(children) ? React.cloneElement(children, { filters }) : children}
       </main>
+      
+      {/* Floating Feedback Button - Always visible on ALL pages */}
+      <FeedbackButton />
     </div>
   );
 
