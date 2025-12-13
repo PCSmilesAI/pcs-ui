@@ -397,7 +397,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
 
   return (
     <div style={wrapperStyle}>
-      <div className="mb-8 flex items-center justify-between">
+      <div style={{ marginBottom: '24px' }} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">To Be Paid</h1>
           <p className="text-gray-600 mt-2">
