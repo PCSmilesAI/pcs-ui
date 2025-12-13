@@ -50,6 +50,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
+    // Load GL Line locations (class names from invoice_categories)
+    try {
+      const { getDatabase } = await import('../../../../lib/db/client');
+      const db = getDatabase();
+      const glLines = db.prepare(`
+        SELECT DISTINCT class_name FROM invoice_categories 
+        WHERE invoice_id = ? AND class_name IS NOT NULL AND class_name != ''
+      `).all(invoice.id) as Array<{ class_name: string }>;
+      
+      if (glLines.length > 0) {
+        invoice.locations = glLines.map(gl => gl.class_name);
+        console.log('[API][INVOICES][TRANSITION]', 'gl_locations_loaded', { invoiceId: String(invoiceId), locations: invoice.locations });
+      }
+    } catch (err) {
+      console.warn('[API][INVOICES][TRANSITION]', 'gl_locations_load_error', { invoiceId: String(invoiceId), error: String(err) });
+    }
+
     const roles = await readRoles();
     const threshold = await getThreshold();
     console.log('[API][INVOICES][TRANSITION]', `transition_request_${action}`, { invoiceId: String(invoiceId), userEmail: user.email });
