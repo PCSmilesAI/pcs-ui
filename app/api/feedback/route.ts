@@ -73,12 +73,12 @@ function formatBugReport(payload: FeedbackPayload): string {
   else if (payload.userAgent.includes('iPhone') || payload.userAgent.includes('iPad')) os = 'iOS';
   else if (payload.userAgent.includes('Android')) os = 'Android';
 
-  let message = `🐛 <b>BUG REPORT</b>\n\n`;
-  message += `📍 <b>Page:</b> ${escapeHtml(payload.url)}\n`;
-  message += `🕐 <b>Time:</b> ${timestamp}\n`;
-  message += `💻 <b>Browser:</b> ${browser} on ${os}\n`;
-  message += `📐 <b>Screen:</b> ${payload.screenSize}\n\n`;
-  message += `💬 <b>Description:</b>\n${escapeHtml(payload.message)}\n`;
+  let message = `<b>DEVELOPER FEEDBACK</b>\n\n`;
+  message += `<b>Page:</b> ${escapeHtml(payload.url)}\n`;
+  message += `<b>Time:</b> ${timestamp}\n`;
+  message += `<b>Browser:</b> ${browser} on ${os}\n`;
+  message += `<b>Screen:</b> ${payload.screenSize}\n\n`;
+  message += `<b>Description:</b>\n${escapeHtml(payload.message)}\n`;
 
   return message;
 }
@@ -93,10 +93,10 @@ function formatFeatureRequest(payload: FeedbackPayload): string {
     timeStyle: 'short',
   });
 
-  let message = `💡 <b>FEATURE REQUEST</b>\n\n`;
-  message += `📍 <b>From Page:</b> ${escapeHtml(payload.url)}\n`;
-  message += `🕐 <b>Time:</b> ${timestamp}\n\n`;
-  message += `✨ <b>Request:</b>\n${escapeHtml(payload.message)}\n`;
+  let message = `<b>FEATURE REQUEST</b>\n\n`;
+  message += `<b>From Page:</b> ${escapeHtml(payload.url)}\n`;
+  message += `<b>Time:</b> ${timestamp}\n\n`;
+  message += `<b>Request:</b>\n${escapeHtml(payload.message)}\n`;
 
   return message;
 }
@@ -118,7 +118,7 @@ function formatConsoleLogs(payload: FeedbackPayload): string | null {
     logs = '... (truncated)\n' + logs;
   }
 
-  let message = `📋 <b>Console Logs (${payload.logCount} entries)</b>\n\n`;
+  let message = `<b>Console Logs (${payload.logCount} entries)</b>\n\n`;
   message += `<pre>${escapeHtml(logs)}</pre>`;
 
   return message;

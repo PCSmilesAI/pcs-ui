@@ -221,14 +221,14 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                   onClick={() => setActiveTab('bug')}
                   style={tabStyle(activeTab === 'bug')}
                 >
-                  🐛 Bug Report
+                  Developer Feedback
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('feature')}
                   style={tabStyle(activeTab === 'feature')}
                 >
-                  💡 Feature Request
+                  Feature Request
                 </button>
               </div>
             </div>
@@ -244,14 +244,10 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                     padding: '12px 16px',
                     borderRadius: '8px',
                     marginBottom: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
                   }}
                 >
-                  <span style={{ fontSize: '18px' }}>✓</span>
                   {activeTab === 'bug' 
-                    ? 'Bug report sent! Thank you for helping improve the app.'
+                    ? 'Feedback sent! Thank you for helping improve the app.'
                     : 'Feature request sent! Thank you for your suggestion.'}
                 </div>
               )}
@@ -323,17 +319,11 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                       marginBottom: '20px',
                       fontSize: '13px',
                       color: '#6b7280',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
                     }}
                   >
-                    <span style={{ fontSize: '16px' }}>📋</span>
-                    <span>
-                      {logCount > 0
-                        ? `${logCount} console log${logCount === 1 ? '' : 's'} will be included automatically`
-                        : 'Console logs will be included automatically'}
-                    </span>
+                    {logCount > 0
+                      ? `${logCount} console log${logCount === 1 ? '' : 's'} will be included automatically`
+                      : 'Console logs will be included automatically'}
                   </div>
 
                   {/* Current page indicator */}
@@ -429,7 +419,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                 ) : submitStatus === 'success' ? (
                   'Sent!'
                 ) : activeTab === 'bug' ? (
-                  'Send Bug Report'
+                  'Send Feedback'
                 ) : (
                   'Send Feature Request'
                 )}
