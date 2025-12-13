@@ -247,7 +247,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     });
   };
 
-  // NEW: Format timestamp for three-stage status display (e.g., "On Nov 3 at 9:26am")
+  // Format timestamp for three-stage status display with automatic timezone detection
+  // Shows user's local timezone (e.g., "On Dec 13, 9:26 AM PST" for Oregon, "On Dec 13, 12:26 PM EST" for Georgia)
   const formatStageTimestamp = (timestamp) => {
     if (!timestamp) return 'Incomplete';
     const date = new Date(timestamp);
@@ -257,7 +258,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-      meridiem: 'short',
+      timeZoneName: 'short',  // Automatically shows user's timezone (PST, EST, etc.)
     });
     return `On ${formatted}`;
   };
