@@ -349,6 +349,7 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_invoices_coding_template_id ON invoices(coding_template_id);
     CREATE INDEX IF NOT EXISTS idx_invoice_categories_invoice_id ON invoice_categories(invoice_id);
     CREATE INDEX IF NOT EXISTS idx_table_template_rows_invoice_id ON table_template_rows(invoice_id);
+    CREATE INDEX IF NOT EXISTS idx_invoices_assigned_user ON invoices(current_assigned_user_email);
   `);
 
   // Seed clinics table with all 9 locations
