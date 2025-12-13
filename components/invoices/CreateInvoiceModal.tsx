@@ -30,6 +30,7 @@ interface TableTemplateRow {
   className: string;
   locationName: string;
   amount: string;
+  isEditing: boolean;
 }
 
 interface CreateInvoiceModalProps {
@@ -58,22 +59,64 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
 
   // Table template state
   const [tableRows, setTableRows] = useState<TableTemplateRow[]>([
-    { id: '1', glAccountPath: '', categoryName: '', className: '', locationName: '', amount: '' }
+    { id: '1', glAccountPath: '', categoryName: '', className: '', locationName: '', amount: '', isEditing: true }
   ]);
   const [qboCategories, setQboCategories] = useState<QBOCategory[]>([]);
   const [qboLocations, setQboLocations] = useState<QBOLocation[]>([]);
   const [chartOfAccounts, setChartOfAccounts] = useState<string[]>([]);
   const [loadingQBOData, setLoadingQBOData] = useState(false);
 
+  // Styles matching InvoiceDetailPage
+  const sectionStyle = {
+    borderBottom: '1px solid #357ab2',
+    padding: '16px',
+  };
+  const sectionTitleStyle = {
+    fontSize: '18px',
+    fontWeight: '600' as const,
+    color: '#357ab2',
+    marginBottom: '12px',
+  };
+  const tableStyle = {
+    width: '100%',
+    borderCollapse: 'collapse' as const,
+    borderLeft: '1px solid #357ab2',
+    borderTop: '1px solid #357ab2',
+    fontSize: '14px',
+  };
+  const cellHeaderStyle = {
+    padding: '8px 12px',
+    borderRight: '1px solid #357ab2',
+    borderBottom: '1px solid #357ab2',
+    fontWeight: '500' as const,
+    color: '#4a5568',
+    backgroundColor: '#f8fafc',
+    textAlign: 'left' as const,
+    width: '35%',
+  };
+  const cellStyle = {
+    padding: '8px 12px',
+    borderRight: '1px solid #357ab2',
+    borderBottom: '1px solid #357ab2',
+    color: '#1f1f1f',
+    backgroundColor: '#ffffff',
+  };
+  const inputStyle = {
+    border: '1px solid #cbd5e0',
+    borderRadius: '4px',
+    padding: '6px 10px',
+    fontSize: '14px',
+    width: '100%',
+    boxSizing: 'border-box' as const,
+  };
+
   // Load templates and QBO data on mount
   useEffect(() => {
     if (isOpen) {
       loadTemplates();
-      if (templateType === 'table_template') {
-        loadQBOData();
-      }
+      loadQBOData();
     }
-  }, [isOpen, templateType]);
+  }, [isOpen]);
 
   const loadTemplates = async () => {
     try {
@@ -92,21 +135,18 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
   const loadQBOData = async () => {
     try {
       setLoadingQBOData(true);
-      // Load QBO categories
       const categoriesRes = await fetch('/api/qbo/categories');
       if (categoriesRes.ok) {
         const categoriesData = await categoriesRes.json();
         setQboCategories(categoriesData.categories || []);
       }
 
-      // Load QBO locations (classes)
       const locationsRes = await fetch('/api/qbo/classes');
       if (locationsRes.ok) {
         const locationsData = await locationsRes.json();
         setQboLocations(locationsData.classes || []);
       }
 
-      // Load chart of accounts
       const chartRes = await fetch('/api/qbo/chart-of-accounts');
       if (chartRes.ok) {
         const chartData = await chartRes.json();
@@ -126,7 +166,8 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
       categoryName: '',
       className: '',
       locationName: '',
-      amount: ''
+      amount: '',
+      isEditing: true
     }]);
   };
 
@@ -136,18 +177,32 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
     }
   };
 
-  const updateTableRow = (id: string, field: keyof TableTemplateRow, value: string) => {
+  const updateTableRow = (id: string, field: keyof TableTemplateRow, value: string | boolean) => {
     setTableRows(tableRows.map(row =>
       row.id === id ? { ...row, [field]: value } : row
     ));
   };
+
+  const confirmRow = (id: string) => {
+    setTableRows(tableRows.map(row =>
+      row.id === id ? { ...row, isEditing: false } : row
+    ));
+  };
+
+  // Calculate allocation summary
+  const totalAmount = templateType === 'even_split' 
+    ? parseFloat(amount) || 0 
+    : tableRows.reduce((sum, row) => sum + (parseFloat(row.amount) || 0), 0);
+  const allocated = templateType === 'even_split' 
+    ? (parseFloat(amount) || 0) 
+    : tableRows.reduce((sum, row) => sum + (parseFloat(row.amount) || 0), 0);
+  const unallocated = 0; // For create modal, we don't track unallocated
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
 
-    // Validation
     if (!invoiceNumber || !vendorName) {
       setError('Please fill in invoice number and vendor name');
       return;
@@ -159,21 +214,19 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
         return;
       }
     } else if (templateType === 'table_template') {
-      // Validate table rows
       const totalAmount = tableRows.reduce((sum, row) => {
         const rowAmount = parseFloat(row.amount) || 0;
         return sum + rowAmount;
       }, 0);
       
       if (totalAmount === 0) {
-        setError('Please fill in at least one table row with an amount');
+        setError('Please fill in at least one GL line with an amount');
         return;
       }
 
-      // Validate all rows have required fields
       for (const row of tableRows) {
-        if (!row.glAccountPath || !row.amount) {
-          setError('All table rows must have GL Account and Amount');
+        if (row.amount && parseFloat(row.amount) > 0 && !row.glAccountPath) {
+          setError('All GL lines with amounts must have an Account selected');
           return;
         }
       }
@@ -182,7 +235,6 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
     try {
       setSubmitting(true);
 
-      // Create FormData to handle file upload
       const formData = new FormData();
       formData.append('template_type', templateType);
       if (templateId) {
@@ -195,14 +247,13 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
         const amountCents = Math.round(parseFloat(amount) * 100);
         formData.append('amount_cents', amountCents.toString());
       } else {
-        // For table template, calculate total from rows
         const totalAmount = tableRows.reduce((sum, row) => {
           const rowAmount = parseFloat(row.amount) || 0;
           return sum + rowAmount;
         }, 0);
         const amountCents = Math.round(totalAmount * 100);
         formData.append('amount_cents', amountCents.toString());
-        formData.append('table_rows', JSON.stringify(tableRows));
+        formData.append('table_rows', JSON.stringify(tableRows.filter(r => parseFloat(r.amount) > 0)));
       }
       
       formData.append('invoice_date', invoiceDate);
@@ -224,7 +275,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
 
       const data = await res.json();
       const allocationCount = data.allocations?.length || data.tableRows?.length || 0;
-      setSuccess(`✅ Invoice ${invoiceNumber} created with ${allocationCount} line item(s)!`);
+      setSuccess(`Invoice ${invoiceNumber} created with ${allocationCount} GL line(s)!`);
 
       // Reset form
       setTemplateType('even_split');
@@ -236,9 +287,8 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
       setDueDate('');
       setDescription('');
       setPdfFile(null);
-      setTableRows([{ id: '1', glAccountPath: '', categoryName: '', className: '', locationName: '', amount: '' }]);
+      setTableRows([{ id: '1', glAccountPath: '', categoryName: '', className: '', locationName: '', amount: '', isEditing: true }]);
 
-      // Close modal and refresh
       setTimeout(() => {
         onSuccess();
         onClose();
@@ -268,15 +318,23 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
       <div style={{
         backgroundColor: 'white',
         borderRadius: '8px',
-        padding: '24px',
-        maxWidth: '500px',
-        width: '90%',
+        maxWidth: '700px',
+        width: '95%',
         maxHeight: '90vh',
         overflowY: 'auto',
         boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+        border: '1px solid #357ab2',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>Create Invoice from Template</h2>
+        {/* Header */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          padding: '16px 20px',
+          borderBottom: '2px solid #357ab2',
+          backgroundColor: '#f8fafc'
+        }}>
+          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold', color: '#357ab2' }}>Create Invoice</h2>
           <button
             onClick={onClose}
             style={{
@@ -285,20 +343,20 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
               fontSize: '24px',
               cursor: 'pointer',
               color: '#666',
+              padding: '0 4px',
             }}
           >
-            ✕
+            ×
           </button>
         </div>
 
         {error && (
           <div style={{
-            backgroundColor: '#fee',
-            color: '#c33',
-            padding: '12px',
-            borderRadius: '4px',
-            marginBottom: '16px',
+            backgroundColor: '#fee2e2',
+            color: '#991b1b',
+            padding: '12px 20px',
             fontSize: '14px',
+            borderBottom: '1px solid #fca5a5',
           }}>
             {error}
           </div>
@@ -306,367 +364,408 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
 
         {success && (
           <div style={{
-            backgroundColor: '#efe',
-            color: '#3c3',
-            padding: '12px',
-            borderRadius: '4px',
-            marginBottom: '16px',
+            backgroundColor: '#d1fae5',
+            color: '#065f46',
+            padding: '12px 20px',
             fontSize: '14px',
+            borderBottom: '1px solid #6ee7b7',
           }}>
             {success}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Template Type Selection */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-              Template Type *
-            </label>
-            <select
-              value={templateType}
-              onChange={(e) => {
-                setTemplateType(e.target.value as 'even_split' | 'table_template');
-                setTemplateId(''); // Reset template selection when type changes
-              }}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '14px',
-              }}
-            >
-              <option value="even_split">Even Split Across All Offices</option>
-              <option value="table_template">Table Template (GL Account/Category/Class/Amount)</option>
-            </select>
+        <form onSubmit={handleSubmit}>
+          {/* Invoice Details Section */}
+          <div style={sectionStyle}>
+            <h3 style={sectionTitleStyle}>Invoice Details</h3>
+            <table style={tableStyle}>
+              <tbody>
+                <tr>
+                  <td style={cellHeaderStyle}>Invoice # *</td>
+                  <td style={cellStyle}>
+                    <input
+                      type="text"
+                      value={invoiceNumber}
+                      onChange={(e) => setInvoiceNumber(e.target.value)}
+                      placeholder="e.g., INV-2025-001"
+                      style={inputStyle}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td style={cellHeaderStyle}>Vendor *</td>
+                  <td style={cellStyle}>
+                    <input
+                      type="text"
+                      value={vendorName}
+                      onChange={(e) => setVendorName(e.target.value)}
+                      placeholder="e.g., Henry Schein"
+                      style={inputStyle}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td style={cellHeaderStyle}>Invoice Date</td>
+                  <td style={cellStyle}>
+                    <input
+                      type="date"
+                      value={invoiceDate}
+                      onChange={(e) => setInvoiceDate(e.target.value)}
+                      style={inputStyle}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td style={cellHeaderStyle}>Due Date</td>
+                  <td style={cellStyle}>
+                    <input
+                      type="date"
+                      value={dueDate}
+                      onChange={(e) => setDueDate(e.target.value)}
+                      style={inputStyle}
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
-          {/* Template Selection (optional for even_split) */}
-          {templateType === 'even_split' && (
-            <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-                Coding Template (Optional)
-              </label>
-              <select
-                value={templateId}
-                onChange={(e) => setTemplateId(e.target.value)}
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                }}
-              >
-                <option value="">None (create new)</option>
-                {templates.filter(t => !t.template_type || t.template_type === 'even_split').map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name} ({t.vendor_name})
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Invoice Number */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-              Invoice Number *
-            </label>
-            <input
-              type="text"
-              value={invoiceNumber}
-              onChange={(e) => setInvoiceNumber(e.target.value)}
-              placeholder="e.g., INV-2025-001"
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '14px',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
-          {/* Vendor Name */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-              Vendor Name *
-            </label>
-            <input
-              type="text"
-              value={vendorName}
-              onChange={(e) => setVendorName(e.target.value)}
-              placeholder="e.g., IT Support Services"
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '14px',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
-          {/* Amount (only for even_split) */}
-          {templateType === 'even_split' && (
-            <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-                Total Amount ($) *
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                }}
-              />
-              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                This amount will be split evenly across all 8 offices
+          {/* GL Lines Section */}
+          <div style={sectionStyle}>
+            <h3 style={sectionTitleStyle}>GL Lines ({templateType === 'even_split' ? '8 offices' : tableRows.length})</h3>
+            
+            {/* Template Type Selection */}
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="templateType"
+                    checked={templateType === 'even_split'}
+                    onChange={() => setTemplateType('even_split')}
+                    style={{ accentColor: '#357ab2' }}
+                  />
+                  <span style={{ fontSize: '14px' }}>Even Split (All 8 Offices)</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="templateType"
+                    checked={templateType === 'table_template'}
+                    onChange={() => setTemplateType('table_template')}
+                    style={{ accentColor: '#357ab2' }}
+                  />
+                  <span style={{ fontSize: '14px' }}>Custom GL Lines</span>
+                </label>
               </div>
             </div>
-          )}
 
-          {/* Table Template UI */}
-          {templateType === 'table_template' && (
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label style={{ display: 'block', fontWeight: '500', fontSize: '14px' }}>
-                  Line Items *
-                </label>
+            {/* Allocation Summary Bar */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '12px 16px',
+              backgroundColor: totalAmount > 0 ? '#ecfdf5' : '#fef2f2',
+              border: `1px solid ${totalAmount > 0 ? '#10b981' : '#ef4444'}`,
+              borderRadius: '6px',
+              marginBottom: '16px'
+            }}>
+              <div style={{ display: 'flex', gap: '24px', fontSize: '14px' }}>
+                <span><strong>Invoice Total:</strong> ${totalAmount.toFixed(2)}</span>
+                <span><strong>Allocated:</strong> ${allocated.toFixed(2)}</span>
+              </div>
+              {totalAmount > 0 ? (
+                <span style={{ 
+                  backgroundColor: '#10b981', 
+                  color: 'white', 
+                  padding: '4px 12px', 
+                  borderRadius: '12px', 
+                  fontSize: '12px',
+                  fontWeight: '600'
+                }}>
+                  ✓ Ready
+                </span>
+              ) : (
+                <span style={{ 
+                  backgroundColor: '#ef4444', 
+                  color: 'white', 
+                  padding: '4px 12px', 
+                  borderRadius: '12px', 
+                  fontSize: '12px',
+                  fontWeight: '600'
+                }}>
+                  Enter Amount
+                </span>
+              )}
+            </div>
+
+            {/* Even Split Mode */}
+            {templateType === 'even_split' && (
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{
+                  padding: '14px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  backgroundColor: '#f8fafc'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: '#357ab2' }}>
+                      GL Line 1
+                    </span>
+                    <span style={{ fontSize: '16px', fontWeight: '600', color: '#10b981' }}>
+                      ${(parseFloat(amount) || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                      Total Amount ($) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="0.00"
+                      style={inputStyle}
+                    />
+                    <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                      This amount will be split evenly across all 8 offices
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#374151' }}>
+                    <strong>Split per office:</strong> ${((parseFloat(amount) || 0) / 8).toFixed(2)}
+                  </div>
+                </div>
+
+                {/* Coding Template Selection */}
+                <div style={{ marginTop: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                    Apply Coding Template (Optional)
+                  </label>
+                  <select
+                    value={templateId}
+                    onChange={(e) => setTemplateId(e.target.value)}
+                    disabled={loading}
+                    style={{
+                      ...inputStyle,
+                      cursor: loading ? 'wait' : 'pointer',
+                    }}
+                  >
+                    <option value="">-- Select a template --</option>
+                    {templates.filter(t => !t.template_type || t.template_type === 'even_split').map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} ({t.vendor_name})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Custom GL Lines Mode */}
+            {templateType === 'table_template' && (
+              <div style={{ marginBottom: '16px' }}>
+                {tableRows.map((row, index) => (
+                  <div key={row.id} style={{
+                    padding: '14px',
+                    border: row.isEditing ? '2px solid #3b82f6' : '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    backgroundColor: row.isEditing ? '#f0f9ff' : '#f8fafc',
+                    marginBottom: '12px'
+                  }}>
+                    {row.isEditing ? (
+                      /* EDIT MODE */
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: '600', color: '#3b82f6' }}>
+                            GL Line {index + 1} (Editing)
+                          </span>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              type="button"
+                              onClick={() => confirmRow(row.id)}
+                              style={{
+                                padding: '4px 12px',
+                                backgroundColor: '#10b981',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                fontWeight: '600'
+                              }}
+                            >
+                              ✓ Done
+                            </button>
+                            {tableRows.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeTableRow(row.id)}
+                                style={{
+                                  padding: '4px 8px',
+                                  backgroundColor: '#fee2e2',
+                                  color: '#991b1b',
+                                  border: '1px solid #fca5a5',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  fontSize: '12px',
+                                  fontWeight: 'bold'
+                                }}
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                          <div style={{ flex: '1 1 200px' }}>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                              Account *
+                            </label>
+                            <input
+                              type="text"
+                              value={row.glAccountPath}
+                              onChange={(e) => updateTableRow(row.id, 'glAccountPath', e.target.value)}
+                              placeholder="e.g., 11010 Dental Equipment"
+                              list={`gl-accounts-${row.id}`}
+                              style={inputStyle}
+                            />
+                            <datalist id={`gl-accounts-${row.id}`}>
+                              {chartOfAccounts.map((account) => (
+                                <option key={account} value={account} />
+                              ))}
+                            </datalist>
+                          </div>
+
+                          <div style={{ flex: '1 1 150px' }}>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                              Class (Location)
+                            </label>
+                            <select
+                              value={row.locationName}
+                              onChange={(e) => updateTableRow(row.id, 'locationName', e.target.value)}
+                              style={inputStyle}
+                            >
+                              <option value="">Select...</option>
+                              {qboLocations.map((loc) => (
+                                <option key={loc.id} value={loc.name}>
+                                  {loc.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div style={{ flex: '0 0 120px' }}>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
+                              Amount ($) *
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={row.amount}
+                              onChange={(e) => updateTableRow(row.id, 'amount', e.target.value)}
+                              placeholder="0.00"
+                              style={inputStyle}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      /* VIEW MODE */
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                              <span style={{ fontSize: '12px', fontWeight: '600', color: '#357ab2' }}>
+                                GL Line {index + 1}
+                              </span>
+                              <span style={{ fontSize: '16px', fontWeight: '600', color: '#10b981' }}>
+                                ${parseFloat(row.amount || '0').toFixed(2)}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>
+                              {row.glAccountPath || 'No account selected'}
+                            </div>
+                            {row.locationName && (
+                              <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                                Class: {row.locationName}
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              type="button"
+                              onClick={() => updateTableRow(row.id, 'isEditing', true)}
+                              style={{
+                                padding: '4px 12px',
+                                backgroundColor: '#f3f4f6',
+                                color: '#374151',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                fontWeight: '500'
+                              }}
+                            >
+                              Edit
+                            </button>
+                            {tableRows.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeTableRow(row.id)}
+                                style={{
+                                  padding: '4px 8px',
+                                  backgroundColor: '#fee2e2',
+                                  color: '#991b1b',
+                                  border: '1px solid #fca5a5',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  fontSize: '12px',
+                                  fontWeight: 'bold'
+                                }}
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+
+                {/* Add GL Line Button */}
                 <button
                   type="button"
                   onClick={addTableRow}
                   style={{
-                    padding: '4px 12px',
-                    border: '1px solid #2563eb',
+                    padding: '8px 16px',
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    border: 'none',
                     borderRadius: '4px',
-                    backgroundColor: '#fff',
-                    color: '#2563eb',
                     cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: '500',
+                    fontSize: '14px',
+                    fontWeight: '500'
                   }}
                 >
-                  + Add Row
+                  + Add GL Line
                 </button>
               </div>
-              <div style={{ overflowX: 'auto', border: '1px solid #ddd', borderRadius: '4px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#f5f5f5' }}>
-                      <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd', fontWeight: '600' }}>GL Account</th>
-                      <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd', fontWeight: '600' }}>Category</th>
-                      <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd', fontWeight: '600' }}>Class (Location)</th>
-                      <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd', fontWeight: '600' }}>Amount ($)</th>
-                      <th style={{ padding: '8px', textAlign: 'center', borderBottom: '1px solid #ddd', fontWeight: '600', width: '50px' }}></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tableRows.map((row) => (
-                      <tr key={row.id}>
-                        <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-                          <input
-                            type="text"
-                            value={row.glAccountPath}
-                            onChange={(e) => updateTableRow(row.id, 'glAccountPath', e.target.value)}
-                            placeholder="e.g., 50000 Expenses: 52110 Dental Supplies"
-                            list={`gl-accounts-${row.id}`}
-                            style={{
-                              width: '100%',
-                              padding: '4px',
-                              border: '1px solid #ddd',
-                              borderRadius: '2px',
-                              fontSize: '12px',
-                            }}
-                          />
-                          <datalist id={`gl-accounts-${row.id}`}>
-                            {chartOfAccounts.map((account) => (
-                              <option key={account} value={account} />
-                            ))}
-                          </datalist>
-                        </td>
-                        <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-                          <select
-                            value={row.categoryName}
-                            onChange={(e) => updateTableRow(row.id, 'categoryName', e.target.value)}
-                            style={{
-                              width: '100%',
-                              padding: '4px',
-                              border: '1px solid #ddd',
-                              borderRadius: '2px',
-                              fontSize: '12px',
-                            }}
-                          >
-                            <option value="">Select...</option>
-                            {qboCategories.map((cat) => (
-                              <option key={cat.id} value={cat.name}>
-                                {cat.name}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-                          <select
-                            value={row.locationName}
-                            onChange={(e) => updateTableRow(row.id, 'locationName', e.target.value)}
-                            style={{
-                              width: '100%',
-                              padding: '4px',
-                              border: '1px solid #ddd',
-                              borderRadius: '2px',
-                              fontSize: '12px',
-                            }}
-                          >
-                            <option value="">Select...</option>
-                            {qboLocations.map((loc) => (
-                              <option key={loc.id} value={loc.name}>
-                                {loc.name}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={row.amount}
-                            onChange={(e) => updateTableRow(row.id, 'amount', e.target.value)}
-                            placeholder="0.00"
-                            style={{
-                              width: '100%',
-                              padding: '4px',
-                              border: '1px solid #ddd',
-                              borderRadius: '2px',
-                              fontSize: '12px',
-                            }}
-                          />
-                        </td>
-                        <td style={{ padding: '8px', borderBottom: '1px solid #eee', textAlign: 'center' }}>
-                          {tableRows.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeTableRow(row.id)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                color: '#dc2626',
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                                padding: '0',
-                                width: '24px',
-                                height: '24px',
-                              }}
-                              title="Remove row"
-                            >
-                              ×
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colSpan={3} style={{ padding: '8px', textAlign: 'right', fontWeight: '600', borderTop: '2px solid #ddd' }}>
-                        Total:
-                      </td>
-                      <td style={{ padding: '8px', fontWeight: '600', borderTop: '2px solid #ddd' }}>
-                        ${tableRows.reduce((sum, row) => sum + (parseFloat(row.amount) || 0), 0).toFixed(2)}
-                      </td>
-                      <td style={{ padding: '8px', borderTop: '2px solid #ddd' }}></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Invoice Date */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-              Invoice Date
-            </label>
-            <input
-              type="date"
-              value={invoiceDate}
-              onChange={(e) => setInvoiceDate(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '14px',
-                boxSizing: 'border-box',
-              }}
-            />
+            )}
           </div>
 
-          {/* Due Date */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-              Due Date
-            </label>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '14px',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-              Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional notes..."
-              rows={3}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '14px',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-              }}
-            />
-          </div>
-
-          {/* PDF Attachment */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-              PDF Attachment
-            </label>
+          {/* Attachments Section */}
+          <div style={sectionStyle}>
+            <h3 style={sectionTitleStyle}>Attachments</h3>
             <div style={{
-              border: '2px dashed #ddd',
-              borderRadius: '4px',
-              padding: '12px',
+              border: '2px dashed #cbd5e0',
+              borderRadius: '6px',
+              padding: '20px',
               textAlign: 'center',
               backgroundColor: pdfFile ? '#f0f9ff' : '#fafafa',
               cursor: 'pointer',
@@ -683,9 +782,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
                     setError('Please select a valid PDF file');
                   }
                 }}
-                style={{
-                  display: 'none',
-                }}
+                style={{ display: 'none' }}
                 id="pdf-input"
               />
               <label
@@ -699,12 +796,12 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
               >
                 {pdfFile ? (
                   <>
-                    <i className="fas fa-file-pdf" style={{ marginRight: '8px', color: '#dc2626' }}></i>
+                    <i className="fas fa-file-pdf" style={{ marginRight: '8px', color: '#dc2626', fontSize: '20px' }}></i>
                     {pdfFile.name}
                   </>
                 ) : (
                   <>
-                    <i className="fas fa-cloud-upload-alt" style={{ marginRight: '8px', color: '#999' }}></i>
+                    <i className="fas fa-cloud-upload-alt" style={{ marginRight: '8px', color: '#999', fontSize: '20px' }}></i>
                     Click to upload PDF or drag and drop
                   </>
                 )}
@@ -712,19 +809,26 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
             </div>
           </div>
 
-          {/* Buttons */}
-          <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+          {/* Action Buttons */}
+          <div style={{ 
+            display: 'flex', 
+            gap: '12px', 
+            padding: '16px 20px',
+            backgroundColor: '#f8fafc',
+            borderTop: '1px solid #e2e8f0'
+          }}>
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
               style={{
                 flex: 1,
-                padding: '10px',
-                border: '1px solid #ddd',
+                padding: '10px 16px',
+                border: '1px solid #d1d5db',
                 borderRadius: '4px',
-                backgroundColor: '#f5f5f5',
-                cursor: 'pointer',
+                backgroundColor: '#ffffff',
+                color: '#374151',
+                cursor: submitting ? 'not-allowed' : 'pointer',
                 fontSize: '14px',
                 fontWeight: '500',
               }}
@@ -736,15 +840,14 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
               disabled={submitting || loading}
               style={{
                 flex: 1,
-                padding: '10px',
+                padding: '10px 16px',
                 border: 'none',
                 borderRadius: '4px',
-                backgroundColor: '#2563eb',
+                backgroundColor: submitting || loading ? '#9ca3af' : '#10b981',
                 color: 'white',
-                cursor: 'pointer',
+                cursor: submitting || loading ? 'not-allowed' : 'pointer',
                 fontSize: '14px',
-                fontWeight: '500',
-                opacity: submitting || loading ? 0.6 : 1,
+                fontWeight: '600',
               }}
             >
               {submitting ? 'Creating...' : 'Create Invoice'}
@@ -755,4 +858,3 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSuccess }: Creat
     </div>
   );
 }
-
