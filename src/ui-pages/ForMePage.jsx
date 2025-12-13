@@ -527,7 +527,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div style={{ marginBottom: '48px' }} className="flex items-center justify-between">
+      <div style={{ marginBottom: '24px' }} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">For Me</h1>
           <p className="text-gray-600 mt-2">
