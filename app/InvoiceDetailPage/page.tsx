@@ -249,7 +249,14 @@ function InvoiceDetailContent() {
             status: foundInvoice.status,
             total: rawTotal,
             approvals: foundInvoice.approvals || {},
-            line_items: Array.isArray(foundInvoice.line_items) ? foundInvoice.line_items : []
+            line_items: Array.isArray(foundInvoice.line_items) ? foundInvoice.line_items : [],
+            // Three-stage status tracking fields
+            coded_at: foundInvoice.coded_at,
+            coded_by_user_id: foundInvoice.coded_by_user_id,
+            approved_at: foundInvoice.approved_at,
+            approved_by_user_id: foundInvoice.approved_by_user_id,
+            paid_at: foundInvoice.paid_at,
+            paid_by_user_id: foundInvoice.paid_by_user_id,
           };
           setInvoice(transformedInvoice);
         } else {
