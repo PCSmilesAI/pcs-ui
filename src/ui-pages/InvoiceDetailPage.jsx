@@ -2879,17 +2879,16 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                 if (p.startsWith('http://') || p.startsWith('https://')) return p;
                 // Already an API path
                 if (p.startsWith('/api/pdf/')) return p;
-                // Extract filename from email_invoices path
-                if (p.includes('email_invoices/')) {
+                // Extract filename from any path that contains a directory
+                // This handles: /email_invoices/file.pdf, /pdfs/file.pdf, email_invoices/file.pdf, etc.
+                if (p.includes('/')) {
                   const filename = p.split('/').pop();
-                  return `/api/pdf/${filename}`;
+                  if (filename && filename.endsWith('.pdf')) {
+                    return `/api/pdf/${filename}`;
+                  }
                 }
                 // If it's just a filename, use the API endpoint
-                if (!p.includes('/')) {
-                  return `/api/pdf/${p}`;
-                }
-                // Otherwise treat as relative path
-                return p;
+                return `/api/pdf/${p}`;
               })()}
               style={{
                 width: '100%',
