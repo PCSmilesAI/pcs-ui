@@ -50,6 +50,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
+    // Load GL Line locations (class names from invoice_categories)
+    try {
+      const { getDatabase } = await import('../../../../lib/db/client');
+      const db = getDatabase();
+      const glLines = db.prepare(`
+        SELECT DISTINCT class_name FROM invoice_categories 
+        WHERE invoice_id = ? AND class_name IS NOT NULL AND class_name != ''
+      `).all(invoice.id) as Array<{ class_name: string }>;
+      
+      if (glLines.length > 0) {
+        invoice.locations = glLines.map(gl => gl.class_name);
+        console.log('[API][INVOICES][TRANSITION]', 'gl_locations_loaded', { invoiceId: String(invoiceId), locations: invoice.locations });
+      }
+    } catch (err) {
+      console.warn('[API][INVOICES][TRANSITION]', 'gl_locations_load_error', { invoiceId: String(invoiceId), error: String(err) });
+    }
+
     const roles = await readRoles();
     const threshold = await getThreshold();
     console.log('[API][INVOICES][TRANSITION]', `transition_request_${action}`, { invoiceId: String(invoiceId), userEmail: user.email });
@@ -75,18 +92,21 @@ export async function POST(req: NextRequest) {
           invoice.office_id = body.office;
         }
 
-        if (status === 'incoming' || status === 'categorized' || status === 'pending') {
+        // Check if user is an admin - admin approval is FINAL and goes directly to to_be_paid
+        const isUserAdmin = await isAdmin(user.email);
+        
+        if (isUserAdmin) {
+          // Admin approval bypasses all intermediate steps and goes directly to to_be_paid
+          console.log('[API][INVOICES][TRANSITION]', 'admin_direct_approval', { invoiceId: String(invoiceId), userEmail: user.email, previousStatus: status });
+          approveAdmin(invoice, { email: user.email, name: user.name });
+        } else if (status === 'incoming' || status === 'categorized' || status === 'pending') {
           approveAP(invoice, { email: user.email, name: user.name }, roles);
         } else if (status === 'awaiting_office_approval') {
           approveOffice(invoice, { email: user.email, name: user.name }, threshold);
         } else if (status === 'awaiting_admin_approval') {
-          // Only admins can approve invoices in awaiting_admin_approval status
-          const isUserAdmin = await isAdmin(user.email);
-          if (!isUserAdmin) {
-            console.log('[API][INVOICES][TRANSITION]', 'admin_approval_unauthorized', { invoiceId: String(invoiceId), userEmail: user.email });
-            return NextResponse.json({ error: 'Only admins can approve invoices at this stage' }, { status: 403 });
-          }
-          approveAdmin(invoice, { email: user.email, name: user.name });
+          // This branch is now only for non-admins, which shouldn't happen
+          console.log('[API][INVOICES][TRANSITION]', 'admin_approval_unauthorized', { invoiceId: String(invoiceId), userEmail: user.email });
+          return NextResponse.json({ error: 'Only admins can approve invoices at this stage' }, { status: 403 });
         } else {
           return NextResponse.json({ error: 'Invoice status does not allow approval at this time' }, { status: 400 });
         }
