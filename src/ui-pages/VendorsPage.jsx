@@ -165,7 +165,7 @@ export default function VendorsPage({ searchQuery = '', filters = {}, onVendorCl
 
   return (
     <div style={wrapperStyle}>
-      <div style={{ marginBottom: '48px' }} className="flex items-center justify-between">
+      <div style={{ marginBottom: '24px' }} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Vendors</h1>
           <p className="text-gray-600 mt-2">

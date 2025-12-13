@@ -287,7 +287,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
 
   return (
     <div style={wrapperStyle}>
-      <div style={{ marginBottom: '48px' }} className="flex items-center justify-between">
+      <div style={{ marginBottom: '24px' }} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Complete</h1>
           <p className="text-gray-600 mt-2">
