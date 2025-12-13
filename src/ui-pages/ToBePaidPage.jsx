@@ -397,7 +397,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
 
   return (
     <div style={wrapperStyle}>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">To Be Paid</h1>
           <p className="text-gray-600 mt-2">
@@ -407,7 +407,20 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         <button
           onClick={handleRefreshInbox}
           disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          style={{
+            padding: '8px 16px',
+            borderRadius: '9999px',
+            fontSize: '14px',
+            fontWeight: 500,
+            border: '1px solid #357ab2',
+            backgroundColor: refreshing ? '#e5e7eb' : '#ffffff',
+            color: refreshing ? '#9ca3af' : '#357ab2',
+            cursor: refreshing ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.2s ease',
+          }}
           title="Check inbox for new invoices"
         >
           <i className={`fas fa-sync-alt ${refreshing ? 'fa-spin' : ''}`}></i>

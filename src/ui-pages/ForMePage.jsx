@@ -492,7 +492,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
 
   return (
     <div style={{ padding: '24px' }}>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">For Me</h1>
           <p className="text-gray-600 mt-2">
@@ -502,7 +502,20 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            style={{
+              padding: '8px 16px',
+              borderRadius: '9999px',
+              fontSize: '14px',
+              fontWeight: 500,
+              border: '1px solid #357ab2',
+              backgroundColor: '#ffffff',
+              color: '#357ab2',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+            }}
             title="Create a new invoice from a template"
           >
             <i className="fas fa-plus"></i>
