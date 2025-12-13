@@ -2971,13 +2971,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           }}>
             <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>
-              📱 Submit Update to PCS AI
+              Submit Update to PCS AI
             </h3>
-            <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#6b7280' }}>
-              Your changes will be saved and sent to Telegram for review.
-              The invoice PDF, before/after details, and GL lines will be included.
-              Add an optional comment to explain what needed fixing.
-            </p>
             <textarea
               value={updateComment}
               onChange={(e) => setUpdateComment(e.target.value)}
