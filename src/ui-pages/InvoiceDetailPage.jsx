@@ -148,7 +148,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       border: '#c084fc',
     },
     to_be_paid: { label: 'To Be Paid', fg: '#047857', bg: '#d1fae5', border: '#34d399' },
-    paid: { label: 'Paid', fg: '#065f46', bg: '#d1fae5', border: '#34d399' },
+    paid: { label: 'Payment Complete', fg: '#065f46', bg: '#d1fae5', border: '#34d399' },
     rejected: { label: 'Rejected', fg: '#b91c1c', bg: '#fee2e2', border: '#f87171' },
     repair: { label: 'Needs Repair', fg: '#92400e', bg: '#fef3c7', border: '#fbbf24' },
   };
@@ -190,22 +190,49 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     { key: 'admin', label: 'Admin' },
   ];
   const renderStatusChip = (size = 'lg') => (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: size === 'lg' ? '6px 14px' : '4px 10px',
-        borderRadius: '9999px',
-        backgroundColor: statusMeta.bg,
-        color: statusMeta.fg,
-        border: `1px solid ${statusMeta.border}`,
-        fontSize: size === 'lg' ? '13px' : '12px',
-        fontWeight: 600,
-        textTransform: 'capitalize',
-      }}
-    >
-      {statusMeta.label}
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: size === 'lg' ? '6px 14px' : '4px 10px',
+          borderRadius: '9999px',
+          backgroundColor: statusMeta.bg,
+          color: statusMeta.fg,
+          border: `1px solid ${statusMeta.border}`,
+          fontSize: size === 'lg' ? '13px' : '12px',
+          fontWeight: 600,
+          textTransform: 'capitalize',
+        }}
+      >
+        {statusMeta.label}
+      </span>
+      {/* Show Receipt link when invoice is paid */}
+      {statusValue === 'paid' && invoice?.id && (
+        <a
+          href={`/payment-receipt/${encodeURIComponent(invoice.id)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '4px 10px',
+            borderRadius: '9999px',
+            backgroundColor: '#f3f4f6',
+            color: '#357ab2',
+            border: '1px solid #357ab2',
+            fontSize: '12px',
+            fontWeight: 500,
+            textDecoration: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <i className="fas fa-receipt" style={{ fontSize: '10px' }}></i>
+          Receipt
+        </a>
+      )}
     </span>
   );
   const formatApprovalTimestamp = (value) => {
@@ -1130,12 +1157,14 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       const userEmail = getUserEmail();
       const isAdmin = await checkIfAdmin(userEmail);
 
-      // Use office_id first (effective value from 3-layer system), then fallback to legacy fields
+      // Check for location in GL Lines first (class field), then fallback to legacy office fields
+      const hasGLLineLocation = invoiceCategories.some(cat => cat.className && cat.className.trim());
       const officeValue = (details?.office || invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '').trim();
+      const hasLocation = hasGLLineLocation || (officeValue && officeValue.toLowerCase() !== 'unknown');
 
-      // Only require office for non-admin users
-      if (!isAdmin && (!officeValue || officeValue.toLowerCase() === 'unknown')) {
-        showToast('Office is required before approval.', 'error');
+      // Only require location for non-admin users
+      if (!isAdmin && !hasLocation) {
+        showToast('Location (Class) is required before approval. Please set it in GL Lines.', 'error');
         return;
       }
     }

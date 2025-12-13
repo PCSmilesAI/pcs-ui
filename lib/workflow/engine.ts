@@ -56,6 +56,13 @@ function parseAmount(raw: unknown): number {
 }
 
 function getInvoiceOffice(invoice: any): string {
+  // First check GL Lines locations (from invoice_categories class names)
+  if (invoice?.locations && Array.isArray(invoice.locations) && invoice.locations.length > 0) {
+    const firstLocation = invoice.locations.find((loc: string) => loc && loc.trim());
+    if (firstLocation) return firstLocation.trim();
+  }
+  
+  // Fallback to legacy office fields
   const office = invoice?.office_location || invoice?.office || invoice?.clinic_id;
   return typeof office === 'string' ? office.trim() : '';
 }

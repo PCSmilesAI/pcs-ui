@@ -299,6 +299,9 @@ export function runMigrations(): void {
 
   // NEW: Invoice reassignment field - tracks current owner/assignee
   ensureColumn('invoices', 'current_assigned_user_email', 'current_assigned_user_email TEXT');
+  
+  // Payment tracking - Stripe transfer ID for payment verification
+  ensureColumn('invoices', 'stripe_transfer_id', 'stripe_transfer_id TEXT');
 
   // Create table_template_rows table for table template type
   db.exec(`

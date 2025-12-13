@@ -1,12 +1,34 @@
 {
-  "vendor": "Unknown",
-  "vendor_name": "Unknown",
-  "invoice_number": "Steven",
+  "vendor": "MegaGen",
+  "vendor_name": "MegaGen",
+  "invoice_number": "PS-INV177040",
   "invoice_date": "9/9/2025",
   "due_date": "10/09/2025",
   "invoice_total": "215.25",
   "office_location": "Roseburg",
-  "line_items": [],
+  "line_items": [
+    {
+      "product_number": "FANIHX5010SC",
+      "product_name": "XPEED AnyRidge Internal Fixture [AR] (C4.0) \u00d85.0/ L10.0",
+      "Quantity": "1",
+      "unit_price": "150.00",
+      "line_item_total": "150.00"
+    },
+    {
+      "product_number": "AANHAF0505",
+      "product_name": "Healing Abutment [AR] \u00d85/ H=5",
+      "Quantity": "1",
+      "unit_price": "44.25",
+      "line_item_total": "44.25"
+    },
+    {
+      "product_number": "PM",
+      "product_name": "Shipping & Handling:2Day PM",
+      "Quantity": "1",
+      "unit_price": "21.00",
+      "line_item_total": "21.00"
+    }
+  ],
   "source_file": "Sales Invoice - PS-INV177040.pdf",
-  "parsed_at": "2025-12-12T18:57:00.928720+00:00"
+  "parsed_at": "2025-12-12T21:57:27.296693+00:00"
 }
