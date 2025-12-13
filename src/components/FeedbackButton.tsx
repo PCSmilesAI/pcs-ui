@@ -8,9 +8,13 @@ interface FeedbackButtonProps {
   position?: 'bottom-right' | 'bottom-left';
 }
 
+type FeedbackType = 'bug' | 'feature';
+
 export default function FeedbackButton({ position = 'bottom-right' }: FeedbackButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<FeedbackType>('bug');
   const [message, setMessage] = useState('');
+  const [featureRequest, setFeatureRequest] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -23,6 +27,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
         if (submitStatus === 'success') {
           setIsOpen(false);
           setMessage('');
+          setFeatureRequest('');
         }
         setSubmitStatus('idle');
         setErrorMessage('');
@@ -34,8 +39,10 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!message.trim()) {
-      setErrorMessage('Please describe the issue');
+    const currentMessage = activeTab === 'bug' ? message : featureRequest;
+    
+    if (!currentMessage.trim()) {
+      setErrorMessage(activeTab === 'bug' ? 'Please describe the issue' : 'Please describe your feature request');
       return;
     }
 
@@ -44,10 +51,11 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
 
     try {
       const payload = {
-        message: message.trim(),
+        type: activeTab,
+        message: currentMessage.trim(),
         url: window.location.href,
-        consoleLogs: getLogsFormatted(),
-        logCount,
+        consoleLogs: activeTab === 'bug' ? getLogsFormatted() : '',
+        logCount: activeTab === 'bug' ? logCount : 0,
         timestamp: new Date().toISOString(),
         userAgent: navigator.userAgent,
         screenSize: `${window.innerWidth}x${window.innerHeight}`,
@@ -78,6 +86,20 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
   const positionStyles = position === 'bottom-right' 
     ? { right: '20px', bottom: '20px' }
     : { left: '20px', bottom: '20px' };
+
+  const tabStyle = (isActive: boolean) => ({
+    flex: 1,
+    padding: '10px 16px',
+    border: 'none',
+    background: isActive ? 'white' : 'transparent',
+    color: isActive ? '#357ab2' : 'rgba(255,255,255,0.8)',
+    fontWeight: isActive ? 600 : 400,
+    fontSize: '14px',
+    cursor: 'pointer',
+    borderRadius: isActive ? '8px 8px 0 0' : '0',
+    marginTop: isActive ? '0' : '4px',
+    transition: 'all 0.2s',
+  });
 
   return (
     <>
@@ -159,38 +181,56 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
               overflow: 'hidden',
             }}
           >
-            {/* Header */}
+            {/* Header with Tabs */}
             <div
               style={{
                 background: '#357ab2',
-                padding: '20px 24px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                padding: '16px 24px 0 24px',
               }}
             >
-              <h2 style={{ margin: 0, color: 'white', fontSize: '20px', fontWeight: 600 }}>
-                Developer Feedback
-              </h2>
-              <button
-                onClick={() => setIsOpen(false)}
-                style={{
-                  background: 'rgba(255,255,255,0.2)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontSize: '18px',
-                }}
-                aria-label="Close"
-              >
-                ✕
-              </button>
+              {/* Title row with close button */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h2 style={{ margin: 0, color: 'white', fontSize: '20px', fontWeight: 600 }}>
+                  Send Feedback
+                </h2>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '18px',
+                  }}
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              {/* Tabs */}
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('bug')}
+                  style={tabStyle(activeTab === 'bug')}
+                >
+                  🐛 Bug Report
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('feature')}
+                  style={tabStyle(activeTab === 'feature')}
+                >
+                  💡 Feature Request
+                </button>
+              </div>
             </div>
 
             {/* Body */}
@@ -210,7 +250,9 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                   }}
                 >
                   <span style={{ fontSize: '18px' }}>✓</span>
-                  Feedback sent! Thank you for helping improve the app.
+                  {activeTab === 'bug' 
+                    ? 'Bug report sent! Thank you for helping improve the app.'
+                    : 'Feature request sent! Thank you for your suggestion.'}
                 </div>
               )}
 
@@ -229,79 +271,127 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                 </div>
               )}
 
-              <div style={{ marginBottom: '16px' }}>
-                <label
-                  htmlFor="feedback-message"
-                  style={{
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontWeight: 500,
-                    color: '#374151',
-                  }}
-                >
-                  What went wrong? <span style={{ color: '#dc2626' }}>*</span>
-                </label>
-                <textarea
-                  id="feedback-message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Describe the bug or issue you encountered..."
-                  required
-                  style={{
-                    width: '100%',
-                    minHeight: '120px',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    border: '2px solid #e5e7eb',
-                    fontSize: '14px',
-                    resize: 'vertical',
-                    fontFamily: 'inherit',
-                    transition: 'border-color 0.2s',
-                    boxSizing: 'border-box',
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#357ab2';
-                    e.target.style.outline = 'none';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#e5e7eb';
-                  }}
-                />
-              </div>
+              {/* Bug Report Tab Content */}
+              {activeTab === 'bug' && (
+                <>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label
+                      htmlFor="feedback-message"
+                      style={{
+                        display: 'block',
+                        marginBottom: '8px',
+                        fontWeight: 500,
+                        color: '#374151',
+                      }}
+                    >
+                      What went wrong? <span style={{ color: '#dc2626' }}>*</span>
+                    </label>
+                    <textarea
+                      id="feedback-message"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Describe the bug or issue you encountered..."
+                      required
+                      style={{
+                        width: '100%',
+                        minHeight: '120px',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '14px',
+                        resize: 'vertical',
+                        fontFamily: 'inherit',
+                        transition: 'border-color 0.2s',
+                        boxSizing: 'border-box',
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#357ab2';
+                        e.target.style.outline = 'none';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e5e7eb';
+                      }}
+                    />
+                  </div>
 
-              {/* Console log indicator */}
-              <div
-                style={{
-                  backgroundColor: '#f3f4f6',
-                  padding: '12px 16px',
-                  borderRadius: '8px',
-                  marginBottom: '20px',
-                  fontSize: '13px',
-                  color: '#6b7280',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <span style={{ fontSize: '16px' }}>📋</span>
-                <span>
-                  {logCount > 0
-                    ? `${logCount} console log${logCount === 1 ? '' : 's'} will be included automatically`
-                    : 'Console logs will be included automatically'}
-                </span>
-              </div>
+                  {/* Console log indicator */}
+                  <div
+                    style={{
+                      backgroundColor: '#f3f4f6',
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      marginBottom: '20px',
+                      fontSize: '13px',
+                      color: '#6b7280',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <span style={{ fontSize: '16px' }}>📋</span>
+                    <span>
+                      {logCount > 0
+                        ? `${logCount} console log${logCount === 1 ? '' : 's'} will be included automatically`
+                        : 'Console logs will be included automatically'}
+                    </span>
+                  </div>
 
-              {/* Current page indicator */}
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: '#9ca3af',
-                  marginBottom: '20px',
-                  wordBreak: 'break-all',
-                }}
-              >
-                Page: {typeof window !== 'undefined' ? window.location.pathname : ''}
-              </div>
+                  {/* Current page indicator */}
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: '#9ca3af',
+                      marginBottom: '20px',
+                      wordBreak: 'break-all',
+                    }}
+                  >
+                    Page: {typeof window !== 'undefined' ? window.location.pathname : ''}
+                  </div>
+                </>
+              )}
+
+              {/* Feature Request Tab Content */}
+              {activeTab === 'feature' && (
+                <div style={{ marginBottom: '20px' }}>
+                  <label
+                    htmlFor="feature-request"
+                    style={{
+                      display: 'block',
+                      marginBottom: '8px',
+                      fontWeight: 500,
+                      color: '#374151',
+                    }}
+                  >
+                    Describe your feature request <span style={{ color: '#dc2626' }}>*</span>
+                  </label>
+                  <textarea
+                    id="feature-request"
+                    value={featureRequest}
+                    onChange={(e) => setFeatureRequest(e.target.value)}
+                    placeholder="What feature would you like to see added? Please be as detailed as possible..."
+                    required
+                    style={{
+                      width: '100%',
+                      minHeight: '150px',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '2px solid #e5e7eb',
+                      fontSize: '14px',
+                      resize: 'vertical',
+                      fontFamily: 'inherit',
+                      transition: 'border-color 0.2s',
+                      boxSizing: 'border-box',
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#357ab2';
+                      e.target.style.outline = 'none';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#e5e7eb';
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Submit Button */}
               <button
@@ -338,8 +428,10 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                   </span>
                 ) : submitStatus === 'success' ? (
                   'Sent!'
+                ) : activeTab === 'bug' ? (
+                  'Send Bug Report'
                 ) : (
-                  'Send Feedback'
+                  'Send Feature Request'
                 )}
               </button>
             </form>
@@ -356,4 +448,3 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
     </>
   );
 }
-
