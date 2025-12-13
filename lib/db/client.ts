@@ -259,6 +259,16 @@ export function runMigrations(): void {
   ensureColumn('invoices', 'coded_by_user_id', 'coded_by_user_id TEXT');
   ensureColumn('invoices', 'coded_at', 'coded_at TEXT');
   ensureColumn('invoices', 'template_type', 'template_type TEXT'); // 'even_split' or 'table_template'
+  
+  // Approval tracking columns
+  ensureColumn('invoices', 'approved_at', 'approved_at TEXT');
+  ensureColumn('invoices', 'approved_by_user_id', 'approved_by_user_id TEXT');
+  ensureColumn('invoices', 'ap_approved_at', 'ap_approved_at TEXT');
+  ensureColumn('invoices', 'ap_approved_by', 'ap_approved_by TEXT');
+  ensureColumn('invoices', 'om_approved_at', 'om_approved_at TEXT');
+  ensureColumn('invoices', 'om_approved_by', 'om_approved_by TEXT');
+  ensureColumn('invoices', 'admin_approved_at', 'admin_approved_at TEXT');
+  ensureColumn('invoices', 'admin_approved_by', 'admin_approved_by TEXT');
 
   // Add template_type to coding_templates table
   ensureColumn('coding_templates', 'template_type', 'template_type TEXT DEFAULT "even_split"');
