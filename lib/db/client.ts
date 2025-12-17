@@ -315,6 +315,11 @@ export function runMigrations(): void {
   // Payment tracking - Stripe transfer ID for payment verification
   ensureColumn('invoices', 'stripe_transfer_id', 'stripe_transfer_id TEXT');
 
+  // Parsing status tracking - for identifying invoices with failed parsing
+  ensureColumn('invoices', 'parsing_status', 'parsing_status TEXT DEFAULT "pending"'); // 'pending' | 'success' | 'failed' | 'partial'
+  ensureColumn('invoices', 'parsing_error', 'parsing_error TEXT'); // Error message if parsing failed
+  ensureColumn('invoices', 'parse_attempts', 'parse_attempts INTEGER DEFAULT 0'); // Number of parse attempts
+
   // Create table_template_rows table for table template type
   db.exec(`
     CREATE TABLE IF NOT EXISTS table_template_rows (
@@ -352,6 +357,7 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_invoice_categories_invoice_id ON invoice_categories(invoice_id);
     CREATE INDEX IF NOT EXISTS idx_table_template_rows_invoice_id ON table_template_rows(invoice_id);
     CREATE INDEX IF NOT EXISTS idx_invoices_assigned_user ON invoices(current_assigned_user_email);
+    CREATE INDEX IF NOT EXISTS idx_invoices_parsing_status ON invoices(parsing_status);
   `);
 
   // Seed clinics table with all 9 locations

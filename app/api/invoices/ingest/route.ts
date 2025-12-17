@@ -18,6 +18,8 @@ interface IngestPayload {
   source_file?: string;
   json_path?: string;
   pdf_path?: string;
+  parsing_status?: 'success' | 'failed' | 'partial';
+  parsing_error?: string;
   [key: string]: any;
 }
 
@@ -95,7 +97,50 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Insert invoice with parsed_* fields
+    // Determine parsing status based on data quality
+    // If parsing_status was provided, use it; otherwise infer from data
+    let parsingStatus = body.parsing_status || 'success';
+    let parsingError = body.parsing_error || null;
+    
+    // Check for parsing issues if status wasn't explicitly set
+    if (!body.parsing_status) {
+      const hasAmount = amountCents > 0;
+      const hasValidInvoiceNumber = body.invoice_number && 
+        !body.invoice_number.startsWith('UNKNOWN-') && 
+        body.invoice_number.trim() !== '';
+      const hasValidVendor = body.vendor && 
+        body.vendor !== 'Unknown' && 
+        body.vendor !== 'Unknown Vendor' &&
+        body.vendor.trim() !== '';
+      
+      if (!hasAmount && !hasValidInvoiceNumber && !hasValidVendor) {
+        parsingStatus = 'failed';
+        parsingError = 'No data extracted from invoice';
+      } else if (!hasAmount) {
+        parsingStatus = 'partial';
+        parsingError = 'Invoice total not extracted';
+      } else if (!hasValidInvoiceNumber) {
+        parsingStatus = 'partial';
+        parsingError = 'Invoice number not extracted';
+      } else if (!hasValidVendor) {
+        parsingStatus = 'partial';
+        parsingError = 'Vendor name not extracted';
+      }
+    }
+
+    // Log parsing issues for monitoring
+    if (parsingStatus !== 'success') {
+      console.warn('[API][INGEST] PARSING_ISSUE:', {
+        status: parsingStatus,
+        error: parsingError,
+        invoice_number: invoice_number,
+        vendor: vendor,
+        amountCents,
+        sourceFile: body.source_file
+      });
+    }
+
+    // Insert invoice with parsed_* fields including parsing status
     db.prepare(`
       INSERT INTO invoices (
         id,
@@ -114,8 +159,11 @@ export async function POST(req: NextRequest) {
         description,
         clinic_id,
         office_location,
-        pdf_path
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        pdf_path,
+        parsing_status,
+        parsing_error,
+        parse_attempts
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       invoice_number,
@@ -133,7 +181,10 @@ export async function POST(req: NextRequest) {
       '',
       body.clinic_id,
       body.office_location,
-      normalizedPdfPath
+      normalizedPdfPath,
+      parsingStatus,
+      parsingError,
+      1  // First parse attempt
     );
 
     // Audit event
@@ -172,6 +223,7 @@ export async function POST(req: NextRequest) {
       vendor: vendor,
       amountCents,
       id,
+      parsingStatus,
       hadMissingFields: !body.invoice_number || !body.vendor
     });
 
@@ -179,7 +231,8 @@ export async function POST(req: NextRequest) {
       ok: true,
       message: 'Invoice ingested successfully',
       id,
-      invoice_number: invoice_number
+      invoice_number: invoice_number,
+      parsing_status: parsingStatus
     });
   } catch (err: any) {
     // Log full error server-side only
