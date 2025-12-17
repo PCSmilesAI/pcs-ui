@@ -13,6 +13,68 @@ function isPathWithinBase(filePath: string, baseDir: string): boolean {
   return resolvedPath.startsWith(resolvedBase + path.sep) || resolvedPath === resolvedBase;
 }
 
+/**
+ * Extract base filename without hash suffix and extension
+ * e.g., "Darby_Invoice_5594577_2a8dacff.pdf" -> "Darby_Invoice_5594577"
+ * e.g., "Patterson  Invoice # 3039224956.PDF" -> "Patterson  Invoice # 3039224956"
+ */
+function getBaseFilename(filename: string): string {
+  // Remove .pdf extension (case insensitive)
+  let base = filename.replace(/\.pdf$/i, '');
+  // Remove hash suffix if present (e.g., _2a8dacff - 8 hex chars)
+  base = base.replace(/_[a-f0-9]{8}$/i, '');
+  return base;
+}
+
+/**
+ * Find matching file in directory with smart matching:
+ * 1. Exact match
+ * 2. Case-insensitive extension match (.PDF -> .pdf)
+ * 3. Base filename match (ignoring hash suffixes)
+ */
+function findMatchingFile(dir: string, requestedFilename: string): string | null {
+  // Check if directory exists first
+  if (!fs.existsSync(dir)) {
+    return null;
+  }
+
+  // 1. Try exact match
+  const exactPath = path.join(dir, requestedFilename);
+  if (fs.existsSync(exactPath)) {
+    return exactPath;
+  }
+
+  // 2. Try case-insensitive extension match (.PDF -> .pdf)
+  if (requestedFilename.endsWith('.PDF')) {
+    const lowerPath = path.join(dir, requestedFilename.slice(0, -4) + '.pdf');
+    if (fs.existsSync(lowerPath)) {
+      return lowerPath;
+    }
+  }
+
+  // 3. Try finding file with same base name + hash suffix
+  // This handles cases where db has "file.pdf" but actual file is "file_abc12345.pdf"
+  try {
+    const baseName = getBaseFilename(requestedFilename);
+    const files = fs.readdirSync(dir);
+    
+    for (const file of files) {
+      // Only consider PDF files
+      if (!file.toLowerCase().endsWith('.pdf')) continue;
+      
+      const fileBase = getBaseFilename(file);
+      if (fileBase.toLowerCase() === baseName.toLowerCase()) {
+        return path.join(dir, file);
+      }
+    }
+  } catch (err) {
+    // Directory read failed, continue to next directory
+    console.warn('[PDF API] Failed to read directory for fuzzy match:', dir, err);
+  }
+
+  return null;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { filename: string } }
@@ -39,11 +101,11 @@ export async function GET(
   let filePath: string | null = null;
   let baseDir: string | null = null;
 
-  // Try each directory until we find the file
+  // Try each directory with smart filename matching
   for (const dir of possibleDirs) {
-    const testPath = path.join(dir, filename);
-    if (fs.existsSync(testPath)) {
-      filePath = testPath;
+    const matchedPath = findMatchingFile(dir, filename);
+    if (matchedPath) {
+      filePath = matchedPath;
       baseDir = dir;
       break;
     }
@@ -66,13 +128,15 @@ export async function GET(
   }
 
   try {
-
     // Read the file
     const fileBuffer = fs.readFileSync(filePath);
 
+    // Use the actual filename from disk for Content-Disposition
+    const actualFilename = path.basename(filePath);
+    
     // Escape filename for Content-Disposition header
     // SECURITY: Escape backslashes first, then quotes to prevent incomplete escaping
-    const escapedFilename = filename.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const escapedFilename = actualFilename.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
     // Return the PDF with appropriate headers
     return new NextResponse(fileBuffer, {
