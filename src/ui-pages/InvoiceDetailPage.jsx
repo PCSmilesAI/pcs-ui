@@ -2179,13 +2179,33 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Vendor</td>
                   <td style={cellStyle}>
                     <SearchableSelect
-                      options={qboVendors}
-                      value={qboVendors.find(v => v.name === details.vendor)?.id || ''}
+                      options={(() => {
+                        // If current vendor exists and isn't in the QBO list, add it as a custom option
+                        const currentVendor = details.vendor;
+                        if (currentVendor && !qboVendors.find(v => v.name === currentVendor && v.id !== '__add_new__')) {
+                          return [
+                            { id: '__add_new__', name: '+ Add New Vendor', displayName: '+ Add New Vendor' },
+                            { id: `__current__`, name: currentVendor, displayName: `${currentVendor} (current)` },
+                            ...qboVendors.filter(v => v.id !== '__add_new__')
+                          ];
+                        }
+                        return qboVendors;
+                      })()}
+                      value={(() => {
+                        const currentVendor = details.vendor;
+                        if (!currentVendor) return '';
+                        const match = qboVendors.find(v => v.name === currentVendor && v.id !== '__add_new__');
+                        if (match) return match.id;
+                        // Return custom ID if vendor exists but not in QBO list
+                        return '__current__';
+                      })()}
                       onChange={(id, displayText) => {
                         if (id === '__add_new__') {
                           setShowAddVendorModal(true);
                         } else {
-                          handleDetailChange('vendor', displayText);
+                          // Remove "(current)" suffix if present
+                          const cleanName = displayText.replace(' (current)', '');
+                          handleDetailChange('vendor', cleanName);
                         }
                       }}
                       placeholder={loadingVendors ? 'Loading vendors...' : 'Select vendor...'}

@@ -9,6 +9,7 @@
  * 
  * Run with: node scripts/fix-pdf-paths.js
  * Dry run (no changes): node scripts/fix-pdf-paths.js --dry-run
+ * Clear missing paths: node scripts/fix-pdf-paths.js --clear-missing
  */
 
 const Database = require('better-sqlite3');
@@ -19,6 +20,7 @@ const path = require('path');
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'pcs_ui_data', 'pcs.db');
 const EMAIL_INVOICES_DIR = process.env.EMAIL_INVOICES_DIR || path.join(__dirname, '..', 'email_invoices');
 const DRY_RUN = process.argv.includes('--dry-run');
+const CLEAR_MISSING = process.argv.includes('--clear-missing');
 
 console.log('='.repeat(60));
 console.log('PDF Path Fixer Script');
@@ -26,6 +28,7 @@ console.log('='.repeat(60));
 console.log(`Database: ${DB_PATH}`);
 console.log(`Email Invoices Dir: ${EMAIL_INVOICES_DIR}`);
 console.log(`Mode: ${DRY_RUN ? 'DRY RUN (no changes)' : 'LIVE (will update database)'}`);
+console.log(`Clear Missing: ${CLEAR_MISSING ? 'YES (will set pdf_path to NULL for missing files)' : 'NO'}`);
 console.log('='.repeat(60));
 
 // Check if paths exist
@@ -179,6 +182,28 @@ if (!DRY_RUN && fixes.length > 0) {
 } else if (DRY_RUN && fixes.length > 0) {
   console.log('\n[DRY RUN] Would update', fixes.length, 'invoice(s)');
   console.log('Run without --dry-run to apply changes');
+}
+
+// Clear missing paths if requested
+if (CLEAR_MISSING && notFound.length > 0) {
+  console.log('\n--- CLEARING MISSING PDF PATHS ---');
+  
+  const clearStmt = db.prepare('UPDATE invoices SET pdf_path = NULL WHERE id = ?');
+  
+  const clearTransaction = db.transaction(() => {
+    for (const nf of notFound) {
+      clearStmt.run(nf.id);
+    }
+  });
+  
+  if (!DRY_RUN) {
+    clearTransaction();
+    console.log(`Cleared pdf_path for ${notFound.length} invoice(s) with missing files`);
+  } else {
+    console.log(`[DRY RUN] Would clear pdf_path for ${notFound.length} invoice(s)`);
+  }
+} else if (!CLEAR_MISSING && notFound.length > 0) {
+  console.log('\nNote: Run with --clear-missing to set pdf_path to NULL for invoices with missing files');
 }
 
 db.close();

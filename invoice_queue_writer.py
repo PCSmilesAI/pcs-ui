@@ -184,6 +184,26 @@ def add_invoice_to_queue(json_file_path):
             log(f"⏭️ Skipped deleted invoice ({skip_reason}): vendor={vendor} invoice={invoice_number}")
             return False
 
+        # Validate parsed data and determine parsing status
+        has_amount = bool(total and total.strip() and total.strip() not in ['0', '0.00', '$0.00', ''])
+        has_invoice_number = bool(invoice_number and invoice_number.strip())
+        has_valid_vendor = bool(vendor and vendor.strip() and vendor.lower() not in ['unknown', 'unknown vendor', ''])
+        
+        if not has_amount and not has_invoice_number and not has_valid_vendor:
+            parsing_status = 'failed'
+            parsing_error = 'No data extracted from invoice'
+            log(f"⚠️ PARSING_FAILED: {json_filename} - No data extracted")
+        elif not has_amount:
+            parsing_status = 'partial'
+            parsing_error = 'Invoice total not extracted'
+            log(f"⚠️ PARSING_PARTIAL: {json_filename} - No amount")
+        elif not has_invoice_number:
+            parsing_status = 'partial'
+            parsing_error = 'Invoice number not extracted'
+        else:
+            parsing_status = 'success'
+            parsing_error = None
+
         # Prepare payload for API
         payload = {
             "invoice_number": invoice_number,
@@ -196,6 +216,8 @@ def add_invoice_to_queue(json_file_path):
             "json_path": json_file_path,
             "pdf_path": pdf_api_path,
             "pdf_fs_path": pdf_fs_path,
+            "parsing_status": parsing_status,
+            "parsing_error": parsing_error,
         }
 
         # Call API to ingest invoice
@@ -203,10 +225,11 @@ def add_invoice_to_queue(json_file_path):
             response = requests.post(INGEST_ENDPOINT, json=payload, timeout=10)
             if response.status_code in [200, 201]:
                 result = response.json()
-                log(f"✅ Ingested invoice {invoice_number} to database")
+                status_icon = "✅" if parsing_status == 'success' else "⚠️" if parsing_status == 'partial' else "❌"
+                log(f"{status_icon} Ingested invoice {invoice_number} to database (parsing: {parsing_status})")
                 log(f"📊 Vendor: {vendor}")
-                log(f"💰 Total: ${total}")
-                log(f"🏥 Clinic: {office_location}")
+                log(f"💰 Total: ${total or 'NOT EXTRACTED'}")
+                log(f"🏥 Clinic: {office_location or 'NOT EXTRACTED'}")
                 return True
             else:
                 log(f"⚠️ API error ingesting {invoice_number}: {response.status_code} {response.text}")
