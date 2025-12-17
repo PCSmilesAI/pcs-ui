@@ -7,6 +7,7 @@ import Toast from '../components/Toast.jsx';
 import { csrfClient } from '../lib/api/csrfClient';
 import { CodingTemplateSelector } from '../../components/invoices/CodingTemplateSelector';
 import SearchableSelect from '../components/SearchableSelect';
+import AddNewVendorModal from '../components/AddNewVendorModal';
 
 // Helper function to get user email from localStorage/cookie
 function getUserEmail() {
@@ -85,6 +86,9 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [allocationSummary, setAllocationSummary] = useState({ totalAmount: 0, allocated: 0, unallocated: 0 });
   const [qboClasses, setQboClasses] = useState([]); // QBO Classes for dropdown
   const [loadingClasses, setLoadingClasses] = useState(false);
+  const [qboVendors, setQboVendors] = useState([]); // QBO Vendors for dropdown
+  const [loadingVendors, setLoadingVendors] = useState(false);
+  const [showAddVendorModal, setShowAddVendorModal] = useState(false); // Add New Vendor modal
   const [toast, setToast] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [loadingPaymentDetails, setLoadingPaymentDetails] = useState(false);
@@ -106,6 +110,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [showUpdateModal, setShowUpdateModal] = useState(false); // NEW: Update confirmation modal
   const [updateComment, setUpdateComment] = useState(''); // NEW: User comment for AI mechanic
   const [showAllocationErrorModal, setShowAllocationErrorModal] = useState(false); // NEW: Allocation error modal
+  const [pdfLoadState, setPdfLoadState] = useState('loading'); // 'loading', 'loaded', 'error'
   
   // Coding Template Creation State
   const [glLinesModified, setGlLinesModified] = useState(false); // Track when GL lines are modified
@@ -126,10 +131,11 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     setToast({ message, variant, at: Date.now() });
   }, []);
 
-  // Load QBO categories and classes on mount
+  // Load QBO categories, classes, and vendors on mount
   useEffect(() => {
     fetchCategories();
     fetchQboClasses();
+    fetchQboVendors();
   }, []);
   const dismissToast = useCallback(() => setToast(null), []);
   const STATUS_META = {
@@ -279,6 +285,11 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       due_date: invoice?.due_date || '',
     });
   }, [invoice]);
+
+  // Reset PDF load state when invoice changes
+  useEffect(() => {
+    setPdfLoadState('loading');
+  }, [invoice?.pdf_path]);
 
   // Load allocations when invoice loads
   useEffect(() => {
@@ -601,6 +612,30 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       console.error('❌ Error fetching QBO classes:', error);
     } finally {
       setLoadingClasses(false);
+    }
+  }
+
+  // Fetch QBO Vendors for dropdown
+  async function fetchQboVendors() {
+    setLoadingVendors(true);
+    try {
+      const response = await fetch('/api/qbo/vendors');
+      if (response.ok) {
+        const data = await response.json();
+        // Add "Add New Vendor" as the first option
+        const vendorOptions = [
+          { id: '__add_new__', name: '+ Add New Vendor', displayName: '+ Add New Vendor' },
+          ...(data.vendors || [])
+        ];
+        setQboVendors(vendorOptions);
+        console.log('✅ QBO Vendors loaded:', data.vendors?.length || 0);
+      } else {
+        console.warn('Failed to load QBO vendors:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching QBO vendors:', error);
+    } finally {
+      setLoadingVendors(false);
     }
   }
 
@@ -2143,18 +2178,21 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Vendor</td>
                   <td style={cellStyle}>
-                    <input
-                      type="text"
-                      value={details.vendor}
-                      onChange={(e) => handleDetailChange('vendor', e.target.value)}
-                      style={{
-                        border: '1px solid #cbd5e0',
-                        borderRadius: '4px',
-                        padding: '4px 8px',
-                        fontSize: '14px',
-                        width: 'calc(100% - 16px)',
-                        boxSizing: 'border-box',
+                    <SearchableSelect
+                      options={qboVendors}
+                      value={qboVendors.find(v => v.name === details.vendor)?.id || ''}
+                      onChange={(id, displayText) => {
+                        if (id === '__add_new__') {
+                          setShowAddVendorModal(true);
+                        } else {
+                          handleDetailChange('vendor', displayText);
+                        }
                       }}
+                      placeholder={loadingVendors ? 'Loading vendors...' : 'Select vendor...'}
+                      displayKey="displayName"
+                      valueKey="id"
+                      disabled={loadingVendors}
+                      style={{ width: '100%' }}
                     />
                   </td>
                 </tr>
@@ -2848,37 +2886,96 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         {/* Right column: PDF viewer */}
         <div style={rightColumnStyle}>
           {invoice?.pdf_path ? (
-            <iframe
-              src={(function() {
-                const p = invoice.pdf_path;
-                if (!p) return '';
-                // Already a full URL
-                if (p.startsWith('http://') || p.startsWith('https://')) return p;
-                // Already an API path
-                if (p.startsWith('/api/pdf/')) return p;
-                // Extract filename from email_invoices path
-                if (p.includes('email_invoices/')) {
+            <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '600px' }}>
+              {/* Loading overlay */}
+              {pdfLoadState === 'loading' && (
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#f8fafc',
+                  zIndex: 1,
+                }}>
+                  <i className="fas fa-spinner fa-spin" style={{ fontSize: '32px', color: '#357ab2', marginBottom: '12px' }}></i>
+                  <span style={{ color: '#666', fontSize: '14px' }}>Loading PDF...</span>
+                </div>
+              )}
+              {/* Error state */}
+              {pdfLoadState === 'error' && (
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#fef2f2',
+                  zIndex: 1,
+                }}>
+                  <i className="fas fa-file-pdf" style={{ fontSize: '48px', color: '#dc2626', marginBottom: '12px' }}></i>
+                  <span style={{ color: '#991b1b', fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>PDF not found</span>
+                  <span style={{ color: '#666', fontSize: '13px', textAlign: 'center', maxWidth: '300px' }}>
+                    The PDF file could not be loaded. It may have been moved or deleted.
+                  </span>
+                </div>
+              )}
+              <iframe
+                src={(function() {
+                  const p = invoice.pdf_path;
+                  if (!p) return '';
+                  // Already a full URL
+                  if (p.startsWith('http://') || p.startsWith('https://')) return p;
+                  // Already an API path
+                  if (p.startsWith('/api/pdf/')) return p;
+                  // Extract filename from email_invoices path
+                  if (p.includes('email_invoices/')) {
+                    const filename = p.split('/').pop();
+                    return `/api/pdf/${filename}`;
+                  }
+                  // If it's just a filename, use the API endpoint
+                  if (!p.includes('/')) {
+                    return `/api/pdf/${p}`;
+                  }
+                  // Otherwise treat as relative path - extract filename and use API
                   const filename = p.split('/').pop();
                   return `/api/pdf/${filename}`;
-                }
-                // If it's just a filename, use the API endpoint
-                if (!p.includes('/')) {
-                  return `/api/pdf/${p}`;
-                }
-                // Otherwise treat as relative path
-                return p;
-              })()}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                minHeight: '600px',
-              }}
-              title="Invoice PDF"
-            />
+                })()}
+                onLoad={() => setPdfLoadState('loaded')}
+                onError={() => setPdfLoadState('error')}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  minHeight: '600px',
+                  display: pdfLoadState === 'error' ? 'none' : 'block',
+                }}
+                title="Invoice PDF"
+              />
+            </div>
           ) : (
-            <div style={{ textAlign: 'center', color: '#666' }}>
-              No PDF available
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              minHeight: '600px',
+              backgroundColor: '#f8fafc',
+            }}>
+              <i className="fas fa-file-alt" style={{ fontSize: '48px', color: '#9ca3af', marginBottom: '12px' }}></i>
+              <span style={{ color: '#6b7280', fontSize: '16px', fontWeight: '500' }}>No PDF attached</span>
+              <span style={{ color: '#9ca3af', fontSize: '13px', marginTop: '4px' }}>
+                This invoice does not have a PDF document
+              </span>
             </div>
           )}
         </div>
@@ -3297,6 +3394,12 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       )}
 
       <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
+      
+      {/* Add New Vendor Modal */}
+      <AddNewVendorModal
+        isOpen={showAddVendorModal}
+        onClose={() => setShowAddVendorModal(false)}
+      />
     </div>
   );
 }

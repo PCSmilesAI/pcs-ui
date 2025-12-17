@@ -460,6 +460,21 @@ export class QBOClient {
       return [];
     }
   }
+
+  async getAllVendors(): Promise<Array<{ id: string; name: string; displayName: string }>> {
+    try {
+      const response = await this.query("SELECT Id, DisplayName FROM Vendor WHERE Active = true");
+      const vendors = response.QueryResponse?.Vendor || [];
+      return (vendors || []).map((v: any) => ({
+        id: v.Id,
+        name: v.DisplayName,
+        displayName: v.DisplayName,
+      }));
+    } catch (error) {
+      console.error('❌ Error getting all vendors:', error);
+      return [];
+    }
+  }
 }
 
 export const qboClient = new QBOClient();
