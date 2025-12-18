@@ -129,7 +129,11 @@ def get_pdf_text(pdf_path: str, force_ocr: bool = False) -> Tuple[str, str]:
 # ============================================================================
 
 def extract_amount_standard(text: str) -> Optional[float]:
-    """Standard amount extraction patterns"""
+    """
+    Standard amount extraction patterns.
+    Looks for amounts directly following total-related keywords.
+    """
+    # Same-line patterns: "Total: $1,234.56" or "Total $1234.56"
     patterns = [
         r"(?:total|amount\s*due|balance\s*due|grand\s*total|invoice\s*total)\s*:?\s*\$?\s*([\d,]+\.?\d*)",
         r"(?:pay\s*this\s*amount|please\s*pay)\s*:?\s*\$?\s*([\d,]+\.?\d*)",
@@ -147,64 +151,177 @@ def extract_amount_standard(text: str) -> Optional[float]:
             except ValueError:
                 continue
     
-    return max(amounts) if amounts else None
+    # Return the LAST match (for multi-page invoices, total is usually at the end)
+    return amounts[-1] if amounts else None
+
+
+def extract_amount_multiline(text: str) -> Optional[float]:
+    """
+    Handle cases where "Total:" and the amount are on separate lines.
+    Common in PDF text extraction.
+    
+    Looks for patterns like:
+        Total:
+        1,932.41
+    """
+    lines = text.split('\n')
+    
+    for i, line in enumerate(lines):
+        line_lower = line.strip().lower()
+        
+        # Look for lines that end with "total" or "total:"
+        # But NOT "subtotal" - we want the final total
+        if (line_lower.endswith('total') or line_lower.endswith('total:') or 
+            line_lower == 'total' or line_lower == 'total:'):
+            
+            # Skip if this is subtotal
+            if 'subtotal' in line_lower or 'sub total' in line_lower:
+                continue
+            
+            # Look at the next few lines for an amount
+            for j in range(i + 1, min(i + 4, len(lines))):
+                next_line = lines[j].strip()
+                
+                # Skip empty lines
+                if not next_line:
+                    continue
+                
+                # Look for a dollar amount
+                match = re.search(r'^\$?\s*([\d,]+\.\d{2})\s*$', next_line)
+                if match:
+                    try:
+                        val = float(match.group(1).replace(',', ''))
+                        if val > 0:
+                            return val
+                    except ValueError:
+                        continue
+                
+                # If we hit another label, stop looking
+                if ':' in next_line or any(word in next_line.lower() for word in ['subtotal', 'tax', 'shipping']):
+                    break
+    
+    return None
+
+
+def extract_amount_near_total(text: str) -> Optional[float]:
+    """
+    Find amounts that appear near "Total" text, even if not on same line.
+    Uses context window approach.
+    """
+    # Find all positions of "Total" (but not Subtotal)
+    total_positions = []
+    for match in re.finditer(r'\btotal\b', text, re.IGNORECASE):
+        # Check it's not part of "subtotal"
+        start = max(0, match.start() - 3)
+        if 'sub' not in text[start:match.start()].lower():
+            total_positions.append(match.end())
+    
+    if not total_positions:
+        return None
+    
+    # For each "Total" position, look for nearby amounts
+    amounts_with_distance = []
+    
+    for pos in total_positions:
+        # Look in the next 50 characters after "Total"
+        search_text = text[pos:pos + 50]
+        matches = re.findall(r'\$?\s*([\d,]+\.\d{2})', search_text)
+        
+        for m in matches:
+            try:
+                val = float(m.replace(',', ''))
+                if val > 0:
+                    amounts_with_distance.append((val, pos))
+            except ValueError:
+                continue
+    
+    if not amounts_with_distance:
+        return None
+    
+    # Return the amount found near the LAST "Total" (for multi-page invoices)
+    amounts_with_distance.sort(key=lambda x: x[1], reverse=True)
+    return amounts_with_distance[0][0]
 
 
 def extract_amount_aggressive(text: str) -> Optional[float]:
     """
-    Aggressive amount extraction - find largest dollar amount on page.
-    Used when standard patterns fail.
+    Aggressive amount extraction - find the largest dollar amount that appears
+    near the end of the document (where totals typically are).
     """
-    # Find all dollar amounts
+    # Split text into roughly last 30% (where totals usually appear)
+    text_length = len(text)
+    last_portion = text[int(text_length * 0.7):]
+    
+    # Find all dollar amounts in the last portion
     pattern = r'\$\s*([\d,]+\.\d{2})'
-    matches = re.findall(pattern, text)
+    matches = re.findall(pattern, last_portion)
     
     amounts = []
     for m in matches:
         try:
             val = float(m.replace(',', ''))
-            # Filter out likely non-total amounts (too small or suspiciously round)
             if val >= 1.00:
                 amounts.append(val)
         except ValueError:
             continue
     
+    # If nothing in last portion, search whole document
+    if not amounts:
+        matches = re.findall(pattern, text)
+        for m in matches:
+            try:
+                val = float(m.replace(',', ''))
+                if val >= 1.00:
+                    amounts.append(val)
+            except ValueError:
+                continue
+    
     if not amounts:
         return None
     
-    # Return the largest amount (most likely the total)
+    # Return the largest amount
     return max(amounts)
 
 
 def extract_amount_from_line_items(text: str) -> Optional[float]:
     """
     Try to sum line items if we can find them.
+    ONLY use this if there's no clear "Total" in the document.
     """
-    # Look for lines with amounts
-    line_amount_pattern = r'^\s*.*?\s+\$?([\d,]+\.\d{2})\s*$'
+    # First, check if there's a Total: in the document
+    # If so, don't use line item summing - it will likely double-count
+    if re.search(r'\btotal\s*:?\s*\$?\s*[\d,]+', text, re.IGNORECASE):
+        return None
     
+    # Look for lines with amounts that look like line items
     amounts = []
-    for line in text.split('\n'):
+    lines = text.split('\n')
+    
+    for line in lines:
         line = line.strip()
-        if not line or len(line) < 5:
+        if not line or len(line) < 10:  # Line items usually have description + amount
             continue
         
-        # Skip header/footer lines
-        skip_words = ['subtotal', 'tax', 'shipping', 'total', 'balance', 'due', 
-                      'invoice', 'date', 'bill to', 'ship to', 'page', 'payment']
+        # Skip header/footer/summary lines
+        skip_words = ['subtotal', 'sub total', 'tax', 'shipping', 'total', 'balance', 'due', 
+                      'invoice', 'date', 'bill to', 'ship to', 'page', 'payment', 'amount due',
+                      'remit', 'customer', 'account']
         if any(skip in line.lower() for skip in skip_words):
             continue
         
-        match = re.search(r'\$?([\d,]+\.\d{2})\s*$', line)
+        # Line should have some text before the amount (product description)
+        match = re.search(r'^.{15,}\s+\$?([\d,]+\.\d{2})\s*(?:TX)?$', line)
         if match:
             try:
                 val = float(match.group(1).replace(',', ''))
-                if 0.01 <= val <= 50000:  # Reasonable line item range
+                # Line items are typically smaller amounts
+                if 0.01 <= val <= 10000:
                     amounts.append(val)
             except ValueError:
                 continue
     
-    if len(amounts) >= 2:  # Need at least 2 line items
+    # Need multiple line items to consider this valid
+    if len(amounts) >= 3:
         total = sum(amounts)
         if total > 0:
             return round(total, 2)
@@ -216,22 +333,39 @@ def extract_amount(text: str, focus_amount: bool = False) -> Tuple[Optional[floa
     """
     Main amount extraction with progressive strategies.
     Returns (amount, strategy_used)
+    
+    Strategy order (from most reliable to least):
+    1. Standard same-line patterns
+    2. Multiline "Total:" followed by amount on next line
+    3. Amount near "Total" text within context window
+    4. Aggressive: largest amount in last 30% of document
+    5. Line item sum (only if no Total found - risky for multi-page)
     """
-    # Strategy 1: Standard patterns
+    # Strategy 1: Standard same-line patterns
     amount = extract_amount_standard(text)
     if amount:
         return amount, 'standard'
     
+    # Strategy 2: Multiline Total: / amount
+    amount = extract_amount_multiline(text)
+    if amount:
+        return amount, 'multiline'
+    
+    # Strategy 3: Amount near "Total" text
+    amount = extract_amount_near_total(text)
+    if amount:
+        return amount, 'near_total'
+    
     if focus_amount:
-        # Strategy 2: Line item sum (only if focusing on amount)
-        amount = extract_amount_from_line_items(text)
-        if amount:
-            return amount, 'line_items_sum'
-        
-        # Strategy 3: Aggressive (largest dollar amount)
+        # Strategy 4: Aggressive (largest in last portion)
         amount = extract_amount_aggressive(text)
         if amount:
             return amount, 'aggressive_largest'
+        
+        # Strategy 5: Line item sum (only if NO Total found in document)
+        amount = extract_amount_from_line_items(text)
+        if amount:
+            return amount, 'line_items_sum'
     
     return None, 'not_found'
 
