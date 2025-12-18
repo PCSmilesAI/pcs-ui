@@ -126,6 +126,10 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [applyingTemplate, setApplyingTemplate] = useState(false);
   
+  // Reparse State (for invoices with parsing errors)
+  const [reparsing, setReparsing] = useState(false);
+  const [reparseResult, setReparseResult] = useState(null);
+  
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -1432,6 +1436,45 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     transitionInvoice('reject');
   }
 
+  // Handle re-parsing an invoice (for invoices with parsing errors)
+  async function handleReparse() {
+    const invoiceId = invoice?.id || invoice?.invoice_number;
+    if (!invoiceId) {
+      showToast('Missing invoice identifier', 'error');
+      return;
+    }
+
+    setReparsing(true);
+    setReparseResult(null);
+
+    try {
+      const response = await csrfClient.post(`/api/invoices/${encodeURIComponent(invoiceId)}/reparse`, {});
+
+      if (!response.ok) {
+        throw new Error(response.error || 'Failed to re-parse invoice');
+      }
+
+      const result = response.data;
+      setReparseResult(result);
+      
+      if (result.parsing_status === 'success') {
+        showToast(`Invoice re-parsed successfully! Amount: $${result.amount || '0.00'}`, 'success');
+        // Reload the page to show updated data
+        setTimeout(() => window.location.reload(), 1500);
+      } else if (result.parsing_status === 'partial') {
+        showToast(`Invoice re-parsed with partial data. ${result.parsing_error || ''}`, 'warning');
+        setTimeout(() => window.location.reload(), 2000);
+      } else {
+        showToast(`Re-parsing failed: ${result.parsing_error || 'Unknown error'}`, 'error');
+      }
+    } catch (err) {
+      console.error('Reparse error:', err);
+      showToast(`Re-parse failed: ${err.message}`, 'error');
+    } finally {
+      setReparsing(false);
+    }
+  }
+
   // Open the Update confirmation modal
   function handleUpdateClick() {
     setShowUpdateModal(true);
@@ -1954,6 +1997,93 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           </button>
         ))}
       </div>
+
+      {/* Parsing Error Warning Banner - Show for failed/partial parses or $0 amounts */}
+      {(invoice?.parsing_status === 'failed' || invoice?.parsing_status === 'partial' || 
+        (invoice?.amount_cents === 0 && invoice?.pdf_path)) && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          marginBottom: '24px',
+          padding: '16px 20px',
+          backgroundColor: '#fef2f2',
+          borderRadius: '8px',
+          border: '1px solid #fca5a5',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            flex: 1,
+          }}>
+            <span style={{ fontSize: '24px' }}>⚠️</span>
+            <div>
+              <div style={{ fontWeight: '600', color: '#b91c1c', marginBottom: '4px' }}>
+                Parsing Issue Detected
+              </div>
+              <div style={{ fontSize: '14px', color: '#7f1d1d' }}>
+                {invoice?.parsing_error || 'This invoice may have incomplete or missing data extracted from the PDF.'}
+                {invoice?.parse_attempts > 0 && (
+                  <span style={{ marginLeft: '8px', color: '#9ca3af', fontSize: '12px' }}>
+                    (Attempted {invoice.parse_attempts} time{invoice.parse_attempts > 1 ? 's' : ''})
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleReparse}
+            disabled={reparsing}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 20px',
+              borderRadius: '6px',
+              fontSize: '14px',
+              fontWeight: '600',
+              border: 'none',
+              backgroundColor: reparsing ? '#9ca3af' : '#357ab2',
+              color: '#ffffff',
+              cursor: reparsing ? 'not-allowed' : 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'background-color 0.2s ease',
+            }}
+          >
+            {reparsing ? (
+              <>
+                <i className="fas fa-spinner fa-spin"></i>
+                Re-parsing...
+              </>
+            ) : (
+              <>
+                <i className="fas fa-robot"></i>
+                Send back to PCS AI Bot
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Reparse Result Message */}
+      {reparseResult && (
+        <div style={{
+          marginBottom: '16px',
+          padding: '12px 16px',
+          borderRadius: '6px',
+          backgroundColor: reparseResult.parsing_status === 'success' ? '#d1fae5' : 
+                          reparseResult.parsing_status === 'partial' ? '#fef3c7' : '#fee2e2',
+          border: `1px solid ${reparseResult.parsing_status === 'success' ? '#34d399' : 
+                              reparseResult.parsing_status === 'partial' ? '#fbbf24' : '#f87171'}`,
+          color: reparseResult.parsing_status === 'success' ? '#047857' : 
+                 reparseResult.parsing_status === 'partial' ? '#92400e' : '#b91c1c',
+        }}>
+          <strong>{reparseResult.message}</strong>
+          {reparseResult.amount && <span style={{ marginLeft: '8px' }}>Amount: ${reparseResult.amount}</span>}
+        </div>
+      )}
 
       {/* NEW: Send to: Reassignment UI */}
       {reassignmentTargets.length > 0 && (
