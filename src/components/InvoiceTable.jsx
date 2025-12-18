@@ -181,9 +181,15 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
       </thead>
       <tbody>
         {sortedRows.map((row, rowIndex) => {
-          // Background colour for hover effect
-          const backgroundColor =
-            hoverIndex === rowIndex ? '#f0f7fc' : '#ffffff';
+          // Check for parsing issues
+          const hasParsingIssue = row.parsing_status === 'failed' || row.parsing_status === 'partial' ||
+            (row.amount_cents === 0 && row.parsing_status !== 'success');
+          
+          // Background colour for hover effect, with red tint for parsing issues
+          const backgroundColor = hasParsingIssue
+            ? (hoverIndex === rowIndex ? '#fef2f2' : '#fff5f5')
+            : (hoverIndex === rowIndex ? '#f0f7fc' : '#ffffff');
+          
           const rowId = getId(row, rowIndex);
           const isChecked = selectable && (selectedIds instanceof Set ? selectedIds.has(rowId) : (selectedIds || []).includes(rowId));
           return (
@@ -214,14 +220,29 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
                   />
                 </td>
               )}
-              {columns.map((col) => {
+              {columns.map((col, colIndex) => {
                 // Center all columns by default
                 let textAlign = col.align || 'center';
+                
+                // Apply red text color for parsing issues
+                const textColor = hasParsingIssue ? '#dc2626' : '#1f1f1f';
+                
+                // Add warning icon to first column if parsing failed
+                const showWarningIcon = hasParsingIssue && colIndex === 0;
+                
                 return (
                   <td
                     key={col.key}
-                    style={{ ...rowCellBase, textAlign }}
+                    style={{ ...rowCellBase, textAlign, color: textColor }}
                   >
+                    {showWarningIcon && (
+                      <span 
+                        style={{ marginRight: '6px', color: '#dc2626' }} 
+                        title={row.parsing_error || 'Parsing issue - data may be incomplete'}
+                      >
+                        ⚠️
+                      </span>
+                    )}
                     {row[col.key]}
                   </td>
                 );

@@ -257,6 +257,10 @@ function InvoiceDetailContent() {
             approved_by_user_id: foundInvoice.approved_by_user_id,
             paid_at: foundInvoice.paid_at,
             paid_by_user_id: foundInvoice.paid_by_user_id,
+            // Parsing status fields
+            parsing_status: foundInvoice.parsing_status,
+            parsing_error: foundInvoice.parsing_error,
+            parse_attempts: foundInvoice.parse_attempts,
           };
           setInvoice(transformedInvoice);
         } else {
