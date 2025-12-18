@@ -9,8 +9,9 @@ export const dynamic = 'force-dynamic';
 // Get the project root directory
 const PROJECT_ROOT = process.env.PROJECT_ROOT || '/var/www/pcs-ui';
 const EMAIL_INVOICES_DIR = process.env.EMAIL_INVOICES_DIR || path.join(PROJECT_ROOT, 'pcs_ui_data', 'email_invoices');
-const OUTPUT_JSONS_DIR = process.env.OUTPUT_JSONS_DIR || path.join(PROJECT_ROOT, 'pcs_ui_data', 'output_jsons');
-const VENDOR_ROUTER_PATH = process.env.VENDOR_ROUTER_PATH || path.join(PROJECT_ROOT, 'vendor_router.py');
+
+// Smart reparse script - ISOLATED from main parsing pipeline
+const SMART_REPARSE_PATH = process.env.SMART_REPARSE_PATH || path.join(PROJECT_ROOT, 'smart_reparse.py');
 
 interface Invoice {
   id: string;
@@ -21,6 +22,27 @@ interface Invoice {
   amount_cents: number | null;
   parsing_status: string | null;
   parse_attempts: number | null;
+  invoice_date: string | null;
+}
+
+interface SmartReparseResult {
+  success: boolean;
+  pdf_path: string;
+  extraction_method: string | null;
+  focus_fields: string[];
+  extracted: {
+    amount?: number;
+    amount_cents?: number;
+    vendor?: string;
+    invoice_date?: string;
+    due_date?: string;
+    invoice_number?: string;
+    office_location?: string;
+  };
+  strategies_used: Record<string, string>;
+  errors: string[];
+  parsing_status?: string;
+  invoice_id?: string;
 }
 
 /**
@@ -70,46 +92,33 @@ function findPdfFile(pdfFilename: string | null): string | null {
 }
 
 /**
- * Find the output JSON file for a parsed PDF
+ * Determine which fields are missing and need focused extraction
  */
-function findOutputJson(pdfPath: string): Record<string, unknown> | null {
-  const pdfFilename = path.basename(pdfPath);
-  const baseName = pdfFilename.replace(/\.pdf$/i, '');
+function getMissingFields(invoice: Invoice): string[] {
+  const missing: string[] = [];
   
-  // Try exact match first
-  const exactPath = path.join(OUTPUT_JSONS_DIR, baseName + '.json');
-  if (fs.existsSync(exactPath)) {
-    try {
-      return JSON.parse(fs.readFileSync(exactPath, 'utf-8'));
-    } catch {
-      return null;
-    }
+  // Check amount - missing if null, 0, or undefined
+  if (!invoice.amount_cents || invoice.amount_cents === 0) {
+    missing.push('amount');
   }
   
-  // Try finding by prefix (in case of hash differences)
-  try {
-    const files = fs.readdirSync(OUTPUT_JSONS_DIR);
-    const baseWithoutHash = baseName.replace(/_[a-f0-9]{8}$/i, '');
-    
-    for (const file of files) {
-      if (file.endsWith('.json')) {
-        const fileBase = file.replace(/\.json$/i, '').replace(/_[a-f0-9]{8}$/i, '');
-        if (fileBase.toLowerCase() === baseWithoutHash.toLowerCase()) {
-          const jsonPath = path.join(OUTPUT_JSONS_DIR, file);
-          return JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-        }
-      }
-    }
-  } catch {
-    return null;
+  // Check vendor - missing if null, empty, or "Unknown"
+  if (!invoice.vendor_name || invoice.vendor_name.trim() === '' || invoice.vendor_name === 'Unknown') {
+    missing.push('vendor');
   }
   
-  return null;
+  // Check date - missing if null or empty
+  if (!invoice.invoice_date) {
+    missing.push('date');
+  }
+  
+  return missing;
 }
 
 /**
  * POST /api/invoices/[id]/reparse
- * Re-parses an invoice's PDF file and updates the database with new data
+ * Re-parses an invoice's PDF file using the ISOLATED smart_reparse.py script.
+ * This does NOT use the main parsing pipeline (vendor_router.py).
  */
 export async function POST(
   req: NextRequest,
@@ -127,10 +136,10 @@ export async function POST(
 
     const db = getDatabase();
 
-    // Get the invoice
+    // Get the invoice with current data
     const invoice = db.prepare(`
       SELECT id, invoice_number, pdf_path, source_file, vendor_name, amount_cents, 
-             parsing_status, parse_attempts
+             parsing_status, parse_attempts, invoice_date
       FROM invoices 
       WHERE id = ? AND deleted = 0
     `).get(id) as Invoice | undefined;
@@ -163,29 +172,60 @@ export async function POST(
       );
     }
 
-    console.log('[REPARSE] Running vendor_router on:', pdfPath);
+    // Determine which fields need focused extraction
+    const missingFields = getMissingFields(invoice);
+    const focusArg = missingFields.length > 0 ? `--focus=${missingFields.join(',')}` : '';
+    
+    // Force OCR if there have been previous failed attempts
+    const forceOcr = (invoice.parse_attempts || 0) >= 1;
+    const ocrArg = forceOcr ? '--force-ocr' : '';
 
-    // Run the vendor_router.py parser
-    let parseSuccess = false;
+    console.log('[REPARSE] Running smart_reparse on:', pdfPath);
+    console.log('[REPARSE] Missing fields:', missingFields);
+    console.log('[REPARSE] Force OCR:', forceOcr);
+
+    // Run the ISOLATED smart_reparse.py script
+    let reparseResult: SmartReparseResult | null = null;
     let parseError = '';
     
     try {
-      execSync(
-        `python3 ${VENDOR_ROUTER_PATH} "${pdfPath}"`,
-        { 
-          cwd: path.dirname(VENDOR_ROUTER_PATH),
-          timeout: 120000, // 2 minute timeout
-          encoding: 'utf-8',
-          stdio: ['pipe', 'pipe', 'pipe']
-        }
-      );
-      parseSuccess = true;
+      const command = `python3 "${SMART_REPARSE_PATH}" "${pdfPath}" ${focusArg} ${ocrArg} --invoice-id="${id}"`;
+      console.log('[REPARSE] Command:', command);
+      
+      const output = execSync(command, { 
+        cwd: path.dirname(SMART_REPARSE_PATH),
+        timeout: 120000, // 2 minute timeout
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      
+      // Parse the JSON output from smart_reparse.py
+      try {
+        reparseResult = JSON.parse(output) as SmartReparseResult;
+      } catch (jsonErr) {
+        console.error('[REPARSE] Failed to parse JSON output:', output);
+        parseError = 'Failed to parse reparse output';
+      }
     } catch (err: unknown) {
-      parseError = err instanceof Error ? err.message : 'Unknown error';
-      console.error('[REPARSE] Parser failed:', parseError);
+      // execSync throws on non-zero exit, but we might still have stdout
+      const execError = err as { stdout?: string; stderr?: string; message?: string };
+      
+      if (execError.stdout) {
+        try {
+          reparseResult = JSON.parse(execError.stdout) as SmartReparseResult;
+        } catch {
+          parseError = execError.message || 'Smart reparse script failed';
+        }
+      } else {
+        parseError = execError.message || 'Smart reparse script failed';
+      }
+      
+      if (execError.stderr) {
+        console.error('[REPARSE] Script stderr:', execError.stderr);
+      }
     }
 
-    if (!parseSuccess) {
+    if (!reparseResult) {
       // Update parsing status to indicate parser failure
       db.prepare(`
         UPDATE invoices 
@@ -197,46 +237,18 @@ export async function POST(
       `).run(parseError.substring(0, 500), id);
 
       return NextResponse.json(
-        { error: 'Parser failed', details: parseError.substring(0, 200) },
+        { error: 'Smart reparse failed', details: parseError.substring(0, 200) },
         { status: 500 }
       );
     }
 
-    // Find and parse the output JSON
-    const jsonData = findOutputJson(pdfPath);
-
-    if (!jsonData) {
-      db.prepare(`
-        UPDATE invoices 
-        SET parsing_status = 'failed',
-            parsing_error = 'No JSON output from parser',
-            parse_attempts = COALESCE(parse_attempts, 0) + 1,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(id);
-
-      return NextResponse.json(
-        { error: 'Parser ran but no output was generated' },
-        { status: 500 }
-      );
-    }
-
-    // Extract data from JSON
-    const vendor = (jsonData.vendor_name as string) || (jsonData.vendor as string) || invoice.vendor_name || '';
-    const total = (jsonData.total as string) || (jsonData.invoice_total as string) || '';
-    const officeLocation = (jsonData.office_location as string) || '';
-    const invoiceDate = (jsonData.invoice_date as string) || '';
-    const dueDate = (jsonData.due_date as string) || '';
-
-    // Parse amount
-    let amountCents = 0;
-    if (total) {
-      const totalStr = String(total).replace(/[^0-9.]/g, '');
-      const totalNum = parseFloat(totalStr);
-      if (!isNaN(totalNum)) {
-        amountCents = Math.round(totalNum * 100);
-      }
-    }
+    // Extract data from the reparse result
+    const extracted = reparseResult.extracted || {};
+    const vendor = extracted.vendor || '';
+    const amountCents = extracted.amount_cents || 0;
+    const officeLocation = extracted.office_location || '';
+    const invoiceDate = extracted.invoice_date || '';
+    const dueDate = extracted.due_date || '';
 
     // Determine parsing status
     const hasAmount = amountCents > 0;
@@ -247,13 +259,16 @@ export async function POST(
     
     if (!hasAmount && !hasVendor) {
       parsingStatus = 'failed';
-      parsingError = 'No data extracted from invoice';
+      parsingError = reparseResult.errors?.join('; ') || 'No data extracted from invoice';
     } else if (!hasAmount) {
       parsingStatus = 'partial';
       parsingError = 'Invoice total not extracted';
+    } else if (!hasVendor) {
+      parsingStatus = 'partial';
+      parsingError = 'Vendor name not extracted';
     }
 
-    // Update database with new data
+    // Update database with new data (only update fields that were extracted)
     db.prepare(`
       UPDATE invoices 
       SET 
@@ -288,17 +303,21 @@ export async function POST(
       id
     );
 
-    // Log the event
+    // Log the event with detailed strategies used
     db.prepare(`
       INSERT INTO invoice_events (invoice_id, action, payload_json)
-      VALUES (?, 'REPARSE', ?)
+      VALUES (?, 'SMART_REPARSE', ?)
     `).run(id, JSON.stringify({
       old_amount_cents: invoice.amount_cents,
       new_amount_cents: amountCents,
       old_vendor: invoice.vendor_name,
       new_vendor: vendor,
       parsing_status: parsingStatus,
-      parse_attempts: (invoice.parse_attempts || 0) + 1
+      parse_attempts: (invoice.parse_attempts || 0) + 1,
+      extraction_method: reparseResult.extraction_method,
+      strategies_used: reparseResult.strategies_used,
+      focus_fields: missingFields,
+      force_ocr: forceOcr
     }));
 
     console.log('[REPARSE] Success:', {
@@ -306,7 +325,8 @@ export async function POST(
       invoiceNumber: invoice.invoice_number,
       amountCents,
       vendor,
-      parsingStatus
+      parsingStatus,
+      strategies: reparseResult.strategies_used
     });
 
     return NextResponse.json({
@@ -316,9 +336,11 @@ export async function POST(
         : 'Invoice re-parsed but some data could not be extracted',
       invoice_number: invoice.invoice_number,
       amount: amountCents > 0 ? (amountCents / 100).toFixed(2) : null,
-      vendor,
+      vendor: vendor || null,
       parsing_status: parsingStatus,
-      parsing_error: parsingError
+      parsing_error: parsingError,
+      extraction_method: reparseResult.extraction_method,
+      strategies_used: reparseResult.strategies_used
     });
 
   } catch (err: unknown) {
@@ -329,4 +351,3 @@ export async function POST(
     );
   }
 }
-
