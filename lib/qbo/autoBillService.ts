@@ -36,7 +36,7 @@ export class AutoBillService {
 
   async processApprovedInvoice(
     invoiceData: InvoiceData,
-    meta: { dryRun?: boolean } = {}
+    meta: { dryRun?: boolean; invoiceId?: string } = {}
   ): Promise<{
     success: boolean;
     billId?: string;
@@ -128,6 +128,7 @@ export class AutoBillService {
         pdfPath: invoiceData.pdf_path || detailedData.pdf_path || detailedData.pdfPath,
         totalAmount: typeof parsedAmount === 'number' ? parsedAmount : undefined,
         dryRun: meta.dryRun,
+        invoiceId: meta.invoiceId || (invoiceData as any).id || (invoiceData as any).invoice_id,
       });
       if (result.success) {
         console.log('✅ AutoBillService: Bill created successfully:', result.billId);

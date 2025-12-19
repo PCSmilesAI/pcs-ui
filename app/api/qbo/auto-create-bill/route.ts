@@ -16,10 +16,13 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log('🔄 Auto-create bill request for invoice:', invoiceData.invoice_number);
+    console.log('🔄 Auto-create bill request for invoice:', invoiceData.invoice_number, 'ID:', invoiceData.id);
 
-    // Process the approved invoice
-    const result = await autoBillService.processApprovedInvoice(invoiceData, { dryRun });
+    // Process the approved invoice - pass invoiceId for GL line lookup
+    const result = await autoBillService.processApprovedInvoice(invoiceData, { 
+      dryRun,
+      invoiceId: invoiceData.id || invoiceData.invoice_id
+    });
 
     if (result.success) {
       return NextResponse.json({

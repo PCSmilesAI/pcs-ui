@@ -1257,6 +1257,66 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               : Number.parseFloat(String(amountValue).replace(/[^0-9.-]/g, '')) || 0;
           setPaymentAmount(`$${parsed.toFixed(2)}`);
         }
+
+        // If invoice status is now 'to_be_paid', automatically create QuickBooks bill
+        if (action === 'approve' && updated.status === 'to_be_paid') {
+          try {
+            console.log('🔄 Invoice approved to to_be_paid - creating QuickBooks bill...');
+            
+            // Check QBO connection first
+            const statusRes = await fetch(`/api/qbo/status?ts=${Date.now()}`, { cache: 'no-store' });
+            const statusJson = await statusRes.json().catch(() => null);
+            const isConnected = !!statusJson?.connected;
+
+            if (!isConnected) {
+              showToast('Invoice approved! QuickBooks not connected - bill not created automatically.', 'warning');
+              if (onBack) onBack();
+              return;
+            }
+
+            // Get the invoice total from amount_cents or fallback
+            const totalAmount = updated.amount_cents 
+              ? (updated.amount_cents / 100).toFixed(2)
+              : (invoice?.amount?.replace(/[^0-9.-]/g, '') || invoice?.total || '0');
+
+            // Create the QBO bill
+            const billResponse = await fetch('/api/qbo/auto-create-bill', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                invoiceData: {
+                  id: updated.id || invoice?.id,
+                  invoice_number: updated.invoice_number || invoice?.invoice_number,
+                  vendor: updated.vendor_name || invoice?.vendor_name || invoice?.vendor,
+                  total: totalAmount,
+                  invoice_date: updated.invoice_date || invoice?.invoice_date,
+                  due_date: updated.due_date || invoice?.due_date,
+                  pdf_path: updated.pdf_path || invoice?.pdf_path,
+                  json_path: updated.json_path || invoice?.json_path,
+                  office: updated.office_id || invoice?.office_id || invoice?.office,
+                  line_items: invoice?.line_items || []
+                }
+              })
+            });
+
+            const billResult = await billResponse.json();
+
+            if (billResult.success) {
+              console.log('✅ QuickBooks bill created successfully:', billResult.billId);
+              const pdfStatus = billResult.pdfAttached ? ' PDF attached.' : '';
+              showToast(`Invoice approved and QBO Bill created! ID: ${billResult.billId}${pdfStatus}`, 'success');
+            } else {
+              console.warn('⚠️ Failed to create QuickBooks bill:', billResult.error);
+              showToast(`Invoice approved, but QBO bill failed: ${billResult.error}`, 'warning');
+            }
+          } catch (billError) {
+            console.error('❌ Error creating QuickBooks bill:', billError);
+            showToast(`Invoice approved, but QBO bill error: ${billError.message}`, 'warning');
+          }
+          
+          if (onBack) onBack();
+          return;
+        }
       }
 
       alert(action === 'approve' ? 'Invoice moved to the next approval step.' : 'Invoice rejected.');
