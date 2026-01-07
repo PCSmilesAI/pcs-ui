@@ -276,7 +276,7 @@ function generateRemittanceHTML(data: RemittanceData): string {
           <div class="section-title">Payment Summary</div>
           <div class="info-box">
             <div class="info-row"><span class="info-label">Payment Date:</span> ${escapeHtml(data.paymentDate)}</div>
-            <div class="info-row"><span class="info-label">Transfer ID:</span> ${escapeHtml(data.transferId)}</div>
+            <div class="info-row"><span class="info-label">Reference #:</span> ${escapeHtml(data.transferId)}</div>
             <div class="info-row"><span class="info-label">Total Amount Paid:</span> <strong>$${data.totalAmount.toFixed(2)}</strong></div>
           </div>
         </div>
@@ -496,7 +496,7 @@ function generateEmailHTML(data: RemittanceData): string {
       <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <p style="margin: 5px 0;"><strong>Total Amount Paid:</strong> $${data.totalAmount.toFixed(2)}</p>
         <p style="margin: 5px 0;"><strong>Payment Date:</strong> ${escapeHtml(data.paymentDate)}</p>
-        <p style="margin: 5px 0;"><strong>Transfer ID:</strong> ${escapeHtml(data.transferId)}</p>
+        <p style="margin: 5px 0;"><strong>Reference #:</strong> ${escapeHtml(data.transferId)}</p>
       </div>
 
       <h3 style="color: #333; margin-top: 20px;">Invoices Paid</h3>
@@ -540,7 +540,7 @@ We have successfully processed payment for the invoices listed below.
 PAYMENT SUMMARY
 Total Amount Paid: $${data.totalAmount.toFixed(2)}
 Payment Date: ${escapeHtml(data.paymentDate)}
-Transfer ID: ${escapeHtml(data.transferId)}
+Reference #: ${escapeHtml(data.transferId)}
 
 INVOICES PAID
 Invoice #            Amount       Due Date

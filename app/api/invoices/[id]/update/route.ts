@@ -5,6 +5,7 @@ import { applyCorrections } from '../../../../../lib/invoices/write';
 import { logRepair } from '../../../../../lib/invoices/repairLogging';
 import { rateLimitByUser } from '../../../../../lib/ratelimit/rateLimiter';
 import { isValidInvoiceId } from '../../../../../lib/security/type-validation';
+import { isAdmin, isAP } from '../../../../../lib/workflow/rolesStore';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,17 @@ export async function POST(
   if (!isValidInvoiceId(invoiceId)) {
     console.warn('[API][INVOICES][UPDATE]', 'invalid_invoice_id', { invoiceId, userEmail: user.email });
     return NextResponse.json({ error: 'Invalid invoice ID' }, { status: 400 });
+  }
+
+  // SECURITY: Only admins and AP managers can update invoices
+  const [isAdminUser, isAPUser] = await Promise.all([
+    isAdmin(user.email),
+    isAP(user.email)
+  ]);
+  
+  if (!isAdminUser && !isAPUser) {
+    console.warn('[API][INVOICES][UPDATE]', 'unauthorized', { userEmail: user.email, invoiceId });
+    return NextResponse.json({ error: 'Unauthorized - only admins and AP managers can update invoices' }, { status: 403 });
   }
 
   // Apply rate limiting per user (500 update requests per minute)
