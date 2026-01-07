@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import NavBar from './NavBar';
 import { InvoiceClickProvider } from '../context/InvoiceClickContext';
 import { InvoiceDataProvider, useInvoiceData } from '../context/InvoiceDataContext';
+import { UserRoleProvider, useUserRole } from '../context/UserRoleContext';
 import FilterPanel from './FilterPanel.jsx'
 import FeedbackButton from './FeedbackButton';
 
@@ -152,10 +153,12 @@ export default function AppLayout({ children }) {
   }
 
   return (
-    <InvoiceDataProvider>
-      <InvoiceClickProvider>
-        {content}
-      </InvoiceClickProvider>
-    </InvoiceDataProvider>
+    <UserRoleProvider>
+      <InvoiceDataProvider>
+        <InvoiceClickProvider>
+          {content}
+        </InvoiceClickProvider>
+      </InvoiceDataProvider>
+    </UserRoleProvider>
   );
 }

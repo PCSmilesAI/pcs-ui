@@ -33,3 +33,6 @@ processed_invoices/
 *.tar.gz
 env
 pcs_ui_data/pcs.db*
+
+# Backup folders
+pcs-ui dec3 copy/

@@ -1,12 +1,8 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useUserRole } from '../context/UserRoleContext';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-
-const ADMIN_EMAILS = new Set([
-  'business@pcsmilesai.com',
-  'mckaym@pcsmiles.com',
-]);
 
 // Navigation bar implemented with inline styles. This component avoids
 // reliance on Tailwind so that styling always appears even when
@@ -22,6 +18,9 @@ function NavBarInner({
   onSearch,
   onLogout
 }) {
+  // Get user permissions from context
+  const { permissions } = useUserRole();
+  
   // Minimal logic-only additions to keep UI identical
   const router = useRouter();
   const pathname = usePathname();
@@ -86,15 +85,22 @@ function NavBarInner({
     }
   }, [sp, userEmail]);
 
-  const isAdminUser = ADMIN_EMAILS.has(userEmail);
+  // Use permissions from context for role-based access
+  const isAdminUser = permissions.isAdmin || permissions.isAPManager;
+  const isOfficeManager = permissions.isOfficeManager && !permissions.isAdmin && !permissions.isAPManager;
 
-  // Tab definitions
-  const tabs = [
-    { label: 'For Me', key: 'forMe' },
-    { label: 'To Be Paid', key: 'toBePaid' },
-    { label: 'Complete', key: 'complete' },
-    { label: 'Vendors', key: 'vendors' },
+  // Tab definitions - filtered based on user role
+  const allTabs = [
+    { label: 'For Me', key: 'forMe', showForOfficeManager: true },
+    { label: 'To Be Paid', key: 'toBePaid', showForOfficeManager: false },
+    { label: 'Complete', key: 'complete', showForOfficeManager: true },
+    { label: 'Vendors', key: 'vendors', showForOfficeManager: false },
   ];
+
+  // Filter tabs based on user role
+  const tabs = isOfficeManager
+    ? allTabs.filter(tab => tab.showForOfficeManager)
+    : allTabs;
 
   // Render a single tab button with inline styles
   const renderTab = (tab) => {
@@ -129,7 +135,7 @@ function NavBarInner({
     );
   };
 
-  // Render All Invoices button
+  // Render All Invoices button (visible to all users)
   const renderAllInvoicesButton = () => {
     const isActive = currentPage === 'allInvoices';
     const baseStyle = {
@@ -308,6 +314,7 @@ function NavBarInner({
           />
           {isAccountOpen && (
             <div style={accountDropdownStyle}>
+              {/* Account - visible to all */}
               <div
                 style={dropdownItemStyle}
                 onClick={() => {
@@ -317,6 +324,7 @@ function NavBarInner({
               >
                 Account
               </div>
+              {/* Company Info - visible to all */}
               <div
                 style={dropdownItemStyle}
                 onClick={() => {
@@ -326,25 +334,32 @@ function NavBarInner({
               >
                 Company Info
               </div>
-              <div
-                style={dropdownItemStyle}
-                onClick={() => {
-                  setIsAccountOpen(false);
-                  onChangePage('payoutAccount');
-                }}
-              >
-                Payout Account
-              </div>
-              <div
-                style={dropdownItemStyle}
-                onClick={() => {
-                  setIsAccountOpen(false);
-                  onChangePage('reports');
-                }}
-              >
-                Reports
-              </div>
+              {/* Payout Account - Admin/AP only */}
               {isAdminUser && (
+                <div
+                  style={dropdownItemStyle}
+                  onClick={() => {
+                    setIsAccountOpen(false);
+                    onChangePage('payoutAccount');
+                  }}
+                >
+                  Payout Account
+                </div>
+              )}
+              {/* Reports - Admin/AP only */}
+              {isAdminUser && (
+                <div
+                  style={dropdownItemStyle}
+                  onClick={() => {
+                    setIsAccountOpen(false);
+                    onChangePage('reports');
+                  }}
+                >
+                  Reports
+                </div>
+              )}
+              {/* Roles - Admin only */}
+              {permissions.canManageRoles && (
                 <div
                   style={dropdownItemStyle}
                   onClick={() => {
@@ -355,6 +370,7 @@ function NavBarInner({
                   Roles
                 </div>
               )}
+              {/* Connections - Admin/AP only */}
               {isAdminUser && (
                 <div
                   style={dropdownItemStyle}
@@ -366,6 +382,7 @@ function NavBarInner({
                   Connections
                 </div>
               )}
+              {/* Coding Templates - Admin/AP only */}
               {isAdminUser && (
                 <div
                   style={dropdownItemStyle}
@@ -380,6 +397,7 @@ function NavBarInner({
                   Coding Templates
                 </div>
               )}
+              {/* Log Out - visible to all */}
               <div
                 style={dropdownItemStyle}
                 onClick={() => {

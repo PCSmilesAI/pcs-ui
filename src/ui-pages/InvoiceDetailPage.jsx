@@ -8,6 +8,7 @@ import { csrfClient } from '../lib/api/csrfClient';
 import { CodingTemplateSelector } from '../../components/invoices/CodingTemplateSelector';
 import SearchableSelect from '../components/SearchableSelect';
 import AddNewVendorModal from '../components/AddNewVendorModal';
+import { useUserRole } from '../context/UserRoleContext';
 
 // Helper function to get user email from localStorage/cookie
 function getUserEmail() {
@@ -53,6 +54,9 @@ async function checkIfAdmin(email) {
  * is available.
  */
 export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext, onInvoiceRejected }) {
+  // Get user permissions from context
+  const { permissions } = useUserRole();
+  
   const invoiceIdentifier = invoice?.id || invoice?.invoice_number || null;
   const invoiceJsonPath = invoice?.json_path || null;
   const invoiceSourceFile = invoice?.source_file || null;
@@ -102,7 +106,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [chatMessages, setChatMessages] = useState([]); // NEW: Chat messages
   const [chatInput, setChatInput] = useState(''); // NEW: Chat input
   const [sendingChat, setSendingChat] = useState(false); // NEW: Chat sending state
-  const [isAdminOrAP, setIsAdminOrAP] = useState(false); // NEW: User authorization check
+  // Use permissions context - isAdminOrAP is derived from permissions
+  const isAdminOrAP = permissions.isAdmin || permissions.isAPManager;
   const [allocations, setAllocations] = useState([]); // NEW: Template allocations
   const [template, setTemplate] = useState(null); // NEW: Applied template info
   const [improveParser, setImproveParser] = useState(false); // NEW: AI Mechanic checkbox
@@ -1053,20 +1058,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       const email = getUserEmail();
       if (!email) return;
       
-      try {
-        const response = await fetch('/api/workflow/config');
-        if (response.ok) {
-          const config = await response.json();
-          const admins = config?.admins || [];
-          const apManagers = config?.ap_managers || [];
-          const normalizedEmail = email.trim().toLowerCase();
-          const isAdmin = admins.map(e => e.trim().toLowerCase()).includes(normalizedEmail);
-          const isAP = apManagers.map(e => e.trim().toLowerCase()).includes(normalizedEmail);
-          setIsAdminOrAP(isAdmin || isAP);
-        }
-      } catch (error) {
-        console.error('Failed to check auth status:', error);
-      }
+      // Role-based access is now handled by UserRoleContext
+      // The isAdminOrAP variable is derived from permissions context above
     };
     checkAuth();
   }, []);
@@ -1455,6 +1448,24 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           
           if (billResult.success) {
             console.log('✅ QuickBooks bill created successfully:', billResult.billId);
+            
+            // Save the QBO Bill ID to the invoice record for Pay button redirect
+            try {
+              const invoiceId = invoice?.id || invoice?.invoice_number;
+              const saveBillIdResponse = await fetch(`${baseUrl}/api/invoices/${encodeURIComponent(invoiceId)}/qbo-bill`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ billId: billResult.billId })
+              });
+              if (saveBillIdResponse.ok) {
+                console.log('✅ QBO Bill ID saved to invoice record');
+              } else {
+                console.warn('⚠️ Failed to save QBO Bill ID to invoice');
+              }
+            } catch (saveBillIdError) {
+              console.warn('⚠️ Error saving QBO Bill ID:', saveBillIdError);
+            }
+            
             const pdfStatus = billResult.pdfAttached ? ' and PDF attached' : ' (PDF not attached)';
             alert(`Invoice approved and QuickBooks bill created! Bill ID: ${billResult.billId}${pdfStatus}`);
           } else {
@@ -1752,59 +1763,33 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }
     setProcessing(true);
     try {
-      // Check if vendor is onboarded
-      const vendorName = invoice?.vendor || invoice?.vendor_name || '';
-      if (!vendorName) {
-        showToast('Vendor information missing.', 'error');
-        setProcessing(false);
-        return;
-      }
-
-      const achResponse = await fetch(`/api/vendors/ach-info?vendor=${encodeURIComponent(vendorName)}`);
-      const achData = await achResponse.json().catch(() => ({}));
-
-      if (!achData.ok) {
-        showToast('Failed to check vendor onboarding status.', 'error');
-        setProcessing(false);
-        return;
-      }
-
-      // Check if vendor is onboarded (ach_status should be 'complete')
-      if (achData.ach_status !== 'complete') {
-        // Show message with button to navigate to vendor page
-        const message = `Vendor "${vendorName}" is not fully onboarded. Please complete their Stripe onboarding before processing payment.`;
-        showToast(message, 'warning');
-
-        // Create a modal-like message with a button
-        const userConfirm = confirm(`${message}\n\nWould you like to go to the Vendor page to complete onboarding?`);
-        if (userConfirm) {
-          // Navigate to vendor detail page
-          window.location.href = `/VendorDetailPage?vendor=${encodeURIComponent(vendorName)}`;
-        }
-        setProcessing(false);
-        return;
-      }
-
-      // Vendor is onboarded, proceed with payment through Stripe
-      showToast('Processing payment...', 'info');
+      // Get QBO Bill Pay redirect URL
+      showToast('Getting QuickBooks payment link...', 'info');
       const response = await csrfClient.post('/api/invoices/pay', { invoiceIds: [invoiceId] });
       const payload = response.data || {};
+      
       if (!response.ok || !payload?.ok) {
-        const errorMsg = payload?.results?.[0]?.error || payload?.error || 'Failed to process payment';
+        const errorMsg = payload?.results?.[0]?.error || payload?.error || 'Failed to get payment link';
         showToast(errorMsg, 'error');
         return;
       }
 
-      // Check if payment was successful
+      // Check if we got a valid QBO Bill Pay URL
       const result = payload.results?.[0];
-      if (result?.ok) {
-        showToast(`✅ Payment processed! Transfer ID: ${result.transferId}`, 'success');
-        if (onBack) onBack();
+      if (result?.ok && result?.payUrl) {
+        showToast('Opening QuickBooks Bill Pay in new tab...', 'success');
+        // Open QBO Bill Pay in a new tab
+        window.open(result.payUrl, '_blank', 'noopener,noreferrer');
+        
+        // Show instructions to user
+        setTimeout(() => {
+          showToast('Complete payment in QuickBooks. The invoice status will update automatically.', 'info');
+        }, 1500);
       } else {
-        showToast(`Payment failed: ${result?.error || 'Unknown error'}`, 'error');
+        showToast(`Unable to get payment link: ${result?.error || 'Unknown error'}`, 'error');
       }
     } catch (err) {
-      showToast(err?.message || 'Unexpected error while marking paid', 'error');
+      showToast(err?.message || 'Unexpected error while getting payment link', 'error');
     } finally {
       setProcessing(false);
     }
@@ -1843,42 +1828,68 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
     }
   }
 
-  // Determine which buttons to show based on invoice status
+  // Determine which buttons to show based on invoice status AND user role
   function getActionButtons() {
     const status = (invoice?.status || 'incoming').toLowerCase();
+    
+    // Role-based access checks
+    const canUpdate = permissions.canUpdateInvoices;
+    const canPay = permissions.canPayInvoices;
+    const canApprove = permissions.canApproveInvoices;
+    const canReject = permissions.canRejectInvoices;
 
     console.log('🔍 InvoiceDetailPage Debug:');
     console.log('  - Invoice Number:', invoice?.invoice_number);
     console.log('  - Status:', status);
-    console.log('  - Full invoice object:', invoice);
+    console.log('  - User Role:', permissions.role);
+    console.log('  - Can Pay:', canPay, 'Can Update:', canUpdate);
 
     if (status === 'removed') {
       return []; // No buttons for removed invoices
     }
 
     if (status === 'completed' || status === 'paid') {
-      return [
-        { label: 'Remove', onClick: handleRemoveCompletely, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } }
-      ];
+      // Only admins/AP can remove completed invoices
+      if (canUpdate) {
+        return [
+          { label: 'Remove', onClick: handleRemoveCompletely, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } }
+        ];
+      }
+      return [];
     }
 
-    // For invoices ready to be paid (to_be_paid status), show Pay button
+    // For invoices ready to be paid (to_be_paid status)
+    // Office managers should NOT see this status (filtered at NavBar level), but handle just in case
     if (status === 'to_be_paid') {
-      return [
-        { label: 'Pay', onClick: handlePaid, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
-        { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
-        { label: 'Update', onClick: handleUpdateClick, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
-      ];
+      const buttons = [];
+      if (canPay) {
+        buttons.push({ label: 'Pay', onClick: handlePaid, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } });
+      }
+      if (canReject) {
+        buttons.push({ label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } });
+      }
+      if (canUpdate) {
+        buttons.push({ label: 'Update', onClick: handleUpdateClick, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } });
+      }
+      return buttons;
     }
 
-    // For all other statuses (incoming, awaiting_office_approval, awaiting_admin_approval, etc.), show Approve
-    const defaultButtons = [
-      { label: 'Approve', onClick: handleApprove, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } },
-      { label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } },
-      { label: 'Update', onClick: handleUpdateClick, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } }
-    ];
+    // For all other statuses (incoming, awaiting_office_approval, awaiting_admin_approval, etc.)
+    const buttons = [];
+    
+    // Office managers can approve/reject but NOT update
+    if (canApprove) {
+      buttons.push({ label: 'Approve', onClick: handleApprove, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } });
+    }
+    if (canReject) {
+      buttons.push({ label: 'Reject', onClick: handleReject, style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } });
+    }
+    // Update button only for admins and AP managers
+    if (canUpdate) {
+      buttons.push({ label: 'Update', onClick: handleUpdateClick, style: { ...actionButtonStyle, backgroundColor: '#d97706', color: '#ffffff', borderColor: '#d97706' } });
+    }
 
-    return defaultButtons;
+    return buttons;
   }
 
   // Basic styles used throughout the detail page
@@ -2287,18 +2298,22 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                   <tr>
                     <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Payment Amount</td>
                     <td style={cellStyle}>
-                      <input
-                        type="text"
-                        value={paymentAmount}
-                        onChange={(e) => setPaymentAmount(e.target.value)}
-                        style={{
-                          border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
-                          padding: '4px 8px',
-                          fontSize: '14px',
-                          width: '80px',
-                        }}
-                      />
+                      {permissions.canEditInvoices ? (
+                        <input
+                          type="text"
+                          value={paymentAmount}
+                          onChange={(e) => setPaymentAmount(e.target.value)}
+                          style={{
+                            border: '1px solid #cbd5e0',
+                            borderRadius: '4px',
+                            padding: '4px 8px',
+                            fontSize: '14px',
+                            width: '80px',
+                          }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: '14px', color: '#2d3748' }}>{paymentAmount}</span>
+                      )}
                     </td>
                     <td style={{ ...cellStyle, fontWeight: '600', color: statusMeta.fg }}>{statusMeta.label}</td>
                   </tr>
@@ -2314,60 +2329,73 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Invoice #</td>
                   <td style={cellStyle}>
-                    <input
-                      type="text"
-                      value={details.invoice}
-                      onChange={(e) => handleDetailChange('invoice', e.target.value)}
-                      style={{
-                        border: '1px solid #cbd5e0',
-                        borderRadius: '4px',
-                        padding: '4px 8px',
-                        fontSize: '14px',
-                        width: 'calc(100% - 16px)',
-                        boxSizing: 'border-box',
-                      }}
-                    />
+                    {permissions.canEditInvoices ? (
+                      <input
+                        type="text"
+                        value={details.invoice}
+                        onChange={(e) => handleDetailChange('invoice', e.target.value)}
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '14px',
+                          width: 'calc(100% - 16px)',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '14px', color: '#2d3748' }}>{details.invoice}</span>
+                    )}
                   </td>
                 </tr>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Invoice Date</td>
                   <td style={cellStyle}>
-                    <input
-                      type="text"
-                      value={details.invoice_date}
-                      onChange={(e) => handleDetailChange('invoice_date', e.target.value)}
-                      style={{
-                        border: '1px solid #cbd5e0',
-                        borderRadius: '4px',
-                        padding: '4px 8px',
-                        fontSize: '14px',
-                        width: 'calc(100% - 16px)',
-                        boxSizing: 'border-box',
-                      }}
-                    />
+                    {permissions.canEditInvoices ? (
+                      <input
+                        type="text"
+                        value={details.invoice_date}
+                        onChange={(e) => handleDetailChange('invoice_date', e.target.value)}
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '14px',
+                          width: 'calc(100% - 16px)',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '14px', color: '#2d3748' }}>{details.invoice_date || 'N/A'}</span>
+                    )}
                   </td>
                 </tr>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Due Date</td>
                   <td style={cellStyle}>
-                    <input
-                      type="text"
-                      value={details.due_date}
-                      onChange={(e) => handleDetailChange('due_date', e.target.value)}
-                      style={{
-                        border: '1px solid #cbd5e0',
-                        borderRadius: '4px',
-                        padding: '4px 8px',
-                        fontSize: '14px',
-                        width: 'calc(100% - 16px)',
-                        boxSizing: 'border-box',
-                      }}
-                    />
+                    {permissions.canEditInvoices ? (
+                      <input
+                        type="text"
+                        value={details.due_date}
+                        onChange={(e) => handleDetailChange('due_date', e.target.value)}
+                        style={{
+                          border: '1px solid #cbd5e0',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '14px',
+                          width: 'calc(100% - 16px)',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '14px', color: '#2d3748' }}>{details.due_date || 'N/A'}</span>
+                    )}
                   </td>
                 </tr>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Vendor</td>
                   <td style={cellStyle}>
+                    {permissions.canEditInvoices ? (
                     <SearchableSelect
                       options={(() => {
                         // If current vendor exists and isn't in the QBO list, add it as a custom option
@@ -2404,6 +2432,9 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                       disabled={loadingVendors}
                       style={{ width: '100%' }}
                     />
+                    ) : (
+                      <span style={{ fontSize: '14px', color: '#2d3748' }}>{details.vendor || 'N/A'}</span>
+                    )}
                   </td>
                 </tr>
               </tbody>
@@ -2814,8 +2845,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
             )}
           </div>
 
-          {/* Apply Coding Template Section (Admin/AP only) */}
-          {isAdminOrAP && !invoice?.is_multi_location && (
+          {/* Apply Coding Template Section (Admin/AP only - hidden from Office Managers) */}
+          {permissions.canUseTemplates && !invoice?.is_multi_location && (
             <div style={sectionStyle}>
               <h2 style={sectionTitleStyle}>Apply Coding Template</h2>
               <CodingTemplateSelector

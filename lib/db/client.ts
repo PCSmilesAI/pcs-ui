@@ -141,9 +141,33 @@ export function runMigrations(): void {
       total REAL,
       invoice_total REAL,
       
+      -- QBO Integration fields
+      qbo_bill_id TEXT,
+      qbo_bill_created_at TEXT,
+      
       UNIQUE(source_message_id)
     );
   `);
+
+  // Migration: Add qbo_bill_id column if it doesn't exist (for existing databases)
+  try {
+    db.exec(`ALTER TABLE invoices ADD COLUMN qbo_bill_id TEXT`);
+    console.log('[DB] Added qbo_bill_id column');
+  } catch (e: any) {
+    // Column already exists, ignore
+    if (!e.message?.includes('duplicate column')) {
+      console.warn('[DB] qbo_bill_id migration:', e.message);
+    }
+  }
+  try {
+    db.exec(`ALTER TABLE invoices ADD COLUMN qbo_bill_created_at TEXT`);
+    console.log('[DB] Added qbo_bill_created_at column');
+  } catch (e: any) {
+    // Column already exists, ignore
+    if (!e.message?.includes('duplicate column')) {
+      console.warn('[DB] qbo_bill_created_at migration:', e.message);
+    }
+  }
   
   // Create invoice_events table for audit trail
   db.exec(`

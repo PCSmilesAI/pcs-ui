@@ -101,15 +101,19 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     }
   }
 
+  // State for bulk payment modal
+  const [showBulkPayModal, setShowBulkPayModal] = useState(false);
+  const [bulkPayResults, setBulkPayResults] = useState([]);
+
   async function bulkUpdate(status, approvedVal) {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
 
     if (status === 'completed') {
-      // Process payments through Stripe
+      // Get QBO Bill Pay URLs for selected invoices
       try {
-        showToast('Processing payments...', 'info');
+        showToast('Getting QuickBooks payment links...', 'info');
 
         const invoiceIds = selectedRows.map(r => r.invoice_number || r.invoice);
         const paymentRes = await fetch('/api/invoices/pay', {
@@ -121,24 +125,36 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         const paymentResult = await paymentRes.json();
 
         if (!paymentResult.ok) {
-          showToast(`Payment failed: ${paymentResult.error}`, 'error');
+          showToast(`Failed to get payment links: ${paymentResult.error}`, 'error');
           return;
         }
 
-        // Show results
-        if (paymentResult.successCount > 0) {
-          showToast(`✅ Successfully paid ${paymentResult.successCount} invoice(s)`, 'success');
+        // Filter successful results with pay URLs
+        const validResults = (paymentResult.results || []).filter(r => r.ok && r.payUrl);
+        const failedResults = (paymentResult.results || []).filter(r => !r.ok);
+
+        if (validResults.length === 0) {
+          if (failedResults.length > 0) {
+            const errors = failedResults.map(r => `${r.invoiceNumber || r.invoiceId}: ${r.error}`).join('; ');
+            showToast(`No valid payment links: ${errors}`, 'error');
+          } else {
+            showToast('No invoices ready for payment', 'warning');
+          }
+          return;
         }
-        if (paymentResult.errorCount > 0) {
-          const errors = paymentResult.results
-            .filter(r => !r.ok)
-            .map(r => `${r.invoiceId}: ${r.error}`)
-            .join('; ');
-          showToast(`⚠️ ${paymentResult.errorCount} payment(s) failed: ${errors}`, 'error');
+
+        // Show bulk payment modal with individual pay buttons
+        setBulkPayResults(validResults);
+        setShowBulkPayModal(true);
+        
+        if (failedResults.length > 0) {
+          showToast(`${validResults.length} ready for payment, ${failedResults.length} not ready`, 'warning');
+        } else {
+          showToast(`${validResults.length} invoice(s) ready for payment in QuickBooks`, 'success');
         }
       } catch (err) {
-        console.error('Error processing payments:', err);
-        showToast(`Payment error: ${err.message}`, 'error');
+        console.error('Error getting payment links:', err);
+        showToast(`Error: ${err.message}`, 'error');
         return;
       }
     } else if (status === 'rejected') {
@@ -155,6 +171,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
 
     setSelectedIds(new Set());
     await reloadList();
+  }
+
+  // Handle opening a single QBO Bill Pay URL from bulk modal
+  function handleOpenQboPay(payUrl) {
+    window.open(payUrl, '_blank', 'noopener,noreferrer');
   }
   
 
@@ -468,6 +489,120 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         }}
       />
       <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
+      
+      {/* Bulk Payment Modal for QBO Bill Pay */}
+      {showBulkPayModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
+                Pay in QuickBooks
+              </h2>
+              <button
+                onClick={() => setShowBulkPayModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                }}
+              >
+                ×
+              </button>
+            </div>
+            
+            <p style={{ color: '#6b7280', marginBottom: '16px' }}>
+              Click each button to open QuickBooks and pay that invoice. Complete each payment in QuickBooks.
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {bulkPayResults.map((result, index) => (
+                <div
+                  key={result.invoiceId || index}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px 16px',
+                    backgroundColor: '#f9fafb',
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 500, color: '#111827' }}>
+                      {result.invoiceNumber || result.invoiceId}
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      {result.vendorName} • ${result.amount}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleOpenQboPay(result.payUrl)}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#059669',
+                      color: '#fff',
+                      borderRadius: '9999px',
+                      border: 'none',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <i className="fas fa-external-link-alt" style={{ fontSize: '12px' }}></i>
+                    Pay in QBO
+                  </button>
+                </div>
+              ))}
+            </div>
+            
+            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowBulkPayModal(false);
+                  setBulkPayResults([]);
+                  reloadList();
+                }}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#357ab2',
+                  color: '#fff',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
