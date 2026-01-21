@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 interface VendorKnowledgeBase {
   id: string;
@@ -315,9 +316,9 @@ export default function KnowledgeBasePage() {
 
   if (!isAdmin && loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-6xl mx-auto bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600">Verifying access...</p>
+      <div style={{ padding: '24px' }}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-gray-600">Verifying access...</div>
         </div>
       </div>
     );
@@ -325,9 +326,9 @@ export default function KnowledgeBasePage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-6xl mx-auto bg-white rounded-lg shadow p-6">
-          <p className="text-red-600 font-semibold">Access Denied</p>
+      <div style={{ padding: '24px' }}>
+        <div className="flex flex-col items-center justify-center h-64">
+          <p className="text-lg text-red-600 font-semibold">Access Denied</p>
           <p className="text-gray-600 mt-2">Only admins can access this page. Redirecting...</p>
         </div>
       </div>
@@ -335,77 +336,93 @@ export default function KnowledgeBasePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Knowledge Base</h1>
-                <p className="text-sm text-gray-500 mt-1">
-                  Configure GPT-5 nano parsing prompts and training history for each vendor
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                {/* GPT Status Indicator */}
-                <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
-                  gptStatus?.connected 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  <span className={`w-2 h-2 rounded-full ${
-                    gptStatus?.connected ? 'bg-green-500' : 'bg-red-500'
-                  }`} />
-                  {gptStatus?.connected ? `GPT Connected (${gptStatus.model})` : 'GPT Disconnected'}
-                </div>
-                <button
-                  onClick={fetchData}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Refresh
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Alerts */}
-          {error && (
-            <div className="px-6 py-3 bg-red-50 border-b border-red-200">
-              <p className="text-red-800">{error}</p>
-            </div>
-          )}
-          {successMessage && (
-            <div className="px-6 py-3 bg-green-50 border-b border-green-200">
-              <p className="text-green-800">{successMessage}</p>
-            </div>
-          )}
+    <div style={{ padding: '24px' }}>
+      {/* Header */}
+      <div style={{ marginBottom: '24px' }} className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Knowledge Base</h1>
+          <p className="text-gray-600 mt-2">
+            Configure GPT-5 nano parsing prompts for each vendor
+          </p>
         </div>
+        <div className="flex items-center gap-4">
+          {/* GPT Status Indicator */}
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
+            gptStatus?.connected 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-red-100 text-red-800'
+          }`}>
+            <span className={`w-2 h-2 rounded-full ${
+              gptStatus?.connected ? 'bg-green-500' : 'bg-red-500'
+            }`} />
+            {gptStatus?.connected ? `GPT Connected (${gptStatus.model})` : 'GPT Disconnected'}
+          </div>
+          <button
+            onClick={fetchData}
+            disabled={loading}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '9999px',
+              fontSize: '14px',
+              fontWeight: 500,
+              border: '1px solid #357ab2',
+              backgroundColor: loading ? '#e5e7eb' : '#ffffff',
+              color: loading ? '#9ca3af' : '#357ab2',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
+      </div>
+
+      {/* Alerts */}
+      {error && (
+        <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
+      {successMessage && (
+        <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-green-800">{successMessage}</p>
+        </div>
+      )}
 
         {loading ? (
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-gray-600">Loading knowledge bases...</p>
+          <div className="flex items-center justify-center h-64">
+            <div className="text-lg text-gray-600">Loading knowledge bases...</div>
           </div>
         ) : (
           <>
             {/* Training Prompt Section */}
-            <div className="bg-white rounded-lg shadow mb-6">
-              <div className="px-6 py-4 border-b border-gray-200 bg-purple-50">
+            <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: '#f3e8ff' }}>
                 <div className="flex justify-between items-center">
                   <div>
-                    <h2 className="text-lg font-semibold text-purple-900">Training Prompt</h2>
-                    <p className="text-sm text-purple-700">
-                      This prompt is sent to GPT when admin corrections are made to update vendor knowledge bases
+                    <h2 className="text-lg font-semibold" style={{ color: '#581c87' }}>Training Prompt</h2>
+                    <p className="text-sm" style={{ color: '#7e22ce' }}>
+                      Sent to GPT when admin corrections are made
                     </p>
                   </div>
                   <button
                     onClick={saveTrainingPrompt}
                     disabled={saving || editedTrainingPrompt === trainingPrompt?.prompt_text}
-                    className={`px-4 py-2 rounded-md text-white ${
-                      saving || editedTrainingPrompt === trainingPrompt?.prompt_text
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-purple-600 hover:bg-purple-700'
-                    }`}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '9999px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      border: saving || editedTrainingPrompt === trainingPrompt?.prompt_text ? '1px solid #9ca3af' : '1px solid #7c3aed',
+                      backgroundColor: saving || editedTrainingPrompt === trainingPrompt?.prompt_text ? '#e5e7eb' : '#7c3aed',
+                      color: saving || editedTrainingPrompt === trainingPrompt?.prompt_text ? '#9ca3af' : '#ffffff',
+                      cursor: saving || editedTrainingPrompt === trainingPrompt?.prompt_text ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
                   >
                     {saving ? 'Saving...' : 'Save Training Prompt'}
                   </button>
@@ -415,7 +432,7 @@ export default function KnowledgeBasePage() {
                 <textarea
                   value={editedTrainingPrompt}
                   onChange={(e) => setEditedTrainingPrompt(e.target.value)}
-                  className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full h-48 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Enter the training prompt..."
                 />
                 <p className="text-xs text-gray-500 mt-2">
@@ -426,23 +443,23 @@ export default function KnowledgeBasePage() {
 
             {/* Training History Summary */}
             {historyStats && historyStats.total_entries > 0 && (
-              <div className="bg-white rounded-lg shadow mb-6">
-                <div className="px-6 py-4 border-b border-gray-200 bg-green-50">
+              <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: '#dcfce7' }}>
                   <div className="flex justify-between items-center">
                     <div>
-                      <h2 className="text-lg font-semibold text-green-900">Training History Database</h2>
-                      <p className="text-sm text-green-700">
-                        Historical invoices used as few-shot examples for AI parsing
+                      <h2 className="text-lg font-semibold" style={{ color: '#14532d' }}>Training History</h2>
+                      <p className="text-sm" style={{ color: '#166534' }}>
+                        Historical invoices used as examples for AI parsing
                       </p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-green-800">{historyStats.total_entries}</p>
-                        <p className="text-xs text-green-600">Total Examples</p>
+                        <p className="text-2xl font-bold" style={{ color: '#166534' }}>{historyStats.total_entries}</p>
+                        <p className="text-xs" style={{ color: '#15803d' }}>Total Examples</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-green-800">{historyStats.total_vendors}</p>
-                        <p className="text-xs text-green-600">Vendors</p>
+                        <p className="text-2xl font-bold" style={{ color: '#166534' }}>{historyStats.total_vendors}</p>
+                        <p className="text-xs" style={{ color: '#15803d' }}>Vendors</p>
                       </div>
                     </div>
                   </div>
@@ -455,7 +472,7 @@ export default function KnowledgeBasePage() {
                       .map((vendor) => (
                         <div
                           key={vendor.vendor_name}
-                          className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+                          className="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
                         >
                           <p className="font-medium text-gray-900 truncate" title={vendor.vendor_name}>
                             {vendor.vendor_name}
@@ -463,7 +480,7 @@ export default function KnowledgeBasePage() {
                           <p className="text-sm text-gray-500">
                             {vendor.entry_count} examples
                             {vendor.corrected_count > 0 && (
-                              <span className="text-orange-600"> ({vendor.corrected_count} corrected)</span>
+                              <span style={{ color: '#ea580c' }}> ({vendor.corrected_count} corrected)</span>
                             )}
                           </p>
                         </div>
@@ -474,21 +491,18 @@ export default function KnowledgeBasePage() {
                       +{historyStats.vendors.length - 8} more vendors with training data
                     </p>
                   )}
-                  <p className="text-xs text-gray-400 mt-4">
-                    Invoices are automatically added to history when approved or paid. The 5 most recent examples per vendor are used as context for parsing new invoices.
-                  </p>
                 </div>
               </div>
             )}
 
             {/* Vendor Knowledge Bases Section */}
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-white rounded-lg shadow overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-lg font-semibold text-gray-900">Vendor Knowledge Bases</h2>
                     <p className="text-sm text-gray-500">
-                      {knowledgeBases.length} vendors configured
+                      {knowledgeBases.length} vendor{knowledgeBases.length !== 1 ? 's' : ''} configured
                     </p>
                   </div>
                   
@@ -499,7 +513,8 @@ export default function KnowledgeBasePage() {
                       placeholder="Search vendors..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      style={{ minWidth: '200px' }}
                     />
                   </div>
                 </div>
@@ -513,16 +528,23 @@ export default function KnowledgeBasePage() {
                     placeholder="New vendor name..."
                     value={newVendorName}
                     onChange={(e) => setNewVendorName(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 flex-grow"
+                    className="px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-green-500 focus:border-transparent flex-grow"
                   />
                   <button
                     onClick={createNewVendorKB}
                     disabled={saving || !newVendorName.trim()}
-                    className={`px-4 py-2 rounded-md text-white ${
-                      saving || !newVendorName.trim()
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-green-600 hover:bg-green-700'
-                    }`}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '9999px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      border: saving || !newVendorName.trim() ? '1px solid #9ca3af' : '1px solid #16a34a',
+                      backgroundColor: saving || !newVendorName.trim() ? '#e5e7eb' : '#16a34a',
+                      color: saving || !newVendorName.trim() ? '#9ca3af' : '#ffffff',
+                      cursor: saving || !newVendorName.trim() ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s ease',
+                      whiteSpace: 'nowrap',
+                    }}
                   >
                     + Add Vendor
                   </button>
@@ -599,7 +621,7 @@ export default function KnowledgeBasePage() {
                             <textarea
                               value={currentPrompt}
                               onChange={(e) => handleKBEdit(kb.vendor_name, e.target.value)}
-                              className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              className="w-full h-48 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               onClick={(e) => e.stopPropagation()}
                             />
                             <div className="flex justify-between items-center mt-4">
@@ -608,7 +630,17 @@ export default function KnowledgeBasePage() {
                                   e.stopPropagation();
                                   deleteVendorKB(kb.vendor_name);
                                 }}
-                                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-md"
+                                style={{
+                                  padding: '8px 16px',
+                                  borderRadius: '9999px',
+                                  fontSize: '14px',
+                                  fontWeight: 500,
+                                  border: '1px solid #dc2626',
+                                  backgroundColor: '#ffffff',
+                                  color: '#dc2626',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                }}
                               >
                                 Delete
                               </button>
@@ -623,7 +655,17 @@ export default function KnowledgeBasePage() {
                                         return newState;
                                       });
                                     }}
-                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                                    style={{
+                                      padding: '8px 16px',
+                                      borderRadius: '9999px',
+                                      fontSize: '14px',
+                                      fontWeight: 500,
+                                      border: '1px solid #6b7280',
+                                      backgroundColor: '#ffffff',
+                                      color: '#6b7280',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s ease',
+                                    }}
                                   >
                                     Reset
                                   </button>
@@ -634,11 +676,17 @@ export default function KnowledgeBasePage() {
                                     saveVendorKB(kb.vendor_name);
                                   }}
                                   disabled={saving || !hasChanges}
-                                  className={`px-4 py-2 rounded-md text-white ${
-                                    saving || !hasChanges
-                                      ? 'bg-gray-400 cursor-not-allowed'
-                                      : 'bg-blue-600 hover:bg-blue-700'
-                                  }`}
+                                  style={{
+                                    padding: '8px 16px',
+                                    borderRadius: '9999px',
+                                    fontSize: '14px',
+                                    fontWeight: 500,
+                                    border: saving || !hasChanges ? '1px solid #9ca3af' : '1px solid #357ab2',
+                                    backgroundColor: saving || !hasChanges ? '#e5e7eb' : '#357ab2',
+                                    color: saving || !hasChanges ? '#9ca3af' : '#ffffff',
+                                    cursor: saving || !hasChanges ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s ease',
+                                  }}
                                 >
                                   {saving ? 'Saving...' : 'Save Changes'}
                                 </button>
@@ -654,19 +702,17 @@ export default function KnowledgeBasePage() {
             </div>
 
             {/* Info Box */}
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-blue-900 mb-2">How the AI Training System Works</h2>
-              <ul className="text-sm text-blue-800 space-y-2">
-                <li><strong>Knowledge Base Prompts:</strong> Each vendor has a master prompt that GPT-5 nano uses when parsing their invoices</li>
-                <li><strong>Historical Examples:</strong> When parsing, GPT also receives up to 5 recent correctly-parsed invoices from that vendor as reference examples</li>
-                <li><strong>Automatic Learning:</strong> When an admin corrects invoice fields and clicks Update, GPT analyzes why parsing failed by comparing with historical examples, then updates the master prompt</li>
-                <li><strong>Continuous Improvement:</strong> The corrected invoice is automatically added to the training history, making future parsing more accurate</li>
-                <li><strong>History Database:</strong> Invoices are auto-added to history when they reach &quot;To Be Paid&quot; or &quot;Paid&quot; status</li>
+            <div className="mt-6 bg-white rounded-lg shadow p-6 border-l-4" style={{ borderLeftColor: '#357ab2' }}>
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">How the AI Training System Works</h2>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li><strong className="text-gray-800">Knowledge Base Prompts:</strong> Each vendor has a master prompt that GPT-5 nano uses when parsing their invoices</li>
+                <li><strong className="text-gray-800">Historical Examples:</strong> When parsing, GPT receives up to 5 recent correctly-parsed invoices as reference examples</li>
+                <li><strong className="text-gray-800">Automatic Learning:</strong> Admin corrections trigger GPT to analyze parsing failures and update the master prompt</li>
+                <li><strong className="text-gray-800">Continuous Improvement:</strong> Corrected invoices are added to training history, improving future accuracy</li>
               </ul>
             </div>
           </>
         )}
-      </div>
     </div>
   );
 }
