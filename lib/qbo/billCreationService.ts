@@ -389,7 +389,8 @@ function applyAccountMappings(
       },
     };
 
-    if (overrideClassId) {
+    // Only use classId if it's a valid numeric QBO ID (not a hardcoded string like "general-eugene")
+    if (overrideClassId && /^\d+$/.test(overrideClassId)) {
       detail.ClassRef = { value: overrideClassId };
     }
 
@@ -546,8 +547,14 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
             });
           }
 
-          if (resolvedClass) {
+          if (resolvedClass && resolvedClass.id && /^\d+$/.test(resolvedClass.id)) {
             overrideClassId = resolvedClass.id;
+          } else if (resolvedClass) {
+            console.warn('[QBO][CLASSIFY] Resolved class has invalid ID (not numeric), skipping:', {
+              vendor: vendorName,
+              classPath: classPathToUse,
+              resolvedId: resolvedClass.id,
+            });
           } else if (classPathToUse) {
             console.warn('[QBO][CLASSIFY] Class path could not be resolved', {
               vendor: vendorName,
@@ -619,7 +626,13 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
             
             const accountId = resolvedAccount?.id || preferredAccount.id;
             const accountName = resolvedAccount?.name || preferredAccount.name;
-            const classId = resolvedClass?.id || overrideClassId;
+            const rawClassId = resolvedClass?.id || overrideClassId;
+            // Only use classId if it's a valid numeric QBO ID (not a hardcoded string like "general-eugene")
+            const classId = rawClassId && /^\d+$/.test(rawClassId) ? rawClassId : undefined;
+            
+            if (rawClassId && !classId) {
+              console.warn('[QBO][CREATE_BILL] Skipping invalid class ID (not numeric):', rawClassId);
+            }
             
             qboLines.push({
               Description: lineDescription,
