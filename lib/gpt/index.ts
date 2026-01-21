@@ -71,3 +71,17 @@ export {
   maybeAddToHistory,
   batchAddToHistory
 } from './historyAutoAdd';
+
+// Bulk parsing operations
+export {
+  runBulkParse,
+  parseAndSave,
+  scanForPDFs,
+  loadProgress,
+  saveProgress,
+  clearProgress,
+  estimateBulkParseTime,
+  getAlreadyParsedFiles,
+  type BulkParseProgress,
+  type BulkParseOptions,
+} from './bulkParse';
