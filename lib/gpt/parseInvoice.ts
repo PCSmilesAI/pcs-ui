@@ -208,7 +208,7 @@ export async function parseInvoiceWithGPT(
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
       max_completion_tokens: 2000,
-      temperature: 0.1, // Low temperature for consistent parsing
+      // Note: GPT-5 nano only supports default temperature (1), so we don't set it
       messages: [
         {
           role: 'system',
@@ -410,7 +410,7 @@ ANALYSIS INSTRUCTIONS:
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
       max_completion_tokens: 3000,
-      temperature: 0.3,
+      // Note: GPT-5 nano only supports default temperature
       messages: [
         {
           role: 'user',
@@ -540,7 +540,7 @@ export async function parseInvoiceFromImages(
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
       max_completion_tokens: 2000,
-      temperature: 0.1,
+      // Note: GPT-5 nano only supports default temperature
       messages: [
         {
           role: 'system',
