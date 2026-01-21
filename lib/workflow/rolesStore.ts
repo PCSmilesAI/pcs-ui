@@ -76,7 +76,7 @@ async function ensureSeed() {
 }
 
 export async function readRoles(): Promise<RolesFile> {
-  if (rolesCache) return rolesCache;
+  // Always read fresh from file to pick up changes without restart
   await ensureSeed();
   const file = getRolesPath();
   const data = await fs.readFile(file, 'utf8');
