@@ -180,7 +180,9 @@ export function UserRoleProvider({ children }) {
       }
 
       const rolesData = await response.json();
-      const newPermissions = getUserPermissionsFromRoles(userEmail, rolesData);
+      // API returns { ok: true, roles: {...} }, extract the roles object
+      const roles = rolesData.roles || rolesData;
+      const newPermissions = getUserPermissionsFromRoles(userEmail, roles);
       
       console.log('[UserRole] Permissions loaded:', {
         email: userEmail,

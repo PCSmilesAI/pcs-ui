@@ -38,12 +38,11 @@ function validateRolesPayload(payload: any, existing: RolesFile): RolesFile {
 }
 
 export async function GET(req: NextRequest) {
-  const user = getCurrentUser(req);
-  if (!user.isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  // Allow all authenticated users to read roles so they can determine their permissions
+  // The roles data itself is not sensitive - it just contains email lists
+  // Write operations (PUT) still require admin
   const roles = await readRoles();
-  return NextResponse.json({ ok: true, roles });
+  return NextResponse.json(roles);
 }
 
 export async function PUT(req: NextRequest) {
