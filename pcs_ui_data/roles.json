@@ -1,16 +1,19 @@
 {
   "admins": [
     "business@pcsmilesai.com",
-    "mckaym@pacificcrestsmiles.com"
+    "mckaym@pcsmiles.com",
+    "laurap@pcsmiles.com"
   ],
   "ap_authorizers": [
     "business@pcsmilesai.com",
-    "mckaym@pacificcrestsmiles.com"
+    "mckaym@pcsmiles.com",
+    "laurap@pcsmiles.com"
   ],
   "office_managers": {
     "Milwaukie": [
       "business@pcsmilesai.com",
-      "mckaym@pacificcrestsmiles.com"
+      "mckaym@pcsmiles.com",
+      "laurap@pcsmiles.com"
     ]
   },
   "threshold_usd": 1000,
