@@ -343,6 +343,8 @@ export function runMigrations(): void {
   ensureColumn('invoices', 'parsing_status', 'parsing_status TEXT DEFAULT "pending"'); // 'pending' | 'success' | 'failed' | 'partial'
   ensureColumn('invoices', 'parsing_error', 'parsing_error TEXT'); // Error message if parsing failed
   ensureColumn('invoices', 'parse_attempts', 'parse_attempts INTEGER DEFAULT 0'); // Number of parse attempts
+  ensureColumn('invoices', 'parsing_method', 'parsing_method TEXT'); // 'gpt-5-nano' | 'legacy' | null
+  ensureColumn('invoices', 'parsing_confidence', 'parsing_confidence REAL'); // 0.0-1.0 confidence score from GPT
 
   // Create table_template_rows table for table template type
   db.exec(`
