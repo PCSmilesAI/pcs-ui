@@ -1,10 +1,11 @@
 /**
- * GPT-4o Knowledge Base Invoice Parsing System
+ * GPT-5 nano Knowledge Base Invoice Parsing System
  * 
  * This module provides:
  * - PDF to image conversion for GPT vision API
  * - Vendor knowledge base management
- * - GPT-4o invoice parsing with knowledge base context
+ * - Historical invoice database for few-shot learning
+ * - GPT-5 nano invoice parsing with knowledge base context
  * - Automatic knowledge base training from corrections
  */
 
@@ -47,3 +48,26 @@ export {
   type TrainingInput,
   type TrainingResult
 } from './parseInvoice';
+
+// Vendor History Database (for few-shot learning)
+export {
+  getVendorHistory,
+  getRecentHistory,
+  addToHistory,
+  updateHistoryEntry,
+  deleteHistoryEntry,
+  getAllVendorsWithHistory,
+  isInvoiceInHistory,
+  getHistoryStats,
+  formatHistoryForPrompt,
+  getHistoryImages,
+  MAX_HISTORY_EXAMPLES,
+  type HistoricalInvoice,
+  type VendorHistory
+} from './vendorHistory';
+
+// Auto-add to history on confirmation
+export {
+  maybeAddToHistory,
+  batchAddToHistory
+} from './historyAutoAdd';

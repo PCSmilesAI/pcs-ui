@@ -26,6 +26,7 @@ import {
   validateApprovalPermission,
 } from '@/lib/workflow/productionEngine';
 import { readRoles } from '@/lib/workflow/rolesStore';
+import { maybeAddToHistory } from '@/lib/gpt/historyAutoAdd';
 
 // Helper to get roles config synchronously (cache result)
 async function getRolesConfig() {
@@ -172,6 +173,17 @@ export async function POST(req: NextRequest) {
           invoice.approval_threshold_cents || null,
           invoiceId
         );
+
+        // Auto-add to vendor history for AI training if status is confirmed
+        if (invoice.status === 'to_be_paid' || invoice.status === 'paid') {
+          maybeAddToHistory(invoice).then(result => {
+            if (result.added) {
+              console.log('[API][BULK]', 'added_to_history', { invoiceId });
+            }
+          }).catch(err => {
+            console.warn('[API][BULK]', 'history_add_failed', { invoiceId, error: String(err) });
+          });
+        }
 
         results.successful.push(invoiceId);
       } catch (error: any) {

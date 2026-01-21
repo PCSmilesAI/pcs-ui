@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { convertPdfToBase64Images, formatImagesForOpenAI } from './pdfToImages';
 import { getKnowledgeBase, getOrCreateKnowledgeBase, getTrainingPrompt, upsertKnowledgeBase } from './knowledgeBase';
+import { getRecentHistory, formatHistoryForPrompt, addToHistory, MAX_HISTORY_EXAMPLES, type HistoricalInvoice } from './vendorHistory';
 
 // Lazy initialization of OpenAI client to avoid build-time errors
 let _openai: OpenAI | null = null;
@@ -144,8 +145,10 @@ export async function parseInvoiceWithGPT(
     // Get or create knowledge base for this vendor
     let knowledgeBaseUsed = false;
     let systemPrompt = BASE_PARSING_PROMPT;
+    let historicalExamples: HistoricalInvoice[] = [];
 
     if (vendorName && vendorName !== 'Unknown') {
+      // Load knowledge base
       const kb = getKnowledgeBase(vendorName);
       if (kb) {
         systemPrompt = kb.knowledge_prompt + '\n\n' + BASE_PARSING_PROMPT;
@@ -154,7 +157,51 @@ export async function parseInvoiceWithGPT(
       } else {
         console.log(`[GPT] No knowledge base found for ${vendorName}, using default prompt`);
       }
+      
+      // Load historical examples for few-shot learning
+      historicalExamples = getRecentHistory(vendorName, MAX_HISTORY_EXAMPLES);
+      if (historicalExamples.length > 0) {
+        const historyPrompt = formatHistoryForPrompt(historicalExamples);
+        systemPrompt += historyPrompt;
+        console.log(`[GPT] Including ${historicalExamples.length} historical examples for ${vendorName}`);
+      } else {
+        console.log(`[GPT] No historical examples available for ${vendorName}`);
+      }
     }
+
+    // Build message content with historical example images (first page only) + new invoice
+    const messageContent: Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string; detail: 'high' | 'low' | 'auto' } }> = [];
+    
+    // Add instruction text
+    messageContent.push({ 
+      type: 'text', 
+      text: historicalExamples.length > 0 
+        ? `Below are ${historicalExamples.length} historical invoice examples from this vendor (for reference), followed by the NEW invoice to parse. Parse ONLY the NEW invoice and extract all fields. Return only JSON.`
+        : 'Parse this invoice and extract all fields. Return only JSON.'
+    });
+    
+    // Add historical example images (first page only, to save tokens)
+    for (let i = 0; i < historicalExamples.length; i++) {
+      const example = historicalExamples[i];
+      if (example.images.length > 0) {
+        messageContent.push({ 
+          type: 'text', 
+          text: `--- Historical Example ${i + 1} (Invoice: ${example.invoice_number || 'Unknown'}) ---` 
+        });
+        messageContent.push({
+          type: 'image_url',
+          image_url: { url: `data:image/png;base64,${example.images[0]}`, detail: 'low' }
+        });
+      }
+    }
+    
+    // Add separator and new invoice
+    if (historicalExamples.length > 0) {
+      messageContent.push({ type: 'text', text: '--- NEW INVOICE TO PARSE (extract data from this one) ---' });
+    }
+    
+    // Add new invoice images (high detail for accuracy)
+    messageContent.push(...formatImagesForOpenAI(base64Images));
 
     // Call GPT with images
     console.log('[GPT] Calling GPT for parsing...');
@@ -169,10 +216,7 @@ export async function parseInvoiceWithGPT(
         },
         {
           role: 'user',
-          content: [
-            { type: 'text', text: 'Parse this invoice and extract all fields. Return only JSON.' },
-            ...formatImagesForOpenAI(base64Images)
-          ]
+          content: messageContent
         }
       ]
     });
@@ -263,6 +307,13 @@ export interface TrainingResult {
 
 /**
  * Update a vendor's knowledge base based on correction feedback
+ * 
+ * This function:
+ * 1. Loads historical examples from the vendor's history
+ * 2. Shows GPT the incorrectly parsed invoice alongside correct historical examples
+ * 3. Asks GPT to analyze WHY parsing failed by comparing patterns
+ * 4. Updates the master prompt to prevent similar errors
+ * 5. Adds the corrected invoice to the history database
  */
 export async function trainFromCorrection(input: TrainingInput): Promise<TrainingResult> {
   const { vendorName, pdfPath, originalParsed, correctedData } = input;
@@ -285,21 +336,77 @@ export async function trainFromCorrection(input: TrainingInput): Promise<Trainin
     console.log('[GPT-TRAIN] Converting PDF for training:', pdfPath);
     const base64Images = await convertPdfToBase64Images(pdfPath);
 
-    // Build the training prompt with placeholders replaced
-    let trainingPrompt = trainingPromptRecord.prompt_text
-      .replace('{{original_data}}', JSON.stringify(originalParsed, null, 2))
-      .replace('{{corrected_data}}', JSON.stringify(correctedData, null, 2));
+    // Load historical examples to show GPT what correct parsing looks like
+    const historicalExamples = getRecentHistory(vendorName, MAX_HISTORY_EXAMPLES);
+    console.log(`[GPT-TRAIN] Loaded ${historicalExamples.length} historical examples for analysis`);
 
-    // Add current knowledge base context
-    trainingPrompt = `CURRENT KNOWLEDGE BASE FOR ${vendorName}:
+    // Build enhanced training prompt with historical analysis
+    let trainingPrompt = `CURRENT KNOWLEDGE BASE FOR ${vendorName}:
 ---
 ${currentKb.knowledge_prompt}
 ---
 
-${trainingPrompt}`;
+`;
+
+    // Add historical examples section if available
+    if (historicalExamples.length > 0) {
+      trainingPrompt += `HISTORICAL CORRECTLY PARSED INVOICES FROM THIS VENDOR:
+Below are ${historicalExamples.length} invoices that were previously parsed correctly. Analyze their patterns to understand why the new invoice was parsed incorrectly.
+
+`;
+      historicalExamples.forEach((example, idx) => {
+        trainingPrompt += `--- Historical Example ${idx + 1} (Invoice: ${example.invoice_number || 'Unknown'}) ---
+Correctly extracted data:
+${JSON.stringify(example.parsed_data, null, 2)}
+
+`;
+      });
+    }
+
+    // Add the base training prompt with placeholders replaced
+    trainingPrompt += trainingPromptRecord.prompt_text
+      .replace('{{original_data}}', JSON.stringify(originalParsed, null, 2))
+      .replace('{{corrected_data}}', JSON.stringify(correctedData, null, 2));
+
+    // Add analysis instructions
+    trainingPrompt += `
+
+ANALYSIS INSTRUCTIONS:
+1. Compare the incorrectly parsed invoice with the historical examples above
+2. Identify WHY certain fields were extracted incorrectly:
+   - Did the field location change on this invoice?
+   - Was there a different format or labeling?
+   - Were there multiple similar values that caused confusion?
+3. Update the knowledge base prompt to handle this variation
+4. Make the prompt MORE ROBUST to handle both the historical patterns AND this new variation
+5. Return ONLY the updated knowledge base prompt text (no explanations)`;
+
+    // Build message content with images
+    const messageContent: Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string; detail: 'high' | 'low' | 'auto' } }> = [];
+    
+    messageContent.push({ type: 'text', text: trainingPrompt });
+    
+    // Add historical example images (low detail to save tokens)
+    if (historicalExamples.length > 0) {
+      messageContent.push({ type: 'text', text: '\n--- HISTORICAL EXAMPLE IMAGES (for pattern reference) ---' });
+      for (let i = 0; i < historicalExamples.length; i++) {
+        const example = historicalExamples[i];
+        if (example.images.length > 0) {
+          messageContent.push({ type: 'text', text: `Historical Example ${i + 1}:` });
+          messageContent.push({
+            type: 'image_url',
+            image_url: { url: `data:image/png;base64,${example.images[0]}`, detail: 'low' }
+          });
+        }
+      }
+    }
+    
+    // Add the incorrectly parsed invoice image (high detail for analysis)
+    messageContent.push({ type: 'text', text: '\n--- INCORRECTLY PARSED INVOICE (analyze this) ---' });
+    messageContent.push(...formatImagesForOpenAI(base64Images));
 
     // Call GPT to generate updated knowledge base
-    console.log('[GPT-TRAIN] Calling GPT for knowledge base update...');
+    console.log('[GPT-TRAIN] Calling GPT for knowledge base update with historical analysis...');
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
       max_completion_tokens: 3000,
@@ -307,10 +414,7 @@ ${trainingPrompt}`;
       messages: [
         {
           role: 'user',
-          content: [
-            { type: 'text', text: trainingPrompt },
-            ...formatImagesForOpenAI(base64Images)
-          ]
+          content: messageContent
         }
       ]
     });
@@ -328,6 +432,25 @@ ${trainingPrompt}`;
     // Update the knowledge base in the database
     console.log('[GPT-TRAIN] Updating knowledge base in database...');
     const updated = upsertKnowledgeBase(vendorName, updatedPrompt, true);
+
+    // Add the corrected invoice to history so future parsing can learn from it
+    const invoiceNumber = correctedData.invoice_number || originalParsed.invoice_number || null;
+    console.log('[GPT-TRAIN] Adding corrected invoice to history...');
+    addToHistory(
+      vendorName,
+      invoiceNumber,
+      base64Images,
+      {
+        invoice_number: correctedData.invoice_number || null,
+        invoice_date: correctedData.invoice_date || null,
+        due_date: correctedData.due_date || null,
+        vendor_name: vendorName,
+        total: typeof correctedData.total === 'number' ? correctedData.total : parseFloat(correctedData.total) || null,
+        office_location: correctedData.office_location || null,
+        line_items: correctedData.line_items || []
+      },
+      true // was_corrected = true
+    );
 
     console.log(`[GPT-TRAIN] Knowledge base updated for ${vendorName}, version ${updated.version}`);
 
@@ -366,9 +489,10 @@ export async function parseInvoiceFromImages(
       vendorName = await detectVendor(base64Images);
     }
 
-    // Get knowledge base
+    // Get knowledge base and historical examples
     let knowledgeBaseUsed = false;
     let systemPrompt = BASE_PARSING_PROMPT;
+    let historicalExamples: HistoricalInvoice[] = [];
 
     if (vendorName && vendorName !== 'Unknown') {
       const kb = getKnowledgeBase(vendorName);
@@ -376,7 +500,41 @@ export async function parseInvoiceFromImages(
         systemPrompt = kb.knowledge_prompt + '\n\n' + BASE_PARSING_PROMPT;
         knowledgeBaseUsed = true;
       }
+      
+      // Load historical examples
+      historicalExamples = getRecentHistory(vendorName, MAX_HISTORY_EXAMPLES);
+      if (historicalExamples.length > 0) {
+        systemPrompt += formatHistoryForPrompt(historicalExamples);
+      }
     }
+
+    // Build message content with historical examples + new invoice
+    const messageContent: Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string; detail: 'high' | 'low' | 'auto' } }> = [];
+    
+    messageContent.push({ 
+      type: 'text', 
+      text: historicalExamples.length > 0 
+        ? `Below are ${historicalExamples.length} historical examples followed by the NEW invoice to parse. Parse ONLY the NEW invoice. Return only JSON.`
+        : 'Parse this invoice and extract all fields. Return only JSON.'
+    });
+    
+    // Add historical example images
+    for (let i = 0; i < historicalExamples.length; i++) {
+      const example = historicalExamples[i];
+      if (example.images.length > 0) {
+        messageContent.push({ type: 'text', text: `--- Example ${i + 1} ---` });
+        messageContent.push({
+          type: 'image_url',
+          image_url: { url: `data:image/png;base64,${example.images[0]}`, detail: 'low' }
+        });
+      }
+    }
+    
+    if (historicalExamples.length > 0) {
+      messageContent.push({ type: 'text', text: '--- NEW INVOICE TO PARSE ---' });
+    }
+    
+    messageContent.push(...formatImagesForOpenAI(base64Images));
 
     // Call GPT
     const response = await getOpenAIClient().chat.completions.create({
@@ -390,10 +548,7 @@ export async function parseInvoiceFromImages(
         },
         {
           role: 'user',
-          content: [
-            { type: 'text', text: 'Parse this invoice and extract all fields. Return only JSON.' },
-            ...formatImagesForOpenAI(base64Images)
-          ]
+          content: messageContent
         }
       ]
     });

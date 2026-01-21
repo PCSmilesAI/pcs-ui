@@ -3,6 +3,7 @@ import { getCurrentUser } from '../../../../lib/auth/currentUser';
 import { readRoles, getThreshold, isAdmin } from '../../../../lib/workflow/rolesStore';
 import { getInvoiceById, saveInvoice, softDeleteInvoice } from '../../../../lib/invoices/db-store';
 import { approveAP, approveOffice, approveAdmin, markPaid } from '../../../../lib/workflow/engine';
+import { maybeAddToHistory } from '../../../../lib/gpt/historyAutoAdd';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +83,17 @@ export async function POST(req: NextRequest) {
       try {
         saveInvoice(invoice);
         console.log('[API][INVOICES][DB]', 'transition_approve_success', { invoiceId: String(invoiceId), userEmail: user.email });
+        
+        // Auto-add to vendor history for AI training (async, don't block response)
+        if (invoice.status === 'to_be_paid') {
+          maybeAddToHistory(invoice).then(result => {
+            if (result.added) {
+              console.log('[API][INVOICES][DB]', 'added_to_history', { invoiceId: String(invoiceId) });
+            }
+          }).catch(err => {
+            console.warn('[API][INVOICES][DB]', 'history_add_failed', { invoiceId: String(invoiceId), error: String(err) });
+          });
+        }
       } catch (err: any) {
         // Log full error server-side only
         console.error('[API][INVOICES][DB]', 'transition_save_error', { invoiceId: String(invoiceId), error: String(err) });
@@ -111,6 +123,16 @@ export async function POST(req: NextRequest) {
 
       saveInvoice(invoice);
       console.log('[API][INVOICES][DB]', 'transition_mark_paid_success', { invoiceId: String(invoiceId), userEmail: user.email });
+      
+      // Auto-add to vendor history for AI training (async, don't block response)
+      maybeAddToHistory(invoice).then(result => {
+        if (result.added) {
+          console.log('[API][INVOICES][DB]', 'added_to_history_paid', { invoiceId: String(invoiceId) });
+        }
+      }).catch(err => {
+        console.warn('[API][INVOICES][DB]', 'history_add_failed', { invoiceId: String(invoiceId), error: String(err) });
+      });
+      
       return NextResponse.json({ ok: true, invoice });
     }
 
