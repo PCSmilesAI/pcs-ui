@@ -438,15 +438,14 @@ def check_inbox(full_scan=False):
         mail.select("INBOX")
 
         # Get emails based on scan mode
+        # CRITICAL FIX: Always search ALL emails, not just UNSEEN
+        # External email clients (webmail, etc.) may mark emails as read before our scanner sees them
+        # We rely on message_id tracking in the database to skip already-processed emails
         if full_scan:
-            # FULL SCAN: Get ALL emails (for one-time analysis)
-            # In full_scan mode, we DON'T skip already-processed emails
-            # Instead, we compare ALL emails to database and import missing ones
             log("[INBOX][SCAN][MODE] FULL SCAN - Processing ALL emails in inbox, comparing to database")
-            status, messages = mail.uid('search', None, 'ALL')
         else:
-            # NORMAL SCAN: Get UNREAD emails only (UNSEEN flag)
-            status, messages = mail.uid('search', None, 'UNSEEN')
+            log("[INBOX][SCAN][MODE] NORMAL SCAN - Processing ALL emails, using message_id tracking to skip duplicates")
+        status, messages = mail.uid('search', None, 'ALL')
 
         if status != 'OK':
             log("[INBOX][SCAN][ERROR] Failed to search inbox")
@@ -454,8 +453,7 @@ def check_inbox(full_scan=False):
             return
 
         email_uids = messages[0].split() if messages[0] else []
-        scan_type = "all" if full_scan else "unread"
-        log(f"[INBOX][SCAN] Found {len(email_uids)} {scan_type} emails in inbox")
+        log(f"[INBOX][SCAN] Found {len(email_uids)} total emails in inbox")
 
         processed_count = 0
         skipped_count = 0
