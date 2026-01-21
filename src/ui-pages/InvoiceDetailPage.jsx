@@ -1626,7 +1626,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         key => originalValues[key] !== correctedValues[key]
       );
 
-      console.log('🔍 AI Mechanic check:', {
+      console.log('🔍 GPT Knowledge Base training check:', {
         originalValues,
         correctedValues,
         changedFields,
@@ -1634,39 +1634,44 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         willSend: changedFields.length > 0 || !!updateComment.trim()
       });
 
-      // Always send to AI Mechanic with the user comment (if provided or fields changed)
+      // Send to GPT Knowledge Base training when fields change or comment provided
       const shouldSend = changedFields.length > 0 || updateComment.trim();
-      console.log('🤖 Will send to AI Mechanic?', shouldSend, '- changedFields:', changedFields.length, 'hasComment:', !!updateComment.trim());
+      console.log('🤖 Will send to GPT for KB training?', shouldSend, '- changedFields:', changedFields.length, 'hasComment:', !!updateComment.trim());
 
       if (shouldSend) {
         setImprovingParser(true);
         try {
-          console.log('🤖 Sending corrections to AI Mechanic... invoiceId:', invoiceId);
-          const mechanicResponse = await csrfClient.post(
-            `/api/invoices/${encodeURIComponent(invoiceId)}/report-parser-issue`,
-            {
-              corrected_fields: correctedValues,
-              user_comment: updateComment.trim() || null,
-              original_fields: originalValues,
-              changed_fields: changedFields,
-            }
-          );
+          const vendorName = details.vendor || invoice?.vendor_name || invoice?.vendor || 'Unknown';
+          const pdfPath = invoice?.pdf_path || invoice?.source_file || '';
+          
+          console.log('🤖 Sending corrections to GPT Knowledge Base training...', { vendorName, pdfPath });
+          
+          const gptTrainResponse = await fetch('/api/gpt-train', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              vendorName: vendorName,
+              pdfPath: pdfPath,
+              originalParsed: originalValues,
+              correctedData: correctedValues,
+              userComment: updateComment.trim() || null,
+            })
+          });
 
-          // csrfClient returns { ok, data, error } not a Response
-          if (mechanicResponse.ok) {
-            console.log('✅ AI Mechanic response:', mechanicResponse.data);
-            if (updateComment.trim()) {
-              showToast('Update submitted with your comment to AI Mechanic!', 'success');
-            } else {
-              showToast('Parser improvement request sent to AI Mechanic!', 'success');
-            }
+          const gptResult = await gptTrainResponse.json();
+
+          if (gptTrainResponse.ok && gptResult.success) {
+            console.log('✅ GPT Knowledge Base updated:', gptResult);
+            showToast(`Knowledge base for ${vendorName} updated to v${gptResult.version}!`, 'success');
           } else {
-            console.warn('⚠️ AI Mechanic failed:', mechanicResponse.error);
-            showToast(`AI Mechanic: ${mechanicResponse.error || 'Failed to process'}`, 'warning');
+            console.warn('⚠️ GPT training failed:', gptResult.error);
+            // Don't show error toast for training failures - the update still succeeded
+            console.log('Note: Invoice update succeeded, but knowledge base training failed');
           }
-        } catch (mechanicError) {
-          console.warn('⚠️ Error calling AI Mechanic:', mechanicError);
-          showToast('AI Mechanic is not available', 'warning');
+        } catch (gptError) {
+          console.warn('⚠️ Error calling GPT training:', gptError);
+          // Don't show error toast - the invoice update still succeeded
+          console.log('Note: Invoice update succeeded, but GPT training call failed');
         } finally {
           setImprovingParser(false);
         }
