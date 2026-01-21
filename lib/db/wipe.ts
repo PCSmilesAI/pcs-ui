@@ -11,12 +11,14 @@ import * as path from 'path';
 
 /**
  * Tables that will be wiped during a full invoice reset
+ * Order matters: tables with foreign keys to invoices must be deleted first
  */
 const INVOICE_TABLES = [
-  'invoices',
   'invoice_categories',
   'invoice_events',
   'invoice_allocations',
+  'table_template_rows',
+  'invoices',  // Delete invoices LAST due to foreign key constraints
 ];
 
 /**

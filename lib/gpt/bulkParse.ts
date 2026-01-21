@@ -201,7 +201,7 @@ export function saveParsedInvoice(
         parsing_method,
         parsing_confidence,
         parsing_error,
-        line_items_json,
+        description,
         approved,
         deleted,
         created_at,
@@ -210,6 +210,11 @@ export function saveParsedInvoice(
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
       )
     `);
+
+    // Store line items as description JSON for now (description field exists)
+    const lineItemsDescription = data?.line_items && data.line_items.length > 0
+      ? `Line items: ${JSON.stringify(data.line_items)}`
+      : null;
 
     stmt.run(
       invoiceId,
@@ -230,7 +235,7 @@ export function saveParsedInvoice(
       'gpt-5-nano',
       data?.parsing_confidence || 0.5,
       result.success ? null : result.error,
-      data?.line_items ? JSON.stringify(data.line_items) : null,
+      lineItemsDescription,
       0,  // not approved yet
       0,  // not deleted
       new Date().toISOString(),

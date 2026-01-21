@@ -146,6 +146,11 @@ export async function POST(req: NextRequest) {
     if (existingInvoice) {
       const totalCents = result.data.total ? Math.round(result.data.total * 100) : null;
 
+      // Store line items as description JSON
+      const lineItemsDescription = result.data.line_items && result.data.line_items.length > 0
+        ? `Line items: ${JSON.stringify(result.data.line_items)}`
+        : null;
+
       db.prepare(`
         UPDATE invoices SET
           parsed_vendor_name = ?,
@@ -161,7 +166,7 @@ export async function POST(req: NextRequest) {
           parsing_method = ?,
           parsing_confidence = ?,
           parsing_error = NULL,
-          line_items_json = ?,
+          description = COALESCE(description, ?),
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `).run(
@@ -177,7 +182,7 @@ export async function POST(req: NextRequest) {
         result.data.due_date,
         'gpt-5-nano',
         result.data.parsing_confidence,
-        result.data.line_items ? JSON.stringify(result.data.line_items) : null,
+        lineItemsDescription,
         invoiceId
       );
 
