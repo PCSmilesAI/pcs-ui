@@ -202,12 +202,11 @@ export function saveParsedInvoice(
         parsing_confidence,
         parsing_error,
         description,
-        approved,
         deleted,
         created_at,
         updated_at
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
       )
     `);
 
@@ -236,7 +235,6 @@ export function saveParsedInvoice(
       data?.parsing_confidence || 0.5,
       result.success ? null : result.error,
       lineItemsDescription,
-      0,  // not approved yet
       0,  // not deleted
       new Date().toISOString(),
       new Date().toISOString()
