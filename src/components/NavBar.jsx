@@ -397,6 +397,21 @@ function NavBarInner({
                   Coding Templates
                 </div>
               )}
+              {/* Knowledge Base - Admin/AP only */}
+              {isAdminUser && (
+                <div
+                  style={dropdownItemStyle}
+                  onClick={() => {
+                    setIsAccountOpen(false);
+                    // Navigate to knowledge base page
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/admin/knowledge-base';
+                    }
+                  }}
+                >
+                  Knowledge Base
+                </div>
+              )}
               {/* Log Out - visible to all */}
               <div
                 style={dropdownItemStyle}

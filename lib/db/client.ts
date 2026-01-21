@@ -406,6 +406,67 @@ export function runMigrations(): void {
     insertClinic.run(clinic.id, clinic.name, clinic.address, clinic.ship_to_reference, clinic.contact_name);
   }
 
+  // Create vendor_knowledge_bases table for GPT-4o parsing system
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS vendor_knowledge_bases (
+      id TEXT PRIMARY KEY,
+      vendor_name TEXT UNIQUE NOT NULL,
+      knowledge_prompt TEXT NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      version INTEGER DEFAULT 1,
+      last_trained_at TEXT,
+      training_invoice_count INTEGER DEFAULT 0
+    );
+  `);
+
+  // Create system_prompts table for Training Prompt and other system prompts
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS system_prompts (
+      id TEXT PRIMARY KEY,
+      prompt_name TEXT UNIQUE NOT NULL,
+      prompt_text TEXT NOT NULL,
+      description TEXT,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Create indexes for knowledge base tables
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_vendor_knowledge_bases_vendor_name ON vendor_knowledge_bases(vendor_name);
+    CREATE INDEX IF NOT EXISTS idx_system_prompts_prompt_name ON system_prompts(prompt_name);
+  `);
+
+  // Seed default Training Prompt if it doesn't exist
+  const defaultTrainingPrompt = db.prepare(`
+    INSERT OR IGNORE INTO system_prompts (id, prompt_name, prompt_text, description)
+    VALUES (?, ?, ?, ?)
+  `);
+  
+  defaultTrainingPrompt.run(
+    'training_prompt_default',
+    'Training Prompt',
+    `You are an invoice parsing expert. A user has corrected parsing errors on an invoice.
+
+ORIGINAL PARSED DATA:
+{{original_data}}
+
+CORRECTED DATA:
+{{corrected_data}}
+
+PDF IMAGES ARE ATTACHED.
+
+Analyze what was parsed incorrectly and why. Then update the knowledge base for this vendor to prevent this mistake in the future.
+
+Your response should be an UPDATED knowledge base prompt that:
+1. Preserves all existing correct parsing rules
+2. Adds or modifies rules to fix the identified parsing error
+3. Includes specific field locations, patterns, or indicators found in this invoice
+
+Return ONLY the updated knowledge base prompt text, nothing else.`,
+    'Master prompt used when admin corrections trigger knowledge base updates'
+  );
+
   // Create users table for local authentication (hybrid with Gist)
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
