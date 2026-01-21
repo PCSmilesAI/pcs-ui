@@ -177,6 +177,7 @@ export async function seedEssentialUsers(): Promise<void> {
   const essentialUsers = [
     { email: 'mckaym@pcsmiles.com', name: 'McKay', role: 'admin' },
     { email: 'business@pcsmilesai.com', name: 'Braxton', role: 'admin' },
+    { email: 'laurap@pcsmiles.com', name: 'Laura', role: 'admin' },
   ];
   
   for (const user of essentialUsers) {
