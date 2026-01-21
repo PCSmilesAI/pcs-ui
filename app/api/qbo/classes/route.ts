@@ -9,6 +9,10 @@ export const dynamic = 'force-dynamic';
 let classesCache: { data: Array<{ id: string; name: string; fullName: string }>; timestamp: number } | null = null;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// Track last sync check time (only check once per hour)
+let lastSyncCheck: number = 0;
+const SYNC_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour
+
 export async function GET(req: NextRequest) {
   try {
     const searchParam = req.nextUrl.searchParams.get('search') || '';
@@ -21,32 +25,53 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    let classes: Array<{ id: string; name: string; fullName: string }> = [];
+    // Use hardcoded classes as the primary source
+    let classes: Array<{ id: string; name: string; fullName: string }> = [...PCS_CLASSES];
 
-    // Try to get classes from QBO API first
-    try {
-      const tokens = await tokenStorage.getLatestTokens();
-      if (tokens?.realmId) {
-        const qboClient = new QBOClient();
-        await qboClient.initialize();
-        const qboClasses = await qboClient.getClasses();
-        
-        if (qboClasses.length > 0) {
-          classes = qboClasses.map(c => ({
-            id: c.id,
-            name: c.name,
-            fullName: c.fullName,
-          }));
+    // Periodically check QBO API to ensure hardcoded classes are up to date
+    const shouldSyncCheck = Date.now() - lastSyncCheck > SYNC_CHECK_INTERVAL;
+    if (shouldSyncCheck) {
+      try {
+        const tokens = await tokenStorage.getLatestTokens();
+        if (tokens?.realmId) {
+          const qboClient = new QBOClient();
+          await qboClient.initialize();
+          const qboClasses = await qboClient.getClasses();
+          
+          if (qboClasses.length > 0) {
+            // Check for differences between hardcoded and live QBO data
+            const hardcodedNames = new Set(PCS_CLASSES.map(c => c.name));
+            const qboNames = new Set(qboClasses.map(c => c.name));
+            
+            const missingInHardcoded = qboClasses.filter(c => !hardcodedNames.has(c.name));
+            const missingInQBO = PCS_CLASSES.filter(c => !qboNames.has(c.name));
+            
+            if (missingInHardcoded.length > 0) {
+              console.warn('[API][QBO][CLASSES] ⚠️ Classes in QBO but NOT in hardcoded list:', 
+                missingInHardcoded.map(c => `${c.name} (ID: ${c.id})`).join(', '));
+            }
+            if (missingInQBO.length > 0) {
+              console.warn('[API][QBO][CLASSES] ⚠️ Classes in hardcoded but NOT in QBO:', 
+                missingInQBO.map(c => c.name).join(', '));
+            }
+            
+            // Check for ID mismatches
+            for (const qboClass of qboClasses) {
+              const hardcoded = PCS_CLASSES.find(c => c.name === qboClass.name);
+              if (hardcoded && hardcoded.id !== qboClass.id) {
+                console.warn(`[API][QBO][CLASSES] ⚠️ ID mismatch for ${qboClass.name}: hardcoded=${hardcoded.id}, QBO=${qboClass.id}`);
+              }
+            }
+            
+            console.log(`[API][QBO][CLASSES] Sync check complete - Hardcoded: ${PCS_CLASSES.length}, QBO: ${qboClasses.length}`);
+          }
+          
+          lastSyncCheck = Date.now();
         }
+      } catch (qboError: any) {
+        console.warn('[API][QBO][CLASSES] Sync check failed (using hardcoded):', qboError.message);
+        lastSyncCheck = Date.now(); // Don't retry immediately on failure
       }
-    } catch (qboError: any) {
-      console.warn('[API][QBO][CLASSES] QBO API failed, using hardcoded classes:', qboError.message);
-    }
-
-    // Fallback to hardcoded PCS classes if QBO returned empty or failed
-    if (classes.length === 0) {
-      console.log('[API][QBO][CLASSES] Using hardcoded PCS classes');
-      classes = [...PCS_CLASSES];
     }
 
     // Apply search filter if provided
@@ -78,4 +103,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-
