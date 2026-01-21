@@ -1296,6 +1296,23 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
             if (billResult.success) {
               console.log('✅ QuickBooks bill created successfully:', billResult.billId);
+              
+              // Save the QBO Bill ID to the invoice record for Pay button redirect
+              try {
+                const invoiceIdentifier = updated.id || invoice?.id || updated.invoice_number || invoice?.invoice_number;
+                const saveBillIdResponse = await csrfClient.post(
+                  `/api/invoices/${encodeURIComponent(invoiceIdentifier)}/qbo-bill`,
+                  { billId: billResult.billId }
+                );
+                if (saveBillIdResponse.ok) {
+                  console.log('✅ QBO Bill ID saved to invoice record:', billResult.billId);
+                } else {
+                  console.warn('⚠️ Failed to save QBO Bill ID to invoice:', saveBillIdResponse.error);
+                }
+              } catch (saveBillIdError) {
+                console.warn('⚠️ Error saving QBO Bill ID:', saveBillIdError);
+              }
+              
               const pdfStatus = billResult.pdfAttached ? ' PDF attached.' : '';
               showToast(`Invoice approved and QBO Bill created! ID: ${billResult.billId}${pdfStatus}`, 'success');
             } else {

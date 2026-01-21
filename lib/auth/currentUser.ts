@@ -2,7 +2,8 @@ import type { NextRequest } from 'next/server';
 
 const ADMIN_EMAILS = new Set([
   'business@pcsmilesai.com',
-  'mckaym@pacificcrestsmiles.com',
+  'mckaym@pcsmiles.com',
+  'laurap@pcsmiles.com',
 ]);
 
 function normaliseEmail(email?: string | null): string {

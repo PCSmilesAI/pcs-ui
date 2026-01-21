@@ -13,8 +13,8 @@ export interface RolesFile {
 }
 
 const DEFAULT_ROLES: RolesFile = {
-  admins: ['mckaym@pacificcrestsmiles.com', 'business@pcsmilesai.com'],
-  ap_authorizers: ['laurag@pacificcrestsmiles.com'],
+  admins: ['business@pcsmilesai.com', 'mckaym@pcsmiles.com', 'laurap@pcsmiles.com'],
+  ap_authorizers: ['business@pcsmilesai.com', 'mckaym@pcsmiles.com', 'laurap@pcsmiles.com'],
   office_managers: {
     Milwaukie: [''],
     Roseburg: [''],

@@ -4,6 +4,7 @@ import Toast from '../components/Toast.jsx';
 const ADMIN_EMAILS = new Set([
   'business@pcsmilesai.com',
   'mckaym@pcsmiles.com',
+  'laurap@pcsmiles.com',
 ]);
 
 function parseEmailList(value) {

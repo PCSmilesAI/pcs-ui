@@ -51,6 +51,7 @@ type AllocationMode = 'split_evenly' | 'split_evenly_all_classes' | 'fixed_amoun
 const ADMIN_EMAILS = new Set([
   'business@pcsmilesai.com',
   'mckaym@pcsmiles.com',
+  'laurap@pcsmiles.com',
 ]);
 
 const ALLOCATION_MODE_LABELS: Record<AllocationMode, string> = {
