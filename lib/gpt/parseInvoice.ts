@@ -66,7 +66,7 @@ export async function detectVendor(base64Images: string[]): Promise<string> {
   try {
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
-      max_tokens: 100,
+      max_completion_tokens: 100,
       messages: [
         {
           role: 'user',
@@ -156,11 +156,11 @@ export async function parseInvoiceWithGPT(
       }
     }
 
-    // Call GPT-4o with images
-    console.log('[GPT] Calling GPT-4o for parsing...');
+    // Call GPT with images
+    console.log('[GPT] Calling GPT for parsing...');
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
-      max_tokens: 2000,
+      max_completion_tokens: 2000,
       temperature: 0.1, // Low temperature for consistent parsing
       messages: [
         {
@@ -298,11 +298,11 @@ ${currentKb.knowledge_prompt}
 
 ${trainingPrompt}`;
 
-    // Call GPT-4o to generate updated knowledge base
-    console.log('[GPT-TRAIN] Calling GPT-4o for knowledge base update...');
+    // Call GPT to generate updated knowledge base
+    console.log('[GPT-TRAIN] Calling GPT for knowledge base update...');
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
-      max_tokens: 3000,
+      max_completion_tokens: 3000,
       temperature: 0.3,
       messages: [
         {
@@ -378,10 +378,10 @@ export async function parseInvoiceFromImages(
       }
     }
 
-    // Call GPT-4o
+    // Call GPT
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
-      max_tokens: 2000,
+      max_completion_tokens: 2000,
       temperature: 0.1,
       messages: [
         {
@@ -436,7 +436,7 @@ export async function testGPTConnection(): Promise<{ connected: boolean; model: 
   try {
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
-      max_tokens: 10,
+      max_completion_tokens: 10,
       messages: [
         { role: 'user', content: 'Say "OK"' }
       ]
