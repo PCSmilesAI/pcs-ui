@@ -124,4 +124,3 @@ export function parseInvoiceAmount(invoice: any): number {
 export function formatDollarAmount(amount: number): string {
   return `$${amount.toFixed(2)}`;
 }
-

@@ -8,6 +8,15 @@ import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
 import { getDisplayVendorName } from '../lib/vendorUtils';
 
+// Helper: Split array into chunks of specified size (max 20 for QBO)
+function chunkArray(array, chunkSize = 20) {
+  const chunks = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    chunks.push(array.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
 /**
  * Page for the "To Be Paid" view. Shows invoices that have been
  * approved and are awaiting payment. Row clicks propagate to
@@ -25,6 +34,20 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const { getStatusForVendor } = useVendorAchMap();
   const [selectedIds, setSelectedIds] = useState(new Set());
   const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
+
+  // ========== BATCH PAYMENT STATE ==========
+  // Modal state: 'hidden' | 'processing' | 'ready' | 'verifying' | 'summary'
+  const [batchModalState, setBatchModalState] = useState('hidden');
+  // Array of batches, each batch is an array of invoice results
+  const [paymentBatches, setPaymentBatches] = useState([]);
+  // Currently selected batch tab (0-indexed)
+  const [currentBatchIndex, setCurrentBatchIndex] = useState(0);
+  // All invoice IDs involved in batching (for verification)
+  const [allBatchInvoiceIds, setAllBatchInvoiceIds] = useState([]);
+  // Verification results
+  const [verificationResult, setVerificationResult] = useState(null);
+  // QBO base URL for redirects
+  const [qboBaseUrl, setQboBaseUrl] = useState('https://app.qbo.intuit.com');
 
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
 
@@ -101,21 +124,26 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     }
   }
 
-  // State for bulk payment modal
-  const [showBulkPayModal, setShowBulkPayModal] = useState(false);
-  const [bulkPayResults, setBulkPayResults] = useState([]);
-
+  // ========== BATCH PAYMENT FUNCTIONS ==========
+  
   async function bulkUpdate(status, approvedVal) {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
 
     if (status === 'completed') {
-      // Get QBO Bill Pay URLs for selected invoices
+      // Start batch payment flow
       try {
-        showToast('Getting QuickBooks payment links...', 'info');
+        // Show non-dismissable processing modal
+        setBatchModalState('processing');
+        setPaymentBatches([]);
+        setCurrentBatchIndex(0);
+        setAllBatchInvoiceIds([]);
+        setVerificationResult(null);
 
         const invoiceIds = selectedRows.map(r => r.invoice_number || r.invoice);
+        
+        // Fetch QBO Bill Pay URLs for all selected invoices
         const paymentRes = await fetch('/api/invoices/pay', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -125,6 +153,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         const paymentResult = await paymentRes.json();
 
         if (!paymentResult.ok) {
+          setBatchModalState('hidden');
           showToast(`Failed to get payment links: ${paymentResult.error}`, 'error');
           return;
         }
@@ -134,6 +163,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         const failedResults = (paymentResult.results || []).filter(r => !r.ok);
 
         if (validResults.length === 0) {
+          setBatchModalState('hidden');
           if (failedResults.length > 0) {
             const errors = failedResults.map(r => `${r.invoiceNumber || r.invoiceId}: ${r.error}`).join('; ');
             showToast(`No valid payment links: ${errors}`, 'error');
@@ -143,17 +173,32 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           return;
         }
 
-        // Show bulk payment modal with individual pay buttons
-        setBulkPayResults(validResults);
-        setShowBulkPayModal(true);
+        // Store all invoice IDs for verification later
+        const allIds = validResults.map(r => r.invoiceId || r.invoiceNumber);
+        setAllBatchInvoiceIds(allIds);
+
+        // Chunk into batches of 20 (QBO limit)
+        const batches = chunkArray(validResults, 20);
+        setPaymentBatches(batches);
+        
+        // Determine QBO environment
+        const baseUrl = paymentResult.qboBaseUrl || 
+          (typeof window !== 'undefined' && window.location.hostname.includes('sandbox') 
+            ? 'https://app.sandbox.qbo.intuit.com' 
+            : 'https://app.qbo.intuit.com');
+        setQboBaseUrl(baseUrl);
+
+        // Show the batch-ready modal
+        setBatchModalState('ready');
         
         if (failedResults.length > 0) {
-          showToast(`${validResults.length} ready for payment, ${failedResults.length} not ready`, 'warning');
+          showToast(`${validResults.length} ready for payment (${batches.length} batch${batches.length > 1 ? 'es' : ''}), ${failedResults.length} not ready`, 'warning');
         } else {
-          showToast(`${validResults.length} invoice(s) ready for payment in QuickBooks`, 'success');
+          showToast(`${validResults.length} invoice(s) split into ${batches.length} batch${batches.length > 1 ? 'es' : ''} for QuickBooks`, 'success');
         }
       } catch (err) {
         console.error('Error getting payment links:', err);
+        setBatchModalState('hidden');
         showToast(`Error: ${err.message}`, 'error');
         return;
       }
@@ -167,15 +212,90 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         }).catch(() => null);
       }
       showToast(`Rejected ${selectedRows.length} invoice(s)`, 'success');
+      setSelectedIds(new Set());
+      await reloadList();
     }
-
-    setSelectedIds(new Set());
-    await reloadList();
   }
 
-  // Handle opening a single QBO Bill Pay URL from bulk modal
-  function handleOpenQboPay(payUrl) {
-    window.open(payUrl, '_blank', 'noopener,noreferrer');
+  // Open ONE QBO Bills page for a batch
+  function handlePayBatch(batchIndex) {
+    // Open QBO Bills list page in a new tab
+    const qboBillsUrl = `${qboBaseUrl}/app/bills`;
+    window.open(qboBillsUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  // Close modal and verify payments
+  async function handleCloseAndVerify() {
+    if (allBatchInvoiceIds.length === 0) {
+      setBatchModalState('hidden');
+      setSelectedIds(new Set());
+      await reloadList();
+      return;
+    }
+
+    // Show verifying spinner
+    setBatchModalState('verifying');
+
+    try {
+      const verifyRes = await fetch('/api/invoices/verify-qbo-payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoiceIds: allBatchInvoiceIds }),
+      });
+
+      const result = await verifyRes.json();
+
+      if (!result.ok) {
+        showToast(`Verification failed: ${result.error}`, 'error');
+        setBatchModalState('ready'); // Go back to ready state
+        return;
+      }
+
+      setVerificationResult(result);
+      setBatchModalState('summary');
+    } catch (err) {
+      console.error('Error verifying payments:', err);
+      showToast(`Error verifying payments: ${err.message}`, 'error');
+      setBatchModalState('ready');
+    }
+  }
+
+  // Handle re-verify (if some invoices unpaid)
+  async function handleReVerify() {
+    setBatchModalState('verifying');
+    try {
+      const verifyRes = await fetch('/api/invoices/verify-qbo-payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoiceIds: allBatchInvoiceIds }),
+      });
+
+      const result = await verifyRes.json();
+
+      if (!result.ok) {
+        showToast(`Verification failed: ${result.error}`, 'error');
+        setBatchModalState('summary');
+        return;
+      }
+
+      setVerificationResult(result);
+      setBatchModalState('summary');
+    } catch (err) {
+      console.error('Error verifying payments:', err);
+      showToast(`Error verifying payments: ${err.message}`, 'error');
+      setBatchModalState('summary');
+    }
+  }
+
+  // Final close after summary
+  function handleDone() {
+    setBatchModalState('hidden');
+    setPaymentBatches([]);
+    setCurrentBatchIndex(0);
+    setAllBatchInvoiceIds([]);
+    setVerificationResult(null);
+    setSelectedIds(new Set());
+    reloadList();
   }
   
 
@@ -490,117 +610,366 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
       />
       <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
       
-      {/* Bulk Payment Modal for QBO Bill Pay */}
-      {showBulkPayModal && (
+      {/* Batch Payment Modal - Multiple States */}
+      {batchModalState !== 'hidden' && (
         <div style={{
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000,
         }}>
-          <div style={{
-            backgroundColor: '#fff',
-            borderRadius: '12px',
-            padding: '24px',
-            maxWidth: '600px',
-            width: '90%',
-            maxHeight: '80vh',
-            overflow: 'auto',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
-                Pay in QuickBooks
+          {/* PROCESSING STATE - Non-dismissable spinner */}
+          {batchModalState === 'processing' && (
+            <div style={{
+              backgroundColor: '#fff',
+              borderRadius: '16px',
+              padding: '48px',
+              textAlign: 'center',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                border: '4px solid #e5e7eb',
+                borderTopColor: '#357ab2',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                margin: '0 auto 24px',
+              }} />
+              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+              <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#111827', marginBottom: '8px' }}>
+                Batching your bills in QuickBooks...
               </h2>
-              <button
-                onClick={() => setShowBulkPayModal(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  color: '#6b7280',
-                }}
-              >
-                ×
-              </button>
+              <p style={{ color: '#6b7280' }}>
+                Please wait while we prepare your payment batches.
+              </p>
             </div>
-            
-            <p style={{ color: '#6b7280', marginBottom: '16px' }}>
-              Click each button to open QuickBooks and pay that invoice. Complete each payment in QuickBooks.
-            </p>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {bulkPayResults.map((result, index) => (
-                <div
-                  key={result.invoiceId || index}
+          )}
+
+          {/* VERIFYING STATE - Non-dismissable spinner */}
+          {batchModalState === 'verifying' && (
+            <div style={{
+              backgroundColor: '#fff',
+              borderRadius: '16px',
+              padding: '48px',
+              textAlign: 'center',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                border: '4px solid #e5e7eb',
+                borderTopColor: '#059669',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                margin: '0 auto 24px',
+              }} />
+              <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#111827', marginBottom: '8px' }}>
+                Verifying payments in QuickBooks...
+              </h2>
+              <p style={{ color: '#6b7280' }}>
+                Checking payment status for {allBatchInvoiceIds.length} invoice(s).
+              </p>
+            </div>
+          )}
+
+          {/* BATCH READY STATE - With tabs and invoice list */}
+          {batchModalState === 'ready' && (
+            <div style={{
+              backgroundColor: '#fff',
+              borderRadius: '16px',
+              padding: '24px',
+              maxWidth: '700px',
+              width: '95%',
+              maxHeight: '85vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            }}>
+              {/* Header with X button */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <div>
+                  <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
+                    Pay in QuickBooks
+                  </h2>
+                  <p style={{ color: '#6b7280', fontSize: '14px', marginTop: '4px' }}>
+                    {allBatchInvoiceIds.length} invoice{allBatchInvoiceIds.length !== 1 ? 's' : ''} split into {paymentBatches.length} batch{paymentBatches.length !== 1 ? 'es' : ''}
+                  </p>
+                </div>
+                <button
+                  onClick={handleCloseAndVerify}
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '12px 16px',
-                    backgroundColor: '#f9fafb',
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '28px',
+                    cursor: 'pointer',
+                    color: '#6b7280',
+                    lineHeight: 1,
+                    padding: '4px',
                   }}
+                  title="Close and verify payments"
                 >
-                  <div>
-                    <div style={{ fontWeight: 500, color: '#111827' }}>
-                      {result.invoiceNumber || result.invoiceId}
-                    </div>
-                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                      {result.vendorName} • ${result.amount}
-                    </div>
-                  </div>
+                  ×
+                </button>
+              </div>
+
+              {/* Batch Tabs */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                {paymentBatches.map((batch, index) => (
                   <button
-                    onClick={() => handleOpenQboPay(result.payUrl)}
+                    key={index}
+                    onClick={() => setCurrentBatchIndex(index)}
                     style={{
                       padding: '8px 16px',
-                      backgroundColor: '#059669',
-                      color: '#fff',
-                      borderRadius: '9999px',
-                      border: 'none',
-                      fontWeight: 500,
+                      borderRadius: '8px',
+                      border: currentBatchIndex === index ? '2px solid #357ab2' : '1px solid #e5e7eb',
+                      backgroundColor: currentBatchIndex === index ? '#eff6ff' : '#fff',
+                      color: currentBatchIndex === index ? '#357ab2' : '#374151',
+                      fontWeight: currentBatchIndex === index ? 600 : 400,
                       cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
+                      fontSize: '14px',
                     }}
                   >
-                    <i className="fas fa-external-link-alt" style={{ fontSize: '12px' }}></i>
-                    Pay in QBO
+                    Batch {index + 1} ({batch.length})
                   </button>
+                ))}
+              </div>
+
+              {/* Pay Batch Button */}
+              <div style={{ marginBottom: '16px' }}>
+                <button
+                  onClick={() => handlePayBatch(currentBatchIndex)}
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#059669',
+                    color: '#fff',
+                    borderRadius: '9999px',
+                    border: 'none',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '15px',
+                  }}
+                >
+                  <i className="fas fa-external-link-alt"></i>
+                  Pay Batch {currentBatchIndex + 1} in QuickBooks ({paymentBatches[currentBatchIndex]?.length || 0} invoices)
+                </button>
+              </div>
+
+              {/* Instructions */}
+              <div style={{
+                backgroundColor: '#fef3c7',
+                border: '1px solid #f59e0b',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginBottom: '16px',
+              }}>
+                <p style={{ color: '#92400e', fontSize: '14px', margin: 0 }}>
+                  <strong>Instructions:</strong> Click the button above to open QuickBooks Bills page. 
+                  Select the invoices listed below and pay them together. When finished with all batches, 
+                  close this window to verify payments.
+                </p>
+              </div>
+
+              {/* Invoice List for Current Batch */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+              }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1.5fr 100px',
+                  padding: '12px 16px',
+                  backgroundColor: '#f9fafb',
+                  borderBottom: '1px solid #e5e7eb',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  color: '#374151',
+                }}>
+                  <div>Invoice #</div>
+                  <div>Vendor</div>
+                  <div style={{ textAlign: 'right' }}>Amount</div>
                 </div>
-              ))}
+                {(paymentBatches[currentBatchIndex] || []).map((invoice, idx) => (
+                  <div
+                    key={invoice.invoiceId || idx}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1.5fr 100px',
+                      padding: '12px 16px',
+                      borderBottom: idx < (paymentBatches[currentBatchIndex]?.length || 0) - 1 ? '1px solid #f3f4f6' : 'none',
+                      fontSize: '14px',
+                    }}
+                  >
+                    <div style={{ color: '#111827', fontWeight: 500 }}>
+                      {invoice.invoiceNumber || invoice.invoiceId}
+                    </div>
+                    <div style={{ color: '#6b7280' }}>
+                      {invoice.vendorName || 'Unknown'}
+                    </div>
+                    <div style={{ textAlign: 'right', color: '#111827' }}>
+                      ${invoice.amount}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Batch Total */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '16px 0 0',
+                marginTop: '16px',
+                borderTop: '1px solid #e5e7eb',
+              }}>
+                <span style={{ fontWeight: 600, color: '#374151' }}>
+                  Batch {currentBatchIndex + 1} Total:
+                </span>
+                <span style={{ fontWeight: 700, fontSize: '18px', color: '#111827' }}>
+                  ${(paymentBatches[currentBatchIndex] || [])
+                    .reduce((sum, inv) => sum + parseFloat(inv.amount || 0), 0)
+                    .toFixed(2)}
+                </span>
+              </div>
             </div>
-            
-            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => {
-                  setShowBulkPayModal(false);
-                  setBulkPayResults([]);
-                  reloadList();
-                }}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#357ab2',
-                  color: '#fff',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                }}
-              >
-                Done
-              </button>
+          )}
+
+          {/* SUMMARY STATE - Verification results */}
+          {batchModalState === 'summary' && verificationResult && (
+            <div style={{
+              backgroundColor: '#fff',
+              borderRadius: '16px',
+              padding: '24px',
+              maxWidth: '500px',
+              width: '90%',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            }}>
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                {verificationResult.paid?.length === allBatchInvoiceIds.length ? (
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    backgroundColor: '#d1fae5',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                  }}>
+                    <i className="fas fa-check" style={{ fontSize: '28px', color: '#059669' }}></i>
+                  </div>
+                ) : (
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    backgroundColor: '#fef3c7',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                  }}>
+                    <i className="fas fa-exclamation" style={{ fontSize: '28px', color: '#f59e0b' }}></i>
+                  </div>
+                )}
+                <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#111827', marginBottom: '8px' }}>
+                  Payment Verification Complete
+                </h2>
+                <p style={{ color: '#6b7280', fontSize: '16px' }}>
+                  <strong style={{ color: '#059669' }}>{verificationResult.paid?.length || 0}</strong> of{' '}
+                  <strong>{allBatchInvoiceIds.length}</strong> invoices verified as paid
+                </p>
+              </div>
+
+              {/* Unpaid invoices list */}
+              {verificationResult.unpaid?.length > 0 && (
+                <div style={{
+                  backgroundColor: '#fef3c7',
+                  border: '1px solid #f59e0b',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  marginBottom: '20px',
+                }}>
+                  <p style={{ fontWeight: 600, color: '#92400e', marginBottom: '8px' }}>
+                    Invoices not yet paid ({verificationResult.unpaid.length}):
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '20px', color: '#92400e', fontSize: '14px' }}>
+                    {verificationResult.unpaid.slice(0, 5).map((id, idx) => (
+                      <li key={idx}>{id}</li>
+                    ))}
+                    {verificationResult.unpaid.length > 5 && (
+                      <li>...and {verificationResult.unpaid.length - 5} more</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+
+              {/* Errors list */}
+              {verificationResult.errors?.length > 0 && (
+                <div style={{
+                  backgroundColor: '#fee2e2',
+                  border: '1px solid #ef4444',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  marginBottom: '20px',
+                }}>
+                  <p style={{ fontWeight: 600, color: '#991b1b', marginBottom: '8px' }}>
+                    Errors during verification:
+                  </p>
+                  <ul style={{ margin: 0, paddingLeft: '20px', color: '#991b1b', fontSize: '14px' }}>
+                    {verificationResult.errors.slice(0, 3).map((err, idx) => (
+                      <li key={idx}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                {verificationResult.unpaid?.length > 0 && (
+                  <button
+                    onClick={handleReVerify}
+                    style={{
+                      padding: '12px 24px',
+                      backgroundColor: '#fff',
+                      color: '#357ab2',
+                      borderRadius: '9999px',
+                      border: '2px solid #357ab2',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Re-Verify Payments
+                  </button>
+                )}
+                <button
+                  onClick={handleDone}
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#357ab2',
+                    color: '#fff',
+                    borderRadius: '9999px',
+                    border: 'none',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Done
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>

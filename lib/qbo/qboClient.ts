@@ -475,6 +475,49 @@ export class QBOClient {
       return [];
     }
   }
+
+  /**
+   * Get a Bill by its QBO ID
+   * Returns the bill object with Balance field (0 = fully paid)
+   */
+  async getBillById(billId: string): Promise<{
+    Id: string;
+    Balance: number;
+    TotalAmt: number;
+    DocNumber?: string;
+    VendorRef?: { value: string; name?: string };
+    DueDate?: string;
+  } | null> {
+    try {
+      const safe = this.escapeQueryValue(billId);
+      const response = await this.query(`SELECT * FROM Bill WHERE Id = '${safe}'`);
+      const bill = response.QueryResponse?.Bill?.[0];
+      if (!bill) {
+        console.warn(`Bill with ID ${billId} not found in QBO`);
+        return null;
+      }
+      return {
+        Id: bill.Id,
+        Balance: bill.Balance ?? bill.TotalAmt ?? 0,
+        TotalAmt: bill.TotalAmt ?? 0,
+        DocNumber: bill.DocNumber,
+        VendorRef: bill.VendorRef,
+        DueDate: bill.DueDate,
+      };
+    } catch (error) {
+      console.error(`❌ Error getting bill by ID ${billId}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Check if a bill has been paid (Balance = 0)
+   */
+  async isBillPaid(billId: string): Promise<boolean> {
+    const bill = await this.getBillById(billId);
+    if (!bill) return false;
+    return bill.Balance === 0;
+  }
 }
 
 export const qboClient = new QBOClient();
