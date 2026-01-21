@@ -22,6 +22,12 @@ interface SystemPrompt {
   updated_at: string;
 }
 
+interface VendorHistoryStats {
+  vendor_name: string;
+  entry_count: number;
+  corrected_count: number;
+}
+
 const ADMIN_EMAILS = new Set([
   'business@pcsmilesai.com',
   'mckaym@pcsmiles.com',
@@ -39,6 +45,13 @@ export default function KnowledgeBasePage() {
   const [knowledgeBases, setKnowledgeBases] = useState<VendorKnowledgeBase[]>([]);
   const [systemPrompts, setSystemPrompts] = useState<SystemPrompt[]>([]);
   const [trainingPrompt, setTrainingPrompt] = useState<SystemPrompt | null>(null);
+  
+  // History stats
+  const [historyStats, setHistoryStats] = useState<{
+    total_vendors: number;
+    total_entries: number;
+    vendors: VendorHistoryStats[];
+  } | null>(null);
 
   // Edit state
   const [editedKBs, setEditedKBs] = useState<Record<string, string>>({});
@@ -83,11 +96,17 @@ export default function KnowledgeBasePage() {
   async function fetchData() {
     try {
       setLoading(true);
-      const response = await fetch('/api/knowledge-base');
-      if (!response.ok) {
+      
+      // Fetch knowledge bases and history stats in parallel
+      const [kbResponse, historyResponse] = await Promise.all([
+        fetch('/api/knowledge-base'),
+        fetch('/api/vendor-history')
+      ]);
+      
+      if (!kbResponse.ok) {
         throw new Error('Failed to fetch knowledge bases');
       }
-      const data = await response.json();
+      const data = await kbResponse.json();
       
       setKnowledgeBases(data.knowledgeBases || []);
       setSystemPrompts(data.systemPrompts || []);
@@ -99,6 +118,16 @@ export default function KnowledgeBasePage() {
       setTrainingPrompt(tp || null);
       if (tp) {
         setEditedTrainingPrompt(tp.prompt_text);
+      }
+      
+      // Process history stats
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json();
+        setHistoryStats({
+          total_vendors: historyData.stats?.total_vendors || 0,
+          total_entries: historyData.stats?.total_entries || 0,
+          vendors: historyData.vendors || []
+        });
       }
 
       setError(null);
@@ -315,7 +344,7 @@ export default function KnowledgeBasePage() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Knowledge Base</h1>
                 <p className="text-sm text-gray-500 mt-1">
-                  Configure GPT-4o parsing prompts for each vendor
+                  Configure GPT-5 nano parsing prompts and training history for each vendor
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -395,6 +424,63 @@ export default function KnowledgeBasePage() {
               </div>
             </div>
 
+            {/* Training History Summary */}
+            {historyStats && historyStats.total_entries > 0 && (
+              <div className="bg-white rounded-lg shadow mb-6">
+                <div className="px-6 py-4 border-b border-gray-200 bg-green-50">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h2 className="text-lg font-semibold text-green-900">Training History Database</h2>
+                      <p className="text-sm text-green-700">
+                        Historical invoices used as few-shot examples for AI parsing
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-green-800">{historyStats.total_entries}</p>
+                        <p className="text-xs text-green-600">Total Examples</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-green-800">{historyStats.total_vendors}</p>
+                        <p className="text-xs text-green-600">Vendors</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {historyStats.vendors
+                      .sort((a, b) => b.entry_count - a.entry_count)
+                      .slice(0, 8)
+                      .map((vendor) => (
+                        <div
+                          key={vendor.vendor_name}
+                          className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                          <p className="font-medium text-gray-900 truncate" title={vendor.vendor_name}>
+                            {vendor.vendor_name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {vendor.entry_count} examples
+                            {vendor.corrected_count > 0 && (
+                              <span className="text-orange-600"> ({vendor.corrected_count} corrected)</span>
+                            )}
+                          </p>
+                        </div>
+                      ))}
+                  </div>
+                  {historyStats.vendors.length > 8 && (
+                    <p className="text-sm text-gray-500 mt-3">
+                      +{historyStats.vendors.length - 8} more vendors with training data
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-4">
+                    Invoices are automatically added to history when approved or paid. The 5 most recent examples per vendor are used as context for parsing new invoices.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Vendor Knowledge Bases Section */}
             <div className="bg-white rounded-lg shadow">
               <div className="px-6 py-4 border-b border-gray-200">
@@ -456,6 +542,13 @@ export default function KnowledgeBasePage() {
                     const isExpanded = expandedVendors.has(kb.vendor_name);
                     const currentPrompt = editedKBs[kb.vendor_name] ?? kb.knowledge_prompt;
                     const hasChanges = hasKBChanges(kb.vendor_name, kb.knowledge_prompt);
+                    
+                    // Get history stats for this vendor
+                    const vendorHistory = historyStats?.vendors.find(
+                      v => v.vendor_name.toLowerCase() === kb.vendor_name.toLowerCase()
+                    );
+                    const historyCount = vendorHistory?.entry_count || 0;
+                    const correctedCount = vendorHistory?.corrected_count || 0;
 
                     return (
                       <div key={kb.id} className="border-b border-gray-100 last:border-0">
@@ -482,7 +575,13 @@ export default function KnowledgeBasePage() {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-3">
+                            {/* History badge */}
+                            {historyCount > 0 && (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded" title={`${historyCount} historical examples (${correctedCount} corrected)`}>
+                                {historyCount} examples
+                              </span>
+                            )}
                             {hasChanges && (
                               <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
                                 Unsaved changes
@@ -556,13 +655,13 @@ export default function KnowledgeBasePage() {
 
             {/* Info Box */}
             <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-blue-900 mb-2">How Knowledge Bases Work</h2>
+              <h2 className="text-lg font-semibold text-blue-900 mb-2">How the AI Training System Works</h2>
               <ul className="text-sm text-blue-800 space-y-2">
-                <li>• Each vendor has a unique knowledge base prompt that GPT-4o uses when parsing their invoices</li>
-                <li>• When an admin corrects invoice fields and clicks Update, the Training Prompt is used to automatically update that vendor&apos;s knowledge base</li>
-                <li>• Knowledge bases can be manually edited here to fine-tune parsing rules</li>
-                <li>• Version numbers track how many times a knowledge base has been updated</li>
-                <li>• New vendors get a default knowledge base prompt when first encountered</li>
+                <li><strong>Knowledge Base Prompts:</strong> Each vendor has a master prompt that GPT-5 nano uses when parsing their invoices</li>
+                <li><strong>Historical Examples:</strong> When parsing, GPT also receives up to 5 recent correctly-parsed invoices from that vendor as reference examples</li>
+                <li><strong>Automatic Learning:</strong> When an admin corrects invoice fields and clicks Update, GPT analyzes why parsing failed by comparing with historical examples, then updates the master prompt</li>
+                <li><strong>Continuous Improvement:</strong> The corrected invoice is automatically added to the training history, making future parsing more accurate</li>
+                <li><strong>History Database:</strong> Invoices are auto-added to history when they reach &quot;To Be Paid&quot; or &quot;Paid&quot; status</li>
               </ul>
             </div>
           </>
