@@ -107,12 +107,13 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
-        // Build QBO Bill Pay URL
-        // QBO bill payment URL format: https://app.qbo.intuit.com/app/billpayment?txnId={billId}
-        const qboBillPayUrl = `${qboBaseUrl}/app/billpayment?txnId=${invoice.qbo_bill_id}`;
-        
-        // Alternative: Direct bill view URL if billpayment doesn't work
+        // Build QBO Bill URLs
+        // The bill view URL shows the full bill with vendor, amount, memo, and attachments
+        // From there, users can click "Pay bill" within QBO
         const qboBillViewUrl = `${qboBaseUrl}/app/bill?txnId=${invoice.qbo_bill_id}`;
+        
+        // The billpayment URL is for creating a check payment (starts blank - not what we want)
+        const qboBillPayUrl = `${qboBaseUrl}/app/billpayment?txnId=${invoice.qbo_bill_id}`;
 
         results.push({
           invoiceId,
@@ -121,8 +122,11 @@ export async function POST(req: NextRequest) {
           amount: invoice.amount_cents ? (invoice.amount_cents / 100).toFixed(2) : null,
           ok: true,
           qboBillId: invoice.qbo_bill_id,
-          payUrl: qboBillPayUrl,
+          // Use bill VIEW URL as primary - shows the bill with all details
+          payUrl: qboBillViewUrl,
           viewUrl: qboBillViewUrl,
+          // Keep the bill payment URL as an alternative
+          billPaymentUrl: qboBillPayUrl,
         });
         successCount++;
 
