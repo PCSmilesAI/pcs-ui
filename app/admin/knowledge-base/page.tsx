@@ -401,11 +401,11 @@ export default function KnowledgeBasePage() {
           <>
             {/* Training Prompt Section */}
             <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: '#f3e8ff' }}>
+              <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: '#e8f4fc' }}>
                 <div className="flex justify-between items-center">
                   <div>
-                    <h2 className="text-lg font-semibold" style={{ color: '#581c87' }}>Training Prompt</h2>
-                    <p className="text-sm" style={{ color: '#7e22ce' }}>
+                    <h2 className="text-lg font-semibold" style={{ color: '#357ab2' }}>Training Prompt</h2>
+                    <p className="text-sm" style={{ color: '#5a9fd4' }}>
                       Sent to GPT when admin corrections are made
                     </p>
                   </div>
@@ -417,8 +417,8 @@ export default function KnowledgeBasePage() {
                       borderRadius: '9999px',
                       fontSize: '14px',
                       fontWeight: 500,
-                      border: saving || editedTrainingPrompt === trainingPrompt?.prompt_text ? '1px solid #9ca3af' : '1px solid #7c3aed',
-                      backgroundColor: saving || editedTrainingPrompt === trainingPrompt?.prompt_text ? '#e5e7eb' : '#7c3aed',
+                      border: saving || editedTrainingPrompt === trainingPrompt?.prompt_text ? '1px solid #9ca3af' : '1px solid #357ab2',
+                      backgroundColor: saving || editedTrainingPrompt === trainingPrompt?.prompt_text ? '#e5e7eb' : '#357ab2',
                       color: saving || editedTrainingPrompt === trainingPrompt?.prompt_text ? '#9ca3af' : '#ffffff',
                       cursor: saving || editedTrainingPrompt === trainingPrompt?.prompt_text ? 'not-allowed' : 'pointer',
                       transition: 'all 0.2s ease',
@@ -432,7 +432,8 @@ export default function KnowledgeBasePage() {
                 <textarea
                   value={editedTrainingPrompt}
                   onChange={(e) => setEditedTrainingPrompt(e.target.value)}
-                  className="w-full h-48 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full h-48 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:border-transparent"
+                  style={{ '--tw-ring-color': '#357ab2' } as React.CSSProperties}
                   placeholder="Enter the training prompt..."
                 />
                 <p className="text-xs text-gray-500 mt-2">
@@ -444,22 +445,22 @@ export default function KnowledgeBasePage() {
             {/* Training History Summary */}
             {historyStats && historyStats.total_entries > 0 && (
               <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: '#dcfce7' }}>
+                <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: '#e8f4fc' }}>
                   <div className="flex justify-between items-center">
                     <div>
-                      <h2 className="text-lg font-semibold" style={{ color: '#14532d' }}>Training History</h2>
-                      <p className="text-sm" style={{ color: '#166534' }}>
+                      <h2 className="text-lg font-semibold" style={{ color: '#357ab2' }}>Training History</h2>
+                      <p className="text-sm" style={{ color: '#5a9fd4' }}>
                         Historical invoices used as examples for AI parsing
                       </p>
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="text-2xl font-bold" style={{ color: '#166534' }}>{historyStats.total_entries}</p>
-                        <p className="text-xs" style={{ color: '#15803d' }}>Total Examples</p>
+                        <p className="text-2xl font-bold" style={{ color: '#357ab2' }}>{historyStats.total_entries}</p>
+                        <p className="text-xs" style={{ color: '#5a9fd4' }}>Total Examples</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold" style={{ color: '#166534' }}>{historyStats.total_vendors}</p>
-                        <p className="text-xs" style={{ color: '#15803d' }}>Vendors</p>
+                        <p className="text-2xl font-bold" style={{ color: '#357ab2' }}>{historyStats.total_vendors}</p>
+                        <p className="text-xs" style={{ color: '#5a9fd4' }}>Vendors</p>
                       </div>
                     </div>
                   </div>
@@ -500,7 +501,7 @@ export default function KnowledgeBasePage() {
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Vendor Knowledge Bases</h2>
+                    <h2 className="text-lg font-semibold" style={{ color: '#357ab2' }}>Vendor Knowledge Bases</h2>
                     <p className="text-sm text-gray-500">
                       {knowledgeBases.length} vendor{knowledgeBases.length !== 1 ? 's' : ''} configured
                     </p>
@@ -580,11 +581,11 @@ export default function KnowledgeBasePage() {
                           onClick={() => toggleVendorExpanded(kb.vendor_name)}
                         >
                           <div className="flex items-center gap-4">
-                            <span className="text-gray-400">
+                            <span style={{ color: '#357ab2' }}>
                               {isExpanded ? '▼' : '▶'}
                             </span>
                             <div>
-                              <h3 className="font-medium text-gray-900">{kb.vendor_name}</h3>
+                              <h3 className="font-medium" style={{ color: '#357ab2' }}>{kb.vendor_name}</h3>
                               <p className="text-xs text-gray-500">
                                 v{kb.version} • 
                                 {kb.training_invoice_count > 0 
@@ -600,7 +601,11 @@ export default function KnowledgeBasePage() {
                           <div className="flex items-center gap-3">
                             {/* History badge */}
                             {historyCount > 0 && (
-                              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded" title={`${historyCount} historical examples (${correctedCount} corrected)`}>
+                              <span 
+                                className="px-2 py-1 text-xs rounded" 
+                                style={{ backgroundColor: '#e8f4fc', color: '#357ab2' }}
+                                title={`${historyCount} historical examples (${correctedCount} corrected)`}
+                              >
                                 {historyCount} examples
                               </span>
                             )}
