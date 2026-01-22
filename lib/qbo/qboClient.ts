@@ -312,6 +312,15 @@ export class QBOClient {
     return response?.Bill || response;
   }
 
+  async updateBill(bill: { Id: string; SyncToken: string; sparse?: boolean; [key: string]: any }): Promise<any> {
+    // QBO requires Id and SyncToken for updates
+    if (!bill.Id || !bill.SyncToken) {
+      throw new Error('Bill update requires Id and SyncToken');
+    }
+    const response = await this.makeRequest('bill?minorversion=70', 'POST', bill);
+    return response?.Bill || response;
+  }
+
   async uploadAttachment(billId: string, fileName: string, fileContent: ArrayBuffer | Uint8Array | Buffer, mimeType: string): Promise<any> {
     await this.ensureValidToken();
 
@@ -524,6 +533,9 @@ export class QBOClient {
     DocNumber?: string;
     VendorRef?: { value: string; name?: string };
     DueDate?: string;
+    SyncToken?: string;
+    PrivateNote?: string;
+    Memo?: string;
   } | null> {
     try {
       const safe = this.escapeQueryValue(billId);
