@@ -79,6 +79,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
+    // Send back to For Me page (from To Be Paid) - doesn't delete, just changes status
+    if (action === 'send_back') {
+      invoice.status = 'awaiting_office_approval'; // This will show in "For Me" page
+      invoice.notes = reason ? `Sent back: ${reason}` : 'Sent back from To Be Paid for review';
+      saveInvoice(invoice);
+      console.log('[API][INVOICES][TRANSITION]', 'send_back_success', { invoiceId: String(invoiceId), userEmail: user.email, newStatus: invoice.status });
+      return NextResponse.json({ ok: true, invoice });
+    }
+
     if (action === 'approve') {
       console.log('[API][INVOICES][TRANSITION]', 'approve_received', { invoiceId: String(invoiceId), userEmail: user.email, invoiceStatus: invoice.status });
       try {
