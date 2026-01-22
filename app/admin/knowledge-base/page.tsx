@@ -57,7 +57,6 @@ export default function KnowledgeBasePage() {
   // Edit state
   const [editedKBs, setEditedKBs] = useState<Record<string, string>>({});
   const [editedTrainingPrompt, setEditedTrainingPrompt] = useState<string>('');
-  const [expandedVendors, setExpandedVendors] = useState<Set<string>>(new Set());
 
   // Search/filter
   const [searchQuery, setSearchQuery] = useState('');
@@ -284,18 +283,6 @@ export default function KnowledgeBasePage() {
     }
   }
 
-  function toggleVendorExpanded(vendorName: string) {
-    setExpandedVendors(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(vendorName)) {
-        newSet.delete(vendorName);
-      } else {
-        newSet.add(vendorName);
-      }
-      return newSet;
-    });
-  }
-
   function handleKBEdit(vendorName: string, newText: string) {
     setEditedKBs(prev => ({
       ...prev,
@@ -429,16 +416,28 @@ export default function KnowledgeBasePage() {
                 </div>
               </div>
               <div className="p-6">
-                <textarea
-                  value={editedTrainingPrompt}
-                  onChange={(e) => setEditedTrainingPrompt(e.target.value)}
-                  className="w-full h-48 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:border-transparent"
-                  style={{ '--tw-ring-color': '#357ab2' } as React.CSSProperties}
-                  placeholder="Enter the training prompt..."
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  Use {"{{original_data}}"} and {"{{corrected_data}}"} as placeholders for the before/after data
-                </p>
+                <div style={{ width: '70%' }}>
+                  <textarea
+                    value={editedTrainingPrompt}
+                    onChange={(e) => setEditedTrainingPrompt(e.target.value)}
+                    style={{
+                      width: '100%',
+                      minHeight: '240px',
+                      padding: '12px',
+                      border: '2px solid #357ab2',
+                      borderRadius: '8px',
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      lineHeight: '1.5',
+                      resize: 'none',
+                      overflow: 'auto',
+                    }}
+                    placeholder="Enter the training prompt..."
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Use {"{{original_data}}"} and {"{{corrected_data}}"} as placeholders for the before/after data
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -553,16 +552,15 @@ export default function KnowledgeBasePage() {
               </div>
 
               {/* Vendor List */}
-              <div className="divide-y divide-gray-200">
+              <div className="p-6 space-y-6">
                 {filteredKBs.length === 0 ? (
-                  <div className="px-6 py-8 text-center text-gray-500">
+                  <div className="py-8 text-center text-gray-500">
                     {searchQuery 
                       ? `No vendors matching "${searchQuery}"`
                       : 'No vendor knowledge bases configured yet. Add one above.'}
                   </div>
                 ) : (
                   filteredKBs.map((kb) => {
-                    const isExpanded = expandedVendors.has(kb.vendor_name);
                     const currentPrompt = editedKBs[kb.vendor_name] ?? kb.knowledge_prompt;
                     const hasChanges = hasKBChanges(kb.vendor_name, kb.knowledge_prompt);
                     
@@ -574,29 +572,21 @@ export default function KnowledgeBasePage() {
                     const correctedCount = vendorHistory?.corrected_count || 0;
 
                     return (
-                      <div key={kb.id} className="border-b border-gray-100 last:border-0">
+                      <div key={kb.id} className="pb-6 border-b border-gray-200 last:border-0 last:pb-0">
                         {/* Vendor Header */}
-                        <div
-                          className="px-6 py-4 cursor-pointer hover:bg-gray-50 flex justify-between items-center"
-                          onClick={() => toggleVendorExpanded(kb.vendor_name)}
-                        >
-                          <div className="flex items-center gap-4">
-                            <span style={{ color: '#357ab2' }}>
-                              {isExpanded ? '▼' : '▶'}
-                            </span>
-                            <div>
-                              <h3 className="font-medium" style={{ color: '#357ab2' }}>{kb.vendor_name}</h3>
-                              <p className="text-xs text-gray-500">
-                                v{kb.version} • 
-                                {kb.training_invoice_count > 0 
-                                  ? ` ${kb.training_invoice_count} corrections trained`
-                                  : ' No corrections trained'
-                                }
-                                {kb.last_trained_at && 
-                                  ` • Last trained: ${new Date(kb.last_trained_at).toLocaleDateString()}`
-                                }
-                              </p>
-                            </div>
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="text-lg font-semibold" style={{ color: '#357ab2' }}>{kb.vendor_name}</h3>
+                            <p className="text-xs text-gray-500 mt-1">
+                              v{kb.version} • 
+                              {kb.training_invoice_count > 0 
+                                ? ` ${kb.training_invoice_count} corrections trained`
+                                : ' No corrections trained'
+                              }
+                              {kb.last_trained_at && 
+                                ` • Last trained: ${new Date(kb.last_trained_at).toLocaleDateString()}`
+                              }
+                            </p>
                           </div>
                           <div className="flex items-center gap-3">
                             {/* History badge */}
@@ -611,94 +601,91 @@ export default function KnowledgeBasePage() {
                             )}
                             {hasChanges && (
                               <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
-                                Unsaved changes
+                                Unsaved
                               </span>
                             )}
-                            <span className="text-xs text-gray-400">
-                              {kb.knowledge_prompt.length} chars
-                            </span>
                           </div>
                         </div>
 
-                        {/* Expanded Editor */}
-                        {isExpanded && (
-                          <div className="px-6 pb-6 bg-gray-50">
-                            <textarea
-                              value={currentPrompt}
-                              onChange={(e) => handleKBEdit(kb.vendor_name, e.target.value)}
-                              className="w-full h-48 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <div className="flex justify-between items-center mt-4">
+                        {/* Always Visible Editor */}
+                        <div style={{ width: '70%' }}>
+                          <textarea
+                            value={currentPrompt}
+                            onChange={(e) => handleKBEdit(kb.vendor_name, e.target.value)}
+                            style={{
+                              width: '100%',
+                              minHeight: '240px',
+                              padding: '12px',
+                              border: '2px solid #357ab2',
+                              borderRadius: '8px',
+                              fontFamily: 'monospace',
+                              fontSize: '13px',
+                              lineHeight: '1.5',
+                              resize: 'none',
+                              overflow: 'auto',
+                            }}
+                            placeholder="Enter the knowledge base prompt for this vendor..."
+                          />
+                          <div className="flex items-center gap-3 mt-3">
+                            <button
+                              onClick={() => saveVendorKB(kb.vendor_name)}
+                              disabled={saving || !hasChanges}
+                              style={{
+                                padding: '8px 16px',
+                                borderRadius: '9999px',
+                                fontSize: '14px',
+                                fontWeight: 500,
+                                border: saving || !hasChanges ? '1px solid #9ca3af' : '1px solid #357ab2',
+                                backgroundColor: saving || !hasChanges ? '#e5e7eb' : '#357ab2',
+                                color: saving || !hasChanges ? '#9ca3af' : '#ffffff',
+                                cursor: saving || !hasChanges ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s ease',
+                              }}
+                            >
+                              {saving ? 'Saving...' : 'Save'}
+                            </button>
+                            {hasChanges && (
                               <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteVendorKB(kb.vendor_name);
+                                onClick={() => {
+                                  setEditedKBs(prev => {
+                                    const newState = { ...prev };
+                                    delete newState[kb.vendor_name];
+                                    return newState;
+                                  });
                                 }}
                                 style={{
                                   padding: '8px 16px',
                                   borderRadius: '9999px',
                                   fontSize: '14px',
                                   fontWeight: 500,
-                                  border: '1px solid #dc2626',
+                                  border: '1px solid #6b7280',
                                   backgroundColor: '#ffffff',
-                                  color: '#dc2626',
+                                  color: '#6b7280',
                                   cursor: 'pointer',
                                   transition: 'all 0.2s ease',
                                 }}
                               >
-                                Delete
+                                Reset
                               </button>
-                              <div className="flex gap-2">
-                                {hasChanges && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setEditedKBs(prev => {
-                                        const newState = { ...prev };
-                                        delete newState[kb.vendor_name];
-                                        return newState;
-                                      });
-                                    }}
-                                    style={{
-                                      padding: '8px 16px',
-                                      borderRadius: '9999px',
-                                      fontSize: '14px',
-                                      fontWeight: 500,
-                                      border: '1px solid #6b7280',
-                                      backgroundColor: '#ffffff',
-                                      color: '#6b7280',
-                                      cursor: 'pointer',
-                                      transition: 'all 0.2s ease',
-                                    }}
-                                  >
-                                    Reset
-                                  </button>
-                                )}
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    saveVendorKB(kb.vendor_name);
-                                  }}
-                                  disabled={saving || !hasChanges}
-                                  style={{
-                                    padding: '8px 16px',
-                                    borderRadius: '9999px',
-                                    fontSize: '14px',
-                                    fontWeight: 500,
-                                    border: saving || !hasChanges ? '1px solid #9ca3af' : '1px solid #357ab2',
-                                    backgroundColor: saving || !hasChanges ? '#e5e7eb' : '#357ab2',
-                                    color: saving || !hasChanges ? '#9ca3af' : '#ffffff',
-                                    cursor: saving || !hasChanges ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.2s ease',
-                                  }}
-                                >
-                                  {saving ? 'Saving...' : 'Save Changes'}
-                                </button>
-                              </div>
-                            </div>
+                            )}
+                            <button
+                              onClick={() => deleteVendorKB(kb.vendor_name)}
+                              style={{
+                                padding: '8px 16px',
+                                borderRadius: '9999px',
+                                fontSize: '14px',
+                                fontWeight: 500,
+                                border: '1px solid #dc2626',
+                                backgroundColor: '#ffffff',
+                                color: '#dc2626',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                              }}
+                            >
+                              Delete
+                            </button>
                           </div>
-                        )}
+                        </div>
                       </div>
                     );
                   })
