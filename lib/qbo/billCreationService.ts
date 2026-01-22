@@ -414,7 +414,12 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
       throw new Error('Vendor name is required to create a QuickBooks bill');
     }
 
-    const invoiceNumber = (options.invoiceNumber || invoiceData.invoice_number || invoiceData.invoiceNumber || '').toString().trim() || undefined;
+    // QBO DocNumber has a max length of 21 characters
+    const rawInvoiceNumber = (options.invoiceNumber || invoiceData.invoice_number || invoiceData.invoiceNumber || '').toString().trim();
+    const invoiceNumber = rawInvoiceNumber ? rawInvoiceNumber.slice(0, 21) : undefined;
+    if (rawInvoiceNumber && rawInvoiceNumber.length > 21) {
+      console.warn(`[QBO][CREATE_BILL] Invoice number truncated from ${rawInvoiceNumber.length} to 21 chars: "${rawInvoiceNumber}" -> "${invoiceNumber}"`);
+    }
     const invoiceDate = formatDate(options.invoiceDate || invoiceData.invoice_date || invoiceData.invoiceDate);
     const dueDate = formatDate(options.dueDate || invoiceData.due_date || invoiceData.dueDate);
 
