@@ -153,7 +153,7 @@ ${invoiceContext}`;
       body: JSON.stringify({
         model,
         messages,
-        max_completion_tokens: 1000,
+        max_completion_tokens: 4000,
       }),
     });
 
