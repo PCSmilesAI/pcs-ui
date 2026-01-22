@@ -5,6 +5,7 @@ import { getInvoiceById, saveInvoice, softDeleteInvoice } from '../../../../lib/
 import { approveAP, approveOffice, approveAdmin, markPaid } from '../../../../lib/workflow/engine';
 import { rateLimitByUser } from '../../../../lib/ratelimit/rateLimiter';
 import { maybeAddToHistory } from '../../../../lib/gpt/historyAutoAdd';
+import { createBillFromInvoice } from '../../../../lib/qbo/billCreationService';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,6 +120,41 @@ export async function POST(req: NextRequest) {
       }
 
       console.log('[API][INVOICES][TRANSITION]', 'before_save', { invoiceId: String(invoiceId), status: invoice.status });
+      
+      // If transitioning to to_be_paid, create QBO bill FIRST
+      let qboBillResult: { success: boolean; billId?: string; error?: string } | null = null;
+      if (invoice.status === 'to_be_paid') {
+        console.log('[API][INVOICES][TRANSITION]', 'creating_qbo_bill', { invoiceId: String(invoiceId) });
+        try {
+          qboBillResult = await createBillFromInvoice({
+            invoiceData: invoice,
+            invoiceId: String(invoiceId),
+          });
+          
+          if (qboBillResult.success && qboBillResult.billId) {
+            // Save QBO bill ID to the invoice
+            invoice.qbo_bill_id = qboBillResult.billId;
+            invoice.qbo_bill_created_at = new Date().toISOString();
+            console.log('[API][INVOICES][TRANSITION]', 'qbo_bill_created', { 
+              invoiceId: String(invoiceId), 
+              qboBillId: qboBillResult.billId 
+            });
+          } else {
+            console.warn('[API][INVOICES][TRANSITION]', 'qbo_bill_failed', { 
+              invoiceId: String(invoiceId), 
+              error: qboBillResult?.error 
+            });
+            // Don't block approval if QBO bill creation fails, but log it
+          }
+        } catch (qboErr: any) {
+          console.error('[API][INVOICES][TRANSITION]', 'qbo_bill_error', { 
+            invoiceId: String(invoiceId), 
+            error: String(qboErr) 
+          });
+          // Don't block approval, but log the error
+        }
+      }
+      
       try {
         saveInvoice(invoice);
         console.log('[API][INVOICES][TRANSITION]', 'approve_success', { invoiceId: String(invoiceId), userEmail: user.email });
@@ -139,7 +175,16 @@ export async function POST(req: NextRequest) {
         // Return safe error message to client
         return NextResponse.json({ error: 'Failed to save invoice' }, { status: 500 });
       }
-      return NextResponse.json({ ok: true, invoice });
+      
+      return NextResponse.json({ 
+        ok: true, 
+        invoice,
+        qboBill: qboBillResult ? {
+          created: qboBillResult.success,
+          billId: qboBillResult.billId,
+          error: qboBillResult.error,
+        } : null
+      });
     }
 
     if (action === 'mark_paid') {

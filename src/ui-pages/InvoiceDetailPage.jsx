@@ -1256,8 +1256,17 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           setPaymentAmount(`$${parsed.toFixed(2)}`);
         }
 
-        // If invoice status is now 'to_be_paid', automatically create QuickBooks bill
+        // If invoice status is now 'to_be_paid', check if QBO bill was already created by transition endpoint
         if (action === 'approve' && updated.status === 'to_be_paid') {
+          // Check if the transition endpoint already created the QBO bill
+          if (payload?.qboBill?.created && payload?.qboBill?.billId) {
+            console.log('✅ QBO bill already created by transition endpoint:', payload.qboBill.billId);
+            showToast(`Invoice approved and QBO Bill created! ID: ${payload.qboBill.billId}`, 'success');
+            if (onBack) onBack();
+            return;
+          }
+          
+          // QBO bill was not created by transition endpoint - try to create it now
           try {
             console.log('🔄 Invoice approved to to_be_paid - creating QuickBooks bill...');
             
