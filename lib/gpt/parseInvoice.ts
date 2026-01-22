@@ -319,6 +319,13 @@ export async function trainFromCorrection(input: TrainingInput): Promise<Trainin
   const { vendorName, pdfPath, originalParsed, correctedData } = input;
 
   try {
+    // Extract user comment from corrected data (if present)
+    const userComment = correctedData._user_comment as string | undefined;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _user_comment, ...cleanCorrectedData } = correctedData;
+    
+    console.log('[GPT-TRAIN] User comment provided:', userComment ? `"${userComment}"` : 'none');
+
     // Get the training prompt
     const trainingPromptRecord = getTrainingPrompt();
     if (!trainingPromptRecord) {
@@ -341,7 +348,21 @@ export async function trainFromCorrection(input: TrainingInput): Promise<Trainin
     console.log(`[GPT-TRAIN] Loaded ${historicalExamples.length} historical examples for analysis`);
 
     // Build enhanced training prompt with historical analysis
-    let trainingPrompt = `CURRENT KNOWLEDGE BASE FOR ${vendorName}:
+    let trainingPrompt = '';
+    
+    // Add user comment prominently at the TOP if provided
+    if (userComment) {
+      trainingPrompt += `⚠️ IMPORTANT USER INSTRUCTION FROM ADMIN:
+"${userComment}"
+
+The above message is from an admin who reviewed this invoice and made corrections. This instruction should be HEAVILY WEIGHTED when updating the knowledge base. The admin is telling you exactly what went wrong or what rule to add. Incorporate this feedback directly into the updated prompt.
+
+---
+
+`;
+    }
+    
+    trainingPrompt += `CURRENT KNOWLEDGE BASE FOR ${vendorName}:
 ---
 ${currentKb.knowledge_prompt}
 ---
@@ -366,13 +387,13 @@ ${JSON.stringify(example.parsed_data, null, 2)}
     // Add the base training prompt with placeholders replaced
     trainingPrompt += trainingPromptRecord.prompt_text
       .replace('{{original_data}}', JSON.stringify(originalParsed, null, 2))
-      .replace('{{corrected_data}}', JSON.stringify(correctedData, null, 2));
+      .replace('{{corrected_data}}', JSON.stringify(cleanCorrectedData, null, 2));
 
     // Add analysis instructions
     trainingPrompt += `
 
 ANALYSIS INSTRUCTIONS:
-1. Compare the incorrectly parsed invoice with the historical examples above
+1. ${userComment ? 'FIRST AND FOREMOST: Follow the admin\'s instruction above - they know what went wrong' : 'Compare the incorrectly parsed invoice with the historical examples above'}
 2. Identify WHY certain fields were extracted incorrectly:
    - Did the field location change on this invoice?
    - Was there a different format or labeling?
