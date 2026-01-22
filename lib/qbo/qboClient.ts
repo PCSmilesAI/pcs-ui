@@ -552,6 +552,9 @@ export class QBOClient {
         DocNumber: bill.DocNumber,
         VendorRef: bill.VendorRef,
         DueDate: bill.DueDate,
+        SyncToken: bill.SyncToken,
+        PrivateNote: bill.PrivateNote,
+        Memo: bill.Memo,
       };
     } catch (error) {
       console.error(`❌ Error getting bill by ID ${billId}:`, error);
