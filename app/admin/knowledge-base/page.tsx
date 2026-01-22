@@ -46,6 +46,7 @@ export default function KnowledgeBasePage() {
   const [knowledgeBases, setKnowledgeBases] = useState<VendorKnowledgeBase[]>([]);
   const [systemPrompts, setSystemPrompts] = useState<SystemPrompt[]>([]);
   const [trainingPrompt, setTrainingPrompt] = useState<SystemPrompt | null>(null);
+  const [masterParsingPrompt, setMasterParsingPrompt] = useState<SystemPrompt | null>(null);
   
   // History stats
   const [historyStats, setHistoryStats] = useState<{
@@ -57,6 +58,7 @@ export default function KnowledgeBasePage() {
   // Edit state
   const [editedKBs, setEditedKBs] = useState<Record<string, string>>({});
   const [editedTrainingPrompt, setEditedTrainingPrompt] = useState<string>('');
+  const [editedMasterParsingPrompt, setEditedMasterParsingPrompt] = useState<string>('');
 
   // Search/filter
   const [searchQuery, setSearchQuery] = useState('');
@@ -120,6 +122,15 @@ export default function KnowledgeBasePage() {
         setEditedTrainingPrompt(tp.prompt_text);
       }
       
+      // Find the Master Parsing Prompt
+      const mpp = (data.systemPrompts || []).find(
+        (sp: SystemPrompt) => sp.prompt_name === 'Master Parsing Prompt'
+      );
+      setMasterParsingPrompt(mpp || null);
+      if (mpp) {
+        setEditedMasterParsingPrompt(mpp.prompt_text);
+      }
+      
       // Process history stats
       if (historyResponse.ok) {
         const historyData = await historyResponse.json();
@@ -149,6 +160,38 @@ export default function KnowledgeBasePage() {
       });
     } catch {
       setGptStatus({ connected: false, model: 'unknown' });
+    }
+  }
+
+  async function saveMasterParsingPrompt() {
+    if (!editedMasterParsingPrompt.trim()) {
+      showToast('Master Parsing prompt cannot be empty', 'error');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch('/api/knowledge-base', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'system',
+          promptName: 'Master Parsing Prompt',
+          promptText: editedMasterParsingPrompt
+        })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to save');
+      }
+
+      showToast('Master Parsing Prompt saved successfully!', 'success');
+      fetchData();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -386,6 +429,61 @@ export default function KnowledgeBasePage() {
           </div>
         ) : (
           <>
+            {/* Master Parsing Prompt Section */}
+            <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: '#e8f4fc' }}>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-lg font-semibold" style={{ color: '#357ab2' }}>Master Parsing Prompt</h2>
+                    <p className="text-sm" style={{ color: '#5a9fd4' }}>
+                      Global extraction rules applied to ALL invoice parsing (runs before vendor-specific prompts)
+                    </p>
+                  </div>
+                  <button
+                    onClick={saveMasterParsingPrompt}
+                    disabled={saving || editedMasterParsingPrompt === masterParsingPrompt?.prompt_text}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '9999px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      border: saving || editedMasterParsingPrompt === masterParsingPrompt?.prompt_text ? '1px solid #9ca3af' : '1px solid #357ab2',
+                      backgroundColor: saving || editedMasterParsingPrompt === masterParsingPrompt?.prompt_text ? '#e5e7eb' : '#357ab2',
+                      color: saving || editedMasterParsingPrompt === masterParsingPrompt?.prompt_text ? '#9ca3af' : '#ffffff',
+                      cursor: saving || editedMasterParsingPrompt === masterParsingPrompt?.prompt_text ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {saving ? 'Saving...' : 'Save Master Parsing Prompt'}
+                  </button>
+                </div>
+              </div>
+              <div className="p-6">
+                <div style={{ width: '70%' }}>
+                  <textarea
+                    value={editedMasterParsingPrompt}
+                    onChange={(e) => setEditedMasterParsingPrompt(e.target.value)}
+                    style={{
+                      width: '100%',
+                      minHeight: '400px',
+                      padding: '12px',
+                      border: '2px solid #357ab2',
+                      borderRadius: '8px',
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      lineHeight: '1.5',
+                      resize: 'none',
+                      overflow: 'auto',
+                    }}
+                    placeholder="Enter the master parsing prompt..."
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Use {"{{QBO_VENDORS}}"} and {"{{QBO_CLASSES}}"} as placeholders - these will be auto-populated with QBO data during parsing
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Training Prompt Section */}
             <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: '#e8f4fc' }}>
