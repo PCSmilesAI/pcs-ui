@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const llmClient = createLocalLLMClient();
     if (!llmClient) {
       return NextResponse.json(
-        { error: 'Local LLM not configured. Please set up LOCAL_LLM_ENDPOINT and LOCAL_LLM_MODEL environment variables.' },
+        { error: 'PCS AI is not configured. Please contact your administrator.' },
         { status: 503 }
       );
     }
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Training data sent to LLM',
+      message: 'Training data sent to PCS AI',
       response: response.content.substring(0, 500), // Return first 500 chars
     });
   } catch (error: any) {

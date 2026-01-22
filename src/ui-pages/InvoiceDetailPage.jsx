@@ -100,7 +100,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [reassignmentTargets, setReassignmentTargets] = useState([]); // NEW: Reassignment targets
   const [selectedReassignmentTarget, setSelectedReassignmentTarget] = useState(null); // NEW: Selected target
   const [reassigningInvoice, setReassigningInvoice] = useState(false); // NEW: Reassignment loading state
-  const [notes, setNotes] = useState(''); // NEW: Notes field for LLM feedback
+  const [notes, setNotes] = useState(''); // NEW: Notes field for PCS AI feedback
   const [notesHistory, setNotesHistory] = useState([]); // NEW: Notes history
   const [isChatOpen, setIsChatOpen] = useState(false); // NEW: Chat interface visibility
   const [chatMessages, setChatMessages] = useState([]); // NEW: Chat messages
@@ -1759,7 +1759,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get LLM response');
+        throw new Error('Failed to get PCS AI response');
       }
 
       const data = await response.json();
@@ -3001,7 +3001,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add notes about this invoice parsing, categorization, or any feedback for the LLM..."
+                placeholder="Add notes about this invoice parsing, categorization, or any feedback for PCS AI..."
                 rows={4}
                 style={{
                   width: '100%',
@@ -3025,7 +3025,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                         body: JSON.stringify({ note: notes }),
                       });
                       if (response.ok) {
-                        showToast('Notes saved and sent to LLM', 'success');
+                        showToast('Notes saved and sent to PCS AI', 'success');
                         // Reload notes history
                         const data = await response.json();
                         setNotesHistory(data.history || []);

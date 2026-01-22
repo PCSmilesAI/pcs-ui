@@ -53,7 +53,7 @@ class LocalLLMClient {
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        throw new Error('LLM request timed out');
+        throw new Error('PCS AI request timed out');
       }
       throw error;
     } finally {
@@ -108,7 +108,7 @@ class LocalLLMClient {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`LLM API error: ${response.status} - ${errorText}`);
+      throw new Error(`PCS AI error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -141,7 +141,7 @@ class LocalLLMClient {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`LLM API error: ${response.status} - ${errorText}`);
+      throw new Error(`PCS AI error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
