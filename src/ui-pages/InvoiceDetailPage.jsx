@@ -135,6 +135,11 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const [reparsing, setReparsing] = useState(false);
   const [reparseResult, setReparseResult] = useState(null);
   
+  // Scan & Reparse State (for post-update scanning of similar invoices)
+  const [scanningInvoices, setScanningInvoices] = useState(false);
+  const [scanResults, setScanResults] = useState(null);
+  const [showScanModal, setShowScanModal] = useState(false);
+  
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -1663,6 +1668,43 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           if (gptTrainResponse.ok && gptResult.success) {
             console.log('✅ GPT Knowledge Base updated:', gptResult);
             showToast(`Knowledge base for ${vendorName} updated to v${gptResult.version}!`, 'success');
+            
+            // Start scanning other invoices with the updated knowledge base
+            console.log('🔍 Starting scan of other invoices for vendor:', vendorName);
+            setShowScanModal(true);
+            setScanningInvoices(true);
+            setImprovingParser(false);
+            
+            try {
+              const scanResponse = await fetch('/api/invoices/scan-and-reparse', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  vendorName: vendorName,
+                  updatedPdfPath: pdfPath,
+                  updatedInvoiceId: invoiceId,
+                })
+              });
+              
+              const scanResult = await scanResponse.json();
+              console.log('✅ Scan complete:', scanResult);
+              setScanResults(scanResult);
+              setScanningInvoices(false);
+              
+              // Don't auto-reload - let user close the modal first
+              return; // Exit early, user will close modal and page will reload then
+            } catch (scanError) {
+              console.warn('⚠️ Scan failed:', scanError);
+              setScanningInvoices(false);
+              setScanResults({ 
+                success: false, 
+                scanned: 0, 
+                matched: 0, 
+                reparsed: 0, 
+                fixed: 0,
+                errors: [scanError?.message || 'Scan failed'] 
+              });
+            }
           } else {
             console.warn('⚠️ GPT training failed:', gptResult.error);
             // Don't show error toast for training failures - the update still succeeded
@@ -3461,6 +3503,175 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                 Got It
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Scanning Other Invoices Modal */}
+      {showScanModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            border: scanningInvoices ? '2px solid #357ab2' : '2px solid #16a34a',
+          }}>
+            {scanningInvoices ? (
+              // Scanning in progress
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e8f4fc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <i className="fas fa-sync-alt fa-spin" style={{ color: '#357ab2', fontSize: '18px' }}></i>
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#357ab2' }}>
+                    Scanning Other Invoices...
+                  </h3>
+                </div>
+                
+                <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
+                  The AI is comparing this invoice with others from the same vendor to apply the updated knowledge base.
+                </p>
+                
+                <div style={{
+                  backgroundColor: '#fef3c7',
+                  border: '1px solid #fcd34d',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  marginBottom: '16px',
+                }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#92400e', fontWeight: '500' }}>
+                    Please do not update another invoice until this scan completes.
+                  </p>
+                </div>
+                
+                <div style={{
+                  height: '4px',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '2px',
+                  overflow: 'hidden',
+                }}>
+                  <div style={{
+                    height: '100%',
+                    width: '100%',
+                    backgroundColor: '#357ab2',
+                    animation: 'scan-progress 2s ease-in-out infinite',
+                  }}></div>
+                </div>
+                <style>{`
+                  @keyframes scan-progress {
+                    0% { transform: translateX(-100%); }
+                    50% { transform: translateX(0%); }
+                    100% { transform: translateX(100%); }
+                  }
+                `}</style>
+              </>
+            ) : (
+              // Scan complete
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: '#dcfce7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px',
+                  }}>
+                    ✓
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#16a34a' }}>
+                    Scan Complete!
+                  </h3>
+                </div>
+                
+                {scanResults && (
+                  <div style={{
+                    backgroundColor: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '8px',
+                    padding: '12px 16px',
+                    marginBottom: '20px',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
+                      <span style={{ color: '#6b7280' }}>Invoices Scanned:</span>
+                      <span style={{ fontWeight: '600', color: '#1f2937' }}>{scanResults.scanned}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
+                      <span style={{ color: '#6b7280' }}>Similar Matches:</span>
+                      <span style={{ fontWeight: '600', color: '#1f2937' }}>{scanResults.matched}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
+                      <span style={{ color: '#6b7280' }}>Re-parsed:</span>
+                      <span style={{ fontWeight: '600', color: '#16a34a' }}>{scanResults.reparsed}</span>
+                    </div>
+                    {scanResults.fixed > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', paddingTop: '8px', borderTop: '1px solid #bbf7d0' }}>
+                        <span style={{ color: '#16a34a', fontWeight: '600' }}>Fixed from Failed Queue:</span>
+                        <span style={{ fontWeight: '700', color: '#16a34a' }}>{scanResults.fixed}</span>
+                      </div>
+                    )}
+                    {scanResults.errors && scanResults.errors.length > 0 && (
+                      <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #fecaca' }}>
+                        <span style={{ color: '#dc2626', fontSize: '13px' }}>
+                          {scanResults.errors.length} error(s) occurred
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#6b7280' }}>
+                  The updated knowledge base has been applied to similar invoices. You can now continue updating other invoices.
+                </p>
+                
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={() => {
+                      setShowScanModal(false);
+                      setScanResults(null);
+                      // Reload page to show updated data
+                      window.location.reload();
+                    }}
+                    style={{
+                      padding: '10px 24px',
+                      backgroundColor: '#16a34a',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Done
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

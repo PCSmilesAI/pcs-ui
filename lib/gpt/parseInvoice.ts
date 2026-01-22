@@ -605,6 +605,108 @@ export async function parseInvoiceFromImages(
   }
 }
 
+// ============================================================================
+// PDF Similarity Comparison
+// ============================================================================
+
+export interface SimilarityResult {
+  similar: boolean;
+  confidence: number;
+  reason: string;
+}
+
+const SIMILARITY_PROMPT = `You are comparing two invoice images to determine if they are from the same vendor and have the same general layout/format.
+
+Compare the two images and assess:
+1. Are they from the same company/vendor?
+2. Do they have the same general layout and structure?
+3. Are field positions (invoice number, total, dates) in similar locations?
+
+Respond with a JSON object:
+{
+  "similar": true/false,
+  "confidence": 0.0-1.0,
+  "reason": "Brief explanation"
+}
+
+Return ONLY the JSON, no other text.`;
+
+/**
+ * Compare two PDFs to determine if they have similar layouts/formats
+ * Used to identify invoices that could benefit from the same knowledge base updates
+ */
+export async function comparePdfSimilarity(
+  referencePdfPath: string,
+  candidatePdfPath: string
+): Promise<SimilarityResult> {
+  try {
+    // Convert both PDFs to images (first page only for speed)
+    console.log('[GPT-SIMILARITY] Comparing PDFs:', { reference: referencePdfPath, candidate: candidatePdfPath });
+    
+    const [refImages, candImages] = await Promise.all([
+      convertPdfToBase64Images(referencePdfPath),
+      convertPdfToBase64Images(candidatePdfPath)
+    ]);
+
+    if (refImages.length === 0 || candImages.length === 0) {
+      return {
+        similar: false,
+        confidence: 0,
+        reason: 'Could not convert one or both PDFs to images'
+      };
+    }
+
+    // Send both first pages to GPT for comparison
+    const response = await getOpenAIClient().chat.completions.create({
+      model: GPT_MODEL,
+      max_completion_tokens: 200,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: SIMILARITY_PROMPT },
+            { type: 'text', text: 'REFERENCE INVOICE (recently updated):' },
+            { 
+              type: 'image_url', 
+              image_url: { url: `data:image/png;base64,${refImages[0]}`, detail: 'low' } 
+            },
+            { type: 'text', text: 'CANDIDATE INVOICE (check if similar):' },
+            { 
+              type: 'image_url', 
+              image_url: { url: `data:image/png;base64,${candImages[0]}`, detail: 'low' } 
+            }
+          ]
+        }
+      ]
+    });
+
+    const rawResponse = response.choices[0]?.message?.content || '';
+    console.log('[GPT-SIMILARITY] Raw response:', rawResponse);
+
+    // Parse JSON response
+    let jsonStr = rawResponse;
+    const jsonMatch = rawResponse.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1];
+    }
+
+    const result = JSON.parse(jsonStr.trim()) as SimilarityResult;
+    return {
+      similar: result.similar === true,
+      confidence: typeof result.confidence === 'number' ? result.confidence : 0.5,
+      reason: result.reason || 'No reason provided'
+    };
+
+  } catch (error: any) {
+    console.error('[GPT-SIMILARITY] Error comparing PDFs:', error.message);
+    return {
+      similar: false,
+      confidence: 0,
+      reason: `Error: ${error.message}`
+    };
+  }
+}
+
 /**
  * Test GPT connection
  */

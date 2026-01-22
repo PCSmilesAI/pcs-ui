@@ -95,6 +95,55 @@ export function clearProgress(): void {
   }
 }
 
+/**
+ * Remove files from the failed tracking list
+ * Called when previously failed invoices are successfully re-parsed
+ * 
+ * @param filenames - Array of filenames to remove from the errors list
+ * @returns Number of entries removed
+ */
+export function removeFromFailedTracking(filenames: string[]): number {
+  const progress = loadProgress();
+  if (!progress) {
+    console.log('[BULK] No progress file found, nothing to remove');
+    return 0;
+  }
+
+  const fileSet = new Set(filenames.map(f => path.basename(f).toLowerCase()));
+  const originalCount = progress.errors.length;
+
+  // Filter out the files that have been fixed
+  progress.errors = progress.errors.filter(err => {
+    const errFile = path.basename(err.file).toLowerCase();
+    return !fileSet.has(errFile);
+  });
+
+  const removedCount = originalCount - progress.errors.length;
+
+  if (removedCount > 0) {
+    // Update the counters
+    progress.failed = progress.failed - removedCount;
+    progress.successful = progress.successful + removedCount;
+    progress.lastUpdated = new Date().toISOString();
+    
+    saveProgress(progress);
+    console.log(`[BULK] Removed ${removedCount} entries from failed tracking`);
+  }
+
+  return removedCount;
+}
+
+/**
+ * Get list of failed files from progress tracking
+ */
+export function getFailedFiles(): string[] {
+  const progress = loadProgress();
+  if (!progress) {
+    return [];
+  }
+  return progress.errors.map(err => err.file);
+}
+
 // ============================================================================
 // PDF Discovery
 // ============================================================================
