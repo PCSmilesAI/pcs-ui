@@ -241,11 +241,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     }
   }
 
-  // Open ONE QBO Bills page for a batch
+  // Open QBO Pay Bills page for batch payment
   function handlePayBatch(batchIndex) {
-    // Open QBO Bills list page in a new tab
-    const qboBillsUrl = `${qboBaseUrl}/app/bills`;
-    window.open(qboBillsUrl, '_blank', 'noopener,noreferrer');
+    // Open QBO "Pay Bills" page (has checkboxes for batch selection)
+    const qboPayBillsUrl = `${qboBaseUrl}/app/paybills`;
+    window.open(qboPayBillsUrl, '_blank', 'noopener,noreferrer');
   }
 
   // Close modal and verify payments
@@ -845,12 +845,12 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                 marginBottom: '16px',
               }}>
                 <p style={{ color: '#92400e', fontSize: '14px', margin: 0 }}>
-                  <strong>Instructions:</strong> Click the button above to open QuickBooks Bills page. 
+                  <strong>Instructions:</strong> Click the button above to open QuickBooks Pay Bills page. 
                   {shortBatchCode && (
-                    <> In QBO, filter by <strong>Reference Number</strong> starting with "<strong>{shortBatchCode}</strong>" to find only the bills in this batch. </>
+                    <> Look for bills with Reference # starting with "<strong>{shortBatchCode}-</strong>". </>
                   )}
-                  Select all the bills and pay them together. When finished with all batches, 
-                  close this window to verify payments.
+                  Check the boxes next to each bill, select your payment account, and click Save. 
+                  When finished, close this window to verify payments.
                 </p>
               </div>
 
