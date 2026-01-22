@@ -571,6 +571,16 @@ export default function KnowledgeBasePage() {
                     const historyCount = vendorHistory?.entry_count || 0;
                     const correctedCount = vendorHistory?.corrected_count || 0;
 
+                    // Format date as MM/DD/YYYY
+                    const formatDate = (dateStr: string | null) => {
+                      if (!dateStr) return null;
+                      const date = new Date(dateStr);
+                      if (isNaN(date.getTime())) return null;
+                      return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+                    };
+                    
+                    const latestUpdate = formatDate(kb.updated_at);
+
                     return (
                       <div key={kb.id} className="pb-6 border-b border-gray-200 last:border-0 last:pb-0">
                         {/* Vendor Header */}
@@ -578,14 +588,8 @@ export default function KnowledgeBasePage() {
                           <div>
                             <h3 className="text-lg font-semibold" style={{ color: '#357ab2' }}>{kb.vendor_name}</h3>
                             <p className="text-xs text-gray-500 mt-1">
-                              v{kb.version} • 
-                              {kb.training_invoice_count > 0 
-                                ? ` ${kb.training_invoice_count} corrections trained`
-                                : ' No corrections trained'
-                              }
-                              {kb.last_trained_at && 
-                                ` • Last trained: ${new Date(kb.last_trained_at).toLocaleDateString()}`
-                              }
+                              {kb.training_invoice_count} Corrections Trained
+                              {latestUpdate && ` (Latest Update: ${latestUpdate})`}
                             </p>
                           </div>
                           <div className="flex items-center gap-3">
