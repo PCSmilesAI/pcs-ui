@@ -1758,19 +1758,21 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         }),
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Failed to get PCS AI response');
+        throw new Error(data.error || 'Failed to get PCS AI response');
       }
 
-      const data = await response.json();
       setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
     } catch (error) {
       console.error('Error sending chat message:', error);
+      const errorMessage = error.message || 'Sorry, I encountered an error. Please try again.';
       setChatMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: errorMessage,
       }]);
-      showToast('Failed to get AI response', 'error');
+      showToast(errorMessage, 'error');
     } finally {
       setSendingChat(false);
     }
