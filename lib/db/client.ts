@@ -469,6 +469,75 @@ Return ONLY the updated knowledge base prompt text, nothing else.`,
     'Master prompt used when admin corrections trigger knowledge base updates'
   );
 
+  // Seed default Master Parsing Prompt if it doesn't exist
+  const defaultMasterParsingPrompt = db.prepare(`
+    INSERT OR IGNORE INTO system_prompts (id, prompt_name, prompt_text, description)
+    VALUES (?, ?, ?, ?)
+  `);
+  
+  defaultMasterParsingPrompt.run(
+    'master_parsing_prompt_default',
+    'Master Parsing Prompt',
+    `You are parsing dental supply invoices for Pacific Crest Smiles (PCS), a dental practice management company.
+
+=== EXTRACTION RULES ===
+
+1. INVOICE NUMBER
+   - Extract the clean invoice number/ID directly from the PDF content
+   - Do NOT use email filename or document name
+   - Should be a single clean identifier (e.g., "5519129473", "INV-12345")
+   - Look for labels: "Invoice #", "Invoice Number", "Inv No", "Document Number"
+
+2. VENDOR NAME
+   - Match vendor name to the QBO_VENDORS list provided below
+   - Return the EXACT QBO vendor name when a match is found
+   - Consolidate similar names (e.g., "Henry Schein Corporate Office" → "Henry Schein")
+   - If no exact match, return the vendor name as shown on the invoice
+
+3. AMOUNT / TOTAL
+   - Extract the total amount due from the invoice
+   - Look for: "Total Due", "Amount Due", "Balance Due", "Invoice Total", "Total"
+   - Return as a decimal number (e.g., 2513.89)
+
+4. LOCATION (CRITICAL PCS RULE)
+   - Extract ONLY the city name, NOT the full address
+   - IMPORTANT: Roseburg is the MAIN OFFICE / BILLING ADDRESS on almost every invoice
+   - The "Bill To" or "Remit To" address is usually Roseburg - this is NOT the service location
+   - Look for "Ship To", "Deliver To", "Service Location" - THIS is the correct location
+   - If you see Roseburg, verify it's the actual service/delivery location, not just billing
+   - Match to QBO_CLASSES list: "General-Salem" → "Salem", "General-Lebanon" → "Lebanon"
+   - Valid PCS locations: Columbia, Eugene, Lebanon, Milwaukie, Riddle, Ridgefield, Roseburg, Salem
+
+5. INVOICE DATE
+   - The date the invoice was issued/created
+   - Look for: "Invoice Date", "Date", "Issued Date", "Document Date"
+   - Format as YYYY-MM-DD
+
+6. DUE DATE
+   - The date payment is due
+   - Look for: "Due Date", "Payment Due", "Due By"
+   - If no explicit due date, calculate from payment terms:
+     * "Net 30" or "Due in 30 days" = invoice_date + 30 days
+     * "Net 15" = invoice_date + 15 days
+     * "Due Upon Receipt" = same as invoice_date
+   - Format as YYYY-MM-DD
+
+7. CATEGORY / GL LINES
+   - Should align with QBO Chart of Accounts
+   - Format: "ACCOUNT_NUMBER - Account Name" (e.g., "53352 - B&O Taxes")
+   - Extract from line item descriptions if identifiable
+
+=== QBO_VENDORS ===
+{{QBO_VENDORS}}
+
+=== QBO_CLASSES (Locations) ===
+{{QBO_CLASSES}}
+
+=== OUTPUT FORMAT ===
+Return a JSON object with these exact fields. Return ONLY valid JSON, no explanation text.`,
+    'Global parsing prompt applied to ALL invoice parsing - includes PCS-specific business rules'
+  );
+
   // Create users table for local authentication (hybrid with Gist)
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (

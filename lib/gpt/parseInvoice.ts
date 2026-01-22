@@ -1,7 +1,9 @@
 import OpenAI from 'openai';
 import { convertPdfToBase64Images, formatImagesForOpenAI } from './pdfToImages';
-import { getKnowledgeBase, getOrCreateKnowledgeBase, getTrainingPrompt, upsertKnowledgeBase } from './knowledgeBase';
+import { getKnowledgeBase, getOrCreateKnowledgeBase, getTrainingPrompt, getMasterParsingPrompt, upsertKnowledgeBase } from './knowledgeBase';
 import { getRecentHistory, formatHistoryForPrompt, addToHistory, MAX_HISTORY_EXAMPLES, type HistoricalInvoice } from './vendorHistory';
+import { QBOClient } from '../qbo/qboClient';
+import { PCS_CLASSES, getDentalOffices } from '../qbo/pcsClasses';
 
 // Lazy initialization of OpenAI client to avoid build-time errors
 let _openai: OpenAI | null = null;
@@ -19,6 +21,98 @@ function getOpenAIClient(): OpenAI {
 
 // Model configuration - use gpt-4o-mini for cost efficiency, gpt-4o for better accuracy
 const GPT_MODEL = process.env.GPT_MODEL || 'gpt-4o-mini';
+
+// ============================================================================
+// QBO Data Fetching for Master Parsing Prompt
+// ============================================================================
+
+// Cache for QBO vendors (refreshed every 5 minutes)
+let _vendorsCache: { data: string[]; timestamp: number } | null = null;
+const VENDORS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Get list of QBO vendor names for GPT context
+ */
+async function getQBOVendorNames(): Promise<string[]> {
+  // Check cache first
+  if (_vendorsCache && Date.now() - _vendorsCache.timestamp < VENDORS_CACHE_TTL) {
+    return _vendorsCache.data;
+  }
+
+  try {
+    const qboClient = new QBOClient();
+    await qboClient.initialize();
+    const vendors = await qboClient.getAllVendors();
+    const vendorNames = vendors.map(v => v.displayName).sort();
+    
+    // Update cache
+    _vendorsCache = {
+      data: vendorNames,
+      timestamp: Date.now()
+    };
+    
+    console.log(`[GPT] Loaded ${vendorNames.length} QBO vendors for parsing context`);
+    return vendorNames;
+  } catch (error: any) {
+    console.warn('[GPT] Failed to fetch QBO vendors:', error.message);
+    // Return cached data if available, otherwise empty array
+    return _vendorsCache?.data || [];
+  }
+}
+
+/**
+ * Get list of PCS location names (from QBO classes) for GPT context
+ */
+function getPCSLocationNames(): string[] {
+  const offices = getDentalOffices();
+  // Extract city names from "General-CityName" format
+  return offices.map(c => c.name.replace('General-', '')).sort();
+}
+
+/**
+ * Format QBO vendors list for inclusion in the master prompt
+ */
+async function formatQBOVendorsForPrompt(): Promise<string> {
+  const vendors = await getQBOVendorNames();
+  if (vendors.length === 0) {
+    return 'QBO vendors list not available - use vendor name from invoice';
+  }
+  return vendors.join('\n');
+}
+
+/**
+ * Format QBO classes/locations for inclusion in the master prompt
+ */
+function formatQBOClassesForPrompt(): string {
+  const offices = getDentalOffices();
+  const lines = offices.map(c => {
+    const cityName = c.name.replace('General-', '');
+    return `${c.name} → "${cityName}"`;
+  });
+  return lines.join('\n');
+}
+
+/**
+ * Build the complete master parsing prompt with QBO data injected
+ */
+async function buildMasterParsingPrompt(): Promise<string | null> {
+  const masterPrompt = getMasterParsingPrompt();
+  if (!masterPrompt) {
+    console.log('[GPT] No master parsing prompt found in database');
+    return null;
+  }
+
+  // Get QBO data
+  const vendorsList = await formatQBOVendorsForPrompt();
+  const classesList = formatQBOClassesForPrompt();
+
+  // Replace placeholders with actual QBO data
+  let prompt = masterPrompt.prompt_text;
+  prompt = prompt.replace('{{QBO_VENDORS}}', vendorsList);
+  prompt = prompt.replace('{{QBO_CLASSES}}', classesList);
+
+  return prompt;
+}
 
 export interface ParsedInvoice {
   invoice_number: string | null;
@@ -142,16 +236,27 @@ export async function parseInvoiceWithGPT(
       console.log('[GPT] Detected vendor:', vendorName);
     }
 
-    // Get or create knowledge base for this vendor
+    // Build the system prompt: Master Prompt + Vendor KB + Base Prompt
     let knowledgeBaseUsed = false;
+    let masterPromptUsed = false;
     let systemPrompt = BASE_PARSING_PROMPT;
     let historicalExamples: HistoricalInvoice[] = [];
 
+    // Load master parsing prompt with QBO data
+    const masterPrompt = await buildMasterParsingPrompt();
+    if (masterPrompt) {
+      systemPrompt = masterPrompt + '\n\n' + systemPrompt;
+      masterPromptUsed = true;
+      console.log('[GPT] Using master parsing prompt with QBO data');
+    }
+
     if (vendorName && vendorName !== 'Unknown') {
-      // Load knowledge base
+      // Load vendor-specific knowledge base
       const kb = getKnowledgeBase(vendorName);
       if (kb) {
-        systemPrompt = kb.knowledge_prompt + '\n\n' + BASE_PARSING_PROMPT;
+        // Insert vendor KB between master and base prompts
+        systemPrompt = (masterPrompt ? masterPrompt + '\n\n' : '') + 
+                       kb.knowledge_prompt + '\n\n' + BASE_PARSING_PROMPT;
         knowledgeBaseUsed = true;
         console.log(`[GPT] Using knowledge base for ${vendorName} (v${kb.version})`);
       } else {
@@ -510,15 +615,24 @@ export async function parseInvoiceFromImages(
       vendorName = await detectVendor(base64Images);
     }
 
-    // Get knowledge base and historical examples
+    // Build the system prompt: Master Prompt + Vendor KB + Base Prompt
     let knowledgeBaseUsed = false;
     let systemPrompt = BASE_PARSING_PROMPT;
     let historicalExamples: HistoricalInvoice[] = [];
 
+    // Load master parsing prompt with QBO data
+    const masterPrompt = await buildMasterParsingPrompt();
+    if (masterPrompt) {
+      systemPrompt = masterPrompt + '\n\n' + systemPrompt;
+      console.log('[GPT] Using master parsing prompt with QBO data');
+    }
+
     if (vendorName && vendorName !== 'Unknown') {
       const kb = getKnowledgeBase(vendorName);
       if (kb) {
-        systemPrompt = kb.knowledge_prompt + '\n\n' + BASE_PARSING_PROMPT;
+        // Insert vendor KB between master and base prompts
+        systemPrompt = (masterPrompt ? masterPrompt + '\n\n' : '') + 
+                       kb.knowledge_prompt + '\n\n' + BASE_PARSING_PROMPT;
         knowledgeBaseUsed = true;
       }
       

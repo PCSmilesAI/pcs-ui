@@ -158,6 +158,13 @@ export function getTrainingPrompt(): SystemPrompt | null {
 }
 
 /**
+ * Get the Master Parsing Prompt (used for all invoice parsing)
+ */
+export function getMasterParsingPrompt(): SystemPrompt | null {
+  return getSystemPrompt('Master Parsing Prompt');
+}
+
+/**
  * Update a system prompt
  */
 export function updateSystemPrompt(

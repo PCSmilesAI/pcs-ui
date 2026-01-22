@@ -28,6 +28,7 @@ export {
   getAllSystemPrompts,
   getSystemPrompt,
   getTrainingPrompt,
+  getMasterParsingPrompt,
   updateSystemPrompt,
   generateDefaultKnowledgePrompt,
   getOrCreateKnowledgeBase,
