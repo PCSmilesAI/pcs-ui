@@ -583,7 +583,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             onClick={() => bulkUpdate('completed', true)}
             style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
           >
-            Paid
+            Pay
           </button>
           <button
             onClick={() => bulkUpdate('rejected', false)}
