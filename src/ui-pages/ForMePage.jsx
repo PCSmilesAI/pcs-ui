@@ -344,12 +344,13 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     let qboBillsCreated = 0;
     
     for (const row of selectedRows) {
+      const rowId = row.id || row.invoice_number;
       try {
         const response = await fetch('/api/invoices/transition', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            id: row.id || row.invoice_number,
+            id: rowId,
             action,
             ...(action === 'approve' ? { office: row.rawOffice || row.office || '' } : {}),
             ...(action === 'reject' ? { reason: 'Rejected from For Me page' } : {}),
@@ -369,6 +370,19 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
             console.error('Bulk update error:', message);
           }
         } else {
+          // Success! Remove invoice from local state immediately for live transition
+          setInvoices(prev => prev.filter(inv => {
+            const invId = inv.id || inv.invoice_number;
+            return invId !== rowId;
+          }));
+          
+          // Also remove from selected IDs
+          setSelectedIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(getRowId(row, 0));
+            return newSet;
+          });
+          
           // Check if QBO bill was created
           const data = await response.json().catch(() => ({}));
           if (data?.qboBill?.created) {
@@ -390,17 +404,20 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
 
     if (!hadError && !officeError) {
       if (action === 'approve' && qboBillsCreated > 0) {
-        showToast(`${selectedRows.length} invoice(s) approved. ${qboBillsCreated} QBO bill(s) created.`, 'success');
+        showToast(`${processedCount} invoice(s) approved. ${qboBillsCreated} QBO bill(s) created.`, 'success');
       } else {
-        showToast(action === 'approve' ? 'Invoices approved.' : 'Invoices rejected.', 'success');
+        showToast(action === 'approve' ? `${processedCount} invoice(s) approved.` : `${processedCount} invoice(s) rejected.`, 'success');
       }
     } else if (hadError) {
-      showToast(`Some invoices failed to process. ${processedCount - (hadError ? 1 : 0)} succeeded.`, 'warning');
+      showToast(`Some invoices failed to process. ${processedCount} succeeded.`, 'warning');
     }
 
+    // Clear any remaining selections
     setSelectedIds(new Set());
+    
+    // Final reload to ensure sync with server (but invoices already removed visually)
     await reloadList();
-  }, [selectedIds, filteredRows, getRowId, showToast, reloadList]);
+  }, [selectedIds, filteredRows, getRowId, showToast, reloadList, setInvoices]);
 
   // Automatic inbox checker - runs every 10 seconds in the background
   const checkInboxAutomatically = useCallback(async () => {
