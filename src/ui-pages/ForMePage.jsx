@@ -311,6 +311,9 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     });
   }, [invoices, effectiveQuery, effectiveFilters]);
 
+  // Track bulk operation progress
+  const [bulkProgress, setBulkProgress] = useState({ active: false, current: 0, total: 0, action: '' });
+
   // Define bulkUpdate after filteredRows is available
   const bulkUpdate = useCallback(async (action) => {
     const ids = Array.from(selectedIds);
@@ -332,8 +335,14 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       }
     }
 
+    // Show progress for bulk operations
+    setBulkProgress({ active: true, current: 0, total: selectedRows.length, action });
+
     let hadError = false;
     let officeError = false;
+    let processedCount = 0;
+    let qboBillsCreated = 0;
+    
     for (const row of selectedRows) {
       try {
         const response = await fetch('/api/invoices/transition', {
@@ -346,6 +355,10 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
             ...(action === 'reject' ? { reason: 'Rejected from For Me page' } : {}),
           }),
         });
+        
+        processedCount++;
+        setBulkProgress(prev => ({ ...prev, current: processedCount }));
+        
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
           const message = data?.error || `Request failed (HTTP ${response.status})`;
@@ -353,21 +366,36 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
             officeError = true;
           } else {
             hadError = true;
-            showToast(message, 'error');
+            console.error('Bulk update error:', message);
+          }
+        } else {
+          // Check if QBO bill was created
+          const data = await response.json().catch(() => ({}));
+          if (data?.qboBill?.created) {
+            qboBillsCreated++;
           }
         }
       } catch (err) {
         hadError = true;
-        showToast(err?.message || 'Network error while updating invoice', 'error');
+        console.error('Bulk update network error:', err?.message);
       }
     }
+
+    // Hide progress
+    setBulkProgress({ active: false, current: 0, total: 0, action: '' });
 
     if (officeError) {
       showToast('Office is required before approval.', 'error');
     }
 
     if (!hadError && !officeError) {
-      showToast(action === 'approve' ? 'Invoices approved.' : 'Invoices rejected.', 'success');
+      if (action === 'approve' && qboBillsCreated > 0) {
+        showToast(`${selectedRows.length} invoice(s) approved. ${qboBillsCreated} QBO bill(s) created.`, 'success');
+      } else {
+        showToast(action === 'approve' ? 'Invoices approved.' : 'Invoices rejected.', 'success');
+      }
+    } else if (hadError) {
+      showToast(`Some invoices failed to process. ${processedCount - (hadError ? 1 : 0)} succeeded.`, 'warning');
     }
 
     setSelectedIds(new Set());
@@ -574,13 +602,42 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
         </div>
       )}
 
-      {selectedIds.size > 0 && (
+      {/* Bulk Progress Indicator */}
+      {bulkProgress.active && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '12px',
+          padding: '12px 16px',
+          backgroundColor: '#dbeafe',
+          borderRadius: '8px',
+          border: '1px solid #3b82f6',
+        }}>
+          <div style={{
+            width: '20px',
+            height: '20px',
+            border: '3px solid #3b82f6',
+            borderTopColor: 'transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+          }} />
+          <span style={{ color: '#1e40af', fontWeight: 500 }}>
+            {bulkProgress.action === 'approve' ? 'Approving' : 'Rejecting'} invoices and creating QBO bills...
+          </span>
+          <span style={{ color: '#3b82f6', fontWeight: 600 }}>
+            {bulkProgress.current} / {bulkProgress.total}
+          </span>
+        </div>
+      )}
+
+      {selectedIds.size > 0 && !bulkProgress.active && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
           <button
             onClick={() => bulkUpdate('approve')}
             style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
           >
-            Approve
+            Approve ({selectedIds.size})
           </button>
           <button
             onClick={() => bulkUpdate('reject')}
