@@ -210,16 +210,26 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         showToast(`Error: ${err.message}`, 'error');
         return;
       }
-    } else if (status === 'rejected') {
-      // Reject invoices
+    } else if (status === 'send_back') {
+      // Send invoices back to For Me page for re-review
+      let successCount = 0;
       for (const row of selectedRows) {
-        await fetch('/api/invoices/transition', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: row.invoice_number || row.invoice, action: 'reject', reason: 'Rejected from To Be Paid page' }),
-        }).catch(() => null);
+        try {
+          const response = await fetch('/api/invoices/transition', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              id: row.id || row.invoice_number || row.invoice, 
+              action: 'send_back', 
+              reason: 'Sent back from To Be Paid page for review' 
+            }),
+          });
+          if (response.ok) successCount++;
+        } catch (err) {
+          console.error('Error sending back invoice:', err);
+        }
       }
-      showToast(`Rejected ${selectedRows.length} invoice(s)`, 'success');
+      showToast(`${successCount} invoice(s) sent back to For Me`, 'success');
       setSelectedIds(new Set());
       await reloadList();
     }
@@ -586,10 +596,10 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             Pay
           </button>
           <button
-            onClick={() => bulkUpdate('rejected', false)}
-            style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
+            onClick={() => bulkUpdate('send_back', false)}
+            style={{ padding: '8px 16px', backgroundColor: '#f59e0b', color: '#fff', borderRadius: 9999, border: '1px solid #f59e0b', fontWeight: 600 }}
           >
-            Reject
+            Send Back
           </button>
         </div>
       )}
