@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const isAuthorized = await isAP(user.email);
     if (!isAuthorized) {
       return NextResponse.json(
-        { error: 'Only admins and AP managers can chat with the LLM' },
+        { error: 'Only admins and AP managers can chat with PCS AI' },
         { status: 403 }
       );
     }
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const llmClient = createLocalLLMClient();
     if (!llmClient) {
       return NextResponse.json(
-        { error: 'Local LLM not configured. Please set up LOCAL_LLM_ENDPOINT and LOCAL_LLM_MODEL environment variables.' },
+        { error: 'PCS AI is not configured. Please contact your administrator.' },
         { status: 503 }
       );
     }
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('[API][AI][CHAT] Error:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to get LLM response' },
+      { error: error?.message || 'Failed to get PCS AI response' },
       { status: 500 }
     );
   }
