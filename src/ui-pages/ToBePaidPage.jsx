@@ -840,9 +840,9 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                 <p style={{ color: '#92400e', fontSize: '14px', margin: 0 }}>
                   <strong>Instructions:</strong> Click the button above to open QuickBooks Bills page. 
                   {batchPaymentId && (
-                    <> Search for "<strong>{batchPaymentId}</strong>" to filter only the bills in this batch. </>
+                    <> In QBO, use Advanced Search and filter by <strong>Memo</strong> containing "<strong>{batchPaymentId}</strong>" to find only the bills in this batch. </>
                   )}
-                  Select the invoices and pay them together. When finished with all batches, 
+                  Select the bills and pay them together. When finished with all batches, 
                   close this window to verify payments.
                 </p>
               </div>
