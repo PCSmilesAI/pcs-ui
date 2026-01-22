@@ -104,6 +104,16 @@ export class QBOClient {
       throw new Error('No refresh token available for QuickBooks');
     }
 
+    // IMPORTANT: Keep a backup of the old token in case refresh fails
+    const oldTokens = { ...this.tokens };
+    const timestamp = new Date().toISOString();
+    
+    console.log(`[${timestamp}] [QBO_REFRESH] Starting token refresh...`, {
+      realmId: oldTokens.realmId,
+      currentExpiresAt: new Date(oldTokens.expiresAt * 1000).toISOString(),
+      hasRefreshToken: !!oldTokens.refreshToken,
+    });
+
     try {
       const params = new URLSearchParams({
         grant_type: 'refresh_token',
@@ -126,34 +136,61 @@ export class QBOClient {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Token refresh failed:', response.status, errorText);
+        console.error(`[${timestamp}] [QBO_REFRESH] ❌ Token refresh API failed:`, {
+          status: response.status,
+          error: errorText.slice(0, 500),
+        });
+        
+        // DON'T clear tokens on refresh failure - keep the old ones
+        // They might still work or we might be able to retry
         throw new Error(`Token refresh failed: ${response.status} - ${errorText}`);
       }
 
       const payload = await response.json();
+      
+      // Validate the response has required fields
+      if (!payload.access_token) {
+        console.error(`[${timestamp}] [QBO_REFRESH] ❌ Invalid refresh response - no access_token`);
+        throw new Error('Token refresh response missing access_token');
+      }
+
       const now = Math.floor(Date.now() / 1000);
       const expiresIn = payload.expires_in ?? 3600;
       const expiresAt = now + expiresIn;
 
+      // Use new refresh token if provided, otherwise keep the old one
+      const newRefreshToken = payload.refresh_token || this.tokens.refreshToken;
+
+      // Save to persistent storage first
       await tokenStorage.saveTokens({
         realmId: this.tokens.realmId,
         accessToken: payload.access_token,
-        refreshToken: payload.refresh_token || this.tokens.refreshToken,
+        refreshToken: newRefreshToken,
         expiresIn,
       });
 
+      // Only update in-memory tokens after successful save
       this.tokens = {
         realmId: this.tokens.realmId,
         accessToken: payload.access_token,
-        refreshToken: payload.refresh_token || this.tokens.refreshToken,
+        refreshToken: newRefreshToken,
         expiresIn,
         expiresAt,
       };
 
-      console.log('✅ QBO token refreshed successfully.');
+      console.log(`[${timestamp}] [QBO_REFRESH] ✅ Token refreshed successfully`, {
+        newExpiresAt: new Date(expiresAt * 1000).toISOString(),
+        expiresInMinutes: Math.floor(expiresIn / 60),
+        refreshTokenUpdated: !!payload.refresh_token,
+      });
     } catch (error: any) {
-      console.error('❌ Failed to refresh QBO token:', error);
-      this.tokens = null;
+      console.error(`[${timestamp}] [QBO_REFRESH] ❌ Failed to refresh QBO token:`, error.message);
+      
+      // IMPORTANT: Do NOT clear tokens on failure!
+      // Keep the old token - it might still be valid or usable
+      // Only log the error and let the caller decide what to do
+      console.log(`[${timestamp}] [QBO_REFRESH] Keeping old token (may still be valid)`);
+      
       throw new Error(`Failed to refresh QuickBooks token: ${error.message}. Please reconnect at /api/qbo/auth`);
     }
   }
