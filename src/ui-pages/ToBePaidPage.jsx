@@ -48,6 +48,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const [verificationResult, setVerificationResult] = useState(null);
   // QBO base URL for redirects
   const [qboBaseUrl, setQboBaseUrl] = useState('https://app.qbo.intuit.com');
+  // Batch payment ID for filtering in QBO
+  const [batchPaymentId, setBatchPaymentId] = useState('');
 
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
 
@@ -140,6 +142,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         setCurrentBatchIndex(0);
         setAllBatchInvoiceIds([]);
         setVerificationResult(null);
+        setBatchPaymentId('');
 
         const invoiceIds = selectedRows.map(r => r.invoice_number || r.invoice);
         
@@ -180,6 +183,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         // Chunk into batches of 20 (QBO limit)
         const batches = chunkArray(validResults, 20);
         setPaymentBatches(batches);
+        
+        // Store batch payment ID for QBO filtering
+        if (paymentResult.batchId) {
+          setBatchPaymentId(paymentResult.batchId);
+        }
         
         // Determine QBO environment
         const baseUrl = paymentResult.qboBaseUrl || 
@@ -294,6 +302,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     setCurrentBatchIndex(0);
     setAllBatchInvoiceIds([]);
     setVerificationResult(null);
+    setBatchPaymentId('');
     setSelectedIds(new Set());
     reloadList();
   }
@@ -764,6 +773,52 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                 </button>
               </div>
 
+              {/* Batch ID for filtering in QBO */}
+              {batchPaymentId && (
+                <div style={{
+                  backgroundColor: '#dbeafe',
+                  border: '1px solid #3b82f6',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                }}>
+                  <div>
+                    <p style={{ color: '#1e40af', fontSize: '13px', margin: 0, fontWeight: 600 }}>
+                      Batch ID for QBO Search:
+                    </p>
+                    <p style={{ color: '#1e3a8a', fontSize: '16px', margin: '4px 0 0', fontFamily: 'monospace', fontWeight: 700 }}>
+                      {batchPaymentId}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(batchPaymentId);
+                      showToast('Batch ID copied to clipboard!', 'success');
+                    }}
+                    style={{
+                      backgroundColor: '#3b82f6',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <i className="fas fa-copy"></i>
+                    Copy
+                  </button>
+                </div>
+              )}
+
               {/* Instructions */}
               <div style={{
                 backgroundColor: '#fef3c7',
@@ -774,7 +829,10 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               }}>
                 <p style={{ color: '#92400e', fontSize: '14px', margin: 0 }}>
                   <strong>Instructions:</strong> Click the button above to open QuickBooks Bills page. 
-                  Select the invoices listed below and pay them together. When finished with all batches, 
+                  {batchPaymentId && (
+                    <> Search for "<strong>{batchPaymentId}</strong>" to filter only the bills in this batch. </>
+                  )}
+                  Select the invoices and pay them together. When finished with all batches, 
                   close this window to verify payments.
                 </p>
               </div>

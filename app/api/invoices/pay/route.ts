@@ -4,6 +4,7 @@ import { getDatabase } from '../../../../lib/db/client';
 import { isAdmin, isAP } from '../../../../lib/workflow/rolesStore';
 import { rateLimitByUser } from '../../../../lib/ratelimit/rateLimiter';
 import { tokenStorage } from '../../../../lib/qbo/tokenStorage';
+import { QBOClient } from '../../../../lib/qbo/qboClient';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,13 +17,25 @@ function json(status: number, body: unknown) {
 }
 
 /**
+ * Generate a unique batch payment ID
+ * Format: PCS-PAY-YYYYMMDD-HHMM-XXX (e.g., PCS-PAY-20260122-1430-A7B)
+ */
+function generateBatchId(): string {
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const time = now.toTimeString().slice(0, 5).replace(':', '');
+  const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+  return `PCS-PAY-${date}-${time}-${random}`;
+}
+
+/**
  * Get QBO Bill Pay redirect URLs for invoices
  * 
  * POST /api/invoices/pay
  * Body: { invoiceIds: string[] }
  * 
  * Returns redirect URLs to QBO Bill Pay for each invoice that has a QBO bill created.
- * Users complete payment in QuickBooks, then QBO's built-in notifications handle remittance.
+ * Also tags each bill with a unique batch ID for easy filtering in QBO.
  */
 export async function POST(req: NextRequest) {
   const user = getCurrentUser(req);
@@ -65,10 +78,19 @@ export async function POST(req: NextRequest) {
       ? 'https://app.sandbox.qbo.intuit.com'
       : 'https://app.qbo.intuit.com';
 
+    // Generate a unique batch payment ID for this payment session
+    const batchId = generateBatchId();
+    console.log('[PAYMENT] Generated batch ID:', batchId, 'for', invoiceIds.length, 'invoices');
+
+    // Initialize QBO client for updating bills
+    const qboClient = new QBOClient();
+    await qboClient.initialize();
+
     const db = getDatabase();
     const results: any[] = [];
     let successCount = 0;
     let errorCount = 0;
+    let taggedCount = 0;
 
     for (const invoiceId of invoiceIds) {
       try {
@@ -107,12 +129,39 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
+        // Tag the QBO bill with the batch ID for easy filtering
+        let tagSuccess = false;
+        try {
+          const existingBill = await qboClient.getBillById(invoice.qbo_bill_id);
+          if (existingBill && existingBill.SyncToken) {
+            // Update the bill's memo to include the batch ID
+            const currentMemo = existingBill.PrivateNote || '';
+            const newMemo = currentMemo.includes('PCS-PAY-') 
+              ? currentMemo.replace(/PCS-PAY-\S+/, batchId) // Replace old batch ID
+              : `${currentMemo} | ${batchId}`.trim().replace(/^\|/, '').trim();
+            
+            // Prepare the update payload
+            const updatePayload = {
+              Id: existingBill.Id,
+              SyncToken: existingBill.SyncToken,
+              sparse: true, // Only update specified fields
+              PrivateNote: newMemo,
+            };
+
+            await qboClient.updateBill(updatePayload);
+            tagSuccess = true;
+            taggedCount++;
+            console.log('[PAYMENT] Tagged bill', invoice.qbo_bill_id, 'with batch ID:', batchId);
+          } else if (existingBill) {
+            console.warn('[PAYMENT] Bill found but missing SyncToken:', invoice.qbo_bill_id);
+          }
+        } catch (tagError: any) {
+          console.warn('[PAYMENT] Failed to tag bill with batch ID:', tagError?.message);
+          // Don't fail the whole operation - just log the warning
+        }
+
         // Build QBO Bill URLs
-        // The bill view URL shows the full bill with vendor, amount, memo, and attachments
-        // From there, users can click "Pay bill" within QBO
         const qboBillViewUrl = `${qboBaseUrl}/app/bill?txnId=${invoice.qbo_bill_id}`;
-        
-        // The billpayment URL is for creating a check payment (starts blank - not what we want)
         const qboBillPayUrl = `${qboBaseUrl}/app/billpayment?txnId=${invoice.qbo_bill_id}`;
 
         results.push({
@@ -122,11 +171,10 @@ export async function POST(req: NextRequest) {
           amount: invoice.amount_cents ? (invoice.amount_cents / 100).toFixed(2) : null,
           ok: true,
           qboBillId: invoice.qbo_bill_id,
-          // Use bill VIEW URL as primary - shows the bill with all details
           payUrl: qboBillViewUrl,
           viewUrl: qboBillViewUrl,
-          // Keep the bill payment URL as an alternative
           billPaymentUrl: qboBillPayUrl,
+          tagged: tagSuccess,
         });
         successCount++;
 
@@ -151,15 +199,22 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Build QBO search URL with batch ID filter
+    // QBO search format: /app/bills with search parameter
+    const qboSearchUrl = `${qboBaseUrl}/app/bills`;
+
     return json(200, {
       ok: true,
       successCount,
       errorCount,
+      taggedCount,
+      batchId, // Include batch ID for frontend to display
       results,
       qboRealmId: realmId,
       qboBaseUrl,
+      qboSearchUrl,
       message: successCount > 0 
-        ? `Generated ${successCount} QBO Bill Pay URL(s). Click to complete payment in QuickBooks.`
+        ? `Generated ${successCount} QBO Bill Pay URL(s). Bills tagged with batch ID: ${batchId}`
         : 'No valid invoices found for payment.',
     });
   } catch (error: any) {
