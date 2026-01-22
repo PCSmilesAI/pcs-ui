@@ -50,6 +50,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
   const [qboBaseUrl, setQboBaseUrl] = useState('https://app.qbo.intuit.com');
   // Batch payment ID for filtering in QBO
   const [batchPaymentId, setBatchPaymentId] = useState('');
+  // Short batch code for Reference Number search in QBO
+  const [shortBatchCode, setShortBatchCode] = useState('');
 
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
 
@@ -143,6 +145,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         setAllBatchInvoiceIds([]);
         setVerificationResult(null);
         setBatchPaymentId('');
+        setShortBatchCode('');
 
         const invoiceIds = selectedRows.map(r => r.invoice_number || r.invoice);
         
@@ -184,9 +187,12 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         const batches = chunkArray(validResults, 20);
         setPaymentBatches(batches);
         
-        // Store batch payment ID for QBO filtering
+        // Store batch payment ID and short code for QBO filtering
         if (paymentResult.batchId) {
           setBatchPaymentId(paymentResult.batchId);
+        }
+        if (paymentResult.shortBatchCode) {
+          setShortBatchCode(paymentResult.shortBatchCode);
         }
         
         // Determine QBO environment
@@ -313,6 +319,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     setAllBatchInvoiceIds([]);
     setVerificationResult(null);
     setBatchPaymentId('');
+    setShortBatchCode('');
     setSelectedIds(new Set());
     reloadList();
   }
@@ -783,8 +790,8 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                 </button>
               </div>
 
-              {/* Batch ID for filtering in QBO */}
-              {batchPaymentId && (
+              {/* Batch Code for filtering in QBO by Reference Number */}
+              {shortBatchCode && (
                 <div style={{
                   backgroundColor: '#dbeafe',
                   border: '1px solid #3b82f6',
@@ -798,16 +805,16 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                 }}>
                   <div>
                     <p style={{ color: '#1e40af', fontSize: '13px', margin: 0, fontWeight: 600 }}>
-                      Batch ID for QBO Search:
+                      Search in QBO by Reference # starting with:
                     </p>
-                    <p style={{ color: '#1e3a8a', fontSize: '16px', margin: '4px 0 0', fontFamily: 'monospace', fontWeight: 700 }}>
-                      {batchPaymentId}
+                    <p style={{ color: '#1e3a8a', fontSize: '28px', margin: '4px 0 0', fontFamily: 'monospace', fontWeight: 700, letterSpacing: '2px' }}>
+                      {shortBatchCode}
                     </p>
                   </div>
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText(batchPaymentId);
-                      showToast('Batch ID copied to clipboard!', 'success');
+                      navigator.clipboard.writeText(shortBatchCode);
+                      showToast('Batch code copied!', 'success');
                     }}
                     style={{
                       backgroundColor: '#3b82f6',
@@ -839,10 +846,10 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               }}>
                 <p style={{ color: '#92400e', fontSize: '14px', margin: 0 }}>
                   <strong>Instructions:</strong> Click the button above to open QuickBooks Bills page. 
-                  {batchPaymentId && (
-                    <> In QBO, use Advanced Search and filter by <strong>Memo</strong> containing "<strong>{batchPaymentId}</strong>" to find only the bills in this batch. </>
+                  {shortBatchCode && (
+                    <> In QBO, filter by <strong>Reference Number</strong> starting with "<strong>{shortBatchCode}</strong>" to find only the bills in this batch. </>
                   )}
-                  Select the bills and pay them together. When finished with all batches, 
+                  Select all the bills and pay them together. When finished with all batches, 
                   close this window to verify payments.
                 </p>
               </div>
