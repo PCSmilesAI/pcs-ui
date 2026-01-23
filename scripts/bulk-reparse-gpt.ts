@@ -44,6 +44,9 @@ interface CLIOptions {
   limit: number | undefined;
   delay: number;
   dryRun: boolean;
+  highQuality: boolean;
+  maxRetries: number;
+  noHistory: boolean;
   help: boolean;
 }
 
@@ -55,6 +58,9 @@ function parseArgs(): CLIOptions {
     limit: undefined,
     delay: 2500,
     dryRun: false,
+    highQuality: false,
+    maxRetries: 3,
+    noHistory: false,
     help: false,
   };
 
@@ -62,6 +68,8 @@ function parseArgs(): CLIOptions {
     if (arg === '--wipe') options.wipe = true;
     else if (arg === '--resume') options.resume = true;
     else if (arg === '--dry-run') options.dryRun = true;
+    else if (arg === '--high-quality') options.highQuality = true;
+    else if (arg === '--no-history') options.noHistory = true;
     else if (arg === '--help' || arg === '-h') options.help = true;
     else if (arg.startsWith('--limit=')) {
       const val = parseInt(arg.split('=')[1], 10);
@@ -70,6 +78,10 @@ function parseArgs(): CLIOptions {
     else if (arg.startsWith('--delay=')) {
       const val = parseInt(arg.split('=')[1], 10);
       if (!isNaN(val)) options.delay = val;
+    }
+    else if (arg.startsWith('--max-retries=')) {
+      const val = parseInt(arg.split('=')[1], 10);
+      if (!isNaN(val)) options.maxRetries = val;
     }
   }
 
@@ -84,26 +96,32 @@ Usage:
   npx ts-node scripts/bulk-reparse-gpt.ts [options]
 
 Options:
-  --wipe         Wipe existing invoice data before starting
-                 (required for a fresh start)
-  --resume       Resume from where we left off (skip already-parsed files)
-  --limit=N      Only process N files (useful for testing)
-  --delay=MS     Delay between parses in milliseconds (default: 2500)
-  --dry-run      Show what would be done without actually doing it
-  --help, -h     Show this help message
+  --wipe           Wipe existing invoice data before starting
+                   (required for a fresh start)
+  --resume         Resume from where we left off (skip already-parsed files)
+  --limit=N        Only process N files (useful for testing)
+  --delay=MS       Delay between parses in milliseconds (default: 2500)
+  --high-quality   Use 'auto' image detail level for better accuracy on complex PDFs
+  --max-retries=N  Max retry attempts per file (default: 3)
+  --no-history     Skip historical examples (reduces context size)
+  --dry-run        Show what would be done without actually doing it
+  --help, -h       Show this help message
 
 Examples:
   # Fresh start - wipe everything and reparse all
-  npx ts-node scripts/bulk-reparse-gpt.ts --wipe
+  npx tsx scripts/bulk-reparse-gpt.ts --wipe
+
+  # High-quality reparse with retries (recommended for 100% success)
+  npx tsx scripts/bulk-reparse-gpt.ts --wipe --high-quality --max-retries=3
 
   # Test with 10 files first
-  npx ts-node scripts/bulk-reparse-gpt.ts --wipe --limit=10
+  npx tsx scripts/bulk-reparse-gpt.ts --wipe --limit=10
 
   # Resume after interruption
-  npx ts-node scripts/bulk-reparse-gpt.ts --resume
+  npx tsx scripts/bulk-reparse-gpt.ts --resume
 
   # Dry run to see what would happen
-  npx ts-node scripts/bulk-reparse-gpt.ts --wipe --dry-run
+  npx tsx scripts/bulk-reparse-gpt.ts --wipe --dry-run
 `);
 }
 
@@ -162,6 +180,9 @@ async function main() {
   const estimate = estimateBulkParseTime(filesToProcess, options.delay);
   console.log(`Estimated time: ${estimate.formatted}`);
   console.log(`Delay between parses: ${options.delay}ms`);
+  console.log(`High-quality mode: ${options.highQuality ? 'YES (auto detail)' : 'NO (low detail)'}`);
+  console.log(`Max retries per file: ${options.maxRetries}`);
+  console.log(`Skip history: ${options.noHistory ? 'YES' : 'NO'}`);
   console.log();
 
   // Show current database stats
@@ -259,6 +280,9 @@ async function main() {
       delayMs: options.delay,
       resume: options.resume,
       limit: options.limit,
+      highQuality: options.highQuality,
+      maxRetries: options.maxRetries,
+      noHistory: options.noHistory,
       onProgress: (progress: BulkParseProgress) => {
         // Progress is logged in runBulkParse
       },
