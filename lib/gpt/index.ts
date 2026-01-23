@@ -86,3 +86,15 @@ export {
   type BulkParseProgress,
   type BulkParseOptions,
 } from './bulkParse';
+
+// Document Classification (for routing invoices vs other documents)
+export {
+  classifyDocument,
+  isLikelyInvoice,
+  getDocumentTypeDisplayName,
+  getDocumentTypeColor,
+  type DocumentType,
+  type EmailContext,
+  type ClassificationResult,
+  type ClassificationResponse,
+} from './documentClassifier';

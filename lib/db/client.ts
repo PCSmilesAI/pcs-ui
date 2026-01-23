@@ -558,5 +558,34 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
     CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
   `);
 
+  // Create other_documents table for non-invoice documents (credit memos, statements, etc.)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS other_documents (
+      id TEXT PRIMARY KEY,
+      document_type TEXT NOT NULL,
+      vendor_name TEXT,
+      amount REAL,
+      document_date TEXT,
+      reference_number TEXT,
+      pdf_path TEXT,
+      source_email_id TEXT,
+      email_subject TEXT,
+      email_from TEXT,
+      classification_confidence REAL,
+      raw_extracted_data TEXT,
+      status TEXT DEFAULT 'pending',
+      notes TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_other_documents_type ON other_documents(document_type);
+    CREATE INDEX IF NOT EXISTS idx_other_documents_status ON other_documents(status);
+    CREATE INDEX IF NOT EXISTS idx_other_documents_vendor ON other_documents(vendor_name);
+    CREATE INDEX IF NOT EXISTS idx_other_documents_created ON other_documents(created_at);
+  `);
+
   console.log('[DB] Migrations completed successfully');
 }
