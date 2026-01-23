@@ -276,6 +276,7 @@ def detect_vendor_from_email(msg):
     return None
 
 def run_vendor_router(filepath, detected_vendor=None):
+    """DEPRECATED: Use parse_invoice_with_gpt instead"""
     try:
         cmd = ["python3", VENDOR_ROUTER_PATH, filepath]
         if detected_vendor:
@@ -296,6 +297,69 @@ def run_vendor_router(filepath, detected_vendor=None):
         return None
     except Exception as e:
         log(f"[VENDOR_ROUTER][ERROR] Exception: {e}")
+        return None
+
+
+def parse_invoice_with_gpt(filepath, vendor_hint=None):
+    """
+    Call the GPT invoice ingest API to parse and save an invoice.
+    Uses GPT-5 nano for intelligent parsing.
+    
+    Returns:
+        dict with invoice data if successful, None if failed
+    """
+    try:
+        log(f"[GPT_INGEST] Parsing invoice with GPT: {os.path.basename(filepath)}")
+        
+        payload = {
+            "pdf_path": filepath,
+            "source_file": filepath
+        }
+        
+        if vendor_hint:
+            payload["vendor_hint"] = vendor_hint
+        
+        response = requests.post(
+            f"{API_BASE_URL}/api/invoices/gpt-ingest",
+            json=payload,
+            timeout=120  # Longer timeout for GPT parsing
+        )
+        
+        if response.status_code != 200:
+            log(f"[GPT_INGEST][ERROR] API returned status {response.status_code}: {response.text}")
+            return None
+        
+        data = response.json()
+        
+        if not data.get("ok"):
+            log(f"[GPT_INGEST][ERROR] Ingest failed: {data.get('error', 'Unknown error')}")
+            return None
+        
+        # Check if skipped (already exists or tombstoned)
+        if data.get("skipped"):
+            log(f"[GPT_INGEST][SKIP] Invoice skipped: {data.get('message')}")
+            return {"skipped": True, "message": data.get("message")}
+        
+        log(f"[GPT_INGEST][SUCCESS] Invoice parsed: #{data.get('invoice_number')} - {data.get('vendor')} - ${data.get('amount', 0):.2f}")
+        
+        return {
+            "id": data.get("id"),
+            "invoice_number": data.get("invoice_number"),
+            "vendor": data.get("vendor"),
+            "amount": data.get("amount"),
+            "parsing_status": data.get("parsing_status"),
+            "parsing_confidence": data.get("parsing_confidence"),
+            "success": True
+        }
+        
+    except requests.exceptions.Timeout:
+        log(f"[GPT_INGEST][TIMEOUT] Parsing timeout for {os.path.basename(filepath)}")
+        return None
+    except requests.exceptions.RequestException as e:
+        log(f"[GPT_INGEST][ERROR] Request failed: {e}")
+        return None
+    except Exception as e:
+        log(f"[GPT_INGEST][ERROR] Exception during parsing: {e}")
         return None
 
 
@@ -500,13 +564,13 @@ def extract_and_save_pdfs(msg, email_subject, source_message_id):
     return pdf_files
 
 def process_pdf_file(filepath, detected_vendor, email_context=None):
-    """Process a single PDF file with GPT classification (can be called in parallel)
+    """Process a single PDF file with GPT-5 nano for classification and parsing
 
     CRITICAL: This function MUST NOT fail silently
     
     Flow:
     1. Classify document using GPT-5 nano
-    2. If invoice -> route to vendor_router for parsing
+    2. If invoice -> parse with GPT-5 nano and save to database
     3. If other document type -> save to other_documents table
     """
     try:
@@ -517,15 +581,18 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
         # Step 1: Classify the document using GPT
         classification = classify_document_with_gpt(filepath, email_context)
         
-        # If classification fails, fall back to treating as invoice
+        # If classification fails, fall back to treating as invoice and parse with GPT
         if not classification:
             log(f"[CLASSIFY][FALLBACK] Classification failed, treating as invoice: {os.path.basename(filepath)}")
-            vendor = run_vendor_router(filepath, detected_vendor)
-            if vendor:
-                log(f"📦 Parsed and routed invoice (fallback): {vendor}")
+            result = parse_invoice_with_gpt(filepath, detected_vendor)
+            if result and result.get("success"):
+                log(f"📦 Parsed invoice with GPT (fallback): {result.get('vendor', 'Unknown')}")
+                return True
+            elif result and result.get("skipped"):
+                log(f"📦 Invoice skipped (already exists): {os.path.basename(filepath)}")
                 return True
             else:
-                log(f"[WARNING] Unknown or unparseable vendor for {os.path.basename(filepath)}")
+                log(f"[WARNING] GPT parsing failed for {os.path.basename(filepath)}")
                 return False
         
         document_type = classification.get("document_type", "other")
@@ -535,13 +602,16 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
         
         # Step 2: Route based on classification
         if document_type == "invoice":
-            # Route to existing invoice processing
-            vendor = run_vendor_router(filepath, detected_vendor)
-            if vendor:
-                log(f"📦 Parsed and routed invoice: {vendor}")
+            # Parse invoice with GPT-5 nano and save to database
+            result = parse_invoice_with_gpt(filepath, detected_vendor)
+            if result and result.get("success"):
+                log(f"📦 Parsed invoice with GPT: {result.get('vendor', 'Unknown')} - ${result.get('amount', 0):.2f}")
+                return True
+            elif result and result.get("skipped"):
+                log(f"📦 Invoice skipped (already exists): {os.path.basename(filepath)}")
                 return True
             else:
-                log(f"[WARNING] Unknown or unparseable vendor for {os.path.basename(filepath)}")
+                log(f"[WARNING] GPT parsing failed for {os.path.basename(filepath)}")
                 return False
         
         elif document_type == "marketing":
