@@ -22,6 +22,52 @@ function getOpenAIClient(): OpenAI {
 // Model configuration - use gpt-4o-mini for cost efficiency, gpt-4o for better accuracy
 const GPT_MODEL = process.env.GPT_MODEL || 'gpt-4o-mini';
 
+// Parsing configuration - can be overridden for bulk operations
+export const PARSING_CONFIG = {
+  maxCompletionTokens: 4000, // Increased from 2000 for complex invoices
+  maxRetries: 3,
+  retryDelayMs: 2000,
+  imageDetailLevel: 'low' as 'high' | 'low' | 'auto', // Can be set to 'auto' for high-quality mode
+};
+
+/**
+ * Retry helper with exponential backoff
+ */
+async function withRetry<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = PARSING_CONFIG.maxRetries,
+  baseDelayMs: number = PARSING_CONFIG.retryDelayMs
+): Promise<T> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error: any) {
+      lastError = error;
+      
+      // Check if error is retryable
+      const isRateLimitError = error.status === 429 || error.code === 'rate_limit_exceeded';
+      const isServerError = error.status >= 500 && error.status < 600;
+      const isTimeout = error.code === 'ETIMEDOUT' || error.code === 'ECONNRESET';
+      
+      if (!isRateLimitError && !isServerError && !isTimeout) {
+        // Non-retryable error, throw immediately
+        throw error;
+      }
+      
+      if (attempt < maxRetries) {
+        // Exponential backoff with jitter
+        const delay = baseDelayMs * Math.pow(2, attempt - 1) + Math.random() * 1000;
+        console.log(`[GPT] Retry ${attempt}/${maxRetries} after ${Math.round(delay)}ms - Error: ${error.message}`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw lastError || new Error('Operation failed after all retries');
+}
+
 // ============================================================================
 // QBO Data Fetching for Master Parsing Prompt
 // ============================================================================
@@ -305,25 +351,27 @@ export async function parseInvoiceWithGPT(
       messageContent.push({ type: 'text', text: '--- NEW INVOICE TO PARSE (extract data from this one) ---' });
     }
     
-    // Add new invoice images (high detail for accuracy)
-    messageContent.push(...formatImagesForOpenAI(base64Images));
+    // Add new invoice images (uses configurable detail level)
+    messageContent.push(...formatImagesForOpenAI(base64Images, PARSING_CONFIG.imageDetailLevel));
 
-    // Call GPT with images
+    // Call GPT with images (with retry logic for robustness)
     console.log('[GPT] Calling GPT for parsing...');
-    const response = await getOpenAIClient().chat.completions.create({
-      model: GPT_MODEL,
-      max_completion_tokens: 2000,
-      // Note: GPT-5 nano only supports default temperature (1), so we don't set it
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: messageContent
-        }
-      ]
+    const response = await withRetry(async () => {
+      return await getOpenAIClient().chat.completions.create({
+        model: GPT_MODEL,
+        max_completion_tokens: PARSING_CONFIG.maxCompletionTokens,
+        // Note: GPT-5 nano only supports default temperature (1), so we don't set it
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: messageContent
+          }
+        ]
+      });
     });
 
     const rawResponse = response.choices[0]?.message?.content || '';
@@ -527,9 +575,9 @@ ANALYSIS INSTRUCTIONS:
       }
     }
     
-    // Add the incorrectly parsed invoice image (high detail for analysis)
+    // Add the incorrectly parsed invoice image (uses configurable detail level)
     messageContent.push({ type: 'text', text: '\n--- INCORRECTLY PARSED INVOICE (analyze this) ---' });
-    messageContent.push(...formatImagesForOpenAI(base64Images));
+    messageContent.push(...formatImagesForOpenAI(base64Images, PARSING_CONFIG.imageDetailLevel));
 
     // Call GPT to generate updated knowledge base
     console.log('[GPT-TRAIN] Calling GPT for knowledge base update with historical analysis...');
@@ -669,23 +717,25 @@ export async function parseInvoiceFromImages(
       messageContent.push({ type: 'text', text: '--- NEW INVOICE TO PARSE ---' });
     }
     
-    messageContent.push(...formatImagesForOpenAI(base64Images));
+    messageContent.push(...formatImagesForOpenAI(base64Images, PARSING_CONFIG.imageDetailLevel));
 
-    // Call GPT
-    const response = await getOpenAIClient().chat.completions.create({
-      model: GPT_MODEL,
-      max_completion_tokens: 2000,
-      // Note: GPT-5 nano only supports default temperature
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: messageContent
-        }
-      ]
+    // Call GPT (with retry logic)
+    const response = await withRetry(async () => {
+      return await getOpenAIClient().chat.completions.create({
+        model: GPT_MODEL,
+        max_completion_tokens: PARSING_CONFIG.maxCompletionTokens,
+        // Note: GPT-5 nano only supports default temperature
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: messageContent
+          }
+        ]
+      });
     });
 
     const rawResponse = response.choices[0]?.message?.content || '';

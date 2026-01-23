@@ -7,7 +7,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { parseInvoiceWithGPT, ParseResult } from './parseInvoice';
+import { parseInvoiceWithGPT, ParseResult, PARSING_CONFIG } from './parseInvoice';
 import { getOrCreateKnowledgeBase } from './knowledgeBase';
 import { getDatabase } from '../db/client';
 import { v4 as uuidv4 } from 'uuid';
@@ -33,6 +33,9 @@ export interface BulkParseOptions {
   delayMs?: number;           // Delay between parses (default: 2500ms)
   resume?: boolean;           // Skip already-parsed files
   limit?: number;             // Max files to process (for testing)
+  highQuality?: boolean;      // Use 'auto' detail level instead of 'low' for better accuracy
+  maxRetries?: number;        // Max retries per file (default: 3)
+  noHistory?: boolean;        // Skip historical examples (reduce context size)
   onProgress?: (progress: BulkParseProgress) => void;
   onParsed?: (file: string, result: ParseResult) => void;
 }
@@ -352,9 +355,25 @@ export async function runBulkParse(
     delayMs = 2500,
     resume = false,
     limit,
+    highQuality = false,
+    maxRetries = 3,
+    noHistory = false,
     onProgress,
     onParsed,
   } = options;
+
+  // Configure parsing settings based on options
+  if (highQuality) {
+    PARSING_CONFIG.imageDetailLevel = 'auto';
+    console.log('[BULK] High-quality mode enabled (image detail: auto)');
+  } else {
+    PARSING_CONFIG.imageDetailLevel = 'low';
+  }
+  
+  if (maxRetries) {
+    PARSING_CONFIG.maxRetries = maxRetries;
+    console.log(`[BULK] Max retries set to ${maxRetries}`);
+  }
 
   // Scan for PDFs
   let pdfFiles = scanForPDFs(directory);
