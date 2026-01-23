@@ -873,25 +873,58 @@ def check_inbox(full_scan=False):
         release_scan_lock()
 
 if __name__ == "__main__":
-    interval_ms = _config["interval_ms"]
-    log(f"[INBOX][WATCHER][START] Starting inbox watcher with {interval_ms}ms interval")
+    import argparse
+    
+    parser = argparse.ArgumentParser(
+        description='Email ingestion agent with GPT-5 nano for classification and parsing'
+    )
+    parser.add_argument(
+        '--full-scan', 
+        action='store_true',
+        help='Run one-time full scan of ALL emails in inbox (processes all emails, skips only tombstoned)'
+    )
+    parser.add_argument(
+        '--once', 
+        action='store_true',
+        help='Run once and exit (no continuous loop). Without --full-scan, processes only new emails.'
+    )
+    args = parser.parse_args()
+    
     log(f"[INBOX][WATCHER][CONFIG] PCS_DATA_DIR={DATA_DIR}")
     log(f"[INBOX][WATCHER][CONFIG] IMAP_SERVER={IMAP_SERVER}")
+    log(f"[INBOX][WATCHER][CONFIG] API_BASE_URL={API_BASE_URL}")
+    
+    if args.full_scan:
+        # One-time full scan mode - process ALL emails
+        log("[INBOX][WATCHER][MODE] Running ONE-TIME FULL SCAN of all emails")
+        log("[INBOX][WATCHER][MODE] This will process ALL emails in inbox, skipping only tombstoned ones")
+        log("[INBOX][WATCHER][MODE] Duplicates will be detected and skipped by the GPT ingest API")
+        check_inbox(full_scan=True)
+        log("[INBOX][WATCHER][MODE] Full scan complete. Exiting.")
+    elif args.once:
+        # Run once mode - process only new emails, then exit
+        log("[INBOX][WATCHER][MODE] Running ONCE mode - processing new emails only")
+        check_inbox(full_scan=False)
+        log("[INBOX][WATCHER][MODE] Single run complete. Exiting.")
+    else:
+        # Continuous watcher mode (default)
+        interval_ms = _config["interval_ms"]
+        log(f"[INBOX][WATCHER][START] Starting continuous inbox watcher with {interval_ms}ms interval")
+        
+        while True:
+            # Check inbox for new emails
+            check_inbox(full_scan=False)
 
-    while True:
-        # Check inbox
-        check_inbox()
+            # Calculate sleep time with jitter (±15%)
+            base_interval_s = _config["interval_ms"] / 1000.0
 
-        # Calculate sleep time with jitter (±15%)
-        base_interval_s = _config["interval_ms"] / 1000.0
+            # If we're in backoff mode, use backoff interval instead
+            if _config["backoff_seconds"] > 10:
+                base_interval_s = _config["backoff_seconds"]
+                log(f"[INBOX][WATCHER][BACKOFF] Using backoff interval: {base_interval_s}s")
 
-        # If we're in backoff mode, use backoff interval instead
-        if _config["backoff_seconds"] > 10:
-            base_interval_s = _config["backoff_seconds"]
-            log(f"[INBOX][WATCHER][BACKOFF] Using backoff interval: {base_interval_s}s")
+            jitter = random.uniform(-0.15, 0.15)  # ±15%
+            sleep_time = base_interval_s * (1 + jitter)
 
-        jitter = random.uniform(-0.15, 0.15)  # ±15%
-        sleep_time = base_interval_s * (1 + jitter)
-
-        log(f"[INBOX][WATCHER][SLEEP] Sleeping for {sleep_time:.1f}s (base: {base_interval_s}s, jitter: {jitter*100:.1f}%)")
-        time.sleep(sleep_time)
+            log(f"[INBOX][WATCHER][SLEEP] Sleeping for {sleep_time:.1f}s (base: {base_interval_s}s, jitter: {jitter*100:.1f}%)")
+            time.sleep(sleep_time)
