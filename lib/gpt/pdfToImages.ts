@@ -179,15 +179,17 @@ export function getPdfPageCount(pdfPath: string): number {
 /**
  * Formats base64 images for OpenAI API vision request.
  */
-export function formatImagesForOpenAI(base64Images: string[]): Array<{
+export function formatImagesForOpenAI(base64Images: string[], detailLevel: 'high' | 'low' | 'auto' = 'low'): Array<{
   type: 'image_url';
   image_url: { url: string; detail: 'high' | 'low' | 'auto' };
 }> {
+  // Default to 'low' detail to reduce token usage (65 tokens vs 170+ tokens per tile)
+  // 'high' detail can cause context limit issues with multi-page PDFs
   return base64Images.map(base64 => ({
     type: 'image_url' as const,
     image_url: {
       url: `data:image/png;base64,${base64}`,
-      detail: 'high' as const
+      detail: detailLevel
     }
   }));
 }
