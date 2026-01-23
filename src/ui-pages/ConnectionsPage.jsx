@@ -172,13 +172,13 @@ export default function ConnectionsPage() {
                   : 'Not connected. Connect to enable automated billing and invoice synchronization.'}
               </p>
               {!qboConnected && (
-                <a href="/api/qbo/auth" style={buttonStyle}>
+                <a href="https://pcsmilesai.com/api/qbo/auth" style={buttonStyle}>
                   Connect QuickBooks
                 </a>
               )}
               {qboConnected && (
                 <div style={{ marginTop: '12px' }}>
-                  <a href="/api/qbo/auth" style={{ ...buttonStyle, backgroundColor: '#6b7280', borderColor: '#6b7280' }}>
+                  <a href="https://pcsmilesai.com/api/qbo/auth" style={{ ...buttonStyle, backgroundColor: '#6b7280', borderColor: '#6b7280' }}>
                     Reconnect QuickBooks
                   </a>
                 </div>
