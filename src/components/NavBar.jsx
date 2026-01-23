@@ -412,6 +412,21 @@ function NavBarInner({
                   Knowledge Base
                 </div>
               )}
+              {/* Other Documents - Admin/AP only */}
+              {isAdminUser && (
+                <div
+                  style={dropdownItemStyle}
+                  onClick={() => {
+                    setIsAccountOpen(false);
+                    // Navigate to other documents page
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/OtherDocumentsPage';
+                    }
+                  }}
+                >
+                  Other Documents
+                </div>
+              )}
               {/* Log Out - visible to all */}
               <div
                 style={dropdownItemStyle}

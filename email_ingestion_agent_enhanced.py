@@ -11,6 +11,7 @@ import random
 import sqlite3
 import hashlib
 import logging
+import requests
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from deduplicate_invoices import deduplicate_invoices
@@ -37,6 +38,10 @@ LOCKS_DIR = os.path.join(DATA_DIR, "locks")
 INGEST_DB_PATH = os.path.join(DATA_DIR, "ingest.db")
 SCAN_LOCK_PATH = os.path.join(LOCKS_DIR, "inbox.scan.lock")
 DELETED_INVOICES_PATH = os.path.join(DATA_DIR, "deleted_invoices.json")
+
+# API Configuration for GPT Document Classification
+# Use local API in development, or the production server URL
+API_BASE_URL = os.environ.get("PCS_API_URL", "http://localhost:3000")
 
 # Create necessary directories
 os.makedirs(SAVE_DIR, exist_ok=True)
@@ -293,15 +298,147 @@ def run_vendor_router(filepath, detected_vendor=None):
         log(f"[VENDOR_ROUTER][ERROR] Exception: {e}")
         return None
 
+
+def classify_document_with_gpt(filepath, email_context=None):
+    """
+    Call the GPT document classification API to determine document type.
+    
+    Returns:
+        dict with keys: document_type, confidence, vendor_name, amount, document_date, reference_number, reasoning
+        or None if classification fails
+    """
+    try:
+        log(f"[GPT_CLASSIFY] Classifying document: {os.path.basename(filepath)}")
+        
+        payload = {
+            "pdfPath": filepath
+        }
+        
+        if email_context:
+            payload["emailContext"] = email_context
+        
+        response = requests.post(
+            f"{API_BASE_URL}/api/gpt-classify",
+            json=payload,
+            timeout=60
+        )
+        
+        if response.status_code != 200:
+            log(f"[GPT_CLASSIFY][ERROR] API returned status {response.status_code}: {response.text}")
+            return None
+        
+        data = response.json()
+        
+        if not data.get("success"):
+            log(f"[GPT_CLASSIFY][ERROR] Classification failed: {data.get('error', 'Unknown error')}")
+            return None
+        
+        classification = data.get("classification", {})
+        log(f"[GPT_CLASSIFY] Result: type={classification.get('document_type')}, confidence={classification.get('confidence')}")
+        
+        return classification
+        
+    except requests.exceptions.Timeout:
+        log(f"[GPT_CLASSIFY][TIMEOUT] Classification timeout for {os.path.basename(filepath)}")
+        return None
+    except requests.exceptions.RequestException as e:
+        log(f"[GPT_CLASSIFY][ERROR] Request failed: {e}")
+        return None
+    except Exception as e:
+        log(f"[GPT_CLASSIFY][ERROR] Exception during classification: {e}")
+        return None
+
+
+def save_other_document(filepath, classification, email_context=None):
+    """
+    Save a non-invoice document to the other_documents table via API.
+    
+    Args:
+        filepath: Path to the PDF file
+        classification: Classification result from GPT
+        email_context: Optional email metadata (subject, from, body)
+    
+    Returns:
+        bool: True if saved successfully, False otherwise
+    """
+    try:
+        log(f"[OTHER_DOC] Saving {classification.get('document_type')} document: {os.path.basename(filepath)}")
+        
+        # Build the document record
+        payload = {
+            "document_type": classification.get("document_type", "other"),
+            "vendor_name": classification.get("vendor_name"),
+            "amount": classification.get("amount"),
+            "document_date": classification.get("document_date"),
+            "reference_number": classification.get("reference_number"),
+            "pdf_path": filepath,
+            "classification_confidence": classification.get("confidence"),
+            "raw_extracted_data": classification
+        }
+        
+        # Add email context if available
+        if email_context:
+            payload["email_subject"] = email_context.get("subject")
+            payload["email_from"] = email_context.get("from")
+        
+        response = requests.post(
+            f"{API_BASE_URL}/api/other-documents",
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code != 200:
+            log(f"[OTHER_DOC][ERROR] API returned status {response.status_code}: {response.text}")
+            return False
+        
+        data = response.json()
+        
+        if data.get("success"):
+            log(f"[OTHER_DOC] Saved document with ID: {data.get('document', {}).get('id')}")
+            return True
+        else:
+            log(f"[OTHER_DOC][ERROR] Failed to save: {data.get('error', 'Unknown error')}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        log(f"[OTHER_DOC][TIMEOUT] Timeout saving document")
+        return False
+    except requests.exceptions.RequestException as e:
+        log(f"[OTHER_DOC][ERROR] Request failed: {e}")
+        return False
+    except Exception as e:
+        log(f"[OTHER_DOC][ERROR] Exception: {e}")
+        return False
+
 def extract_and_save_pdfs(msg, email_subject, source_message_id):
-    """Extract PDFs from email and return list of filepaths
+    """Extract PDFs from email and return list of filepaths with email context
 
     CRITICAL: Each email gets a unique filename to prevent collisions
     CRITICAL: Check ALL parts, not just those with Content-Disposition header
+    
+    Returns:
+        list of tuples: (filepath, detected_vendor, email_context)
     """
     detected_vendor = detect_vendor_from_email(msg)
     if detected_vendor:
         log(f"📧 Vendor detected from email: {detected_vendor}")
+
+    # Extract email context for GPT classification
+    email_from = msg.get("From", "")
+    email_body = ""
+    for part in msg.walk():
+        if part.get_content_type() == 'text/plain':
+            try:
+                email_body = part.get_payload(decode=True).decode(errors='ignore')[:500]  # First 500 chars
+            except:
+                pass
+            break
+    
+    email_context = {
+        "subject": email_subject,
+        "from": email_from,
+        "body": email_body
+    }
 
     pdf_files = []
     for part in msg.walk():
@@ -352,7 +489,7 @@ def extract_and_save_pdfs(msg, email_subject, source_message_id):
                 with open(filepath, 'wb') as f:
                     f.write(part.get_payload(decode=True))
                 log(f"✅ Saved: {unique_filename}")
-                pdf_files.append((filepath, detected_vendor))
+                pdf_files.append((filepath, detected_vendor, email_context))
             except Exception as e:
                 log(f"[ERROR] Failed to save PDF {unique_filename}: {e}")
                 continue
@@ -362,23 +499,65 @@ def extract_and_save_pdfs(msg, email_subject, source_message_id):
 
     return pdf_files
 
-def process_pdf_file(filepath, detected_vendor):
-    """Process a single PDF file (can be called in parallel)
+def process_pdf_file(filepath, detected_vendor, email_context=None):
+    """Process a single PDF file with GPT classification (can be called in parallel)
 
     CRITICAL: This function MUST NOT fail silently
+    
+    Flow:
+    1. Classify document using GPT-5 nano
+    2. If invoice -> route to vendor_router for parsing
+    3. If other document type -> save to other_documents table
     """
     try:
         if not os.path.exists(filepath):
             log(f"[ERROR][CRITICAL] PDF file does not exist: {filepath}")
             return False
 
-        vendor = run_vendor_router(filepath, detected_vendor)
-        if vendor:
-            log(f"📦 Parsed and routed invoice: {vendor}")
-            return True
+        # Step 1: Classify the document using GPT
+        classification = classify_document_with_gpt(filepath, email_context)
+        
+        # If classification fails, fall back to treating as invoice
+        if not classification:
+            log(f"[CLASSIFY][FALLBACK] Classification failed, treating as invoice: {os.path.basename(filepath)}")
+            vendor = run_vendor_router(filepath, detected_vendor)
+            if vendor:
+                log(f"📦 Parsed and routed invoice (fallback): {vendor}")
+                return True
+            else:
+                log(f"[WARNING] Unknown or unparseable vendor for {os.path.basename(filepath)}")
+                return False
+        
+        document_type = classification.get("document_type", "other")
+        confidence = classification.get("confidence", 0)
+        
+        log(f"[CLASSIFY] Document classified as '{document_type}' with {confidence:.1%} confidence")
+        
+        # Step 2: Route based on classification
+        if document_type == "invoice":
+            # Route to existing invoice processing
+            vendor = run_vendor_router(filepath, detected_vendor)
+            if vendor:
+                log(f"📦 Parsed and routed invoice: {vendor}")
+                return True
+            else:
+                log(f"[WARNING] Unknown or unparseable vendor for {os.path.basename(filepath)}")
+                return False
+        
+        elif document_type == "marketing":
+            # Skip marketing materials entirely
+            log(f"📧 Skipping marketing material: {os.path.basename(filepath)}")
+            return True  # Return True since we successfully handled it (by skipping)
+        
         else:
-            log(f"[WARNING] Unknown or unparseable vendor for {os.path.basename(filepath)}")
-            return False
+            # Save to other_documents table (credit_memo, statement, payment_confirmation, other)
+            if save_other_document(filepath, classification, email_context):
+                log(f"📄 Saved {document_type}: {os.path.basename(filepath)}")
+                return True
+            else:
+                log(f"[ERROR] Failed to save {document_type}: {os.path.basename(filepath)}")
+                return False
+        
     except Exception as e:
         log(f"[ERROR][CRITICAL] Failed to process {os.path.basename(filepath)}: {e}")
         import traceback
@@ -399,7 +578,9 @@ def verify_pdf_processing(pdf_tasks):
 
     log(f"[VERIFY] Checking that all {len(pdf_tasks)} PDFs exist before processing...")
     missing_pdfs = []
-    for filepath, vendor in pdf_tasks:
+    for task in pdf_tasks:
+        # Handle both old (filepath, vendor) and new (filepath, vendor, email_context) formats
+        filepath = task[0]
         if not os.path.exists(filepath):
             missing_pdfs.append(filepath)
             log(f"[VERIFY][ERROR] PDF missing: {filepath}")
@@ -517,9 +698,9 @@ def check_inbox(full_scan=False):
             if has_pdf:
                 log(f"[INBOX][SCAN] Processing invoice email: {subject}")
                 pdf_files = extract_and_save_pdfs(msg, subject, source_message_id)
-                # Queue PDFs for parallel processing
-                for filepath, detected_vendor in pdf_files:
-                    pdf_tasks.append((filepath, detected_vendor))
+                # Queue PDFs for parallel processing (now includes email_context)
+                for filepath, detected_vendor, email_context in pdf_files:
+                    pdf_tasks.append((filepath, detected_vendor, email_context))
                 # CRITICAL FIX: Only mark as read AFTER successfully extracting PDFs
                 # This ensures we don't lose emails if extraction fails
                 if pdf_files:
@@ -551,13 +732,13 @@ def check_inbox(full_scan=False):
             }
             return
 
-        # Second pass: process PDFs in parallel
+        # Second pass: process PDFs in parallel with GPT classification
         processed_pdfs = 0
         failed_pdfs = 0
         if pdf_tasks:
-            log(f"[INBOX][PARALLEL] Processing {len(pdf_tasks)} PDFs with thread pool")
-            with ThreadPoolExecutor(max_workers=5) as executor:
-                futures = [executor.submit(process_pdf_file, filepath, vendor) for filepath, vendor in pdf_tasks]
+            log(f"[INBOX][PARALLEL] Processing {len(pdf_tasks)} PDFs with GPT classification and thread pool")
+            with ThreadPoolExecutor(max_workers=3) as executor:  # Reduced workers to avoid API rate limits
+                futures = [executor.submit(process_pdf_file, filepath, vendor, email_ctx) for filepath, vendor, email_ctx in pdf_tasks]
                 for future in as_completed(futures):
                     try:
                         result = future.result()
