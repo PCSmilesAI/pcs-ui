@@ -47,6 +47,7 @@ interface CLIOptions {
   highQuality: boolean;
   maxRetries: number;
   noHistory: boolean;
+  classifyFirst: boolean;
   help: boolean;
 }
 
@@ -61,6 +62,7 @@ function parseArgs(): CLIOptions {
     highQuality: false,
     maxRetries: 3,
     noHistory: false,
+    classifyFirst: false,
     help: false,
   };
 
@@ -70,6 +72,7 @@ function parseArgs(): CLIOptions {
     else if (arg === '--dry-run') options.dryRun = true;
     else if (arg === '--high-quality') options.highQuality = true;
     else if (arg === '--no-history') options.noHistory = true;
+    else if (arg === '--classify') options.classifyFirst = true;
     else if (arg === '--help' || arg === '-h') options.help = true;
     else if (arg.startsWith('--limit=')) {
       const val = parseInt(arg.split('=')[1], 10);
@@ -104,6 +107,7 @@ Options:
   --high-quality   Use 'auto' image detail level for better accuracy on complex PDFs
   --max-retries=N  Max retry attempts per file (default: 3)
   --no-history     Skip historical examples (reduces context size)
+  --classify       Classify documents first; route non-invoices to Other Documents
   --dry-run        Show what would be done without actually doing it
   --help, -h       Show this help message
 
@@ -111,8 +115,8 @@ Examples:
   # Fresh start - wipe everything and reparse all
   npx tsx scripts/bulk-reparse-gpt.ts --wipe
 
-  # High-quality reparse with retries (recommended for 100% success)
-  npx tsx scripts/bulk-reparse-gpt.ts --wipe --high-quality --max-retries=3
+  # High-quality reparse with classification (recommended)
+  npx tsx scripts/bulk-reparse-gpt.ts --wipe --high-quality --max-retries=3 --classify
 
   # Test with 10 files first
   npx tsx scripts/bulk-reparse-gpt.ts --wipe --limit=10
@@ -183,6 +187,7 @@ async function main() {
   console.log(`High-quality mode: ${options.highQuality ? 'YES (auto detail)' : 'NO (low detail)'}`);
   console.log(`Max retries per file: ${options.maxRetries}`);
   console.log(`Skip history: ${options.noHistory ? 'YES' : 'NO'}`);
+  console.log(`Classify first: ${options.classifyFirst ? 'YES (route non-invoices to Other Documents)' : 'NO'}`);
   console.log();
 
   // Show current database stats
@@ -283,6 +288,7 @@ async function main() {
       highQuality: options.highQuality,
       maxRetries: options.maxRetries,
       noHistory: options.noHistory,
+      classifyFirst: options.classifyFirst,
       onProgress: (progress: BulkParseProgress) => {
         // Progress is logged in runBulkParse
       },

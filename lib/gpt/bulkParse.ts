@@ -8,6 +8,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { parseInvoiceWithGPT, ParseResult, PARSING_CONFIG } from './parseInvoice';
+import { classifyDocument, type ClassificationResult } from './documentClassifier';
 import { getOrCreateKnowledgeBase } from './knowledgeBase';
 import { getDatabase } from '../db/client';
 import { v4 as uuidv4 } from 'uuid';
@@ -36,6 +37,7 @@ export interface BulkParseOptions {
   highQuality?: boolean;      // Use 'auto' detail level instead of 'low' for better accuracy
   maxRetries?: number;        // Max retries per file (default: 3)
   noHistory?: boolean;        // Skip historical examples (reduce context size)
+  classifyFirst?: boolean;    // Classify documents before parsing (route non-invoices to other_documents)
   onProgress?: (progress: BulkParseProgress) => void;
   onParsed?: (file: string, result: ParseResult) => void;
 }
@@ -307,17 +309,106 @@ export function saveParsedInvoice(
 }
 
 // ============================================================================
+// Non-Invoice Document Handling
+// ============================================================================
+
+/**
+ * Save a non-invoice document to the other_documents table
+ */
+function saveOtherDocument(
+  pdfPath: string,
+  classification: ClassificationResult
+): { success: boolean; documentId?: string; error?: string } {
+  const db = getDatabase();
+  
+  try {
+    const documentId = uuidv4();
+    const now = new Date().toISOString();
+    
+    db.prepare(`
+      INSERT INTO other_documents (
+        id, document_type, vendor_name, amount, document_date,
+        reference_number, pdf_path, classification_confidence,
+        raw_extracted_data, status, notes, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      documentId,
+      classification.document_type,
+      classification.vendor_name,
+      classification.amount,
+      classification.document_date,
+      classification.reference_number,
+      pdfPath,
+      classification.confidence,
+      JSON.stringify({
+        reasoning: classification.reasoning,
+        source: 'bulk_parse_classification',
+        classified_at: now,
+      }),
+      'pending',
+      `Auto-classified during bulk parse: ${classification.reasoning}`,
+      now,
+      now
+    );
+    
+    console.log(`[BULK] Saved non-invoice (${classification.document_type}): ${path.basename(pdfPath)}`);
+    return { success: true, documentId };
+    
+  } catch (error: any) {
+    console.error('[BULK] Failed to save other document:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+// ============================================================================
 // Bulk Parse Execution
 // ============================================================================
 
 /**
  * Parse a single PDF and save to database
+ * If classifyFirst is enabled, classifies the document first and routes non-invoices
  */
 export async function parseAndSave(
-  pdfPath: string
-): Promise<{ success: boolean; result?: ParseResult; error?: string }> {
+  pdfPath: string,
+  options: { classifyFirst?: boolean } = {}
+): Promise<{ success: boolean; result?: ParseResult; error?: string; isNonInvoice?: boolean }> {
   try {
-    console.log(`[BULK] Parsing: ${path.basename(pdfPath)}`);
+    console.log(`[BULK] Processing: ${path.basename(pdfPath)}`);
+    
+    // Optionally classify first
+    if (options.classifyFirst) {
+      console.log(`[BULK] Classifying document first...`);
+      const classificationResult = await classifyDocument(pdfPath);
+      
+      if (classificationResult.success && classificationResult.result) {
+        const docType = classificationResult.result.document_type;
+        const confidence = classificationResult.result.confidence;
+        
+        if (docType !== 'invoice') {
+          // This is NOT an invoice - save to other_documents and skip parsing
+          console.log(`[BULK] Non-invoice detected: ${docType} (${(confidence * 100).toFixed(0)}%)`);
+          
+          if (docType === 'marketing') {
+            // Skip marketing materials entirely
+            console.log(`[BULK] Skipping marketing material`);
+            return { success: true, isNonInvoice: true };
+          }
+          
+          // Save credit memos, statements, etc. to other_documents
+          const saveResult = saveOtherDocument(pdfPath, classificationResult.result);
+          if (!saveResult.success) {
+            return { success: false, error: saveResult.error, isNonInvoice: true };
+          }
+          
+          return { success: true, isNonInvoice: true };
+        }
+        
+        console.log(`[BULK] Confirmed invoice (${(confidence * 100).toFixed(0)}%), proceeding to parse`);
+      } else {
+        // Classification failed - assume it's an invoice to avoid data loss
+        console.log(`[BULK] Classification failed, treating as invoice`);
+      }
+    }
     
     // Parse with GPT
     const result = await parseInvoiceWithGPT(pdfPath);
@@ -358,6 +449,7 @@ export async function runBulkParse(
     highQuality = false,
     maxRetries = 3,
     noHistory = false,
+    classifyFirst = false,
     onProgress,
     onParsed,
   } = options;
@@ -373,6 +465,10 @@ export async function runBulkParse(
   if (maxRetries) {
     PARSING_CONFIG.maxRetries = maxRetries;
     console.log(`[BULK] Max retries set to ${maxRetries}`);
+  }
+  
+  if (classifyFirst) {
+    console.log('[BULK] Document classification enabled - non-invoices will be routed to Other Documents');
   }
 
   // Scan for PDFs
@@ -422,10 +518,14 @@ export async function runBulkParse(
       onProgress(progress);
     }
 
-    // Parse and save
-    const result = await parseAndSave(pdfPath);
+    // Parse and save (with optional classification)
+    const result = await parseAndSave(pdfPath, { classifyFirst });
     
-    if (result.success) {
+    if (result.isNonInvoice) {
+      // Non-invoice document was handled (saved to other_documents or skipped)
+      progress.skipped++;  // Count as skipped from invoice perspective
+      console.log(`[BULK] Non-invoice handled: ${fileName}`);
+    } else if (result.success) {
       progress.successful++;
     } else {
       progress.failed++;
