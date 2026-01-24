@@ -86,6 +86,9 @@ export async function GET(req: NextRequest) {
       params.push(...offices);
     }
 
+    // Sort by newest first (created_at DESC) so most recent invoices appear at the top
+    query += ' ORDER BY created_at DESC';
+    
     // Get all matching invoices
     const allInvoices = db.prepare(query).all(...params) as any[];
     

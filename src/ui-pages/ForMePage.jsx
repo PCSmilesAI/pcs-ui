@@ -481,30 +481,58 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     }
   }, [reloadList]);
 
-  // Set up automatic inbox checking every 10 seconds
-  useEffect(() => {
-    // Only run if component is mounted and page is visible
-    if (typeof window === 'undefined') return;
+  // Manual inbox scan handler - replaces automatic checking
+  // The PM2 inbox-watcher now runs hourly in the background
+  // This button allows users to trigger an immediate scan when needed
+  const [isScanning, setIsScanning] = useState(false);
+  
+  const handleManualInboxScan = useCallback(async () => {
+    if (isScanning) return;
+    
+    setIsScanning(true);
+    try {
+      const params = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search)
+        : new URLSearchParams();
+      const email = params.get('email') || 'user@pcsmilesai.com';
 
-    // Initial check after 2 seconds (give page time to load)
-    const initialTimeout = setTimeout(() => {
-      checkInboxAutomatically();
-    }, 2000);
+      const res = await fetch('/api/inbox/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, full_scan: false }),
+      });
 
-    // Then check every 10 seconds
-    const interval = setInterval(() => {
-      // Only check if page is visible (don't waste resources on hidden tabs)
-      if (document.visibilityState === 'visible') {
-        checkInboxAutomatically();
+      if (!res.ok) {
+        if (res.status === 504 || res.status === 408) {
+          showToast('Inbox scan timed out, but may still be processing...', 'warning');
+          await reloadList();
+          return;
+        }
+        showToast('Failed to scan inbox', 'error');
+        return;
       }
-    }, 10000); // 10 seconds
 
-    // Cleanup
-    return () => {
-      clearTimeout(initialTimeout);
-      clearInterval(interval);
-    };
-  }, [checkInboxAutomatically]);
+      const result = await res.json();
+      
+      if (result.ok) {
+        const added = result.added || 0;
+        const skipped = result.skipped || 0;
+        if (added > 0) {
+          showToast(`Inbox scanned! Found ${added} new invoice(s)`, 'success');
+        } else if (skipped > 0) {
+          showToast(`Inbox scanned. ${skipped} email(s) already processed.`, 'info');
+        } else {
+          showToast('Inbox scanned. No new invoices found.', 'info');
+        }
+        await reloadList();
+      }
+    } catch (err) {
+      console.error('[Manual Inbox Scan] Error:', err.message);
+      showToast('Error scanning inbox', 'error');
+    } finally {
+      setIsScanning(false);
+    }
+  }, [isScanning, showToast, reloadList]);
 
   // Now do conditional returns AFTER all handlers are defined
   if (loading) {
@@ -565,13 +593,30 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
             <i className="fas fa-plus"></i>
             Create Invoice
           </button>
-          <div
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg"
-            title="Inbox is automatically checked every 10 seconds"
+          <button
+            onClick={handleManualInboxScan}
+            disabled={isScanning}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '9999px',
+              fontSize: '14px',
+              fontWeight: 500,
+              border: '1px solid #357ab2',
+              backgroundColor: isScanning ? '#e5e7eb' : '#357ab2',
+              color: isScanning ? '#6b7280' : '#ffffff',
+              cursor: isScanning ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              minWidth: '180px',
+              justifyContent: 'center',
+            }}
+            title={isScanning ? 'Scanning inbox for new invoices...' : 'Manually scan inbox for new invoices'}
           >
-            <i className="fas fa-sync-alt fa-spin text-blue-600"></i>
-            <span className="text-sm">Auto-refreshing inbox...</span>
-          </div>
+            <i className={`fas ${isScanning ? 'fa-spinner fa-spin' : 'fa-inbox'}`}></i>
+            {isScanning ? 'Scanning Inbox...' : 'Scan Inbox'}
+          </button>
         </div>
       </div>
 
