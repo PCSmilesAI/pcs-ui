@@ -170,6 +170,77 @@ export async function POST(
           difference: amount_cents - (originalInvoice.amount_cents || 0)
         });
       }
+
+      // Trigger GPT-5 nano knowledge base training with the correction
+      // This updates the vendor's parsing prompt to improve future accuracy
+      const vendorName = updatedInvoice.vendor_name || originalInvoice.vendor_name || originalInvoice.parsed_vendor_name;
+      if (vendorName && originalInvoice.pdf_path) {
+        console.log('[API][INVOICES][UPDATE]', 'triggering_gpt_training', { vendorName, invoiceId: actualInvoiceId });
+        
+        // Build original parsed data from the invoice
+        const originalParsed = {
+          invoice_number: originalInvoice.invoice_number,
+          vendor_name: originalInvoice.vendor_name || originalInvoice.parsed_vendor_name,
+          office_location: originalInvoice.office_id || originalInvoice.parsed_office_id,
+          total: originalInvoice.amount_cents ? originalInvoice.amount_cents / 100 : null,
+          invoice_date: originalInvoice.invoice_date,
+          due_date: originalInvoice.due_date,
+        };
+
+        // Build corrected data from the patch
+        const correctedData: Record<string, any> = {
+          invoice_number: updatedInvoice.invoice_number,
+          vendor_name: updatedInvoice.vendor_name,
+          office_location: updatedInvoice.office_id,
+          total: updatedInvoice.amount_cents ? updatedInvoice.amount_cents / 100 : null,
+          invoice_date: updatedInvoice.invoice_date,
+          due_date: updatedInvoice.due_date,
+        };
+
+        // Include user comment if provided (heavily weighted in training)
+        if (body.userComment) {
+          correctedData._user_comment = body.userComment;
+        }
+
+        // Fire-and-forget the training request (don't block the response)
+        const baseUrl = process.env.NEXTAUTH_URL || process.env.VERCEL_URL 
+          ? `https://${process.env.VERCEL_URL}` 
+          : 'http://localhost:3000';
+        
+        fetch(`${baseUrl}/api/gpt-train`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            vendorName,
+            pdfPath: originalInvoice.pdf_path,
+            originalParsed,
+            correctedData,
+          })
+        }).then(async (trainRes) => {
+          if (trainRes.ok) {
+            const trainResult = await trainRes.json();
+            console.log('[API][INVOICES][UPDATE]', 'gpt_training_success', { 
+              vendorName, 
+              version: trainResult.version,
+              invoiceId: actualInvoiceId 
+            });
+          } else {
+            const errorText = await trainRes.text();
+            console.warn('[API][INVOICES][UPDATE]', 'gpt_training_failed', { 
+              vendorName, 
+              status: trainRes.status,
+              error: errorText,
+              invoiceId: actualInvoiceId 
+            });
+          }
+        }).catch((trainErr) => {
+          console.warn('[API][INVOICES][UPDATE]', 'gpt_training_error', { 
+            vendorName, 
+            error: trainErr.message,
+            invoiceId: actualInvoiceId 
+          });
+        });
+      }
     } catch (logError) {
       console.error('[API][INVOICES][UPDATE]', 'Failed to log repair', { invoiceId: actualInvoiceId, error: (logError as any)?.message });
       // Don't fail the update if logging fails, just log the error
