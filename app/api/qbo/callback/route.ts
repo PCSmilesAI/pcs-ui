@@ -136,9 +136,17 @@ export async function GET(req: NextRequest) {
     console.log('🎉 Successfully connected to QuickBooks!');
     console.log('📊 Realm ID:', realmId);
 
-    // Redirect back to the Connections page
+    // Redirect back to the Connections page with cache-busting
     const baseUrl = QBO_REDIRECT_URI.replace('/api/qbo/callback', '');
-    return NextResponse.redirect(`${baseUrl}/ConnectionsPage?qbo_connected=true`, 302);
+    const timestamp = Date.now();
+    const redirectUrl = `${baseUrl}/ConnectionsPage?qbo_connected=true&t=${timestamp}`;
+    
+    // Use 303 redirect and add no-cache headers to prevent browser caching issues
+    const response = NextResponse.redirect(redirectUrl, 303);
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    return response;
     
   } catch (e: any) {
     // Log full error server-side only
