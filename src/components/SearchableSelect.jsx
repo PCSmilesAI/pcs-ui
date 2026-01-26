@@ -17,6 +17,7 @@ export default function SearchableSelect({
   getDisplayText = null,
   disabled = false,
   style = {},
+  initialDisplayValue = '', // Fallback display text when value doesn't match any option
 }) {
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -36,11 +37,18 @@ export default function SearchableSelect({
       const selected = options.find(opt => opt[valueKey] === value);
       if (selected) {
         setInputValue(getOptionDisplay(selected));
+      } else if (initialDisplayValue) {
+        // Fallback to provided display value when no option matches
+        // This is useful when editing saved data where the ID might not match current options
+        setInputValue(initialDisplayValue);
       }
+    } else if (initialDisplayValue) {
+      // If no value but initialDisplayValue provided, show it
+      setInputValue(initialDisplayValue);
     } else {
       setInputValue('');
     }
-  }, [value, options, valueKey, getOptionDisplay]);
+  }, [value, options, valueKey, getOptionDisplay, initialDisplayValue]);
 
   // Filter options based on input
   const filteredOptions = inputValue
@@ -131,18 +139,22 @@ export default function SearchableSelect({
         inputRef.current && !inputRef.current.contains(e.target)
       ) {
         setIsOpen(false);
-        // If input doesn't match any option, revert to selected value
+        // If input doesn't match any option, revert to selected value or initialDisplayValue
         if (value) {
           const selected = options.find(opt => opt[valueKey] === value);
           if (selected) {
             setInputValue(getOptionDisplay(selected));
+          } else if (initialDisplayValue) {
+            setInputValue(initialDisplayValue);
           }
+        } else if (initialDisplayValue) {
+          setInputValue(initialDisplayValue);
         }
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [value, options, valueKey, getOptionDisplay]);
+  }, [value, options, valueKey, getOptionDisplay, initialDisplayValue]);
 
   // Scroll highlighted option into view
   useEffect(() => {

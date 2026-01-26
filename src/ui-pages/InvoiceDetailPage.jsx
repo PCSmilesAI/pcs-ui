@@ -2676,6 +2676,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                               <SearchableSelect
                                 options={categories}
                                 value={cat.categoryId || ''}
+                                initialDisplayValue={cat.categoryName || ''}
                                 onChange={(id, displayText) => {
                                   updateInvoiceCategory(index, 'category', id, displayText);
                                 }}
@@ -2693,6 +2694,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                               <SearchableSelect
                                 options={qboClasses}
                                 value={cat.classId || ''}
+                                initialDisplayValue={cat.className || ''}
                                 onChange={(id, displayText) => {
                                   updateInvoiceCategory(index, 'class', id, displayText);
                                 }}
