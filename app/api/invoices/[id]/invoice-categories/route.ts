@@ -82,7 +82,7 @@ export async function GET(
     const invoice = db
       .prepare(
         `SELECT id, invoice_number, amount_cents, total, invoice_total, vendor_name, 
-                office_id, office_location, office
+                office_id, office_location
          FROM invoices 
          WHERE id = ?`
       )
@@ -147,8 +147,8 @@ export async function GET(
     if (transformedCategories.length === 0 && totalAmount > 0) {
       const vendorName = invoice.vendor_name || '';
       
-      // Get class from parsed location (office_location field)
-      const parsedLocation = invoice.office_location || invoice.office_id || invoice.office || '';
+      // Get class from parsed location (office_location or office_id field)
+      const parsedLocation = invoice.office_location || invoice.office_id || '';
       const classFromLocation = mapLocationToClass(parsedLocation);
       
       try {
