@@ -151,17 +151,23 @@ async function qboQuery(tokens: Tokens, sql: string, minor = '65'): Promise<any>
 
 function mapAccounts(data: any) {
   const list = data?.QueryResponse?.Account ?? []
-  return list.map((a: any) => ({
-    id: a.Id,
-    name: a.Name,
-    acctNum: a.AcctNum || undefined,
-    fullName: a.FullyQualifiedName || a.Name,
-    // Display text with account number if available
-    displayText: a.AcctNum ? `${a.AcctNum} - ${a.Name}` : a.Name,
-    type: a.AccountType,
-    subtype: a.AccountSubType,
-    classification: a.Classification,
-  }))
+  return list.map((a: any) => {
+    const fullName = a.FullyQualifiedName || a.Name;
+    // Display text with account number and FULL path (including parent accounts)
+    // Example: "52210 Expenses:Direct Supplies:Lab Fees:Dental Lab Fees"
+    const displayText = a.AcctNum ? `${a.AcctNum} ${fullName}` : fullName;
+    
+    return {
+      id: a.Id,
+      name: a.Name,
+      acctNum: a.AcctNum || undefined,
+      fullName: fullName,
+      displayText: displayText,
+      type: a.AccountType,
+      subtype: a.AccountSubType,
+      classification: a.Classification,
+    };
+  })
 }
 
 export async function GET(req: Request) {
@@ -176,11 +182,12 @@ export async function GET(req: Request) {
     const valid = await ensureAccessToken(tokens)
 
     // 1) Preferred: AccountType filter (typical expense coding)
+    // Use MAXRESULTS 1000 to get all accounts including sub-accounts
     const sql1 = `
       select Id, Name, AcctNum, FullyQualifiedName, AccountType, AccountSubType, Classification
       from Account
       where AccountType in ('Expense','Cost of Goods Sold','Other Expense')
-      order by Name
+      MAXRESULTS 1000
     `.trim()
     let data = await qboQuery(valid, sql1)
     let categories = mapAccounts(data)
@@ -193,7 +200,7 @@ export async function GET(req: Request) {
         select Id, Name, AcctNum, FullyQualifiedName, AccountType, AccountSubType, Classification
         from Account
         where Classification = 'Expense'
-        order by Name
+        MAXRESULTS 1000
       `.trim()
       data = await qboQuery(valid, sql2)
       categories = mapAccounts(data)
@@ -205,13 +212,20 @@ export async function GET(req: Request) {
       const sql3 = `
         select Id, Name, AcctNum, FullyQualifiedName, AccountType, AccountSubType, Classification
         from Account
-        order by Name
+        MAXRESULTS 1000
       `.trim()
       data = await qboQuery(valid, sql3)
       categories = mapAccounts(data)
       source = 'Account(all)'
       reason = 'No expense-type accounts matched; showing all accounts.'
     }
+    
+    // Sort by displayText (account number + full path) for easier searching
+    categories.sort((a: any, b: any) => {
+      const aText = a.displayText || a.name || '';
+      const bText = b.displayText || b.name || '';
+      return aText.localeCompare(bText);
+    });
 
     // 4) If really nothing, last resort—Item "Category" (diagnostic only)
     if (categories.length === 0) {
