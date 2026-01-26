@@ -1,7 +1,7 @@
 /**
  * Invoice Reparse API
  * 
- * POST /api/invoices/reparse - Reparse a single invoice using GPT-5 nano
+ * POST /api/invoices/reparse - Reparse a single invoice using PCS AI
  * GET /api/invoices/reparse - Get bulk parse progress status
  */
 

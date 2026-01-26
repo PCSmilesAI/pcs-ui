@@ -1,11 +1,11 @@
 /**
- * GPT-5 nano Knowledge Base Invoice Parsing System
+ * PCS AI Knowledge Base Invoice Parsing System
  * 
  * This module provides:
- * - PDF to image conversion for GPT vision API
+ * - PDF to image conversion for PCS AI vision API
  * - Vendor knowledge base management
  * - Historical invoice database for few-shot learning
- * - GPT-5 nano invoice parsing with knowledge base context
+ * - PCS AI invoice parsing with knowledge base context
  * - Automatic knowledge base training from corrections
  */
 
@@ -37,7 +37,7 @@ export {
   type SystemPrompt
 } from './knowledgeBase';
 
-// GPT Invoice Parsing
+// PCS AI Invoice Parsing
 export {
   parseInvoiceWithGPT,
   parseInvoiceFromImages,

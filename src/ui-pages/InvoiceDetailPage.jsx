@@ -1640,7 +1640,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         key => originalValues[key] !== correctedValues[key]
       );
 
-      console.log('🔍 GPT Knowledge Base training check:', {
+      console.log('🔍 PCS AI Knowledge Base training check:', {
         originalValues,
         correctedValues,
         changedFields,
@@ -1648,9 +1648,9 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         willSend: changedFields.length > 0 || !!updateComment.trim()
       });
 
-      // Send to GPT Knowledge Base training when fields change or comment provided
+      // Send to PCS AI Knowledge Base training when fields change or comment provided
       const shouldSend = changedFields.length > 0 || updateComment.trim();
-      console.log('🤖 Will send to GPT for KB training?', shouldSend, '- changedFields:', changedFields.length, 'hasComment:', !!updateComment.trim());
+      console.log('🤖 Will send to PCS AI for KB training?', shouldSend, '- changedFields:', changedFields.length, 'hasComment:', !!updateComment.trim());
 
       if (shouldSend) {
         setImprovingParser(true);
@@ -1658,7 +1658,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           const vendorName = details.vendor || invoice?.vendor_name || invoice?.vendor || 'Unknown';
           const pdfPath = invoice?.pdf_path || invoice?.source_file || '';
           
-          console.log('🤖 Sending corrections to GPT Knowledge Base training...', { vendorName, pdfPath });
+          console.log('🤖 Sending corrections to PCS AI Knowledge Base training...', { vendorName, pdfPath });
           
           const gptTrainResponse = await fetch('/api/gpt-train', {
             method: 'POST',
@@ -1675,7 +1675,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
           const gptResult = await gptTrainResponse.json();
 
           if (gptTrainResponse.ok && gptResult.success) {
-            console.log('✅ GPT Knowledge Base updated:', gptResult);
+            console.log('✅ PCS AI Knowledge Base updated:', gptResult);
             showToast(`Knowledge base for ${vendorName} updated to v${gptResult.version}!`, 'success');
             
             // Start scanning other invoices with the updated knowledge base
@@ -1715,14 +1715,14 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
               });
             }
           } else {
-            console.warn('⚠️ GPT training failed:', gptResult.error);
+            console.warn('⚠️ PCS AI training failed:', gptResult.error);
             // Don't show error toast for training failures - the update still succeeded
             console.log('Note: Invoice update succeeded, but knowledge base training failed');
           }
         } catch (gptError) {
-          console.warn('⚠️ Error calling GPT training:', gptError);
+          console.warn('⚠️ Error calling PCS AI training:', gptError);
           // Don't show error toast - the invoice update still succeeded
-          console.log('Note: Invoice update succeeded, but GPT training call failed');
+          console.log('Note: Invoice update succeeded, but PCS AI training call failed');
         } finally {
           setImprovingParser(false);
         }

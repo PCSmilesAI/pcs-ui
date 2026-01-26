@@ -2,7 +2,7 @@
 /**
  * Bulk Reparse Script
  * 
- * Reparses all invoices from email_invoices/ using GPT-5 nano.
+ * Reparses all invoices from email_invoices/ using PCS AI.
  * 
  * Usage:
  *   npx ts-node scripts/bulk-reparse-gpt.ts [options]
@@ -93,7 +93,7 @@ function parseArgs(): CLIOptions {
 
 function showHelp(): void {
   console.log(`
-Bulk Reparse Script - Parse all invoices with GPT-5 nano
+Bulk Reparse Script - Parse all invoices with PCS AI
 
 Usage:
   npx ts-node scripts/bulk-reparse-gpt.ts [options]
@@ -142,7 +142,7 @@ async function main() {
   }
 
   console.log('='.repeat(60));
-  console.log('BULK REPARSE SCRIPT - GPT-5 nano');
+  console.log('BULK REPARSE SCRIPT - PCS AI');
   console.log('='.repeat(60));
   console.log();
 
@@ -153,11 +153,11 @@ async function main() {
     process.exit(1);
   }
 
-  // Test GPT connection
-  console.log('Testing GPT-5 nano connection...');
+  // Test PCS AI connection
+  console.log('Testing PCS AI connection...');
   const gptTest = await testGPTConnection();
   if (!gptTest.connected) {
-    console.error(`ERROR: Cannot connect to GPT: ${gptTest.error}`);
+    console.error(`ERROR: Cannot connect to PCS AI: ${gptTest.error}`);
     process.exit(1);
   }
   console.log(`Connected to ${gptTest.model}`);

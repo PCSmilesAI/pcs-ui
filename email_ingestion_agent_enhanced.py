@@ -39,7 +39,7 @@ INGEST_DB_PATH = os.path.join(DATA_DIR, "ingest.db")
 SCAN_LOCK_PATH = os.path.join(LOCKS_DIR, "inbox.scan.lock")
 DELETED_INVOICES_PATH = os.path.join(DATA_DIR, "deleted_invoices.json")
 
-# API Configuration for GPT Document Classification
+# API Configuration for PCS AI Document Classification
 # Use local API in development, or the production server URL
 API_BASE_URL = os.environ.get("PCS_API_URL", "http://localhost:3000")
 
@@ -276,7 +276,7 @@ def detect_vendor_from_email(msg):
     return None
 
 def run_vendor_router(filepath, detected_vendor=None):
-    """DEPRECATED: Use parse_invoice_with_gpt instead"""
+    """DEPRECATED: Use parse_invoice_with_pcs_ai instead"""
     try:
         cmd = ["python3", VENDOR_ROUTER_PATH, filepath]
         if detected_vendor:
@@ -302,8 +302,8 @@ def run_vendor_router(filepath, detected_vendor=None):
 
 def parse_invoice_with_gpt(filepath, vendor_hint=None):
     """
-    Call the GPT invoice ingest API to parse and save an invoice.
-    Uses GPT-5 nano for intelligent parsing.
+    Call the PCS AI invoice ingest API to parse and save an invoice.
+    Uses PCS AI for intelligent parsing.
     
     Returns:
         dict with invoice data if successful, None if failed
@@ -322,25 +322,25 @@ def parse_invoice_with_gpt(filepath, vendor_hint=None):
         response = requests.post(
             f"{API_BASE_URL}/api/invoices/gpt-ingest",
             json=payload,
-            timeout=120  # Longer timeout for GPT parsing
+            timeout=120  # Longer timeout for PCS AI parsing
         )
         
         if response.status_code != 200:
-            log(f"[GPT_INGEST][ERROR] API returned status {response.status_code}: {response.text}")
+            log(f"[PCS_AI_INGEST][ERROR] API returned status {response.status_code}: {response.text}")
             return None
         
         data = response.json()
         
         if not data.get("ok"):
-            log(f"[GPT_INGEST][ERROR] Ingest failed: {data.get('error', 'Unknown error')}")
+            log(f"[PCS_AI_INGEST][ERROR] Ingest failed: {data.get('error', 'Unknown error')}")
             return None
         
         # Check if skipped (already exists or tombstoned)
         if data.get("skipped"):
-            log(f"[GPT_INGEST][SKIP] Invoice skipped: {data.get('message')}")
+            log(f"[PCS_AI_INGEST][SKIP] Invoice skipped: {data.get('message')}")
             return {"skipped": True, "message": data.get("message")}
         
-        log(f"[GPT_INGEST][SUCCESS] Invoice parsed: #{data.get('invoice_number')} - {data.get('vendor')} - ${data.get('amount', 0):.2f}")
+        log(f"[PCS_AI_INGEST][SUCCESS] Invoice parsed: #{data.get('invoice_number')} - {data.get('vendor')} - ${data.get('amount', 0):.2f}")
         
         return {
             "id": data.get("id"),
@@ -353,26 +353,26 @@ def parse_invoice_with_gpt(filepath, vendor_hint=None):
         }
         
     except requests.exceptions.Timeout:
-        log(f"[GPT_INGEST][TIMEOUT] Parsing timeout for {os.path.basename(filepath)}")
+        log(f"[PCS_AI_INGEST][TIMEOUT] Parsing timeout for {os.path.basename(filepath)}")
         return None
     except requests.exceptions.RequestException as e:
-        log(f"[GPT_INGEST][ERROR] Request failed: {e}")
+        log(f"[PCS_AI_INGEST][ERROR] Request failed: {e}")
         return None
     except Exception as e:
-        log(f"[GPT_INGEST][ERROR] Exception during parsing: {e}")
+        log(f"[PCS_AI_INGEST][ERROR] Exception during parsing: {e}")
         return None
 
 
 def classify_document_with_gpt(filepath, email_context=None):
     """
-    Call the GPT document classification API to determine document type.
+    Call the PCS AI document classification API to determine document type.
     
     Returns:
         dict with keys: document_type, confidence, vendor_name, amount, document_date, reference_number, reasoning
         or None if classification fails
     """
     try:
-        log(f"[GPT_CLASSIFY] Classifying document: {os.path.basename(filepath)}")
+        log(f"[PCS_AI_CLASSIFY] Classifying document: {os.path.basename(filepath)}")
         
         payload = {
             "pdfPath": filepath
@@ -388,28 +388,28 @@ def classify_document_with_gpt(filepath, email_context=None):
         )
         
         if response.status_code != 200:
-            log(f"[GPT_CLASSIFY][ERROR] API returned status {response.status_code}: {response.text}")
+            log(f"[PCS_AI_CLASSIFY][ERROR] API returned status {response.status_code}: {response.text}")
             return None
         
         data = response.json()
         
         if not data.get("success"):
-            log(f"[GPT_CLASSIFY][ERROR] Classification failed: {data.get('error', 'Unknown error')}")
+            log(f"[PCS_AI_CLASSIFY][ERROR] Classification failed: {data.get('error', 'Unknown error')}")
             return None
-        
+
         classification = data.get("classification", {})
-        log(f"[GPT_CLASSIFY] Result: type={classification.get('document_type')}, confidence={classification.get('confidence')}")
+        log(f"[PCS_AI_CLASSIFY] Result: type={classification.get('document_type')}, confidence={classification.get('confidence')}")
         
         return classification
         
     except requests.exceptions.Timeout:
-        log(f"[GPT_CLASSIFY][TIMEOUT] Classification timeout for {os.path.basename(filepath)}")
+        log(f"[PCS_AI_CLASSIFY][TIMEOUT] Classification timeout for {os.path.basename(filepath)}")
         return None
     except requests.exceptions.RequestException as e:
-        log(f"[GPT_CLASSIFY][ERROR] Request failed: {e}")
+        log(f"[PCS_AI_CLASSIFY][ERROR] Request failed: {e}")
         return None
     except Exception as e:
-        log(f"[GPT_CLASSIFY][ERROR] Exception during classification: {e}")
+        log(f"[PCS_AI_CLASSIFY][ERROR] Exception during classification: {e}")
         return None
 
 
@@ -419,7 +419,7 @@ def save_other_document(filepath, classification, email_context=None):
     
     Args:
         filepath: Path to the PDF file
-        classification: Classification result from GPT
+        classification: Classification result from PCS AI
         email_context: Optional email metadata (subject, from, body)
     
     Returns:
@@ -487,7 +487,7 @@ def extract_and_save_pdfs(msg, email_subject, source_message_id):
     if detected_vendor:
         log(f"📧 Vendor detected from email: {detected_vendor}")
 
-    # Extract email context for GPT classification
+    # Extract email context for PCS AI classification
     email_from = msg.get("From", "")
     email_body = ""
     for part in msg.walk():
@@ -564,13 +564,13 @@ def extract_and_save_pdfs(msg, email_subject, source_message_id):
     return pdf_files
 
 def process_pdf_file(filepath, detected_vendor, email_context=None):
-    """Process a single PDF file with GPT-5 nano for classification and parsing
+    """Process a single PDF file with PCS AI for classification and parsing
 
     CRITICAL: This function MUST NOT fail silently
     
     Flow:
-    1. Classify document using GPT-5 nano
-    2. If invoice -> parse with GPT-5 nano and save to database
+    1. Classify document using PCS AI
+    2. If invoice -> parse with PCS AI and save to database
     3. If other document type -> save to other_documents table
     """
     try:
@@ -578,21 +578,21 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
             log(f"[ERROR][CRITICAL] PDF file does not exist: {filepath}")
             return False
 
-        # Step 1: Classify the document using GPT
+        # Step 1: Classify the document using PCS AI
         classification = classify_document_with_gpt(filepath, email_context)
         
-        # If classification fails, fall back to treating as invoice and parse with GPT
+        # If classification fails, fall back to treating as invoice and parse with PCS AI
         if not classification:
             log(f"[CLASSIFY][FALLBACK] Classification failed, treating as invoice: {os.path.basename(filepath)}")
             result = parse_invoice_with_gpt(filepath, detected_vendor)
             if result and result.get("success"):
-                log(f"📦 Parsed invoice with GPT (fallback): {result.get('vendor', 'Unknown')}")
+                log(f"📦 Parsed invoice with PCS AI (fallback): {result.get('vendor', 'Unknown')}")
                 return True
             elif result and result.get("skipped"):
                 log(f"📦 Invoice skipped (already exists): {os.path.basename(filepath)}")
                 return True
             else:
-                log(f"[WARNING] GPT parsing failed for {os.path.basename(filepath)}")
+                log(f"[WARNING] PCS AI parsing failed for {os.path.basename(filepath)}")
                 return False
         
         document_type = classification.get("document_type", "other")
@@ -602,16 +602,16 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
         
         # Step 2: Route based on classification
         if document_type == "invoice":
-            # Parse invoice with GPT-5 nano and save to database
+            # Parse invoice with PCS AI and save to database
             result = parse_invoice_with_gpt(filepath, detected_vendor)
             if result and result.get("success"):
-                log(f"📦 Parsed invoice with GPT: {result.get('vendor', 'Unknown')} - ${result.get('amount', 0):.2f}")
+                log(f"📦 Parsed invoice with PCS AI: {result.get('vendor', 'Unknown')} - ${result.get('amount', 0):.2f}")
                 return True
             elif result and result.get("skipped"):
                 log(f"📦 Invoice skipped (already exists): {os.path.basename(filepath)}")
                 return True
             else:
-                log(f"[WARNING] GPT parsing failed for {os.path.basename(filepath)}")
+                log(f"[WARNING] PCS AI parsing failed for {os.path.basename(filepath)}")
                 return False
         
         elif document_type == "marketing":
@@ -802,11 +802,11 @@ def check_inbox(full_scan=False):
             }
             return
 
-        # Second pass: process PDFs in parallel with GPT classification
+        # Second pass: process PDFs in parallel with PCS AI classification
         processed_pdfs = 0
         failed_pdfs = 0
         if pdf_tasks:
-            log(f"[INBOX][PARALLEL] Processing {len(pdf_tasks)} PDFs with GPT classification and thread pool")
+            log(f"[INBOX][PARALLEL] Processing {len(pdf_tasks)} PDFs with PCS AI classification and thread pool")
             with ThreadPoolExecutor(max_workers=3) as executor:  # Reduced workers to avoid API rate limits
                 futures = [executor.submit(process_pdf_file, filepath, vendor, email_ctx) for filepath, vendor, email_ctx in pdf_tasks]
                 for future in as_completed(futures):
@@ -876,7 +876,7 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(
-        description='Email ingestion agent with GPT-5 nano for classification and parsing'
+        description='Email ingestion agent with PCS AI for classification and parsing'
     )
     parser.add_argument(
         '--full-scan', 
@@ -898,7 +898,7 @@ if __name__ == "__main__":
         # One-time full scan mode - process ALL emails
         log("[INBOX][WATCHER][MODE] Running ONE-TIME FULL SCAN of all emails")
         log("[INBOX][WATCHER][MODE] This will process ALL emails in inbox, skipping only tombstoned ones")
-        log("[INBOX][WATCHER][MODE] Duplicates will be detected and skipped by the GPT ingest API")
+        log("[INBOX][WATCHER][MODE] Duplicates will be detected and skipped by the PCS AI ingest API")
         check_inbox(full_scan=True)
         log("[INBOX][WATCHER][MODE] Full scan complete. Exiting.")
     elif args.once:

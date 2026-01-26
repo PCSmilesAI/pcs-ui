@@ -1,5 +1,5 @@
 /**
- * GPT Document Classification API
+ * PCS AI Document Classification API
  * 
  * POST /api/gpt-classify - Classify a document (invoice, credit memo, statement, etc.)
  * GET /api/gpt-classify - Health check
@@ -86,7 +86,7 @@ function resolvePdfPath(pdfPath: string): string | null {
 
 /**
  * POST /api/gpt-classify
- * Classify a document using GPT vision
+ * Classify a document using PCS AI vision
  * 
  * Body:
  * {
@@ -122,9 +122,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[GPT-CLASSIFY] Classifying document:', resolvedPath);
+    console.log('[PCS-AI-CLASSIFY] Classifying document:', resolvedPath);
 
-    // Classify with GPT
+    // Classify with PCS AI
     const result = await classifyDocument(resolvedPath, emailContext);
 
     if (!result.success || !result.result) {
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[GPT-CLASSIFY] Error:', error);
+    console.error('[PCS-AI-CLASSIFY] Error:', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }

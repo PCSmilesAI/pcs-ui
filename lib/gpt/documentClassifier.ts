@@ -1,5 +1,5 @@
 /**
- * GPT Document Classifier
+ * PCS AI Document Classifier
  * 
  * Classifies documents into types (invoice, credit_memo, statement, etc.)
  * before routing to appropriate processing pipelines.
@@ -103,14 +103,14 @@ Return ONLY valid JSON, no explanation text outside the JSON.`;
 // ============================================================================
 
 /**
- * Classify a document using GPT vision
+ * Classify a document using PCS AI vision
  */
 export async function classifyDocument(
   pdfPath: string,
   emailContext?: EmailContext
 ): Promise<ClassificationResponse> {
   try {
-    console.log('[GPT-CLASSIFY] Classifying document:', pdfPath);
+    console.log('[PCS-AI-CLASSIFY] Classifying document:', pdfPath);
 
     // Convert PDF to images
     const base64Images = await convertPdfToBase64Images(pdfPath);
@@ -121,7 +121,7 @@ export async function classifyDocument(
         error: 'Failed to convert PDF to images'
       };
     }
-    console.log(`[GPT-CLASSIFY] Converted ${base64Images.length} page(s)`);
+    console.log(`[PCS-AI-CLASSIFY] Converted ${base64Images.length} page(s)`);
 
     // Build message content
     const messageContent: Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string; detail: 'high' | 'low' | 'auto' } }> = [];
@@ -146,8 +146,8 @@ export async function classifyDocument(
     const imagesToSend = base64Images.slice(0, 2);
     messageContent.push(...formatImagesForOpenAI(imagesToSend));
 
-    // Call GPT
-    console.log('[GPT-CLASSIFY] Calling GPT for classification...');
+    // Call PCS AI
+    console.log('[PCS-AI-CLASSIFY] Calling PCS AI for classification...');
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
       max_completion_tokens: 500,
@@ -164,13 +164,13 @@ export async function classifyDocument(
     });
 
     const rawResponse = response.choices[0]?.message?.content || '';
-    console.log('[GPT-CLASSIFY] Raw response length:', rawResponse.length);
+    console.log('[PCS-AI-CLASSIFY] Raw response length:', rawResponse.length);
 
     if (!rawResponse || rawResponse.length === 0) {
       return {
         success: false,
         result: null,
-        error: 'GPT returned empty response'
+        error: 'PCS AI returned empty response'
       };
     }
 
@@ -194,7 +194,7 @@ export async function classifyDocument(
       result.confidence = 0.5;
     }
 
-    console.log('[GPT-CLASSIFY] Classification result:', {
+    console.log('[PCS-AI-CLASSIFY] Classification result:', {
       type: result.document_type,
       confidence: result.confidence,
       vendor: result.vendor_name,
@@ -207,7 +207,7 @@ export async function classifyDocument(
     };
 
   } catch (error: any) {
-    console.error('[GPT-CLASSIFY] Error:', error.message);
+    console.error('[PCS-AI-CLASSIFY] Error:', error.message);
     return {
       success: false,
       result: null,

@@ -3,7 +3,7 @@ import Toast from '../components/Toast.jsx';
 
 /**
  * Page for viewing non-invoice documents (credit memos, statements, etc.)
- * These documents are routed here by the GPT document classifier.
+ * These documents are routed here by the PCS AI document classifier.
  */
 export default function OtherDocumentsPage({ searchQuery = '' }) {
   const [documents, setDocuments] = useState([]);

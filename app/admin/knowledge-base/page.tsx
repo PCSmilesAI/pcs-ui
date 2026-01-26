@@ -64,7 +64,7 @@ export default function KnowledgeBasePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [newVendorName, setNewVendorName] = useState('');
 
-  // GPT connection status
+  // PCS AI connection status
   const [gptStatus, setGptStatus] = useState<{ connected: boolean; model: string } | null>(null);
 
   useEffect(() => {
@@ -372,11 +372,11 @@ export default function KnowledgeBasePage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Knowledge Base</h1>
           <p className="text-gray-600 mt-2">
-            Configure GPT-5 nano parsing prompts for each vendor
+            Configure PCS AI parsing prompts for each vendor
           </p>
         </div>
         <div className="flex items-center gap-4">
-          {/* GPT Status Indicator */}
+          {/* PCS AI Status Indicator */}
           <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
             gptStatus?.connected 
               ? 'bg-green-100 text-green-800' 
@@ -385,7 +385,7 @@ export default function KnowledgeBasePage() {
             <span className={`w-2 h-2 rounded-full ${
               gptStatus?.connected ? 'bg-green-500' : 'bg-red-500'
             }`} />
-            {gptStatus?.connected ? `GPT Connected (${gptStatus.model})` : 'GPT Disconnected'}
+            {gptStatus?.connected ? `PCS AI Connected (${gptStatus.model})` : 'PCS AI Disconnected'}
           </div>
           <button
             onClick={fetchData}
@@ -491,7 +491,7 @@ export default function KnowledgeBasePage() {
                   <div>
                     <h2 className="text-lg font-semibold" style={{ color: '#357ab2' }}>Training Prompt</h2>
                     <p className="text-sm" style={{ color: '#5a9fd4' }}>
-                      Sent to GPT when admin corrections are made
+                      Sent to PCS AI when admin corrections are made
                     </p>
                   </div>
                   <button
@@ -799,9 +799,9 @@ export default function KnowledgeBasePage() {
             <div className="mt-6 bg-white rounded-lg shadow p-6 border-l-4" style={{ borderLeftColor: '#357ab2' }}>
               <h2 className="text-lg font-semibold text-gray-900 mb-3">How the AI Training System Works</h2>
               <ul className="text-sm text-gray-600 space-y-2">
-                <li><strong className="text-gray-800">Knowledge Base Prompts:</strong> Each vendor has a master prompt that GPT-5 nano uses when parsing their invoices</li>
-                <li><strong className="text-gray-800">Historical Examples:</strong> When parsing, GPT receives up to 5 recent correctly-parsed invoices as reference examples</li>
-                <li><strong className="text-gray-800">Automatic Learning:</strong> Admin corrections trigger GPT to analyze parsing failures and update the master prompt</li>
+                <li><strong className="text-gray-800">Knowledge Base Prompts:</strong> Each vendor has a master prompt that PCS AI uses when parsing their invoices</li>
+                <li><strong className="text-gray-800">Historical Examples:</strong> When parsing, PCS AI receives up to 5 recent correctly-parsed invoices as reference examples</li>
+                <li><strong className="text-gray-800">Automatic Learning:</strong> Admin corrections trigger PCS AI to analyze parsing failures and update the master prompt</li>
                 <li><strong className="text-gray-800">Continuous Improvement:</strong> Corrected invoices are added to training history, improving future accuracy</li>
               </ul>
             </div>

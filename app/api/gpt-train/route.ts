@@ -97,13 +97,13 @@ export async function POST(request: NextRequest) {
     // Resolve the PDF path
     const resolvedPath = resolvePdfPath(pdfPath);
     if (!resolvedPath) {
-      console.warn('[GPT-TRAIN] PDF not found, training without image:', pdfPath);
+      console.warn('[PCS-AI-TRAIN] PDF not found, training without image:', pdfPath);
       // We'll still try to train, but without the PDF images
       // This allows training from corrections even if PDF isn't available
     }
 
-    console.log('[GPT-TRAIN] Training knowledge base for:', vendorName);
-    console.log('[GPT-TRAIN] Changes:', {
+    console.log('[PCS-AI-TRAIN] Training knowledge base for:', vendorName);
+    console.log('[PCS-AI-TRAIN] Changes:', {
       original: originalParsed,
       corrected: correctedData,
       hasComment: !!userComment
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!result.success) {
-      console.error('[GPT-TRAIN] Training failed:', result.error);
+      console.error('[PCS-AI-TRAIN] Training failed:', result.error);
       return NextResponse.json(
         { 
           error: result.error || 'Training failed',
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[GPT-TRAIN] Knowledge base updated successfully:', {
+    console.log('[PCS-AI-TRAIN] Knowledge base updated successfully:', {
       vendor: result.vendorName,
       version: result.version
     });
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[GPT-TRAIN] Error:', error);
+    console.error('[PCS-AI-TRAIN] Error:', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }
