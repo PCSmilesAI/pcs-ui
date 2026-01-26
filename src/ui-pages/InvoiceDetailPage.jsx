@@ -2692,8 +2692,6 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                               <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '4px' }}>
                                 Class (Location)
                               </label>
-                              {/* Debug: log class data */}
-                              {console.log('[GL_LINE_EDIT] Class field data:', { index, classId: cat.classId, className: cat.className, catId: cat.id })}
                               <SearchableSelect
                                 key={`class-${index}-${cat.id || index}`}
                                 options={qboClasses}

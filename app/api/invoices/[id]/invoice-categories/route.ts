@@ -159,8 +159,9 @@ export async function GET(
         
         if (suggestedCategories && suggestedCategories.length > 0) {
           const suggested = suggestedCategories[0];
-          // Use class from vendor mapping, or fall back to parsed location
-          const finalClass = suggested.className || classFromLocation;
+          // ALWAYS use class from parsed location (office_id/office_location)
+          // This ensures the class reflects the actual invoice location
+          const finalClass = classFromLocation || suggested.className || '';
           
           console.log('[GL_LINES] Auto-categorized from vendor mapping', {
             invoiceId,
@@ -169,6 +170,7 @@ export async function GET(
             classFromVendor: suggested.className,
             classFromLocation,
             finalClass,
+            parsedLocation,
             source: suggested.source
           });
           

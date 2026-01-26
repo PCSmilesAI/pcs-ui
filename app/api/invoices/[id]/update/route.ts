@@ -193,33 +193,41 @@ export async function POST(
       `).run(actualInvoiceId, user.email, JSON.stringify(directUpdates));
     }
 
-    // If amount was changed, reset all category allocations to $0
+    // If amount was changed, reset all category AMOUNTS to $0 (but preserve class assignments)
     if (amount_cents !== undefined) {
-      const resetResult = db.prepare(`
-        UPDATE invoice_categories 
-        SET amount_cents = 0 
-        WHERE invoice_id = ?
-      `).run(actualInvoiceId);
+      // Check if there are any existing GL Lines
+      const existingLines = db.prepare(`
+        SELECT COUNT(*) as count FROM invoice_categories WHERE invoice_id = ?
+      `).get(actualInvoiceId) as { count: number };
+      
+      if (existingLines.count > 0) {
+        // Only reset amounts, preserve class_id and class_name
+        const resetResult = db.prepare(`
+          UPDATE invoice_categories 
+          SET amount_cents = 0 
+          WHERE invoice_id = ?
+        `).run(actualInvoiceId);
 
-      // Log the allocation reset
-      db.prepare(`
-        INSERT INTO invoice_events (invoice_id, action, actor_email, payload_json)
-        VALUES (?, 'ALLOCATIONS_RESET', ?, ?)
-      `).run(
-        actualInvoiceId,
-        user.email,
-        JSON.stringify({
-          reason: 'Invoice amount changed',
-          new_amount_cents: amount_cents,
-          categories_reset: resetResult.changes
-        })
-      );
+        // Log the allocation reset
+        db.prepare(`
+          INSERT INTO invoice_events (invoice_id, action, actor_email, payload_json)
+          VALUES (?, 'ALLOCATIONS_RESET', ?, ?)
+        `).run(
+          actualInvoiceId,
+          user.email,
+          JSON.stringify({
+            reason: 'Invoice amount changed',
+            new_amount_cents: amount_cents,
+            categories_reset: resetResult.changes
+          })
+        );
 
-      console.log('[API][INVOICES][UPDATE]', 'allocations_reset', {
-        invoiceId: actualInvoiceId,
-        categoriesReset: resetResult.changes,
-        newAmountCents: amount_cents
-      });
+        console.log('[API][INVOICES][UPDATE]', 'allocations_reset', {
+          invoiceId: actualInvoiceId,
+          categoriesReset: resetResult.changes,
+          newAmountCents: amount_cents
+        });
+      }
     }
 
     // Fetch updated invoice (use actual database ID)
