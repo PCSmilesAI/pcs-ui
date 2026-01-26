@@ -68,6 +68,18 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
 
   const dismissToast = useCallback(() => setToast(null), []);
 
+  // Extract just the city/location name from class names like "General-Columbia" -> "Columbia"
+  const extractLocationFromClass = (className) => {
+    if (!className) return '';
+    // Handle formats like "General-Columbia", "Corp-Executive", "Div-Marketing"
+    const parts = className.split('-');
+    if (parts.length >= 2) {
+      // Return everything after the first dash (handles "General-Columbia" -> "Columbia")
+      return parts.slice(1).join('-');
+    }
+    return className;
+  };
+
   const transformInvoice = useCallback((invoice) => {
     const vendorName = getDisplayVendorName(invoice.vendor_name || invoice.vendor);
     const rawInvoiceDate = invoice.invoice_date || null;
@@ -76,9 +88,9 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     const locations = invoice.locations || [];
     // Fallback to legacy office fields if no GL Line locations
     const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
-    // Display locations from GL Lines, fallback to legacy office
+    // Display locations from GL Lines (extract just city name), fallback to legacy office
     const locationDisplay = locations.length > 0 
-      ? locations.join(', ') 
+      ? locations.map(loc => extractLocationFromClass(loc)).join(', ') 
       : (officeRaw || 'Unknown');
     const formatDate = (dateString) => {
       if (!dateString) return 'N/A';
