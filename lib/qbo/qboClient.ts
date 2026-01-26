@@ -509,13 +509,38 @@ export class QBOClient {
 
   async getAllVendors(): Promise<Array<{ id: string; name: string; displayName: string }>> {
     try {
-      const response = await this.query("SELECT Id, DisplayName FROM Vendor WHERE Active = true");
-      const vendors = response.QueryResponse?.Vendor || [];
-      return (vendors || []).map((v: any) => ({
-        id: v.Id,
-        name: v.DisplayName,
-        displayName: v.DisplayName,
-      }));
+      // QBO API returns max 100 results by default, so we need to paginate
+      const allVendors: Array<{ id: string; name: string; displayName: string }> = [];
+      let startPosition = 1;
+      const maxResults = 1000; // Request more at once
+      let hasMore = true;
+      
+      while (hasMore) {
+        const response = await this.query(
+          `SELECT Id, DisplayName FROM Vendor WHERE Active = true STARTPOSITION ${startPosition} MAXRESULTS ${maxResults}`
+        );
+        const vendors = response.QueryResponse?.Vendor || [];
+        
+        if (vendors.length === 0) {
+          hasMore = false;
+        } else {
+          allVendors.push(...vendors.map((v: any) => ({
+            id: v.Id,
+            name: v.DisplayName,
+            displayName: v.DisplayName,
+          })));
+          
+          // If we got fewer than maxResults, we've reached the end
+          if (vendors.length < maxResults) {
+            hasMore = false;
+          } else {
+            startPosition += maxResults;
+          }
+        }
+      }
+      
+      console.log(`[QBO] Loaded ${allVendors.length} vendors`);
+      return allVendors;
     } catch (error) {
       console.error('❌ Error getting all vendors:', error);
       return [];
