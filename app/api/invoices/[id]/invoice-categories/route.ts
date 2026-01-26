@@ -267,6 +267,9 @@ export async function POST(
     const body = await req.json();
     const { categories } = body as { categories: CategoryInput[] };
 
+    // Log received categories for debugging
+    console.log('[GL_LINES] Received categories from frontend:', JSON.stringify(categories, null, 2));
+
     if (!Array.isArray(categories)) {
       return NextResponse.json(
         { error: 'Categories must be an array' },
@@ -371,6 +374,20 @@ export async function POST(
       }
 
       const recordId = uuidv4();
+      
+      // Log what we're saving for debugging
+      console.log('[GL_LINES] Saving category:', {
+        invoiceId,
+        recordId,
+        categoryId,
+        categoryName,
+        classId: cat.classId || null,
+        className: cat.className || null,
+        description: cat.description || null,
+        amountCents,
+        sequence,
+        source: cat.source || 'manual'
+      });
       
       insertStmt.run(
         recordId,
