@@ -78,10 +78,11 @@ export async function GET(
 
     const db = getDatabase();
     
-    // Get invoice to fetch total amount
+    // Get invoice to fetch total amount and location for class mapping
     const invoice = db
       .prepare(
-        `SELECT id, invoice_number, amount_cents, total, invoice_total, vendor_name
+        `SELECT id, invoice_number, amount_cents, total, invoice_total, vendor_name, 
+                office_id, office_location, office
          FROM invoices 
          WHERE id = ?`
       )
