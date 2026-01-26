@@ -385,7 +385,7 @@ export default function KnowledgeBasePage() {
             <span className={`w-2 h-2 rounded-full ${
               gptStatus?.connected ? 'bg-green-500' : 'bg-red-500'
             }`} />
-            {gptStatus?.connected ? `PCS AI Connected (${gptStatus.model})` : 'PCS AI Disconnected'}
+            {gptStatus?.connected ? 'PCS AI Connected (GPT 5 Nano)' : 'PCS AI Disconnected'}
           </div>
           <button
             onClick={fetchData}
