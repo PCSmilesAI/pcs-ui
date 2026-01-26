@@ -2399,7 +2399,29 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                         <span style={{ fontSize: '14px', color: '#2d3748' }}>{paymentAmount}</span>
                       )}
                     </td>
-                    <td style={{ ...cellStyle, fontWeight: '600', color: statusMeta.fg }}>{statusMeta.label}</td>
+                    <td style={{ ...cellStyle, fontWeight: '600', color: statusMeta.fg }}>
+                      {statusValue === 'paid' || statusValue === 'completed' ? (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ color: '#065f46' }}>Completed</span>
+                          {invoice?.qbo_bill_id && (
+                            <a
+                              href={`https://app.qbo.intuit.com/app/bill?txnId=${invoice.qbo_bill_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color: '#357ab2',
+                                textDecoration: 'underline',
+                                fontWeight: '500',
+                              }}
+                            >
+                              View Receipt
+                            </a>
+                          )}
+                        </span>
+                      ) : (
+                        statusMeta.label
+                      )}
+                    </td>
                   </tr>
                 )}
               </tbody>
