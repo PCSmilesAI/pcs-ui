@@ -1,7 +1,7 @@
 /**
  * Bulk Parse Library
  * 
- * Shared logic for bulk reparsing operations using GPT-5 nano.
+ * Shared logic for bulk reparsing operations using PCS AI.
  * Used by both CLI script and API endpoints.
  */
 

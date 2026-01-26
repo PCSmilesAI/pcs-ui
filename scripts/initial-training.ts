@@ -1,7 +1,7 @@
 #!/usr/bin/env npx ts-node
 
 /**
- * Initial Training Script for GPT-4o Knowledge Base System
+ * Initial Training Script for PCS AI Knowledge Base System
  * 
  * This script generates initial knowledge base prompts for each vendor
  * by analyzing sample invoice PDFs and existing parsed JSON data.
@@ -206,7 +206,7 @@ function formatImagesForOpenAI(base64Images: string[]): Array<{
 }
 
 /**
- * Generate knowledge base prompt for a vendor using GPT-4o
+ * Generate knowledge base prompt for a vendor using PCS AI
  */
 async function generateKnowledgeBase(vendor: VendorInvoices): Promise<TrainingResult> {
   console.log(`\n📚 Training knowledge base for: ${vendor.vendorName}`);
@@ -253,7 +253,7 @@ ${JSON.stringify(sampleJsons.slice(0, 2), null, 2)}` : ''}
 
 INVOICE IMAGES ARE ATTACHED (if available).
 
-Analyze these invoices and create a detailed knowledge base prompt that will help GPT-4o accurately parse future invoices from this vendor. Your response should be a complete prompt that includes:
+Analyze these invoices and create a detailed knowledge base prompt that will help PCS AI accurately parse future invoices from this vendor. Your response should be a complete prompt that includes:
 
 1. VENDOR IDENTIFICATION
    - How to identify this is a ${vendor.vendorName} invoice
@@ -279,7 +279,7 @@ Analyze these invoices and create a detailed knowledge base prompt that will hel
 Return ONLY the knowledge base prompt text. Do not include any explanation or preamble.
 Start with: "You are parsing invoices from ${vendor.vendorName}."`;
 
-    console.log(`   Calling GPT-4o with ${allImages.length} image(s)...`);
+    console.log(`   Calling PCS AI with ${allImages.length} image(s)...`);
 
     const messages: any[] = [
       {
@@ -304,7 +304,7 @@ Start with: "You are parsing invoices from ${vendor.vendorName}."`;
       return {
         vendorName: vendor.vendorName,
         success: false,
-        error: 'GPT returned empty or too short response',
+        error: 'PCS AI returned empty or too short response',
         pdfCount: vendor.pdfPaths.length,
         jsonCount: vendor.jsonPaths.length
       };
@@ -365,7 +365,7 @@ async function saveKnowledgeBase(vendorName: string, knowledgePrompt: string): P
  * Main function
  */
 async function main() {
-  console.log('🚀 GPT-4o Knowledge Base Initial Training Script');
+  console.log('🚀 PCS AI Knowledge Base Initial Training Script');
   console.log('=' .repeat(50));
 
   // Check for OpenAI API key

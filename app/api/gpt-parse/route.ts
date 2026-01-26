@@ -62,7 +62,7 @@ function resolvePdfPath(pdfPath: string): string | null {
 
 /**
  * POST /api/gpt-parse
- * Parse an invoice using GPT-4o vision
+ * Parse an invoice using PCS AI vision
  */
 export async function POST(request: NextRequest) {
   try {
@@ -85,9 +85,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[GPT-PARSE] Parsing invoice:', resolvedPath);
+    console.log('[PCS-AI-PARSE] Parsing invoice:', resolvedPath);
 
-    // Parse with GPT
+    // Parse with PCS AI
     const result = await parseInvoiceWithGPT(resolvedPath, vendorHint);
 
     if (!result.success) {
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[GPT-PARSE] Error:', error);
+    console.error('[PCS-AI-PARSE] Error:', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }

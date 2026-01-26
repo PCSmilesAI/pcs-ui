@@ -59,7 +59,7 @@ async function withRetry<T>(
       if (attempt < maxRetries) {
         // Exponential backoff with jitter
         const delay = baseDelayMs * Math.pow(2, attempt - 1) + Math.random() * 1000;
-        console.log(`[GPT] Retry ${attempt}/${maxRetries} after ${Math.round(delay)}ms - Error: ${error.message}`);
+        console.log(`[PCS-AI] Retry ${attempt}/${maxRetries} after ${Math.round(delay)}ms - Error: ${error.message}`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
@@ -77,7 +77,7 @@ let _vendorsCache: { data: string[]; timestamp: number } | null = null;
 const VENDORS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Get list of QBO vendor names for GPT context
+ * Get list of QBO vendor names for PCS AI context
  */
 async function getQBOVendorNames(): Promise<string[]> {
   // Check cache first
@@ -97,17 +97,17 @@ async function getQBOVendorNames(): Promise<string[]> {
       timestamp: Date.now()
     };
     
-    console.log(`[GPT] Loaded ${vendorNames.length} QBO vendors for parsing context`);
+    console.log(`[PCS-AI] Loaded ${vendorNames.length} QBO vendors for parsing context`);
     return vendorNames;
   } catch (error: any) {
-    console.warn('[GPT] Failed to fetch QBO vendors:', error.message);
+    console.warn('[PCS-AI] Failed to fetch QBO vendors:', error.message);
     // Return cached data if available, otherwise empty array
     return _vendorsCache?.data || [];
   }
 }
 
 /**
- * Get list of PCS location names (from QBO classes) for GPT context
+ * Get list of PCS location names (from QBO classes) for PCS AI context
  */
 function getPCSLocationNames(): string[] {
   const offices = getDentalOffices();
@@ -144,7 +144,7 @@ function formatQBOClassesForPrompt(): string {
 async function buildMasterParsingPrompt(): Promise<string | null> {
   const masterPrompt = getMasterParsingPrompt();
   if (!masterPrompt) {
-    console.log('[GPT] No master parsing prompt found in database');
+    console.log('[PCS-AI] No master parsing prompt found in database');
     return null;
   }
 
@@ -222,7 +222,7 @@ export async function detectVendor(base64Images: string[]): Promise<string> {
     const vendorName = response.choices[0]?.message?.content?.trim() || 'Unknown';
     return vendorName;
   } catch (error: any) {
-    console.error('[GPT] Vendor detection error:', error.message);
+    console.error('[PCS-AI] Vendor detection error:', error.message);
     return 'Unknown';
   }
 }
@@ -262,7 +262,7 @@ IMPORTANT RULES:
 `;
 
 /**
- * Parse an invoice PDF using GPT-4o vision
+ * Parse an invoice PDF using PCS AI vision
  */
 export async function parseInvoiceWithGPT(
   pdfPath: string,
@@ -270,16 +270,16 @@ export async function parseInvoiceWithGPT(
 ): Promise<ParseResult> {
   try {
     // Convert PDF to images
-    console.log('[GPT] Converting PDF to images:', pdfPath);
+    console.log('[PCS-AI] Converting PDF to images:', pdfPath);
     const base64Images = await convertPdfToBase64Images(pdfPath);
-    console.log(`[GPT] Converted ${base64Images.length} page(s)`);
+    console.log(`[PCS-AI] Converted ${base64Images.length} page(s)`);
 
     // Detect vendor if not provided
     let vendorName = vendorNameHint;
     if (!vendorName || vendorName === 'Unknown') {
-      console.log('[GPT] Detecting vendor...');
+      console.log('[PCS-AI] Detecting vendor...');
       vendorName = await detectVendor(base64Images);
-      console.log('[GPT] Detected vendor:', vendorName);
+      console.log('[PCS-AI] Detected vendor:', vendorName);
     }
 
     // Build the system prompt: Master Prompt + Vendor KB + Base Prompt
@@ -293,7 +293,7 @@ export async function parseInvoiceWithGPT(
     if (masterPrompt) {
       systemPrompt = masterPrompt + '\n\n' + systemPrompt;
       masterPromptUsed = true;
-      console.log('[GPT] Using master parsing prompt with QBO data');
+      console.log('[PCS-AI] Using master parsing prompt with QBO data');
     }
 
     if (vendorName && vendorName !== 'Unknown') {
@@ -304,9 +304,9 @@ export async function parseInvoiceWithGPT(
         systemPrompt = (masterPrompt ? masterPrompt + '\n\n' : '') + 
                        kb.knowledge_prompt + '\n\n' + BASE_PARSING_PROMPT;
         knowledgeBaseUsed = true;
-        console.log(`[GPT] Using knowledge base for ${vendorName} (v${kb.version})`);
+        console.log(`[PCS-AI] Using knowledge base for ${vendorName} (v${kb.version})`);
       } else {
-        console.log(`[GPT] No knowledge base found for ${vendorName}, using default prompt`);
+        console.log(`[PCS-AI] No knowledge base found for ${vendorName}, using default prompt`);
       }
       
       // Load historical examples for few-shot learning
@@ -314,9 +314,9 @@ export async function parseInvoiceWithGPT(
       if (historicalExamples.length > 0) {
         const historyPrompt = formatHistoryForPrompt(historicalExamples);
         systemPrompt += historyPrompt;
-        console.log(`[GPT] Including ${historicalExamples.length} historical examples for ${vendorName}`);
+        console.log(`[PCS-AI] Including ${historicalExamples.length} historical examples for ${vendorName}`);
       } else {
-        console.log(`[GPT] No historical examples available for ${vendorName}`);
+        console.log(`[PCS-AI] No historical examples available for ${vendorName}`);
       }
     }
 
@@ -354,13 +354,13 @@ export async function parseInvoiceWithGPT(
     // Add new invoice images (uses configurable detail level)
     messageContent.push(...formatImagesForOpenAI(base64Images, PARSING_CONFIG.imageDetailLevel));
 
-    // Call GPT with images (with retry logic for robustness)
-    console.log('[GPT] Calling GPT for parsing...');
+    // Call PCS AI with images (with retry logic for robustness)
+    console.log('[PCS-AI] Calling PCS AI for parsing...');
     const response = await withRetry(async () => {
       return await getOpenAIClient().chat.completions.create({
         model: GPT_MODEL,
         max_completion_tokens: PARSING_CONFIG.maxCompletionTokens,
-        // Note: GPT-5 nano only supports default temperature (1), so we don't set it
+        // Note: PCS AI only supports default temperature (1), so we don't set it
         messages: [
           {
             role: 'system',
@@ -375,7 +375,7 @@ export async function parseInvoiceWithGPT(
     });
 
     const rawResponse = response.choices[0]?.message?.content || '';
-    console.log('[GPT] Raw response length:', rawResponse.length);
+    console.log('[PCS-AI] Raw response length:', rawResponse.length);
 
     // Parse the JSON response
     let parsedData: ParsedInvoice;
@@ -405,17 +405,17 @@ export async function parseInvoiceWithGPT(
       };
 
     } catch (parseError: any) {
-      console.error('[GPT] Failed to parse JSON response:', parseError.message);
+      console.error('[PCS-AI] Failed to parse JSON response:', parseError.message);
       return {
         success: false,
         data: null,
-        error: `Failed to parse GPT response as JSON: ${parseError.message}`,
+        error: `Failed to parse PCS AI response as JSON: ${parseError.message}`,
         vendorDetected: vendorName || undefined,
         knowledgeBaseUsed
       };
     }
 
-    console.log('[GPT] Successfully parsed invoice:', {
+    console.log('[PCS-AI] Successfully parsed invoice:', {
       invoice_number: parsedData.invoice_number,
       vendor: parsedData.vendor_name,
       total: parsedData.total,
@@ -430,7 +430,7 @@ export async function parseInvoiceWithGPT(
     };
 
   } catch (error: any) {
-    console.error('[GPT] Invoice parsing error:', error.message);
+    console.error('[PCS-AI] Invoice parsing error:', error.message);
     return {
       success: false,
       data: null,
@@ -463,8 +463,8 @@ export interface TrainingResult {
  * 
  * This function:
  * 1. Loads historical examples from the vendor's history
- * 2. Shows GPT the incorrectly parsed invoice alongside correct historical examples
- * 3. Asks GPT to analyze WHY parsing failed by comparing patterns
+ * 2. Shows PCS AI the incorrectly parsed invoice alongside correct historical examples
+ * 3. Asks PCS AI to analyze WHY parsing failed by comparing patterns
  * 4. Updates the master prompt to prevent similar errors
  * 5. Adds the corrected invoice to the history database
  */
@@ -477,7 +477,7 @@ export async function trainFromCorrection(input: TrainingInput): Promise<Trainin
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _user_comment, ...cleanCorrectedData } = correctedData;
     
-    console.log('[GPT-TRAIN] User comment provided:', userComment ? `"${userComment}"` : 'none');
+    console.log('[PCS-AI-TRAIN] User comment provided:', userComment ? `"${userComment}"` : 'none');
 
     // Get the training prompt
     const trainingPromptRecord = getTrainingPrompt();
@@ -493,12 +493,12 @@ export async function trainFromCorrection(input: TrainingInput): Promise<Trainin
     const currentKb = getOrCreateKnowledgeBase(vendorName);
 
     // Convert PDF to images
-    console.log('[GPT-TRAIN] Converting PDF for training:', pdfPath);
+    console.log('[PCS-AI-TRAIN] Converting PDF for training:', pdfPath);
     const base64Images = await convertPdfToBase64Images(pdfPath);
 
-    // Load historical examples to show GPT what correct parsing looks like
+    // Load historical examples to show PCS AI what correct parsing looks like
     const historicalExamples = getRecentHistory(vendorName, MAX_HISTORY_EXAMPLES);
-    console.log(`[GPT-TRAIN] Loaded ${historicalExamples.length} historical examples for analysis`);
+    console.log(`[PCS-AI-TRAIN] Loaded ${historicalExamples.length} historical examples for analysis`);
 
     // Build enhanced training prompt with historical analysis
     let trainingPrompt = '';
@@ -579,12 +579,12 @@ ANALYSIS INSTRUCTIONS:
     messageContent.push({ type: 'text', text: '\n--- INCORRECTLY PARSED INVOICE (analyze this) ---' });
     messageContent.push(...formatImagesForOpenAI(base64Images, PARSING_CONFIG.imageDetailLevel));
 
-    // Call GPT to generate updated knowledge base
-    console.log('[GPT-TRAIN] Calling GPT for knowledge base update with historical analysis...');
+    // Call PCS AI to generate updated knowledge base
+    console.log('[PCS-AI-TRAIN] Calling PCS AI for knowledge base update with historical analysis...');
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
       max_completion_tokens: 3000,
-      // Note: GPT-5 nano only supports default temperature
+      // Note: PCS AI only supports default temperature
       messages: [
         {
           role: 'user',
@@ -598,18 +598,18 @@ ANALYSIS INSTRUCTIONS:
     if (!updatedPrompt || updatedPrompt.length < 50) {
       return {
         success: false,
-        error: 'GPT returned empty or too short response',
+        error: 'PCS AI returned empty or too short response',
         vendorName
       };
     }
 
     // Update the knowledge base in the database
-    console.log('[GPT-TRAIN] Updating knowledge base in database...');
+    console.log('[PCS-AI-TRAIN] Updating knowledge base in database...');
     const updated = upsertKnowledgeBase(vendorName, updatedPrompt, true);
 
     // Add the corrected invoice to history so future parsing can learn from it
     const invoiceNumber = correctedData.invoice_number || originalParsed.invoice_number || null;
-    console.log('[GPT-TRAIN] Adding corrected invoice to history...');
+    console.log('[PCS-AI-TRAIN] Adding corrected invoice to history...');
     addToHistory(
       vendorName,
       invoiceNumber,
@@ -626,7 +626,7 @@ ANALYSIS INSTRUCTIONS:
       true // was_corrected = true
     );
 
-    console.log(`[GPT-TRAIN] Knowledge base updated for ${vendorName}, version ${updated.version}`);
+    console.log(`[PCS-AI-TRAIN] Knowledge base updated for ${vendorName}, version ${updated.version}`);
 
     return {
       success: true,
@@ -636,7 +636,7 @@ ANALYSIS INSTRUCTIONS:
     };
 
   } catch (error: any) {
-    console.error('[GPT-TRAIN] Training error:', error.message);
+    console.error('[PCS-AI-TRAIN] Training error:', error.message);
     return {
       success: false,
       error: error.message,
@@ -672,7 +672,7 @@ export async function parseInvoiceFromImages(
     const masterPrompt = await buildMasterParsingPrompt();
     if (masterPrompt) {
       systemPrompt = masterPrompt + '\n\n' + systemPrompt;
-      console.log('[GPT] Using master parsing prompt with QBO data');
+      console.log('[PCS-AI] Using master parsing prompt with QBO data');
     }
 
     if (vendorName && vendorName !== 'Unknown') {
@@ -719,12 +719,12 @@ export async function parseInvoiceFromImages(
     
     messageContent.push(...formatImagesForOpenAI(base64Images, PARSING_CONFIG.imageDetailLevel));
 
-    // Call GPT (with retry logic)
+    // Call PCS AI (with retry logic)
     const response = await withRetry(async () => {
       return await getOpenAIClient().chat.completions.create({
         model: GPT_MODEL,
         max_completion_tokens: PARSING_CONFIG.maxCompletionTokens,
-        // Note: GPT-5 nano only supports default temperature
+        // Note: PCS AI only supports default temperature
         messages: [
           {
             role: 'system',
@@ -805,7 +805,7 @@ export async function comparePdfSimilarity(
 ): Promise<SimilarityResult> {
   try {
     // Convert both PDFs to images (first page only for speed)
-    console.log('[GPT-SIMILARITY] Comparing PDFs:', { reference: referencePdfPath, candidate: candidatePdfPath });
+    console.log('[PCS-AI-SIMILARITY] Comparing PDFs:', { reference: referencePdfPath, candidate: candidatePdfPath });
     
     const [refImages, candImages] = await Promise.all([
       convertPdfToBase64Images(referencePdfPath),
@@ -820,7 +820,7 @@ export async function comparePdfSimilarity(
       };
     }
 
-    // Send both first pages to GPT for comparison
+    // Send both first pages to PCS AI for comparison
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
       max_completion_tokens: 200,
@@ -845,7 +845,7 @@ export async function comparePdfSimilarity(
     });
 
     const rawResponse = response.choices[0]?.message?.content || '';
-    console.log('[GPT-SIMILARITY] Raw response:', rawResponse);
+    console.log('[PCS-AI-SIMILARITY] Raw response:', rawResponse);
 
     // Parse JSON response
     let jsonStr = rawResponse;
@@ -862,7 +862,7 @@ export async function comparePdfSimilarity(
     };
 
   } catch (error: any) {
-    console.error('[GPT-SIMILARITY] Error comparing PDFs:', error.message);
+    console.error('[PCS-AI-SIMILARITY] Error comparing PDFs:', error.message);
     return {
       similar: false,
       confidence: 0,
@@ -872,7 +872,7 @@ export async function comparePdfSimilarity(
 }
 
 /**
- * Test GPT connection
+ * Test PCS AI connection
  */
 export async function testGPTConnection(): Promise<{ connected: boolean; model: string; error?: string }> {
   try {

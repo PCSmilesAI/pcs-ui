@@ -171,11 +171,11 @@ export async function POST(
         });
       }
 
-      // Trigger GPT-5 nano knowledge base training with the correction
+      // Trigger PCS AI knowledge base training with the correction
       // This updates the vendor's parsing prompt to improve future accuracy
       const vendorName = updatedInvoice.vendor_name || originalInvoice.vendor_name || originalInvoice.parsed_vendor_name;
       if (vendorName && originalInvoice.pdf_path) {
-        console.log('[API][INVOICES][UPDATE]', 'triggering_gpt_training', { vendorName, invoiceId: actualInvoiceId });
+        console.log('[API][INVOICES][UPDATE]', 'triggering_pcs_ai_training', { vendorName, invoiceId: actualInvoiceId });
         
         // Build original parsed data from the invoice
         const originalParsed = {
@@ -219,14 +219,14 @@ export async function POST(
         }).then(async (trainRes) => {
           if (trainRes.ok) {
             const trainResult = await trainRes.json();
-            console.log('[API][INVOICES][UPDATE]', 'gpt_training_success', { 
+            console.log('[API][INVOICES][UPDATE]', 'pcs_ai_training_success', { 
               vendorName, 
               version: trainResult.version,
               invoiceId: actualInvoiceId 
             });
           } else {
             const errorText = await trainRes.text();
-            console.warn('[API][INVOICES][UPDATE]', 'gpt_training_failed', { 
+            console.warn('[API][INVOICES][UPDATE]', 'pcs_ai_training_failed', { 
               vendorName, 
               status: trainRes.status,
               error: errorText,
@@ -234,7 +234,7 @@ export async function POST(
             });
           }
         }).catch((trainErr) => {
-          console.warn('[API][INVOICES][UPDATE]', 'gpt_training_error', { 
+          console.warn('[API][INVOICES][UPDATE]', 'pcs_ai_training_error', { 
             vendorName, 
             error: trainErr.message,
             invoiceId: actualInvoiceId 

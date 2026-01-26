@@ -8,7 +8,7 @@ import { randomUUID } from 'crypto';
 import path from 'path';
 import fs from 'fs';
 
-// Import GPT parsing
+// Import PCS AI parsing
 import { parseInvoiceWithGPT, ParseResult } from '../../../../lib/gpt/parseInvoice';
 
 export const dynamic = 'force-dynamic';
@@ -76,10 +76,10 @@ function resolvePdfPath(pdfPath: string): string | null {
 /**
  * POST /api/invoices/gpt-ingest
  * 
- * Ingest an invoice PDF using GPT-4o for parsing.
+ * Ingest an invoice PDF using PCS AI for parsing.
  * This endpoint:
  * 1. Receives a PDF path
- * 2. Calls GPT-4o to parse the invoice
+ * 2. Calls PCS AI to parse the invoice
  * 3. Stores the parsed data in the database
  */
 export async function POST(req: NextRequest) {
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     // Check if invoice has been tombstoned
     if (isTombstoned(sourceFile)) {
-      console.log('[GPT-INGEST] Invoice tombstoned:', sourceFile);
+      console.log('[PCS_AI_INGEST] Invoice tombstoned:', sourceFile);
       return NextResponse.json(
         { ok: true, message: 'Invoice was previously rejected', skipped: true },
         { status: 200 }
@@ -133,16 +133,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log('[GPT-INGEST] Parsing invoice with GPT:', resolvedPdfPath);
+    console.log('[PCS_AI_INGEST] Parsing invoice with PCS AI:', resolvedPdfPath);
 
-    // Parse with GPT-4o
+    // Parse with PCS AI
     const parseResult: ParseResult = await parseInvoiceWithGPT(
       resolvedPdfPath,
       body.vendor_hint
     );
 
     if (!parseResult.success || !parseResult.data) {
-      console.error('[GPT-INGEST] GPT parsing failed:', parseResult.error);
+      console.error('[PCS_AI_INGEST] PCS AI parsing failed:', parseResult.error);
       
       // Still create the invoice record with failed status
       const id = randomUUID();
@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
         id, invoiceNumber, sourceFile, buildApiPdfPath(normalizedPdfFilename),
         'Unknown', 'Unknown',
         'incoming', JSON.stringify({}), 0,
-        'failed', parseResult.error || 'GPT parsing failed', 1
+        'failed', parseResult.error || 'PCS AI parsing failed', 1
       );
 
       return NextResponse.json({
@@ -250,7 +250,7 @@ export async function POST(req: NextRequest) {
     // Audit event
     db.prepare(`
       INSERT INTO invoice_events (invoice_id, action, payload_json)
-      VALUES (?, 'GPT_PARSED', ?)
+      VALUES (?, 'PCS_AI_PARSED', ?)
     `).run(id, JSON.stringify({
       vendor: vendor,
       amount_cents: amountCents,
@@ -278,15 +278,15 @@ export async function POST(req: NextRequest) {
         vendor
       );
       await storeInvoiceCategories(id, categories);
-      console.log('[GPT-INGEST] Auto-categorized invoice', {
+      console.log('[PCS_AI_INGEST] Auto-categorized invoice', {
         invoiceId: id,
         categories: categories.map(c => c.categoryName),
       });
     } catch (err: any) {
-      console.warn('[GPT-INGEST] Failed to auto-categorize:', err?.message);
+      console.warn('[PCS_AI_INGEST] Failed to auto-categorize:', err?.message);
     }
 
-    console.log('[GPT-INGEST] Invoice ingested successfully:', {
+    console.log('[PCS_AI_INGEST] Invoice ingested successfully:', {
       id,
       invoice_number: invoiceNumber,
       vendor: vendor,
@@ -317,7 +317,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (err: any) {
-    console.error('[GPT-INGEST] Error:', err?.message);
+    console.error('[PCS_AI_INGEST] Error:', err?.message);
     return NextResponse.json(
       { error: 'Ingestion failed', details: err?.message },
       { status: 500 }
@@ -327,7 +327,7 @@ export async function POST(req: NextRequest) {
 
 /**
  * GET /api/invoices/gpt-ingest
- * Health check for GPT ingestion
+ * Health check for PCS AI ingestion
  */
 export async function GET() {
   const hasApiKey = !!process.env.OPENAI_API_KEY;

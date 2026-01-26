@@ -408,7 +408,7 @@ export function runMigrations(): void {
     insertClinic.run(clinic.id, clinic.name, clinic.address, clinic.ship_to_reference, clinic.contact_name);
   }
 
-  // Create vendor_knowledge_bases table for GPT-4o parsing system
+  // Create vendor_knowledge_bases table for PCS AI parsing system
   db.exec(`
     CREATE TABLE IF NOT EXISTS vendor_knowledge_bases (
       id TEXT PRIMARY KEY,
