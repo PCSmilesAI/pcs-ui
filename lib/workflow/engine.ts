@@ -146,12 +146,25 @@ export function approveOffice(invoice: any, actor: Actor, threshold: number): vo
 
 export function approveAdmin(invoice: any, actor: Actor): void {
   invoice.approvals = (invoice.approvals && typeof invoice.approvals === 'object') ? invoice.approvals : {} as InvoiceApprovals;
+  const now = new Date().toISOString();
+  const normalizedEmail = normaliseEmail(actor.email);
+  
   invoice.approvals.admin = {
-    by: normaliseEmail(actor.email),
-    at: new Date().toISOString(),
+    by: normalizedEmail,
+    at: now,
   };
+  
+  // When admin approves directly, set both coded and approved with same credentials
+  // This handles the case where invoice is approved without needing manual corrections
+  if (!invoice.coded_at) {
+    invoice.coded_at = now;
+    invoice.coded_by_user_id = normalizedEmail;
+  }
+  invoice.approved_at = now;
+  invoice.approved_by_user_id = normalizedEmail;
+  
   invoice.status = 'to_be_paid';
-  logEngine('approveAdmin', { invoiceId: getInvoiceId(invoice), userEmail: normaliseEmail(actor.email) });
+  logEngine('approveAdmin', { invoiceId: getInvoiceId(invoice), userEmail: normalizedEmail });
 }
 
 export function markPaid(

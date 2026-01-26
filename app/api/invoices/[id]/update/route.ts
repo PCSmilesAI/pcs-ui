@@ -70,7 +70,7 @@ export async function POST(
     const actualInvoiceId = originalInvoice.id;
 
     const body = await req.json();
-    const { vendor_name, office_id, amount_cents, overrideLocks } = body;
+    const { vendor_name, office_id, amount_cents, invoice_number, invoice_date, due_date, overrideLocks } = body;
 
     // Validate types
     if (vendor_name !== undefined && typeof vendor_name !== 'string') {
@@ -82,19 +82,61 @@ export async function POST(
     if (amount_cents !== undefined && typeof amount_cents !== 'number') {
       return NextResponse.json({ error: 'amount_cents must be a number' }, { status: 400 });
     }
+    if (invoice_number !== undefined && typeof invoice_number !== 'string') {
+      return NextResponse.json({ error: 'invoice_number must be a string' }, { status: 400 });
+    }
+    if (invoice_date !== undefined && typeof invoice_date !== 'string') {
+      return NextResponse.json({ error: 'invoice_date must be a string' }, { status: 400 });
+    }
+    if (due_date !== undefined && typeof due_date !== 'string') {
+      return NextResponse.json({ error: 'due_date must be a string' }, { status: 400 });
+    }
 
-    // Build patch
+    // Build patch for correction fields (vendor, office, amount)
     const patch: Record<string, any> = {};
     if (vendor_name !== undefined) patch.vendor_name = vendor_name;
     if (office_id !== undefined) patch.office_id = office_id;
     if (amount_cents !== undefined) patch.amount_cents = amount_cents;
 
-    if (Object.keys(patch).length === 0) {
+    // Build direct update fields (invoice_number, dates)
+    const directUpdates: Record<string, any> = {};
+    if (invoice_number !== undefined) directUpdates.invoice_number = invoice_number;
+    if (invoice_date !== undefined) directUpdates.invoice_date = invoice_date;
+    if (due_date !== undefined) directUpdates.due_date = due_date;
+
+    if (Object.keys(patch).length === 0 && Object.keys(directUpdates).length === 0) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
     }
 
-    // Apply corrections to database (use actual database ID)
-    await applyCorrections(actualInvoiceId, user.email, patch, overrideLocks === true);
+    // Apply corrections to database for vendor/office/amount (use actual database ID)
+    if (Object.keys(patch).length > 0) {
+      await applyCorrections(actualInvoiceId, user.email, patch, overrideLocks === true);
+    }
+
+    // Apply direct updates for invoice_number, dates, and coded tracking
+    const now = new Date().toISOString();
+    const directUpdateFields = [
+      ...Object.keys(directUpdates).map(k => `${k} = ?`),
+      'coded_at = ?',
+      'coded_by_user_id = ?',
+      'updated_at = CURRENT_TIMESTAMP'
+    ].join(', ');
+    const directUpdateValues = [
+      ...Object.values(directUpdates),
+      now,
+      user.email
+    ];
+    
+    db.prepare(`UPDATE invoices SET ${directUpdateFields} WHERE id = ?`)
+      .run(...directUpdateValues, actualInvoiceId);
+    
+    // Log the direct updates as an event
+    if (Object.keys(directUpdates).length > 0) {
+      db.prepare(`
+        INSERT INTO invoice_events (invoice_id, action, actor_email, payload_json)
+        VALUES (?, 'DIRECT_UPDATE', ?, ?)
+      `).run(actualInvoiceId, user.email, JSON.stringify(directUpdates));
+    }
 
     // If amount was changed, reset all category allocations to $0
     if (amount_cents !== undefined) {
