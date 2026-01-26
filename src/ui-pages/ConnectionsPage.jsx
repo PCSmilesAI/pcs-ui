@@ -4,10 +4,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 export default function ConnectionsPage() {
   const [qboConnected, setQboConnected] = useState(false);
   const [qboLoading, setQboLoading] = useState(true);
-  const [stripeConnected, setStripeConnected] = useState(false);
-  const [stripeLoading, setStripeLoading] = useState(true);
   const [qboError, setQboError] = useState(null);
-  const [stripeError, setStripeError] = useState(null);
+  const [openaiConnected, setOpenaiConnected] = useState(false);
+  const [openaiLoading, setOpenaiLoading] = useState(true);
+  const [openaiError, setOpenaiError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
   // Check for success message from URL params
@@ -40,27 +40,30 @@ export default function ConnectionsPage() {
     }
   }, []);
 
-  // Check Stripe connection status
-  const checkStripeStatus = useCallback(async () => {
+  // Check OpenAI/PCS AI connection status
+  const checkOpenAIStatus = useCallback(async () => {
     try {
-      setStripeLoading(true);
-      setStripeError(null);
-      const response = await fetch('/api/stripe/status');
+      setOpenaiLoading(true);
+      setOpenaiError(null);
+      const response = await fetch('/api/gpt-parse');
       const data = await response.json();
-      setStripeConnected(!!data.connected);
+      setOpenaiConnected(data.status === 'ok' && data.apiKeyConfigured);
+      if (data.error) {
+        setOpenaiError(data.error);
+      }
     } catch (statusError) {
-      console.error('❌ Failed to check Stripe status:', statusError);
-      setStripeConnected(false);
-      setStripeError(statusError.message || 'Failed to check Stripe status');
+      console.error('Failed to check PCS AI status:', statusError);
+      setOpenaiConnected(false);
+      setOpenaiError(statusError.message || 'Failed to check PCS AI status');
     } finally {
-      setStripeLoading(false);
+      setOpenaiLoading(false);
     }
   }, []);
 
   useEffect(() => {
     checkQboStatus();
-    checkStripeStatus();
-  }, [checkQboStatus, checkStripeStatus]);
+    checkOpenAIStatus();
+  }, [checkQboStatus, checkOpenAIStatus]);
 
   const cardStyle = {
     backgroundColor: '#ffffff',
@@ -138,7 +141,7 @@ export default function ConnectionsPage() {
       <div style={cardStyle}>
         <h1 style={{ ...sectionTitleStyle, marginBottom: '24px' }}>Connections</h1>
         <p style={{ color: '#6b7280', marginBottom: '32px' }}>
-          Manage your API connections for QuickBooks and Stripe integrations.
+          Manage your API connections for QuickBooks and PCS AI integrations.
         </p>
 
         {/* Success Message */}
@@ -188,36 +191,34 @@ export default function ConnectionsPage() {
           {qboError && <p style={errorStyle}>Error: {qboError}</p>}
         </div>
 
-        {/* Stripe Connection Status */}
-        <div style={statusCardStyle(stripeConnected)}>
+        {/* PCS AI (OpenAI) Connection Status */}
+        <div style={statusCardStyle(openaiConnected)}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={statusIndicatorStyle(stripeConnected)}></span>
-            <h3 style={statusTextStyle(stripeConnected)}>Stripe Payments</h3>
+            <span style={statusIndicatorStyle(openaiConnected)}></span>
+            <h3 style={statusTextStyle(openaiConnected)}>PCS AI (GPT 5 Nano)</h3>
           </div>
-          {stripeLoading ? (
-            <p style={loadingStyle}>Checking Stripe connection...</p>
+          {openaiLoading ? (
+            <p style={loadingStyle}>Checking PCS AI connection...</p>
           ) : (
             <>
-              <p style={statusSubtextStyle(stripeConnected)}>
-                {stripeConnected
-                  ? 'Connected successfully. Payment processing and webhook handling enabled.'
-                  : 'Not connected. Connect to enable payment processing and automated invoice payments.'}
+              <p style={statusSubtextStyle(openaiConnected)}>
+                {openaiConnected
+                  ? 'Connected successfully. Invoice parsing and knowledge base training enabled.'
+                  : 'Not connected. API key needs to be configured in server environment.'}
               </p>
-              {!stripeConnected && (
-                <a href="/api/stripe/connect" style={buttonStyle}>
-                  Connect Stripe
-                </a>
-              )}
-              {stripeConnected && (
-                <div style={{ marginTop: '12px' }}>
-                  <a href="/api/stripe/connect" style={{ ...buttonStyle, backgroundColor: '#6b7280', borderColor: '#6b7280' }}>
-                    Reconnect Stripe
-                  </a>
-                </div>
-              )}
+              <button
+                onClick={checkOpenAIStatus}
+                style={{
+                  ...buttonStyle,
+                  backgroundColor: openaiConnected ? '#6b7280' : '#357ab2',
+                  borderColor: openaiConnected ? '#6b7280' : '#357ab2',
+                }}
+              >
+                Test Connection
+              </button>
             </>
           )}
-          {stripeError && <p style={errorStyle}>Error: {stripeError}</p>}
+          {openaiError && <p style={errorStyle}>Error: {openaiError}</p>}
         </div>
 
         {/* Refresh Button */}
@@ -225,7 +226,7 @@ export default function ConnectionsPage() {
           <button
             onClick={() => {
               checkQboStatus();
-              checkStripeStatus();
+              checkOpenAIStatus();
             }}
             style={{
               ...buttonStyle,
