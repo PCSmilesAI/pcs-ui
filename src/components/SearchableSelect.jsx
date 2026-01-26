@@ -20,7 +20,12 @@ export default function SearchableSelect({
   initialDisplayValue = '', // Fallback display text when value doesn't match any option
 }) {
   // Initialize with initialDisplayValue if provided (important for edit mode)
-  const [inputValue, setInputValue] = useState(initialDisplayValue || '');
+  const [inputValue, setInputValue] = useState(() => {
+    // Use a function to ensure we get the correct initial value
+    const initial = initialDisplayValue || '';
+    console.log('[SearchableSelect] Initializing with:', { initialDisplayValue, value, initial });
+    return initial;
+  });
   const [isOpen, setIsOpen] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(0);
   const inputRef = useRef(null);
@@ -34,17 +39,20 @@ export default function SearchableSelect({
 
   // Find selected option and set input value
   useEffect(() => {
+    console.log('[SearchableSelect] useEffect triggered:', { value, initialDisplayValue, optionsCount: options.length });
     if (value) {
       const selected = options.find(opt => opt[valueKey] === value);
       if (selected) {
+        console.log('[SearchableSelect] Found matching option:', getOptionDisplay(selected));
         setInputValue(getOptionDisplay(selected));
       } else if (initialDisplayValue) {
         // Fallback to provided display value when no option matches
-        // This is useful when editing saved data where the ID might not match current options
+        console.log('[SearchableSelect] No match, using initialDisplayValue:', initialDisplayValue);
         setInputValue(initialDisplayValue);
       }
     } else if (initialDisplayValue) {
       // If no value but initialDisplayValue provided, show it
+      console.log('[SearchableSelect] No value, using initialDisplayValue:', initialDisplayValue);
       setInputValue(initialDisplayValue);
     } else {
       setInputValue('');
