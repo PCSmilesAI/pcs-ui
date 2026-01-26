@@ -6,6 +6,7 @@ import { logRepair } from '../../../../../lib/invoices/repairLogging';
 import { rateLimitByUser } from '../../../../../lib/ratelimit/rateLimiter';
 import { isValidInvoiceId } from '../../../../../lib/security/type-validation';
 import { isAdmin, isAP } from '../../../../../lib/workflow/rolesStore';
+import { detectReclassificationIntent, moveInvoiceToOtherDocuments, getDocumentTypeDisplayName } from '../../../../../lib/gpt/reclassifyIntent';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,7 +71,61 @@ export async function POST(
     const actualInvoiceId = originalInvoice.id;
 
     const body = await req.json();
-    const { vendor_name, office_id, amount_cents, invoice_number, invoice_date, due_date, overrideLocks } = body;
+    const { vendor_name, office_id, amount_cents, invoice_number, invoice_date, due_date, overrideLocks, userComment } = body;
+
+    // Check for reclassification intent in user comment
+    // This allows users to say things like "this is a receipt, not an invoice"
+    if (userComment && typeof userComment === 'string' && userComment.trim().length > 0) {
+      try {
+        const intent = await detectReclassificationIntent(userComment);
+        
+        if (intent.shouldReclassify && intent.newDocumentType && intent.confidence >= 0.7) {
+          console.log('[API][INVOICES][UPDATE]', 'reclassification_detected', {
+            invoiceId: actualInvoiceId,
+            newDocumentType: intent.newDocumentType,
+            confidence: intent.confidence,
+            reason: intent.reason
+          });
+          
+          // Move the document to other_documents
+          const moveResult = await moveInvoiceToOtherDocuments(
+            actualInvoiceId,
+            intent.newDocumentType,
+            user.email,
+            userComment
+          );
+          
+          if (moveResult.success) {
+            console.log('[API][INVOICES][UPDATE]', 'reclassification_success', {
+              originalInvoiceId: actualInvoiceId,
+              newDocumentId: moveResult.newId,
+              documentType: intent.newDocumentType
+            });
+            
+            return NextResponse.json({
+              ok: true,
+              reclassified: true,
+              newDocumentType: intent.newDocumentType,
+              newDocumentTypeDisplay: getDocumentTypeDisplayName(intent.newDocumentType),
+              newDocumentId: moveResult.newId,
+              message: `Document moved to Other Documents as ${getDocumentTypeDisplayName(intent.newDocumentType)}`
+            });
+          } else {
+            console.warn('[API][INVOICES][UPDATE]', 'reclassification_move_failed', {
+              invoiceId: actualInvoiceId,
+              error: moveResult.error
+            });
+            // Fall through to normal update if move fails
+          }
+        }
+      } catch (reclassifyError: any) {
+        console.warn('[API][INVOICES][UPDATE]', 'reclassification_check_error', {
+          invoiceId: actualInvoiceId,
+          error: reclassifyError?.message
+        });
+        // Fall through to normal update if reclassification check fails
+      }
+    }
 
     // Validate types
     if (vendor_name !== undefined && typeof vendor_name !== 'string') {
