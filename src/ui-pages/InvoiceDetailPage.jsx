@@ -1633,6 +1633,44 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         return;
       }
 
+      // Save GL Lines automatically if they exist
+      // This ensures the user doesn't have to save GL Lines separately
+      if (invoiceCategories && invoiceCategories.length > 0) {
+        try {
+          // Check if all categories have valid amounts
+          const hasValidAmounts = invoiceCategories.every(cat => cat.amount && cat.amount > 0);
+          
+          if (hasValidAmounts) {
+            console.log('💾 Auto-saving GL Lines with Update...');
+            const glResponse = await fetch(`/api/invoices/${invoiceId}/invoice-categories`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ categories: invoiceCategories })
+            });
+            
+            if (glResponse.ok) {
+              const glData = await glResponse.json();
+              console.log('✅ GL Lines saved automatically');
+              // Update local state with saved data
+              if (glData.categories) {
+                setInvoiceCategories(glData.categories.map(cat => ({ ...cat, isEditing: false })));
+              }
+              if (glData.summary) {
+                setAllocationSummary(glData.summary);
+              }
+            } else {
+              const glError = await glResponse.json();
+              console.warn('⚠️ GL Lines auto-save failed:', glError.message || glError.error);
+              // Don't fail the whole update, just warn
+              showToast(`Invoice updated, but GL Lines may need re-allocation: ${glError.message || 'Amount mismatch'}`, 'warning');
+            }
+          }
+        } catch (glErr) {
+          console.warn('⚠️ GL Lines auto-save error:', glErr);
+          // Don't fail the whole update
+        }
+      }
+
       // Check if allocations were reset due to amount change
       if (updateResult.allocations_reset) {
         showToast('Invoice amount updated. GL line allocations have been reset to $0 - please re-allocate.', 'warning');
