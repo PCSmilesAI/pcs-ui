@@ -19,7 +19,8 @@ export default function SearchableSelect({
   style = {},
   initialDisplayValue = '', // Fallback display text when value doesn't match any option
 }) {
-  const [inputValue, setInputValue] = useState('');
+  // Initialize with initialDisplayValue if provided (important for edit mode)
+  const [inputValue, setInputValue] = useState(initialDisplayValue || '');
   const [isOpen, setIsOpen] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(0);
   const inputRef = useRef(null);

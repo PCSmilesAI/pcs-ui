@@ -2674,6 +2674,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                                 Account *
                               </label>
                               <SearchableSelect
+                                key={`account-${index}-${cat.id || index}`}
                                 options={categories}
                                 value={cat.categoryId || ''}
                                 initialDisplayValue={cat.categoryName || ''}
@@ -2692,6 +2693,7 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                                 Class (Location)
                               </label>
                               <SearchableSelect
+                                key={`class-${index}-${cat.id || index}`}
                                 options={qboClasses}
                                 value={cat.classId || ''}
                                 initialDisplayValue={cat.className || ''}
