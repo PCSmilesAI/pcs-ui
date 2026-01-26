@@ -1619,8 +1619,21 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
       console.log('✅ Invoice updated successfully');
 
-      // Check if allocations were reset due to amount change
+      // Check if document was reclassified (moved to Other Documents)
       const updateResult = response.data || {};
+      if (updateResult.reclassified) {
+        showToast(
+          `Document moved to Other Documents as ${updateResult.newDocumentTypeDisplay || updateResult.newDocumentType}`,
+          'success'
+        );
+        // Navigate back to invoice list since this document is no longer an invoice
+        if (onBack) {
+          onBack();
+        }
+        return;
+      }
+
+      // Check if allocations were reset due to amount change
       if (updateResult.allocations_reset) {
         showToast('Invoice amount updated. GL line allocations have been reset to $0 - please re-allocate.', 'warning');
       }

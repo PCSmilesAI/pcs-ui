@@ -98,3 +98,12 @@ export {
   type ClassificationResult,
   type ClassificationResponse,
 } from './documentClassifier';
+
+// Reclassification Intent Detection (for moving invoices to other documents)
+export {
+  detectReclassificationIntent,
+  moveInvoiceToOtherDocuments,
+  getDocumentTypeDisplayName as getReclassifyDisplayName,
+  type ReclassificationIntent,
+  type MoveResult,
+} from './reclassifyIntent';
