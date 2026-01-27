@@ -14,15 +14,15 @@ interface TypeCount {
   label: string;
 }
 
-const documentTypeConfig: Record<string, { label: string; bg: string; text: string; icon: string }> = {
-  'credit_memo': { label: 'Credit Memos', bg: '#fef3c7', text: '#d97706', icon: '💳' },
-  'statement': { label: 'Statements', bg: '#e0f2fe', text: '#0369a1', icon: '📄' },
-  'payment_confirmation': { label: 'Payment Confirmations', bg: '#dcfce7', text: '#16a34a', icon: '✅' },
-  'receipt': { label: 'Receipts', bg: '#fae8ff', text: '#a21caf', icon: '🧾' },
-  'packing_slip': { label: 'Packing Slips', bg: '#f0fdf4', text: '#166534', icon: '📦' },
-  'letter': { label: 'Letters', bg: '#fef9c3', text: '#854d0e', icon: '✉️' },
-  'marketing': { label: 'Marketing', bg: '#f3f4f6', text: '#6b7280', icon: '📢' },
-  'other': { label: 'Other', bg: '#fef2f2', text: '#dc2626', icon: '📎' },
+const documentTypeConfig: Record<string, { label: string; bg: string; text: string; iconClass: string }> = {
+  'credit_memo': { label: 'Credit Memos', bg: '#fef3c7', text: '#d97706', iconClass: 'fa-credit-card' },
+  'statement': { label: 'Statements', bg: '#e0f2fe', text: '#0369a1', iconClass: 'fa-file-alt' },
+  'payment_confirmation': { label: 'Payment Confirmations', bg: '#dcfce7', text: '#16a34a', iconClass: 'fa-check-circle' },
+  'receipt': { label: 'Receipts', bg: '#fae8ff', text: '#a21caf', iconClass: 'fa-receipt' },
+  'packing_slip': { label: 'Packing Slips', bg: '#f0fdf4', text: '#166534', iconClass: 'fa-box' },
+  'letter': { label: 'Letters', bg: '#fef9c3', text: '#854d0e', iconClass: 'fa-envelope' },
+  'marketing': { label: 'Marketing', bg: '#f3f4f6', text: '#6b7280', iconClass: 'fa-bullhorn' },
+  'other': { label: 'Other', bg: '#fef2f2', text: '#dc2626', iconClass: 'fa-paperclip' },
 };
 
 export default function FiledDocumentsPage() {
@@ -87,7 +87,8 @@ export default function FiledDocumentsPage() {
           ← Back to Other Documents
         </button>
         <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#1f2937', marginBottom: '8px' }}>
-          📁 Filed Documents
+          <i className="fas fa-folder" style={{ marginRight: '10px', color: '#16a34a' }}></i>
+          Filed Documents
         </h1>
         <p style={{ color: '#6b7280', fontSize: '14px' }}>
           Browse documents that have been reviewed and filed by type. Total: {totalFiled} documents
@@ -152,7 +153,7 @@ export default function FiledDocumentsPage() {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '32px' }}>{config.icon}</span>
+                  <i className={`fas ${config.iconClass}`} style={{ fontSize: '28px', color: count > 0 ? config.text : '#9ca3af' }}></i>
                   <div>
                     <h3 style={{ 
                       fontSize: '18px', 
@@ -204,7 +205,7 @@ export default function FiledDocumentsPage() {
           borderRadius: '12px',
           marginTop: '20px',
         }}>
-          <span style={{ fontSize: '48px', marginBottom: '16px', display: 'block' }}>📂</span>
+          <i className="fas fa-folder-open" style={{ fontSize: '48px', marginBottom: '16px', display: 'block', color: '#9ca3af' }}></i>
           <h3 style={{ color: '#374151', marginBottom: '8px' }}>No Filed Documents Yet</h3>
           <p style={{ color: '#6b7280' }}>
             Documents will appear here once they've been reviewed and filed.

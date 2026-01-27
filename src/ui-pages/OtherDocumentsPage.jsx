@@ -203,7 +203,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
             gap: '8px',
           }}
         >
-          <span style={{ fontSize: '16px' }}>📁</span>
+          <i className="fas fa-folder" style={{ fontSize: '14px' }}></i>
           View Filed Documents
         </button>
       </div>
