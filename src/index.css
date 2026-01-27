@@ -23,3 +23,45 @@ body {
 .table-row-hover:hover {
   @apply bg-gray-50;
 }
+
+/* Custom circular checkbox styling for PCS */
+.pcs-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #357ab2;
+  border-radius: 50%;
+  background-color: #ffffff;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease-in-out;
+  vertical-align: middle;
+}
+
+.pcs-checkbox:hover {
+  border-color: #2a6293;
+  background-color: #f0f7fc;
+}
+
+.pcs-checkbox:checked {
+  background-color: #357ab2;
+  border-color: #357ab2;
+}
+
+.pcs-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 3px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+}
+
+.pcs-checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(53, 122, 178, 0.3);
+}

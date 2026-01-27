@@ -142,10 +142,11 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
           {selectable && (
             <th
               key="__select"
-              style={{ ...headerCellBase, textAlign: 'center', width: 36 }}
+              style={{ ...headerCellBase, textAlign: 'center', width: 56 }}
             >
               <input
                 type="checkbox"
+                className="pcs-checkbox"
                 checked={allSelected}
                 onChange={() => {
                   if (typeof onToggleAll === 'function') onToggleAll(allSelected, allVisibleIds);
@@ -212,6 +213,7 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
                 <td key="__select" style={{ ...rowCellBase, textAlign: 'center' }}>
                   <input
                     type="checkbox"
+                    className="pcs-checkbox"
                     checked={!!isChecked}
                     onClick={(e) => e.stopPropagation()}
                     onChange={(e) => {
