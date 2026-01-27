@@ -664,5 +664,10 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
     CREATE INDEX IF NOT EXISTS idx_other_documents_created ON other_documents(created_at);
   `);
 
+  // Add filing workflow columns to other_documents
+  ensureColumn('other_documents', 'filed_at', 'filed_at TEXT');
+  ensureColumn('other_documents', 'filed_by', 'filed_by TEXT');
+  ensureColumn('other_documents', 'user_note', 'user_note TEXT');
+
   console.log('[DB] Migrations completed successfully');
 }

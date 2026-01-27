@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Toast from '../components/Toast.jsx';
 
 /**
@@ -6,6 +7,7 @@ import Toast from '../components/Toast.jsx';
  * These documents are routed here by the PCS AI document classifier.
  */
 export default function OtherDocumentsPage({ searchQuery = '' }) {
+  const router = useRouter();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,11 +19,17 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
   const [typeFilter, setTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   
-  // Selected document for detail view
+  // Selected document for detail view (kept for backwards compatibility)
   const [selectedDoc, setSelectedDoc] = useState(null);
   
   // Updating state
   const [updating, setUpdating] = useState(false);
+
+  // Navigate to document view page
+  const navigateToDocument = useCallback((doc) => {
+    const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+    router.push(`/OtherDocumentsPage/view?id=${encodeURIComponent(doc.id)}&from=${currentUrl}`);
+  }, [router]);
 
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -140,6 +148,18 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
       day: 'numeric',
       year: '2-digit'
     });
+  };
+
+  // Normalize PDF path to /api/pdf/filename.pdf format
+  const getPdfUrl = (pdfPath) => {
+    if (!pdfPath) return '';
+    // Already in API format
+    if (pdfPath.startsWith('/api/pdf/')) return pdfPath;
+    // Already a full URL
+    if (pdfPath.startsWith('http://') || pdfPath.startsWith('https://')) return pdfPath;
+    // Extract filename from any path format and use API endpoint
+    const filename = pdfPath.split('/').pop();
+    return `/api/pdf/${filename}`;
   };
 
   // Filter documents by search query
@@ -310,6 +330,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Amount</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Date</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Status</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Note</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Email Subject</th>
                 <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Actions</th>
               </tr>
@@ -328,7 +349,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
-                    onClick={() => setSelectedDoc(doc)}
+                    onClick={() => navigateToDocument(doc)}
                   >
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{
@@ -368,6 +389,20 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                         {statusBadge.label}
                       </span>
                     </td>
+                    <td 
+                      style={{ 
+                        padding: '12px 16px', 
+                        fontSize: '13px', 
+                        color: '#4b5563', 
+                        maxWidth: '200px', 
+                        overflow: 'hidden', 
+                        textOverflow: 'ellipsis', 
+                        whiteSpace: 'nowrap' 
+                      }}
+                      title={doc.user_note || ''}
+                    >
+                      {doc.user_note || '-'}
+                    </td>
                     <td style={{ padding: '12px 16px', fontSize: '13px', color: '#6b7280', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {doc.email_subject || '-'}
                     </td>
@@ -375,7 +410,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                       <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
                         {doc.pdf_path && (
                           <a
-                            href={doc.pdf_path}
+                            href={getPdfUrl(doc.pdf_path)}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{
@@ -577,7 +612,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
               {selectedDoc.pdf_path && (
                 <div style={{ marginTop: '8px' }}>
                   <a
-                    href={selectedDoc.pdf_path}
+                    href={getPdfUrl(selectedDoc.pdf_path)}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

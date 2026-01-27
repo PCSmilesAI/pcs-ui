@@ -10,6 +10,19 @@ import OpenAI from 'openai';
 import { getDatabase } from '../db/client';
 import { DocumentType } from './documentClassifier';
 
+/**
+ * Normalize a PDF path to the /api/pdf/filename.pdf format
+ */
+function normalizePdfPath(pdfPath: string | null | undefined): string | null {
+  if (!pdfPath) return null;
+  // Already in API format
+  if (pdfPath.startsWith('/api/pdf/')) return pdfPath;
+  // Extract filename from any path format
+  const filename = pdfPath.split('/').pop();
+  if (!filename) return null;
+  return `/api/pdf/${filename}`;
+}
+
 // Lazy initialization of OpenAI client
 let _openai: OpenAI | null = null;
 
@@ -213,6 +226,9 @@ export async function moveInvoiceToOtherDocuments(
     const newId = `reclassified_${invoiceId}_${Date.now()}`;
     const now = new Date().toISOString();
 
+    // Normalize the PDF path to /api/pdf/filename.pdf format
+    const normalizedPdfPath = normalizePdfPath(invoice.pdf_path);
+
     // Insert into other_documents
     db.prepare(`
       INSERT INTO other_documents (
@@ -228,7 +244,7 @@ export async function moveInvoiceToOtherDocuments(
       invoice.amount_cents ? invoice.amount_cents / 100 : null,
       invoice.invoice_date || null,
       invoice.invoice_number || null,
-      invoice.pdf_path || null,
+      normalizedPdfPath,
       invoice.source_message_id || null,
       invoice.email_subject || null,
       invoice.email_from || null,
