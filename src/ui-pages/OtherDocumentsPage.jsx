@@ -178,13 +178,34 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
   return (
     <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#1f2937', marginBottom: '8px' }}>
-          Other Documents
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '14px' }}>
-          Credit memos, statements, and other non-invoice documents
-        </p>
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#1f2937', marginBottom: '8px' }}>
+            Other Documents
+          </h1>
+          <p style={{ color: '#6b7280', fontSize: '14px' }}>
+            Credit memos, statements, and other non-invoice documents
+          </p>
+        </div>
+        <button
+          onClick={() => router.push('/OtherDocumentsPage/filed')}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '8px',
+            backgroundColor: '#16a34a',
+            color: '#fff',
+            border: 'none',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          <span style={{ fontSize: '16px' }}>📁</span>
+          View Filed Documents
+        </button>
       </div>
 
       {/* Stats Cards */}
