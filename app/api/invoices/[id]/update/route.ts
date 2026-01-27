@@ -162,10 +162,39 @@ export async function POST(
     if (Object.keys(patch).length === 0 && Object.keys(directUpdates).length === 0) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
     }
+    
+    // Check for invoice_number uniqueness before attempting update
+    // This prevents UNIQUE constraint errors and provides a clearer error message
+    if (invoice_number !== undefined && invoice_number !== originalInvoice.invoice_number) {
+      const existingWithNumber = db.prepare(
+        'SELECT id FROM invoices WHERE invoice_number = ? AND id != ?'
+      ).get(invoice_number, actualInvoiceId) as any;
+      
+      if (existingWithNumber) {
+        console.warn('[API][INVOICES][UPDATE]', 'duplicate_invoice_number', {
+          invoiceId: actualInvoiceId,
+          attemptedInvoiceNumber: invoice_number,
+          existingInvoiceId: existingWithNumber.id
+        });
+        return NextResponse.json({ 
+          error: 'Invoice number already exists on another invoice',
+          existingInvoiceId: existingWithNumber.id 
+        }, { status: 409 });
+      }
+    }
 
     // Apply corrections to database for vendor/office/amount (use actual database ID)
     if (Object.keys(patch).length > 0) {
-      await applyCorrections(actualInvoiceId, user.email, patch, overrideLocks === true);
+      try {
+        await applyCorrections(actualInvoiceId, user.email, patch, overrideLocks === true);
+      } catch (correctionError: any) {
+        console.error('[API][INVOICES][UPDATE]', 'applyCorrections_failed', {
+          invoiceId: actualInvoiceId,
+          patch,
+          error: correctionError?.message
+        });
+        throw correctionError;
+      }
     }
 
     // Apply direct updates for invoice_number, dates, and coded tracking
@@ -182,8 +211,18 @@ export async function POST(
       user.email
     ];
     
-    db.prepare(`UPDATE invoices SET ${directUpdateFields} WHERE id = ?`)
-      .run(...directUpdateValues, actualInvoiceId);
+    try {
+      db.prepare(`UPDATE invoices SET ${directUpdateFields} WHERE id = ?`)
+        .run(...directUpdateValues, actualInvoiceId);
+    } catch (directUpdateError: any) {
+      console.error('[API][INVOICES][UPDATE]', 'directUpdate_failed', {
+        invoiceId: actualInvoiceId,
+        directUpdates,
+        directUpdateFields,
+        error: directUpdateError?.message
+      });
+      throw directUpdateError;
+    }
     
     // Log the direct updates as an event
     if (Object.keys(directUpdates).length > 0) {
