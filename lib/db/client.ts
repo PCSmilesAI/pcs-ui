@@ -517,7 +517,7 @@ Return ONLY the updated knowledge base prompt text, nothing else.`,
 5. INVOICE DATE
    - The date the invoice was issued/created
    - Look for: "Invoice Date", "Date", "Issued Date", "Document Date"
-   - Format as YYYY-MM-DD
+   - Format as MM/DD/YYYY (e.g., 01/15/2025)
 
 6. DUE DATE
    - The date payment is due
@@ -526,7 +526,7 @@ Return ONLY the updated knowledge base prompt text, nothing else.`,
      * "Net 30" or "Due in 30 days" = invoice_date + 30 days
      * "Net 15" = invoice_date + 15 days
      * "Due Upon Receipt" = same as invoice_date
-   - Format as YYYY-MM-DD
+   - Format as MM/DD/YYYY (e.g., 02/14/2025)
 
 7. CATEGORY / GL LINES
    - Should align with QBO Chart of Accounts
@@ -590,7 +590,7 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
 5. INVOICE DATE
    - The date the invoice was issued/created
    - Look for: "Invoice Date", "Date", "Issued Date", "Document Date"
-   - Format as YYYY-MM-DD
+   - Format as MM/DD/YYYY (e.g., 01/15/2025)
 
 6. DUE DATE
    - The date payment is due
@@ -599,7 +599,7 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
      * "Net 30" or "Due in 30 days" = invoice_date + 30 days
      * "Net 15" = invoice_date + 15 days
      * "Due Upon Receipt" = same as invoice_date
-   - Format as YYYY-MM-DD
+   - Format as MM/DD/YYYY (e.g., 02/14/2025)
 
 7. CATEGORY / GL LINES
    - Should align with QBO Chart of Accounts

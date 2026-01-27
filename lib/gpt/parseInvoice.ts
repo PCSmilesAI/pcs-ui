@@ -19,8 +19,9 @@ function getOpenAIClient(): OpenAI {
   return _openai;
 }
 
-// Model configuration - use gpt-4o-mini for cost efficiency, gpt-4o for better accuracy
-const GPT_MODEL = process.env.GPT_MODEL || 'gpt-4o-mini';
+// Model configuration - GPT-5 Nano is fast and cost-effective for invoice parsing
+// Set GPT_MODEL=gpt-5-nano for faster/cheaper parsing, or gpt-4o for better accuracy
+const GPT_MODEL = process.env.GPT_MODEL || 'gpt-5-nano';
 
 // Parsing configuration - can be overridden for bulk operations
 export const PARSING_CONFIG = {
@@ -236,8 +237,8 @@ const BASE_PARSING_PROMPT = `You are an expert invoice parser for dental practic
 EXTRACTION SCHEMA - Return a JSON object with these exact fields:
 {
   "invoice_number": "string or null",
-  "invoice_date": "YYYY-MM-DD or null",
-  "due_date": "YYYY-MM-DD or null",
+  "invoice_date": "MM/DD/YYYY or null",
+  "due_date": "MM/DD/YYYY or null",
   "vendor_name": "string or null",
   "total": number or null (as decimal, e.g., 1234.56),
   "office_location": "string or null",
@@ -255,7 +256,7 @@ EXTRACTION SCHEMA - Return a JSON object with these exact fields:
 IMPORTANT RULES:
 - Return ONLY valid JSON, no explanation text
 - Amounts should be numbers without currency symbols or commas
-- Dates in YYYY-MM-DD format
+- Dates MUST be in MM/DD/YYYY format (e.g., 01/15/2025)
 - parsing_confidence: 1.0 = very confident, 0.5 = uncertain, 0.0 = guessing
 - For office_location, look for "Ship To", "Deliver To", or dental office names
 

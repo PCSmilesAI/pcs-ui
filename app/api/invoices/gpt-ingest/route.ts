@@ -5,6 +5,7 @@ import { normalizeVendorNameForStorage } from '../../../../lib/invoices/vendorNo
 import { resolveVendor } from '../../../../lib/invoices/vendorMatcher';
 import { buildApiPdfPath, normalizePdfFilename } from '../../../../lib/security/filename';
 import { isPathWithinBase } from '../../../../lib/security/path-validation';
+import { normalizeDateForStorage } from '../../../../lib/utils/dateUtils';
 import { randomUUID } from 'crypto';
 import path from 'path';
 import fs from 'fs';
@@ -263,6 +264,10 @@ export async function POST(req: NextRequest) {
     // Generate ID
     const id = randomUUID();
 
+    // Normalize dates to MM/DD/YYYY format before storage
+    const normalizedInvoiceDate = normalizeDateForStorage(parsed.invoice_date);
+    const normalizedDueDate = normalizeDateForStorage(parsed.due_date);
+
     // Insert invoice
     db.prepare(`
       INSERT INTO invoices (
@@ -299,8 +304,8 @@ export async function POST(req: NextRequest) {
       'incoming',
       JSON.stringify({}),
       0,
-      parsed.invoice_date,
-      parsed.due_date,
+      normalizedInvoiceDate,
+      normalizedDueDate,
       parsed.office_location,
       buildApiPdfPath(normalizedPdfFilename),
       parsingStatus,
