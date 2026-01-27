@@ -725,7 +725,21 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
 
   // NEW: Invoice-level category handlers with GL line splitting
   
-  // Calculate allocation summary whenever categories change
+  // Sync paymentAmount field with invoiceTotalAmount for allocation tracking
+  // This ensures the GL Lines allocation updates LIVE as the user edits the payment amount
+  useEffect(() => {
+    // Parse payment amount string (remove $ and , characters)
+    const amountStr = paymentAmount?.toString().replace(/\$/g, '').replace(/,/g, '') || '0';
+    const parsedAmount = parseFloat(amountStr) || 0;
+    const roundedAmount = Math.round(parsedAmount * 100) / 100;
+    
+    // Only update if different to avoid infinite loops
+    if (Math.abs(roundedAmount - invoiceTotalAmount) > 0.001) {
+      setInvoiceTotalAmount(roundedAmount);
+    }
+  }, [paymentAmount]);
+  
+  // Calculate allocation summary whenever categories or invoice total changes
   useEffect(() => {
     const allocated = invoiceCategories.reduce((sum, cat) => sum + (parseFloat(cat.amount) || 0), 0);
     const roundedAllocated = Math.round(allocated * 100) / 100;
