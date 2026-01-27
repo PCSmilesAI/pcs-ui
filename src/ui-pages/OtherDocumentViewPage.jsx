@@ -14,7 +14,20 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
     vendor: document?.vendor_name || '',
     date: document?.document_date || '',
     note: document?.user_note || '',
+    documentType: document?.document_type || 'other',
   });
+
+  // Available document types for dropdown
+  const documentTypes = [
+    { value: 'credit_memo', label: 'Credit Memo' },
+    { value: 'statement', label: 'Statement' },
+    { value: 'payment_confirmation', label: 'Payment Confirmation' },
+    { value: 'receipt', label: 'Receipt' },
+    { value: 'packing_slip', label: 'Packing Slip' },
+    { value: 'letter', label: 'Letter' },
+    { value: 'marketing', label: 'Marketing' },
+    { value: 'other', label: 'Other' },
+  ];
   
   // State management
   const [processing, setProcessing] = useState(false);
@@ -36,6 +49,8 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
       'statement': { bg: '#e0f2fe', text: '#0369a1', label: 'Statement' },
       'payment_confirmation': { bg: '#dcfce7', text: '#16a34a', label: 'Payment Confirmation' },
       'receipt': { bg: '#fae8ff', text: '#a21caf', label: 'Receipt' },
+      'packing_slip': { bg: '#f0fdf4', text: '#166534', label: 'Packing Slip' },
+      'letter': { bg: '#fef9c3', text: '#854d0e', label: 'Letter' },
       'marketing': { bg: '#f3f4f6', text: '#6b7280', label: 'Marketing' },
       'other': { bg: '#fef2f2', text: '#dc2626', label: 'Other' },
     };
@@ -53,7 +68,8 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
     return colors[status] || colors['pending'];
   };
 
-  const typeBadge = getTypeBadge(document?.document_type);
+  // Use details.documentType so the badge updates when user changes the dropdown
+  const typeBadge = getTypeBadge(details.documentType || document?.document_type);
   const statusBadge = getStatusBadge(document?.status);
 
   // Format timestamp for stage display
@@ -106,6 +122,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
             vendor: data.document.vendor_name || '',
             date: data.document.document_date || '',
             note: data.document.user_note || '',
+            documentType: data.document.document_type || 'other',
           });
         }
       }
@@ -200,6 +217,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
           vendor_name: details.vendor,
           document_date: details.date,
           user_note: details.note,
+          document_type: details.documentType,
         }),
       });
       
@@ -467,6 +485,26 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
             <h2 style={sectionTitleStyle}>Document Details</h2>
             <table style={tableStyle}>
               <tbody>
+                <tr>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568', width: '120px' }}>Document Type</td>
+                  <td style={cellStyle}>
+                    <select
+                      value={details.documentType}
+                      onChange={(e) => handleDetailChange('documentType', e.target.value)}
+                      style={{
+                        ...inputStyle,
+                        cursor: 'pointer',
+                        backgroundColor: '#fff',
+                      }}
+                    >
+                      {documentTypes.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568', width: '120px' }}>Date</td>
                   <td style={cellStyle}>
