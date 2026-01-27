@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '../../../../lib/db/client';
 import { isTombstoned } from '../../../../lib/invoices/tombstoneService';
 import { normalizeVendorNameForStorage } from '../../../../lib/invoices/vendorNormalization';
+import { resolveVendor } from '../../../../lib/invoices/vendorMatcher';
 import { buildApiPdfPath, normalizePdfFilename } from '../../../../lib/security/filename';
 import { isPathWithinBase } from '../../../../lib/security/path-validation';
 import { randomUUID } from 'crypto';
@@ -10,6 +11,36 @@ import fs from 'fs';
 
 // Import PCS AI parsing
 import { parseInvoiceWithGPT, ParseResult } from '../../../../lib/gpt/parseInvoice';
+import { QBOClient } from '../../../../lib/qbo/qboClient';
+
+// Cache for QBO vendors (5 minute TTL)
+let qboVendorsCache: { vendors: string[]; timestamp: number } | null = null;
+const QBO_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Get QBO vendor list (cached)
+ */
+async function getQBOVendors(): Promise<string[]> {
+  // Check cache
+  if (qboVendorsCache && Date.now() - qboVendorsCache.timestamp < QBO_CACHE_TTL) {
+    return qboVendorsCache.vendors;
+  }
+
+  try {
+    const qboClient = new QBOClient();
+    await qboClient.initialize();
+    const vendors = await qboClient.getAllVendors();
+    const vendorNames = vendors.map(v => v.displayName);
+    
+    // Update cache
+    qboVendorsCache = { vendors: vendorNames, timestamp: Date.now() };
+    console.log(`[PCS_AI_INGEST] Loaded ${vendorNames.length} QBO vendors for validation`);
+    return vendorNames;
+  } catch (error: any) {
+    console.warn('[PCS_AI_INGEST] Could not fetch QBO vendors:', error.message);
+    return qboVendorsCache?.vendors || [];
+  }
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -173,8 +204,38 @@ export async function POST(req: NextRequest) {
 
     // Successfully parsed - extract data
     const parsed = parseResult.data;
-    const vendor = parsed.vendor_name || parseResult.vendorDetected || 'Unknown Vendor';
-    const normalizedVendor = normalizeVendorNameForStorage(vendor);
+    const rawVendor = parsed.vendor_name || parseResult.vendorDetected || 'Unknown';
+    
+    // Validate vendor against QBO list
+    let validatedVendor = rawVendor;
+    let vendorMatchMethod = 'raw';
+    let vendorConfidence = 0;
+    
+    try {
+      const qboVendors = await getQBOVendors();
+      if (qboVendors.length > 0) {
+        // Resolve vendor using the matcher
+        // Note: OCR text fallback not available in current implementation
+        const vendorMatch = resolveVendor(rawVendor, null, qboVendors);
+        validatedVendor = vendorMatch.vendor;
+        vendorMatchMethod = vendorMatch.method;
+        vendorConfidence = vendorMatch.confidence;
+        
+        console.log('[PCS_AI_INGEST] Vendor validation:', {
+          raw: rawVendor,
+          validated: validatedVendor,
+          method: vendorMatchMethod,
+          confidence: vendorConfidence.toFixed(2)
+        });
+      } else {
+        console.warn('[PCS_AI_INGEST] No QBO vendors available, using raw vendor name');
+      }
+    } catch (vendorError: any) {
+      console.warn('[PCS_AI_INGEST] Vendor validation failed, using raw:', vendorError.message);
+    }
+    
+    // Normalize for storage (handles title case, etc.)
+    const normalizedVendor = normalizeVendorNameForStorage(validatedVendor);
     
     // Generate invoice number
     const invoiceNumber = parsed.invoice_number || 
@@ -252,7 +313,10 @@ export async function POST(req: NextRequest) {
       INSERT INTO invoice_events (invoice_id, action, payload_json)
       VALUES (?, 'PCS_AI_PARSED', ?)
     `).run(id, JSON.stringify({
-      vendor: vendor,
+      vendor_raw: rawVendor,
+      vendor_validated: validatedVendor,
+      vendor_match_method: vendorMatchMethod,
+      vendor_confidence: vendorConfidence,
       amount_cents: amountCents,
       office_location: parsed.office_location,
       source: 'gpt-4o',
@@ -272,10 +336,10 @@ export async function POST(req: NextRequest) {
       }));
       const categories = await categorizeInvoice(
         {
-          vendor_name: vendor,
+          vendor_name: normalizedVendor,
           line_items: lineItems,
         },
-        vendor
+        normalizedVendor
       );
       await storeInvoiceCategories(id, categories);
       console.log('[PCS_AI_INGEST] Auto-categorized invoice', {
@@ -289,7 +353,9 @@ export async function POST(req: NextRequest) {
     console.log('[PCS_AI_INGEST] Invoice ingested successfully:', {
       id,
       invoice_number: invoiceNumber,
-      vendor: vendor,
+      vendor: normalizedVendor,
+      vendor_raw: rawVendor,
+      vendor_match: vendorMatchMethod,
       amount: amountCents / 100,
       confidence: parsed.parsing_confidence,
       kb_used: parseResult.knowledgeBaseUsed
@@ -300,7 +366,9 @@ export async function POST(req: NextRequest) {
       message: 'Invoice parsed and ingested successfully',
       id,
       invoice_number: invoiceNumber,
-      vendor: vendor,
+      vendor: normalizedVendor,
+      vendor_raw: rawVendor,
+      vendor_match_method: vendorMatchMethod,
       amount: amountCents / 100,
       parsing_status: parsingStatus,
       parsing_confidence: parsed.parsing_confidence,
