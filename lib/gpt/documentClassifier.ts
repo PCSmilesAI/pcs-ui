@@ -34,6 +34,8 @@ export type DocumentType =
   | 'statement' 
   | 'payment_confirmation' 
   | 'receipt'
+  | 'packing_slip'
+  | 'letter'
   | 'marketing' 
   | 'other';
 
@@ -185,7 +187,7 @@ export async function classifyDocument(
     const result = JSON.parse(jsonStr.trim()) as ClassificationResult;
 
     // Validate document_type
-    const validTypes: DocumentType[] = ['invoice', 'credit_memo', 'statement', 'payment_confirmation', 'receipt', 'marketing', 'other'];
+    const validTypes: DocumentType[] = ['invoice', 'credit_memo', 'statement', 'payment_confirmation', 'receipt', 'packing_slip', 'letter', 'marketing', 'other'];
     if (!validTypes.includes(result.document_type)) {
       result.document_type = 'other';
     }
@@ -247,6 +249,8 @@ export function getDocumentTypeDisplayName(type: DocumentType): string {
     'statement': 'Statement',
     'payment_confirmation': 'Payment Confirmation',
     'receipt': 'Receipt',
+    'packing_slip': 'Packing Slip',
+    'letter': 'Letter',
     'marketing': 'Marketing',
     'other': 'Other'
   };
@@ -263,6 +267,8 @@ export function getDocumentTypeColor(type: DocumentType): { bg: string; text: st
     'statement': { bg: '#e0f2fe', text: '#0369a1', border: '#38bdf8' },
     'payment_confirmation': { bg: '#dcfce7', text: '#16a34a', border: '#22c55e' },
     'receipt': { bg: '#fae8ff', text: '#a21caf', border: '#d946ef' },
+    'packing_slip': { bg: '#f0fdf4', text: '#166534', border: '#4ade80' },
+    'letter': { bg: '#fef9c3', text: '#854d0e', border: '#facc15' },
     'marketing': { bg: '#f3f4f6', text: '#6b7280', border: '#9ca3af' },
     'other': { bg: '#fef2f2', text: '#dc2626', border: '#f87171' }
   };

@@ -13,13 +13,14 @@ export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/other-documents/[id]/update
- * Update document details (vendor, date, user note)
+ * Update document details (vendor, date, user note, document type)
  * 
  * Body:
  * {
  *   vendor_name?: string,
  *   document_date?: string,
- *   user_note?: string
+ *   user_note?: string,
+ *   document_type?: string
  * }
  */
 export async function POST(
@@ -37,7 +38,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { vendor_name, document_date, user_note } = body;
+    const { vendor_name, document_date, user_note, document_type } = body;
 
     const db = getDatabase();
     const now = new Date().toISOString();
@@ -47,6 +48,9 @@ export async function POST(
     if (!document) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
+
+    // Valid document types
+    const validTypes = ['credit_memo', 'statement', 'payment_confirmation', 'receipt', 'packing_slip', 'letter', 'marketing', 'other'];
 
     // Build update query dynamically
     const updates: string[] = ['updated_at = ?'];
@@ -65,6 +69,17 @@ export async function POST(
     if (user_note !== undefined) {
       updates.push('user_note = ?');
       params_.push(user_note || null);
+    }
+
+    if (document_type !== undefined) {
+      // Validate document type
+      if (!validTypes.includes(document_type)) {
+        return NextResponse.json({ 
+          error: `Invalid document type. Must be one of: ${validTypes.join(', ')}` 
+        }, { status: 400 });
+      }
+      updates.push('document_type = ?');
+      params_.push(document_type);
     }
 
     // Add document ID to params

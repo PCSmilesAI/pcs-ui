@@ -112,6 +112,8 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
       'statement': { bg: '#e0f2fe', text: '#0369a1', label: 'Statement' },
       'payment_confirmation': { bg: '#dcfce7', text: '#16a34a', label: 'Payment Confirmation' },
       'receipt': { bg: '#fae8ff', text: '#a21caf', label: 'Receipt' },
+      'packing_slip': { bg: '#f0fdf4', text: '#166534', label: 'Packing Slip' },
+      'letter': { bg: '#fef9c3', text: '#854d0e', label: 'Letter' },
       'marketing': { bg: '#f3f4f6', text: '#6b7280', label: 'Marketing' },
       'other': { bg: '#fef2f2', text: '#dc2626', label: 'Other' },
       'invoice': { bg: '#e8f4fc', text: '#357ab2', label: 'Invoice' }
@@ -245,6 +247,8 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
           <option value="statement">Statement</option>
           <option value="payment_confirmation">Payment Confirmation</option>
           <option value="receipt">Receipt</option>
+          <option value="packing_slip">Packing Slip</option>
+          <option value="letter">Letter</option>
           <option value="marketing">Marketing</option>
           <option value="other">Other</option>
         </select>

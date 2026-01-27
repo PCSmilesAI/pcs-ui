@@ -164,7 +164,7 @@ export async function detectReclassificationIntent(
     const result = JSON.parse(jsonStr.trim()) as ReclassificationIntent;
 
     // Validate document type
-    const validTypes: DocumentType[] = ['receipt', 'credit_memo', 'statement', 'payment_confirmation', 'marketing', 'other'];
+    const validTypes: DocumentType[] = ['receipt', 'credit_memo', 'statement', 'payment_confirmation', 'packing_slip', 'letter', 'marketing', 'other'];
     if (result.newDocumentType && !validTypes.includes(result.newDocumentType)) {
       result.newDocumentType = 'other';
     }
@@ -308,6 +308,8 @@ export function getDocumentTypeDisplayName(type: DocumentType): string {
     'credit_memo': 'Credit Memo',
     'statement': 'Statement',
     'payment_confirmation': 'Payment Confirmation',
+    'packing_slip': 'Packing Slip',
+    'letter': 'Letter',
     'marketing': 'Marketing',
     'other': 'Other Document'
   };
