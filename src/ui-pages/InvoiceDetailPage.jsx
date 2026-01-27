@@ -1575,11 +1575,11 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       
       if (result.parsing_status === 'success') {
         showToast(`Invoice re-parsed successfully! Amount: $${result.amount || '0.00'}`, 'success');
-        // Reload the page to show updated data
-        setTimeout(() => window.location.reload(), 1500);
+        // Navigate back to list to show updated data
+        setTimeout(() => { if (onBack) onBack(); }, 1500);
       } else if (result.parsing_status === 'partial') {
         showToast(`Invoice re-parsed with partial data. ${result.parsing_error || ''}`, 'warning');
-        setTimeout(() => window.location.reload(), 2000);
+        setTimeout(() => { if (onBack) onBack(); }, 2000);
       } else {
         showToast(`Re-parsing failed: ${result.parsing_error || 'Unknown error'}`, 'error');
       }
@@ -1807,9 +1807,9 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         showToast('Invoice updated successfully! Changes are now reflected across the system.', 'success');
       }
 
-      // Refresh the page after a short delay to show the toast
+      // Navigate back to list after a short delay to show the toast
       setTimeout(() => {
-        window.location.reload();
+        if (onBack) onBack();
       }, 2000);
 
     } catch (error) {
@@ -3764,8 +3764,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                     onClick={() => {
                       setShowScanModal(false);
                       setScanResults(null);
-                      // Reload page to show updated data
-                      window.location.reload();
+                      // Navigate back to list to show updated data
+                      if (onBack) onBack();
                     }}
                     style={{
                       padding: '10px 24px',
