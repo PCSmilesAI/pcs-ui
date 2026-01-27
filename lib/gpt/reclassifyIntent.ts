@@ -251,25 +251,15 @@ export async function moveInvoiceToOtherDocuments(
       now
     );
 
-    // Log the reclassification event
-    db.prepare(`
-      INSERT INTO invoice_events (invoice_id, action, actor_email, payload_json)
-      VALUES (?, 'RECLASSIFIED', ?, ?)
-    `).run(
-      invoiceId,
-      actorEmail,
-      JSON.stringify({
-        new_document_type: documentType,
-        new_document_id: newId,
-        user_notes: notes
-      })
-    );
-
-    // Delete from invoices table
-    db.prepare('DELETE FROM invoices WHERE id = ?').run(invoiceId);
-
-    // Also delete any associated invoice_categories
+    // Delete associated records BEFORE deleting the invoice (foreign key constraints)
+    // Delete invoice_events first (has FK to invoices)
+    db.prepare('DELETE FROM invoice_events WHERE invoice_id = ?').run(invoiceId);
+    
+    // Delete invoice_categories
     db.prepare('DELETE FROM invoice_categories WHERE invoice_id = ?').run(invoiceId);
+    
+    // Now delete the invoice itself
+    db.prepare('DELETE FROM invoices WHERE id = ?').run(invoiceId);
 
     console.log('[PCS-AI-RECLASSIFY] Successfully moved invoice to other_documents:', {
       originalId: invoiceId,
