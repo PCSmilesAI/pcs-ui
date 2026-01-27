@@ -20,15 +20,15 @@ interface FiledDocument {
   created_at: string;
 }
 
-const documentTypeConfig: Record<string, { label: string; bg: string; text: string; icon: string }> = {
-  'credit_memo': { label: 'Credit Memos', bg: '#fef3c7', text: '#d97706', icon: '💳' },
-  'statement': { label: 'Statements', bg: '#e0f2fe', text: '#0369a1', icon: '📄' },
-  'payment_confirmation': { label: 'Payment Confirmations', bg: '#dcfce7', text: '#16a34a', icon: '✅' },
-  'receipt': { label: 'Receipts', bg: '#fae8ff', text: '#a21caf', icon: '🧾' },
-  'packing_slip': { label: 'Packing Slips', bg: '#f0fdf4', text: '#166534', icon: '📦' },
-  'letter': { label: 'Letters', bg: '#fef9c3', text: '#854d0e', icon: '✉️' },
-  'marketing': { label: 'Marketing', bg: '#f3f4f6', text: '#6b7280', icon: '📢' },
-  'other': { label: 'Other', bg: '#fef2f2', text: '#dc2626', icon: '📎' },
+const documentTypeConfig: Record<string, { label: string; bg: string; text: string; iconClass: string }> = {
+  'credit_memo': { label: 'Credit Memos', bg: '#fef3c7', text: '#d97706', iconClass: 'fa-credit-card' },
+  'statement': { label: 'Statements', bg: '#e0f2fe', text: '#0369a1', iconClass: 'fa-file-alt' },
+  'payment_confirmation': { label: 'Payment Confirmations', bg: '#dcfce7', text: '#16a34a', iconClass: 'fa-check-circle' },
+  'receipt': { label: 'Receipts', bg: '#fae8ff', text: '#a21caf', iconClass: 'fa-receipt' },
+  'packing_slip': { label: 'Packing Slips', bg: '#f0fdf4', text: '#166534', iconClass: 'fa-box' },
+  'letter': { label: 'Letters', bg: '#fef9c3', text: '#854d0e', iconClass: 'fa-envelope' },
+  'marketing': { label: 'Marketing', bg: '#f3f4f6', text: '#6b7280', iconClass: 'fa-bullhorn' },
+  'other': { label: 'Other', bg: '#fef2f2', text: '#dc2626', iconClass: 'fa-paperclip' },
 };
 
 export default function FiledDocumentsByTypePage() {
@@ -178,7 +178,7 @@ export default function FiledDocumentsByTypePage() {
           ← Back to Filed Documents
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-          <span style={{ fontSize: '32px' }}>{typeConfig.icon}</span>
+          <i className={`fas ${typeConfig.iconClass}`} style={{ fontSize: '28px', color: typeConfig.text }}></i>
           <h1 style={{ fontSize: '24px', fontWeight: 600, color: typeConfig.text, margin: 0 }}>
             {typeConfig.label}
           </h1>
