@@ -13,14 +13,15 @@ export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/other-documents/[id]/update
- * Update document details (vendor, date, user note, document type)
+ * Update document details (vendor, date, user note, document type, amount)
  * 
  * Body:
  * {
  *   vendor_name?: string,
  *   document_date?: string,
  *   user_note?: string,
- *   document_type?: string
+ *   document_type?: string,
+ *   amount?: number
  * }
  */
 export async function POST(
@@ -38,7 +39,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { vendor_name, document_date, user_note, document_type } = body;
+    const { vendor_name, document_date, user_note, document_type, amount } = body;
 
     const db = getDatabase();
     const now = new Date().toISOString();
@@ -80,6 +81,11 @@ export async function POST(
       }
       updates.push('document_type = ?');
       params_.push(document_type);
+    }
+
+    if (amount !== undefined) {
+      updates.push('amount = ?');
+      params_.push(amount);
     }
 
     // Add document ID to params
