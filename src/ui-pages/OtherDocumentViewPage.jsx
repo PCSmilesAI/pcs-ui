@@ -35,6 +35,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
   const [pdfLoadState, setPdfLoadState] = useState('loading');
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showTrainModal, setShowTrainModal] = useState(false);
 
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -199,6 +200,55 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
       setTimeout(() => {
         if (onBack) onBack();
       }, 1500);
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // Train AI to recognize this document type for this vendor
+  const handleTrain = async () => {
+    // Validate required fields
+    if (!details.vendor) {
+      showToast('Please set the vendor name before training', 'error');
+      setShowTrainModal(false);
+      return;
+    }
+    if (!details.documentType || details.documentType === 'other') {
+      showToast('Please select a specific document type before training', 'error');
+      setShowTrainModal(false);
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      // First save any pending changes
+      await fetch(`/api/other-documents/${document.id}/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vendor_name: details.vendor,
+          document_date: details.date,
+          user_note: details.note,
+          document_type: details.documentType,
+        }),
+      });
+
+      // Then train the knowledge base
+      const res = await fetch(`/api/other-documents/${document.id}/train`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to train AI');
+      }
+      
+      const data = await res.json();
+      showToast(`AI trained! ${data.vendorName} will now recognize ${details.documentType.replace('_', ' ')} documents.`, 'success');
+      setShowTrainModal(false);
     } catch (err) {
       showToast(err.message, 'error');
     } finally {
@@ -404,6 +454,24 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
             }}
           >
             Delete
+          </button>
+          <button
+            onClick={() => setShowTrainModal(true)}
+            disabled={processing || !details.vendor}
+            title={!details.vendor ? 'Set vendor name first' : 'Train AI to recognize this document type'}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '9999px',
+              fontSize: '14px',
+              fontWeight: '500',
+              border: '1px solid #7c3aed',
+              color: '#ffffff',
+              backgroundColor: '#7c3aed',
+              cursor: processing || !details.vendor ? 'not-allowed' : 'pointer',
+              opacity: processing || !details.vendor ? 0.6 : 1,
+            }}
+          >
+            Update AI
           </button>
           <button
             onClick={() => setShowInvoiceModal(true)}
@@ -779,6 +847,101 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                 }}
               >
                 {processing ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Train AI Confirmation Modal */}
+      {showTrainModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setShowTrainModal(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '500px',
+              width: '90%',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0, color: '#7c3aed', fontSize: '18px' }}>
+              Update AI Knowledge Base
+            </h3>
+            <p style={{ color: '#4b5563', marginBottom: '12px' }}>
+              This will train PCS AI to recognize <strong>{details.documentType?.replace('_', ' ') || 'this document type'}</strong> from <strong>{details.vendor || 'this vendor'}</strong>.
+            </p>
+            <div style={{ 
+              backgroundColor: '#f3f4f6', 
+              padding: '12px', 
+              borderRadius: '8px',
+              marginBottom: '16px',
+              fontSize: '14px',
+              color: '#374151'
+            }}>
+              <strong>What this does:</strong>
+              <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
+                <li>Teaches AI to identify similar documents as "{details.documentType?.replace('_', ' ')}"</li>
+                <li>Adds recognition rules based on this document's visual patterns</li>
+                <li>Future similar documents will be auto-classified correctly</li>
+              </ul>
+            </div>
+            {details.note && (
+              <div style={{ 
+                backgroundColor: '#fef3c7', 
+                padding: '12px', 
+                borderRadius: '8px',
+                marginBottom: '16px',
+                fontSize: '14px',
+                color: '#92400e'
+              }}>
+                <strong>Your note will be included:</strong>
+                <p style={{ margin: '4px 0 0 0', fontStyle: 'italic' }}>"{details.note}"</p>
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
+              <button
+                onClick={() => setShowTrainModal(false)}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: '#fff',
+                  color: '#374151',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleTrain}
+                disabled={processing}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  backgroundColor: '#7c3aed',
+                  color: '#fff',
+                  cursor: processing ? 'not-allowed' : 'pointer',
+                  opacity: processing ? 0.6 : 1,
+                }}
+              >
+                {processing ? 'Training...' : 'Train AI'}
               </button>
             </div>
           </div>
