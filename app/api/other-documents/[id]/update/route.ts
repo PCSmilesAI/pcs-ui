@@ -39,7 +39,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { vendor_name, document_date, user_note, document_type, amount } = body;
+    const { vendor_name, document_date, user_note, document_type, amount, location } = body;
 
     const db = getDatabase();
     const now = new Date().toISOString();
@@ -86,6 +86,11 @@ export async function POST(
     if (amount !== undefined) {
       updates.push('amount = ?');
       params_.push(amount);
+    }
+
+    if (location !== undefined) {
+      updates.push('location = ?');
+      params_.push(location || null);
     }
 
     // Add document ID to params

@@ -18,7 +18,21 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
     note: document?.user_note || '',
     documentType: document?.document_type || 'other',
     amount: document?.amount || '',
+    location: document?.location || '',
   });
+
+  // Office locations dropdown
+  const officeLocations = [
+    { value: '', label: 'Select location...' },
+    { value: 'Milwaukie', label: 'Milwaukie' },
+    { value: 'Lebanon', label: 'Lebanon' },
+    { value: 'Eugene', label: 'Eugene' },
+    { value: 'Roseburg', label: 'Roseburg' },
+    { value: 'Riddle', label: 'Riddle' },
+    { value: 'Salem', label: 'Salem' },
+    { value: 'Ridgefield', label: 'Ridgefield' },
+    { value: 'Columbia', label: 'Columbia' },
+  ];
 
   // QBO Vendors state
   const [qboVendors, setQboVendors] = useState([]);
@@ -161,6 +175,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
             note: data.document.user_note || '',
             documentType: data.document.document_type || 'other',
             amount: data.document.amount || '',
+            location: data.document.location || '',
           });
         }
       }
@@ -270,6 +285,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
           user_note: details.note,
           document_type: details.documentType,
           amount: details.amount ? parseFloat(details.amount) : null,
+          location: details.location || null,
         }),
       });
 
@@ -307,6 +323,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
           user_note: details.note,
           document_type: details.documentType,
           amount: details.amount ? parseFloat(details.amount) : null,
+          location: details.location || null,
         }),
       });
       
@@ -675,6 +692,26 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                       placeholder="0.00"
                       style={inputStyle}
                     />
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Location</td>
+                  <td style={cellStyle}>
+                    <select
+                      value={details.location}
+                      onChange={(e) => handleDetailChange('location', e.target.value)}
+                      style={{
+                        ...inputStyle,
+                        cursor: 'pointer',
+                        backgroundColor: '#fff',
+                      }}
+                    >
+                      {officeLocations.map((loc) => (
+                        <option key={loc.value} value={loc.value}>
+                          {loc.label}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                 </tr>
                 <tr>
