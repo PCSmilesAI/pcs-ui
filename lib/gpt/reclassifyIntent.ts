@@ -52,7 +52,7 @@ const INTENT_DETECTION_PROMPT = `You are analyzing a user comment to determine i
 The user is reviewing what was classified as an invoice. They may be making corrections to invoice fields (like fixing the vendor name or amount), OR they may be saying the document is NOT an invoice at all.
 
 RECLASSIFICATION INDICATORS (user wants to change document type):
-- "This is a receipt" / "This is just a receipt"
+- "This is a receipt" / "This is just a receipt" / "reciept" (misspelling)
 - "This is a credit memo" / "This is a credit"
 - "This is a statement" / "This is an account statement"
 - "Not an invoice" / "This isn't an invoice"
@@ -60,6 +60,7 @@ RECLASSIFICATION INDICATORS (user wants to change document type):
 - "This is a payment confirmation"
 - "Wrong document type"
 - "This is marketing" / "This is junk"
+- "Scanned receipt" / "scan receipt"
 
 NON-RECLASSIFICATION (just correcting invoice fields):
 - "The vendor name is wrong"
@@ -69,21 +70,24 @@ NON-RECLASSIFICATION (just correcting invoice fields):
 - Any comment about specific field values
 
 DOCUMENT TYPES:
+- receipt: Purchase receipts, transaction receipts, scanned receipts (USE THIS for "this is a receipt")
 - credit_memo: Credit notes, refunds, credits applied
 - statement: Account statements, balance summaries
-- payment_confirmation: Payment receipts, payment confirmations
+- payment_confirmation: Payment confirmations, payment acknowledgments
 - marketing: Promotional material, advertisements
 - other: Anything else that's not an invoice
 
 Return a JSON object:
 {
   "shouldReclassify": true/false,
-  "newDocumentType": "credit_memo" | "statement" | "payment_confirmation" | "marketing" | "other" | null,
+  "newDocumentType": "receipt" | "credit_memo" | "statement" | "payment_confirmation" | "marketing" | "other" | null,
   "confidence": 0.0 to 1.0,
   "reason": "Brief explanation"
 }
 
-IMPORTANT: Only set shouldReclassify to true if the user CLEARLY indicates the document should not be treated as an invoice. If they're just making corrections to invoice fields, set shouldReclassify to false.
+IMPORTANT: 
+- If the user says "this is a receipt" (or any misspelling like "reciept"), set shouldReclassify=true and newDocumentType="receipt"
+- Only set shouldReclassify to false if they're just making corrections to invoice fields.
 
 Return ONLY valid JSON.`;
 
@@ -147,7 +151,7 @@ export async function detectReclassificationIntent(
     const result = JSON.parse(jsonStr.trim()) as ReclassificationIntent;
 
     // Validate document type
-    const validTypes: DocumentType[] = ['credit_memo', 'statement', 'payment_confirmation', 'marketing', 'other'];
+    const validTypes: DocumentType[] = ['receipt', 'credit_memo', 'statement', 'payment_confirmation', 'marketing', 'other'];
     if (result.newDocumentType && !validTypes.includes(result.newDocumentType)) {
       result.newDocumentType = 'other';
     }
@@ -294,6 +298,7 @@ export async function moveInvoiceToOtherDocuments(
 export function getDocumentTypeDisplayName(type: DocumentType): string {
   const displayNames: Record<DocumentType, string> = {
     'invoice': 'Invoice',
+    'receipt': 'Receipt',
     'credit_memo': 'Credit Memo',
     'statement': 'Statement',
     'payment_confirmation': 'Payment Confirmation',
