@@ -669,6 +669,7 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
   ensureColumn('other_documents', 'filed_by', 'filed_by TEXT');
   ensureColumn('other_documents', 'user_note', 'user_note TEXT');
   ensureColumn('other_documents', 'amount', 'amount REAL');
+  ensureColumn('other_documents', 'location', 'location TEXT');
 
   console.log('[DB] Migrations completed successfully');
 }
