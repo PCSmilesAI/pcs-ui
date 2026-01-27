@@ -103,6 +103,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
       'credit_memo': { bg: '#fef3c7', text: '#d97706', label: 'Credit Memo' },
       'statement': { bg: '#e0f2fe', text: '#0369a1', label: 'Statement' },
       'payment_confirmation': { bg: '#dcfce7', text: '#16a34a', label: 'Payment Confirmation' },
+      'receipt': { bg: '#fae8ff', text: '#a21caf', label: 'Receipt' },
       'marketing': { bg: '#f3f4f6', text: '#6b7280', label: 'Marketing' },
       'other': { bg: '#fef2f2', text: '#dc2626', label: 'Other' },
       'invoice': { bg: '#e8f4fc', text: '#357ab2', label: 'Invoice' }
@@ -223,6 +224,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
           <option value="credit_memo">Credit Memo</option>
           <option value="statement">Statement</option>
           <option value="payment_confirmation">Payment Confirmation</option>
+          <option value="receipt">Receipt</option>
           <option value="marketing">Marketing</option>
           <option value="other">Other</option>
         </select>
