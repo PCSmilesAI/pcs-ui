@@ -204,13 +204,13 @@ export default function FiledDocumentsByTypePage() {
         gap: '16px', 
         marginBottom: '20px',
         flexWrap: 'wrap',
-        alignItems: 'center',
+        alignItems: 'flex-end',
         padding: '16px',
         backgroundColor: '#f9fafb',
         borderRadius: '8px',
       }}>
-        <div style={{ flex: '1', minWidth: '200px' }}>
-          <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+        <div style={{ minWidth: '200px', maxWidth: '280px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '4px', fontWeight: 500 }}>
             Search by Vendor
           </label>
           <input
@@ -224,11 +224,12 @@ export default function FiledDocumentsByTypePage() {
               border: '1px solid #d1d5db',
               borderRadius: '6px',
               fontSize: '14px',
+              boxSizing: 'border-box',
             }}
           />
         </div>
-        <div style={{ flex: '1', minWidth: '200px' }}>
-          <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+        <div style={{ minWidth: '200px', maxWidth: '280px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '4px', fontWeight: 500 }}>
             Search by Date
           </label>
           <input
@@ -242,11 +243,12 @@ export default function FiledDocumentsByTypePage() {
               border: '1px solid #d1d5db',
               borderRadius: '6px',
               fontSize: '14px',
+              boxSizing: 'border-box',
             }}
           />
         </div>
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+        <div style={{ minWidth: '160px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '4px', fontWeight: 500 }}>
             Sort By
           </label>
           <select
@@ -257,11 +259,13 @@ export default function FiledDocumentsByTypePage() {
               setSortOrder(order as 'asc' | 'desc');
             }}
             style={{
+              width: '100%',
               padding: '8px 12px',
               border: '1px solid #d1d5db',
               borderRadius: '6px',
               fontSize: '14px',
               backgroundColor: '#fff',
+              boxSizing: 'border-box',
             }}
           >
             <option value="filed-desc">Filed (Newest)</option>
@@ -283,7 +287,7 @@ export default function FiledDocumentsByTypePage() {
               cursor: 'pointer',
               fontSize: '14px',
               color: '#6b7280',
-              marginTop: '18px',
+              height: '38px',
             }}
           >
             Clear Filters

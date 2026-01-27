@@ -99,10 +99,25 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
     }
   };
 
-  // Archive document
-  const archiveDocument = async (docId) => {
-    if (!confirm('Archive this document?')) return;
-    await updateDocumentStatus(docId, 'archived');
+  // Delete document
+  const deleteDocument = async (docId) => {
+    if (!confirm('Delete this document? This cannot be undone.')) return;
+    try {
+      setUpdating(true);
+      const res = await fetch(`/api/other-documents/${docId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to delete');
+      }
+      showToast('Document deleted', 'success');
+      fetchDocuments();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setUpdating(false);
+    }
   };
 
   // Get type badge styling
@@ -164,8 +179,11 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
     return `/api/pdf/${filename}`;
   };
 
-  // Filter documents by search query
+  // Filter documents by search query and exclude filed documents
   const filteredDocuments = documents.filter(doc => {
+    // Exclude filed documents - they appear in the Filed Documents section
+    if (doc.status === 'filed') return false;
+    
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -356,7 +374,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Date</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Status</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Note</th>
-                <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Actions</th>
+                <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', minWidth: '140px' }}>Quick Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -428,58 +446,41 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                       {doc.user_note || '-'}
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-                      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'nowrap' }}>
                         {doc.pdf_path && (
                           <a
                             href={getPdfUrl(doc.pdf_path)}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{
-                              padding: '4px 8px',
+                              padding: '4px 10px',
                               borderRadius: '4px',
                               backgroundColor: '#e8f4fc',
                               color: '#357ab2',
                               fontSize: '12px',
-                              textDecoration: 'none'
+                              textDecoration: 'none',
+                              whiteSpace: 'nowrap'
                             }}
                           >
                             View PDF
                           </a>
                         )}
-                        {doc.status === 'pending' && (
-                          <button
-                            onClick={() => updateDocumentStatus(doc.id, 'reviewed')}
-                            disabled={updating}
-                            style={{
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              backgroundColor: '#dcfce7',
-                              color: '#16a34a',
-                              border: 'none',
-                              fontSize: '12px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            Mark Reviewed
-                          </button>
-                        )}
-                        {doc.status !== 'archived' && (
-                          <button
-                            onClick={() => archiveDocument(doc.id)}
-                            disabled={updating}
-                            style={{
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              backgroundColor: '#f3f4f6',
-                              color: '#6b7280',
-                              border: 'none',
-                              fontSize: '12px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            Archive
-                          </button>
-                        )}
+                        <button
+                          onClick={() => deleteDocument(doc.id)}
+                          disabled={updating}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '4px',
+                            backgroundColor: '#fef2f2',
+                            color: '#dc2626',
+                            border: 'none',
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
