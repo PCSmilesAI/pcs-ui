@@ -589,15 +589,22 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
               </tbody>
             </table>
 
-            {/* Payment Amount row */}
+            {/* Payment Amount row - editable */}
             <table style={{ ...tableStyle, marginTop: '12px' }}>
               <tbody>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Amount</td>
                   <td style={cellStyle}>
-                    <span style={{ fontSize: '14px', fontWeight: '600' }}>
-                      {formatAmount(document?.amount)}
-                    </span>
+                    <input
+                      type="text"
+                      value={details.amount}
+                      onChange={(e) => handleDetailChange('amount', e.target.value)}
+                      placeholder="0.00"
+                      style={{
+                        ...inputStyle,
+                        fontWeight: '600',
+                      }}
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -679,18 +686,6 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                       valueKey="id"
                       disabled={loadingVendors}
                       style={{ width: '100%' }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Amount</td>
-                  <td style={cellStyle}>
-                    <input
-                      type="text"
-                      value={details.amount}
-                      onChange={(e) => handleDetailChange('amount', e.target.value)}
-                      placeholder="0.00"
-                      style={inputStyle}
                     />
                   </td>
                 </tr>
