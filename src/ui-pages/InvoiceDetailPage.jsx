@@ -53,9 +53,12 @@ async function checkIfAdmin(email) {
  * that the layout and colours appear even if no CSS preprocessor
  * is available.
  */
-export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext, onInvoiceRejected }) {
+export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext, onInvoiceRejected }) {
   // Get user permissions from context
   const { permissions } = useUserRole();
+  
+  // Track current invoice data (can be refreshed after updates)
+  const [invoice, setInvoice] = useState(initialInvoice);
   
   const invoiceIdentifier = invoice?.id || invoice?.invoice_number || null;
   const invoiceJsonPath = invoice?.json_path || null;
@@ -144,6 +147,43 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
   }, []);
+  
+  // Function to refresh invoice data from the server (stays on same page)
+  const refreshInvoiceData = useCallback(async () => {
+    if (!invoiceIdentifier) return;
+    
+    try {
+      const response = await fetch(`/api/invoices/${invoiceIdentifier}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.invoice) {
+          setInvoice(data.invoice);
+          // Update related state
+          const amountCents = data.invoice.amount_cents;
+          const newAmount = amountCents != null
+            ? `$${(amountCents / 100).toFixed(2)}`
+            : (data.invoice.amount || data.invoice.total || '');
+          setPaymentAmount(newAmount);
+          setDetails({
+            invoice: data.invoice.invoice_number || data.invoice.invoice || '',
+            vendor: data.invoice.vendor_name || data.invoice.vendor || '',
+            office: data.invoice.office_id || data.invoice.office || '',
+            category: data.invoice.category || 'Dental Lab',
+            invoice_date: data.invoice.invoice_date || '',
+            due_date: data.invoice.due_date || '',
+          });
+          if (data.allocations) {
+            setAllocations(data.allocations);
+          }
+          if (data.template) {
+            setTemplate(data.template);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error refreshing invoice data:', err);
+    }
+  }, [invoiceIdentifier]);
 
   // Load QBO categories, classes, and vendors on mount
   useEffect(() => {
@@ -1575,11 +1615,11 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
       
       if (result.parsing_status === 'success') {
         showToast(`Invoice re-parsed successfully! Amount: $${result.amount || '0.00'}`, 'success');
-        // Navigate back to list to show updated data
-        setTimeout(() => { if (onBack) onBack(); }, 1500);
+        // Refresh invoice data to show updated values
+        setTimeout(() => refreshInvoiceData(), 1500);
       } else if (result.parsing_status === 'partial') {
         showToast(`Invoice re-parsed with partial data. ${result.parsing_error || ''}`, 'warning');
-        setTimeout(() => { if (onBack) onBack(); }, 2000);
+        setTimeout(() => refreshInvoiceData(), 2000);
       } else {
         showToast(`Re-parsing failed: ${result.parsing_error || 'Unknown error'}`, 'error');
       }
@@ -1807,9 +1847,9 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
         showToast('Invoice updated successfully! Changes are now reflected across the system.', 'success');
       }
 
-      // Navigate back to list after a short delay to show the toast
+      // Refresh invoice data after a short delay to show the toast
       setTimeout(() => {
-        if (onBack) onBack();
+        refreshInvoiceData();
       }, 2000);
 
     } catch (error) {
@@ -3764,8 +3804,8 @@ export default function InvoiceDetailPage({ invoice, onBack, onPrevious, onNext,
                     onClick={() => {
                       setShowScanModal(false);
                       setScanResults(null);
-                      // Navigate back to list to show updated data
-                      if (onBack) onBack();
+                      // Refresh invoice data to show updated values
+                      refreshInvoiceData();
                     }}
                     style={{
                       padding: '10px 24px',
