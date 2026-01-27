@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Toast from '../components/Toast.jsx';
+import SearchableSelect from '../components/SearchableSelect';
+import AddNewVendorModal from '../components/AddNewVendorModal';
 
 /**
  * Page for viewing and managing individual other documents (receipts, credit memos, statements, etc.)
@@ -15,7 +17,13 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
     date: document?.document_date || '',
     note: document?.user_note || '',
     documentType: document?.document_type || 'other',
+    amount: document?.amount || '',
   });
+
+  // QBO Vendors state
+  const [qboVendors, setQboVendors] = useState([]);
+  const [loadingVendors, setLoadingVendors] = useState(false);
+  const [showAddVendorModal, setShowAddVendorModal] = useState(false);
 
   // Available document types for dropdown
   const documentTypes = [
@@ -42,6 +50,34 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
   }, []);
 
   const dismissToast = useCallback(() => setToast(null), []);
+
+  // Fetch QBO Vendors
+  const fetchQboVendors = useCallback(async () => {
+    setLoadingVendors(true);
+    try {
+      const response = await fetch('/api/qbo/vendors');
+      if (response.ok) {
+        const data = await response.json();
+        // Add "Add New Vendor" as the first option
+        const vendorOptions = [
+          { id: '__add_new__', name: '+ Add New Vendor', displayName: '+ Add New Vendor' },
+          ...(data.vendors || [])
+        ];
+        setQboVendors(vendorOptions);
+      } else {
+        console.warn('Failed to load QBO vendors:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching QBO vendors:', error);
+    } finally {
+      setLoadingVendors(false);
+    }
+  }, []);
+
+  // Load QBO vendors on mount
+  useEffect(() => {
+    fetchQboVendors();
+  }, [fetchQboVendors]);
 
   // Get document type display info
   const getTypeBadge = (type) => {
@@ -124,6 +160,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
             date: data.document.document_date || '',
             note: data.document.user_note || '',
             documentType: data.document.document_type || 'other',
+            amount: data.document.amount || '',
           });
         }
       }
@@ -232,6 +269,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
           document_date: details.date,
           user_note: details.note,
           document_type: details.documentType,
+          amount: details.amount ? parseFloat(details.amount) : null,
         }),
       });
 
@@ -268,6 +306,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
           document_date: details.date,
           user_note: details.note,
           document_type: details.documentType,
+          amount: details.amount ? parseFloat(details.amount) : null,
         }),
       });
       
@@ -588,11 +627,52 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Vendor</td>
                   <td style={cellStyle}>
+                    <SearchableSelect
+                      options={(() => {
+                        // If current vendor exists and isn't in the QBO list, add it as a custom option
+                        const currentVendor = details.vendor;
+                        if (currentVendor && !qboVendors.find(v => v.name === currentVendor && v.id !== '__add_new__')) {
+                          return [
+                            { id: '__add_new__', name: '+ Add New Vendor', displayName: '+ Add New Vendor' },
+                            { id: `__current__`, name: currentVendor, displayName: `${currentVendor} (current)` },
+                            ...qboVendors.filter(v => v.id !== '__add_new__')
+                          ];
+                        }
+                        return qboVendors;
+                      })()}
+                      value={(() => {
+                        const currentVendor = details.vendor;
+                        if (!currentVendor) return '';
+                        const match = qboVendors.find(v => v.name === currentVendor && v.id !== '__add_new__');
+                        if (match) return match.id;
+                        // Return custom ID if vendor exists but not in QBO list
+                        return '__current__';
+                      })()}
+                      onChange={(id, displayText) => {
+                        if (id === '__add_new__') {
+                          setShowAddVendorModal(true);
+                          return;
+                        }
+                        // Find the vendor and use its name
+                        const vendor = qboVendors.find(v => v.id === id);
+                        handleDetailChange('vendor', vendor?.name || displayText || '');
+                      }}
+                      placeholder={loadingVendors ? 'Loading vendors...' : 'Select vendor...'}
+                      displayKey="displayName"
+                      valueKey="id"
+                      disabled={loadingVendors}
+                      style={{ width: '100%' }}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Amount</td>
+                  <td style={cellStyle}>
                     <input
                       type="text"
-                      value={details.vendor}
-                      onChange={(e) => handleDetailChange('vendor', e.target.value)}
-                      placeholder="Enter vendor name"
+                      value={details.amount}
+                      onChange={(e) => handleDetailChange('amount', e.target.value)}
+                      placeholder="0.00"
                       style={inputStyle}
                     />
                   </td>
@@ -926,6 +1006,20 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
           </div>
         </div>
       )}
+
+      {/* Add New Vendor Modal */}
+      <AddNewVendorModal
+        isOpen={showAddVendorModal}
+        onClose={() => setShowAddVendorModal(false)}
+        onVendorCreated={(newVendor) => {
+          // Refresh vendor list and select the new vendor
+          fetchQboVendors();
+          if (newVendor?.name) {
+            handleDetailChange('vendor', newVendor.name);
+          }
+          setShowAddVendorModal(false);
+        }}
+      />
     </div>
   );
 }
