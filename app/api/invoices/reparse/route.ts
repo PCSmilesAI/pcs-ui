@@ -11,6 +11,7 @@ import { isAdmin } from '@/lib/workflow/rolesStore';
 import { parseInvoiceWithGPT } from '@/lib/gpt/parseInvoice';
 import { getDatabase } from '@/lib/db/client';
 import { loadProgress, BulkParseProgress } from '@/lib/gpt/bulkParse';
+import { normalizeDateForStorage } from '@/lib/utils/dateUtils';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -146,6 +147,10 @@ export async function POST(req: NextRequest) {
     if (existingInvoice) {
       const totalCents = result.data.total ? Math.round(result.data.total * 100) : null;
 
+      // Normalize dates to MM/DD/YYYY format
+      const normalizedInvoiceDate = normalizeDateForStorage(result.data.invoice_date);
+      const normalizedDueDate = normalizeDateForStorage(result.data.due_date);
+
       // Store line items as description JSON
       const lineItemsDescription = result.data.line_items && result.data.line_items.length > 0
         ? `Line items: ${JSON.stringify(result.data.line_items)}`
@@ -178,8 +183,8 @@ export async function POST(req: NextRequest) {
         totalCents,
         result.data.total,
         result.data.total,
-        result.data.invoice_date,
-        result.data.due_date,
+        normalizedInvoiceDate,
+        normalizedDueDate,
         'gpt-5-nano',
         result.data.parsing_confidence,
         lineItemsDescription,
