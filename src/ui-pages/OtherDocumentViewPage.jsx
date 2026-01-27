@@ -199,7 +199,10 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
       }
       
       showToast('Document filed successfully!', 'success');
-      await refreshDocument();
+      // Navigate back to the main Other Documents page
+      setTimeout(() => {
+        if (onBack) onBack();
+      }, 1000);
     } catch (err) {
       showToast(err.message, 'error');
     } finally {
