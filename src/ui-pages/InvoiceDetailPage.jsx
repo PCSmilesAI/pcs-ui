@@ -1657,13 +1657,15 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       const amountCents = Math.round(amountNum * 100);
 
       // Call update API with corrected fields (including invoice number and dates)
+      // Also pass userComment so the API can detect reclassification intent (e.g., "this is a receipt")
       const response = await csrfClient.post(`/api/invoices/${encodeURIComponent(invoiceId)}/update`, {
         vendor_name: details.vendor,
         office_id: details.office,
         amount_cents: amountCents,
         invoice_number: details.invoice,
         invoice_date: details.invoice_date,
-        due_date: details.due_date
+        due_date: details.due_date,
+        userComment: updateComment.trim() || undefined
       });
 
       // csrfClient returns { ok, status, data, error } not a Response object
