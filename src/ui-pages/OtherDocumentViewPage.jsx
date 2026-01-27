@@ -464,14 +464,14 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
               borderRadius: '9999px',
               fontSize: '14px',
               fontWeight: '500',
-              border: '1px solid #7c3aed',
+              border: '1px solid #d97706',
               color: '#ffffff',
-              backgroundColor: '#7c3aed',
+              backgroundColor: '#d97706',
               cursor: processing || !details.vendor ? 'not-allowed' : 'pointer',
               opacity: processing || !details.vendor ? 0.6 : 1,
             }}
           >
-            Update AI
+            Update
           </button>
           <button
             onClick={() => setShowInvoiceModal(true)}
@@ -615,27 +615,6 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                 </tr>
               </tbody>
             </table>
-            
-            {/* Update button */}
-            <div style={{ marginTop: '12px', textAlign: 'right' }}>
-              <button
-                onClick={handleUpdate}
-                disabled={processing}
-                style={{
-                  padding: '8px 20px',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  border: 'none',
-                  color: '#ffffff',
-                  backgroundColor: '#357ab2',
-                  cursor: processing ? 'not-allowed' : 'pointer',
-                  opacity: processing ? 0.6 : 1,
-                }}
-              >
-                {processing ? 'Updating...' : 'Update'}
-              </button>
-            </div>
           </div>
         </div>
 
