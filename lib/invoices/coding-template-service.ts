@@ -237,16 +237,17 @@ export function applyCodingTemplate(
     // Load template rows
     let templateRows = getTemplateRows(templateId);
 
-    // For split_evenly_all_classes mode, auto-generate rows from dental offices if none exist
-    if (allocationMode === 'split_evenly_all_classes' && templateRows.length === 0) {
-      console.log('[CODING_TEMPLATE] Auto-generating rows for split_evenly_all_classes mode');
+    // For split_evenly modes, auto-generate rows from dental offices if none exist
+    // This handles both 'split_evenly' and 'split_evenly_all_classes' modes
+    if ((allocationMode === 'split_evenly_all_classes' || allocationMode === 'split_evenly') && templateRows.length === 0) {
+      console.log(`[CODING_TEMPLATE] Auto-generating rows for ${allocationMode} mode (no rows defined)`);
       const dentalOffices = getDentalOffices();
       
       if (dentalOffices.length === 0) {
-        return { success: false, error: 'No dental office classes available for split_evenly_all_classes mode' };
+        return { success: false, error: 'No dental office classes available for even split mode' };
       }
       
-      // Create virtual template rows from dental offices
+      // Create virtual template rows from dental offices (all 8 locations)
       templateRows = dentalOffices.map((office) => ({
         id: `auto-${office.id}`,
         template_id: templateId,
@@ -258,11 +259,11 @@ export function applyCodingTemplate(
         created_at: now,
       })) as TemplateRow[];
       
-      console.log(`[CODING_TEMPLATE] Auto-generated ${templateRows.length} rows from dental offices`);
+      console.log(`[CODING_TEMPLATE] Auto-generated ${templateRows.length} rows from dental offices for ${allocationMode} mode`);
     }
 
     if (templateRows.length === 0) {
-      return { success: false, error: 'Template has no rows defined' };
+      return { success: false, error: 'Template has no rows defined. Add rows to the template or use a split evenly mode.' };
     }
 
     // Get all clinics for mapping
