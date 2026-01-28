@@ -113,6 +113,33 @@ const HARDCODED_VENDOR_ACCOUNTS: Record<string, string> = {
   'tc dental laboratory': '52210 Dental Lab Fees',
   'glidewell': '52210 Dental Lab Fees',
   'glidewell dental': '52210 Dental Lab Fees',
+  
+  // More vendors
+  'tech edge': '53334 Software',
+  'systech consulting': '53334 Software',
+  'premier dental products': '10210 Dental Supplies Inventory',
+  'premier dental products co.': '10210 Dental Supplies Inventory',
+  'pacific supply': '10210 Dental Supplies Inventory',
+  'pacific crest supplies': '10210 Dental Supplies Inventory',
+  'instruments direct supply': '11010 Dental Equipment',
+  'instruments direct supply, inc.': '11010 Dental Equipment',
+  'dental town': '10210 Dental Supplies Inventory',
+  'jan-pro': '53221 Janitorial',
+  'jan pro': '53221 Janitorial',
+  'passport to languages inc': '53361 Contract Services',
+  'passport to languages': '53361 Contract Services',
+  'national fire fighter corp.': '53361 Contract Services',
+  'national fire fighter': '53361 Contract Services',
+  'adco g & s equipment': '11010 Dental Equipment',
+  'sunset heating': '53361 Contract Services',
+  'sunset heating, cooling, & electrical': '53361 Contract Services',
+  'housfield dental': '10210 Dental Supplies Inventory',
+  'odp business solutions': '53223 Office Supplies',
+  'national interpretation service': '53361 Contract Services',
+  'pure clean llc': '53221 Janitorial',
+  'pure clean': '53221 Janitorial',
+  "murphy's law janitorial": '53221 Janitorial',
+  'murphys law janitorial': '53221 Janitorial',
 };
 
 /**
