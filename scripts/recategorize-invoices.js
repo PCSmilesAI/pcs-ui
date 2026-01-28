@@ -56,6 +56,32 @@ const HARDCODED_VENDOR_ACCOUNTS = {
   'patterson dental': '10210 Dental Supplies Inventory',
   'patterson': '10210 Dental Supplies Inventory',
   'henry schein': '10210 Dental Supplies Inventory',
+  'henry schein inc': '10210 Dental Supplies Inventory',
+  
+  // Additional vendors
+  'ondiem': '53361 Contract Services',
+  'benco': '10210 Dental Supplies Inventory',
+  'benco dental': '10210 Dental Supplies Inventory',
+  'national interpreting service inc': '53361 Contract Services',
+  'national interpreting service': '53361 Contract Services',
+  'safeway': '53220 Office Expenses',
+  'statdds': '53334 Software',
+  'oral biotech': '10210 Dental Supplies Inventory',
+  'oral biotech, llc': '10210 Dental Supplies Inventory',
+  'procter & gamble': '10210 Dental Supplies Inventory',
+  'umpqua valley fire services': '53361 Contract Services',
+  'umpqua valley fire services, inc': '53361 Contract Services',
+  'marion environmental services': '53225 Hazardous Disposal',
+  'marion environmental services, inc.': '53225 Hazardous Disposal',
+  'bonadent': '52210 Dental Lab Fees',
+  'pacific dental services': '53361 Contract Services',
+  'corsearch': '53334 Software',
+  'berman fink van horn p.c.': '53360 Professional Fees',
+  'berman fink van horn': '53360 Professional Fees',
+  'tc dental': '10210 Dental Supplies Inventory',
+  'tc dental laboratory': '52210 Dental Lab Fees',
+  'glidewell': '52210 Dental Lab Fees',
+  'glidewell dental': '52210 Dental Lab Fees',
 };
 
 // Categories that need fixing
