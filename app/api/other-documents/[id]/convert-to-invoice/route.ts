@@ -163,7 +163,7 @@ export async function POST(
     const pdfFilename = document.pdf_path.split('/').pop();
     const normalizedPdfPath = `/api/pdf/${pdfFilename}`;
 
-    // Insert into invoices table
+    // Insert into invoices table (only columns that exist in schema)
     db.prepare(`
       INSERT INTO invoices (
         id,
@@ -179,15 +179,11 @@ export async function POST(
         invoice_date,
         due_date,
         status,
-        parsing_status,
-        parsing_confidence,
         pdf_path,
-        email_subject,
-        email_from,
         deleted,
         created_at,
         updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
     `).run(
       invoiceId,
       invoiceNumber,
@@ -202,11 +198,7 @@ export async function POST(
       parsed.invoice_date || document.document_date || null,
       parsed.due_date || null,
       'incoming', // Start as incoming for review
-      parseResult.success ? 'success' : 'partial',
-      parsed.confidence || 0.8,
       normalizedPdfPath,
-      document.email_subject || null,
-      document.email_from || null,
       now,
       now
     );
