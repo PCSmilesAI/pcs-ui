@@ -91,7 +91,7 @@ function OtherDocumentViewContent() {
           onClick={handleBack}
           style={{
             padding: '8px 16px',
-            borderRadius: '6px',
+            borderRadius: '12px',
             border: '1px solid #357ab2',
             backgroundColor: '#fff',
             color: '#357ab2',
@@ -113,7 +113,7 @@ function OtherDocumentViewContent() {
           style={{
             marginTop: '16px',
             padding: '8px 16px',
-            borderRadius: '6px',
+            borderRadius: '12px',
             border: '1px solid #357ab2',
             backgroundColor: '#fff',
             color: '#357ab2',

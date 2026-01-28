@@ -24,7 +24,7 @@ export default function AddNewVendorModal({ isOpen, onClose }) {
 
   const modalStyle = {
     backgroundColor: '#ffffff',
-    borderRadius: '12px',
+    borderRadius: '20px',
     padding: '32px',
     maxWidth: '450px',
     width: '90%',
@@ -66,7 +66,7 @@ export default function AddNewVendorModal({ isOpen, onClose }) {
     color: '#ffffff',
     fontSize: '14px',
     fontWeight: '600',
-    borderRadius: '8px',
+    borderRadius: '9999px',
     textDecoration: 'none',
     transition: 'background-color 0.2s',
     marginBottom: '16px',
@@ -79,7 +79,7 @@ export default function AddNewVendorModal({ isOpen, onClose }) {
     fontSize: '14px',
     fontWeight: '500',
     border: '1px solid #e2e8f0',
-    borderRadius: '8px',
+    borderRadius: '9999px',
     cursor: 'pointer',
     transition: 'all 0.2s',
   };

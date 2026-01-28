@@ -236,7 +236,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
   const backBtn = {
     padding: '8px 12px',
     border: '1px solid #357ab2',
-    borderRadius: 6,
+    borderRadius: 20,
     color: '#357ab2',
     background: '#fff',
     cursor: 'pointer',
@@ -248,7 +248,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
     gap: 12,
     marginBottom: 16,
   };
-  const card = { border: '1px solid #357ab2', borderRadius: 8, padding: 12, background: '#fff' };
+  const card = { border: '1px solid #357ab2', borderRadius: 16, padding: 12, background: '#fff' };
   const cardLabel = { color: '#5a5a5a', fontSize: 12 };
   const cardValue = { color: '#357ab2', fontSize: 18, fontWeight: 600 };
   const infoGrid = {
@@ -257,8 +257,8 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
     gap: 12,
     marginBottom: 16,
   };
-  const infoItem = { border: '1px solid #357ab2', borderRadius: 8, padding: 12, background: '#fff' };
-  const achPanel = { border: '1px solid #357ab2', borderRadius: 12, padding: 16, background: '#fff', marginBottom: 16 };
+  const infoItem = { border: '1px solid #357ab2', borderRadius: 16, padding: 12, background: '#fff' };
+  const achPanel = { border: '1px solid #357ab2', borderRadius: 20, padding: 16, background: '#fff', marginBottom: 16 };
   const achGrid = { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 };
 
   // Get display-friendly vendor name for the header
@@ -275,7 +275,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
           disabled={loading}
           style={{
             padding: '8px 16px',
-            borderRadius: 6,
+            borderRadius: 20,
             border: '1px solid #357ab2',
             color: loading ? '#999' : '#fff',
             background: loading ? '#e0e0e0' : '#357ab2',
@@ -330,7 +330,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
                 console.error('Failed to refresh ACH status for vendor:', vendor, refreshError);
               }
             }}
-            style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #357ab2', color: '#357ab2', background: '#fff', cursor: 'pointer' }}
+            style={{ padding: '6px 10px', borderRadius: 9999, border: '1px solid #357ab2', color: '#357ab2', background: '#fff', cursor: 'pointer' }}
           >
             Refresh ACH Status
           </button>
@@ -390,7 +390,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
                 alert('Failed to send onboarding email');
               }
             }}
-            style={{ marginLeft: 8, padding: '6px 10px', borderRadius: 8, border: '1px solid #357ab2', color: '#fff', background: '#357ab2', cursor: 'pointer' }}
+            style={{ marginLeft: 8, padding: '6px 10px', borderRadius: 9999, border: '1px solid #357ab2', color: '#fff', background: '#357ab2', cursor: 'pointer' }}
           >
             Email ACH Onboarding
           </button>
@@ -481,7 +481,7 @@ export default function VendorDetailPage({ vendor, onBack, onRowClick }) {
         }}>
           <div style={{
             backgroundColor: '#fff',
-            borderRadius: 8,
+            borderRadius: 16,
             maxWidth: '800px',
             maxHeight: '90vh',
             overflowY: 'auto',

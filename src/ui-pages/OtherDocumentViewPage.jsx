@@ -422,7 +422,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
   };
   const inputStyle = {
     border: '1px solid #cbd5e0',
-    borderRadius: '4px',
+    borderRadius: '12px',
     padding: '4px 8px',
     fontSize: '14px',
     width: 'calc(100% - 16px)',
@@ -834,7 +834,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
           <div
             style={{
               backgroundColor: '#fff',
-              borderRadius: '12px',
+              borderRadius: '20px',
               padding: '24px',
               maxWidth: '450px',
               width: '90%',
@@ -853,7 +853,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                 onClick={() => setShowInvoiceModal(false)}
                 style={{
                   padding: '10px 20px',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   border: '1px solid #d1d5db',
                   backgroundColor: '#fff',
                   color: '#374151',
@@ -867,7 +867,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                 disabled={processing}
                 style={{
                   padding: '10px 20px',
-                  borderRadius: '6px',
+                  borderRadius: '9999px',
                   border: 'none',
                   backgroundColor: '#059669',
                   color: '#fff',
@@ -902,7 +902,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
           <div
             style={{
               backgroundColor: '#fff',
-              borderRadius: '12px',
+              borderRadius: '20px',
               padding: '24px',
               maxWidth: '400px',
               width: '90%',
@@ -920,7 +920,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                 onClick={() => setShowDeleteModal(false)}
                 style={{
                   padding: '10px 20px',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   border: '1px solid #d1d5db',
                   backgroundColor: '#fff',
                   color: '#374151',
@@ -934,7 +934,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                 disabled={processing}
                 style={{
                   padding: '10px 20px',
-                  borderRadius: '6px',
+                  borderRadius: '9999px',
                   border: 'none',
                   backgroundColor: '#dc2626',
                   color: '#fff',
@@ -969,7 +969,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
           <div
             style={{
               backgroundColor: '#fff',
-              borderRadius: '12px',
+              borderRadius: '20px',
               padding: '24px',
               maxWidth: '500px',
               width: '90%',
@@ -985,7 +985,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
             <div style={{ 
               backgroundColor: '#f3f4f6', 
               padding: '12px', 
-              borderRadius: '8px',
+              borderRadius: '16px',
               marginBottom: '16px',
               fontSize: '14px',
               color: '#374151'
@@ -1001,7 +1001,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
               <div style={{ 
                 backgroundColor: '#fef3c7', 
                 padding: '12px', 
-                borderRadius: '8px',
+                borderRadius: '16px',
                 marginBottom: '16px',
                 fontSize: '14px',
                 color: '#92400e'
@@ -1015,7 +1015,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                 onClick={() => setShowTrainModal(false)}
                 style={{
                   padding: '10px 20px',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   border: '1px solid #d1d5db',
                   backgroundColor: '#fff',
                   color: '#374151',
@@ -1029,7 +1029,7 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
                 disabled={processing}
                 style={{
                   padding: '10px 20px',
-                  borderRadius: '6px',
+                  borderRadius: '9999px',
                   border: 'none',
                   backgroundColor: '#7c3aed',
                   color: '#fff',

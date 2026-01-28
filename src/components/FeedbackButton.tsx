@@ -96,7 +96,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
     fontWeight: isActive ? 600 : 400,
     fontSize: '14px',
     cursor: 'pointer',
-    borderRadius: isActive ? '8px 8px 0 0' : '0',
+    borderRadius: isActive ? '16px 16px 0 0' : '0',
     marginTop: isActive ? '0' : '4px',
     transition: 'all 0.2s',
   });
@@ -242,7 +242,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                     backgroundColor: '#d4edda',
                     color: '#155724',
                     padding: '12px 16px',
-                    borderRadius: '8px',
+                    borderRadius: '16px',
                     marginBottom: '16px',
                   }}
                 >
@@ -259,7 +259,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                     backgroundColor: '#f8d7da',
                     color: '#721c24',
                     padding: '12px 16px',
-                    borderRadius: '8px',
+                    borderRadius: '16px',
                     marginBottom: '16px',
                   }}
                 >
@@ -292,7 +292,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                         width: '100%',
                         minHeight: '120px',
                         padding: '12px',
-                        borderRadius: '8px',
+                        borderRadius: '16px',
                         border: '2px solid #e5e7eb',
                         fontSize: '14px',
                         resize: 'vertical',
@@ -315,7 +315,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                     style={{
                       backgroundColor: '#f3f4f6',
                       padding: '12px 16px',
-                      borderRadius: '8px',
+                      borderRadius: '16px',
                       marginBottom: '20px',
                       fontSize: '13px',
                       color: '#6b7280',
@@ -364,7 +364,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                       width: '100%',
                       minHeight: '150px',
                       padding: '12px',
-                      borderRadius: '8px',
+                      borderRadius: '16px',
                       border: '2px solid #e5e7eb',
                       fontSize: '14px',
                       resize: 'vertical',
@@ -395,7 +395,7 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
                     : '#357ab2',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '16px',
                   fontSize: '16px',
                   fontWeight: 600,
                   cursor: isSubmitting || submitStatus === 'success' ? 'not-allowed' : 'pointer',

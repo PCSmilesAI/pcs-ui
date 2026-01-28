@@ -753,7 +753,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                     onClick={() => setCurrentBatchIndex(index)}
                     style={{
                       padding: '8px 16px',
-                      borderRadius: '8px',
+                      borderRadius: '16px',
                       border: currentBatchIndex === index ? '2px solid #357ab2' : '1px solid #e5e7eb',
                       backgroundColor: currentBatchIndex === index ? '#eff6ff' : '#fff',
                       color: currentBatchIndex === index ? '#357ab2' : '#374151',
@@ -795,7 +795,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                 <div style={{
                   backgroundColor: '#dbeafe',
                   border: '1px solid #3b82f6',
-                  borderRadius: '8px',
+                  borderRadius: '16px',
                   padding: '12px 16px',
                   marginBottom: '12px',
                   display: 'flex',
@@ -820,7 +820,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                       backgroundColor: '#3b82f6',
                       color: '#fff',
                       border: 'none',
-                      borderRadius: '6px',
+                      borderRadius: '12px',
                       padding: '8px 12px',
                       cursor: 'pointer',
                       fontSize: '13px',
@@ -840,7 +840,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               <div style={{
                 backgroundColor: '#fef3c7',
                 border: '1px solid #f59e0b',
-                borderRadius: '8px',
+                borderRadius: '16px',
                 padding: '12px 16px',
                 marginBottom: '16px',
               }}>
@@ -859,7 +859,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                 flex: 1,
                 overflowY: 'auto',
                 border: '1px solid #e5e7eb',
-                borderRadius: '8px',
+                borderRadius: '16px',
               }}>
                 <div style={{
                   display: 'grid',
@@ -972,7 +972,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                 <div style={{
                   backgroundColor: '#fef3c7',
                   border: '1px solid #f59e0b',
-                  borderRadius: '8px',
+                  borderRadius: '16px',
                   padding: '16px',
                   marginBottom: '20px',
                 }}>
@@ -995,7 +995,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
                 <div style={{
                   backgroundColor: '#fee2e2',
                   border: '1px solid #ef4444',
-                  borderRadius: '8px',
+                  borderRadius: '16px',
                   padding: '16px',
                   marginBottom: '20px',
                 }}>

@@ -209,7 +209,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
           onClick={() => router.push('/OtherDocumentsPage/filed')}
           style={{
             padding: '10px 20px',
-            borderRadius: '8px',
+            borderRadius: '16px',
             backgroundColor: '#16a34a',
             color: '#fff',
             border: 'none',
@@ -236,7 +236,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
               onClick={() => setTypeFilter(typeFilter === type ? '' : type)}
               style={{
                 padding: '12px 20px',
-                borderRadius: '8px',
+                borderRadius: '16px',
                 backgroundColor: typeFilter === type ? badge.bg : '#ffffff',
                 border: `2px solid ${typeFilter === type ? badge.text : '#e5e7eb'}`,
                 cursor: 'pointer',
@@ -257,7 +257,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
           onChange={(e) => setStatusFilter(e.target.value)}
           style={{
             padding: '8px 12px',
-            borderRadius: '6px',
+            borderRadius: '12px',
             border: '1px solid #d1d5db',
             fontSize: '14px',
             backgroundColor: '#fff'
@@ -275,7 +275,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
           onChange={(e) => setTypeFilter(e.target.value)}
           style={{
             padding: '8px 12px',
-            borderRadius: '6px',
+            borderRadius: '12px',
             border: '1px solid #d1d5db',
             fontSize: '14px',
             backgroundColor: '#fff'
@@ -296,7 +296,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
           onClick={() => { setTypeFilter(''); setStatusFilter(''); }}
           style={{
             padding: '8px 16px',
-            borderRadius: '6px',
+            borderRadius: '12px',
             border: '1px solid #d1d5db',
             backgroundColor: '#fff',
             fontSize: '14px',
@@ -311,7 +311,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
           disabled={loading}
           style={{
             padding: '8px 16px',
-            borderRadius: '6px',
+            borderRadius: '9999px',
             border: 'none',
             backgroundColor: '#357ab2',
             color: '#fff',
@@ -330,7 +330,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
           padding: '16px',
           backgroundColor: '#fef2f2',
           border: '1px solid #fecaca',
-          borderRadius: '8px',
+          borderRadius: '16px',
           marginBottom: '16px',
           color: '#dc2626'
         }}>
@@ -344,7 +344,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
           padding: '48px',
           textAlign: 'center',
           backgroundColor: '#f9fafb',
-          borderRadius: '8px'
+          borderRadius: '16px'
         }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>📄</div>
           <p style={{ color: '#6b7280', fontSize: '16px' }}>
@@ -360,7 +360,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
       {filteredDocuments.length > 0 && (
         <div style={{
           backgroundColor: '#fff',
-          borderRadius: '8px',
+          borderRadius: '16px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
           overflow: 'hidden'
         }}>
@@ -397,7 +397,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                       <span style={{
                         display: 'inline-block',
                         padding: '4px 8px',
-                        borderRadius: '4px',
+                        borderRadius: '9999px',
                         fontSize: '12px',
                         fontWeight: 500,
                         backgroundColor: typeBadge.bg,
@@ -422,7 +422,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                       <span style={{
                         display: 'inline-block',
                         padding: '4px 8px',
-                        borderRadius: '4px',
+                        borderRadius: '9999px',
                         fontSize: '12px',
                         fontWeight: 500,
                         backgroundColor: statusBadge.bg,
@@ -454,7 +454,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                             rel="noopener noreferrer"
                             style={{
                               padding: '4px 10px',
-                              borderRadius: '4px',
+                              borderRadius: '9999px',
                               backgroundColor: '#e8f4fc',
                               color: '#357ab2',
                               fontSize: '12px',
@@ -470,7 +470,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                           disabled={updating}
                           style={{
                             padding: '4px 10px',
-                            borderRadius: '4px',
+                            borderRadius: '9999px',
                             backgroundColor: '#fef2f2',
                             color: '#dc2626',
                             border: 'none',
@@ -499,7 +499,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
             disabled={pagination.offset === 0}
             style={{
               padding: '8px 16px',
-              borderRadius: '6px',
+              borderRadius: '12px',
               border: '1px solid #d1d5db',
               backgroundColor: '#fff',
               cursor: pagination.offset === 0 ? 'not-allowed' : 'pointer',
@@ -516,7 +516,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
             disabled={!pagination.hasMore}
             style={{
               padding: '8px 16px',
-              borderRadius: '6px',
+              borderRadius: '12px',
               border: '1px solid #d1d5db',
               backgroundColor: '#fff',
               cursor: !pagination.hasMore ? 'not-allowed' : 'pointer',
@@ -548,7 +548,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
           <div
             style={{
               backgroundColor: '#fff',
-              borderRadius: '12px',
+              borderRadius: '20px',
               padding: '24px',
               maxWidth: '600px',
               width: '90%',
@@ -576,7 +576,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                   <span style={{
                     display: 'inline-block',
                     padding: '4px 8px',
-                    borderRadius: '4px',
+                    borderRadius: '9999px',
                     fontSize: '14px',
                     fontWeight: 500,
                     backgroundColor: getTypeBadge(selectedDoc.document_type).bg,
@@ -640,7 +640,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                     style={{
                       display: 'inline-block',
                       padding: '10px 20px',
-                      borderRadius: '6px',
+                      borderRadius: '9999px',
                       backgroundColor: '#357ab2',
                       color: '#fff',
                       textDecoration: 'none',
@@ -659,7 +659,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                   onClick={() => { updateDocumentStatus(selectedDoc.id, 'reviewed'); setSelectedDoc(null); }}
                   style={{
                     padding: '10px 20px',
-                    borderRadius: '6px',
+                    borderRadius: '9999px',
                     backgroundColor: '#16a34a',
                     color: '#fff',
                     border: 'none',
@@ -675,7 +675,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                   onClick={() => { updateDocumentStatus(selectedDoc.id, 'applied'); setSelectedDoc(null); }}
                   style={{
                     padding: '10px 20px',
-                    borderRadius: '6px',
+                    borderRadius: '9999px',
                     backgroundColor: '#357ab2',
                     color: '#fff',
                     border: 'none',
@@ -690,7 +690,7 @@ export default function OtherDocumentsPage({ searchQuery = '' }) {
                 onClick={() => setSelectedDoc(null)}
                 style={{
                   padding: '10px 20px',
-                  borderRadius: '6px',
+                  borderRadius: '9999px',
                   backgroundColor: '#f3f4f6',
                   color: '#374151',
                   border: 'none',

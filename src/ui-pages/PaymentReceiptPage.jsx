@@ -45,7 +45,7 @@ export default function PaymentReceiptPage({ payment, vendor, onBack }) {
           style={{
             padding: '8px 12px',
             border: '1px solid #357ab2',
-            borderRadius: 6,
+            borderRadius: 12,
             color: '#357ab2',
             background: '#fff',
             cursor: 'pointer',
@@ -63,13 +63,13 @@ export default function PaymentReceiptPage({ payment, vendor, onBack }) {
   const backBtn = {
     padding: '8px 12px',
     border: '1px solid #357ab2',
-    borderRadius: 6,
+    borderRadius: 12,
     color: '#357ab2',
     background: '#fff',
     cursor: 'pointer',
   };
   const titleStyle = { fontSize: 24, fontWeight: 600, color: '#357ab2' };
-  const sectionStyle = { marginBottom: 24, border: '1px solid #357ab2', borderRadius: 8, padding: 16, background: '#fff' };
+  const sectionStyle = { marginBottom: 24, border: '1px solid #357ab2', borderRadius: 16, padding: 16, background: '#fff' };
   const sectionTitleStyle = { fontSize: 16, fontWeight: 600, color: '#357ab2', marginBottom: 12 };
 
   return (

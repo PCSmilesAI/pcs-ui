@@ -653,7 +653,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
               backgroundColor: '#dc2626',
               color: '#ffffff',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: '16px',
               fontSize: '14px',
               fontWeight: '600',
               cursor: 'pointer',
@@ -684,7 +684,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
           marginBottom: '12px',
           padding: '12px 16px',
           backgroundColor: '#dbeafe',
-          borderRadius: '8px',
+          borderRadius: '16px',
           border: '1px solid #3b82f6',
         }}>
           <div style={{

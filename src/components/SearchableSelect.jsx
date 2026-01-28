@@ -179,7 +179,7 @@ export default function SearchableSelect({
 
   const inputStyle = {
     padding: '8px 12px',
-    borderRadius: '4px',
+    borderRadius: '12px',
     border: '1px solid #cbd5e0',
     fontSize: '14px',
     backgroundColor: disabled ? '#f3f4f6' : '#ffffff',
@@ -195,7 +195,7 @@ export default function SearchableSelect({
     left: 0,
     right: 0,
     padding: '8px 12px',
-    borderRadius: '4px',
+    borderRadius: '12px',
     border: '1px solid transparent',
     fontSize: '14px',
     color: '#9ca3af',
@@ -214,7 +214,7 @@ export default function SearchableSelect({
     overflowY: 'auto',
     backgroundColor: '#ffffff',
     border: '1px solid #cbd5e0',
-    borderRadius: '4px',
+    borderRadius: '12px',
     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
     zIndex: 1000,
     marginTop: '4px',

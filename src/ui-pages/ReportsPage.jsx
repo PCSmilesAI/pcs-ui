@@ -166,7 +166,7 @@ export default function ReportsPage() {
   const rangeButtonStyle = (isActive) => ({
     padding: '8px 16px',
     border: '1px solid #357ab2',
-    borderRadius: '4px',
+    borderRadius: '12px',
     backgroundColor: isActive ? '#357ab2' : '#ffffff',
     color: isActive ? '#ffffff' : '#357ab2',
     cursor: 'pointer',
@@ -177,7 +177,7 @@ export default function ReportsPage() {
     height: '24px',
     display: 'flex',
     border: '1px solid #357ab2',
-    borderRadius: '4px',
+    borderRadius: '12px',
     overflow: 'hidden',
     marginBottom: '8px',
   };
@@ -253,7 +253,7 @@ export default function ReportsPage() {
                 width: '12px',
                 height: '12px',
                 backgroundColor: colours[idx % colours.length],
-                borderRadius: '2px',
+                borderRadius: '8px',
               }}
             ></span>
             <span>{v.vendor}</span>

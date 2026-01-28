@@ -129,7 +129,7 @@ export default function AccountPage() {
             backgroundColor: '#357ab2',
             color: 'white',
             border: 'none',
-            borderRadius: '6px',
+            borderRadius: '12px',
             cursor: 'pointer',
             fontSize: '14px',
             fontWeight: '500'
@@ -153,7 +153,7 @@ export default function AccountPage() {
 
   const cardStyle = {
     backgroundColor: '#ffffff',
-    borderRadius: '8px',
+    borderRadius: '16px',
     padding: '24px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
     marginBottom: '24px'
@@ -178,7 +178,7 @@ export default function AccountPage() {
     width: '100%',
     padding: '10px 12px',
     border: '1px solid #d1d5db',
-    borderRadius: '6px',
+    borderRadius: '12px',
     fontSize: '14px',
     marginBottom: '16px',
     boxSizing: 'border-box'
@@ -189,7 +189,7 @@ export default function AccountPage() {
     backgroundColor: '#357ab2',
     color: 'white',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '12px',
     cursor: saving ? 'not-allowed' : 'pointer',
     fontSize: '14px',
     fontWeight: '500',
@@ -198,7 +198,7 @@ export default function AccountPage() {
 
   const messageStyle = {
     padding: '12px',
-    borderRadius: '6px',
+    borderRadius: '12px',
     marginTop: '16px',
     fontSize: '14px',
     backgroundColor: messageType === 'success' ? '#d1fae5' : messageType === 'error' ? '#fee2e2' : '#e0f2fe',
@@ -303,7 +303,7 @@ export default function AccountPage() {
             backgroundColor: '#dc2626',
             color: 'white',
             border: 'none',
-            borderRadius: '6px',
+            borderRadius: '12px',
             cursor: 'pointer',
             fontSize: '14px',
             fontWeight: '500'

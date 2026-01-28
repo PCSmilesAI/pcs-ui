@@ -168,7 +168,7 @@ export default function FiledDocumentsByTypePage() {
             padding: '8px 16px',
             backgroundColor: '#f3f4f6',
             border: '1px solid #e5e7eb',
-            borderRadius: '6px',
+            borderRadius: '12px',
             cursor: 'pointer',
             fontSize: '14px',
             color: '#374151',
@@ -207,7 +207,7 @@ export default function FiledDocumentsByTypePage() {
         alignItems: 'flex-end',
         padding: '16px',
         backgroundColor: '#f9fafb',
-        borderRadius: '8px',
+        borderRadius: '16px',
       }}>
         <div style={{ minWidth: '200px', maxWidth: '280px' }}>
           <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '4px', fontWeight: 500 }}>
@@ -222,7 +222,7 @@ export default function FiledDocumentsByTypePage() {
               width: '100%',
               padding: '8px 12px',
               border: '1px solid #d1d5db',
-              borderRadius: '6px',
+              borderRadius: '12px',
               fontSize: '14px',
               boxSizing: 'border-box',
             }}
@@ -241,7 +241,7 @@ export default function FiledDocumentsByTypePage() {
               width: '100%',
               padding: '8px 12px',
               border: '1px solid #d1d5db',
-              borderRadius: '6px',
+              borderRadius: '12px',
               fontSize: '14px',
               boxSizing: 'border-box',
             }}
@@ -262,7 +262,7 @@ export default function FiledDocumentsByTypePage() {
               width: '100%',
               padding: '8px 12px',
               border: '1px solid #d1d5db',
-              borderRadius: '6px',
+              borderRadius: '12px',
               fontSize: '14px',
               backgroundColor: '#fff',
               boxSizing: 'border-box',
@@ -283,7 +283,7 @@ export default function FiledDocumentsByTypePage() {
               padding: '8px 16px',
               backgroundColor: '#fff',
               border: '1px solid #d1d5db',
-              borderRadius: '6px',
+              borderRadius: '12px',
               cursor: 'pointer',
               fontSize: '14px',
               color: '#6b7280',
@@ -308,7 +308,7 @@ export default function FiledDocumentsByTypePage() {
           padding: '16px', 
           backgroundColor: '#fef2f2', 
           border: '1px solid #fecaca',
-          borderRadius: '8px',
+          borderRadius: '16px',
           color: '#dc2626',
         }}>
           Error: {error}
@@ -319,7 +319,7 @@ export default function FiledDocumentsByTypePage() {
       {!loading && !error && (
         <div style={{ 
           backgroundColor: '#fff', 
-          borderRadius: '8px', 
+          borderRadius: '16px', 
           border: '1px solid #e5e7eb',
           overflow: 'hidden',
         }}>

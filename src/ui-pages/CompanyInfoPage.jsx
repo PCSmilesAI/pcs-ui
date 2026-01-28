@@ -52,7 +52,7 @@ export default function CompanyInfoPage() {
     color: '#1f1f1f',
     padding: '12px',
     border: '1px solid #e2e8f0',
-    borderRadius: '8px',
+    borderRadius: '16px',
     backgroundColor: '#f8fafc'
   };
   const officeNameStyle = { 
@@ -143,7 +143,7 @@ export default function CompanyInfoPage() {
       <div style={infoStyle}><strong>Invoice Email:</strong> invoices@pcsmilesai.com</div>
       <div style={infoStyle}><strong>Company Tax ID:</strong> <em>(not provided)</em></div>
       
-      <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+      <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#f0f9ff', borderRadius: '16px', border: '1px solid #bae6fd' }}>
         <div style={{ fontWeight: '600', color: '#0369a1', marginBottom: '8px' }}>
           📞 Contact Information
         </div>
