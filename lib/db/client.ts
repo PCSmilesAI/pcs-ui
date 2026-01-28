@@ -439,6 +439,10 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_system_prompts_prompt_name ON system_prompts(prompt_name);
   `);
 
+  // Add preferred_template_id column to vendor_knowledge_bases for template auto-suggestion
+  ensureColumn('vendor_knowledge_bases', 'preferred_template_id', 'preferred_template_id TEXT');
+  ensureColumn('vendor_knowledge_bases', 'preferred_template_name', 'preferred_template_name TEXT');
+
   // Seed default Training Prompt if it doesn't exist
   const defaultTrainingPrompt = db.prepare(`
     INSERT OR IGNORE INTO system_prompts (id, prompt_name, prompt_text, description)

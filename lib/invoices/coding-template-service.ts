@@ -1,5 +1,6 @@
 import { getDatabase } from '../db/client';
 import { v4 as uuidv4 } from 'uuid';
+import { getDentalOffices } from '../qbo/pcsClasses';
 
 export interface CodingTemplate {
   id: string;
@@ -234,7 +235,31 @@ export function applyCodingTemplate(
     const now = new Date().toISOString();
 
     // Load template rows
-    const templateRows = getTemplateRows(templateId);
+    let templateRows = getTemplateRows(templateId);
+
+    // For split_evenly_all_classes mode, auto-generate rows from dental offices if none exist
+    if (allocationMode === 'split_evenly_all_classes' && templateRows.length === 0) {
+      console.log('[CODING_TEMPLATE] Auto-generating rows for split_evenly_all_classes mode');
+      const dentalOffices = getDentalOffices();
+      
+      if (dentalOffices.length === 0) {
+        return { success: false, error: 'No dental office classes available for split_evenly_all_classes mode' };
+      }
+      
+      // Create virtual template rows from dental offices
+      templateRows = dentalOffices.map((office) => ({
+        id: `auto-${office.id}`,
+        template_id: templateId,
+        gl_account_path: template.gl_account_name || '',
+        category_name: template.gl_account_name || '',
+        description: '',
+        class_name: office.name,
+        location_name: office.name,
+        created_at: now,
+      })) as TemplateRow[];
+      
+      console.log(`[CODING_TEMPLATE] Auto-generated ${templateRows.length} rows from dental offices`);
+    }
 
     if (templateRows.length === 0) {
       return { success: false, error: 'Template has no rows defined' };
