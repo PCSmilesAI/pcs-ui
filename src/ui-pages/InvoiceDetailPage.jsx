@@ -2608,9 +2608,9 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
             </table>
           </div>
           {/* Invoice Details section */}
-          <div style={{ ...sectionStyle, position: 'relative', zIndex: 10 }}>
+          <div style={{ ...sectionStyle, position: 'relative', zIndex: 100, overflow: 'visible' }}>
             <h2 style={sectionTitleStyle}>Invoice Details</h2>
-            <table style={tableStyle}>
+            <table style={{ ...tableStyle, overflow: 'visible' }}>
               <tbody>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Invoice #</td>
@@ -2680,9 +2680,9 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 </tr>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Vendor</td>
-                  <td style={{ ...cellStyle, position: 'relative' }}>
+                  <td style={{ ...cellStyle, position: 'relative', overflow: 'visible' }}>
                     {permissions.canEditInvoices ? (
-                    <div style={{ position: 'relative', height: '38px' }}>
+                    <div style={{ position: 'relative', zIndex: 1000 }}>
                       <SearchableSelect
                         options={(() => {
                           // If current vendor exists and isn't in the QBO list, add it as a custom option
