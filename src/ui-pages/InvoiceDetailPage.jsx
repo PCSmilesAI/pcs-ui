@@ -133,6 +133,8 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [applyingTemplate, setApplyingTemplate] = useState(false);
+  const [suggestedTemplateId, setSuggestedTemplateId] = useState(''); // Vendor's preferred template
+  const [suggestedTemplateName, setSuggestedTemplateName] = useState('');
   
   // Reparse State (for invoices with parsing errors)
   const [reparsing, setReparsing] = useState(false);
@@ -918,6 +920,30 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       setLoadingTemplates(false);
     }
   }
+  
+  // Fetch vendor's preferred template (if any)
+  async function fetchVendorTemplatePreference() {
+    const vendorName = invoice?.vendor_name || invoice?.vendor;
+    if (!vendorName) return;
+    
+    try {
+      const response = await fetch(`/api/vendors/${encodeURIComponent(vendorName)}/template-preference`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.hasPreference && data.templateId) {
+          setSuggestedTemplateId(data.templateId);
+          setSuggestedTemplateName(data.templateName || 'Suggested Template');
+          // Auto-select the suggested template if no template is currently selected
+          if (!selectedTemplateId) {
+            setSelectedTemplateId(data.templateId);
+          }
+          console.log(`[TEMPLATE] Vendor ${vendorName} has preferred template: ${data.templateName}`);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch vendor template preference:', error);
+    }
+  }
 
   // Create template from current GL lines
   async function handleCreateTemplateFromInvoice() {
@@ -1008,8 +1034,44 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         throw new Error('Failed to load template');
       }
       const templateData = await templateResponse.json();
-      const templateRows = templateData.rows || [];
+      let templateRows = templateData.rows || [];
       const template = (await (await fetch(`/api/coding-templates/${selectedTemplateId}`)).json()).template;
+      const allocationMode = template?.allocation_mode || 'split_evenly';
+      
+      // For split_evenly_all_classes mode with no pre-saved rows, dynamically generate from QBO classes
+      if (allocationMode === 'split_evenly_all_classes' && templateRows.length === 0) {
+        try {
+          const classesResponse = await fetch('/api/qbo/classes');
+          if (classesResponse.ok) {
+            const classesData = await classesResponse.json();
+            const qboClasses = classesData.classes || [];
+            
+            if (qboClasses.length === 0) {
+              showToast('No QuickBooks classes found. Please configure classes in QuickBooks first.', 'error');
+              return;
+            }
+            
+            // Generate template rows from QBO classes
+            templateRows = qboClasses.map((cls, index) => ({
+              id: `auto-${index}`,
+              gl_account_path: template?.gl_account_name || '',
+              category_name: template?.gl_account_name || '',
+              description: '',
+              class_name: cls.name || cls.fullName,
+              location_name: cls.name || cls.fullName,
+            }));
+            
+            console.log(`[TEMPLATE] Auto-generated ${templateRows.length} GL lines from QBO classes for split_evenly_all_classes mode`);
+          } else {
+            showToast('Failed to fetch QuickBooks classes', 'error');
+            return;
+          }
+        } catch (classError) {
+          console.error('Error fetching QBO classes:', classError);
+          showToast('Failed to fetch QuickBooks classes for template', 'error');
+          return;
+        }
+      }
       
       if (templateRows.length === 0) {
         showToast('Template has no GL lines defined', 'error');
@@ -1018,11 +1080,10 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
 
       // Calculate amounts based on allocation mode
       const totalAmount = invoiceTotalAmount || 0;
-      const allocationMode = template?.allocation_mode || 'split_evenly';
       
       let newCategories = [];
       
-      if (allocationMode === 'split_evenly') {
+      if (allocationMode === 'split_evenly' || allocationMode === 'split_evenly_all_classes') {
         // Split evenly among all lines
         const evenAmount = totalAmount / templateRows.length;
         newCategories = templateRows.map((row, index) => ({
@@ -1110,6 +1171,13 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   useEffect(() => {
     fetchAvailableTemplates();
   }, []);
+  
+  // Fetch vendor's preferred template when invoice loads
+  useEffect(() => {
+    if (invoice && (invoice.vendor_name || invoice.vendor)) {
+      fetchVendorTemplatePreference();
+    }
+  }, [invoice?.vendor_name, invoice?.vendor]);
 
   // Check if user is admin or AP manager
   useEffect(() => {
@@ -3025,7 +3093,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                     disabled={loadingTemplates || applyingTemplate}
                     style={{
                       padding: '8px 12px',
-                      border: '1px solid #d1d5db',
+                      border: suggestedTemplateId && selectedTemplateId === suggestedTemplateId ? '2px solid #10b981' : '1px solid #d1d5db',
                       borderRadius: '12px',
                       fontSize: '14px',
                       backgroundColor: 'white',
@@ -3036,7 +3104,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                     <option value="">-- Select a template --</option>
                     {availableTemplates.map(t => (
                       <option key={t.id} value={t.id}>
-                        {t.name} ({t.allocation_mode === 'percentage' ? 'Percent' : t.allocation_mode === 'fixed_amount' ? 'Fixed' : 'Even Split'})
+                        {t.name} ({t.allocation_mode === 'percentage' ? 'Percent' : t.allocation_mode === 'fixed_amount' ? 'Fixed' : t.allocation_mode === 'split_evenly_all_classes' ? 'All Locations' : 'Even Split'}){t.id === suggestedTemplateId ? ' - Suggested' : ''}
                       </option>
                     ))}
                   </select>
@@ -3057,8 +3125,8 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   >
                     {applyingTemplate ? 'Applying...' : 'Apply Template'}
                   </button>
-                  <span style={{ fontSize: '12px', color: '#6b7280' }}>
-                    Apply a saved template to auto-fill GL lines
+                  <span style={{ fontSize: '12px', color: suggestedTemplateId ? '#10b981' : '#6b7280' }}>
+                    {suggestedTemplateId ? `Suggested: ${suggestedTemplateName}` : 'Apply a saved template to auto-fill GL lines'}
                   </span>
                 </div>
               </div>

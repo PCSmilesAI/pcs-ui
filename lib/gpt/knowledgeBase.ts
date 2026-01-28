@@ -10,6 +10,8 @@ export interface VendorKnowledgeBase {
   version: number;
   last_trained_at: string | null;
   training_invoice_count: number;
+  preferred_template_id: string | null;
+  preferred_template_name: string | null;
 }
 
 export interface SystemPrompt {
@@ -241,6 +243,97 @@ export function getOrCreateKnowledgeBase(vendorName: string): VendorKnowledgeBas
   // Create default knowledge base
   const defaultPrompt = generateDefaultKnowledgePrompt(vendorName);
   return upsertKnowledgeBase(vendorName, defaultPrompt, false);
+}
+
+// ============================================================================
+// Template Preference Operations
+// ============================================================================
+
+/**
+ * Save preferred coding template for a vendor
+ * This is used to auto-suggest/auto-apply templates on future invoices
+ */
+export function saveVendorTemplatePreference(
+  vendorName: string,
+  templateId: string,
+  templateName: string
+): VendorKnowledgeBase {
+  const db = getDatabase();
+  const existing = getKnowledgeBase(vendorName);
+
+  if (existing) {
+    // Update existing with template preference
+    db.prepare(`
+      UPDATE vendor_knowledge_bases 
+      SET preferred_template_id = ?,
+          preferred_template_name = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(templateId, templateName, existing.id);
+    
+    // Also update the knowledge prompt to mention the template
+    const updatedPrompt = addTemplateToKnowledgePrompt(existing.knowledge_prompt, templateName);
+    if (updatedPrompt !== existing.knowledge_prompt) {
+      db.prepare(`
+        UPDATE vendor_knowledge_bases 
+        SET knowledge_prompt = ?,
+            version = version + 1
+        WHERE id = ?
+      `).run(updatedPrompt, existing.id);
+    }
+
+    console.log(`[KNOWLEDGE_BASE] Saved template preference for ${vendorName}: ${templateName} (${templateId})`);
+    return getKnowledgeBaseById(existing.id)!;
+  } else {
+    // Create new knowledge base with template preference
+    const id = randomUUID();
+    let defaultPrompt = generateDefaultKnowledgePrompt(vendorName);
+    defaultPrompt = addTemplateToKnowledgePrompt(defaultPrompt, templateName);
+    
+    db.prepare(`
+      INSERT INTO vendor_knowledge_bases 
+      (id, vendor_name, knowledge_prompt, training_invoice_count, preferred_template_id, preferred_template_name)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(id, vendorName, defaultPrompt, 0, templateId, templateName);
+
+    console.log(`[KNOWLEDGE_BASE] Created new knowledge base for ${vendorName} with template preference: ${templateName}`);
+    return getKnowledgeBaseById(id)!;
+  }
+}
+
+/**
+ * Get preferred template for a vendor
+ */
+export function getVendorTemplatePreference(vendorName: string): { templateId: string; templateName: string } | null {
+  const kb = getKnowledgeBase(vendorName);
+  if (kb && kb.preferred_template_id) {
+    return {
+      templateId: kb.preferred_template_id,
+      templateName: kb.preferred_template_name || 'Unknown Template'
+    };
+  }
+  return null;
+}
+
+/**
+ * Add template preference note to a knowledge base prompt
+ */
+function addTemplateToKnowledgePrompt(prompt: string, templateName: string): string {
+  const templateNote = `\n\nCODING TEMPLATE PREFERENCE:
+This vendor typically uses the "${templateName}" coding template. When this vendor's invoices are processed, 
+the system should suggest applying this template for GL line allocation.`;
+
+  // Check if template note already exists
+  if (prompt.includes('CODING TEMPLATE PREFERENCE:')) {
+    // Replace existing template note
+    return prompt.replace(
+      /\n\nCODING TEMPLATE PREFERENCE:[\s\S]*?(?=\n\n[A-Z]|$)/,
+      templateNote
+    );
+  }
+  
+  // Add new template note at the end
+  return prompt + templateNote;
 }
 
 // ============================================================================

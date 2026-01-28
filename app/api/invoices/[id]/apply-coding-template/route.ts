@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '../../../../../lib/auth/currentUser';
 import { readRoles } from '../../../../../lib/workflow/rolesStore';
-import { applyCodingTemplate, getInvoiceAllocations } from '../../../../../lib/invoices/coding-template-service';
+import { applyCodingTemplate, getInvoiceAllocations, getCodingTemplateById } from '../../../../../lib/invoices/coding-template-service';
 import { getDatabase } from '../../../../../lib/db/client';
 import { rateLimitByUser } from '../../../../../lib/ratelimit/rateLimiter';
+import { saveVendorTemplatePreference } from '../../../../../lib/gpt/knowledgeBase';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,6 +106,27 @@ export async function POST(
     const updatedInvoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId) as any;
     const allocations = getInvoiceAllocations(invoiceId);
 
+    // Save template preference for vendor knowledge base (for future auto-suggestion)
+    const vendorName = invoice.vendor_name || invoice.vendor;
+    const template = getCodingTemplateById(template_id);
+    
+    if (vendorName && template) {
+      try {
+        saveVendorTemplatePreference(vendorName, template_id, template.name);
+        console.log('[API][CODING_TEMPLATE]', 'saved_vendor_template_preference', {
+          vendorName,
+          templateId: template_id,
+          templateName: template.name
+        });
+      } catch (prefError: any) {
+        // Non-fatal: log but don't fail the request
+        console.warn('[API][CODING_TEMPLATE]', 'failed_to_save_template_preference', {
+          vendorName,
+          error: prefError?.message
+        });
+      }
+    }
+
     console.log('[API][CODING_TEMPLATE]', 'applied_successfully', {
       invoiceId,
       templateId: template_id,
@@ -115,7 +137,8 @@ export async function POST(
     return NextResponse.json({
       ok: true,
       invoice: updatedInvoice,
-      allocations
+      allocations,
+      templatePreferenceSaved: !!(vendorName && template)
     });
   } catch (error: any) {
     console.error('[API][CODING_TEMPLATE]', 'error', {
