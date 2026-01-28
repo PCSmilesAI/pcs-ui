@@ -185,9 +185,12 @@ export default function ReportsPage() {
   const legendItemStyle = { display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px' };
   const tableStyle = {
     width: '100%',
-    borderCollapse: 'collapse',
+    borderCollapse: 'separate',
+    borderSpacing: 0,
     borderLeft: '1px solid #357ab2',
     borderTop: '1px solid #357ab2',
+    borderRadius: '16px',
+    overflow: 'hidden',
     fontSize: '14px',
   };
   const thStyle = {

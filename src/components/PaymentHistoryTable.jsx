@@ -15,13 +15,16 @@ export default function PaymentHistoryTable({ rows, onReceiptClick, loading, err
 
   const tableStyle = {
     width: '100%',
-    borderCollapse: 'collapse',
+    borderCollapse: 'separate',
+    borderSpacing: 0,
+    border: '1px solid #357ab2',
+    borderRadius: '16px',
+    overflow: 'hidden',
     marginTop: '12px',
   };
 
   const headerStyle = {
     backgroundColor: '#f3f4f6',
-    borderBottom: '2px solid #357ab2',
     padding: '12px',
     textAlign: 'left',
     fontWeight: 600,

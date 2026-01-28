@@ -2122,14 +2122,14 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     // takes up half of the available width so the vertical line sits
     // precisely in the middle.
     gridTemplateColumns: '1fr 1fr',
-    borderTop: '1px solid #357ab2',
-    borderLeft: '1px solid #357ab2',
+    border: '1px solid #357ab2',
+    borderRadius: '16px',
+    overflow: 'hidden',
   };
   const leftColumnStyle = {
     borderRight: '1px solid #357ab2',
   };
   const rightColumnStyle = {
-    borderRight: '1px solid #357ab2',
     display: 'flex',
     flexDirection: 'column',
     padding: '16px',
@@ -2149,9 +2149,12 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   };
   const tableStyle = {
     width: '100%',
-    borderCollapse: 'collapse',
+    borderCollapse: 'separate',
+    borderSpacing: 0,
     borderLeft: '1px solid #357ab2',
     borderTop: '1px solid #357ab2',
+    borderRadius: '16px',
+    overflow: 'hidden',
     fontSize: '14px',
   };
   const cellHeaderStyle = {
@@ -3097,8 +3100,11 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 <div>
                   <table style={{
                     width: '100%',
-                    borderCollapse: 'collapse',
+                    borderCollapse: 'separate',
+                    borderSpacing: 0,
                     border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
                     fontSize: '14px',
                     backgroundColor: '#ffffff',
                   }}>
@@ -4139,9 +4145,9 @@ function PaymentReceiptModal({ payment, invoice }) {
           <div style={{ marginTop: 12 }}>
             <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 13 }}>Invoices Included:</div>
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: '12px', border: '1px solid #357ab2', borderRadius: '12px', overflow: 'hidden' }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '1px solid #357ab2' }}>
+                  <tr style={{ backgroundColor: '#f3f4f6' }}>
                     <th style={{ padding: '6px', textAlign: 'left', fontWeight: 600 }}>Invoice #</th>
                     <th style={{ padding: '6px', textAlign: 'left', fontWeight: 600 }}>Amount</th>
                     <th style={{ padding: '6px', textAlign: 'left', fontWeight: 600 }}>Date</th>

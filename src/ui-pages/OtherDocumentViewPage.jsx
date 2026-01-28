@@ -373,14 +373,14 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
   const mainGridStyle = {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    borderTop: '1px solid #357ab2',
-    borderLeft: '1px solid #357ab2',
+    border: '1px solid #357ab2',
+    borderRadius: '16px',
+    overflow: 'hidden',
   };
   const leftColumnStyle = {
     borderRight: '1px solid #357ab2',
   };
   const rightColumnStyle = {
-    borderRight: '1px solid #357ab2',
     display: 'flex',
     flexDirection: 'column',
     padding: '16px',
@@ -399,9 +399,12 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
   };
   const tableStyle = {
     width: '100%',
-    borderCollapse: 'collapse',
+    borderCollapse: 'separate',
+    borderSpacing: 0,
     borderLeft: '1px solid #357ab2',
     borderTop: '1px solid #357ab2',
+    borderRadius: '16px',
+    overflow: 'hidden',
     fontSize: '14px',
   };
   const cellHeaderStyle = {
