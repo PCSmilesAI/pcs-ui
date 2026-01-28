@@ -12,9 +12,17 @@ import { convertPdfToBase64Images } from './pdfToImages';
 import { getOrCreateKnowledgeBase, upsertKnowledgeBase } from './knowledgeBase';
 import { DocumentType, getDocumentTypeDisplayName } from './documentClassifier';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// Lazy initialization of OpenAI client to avoid build-time errors
+let openaiClient: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+  }
+  return openaiClient;
+}
 
 export interface OtherDocumentTrainingInput {
   vendorName: string;
@@ -134,7 +142,7 @@ export async function trainFromOtherDocument(input: OtherDocumentTrainingInput):
 
     // Call GPT-5 Nano to generate updated knowledge base
     console.log('[PCS-AI-TRAIN-OTHER] Calling GPT for knowledge base update...');
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
