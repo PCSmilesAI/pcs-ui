@@ -2608,7 +2608,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
             </table>
           </div>
           {/* Invoice Details section */}
-          <div style={sectionStyle}>
+          <div style={{ ...sectionStyle, position: 'relative', zIndex: 10 }}>
             <h2 style={sectionTitleStyle}>Invoice Details</h2>
             <table style={tableStyle}>
               <tbody>
