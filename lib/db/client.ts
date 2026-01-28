@@ -347,6 +347,8 @@ export function runMigrations(): void {
   ensureColumn('invoices', 'parsing_confidence', 'parsing_confidence REAL'); // 0.0-1.0 confidence score from GPT
 
   // Create table_template_rows table for table template type
+  // Note: invoice_id is nullable (template rows don't need an invoice)
+  // Note: amount_cents is nullable (split evenly modes don't specify amounts)
   db.exec(`
     CREATE TABLE IF NOT EXISTS table_template_rows (
       id TEXT PRIMARY KEY,
@@ -354,9 +356,11 @@ export function runMigrations(): void {
       template_id TEXT,
       gl_account_path TEXT NOT NULL,
       category_name TEXT,
+      description TEXT,
       class_name TEXT,
       location_name TEXT,
-      amount_cents INTEGER NOT NULL,
+      amount_cents INTEGER,
+      percentage REAL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (invoice_id) REFERENCES invoices(id),
       FOREIGN KEY (template_id) REFERENCES coding_templates(id)
