@@ -1038,9 +1038,11 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       const template = (await (await fetch(`/api/coding-templates/${selectedTemplateId}`)).json()).template;
       const allocationMode = template?.allocation_mode || 'split_evenly';
       
-      // For split_evenly_all_classes mode with no pre-saved rows, dynamically generate from QBO classes
-      if (allocationMode === 'split_evenly_all_classes' && templateRows.length === 0) {
+      // For split_evenly modes with no pre-saved rows, dynamically generate from QBO classes (8 locations)
+      // This handles both 'split_evenly' and 'split_evenly_all_classes' modes
+      if ((allocationMode === 'split_evenly_all_classes' || allocationMode === 'split_evenly') && templateRows.length === 0) {
         try {
+          console.log(`[TEMPLATE] No rows defined for ${allocationMode} mode, auto-generating from QBO classes...`);
           const classesResponse = await fetch('/api/qbo/classes');
           if (classesResponse.ok) {
             const classesData = await classesResponse.json();
@@ -1051,7 +1053,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
               return;
             }
             
-            // Generate template rows from QBO classes
+            // Generate template rows from QBO classes (all 8 locations)
             templateRows = qboClasses.map((cls, index) => ({
               id: `auto-${index}`,
               gl_account_path: template?.gl_account_name || '',
@@ -1061,7 +1063,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
               location_name: cls.name || cls.fullName,
             }));
             
-            console.log(`[TEMPLATE] Auto-generated ${templateRows.length} GL lines from QBO classes for split_evenly_all_classes mode`);
+            console.log(`[TEMPLATE] Auto-generated ${templateRows.length} GL lines from QBO classes for ${allocationMode} mode`);
           } else {
             showToast('Failed to fetch QuickBooks classes', 'error');
             return;
@@ -1074,7 +1076,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       }
       
       if (templateRows.length === 0) {
-        showToast('Template has no GL lines defined', 'error');
+        showToast('Template has no GL lines defined. Please add rows to the template or use a split evenly mode.', 'error');
         return;
       }
 
