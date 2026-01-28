@@ -88,10 +88,12 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     const locations = invoice.locations || [];
     // Fallback to legacy office fields if no GL Line locations
     const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
-    // Display locations from GL Lines (extract just city name), fallback to legacy office
-    const locationDisplay = locations.length > 0 
-      ? locations.map(loc => extractLocationFromClass(loc)).join(', ') 
-      : (officeRaw || 'Unknown');
+    // If a template was applied, show the template name; otherwise show locations
+    const locationDisplay = invoice.applied_template_name 
+      ? invoice.applied_template_name
+      : (locations.length > 0 
+          ? locations.map(loc => extractLocationFromClass(loc)).join(', ') 
+          : (officeRaw || 'Unknown'));
     const formatDate = (dateString) => {
       if (!dateString) return 'N/A';
       const parsed = new Date(dateString);

@@ -150,16 +150,29 @@ export async function GET(req: NextRequest) {
       WHERE invoice_id = ? AND class_name IS NOT NULL AND class_name != ''
       ORDER BY sequence ASC
     `);
+    
+    // Fetch template name if a coding template was applied
+    const getTemplateStmt = db.prepare(`
+      SELECT name FROM coding_templates WHERE id = ?
+    `);
 
     const paginatedWithCategories = paginated.map(invoice => {
       const categories = getCategoriesStmt.all(invoice.id) as any[];
       const locationRows = getLocationsStmt.all(invoice.id) as { class_name: string }[];
       const locations = locationRows.map(r => r.class_name);
       
+      // Get template name if template was applied
+      let applied_template_name: string | null = null;
+      if (invoice.coding_template_id) {
+        const template = getTemplateStmt.get(invoice.coding_template_id) as { name: string } | undefined;
+        applied_template_name = template?.name || null;
+      }
+      
       return {
         ...invoice,
         invoice_categories: categories,
         locations: locations, // Array of all class names from GL Lines
+        applied_template_name, // Name of coding template if used
       };
     });
 

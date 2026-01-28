@@ -80,9 +80,12 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           // Get locations from GL Lines (invoice_categories classes)
           const locations = invoice.locations || [];
           const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
-          const locationDisplay = locations.length > 0 
-            ? locations.join(', ') 
-            : (officeRaw || 'Unknown');
+          // If a template was applied, show the template name; otherwise show locations
+          const locationDisplay = invoice.applied_template_name 
+            ? invoice.applied_template_name
+            : (locations.length > 0 
+                ? locations.join(', ') 
+                : (officeRaw || 'Unknown'));
           return {
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
@@ -156,9 +159,12 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
         // Get locations from GL Lines (invoice_categories classes)
         const locations = invoice.locations || [];
         const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
-        const locationDisplay = locations.length > 0 
-          ? locations.join(', ') 
-          : (officeRaw || 'Unknown');
+        // If a template was applied, show the template name; otherwise show locations
+        const locationDisplay = invoice.applied_template_name 
+          ? invoice.applied_template_name
+          : (locations.length > 0 
+              ? locations.join(', ') 
+              : (officeRaw || 'Unknown'));
         return {
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
