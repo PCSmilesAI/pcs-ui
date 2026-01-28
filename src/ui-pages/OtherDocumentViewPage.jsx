@@ -250,13 +250,15 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
       }
       
       const data = await res.json();
-      showToast('Document sent to PCS AI for invoice processing!', 'success');
       setShowInvoiceModal(false);
+      showToast('Document sent to PCS AI for invoice processing!', 'success');
       setTimeout(() => {
         if (onBack) onBack();
       }, 1500);
     } catch (err) {
-      showToast(err.message, 'error');
+      console.error('[CONVERT-TO-INVOICE] Error:', err);
+      setShowInvoiceModal(false); // Close modal so user can see the error
+      showToast(err.message || 'Failed to convert document', 'error');
     } finally {
       setProcessing(false);
     }
