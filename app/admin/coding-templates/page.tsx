@@ -234,8 +234,15 @@ export default function CodingTemplatesPage() {
   }
 
   function updateTableRow(id: string, field: keyof TableTemplateRow, value: string) {
-    setTableRows(tableRows.map(row =>
+    setTableRows(prev => prev.map(row =>
       row.id === id ? { ...row, [field]: value } : row
+    ));
+  }
+
+  // Update multiple fields at once to avoid stale closure issues
+  function updateTableRowMultiple(id: string, updates: Partial<TableTemplateRow>) {
+    setTableRows(prev => prev.map(row =>
+      row.id === id ? { ...row, ...updates } : row
     ));
   }
 
@@ -263,24 +270,30 @@ export default function CodingTemplatesPage() {
   function handleCategorySelect(rowId: string, category: QBOCategory) {
     // In "split_evenly_all_classes" mode, propagate category to all rows
     if (allocationMode === 'split_evenly_all_classes') {
-      setTableRows(tableRows.map(row => ({
+      setTableRows(prev => prev.map(row => ({
         ...row,
         glAccountPath: category.fullPath,
         categoryName: category.displayText,
       })));
     } else {
-    updateTableRow(rowId, 'glAccountPath', category.fullPath);
-    updateTableRow(rowId, 'categoryName', category.displayText);
+      // Update both fields at once to avoid stale closure issues
+      updateTableRowMultiple(rowId, {
+        glAccountPath: category.fullPath,
+        categoryName: category.displayText,
+      });
     }
-    setCategorySearchQueries({ ...categorySearchQueries, [rowId]: '' });
-    setCategoryDropdownOpen({ ...categoryDropdownOpen, [rowId]: false });
+    setCategorySearchQueries(prev => ({ ...prev, [rowId]: '' }));
+    setCategoryDropdownOpen(prev => ({ ...prev, [rowId]: false }));
   }
 
   function handleLocationSelect(rowId: string, location: QBOLocation) {
-    updateTableRow(rowId, 'className', location.name);
-    updateTableRow(rowId, 'locationName', location.name);
-    setClassSearchQueries({ ...classSearchQueries, [rowId]: '' });
-    setClassDropdownOpen({ ...classDropdownOpen, [rowId]: false });
+    // Update both fields at once to avoid stale closure issues
+    updateTableRowMultiple(rowId, {
+      className: location.name,
+      locationName: location.name,
+    });
+    setClassSearchQueries(prev => ({ ...prev, [rowId]: '' }));
+    setClassDropdownOpen(prev => ({ ...prev, [rowId]: false }));
   }
 
   function getAutocompleteCategorySuggestion(rowId: string): QBOCategory | null {
@@ -802,7 +815,8 @@ export default function CodingTemplatesPage() {
                       {vendorSuggestions.map((vendor) => (
                         <div
                           key={vendor.id}
-                          onClick={() => {
+                          onMouseDown={(e) => {
+                            e.preventDefault(); // Prevent blur from firing
                             setVendorName(vendor.name);
                             setVendorSearchQuery(vendor.name);
                             setShowVendorSuggestions(false);
@@ -978,7 +992,10 @@ export default function CodingTemplatesPage() {
                             {getFilteredCategories(row.id).map((cat) => (
                                       <div
                                         key={cat.id}
-                                        onClick={() => handleCategorySelect(row.id, cat)}
+                                        onMouseDown={(e) => {
+                                          e.preventDefault(); // Prevent blur from firing
+                                          handleCategorySelect(row.id, cat);
+                                        }}
                                 style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '13px' }}
                                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#edf2f7'; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#fff'; }}
@@ -1050,7 +1067,10 @@ export default function CodingTemplatesPage() {
                             {getFilteredLocations(row.id).map((loc) => (
                                       <div
                                         key={loc.id}
-                                        onClick={() => handleLocationSelect(row.id, loc)}
+                                        onMouseDown={(e) => {
+                                          e.preventDefault(); // Prevent blur from firing
+                                          handleLocationSelect(row.id, loc);
+                                        }}
                                 style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '13px' }}
                                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#edf2f7'; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#fff'; }}
