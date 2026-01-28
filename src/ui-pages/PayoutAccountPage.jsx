@@ -11,9 +11,12 @@ export default function PayoutAccountPage() {
   const titleStyle = { fontSize: '24px', fontWeight: '600', color: '#357ab2', marginBottom: '16px' };
   const tableStyle = {
     width: '100%',
-    borderCollapse: 'collapse',
+    borderCollapse: 'separate',
+    borderSpacing: 0,
     borderLeft: '1px solid #357ab2',
     borderTop: '1px solid #357ab2',
+    borderRadius: '16px',
+    overflow: 'hidden',
     fontSize: '14px',
     marginBottom: '16px',
   };

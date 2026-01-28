@@ -33,9 +33,12 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
   // are chosen to approximate the provided wireframes.
   const tableStyle = {
     width: '100%',
-    borderCollapse: 'collapse',
+    borderCollapse: 'separate',
+    borderSpacing: 0,
     borderLeft: '1px solid #357ab2',
     borderTop: '1px solid #357ab2',
+    borderRadius: '16px',
+    overflow: 'hidden',
     tableLayout: 'fixed',
   };
   const headerCellBase = {

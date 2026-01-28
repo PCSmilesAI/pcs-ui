@@ -603,9 +603,9 @@ function PaymentReceiptContent({ payment, vendor }) {
           <div style={{ marginTop: 12 }}>
             <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 13 }}>Invoices Included:</div>
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: '12px', border: '1px solid #357ab2', borderRadius: '12px', overflow: 'hidden' }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '1px solid #357ab2' }}>
+                  <tr style={{ backgroundColor: '#f3f4f6' }}>
                     <th style={{ padding: '6px', textAlign: 'left', fontWeight: 600 }}>Invoice #</th>
                     <th style={{ padding: '6px', textAlign: 'left', fontWeight: 600 }}>Amount</th>
                     <th style={{ padding: '6px', textAlign: 'left', fontWeight: 600 }}>Date</th>

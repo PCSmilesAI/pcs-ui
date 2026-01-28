@@ -144,12 +144,16 @@ export default function PaymentReceiptPage({ payment, vendor, onBack }) {
               <table
                 style={{
                   width: '100%',
-                  borderCollapse: 'collapse',
+                  borderCollapse: 'separate',
+                  borderSpacing: 0,
                   fontSize: '14px',
+                  border: '1px solid #357ab2',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
                 }}
               >
                 <thead>
-                  <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '1px solid #357ab2' }}>
+                  <tr style={{ backgroundColor: '#f3f4f6' }}>
                     <th style={{ padding: '8px', textAlign: 'left', fontWeight: 600 }}>Invoice #</th>
                     <th style={{ padding: '8px', textAlign: 'left', fontWeight: 600 }}>Amount</th>
                     <th style={{ padding: '8px', textAlign: 'left', fontWeight: 600 }}>Date</th>
