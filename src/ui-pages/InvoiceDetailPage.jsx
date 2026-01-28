@@ -2678,44 +2678,46 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 </tr>
                 <tr>
                   <td style={{ ...cellStyle, fontWeight: '500', color: '#4a5568' }}>Vendor</td>
-                  <td style={cellStyle}>
+                  <td style={{ ...cellStyle, position: 'relative' }}>
                     {permissions.canEditInvoices ? (
-                    <SearchableSelect
-                      options={(() => {
-                        // If current vendor exists and isn't in the QBO list, add it as a custom option
-                        const currentVendor = details.vendor;
-                        if (currentVendor && !qboVendors.find(v => v.name === currentVendor && v.id !== '__add_new__')) {
-                          return [
-                            { id: '__add_new__', name: '+ Add New Vendor', displayName: '+ Add New Vendor' },
-                            { id: `__current__`, name: currentVendor, displayName: `${currentVendor} (current)` },
-                            ...qboVendors.filter(v => v.id !== '__add_new__')
-                          ];
-                        }
-                        return qboVendors;
-                      })()}
-                      value={(() => {
-                        const currentVendor = details.vendor;
-                        if (!currentVendor) return '';
-                        const match = qboVendors.find(v => v.name === currentVendor && v.id !== '__add_new__');
-                        if (match) return match.id;
-                        // Return custom ID if vendor exists but not in QBO list
-                        return '__current__';
-                      })()}
-                      onChange={(id, displayText) => {
-                        if (id === '__add_new__') {
-                          setShowAddVendorModal(true);
-                        } else {
-                          // Remove "(current)" suffix if present
-                          const cleanName = displayText.replace(' (current)', '');
-                          handleDetailChange('vendor', cleanName);
-                        }
-                      }}
-                      placeholder={loadingVendors ? 'Loading vendors...' : 'Select vendor...'}
-                      displayKey="displayName"
-                      valueKey="id"
-                      disabled={loadingVendors}
-                      style={{ width: '100%' }}
-                    />
+                    <div style={{ position: 'relative', height: '38px' }}>
+                      <SearchableSelect
+                        options={(() => {
+                          // If current vendor exists and isn't in the QBO list, add it as a custom option
+                          const currentVendor = details.vendor;
+                          if (currentVendor && !qboVendors.find(v => v.name === currentVendor && v.id !== '__add_new__')) {
+                            return [
+                              { id: '__add_new__', name: '+ Add New Vendor', displayName: '+ Add New Vendor' },
+                              { id: `__current__`, name: currentVendor, displayName: `${currentVendor} (current)` },
+                              ...qboVendors.filter(v => v.id !== '__add_new__')
+                            ];
+                          }
+                          return qboVendors;
+                        })()}
+                        value={(() => {
+                          const currentVendor = details.vendor;
+                          if (!currentVendor) return '';
+                          const match = qboVendors.find(v => v.name === currentVendor && v.id !== '__add_new__');
+                          if (match) return match.id;
+                          // Return custom ID if vendor exists but not in QBO list
+                          return '__current__';
+                        })()}
+                        onChange={(id, displayText) => {
+                          if (id === '__add_new__') {
+                            setShowAddVendorModal(true);
+                          } else {
+                            // Remove "(current)" suffix if present
+                            const cleanName = displayText.replace(' (current)', '');
+                            handleDetailChange('vendor', cleanName);
+                          }
+                        }}
+                        placeholder={loadingVendors ? 'Loading vendors...' : 'Select vendor...'}
+                        displayKey="displayName"
+                        valueKey="id"
+                        disabled={loadingVendors}
+                        style={{ width: '100%' }}
+                      />
+                    </div>
                     ) : (
                       <span style={{ fontSize: '14px', color: '#2d3748' }}>{details.vendor || 'N/A'}</span>
                     )}
