@@ -237,7 +237,7 @@ export default function RolesPage() {
   const inputStyle = {
     width: '100%',
     border: '1px solid #cbd5e0',
-    borderRadius: '6px',
+    borderRadius: '12px',
     padding: '8px 12px',
     fontSize: '14px',
     boxSizing: 'border-box',
@@ -251,7 +251,7 @@ export default function RolesPage() {
   const labelStyle = { fontWeight: 500, color: '#4a5568', marginBottom: '6px', display: 'block' };
   const cardStyle = {
     border: '1px solid #e2e8f0',
-    borderRadius: '12px',
+    borderRadius: '20px',
     padding: '16px',
     backgroundColor: '#ffffff',
     boxShadow: '0 10px 25px rgba(15, 23, 42, 0.08)',
@@ -284,7 +284,7 @@ export default function RolesPage() {
     <div style={containerStyle}>
       <h1 style={titleStyle}>Workflow Roles</h1>
       {error && (
-        <div style={{ marginBottom: '16px', padding: '12px 16px', borderRadius: '10px', backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' }}>
+        <div style={{ marginBottom: '16px', padding: '12px 16px', borderRadius: '16px', backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' }}>
           {error}
         </div>
       )}
@@ -355,7 +355,7 @@ export default function RolesPage() {
                   color: '#1f1f1f',
                   padding: '12px',
                   border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
+                  borderRadius: '16px',
                   backgroundColor: '#f8fafc',
                 }}
               >

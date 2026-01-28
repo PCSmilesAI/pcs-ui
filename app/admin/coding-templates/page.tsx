@@ -549,7 +549,7 @@ export default function CodingTemplatesPage() {
     padding: '8px 12px',
     fontSize: '14px',
     border: '1px solid #cbd5e0',
-    borderRadius: '4px',
+    borderRadius: '12px',
     outline: 'none',
     boxSizing: 'border-box',
   };
@@ -564,7 +564,7 @@ export default function CodingTemplatesPage() {
     padding: '8px 16px',
     fontSize: '14px',
     border: '1px solid #3182ce',
-    borderRadius: '4px',
+    borderRadius: '12px',
     cursor: 'pointer',
     backgroundColor: '#3182ce',
     color: 'white',
@@ -607,7 +607,7 @@ export default function CodingTemplatesPage() {
           </div>
 
           {error && !showModal && (
-        <div style={{ padding: '12px 16px', backgroundColor: '#fed7d7', color: '#c53030', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
+        <div style={{ padding: '12px 16px', backgroundColor: '#fed7d7', color: '#c53030', borderRadius: '12px', marginBottom: '16px', fontSize: '14px' }}>
           {error}
             </div>
           )}
@@ -659,7 +659,7 @@ export default function CodingTemplatesPage() {
                 <td style={{ padding: '12px 16px' }}>
                   <span style={{
                     padding: '2px 8px',
-                    borderRadius: '4px',
+                    borderRadius: '12px',
                     fontSize: '12px',
                     backgroundColor: template.is_active ? '#c6f6d5' : '#e2e8f0',
                     color: template.is_active ? '#276749' : '#718096',
@@ -704,7 +704,7 @@ export default function CodingTemplatesPage() {
         }}>
           <div style={{
             backgroundColor: '#fff',
-            borderRadius: '8px',
+            borderRadius: '16px',
             width: '100%',
             maxWidth: '800px',
             maxHeight: '90vh',
@@ -734,7 +734,7 @@ export default function CodingTemplatesPage() {
             {/* Modal Body */}
             <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
               {error && (
-                <div style={{ padding: '10px 14px', backgroundColor: '#fed7d7', color: '#c53030', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
+                <div style={{ padding: '10px 14px', backgroundColor: '#fed7d7', color: '#c53030', borderRadius: '12px', marginBottom: '16px', fontSize: '14px' }}>
                   {error}
                 </div>
               )}
@@ -793,7 +793,7 @@ export default function CodingTemplatesPage() {
                       right: 0,
                       backgroundColor: '#fff',
                       border: '1px solid #e2e8f0',
-                      borderRadius: '4px',
+                      borderRadius: '12px',
                       maxHeight: '200px',
                       overflowY: 'auto',
                       zIndex: 50,
@@ -842,7 +842,7 @@ export default function CodingTemplatesPage() {
                   padding: '10px 14px',
                   backgroundColor: isPercentageValid ? '#c6f6d5' : '#fed7d7',
                   color: isPercentageValid ? '#276749' : '#c53030',
-                  borderRadius: '4px',
+                  borderRadius: '12px',
                   marginBottom: '16px',
                   fontSize: '14px',
                   display: 'flex',
@@ -860,7 +860,7 @@ export default function CodingTemplatesPage() {
                   padding: '10px 14px',
                   backgroundColor: '#ebf8ff',
                   color: '#2b6cb0',
-                  borderRadius: '4px',
+                  borderRadius: '12px',
                   marginBottom: '16px',
                   fontSize: '14px',
                 }}>
@@ -893,7 +893,7 @@ export default function CodingTemplatesPage() {
                   <div key={row.id} style={{
                     padding: '16px',
                     backgroundColor: '#f7fafc',
-                    borderRadius: '4px',
+                    borderRadius: '12px',
                     border: '1px solid #e2e8f0',
                     marginBottom: '12px',
                   }}>
@@ -969,7 +969,7 @@ export default function CodingTemplatesPage() {
                             right: 0,
                             backgroundColor: '#fff',
                             border: '1px solid #e2e8f0',
-                            borderRadius: '4px',
+                            borderRadius: '12px',
                             maxHeight: '180px',
                             overflowY: 'auto',
                             zIndex: 50,
@@ -1041,7 +1041,7 @@ export default function CodingTemplatesPage() {
                             right: 0,
                             backgroundColor: '#fff',
                             border: '1px solid #e2e8f0',
-                            borderRadius: '4px',
+                            borderRadius: '12px',
                             maxHeight: '180px',
                             overflowY: 'auto',
                             zIndex: 50,

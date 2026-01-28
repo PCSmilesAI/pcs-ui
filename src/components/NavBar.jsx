@@ -211,7 +211,7 @@ function NavBarInner({
     top: '32px',
     background: '#fff',
     border: '1px solid #357ab2',
-    borderRadius: '8px',
+    borderRadius: '16px',
     boxShadow: '0 2px 8px rgba(53,122,178,0.08)',
     zIndex: 10,
     minWidth: '170px',

@@ -67,7 +67,7 @@ export default function ConnectionsPage() {
 
   const cardStyle = {
     backgroundColor: '#ffffff',
-    borderRadius: '8px',
+    borderRadius: '16px',
     padding: '24px',
     marginBottom: '24px',
     border: '1px solid #e2e8f0',
@@ -83,7 +83,7 @@ export default function ConnectionsPage() {
 
   const statusCardStyle = (connected) => ({
     padding: '16px',
-    borderRadius: '8px',
+    borderRadius: '16px',
     border: `1px solid ${connected ? '#10b981' : '#ef4444'}`,
     backgroundColor: connected ? '#f0fdf4' : '#fef2f2',
     marginBottom: '16px',
@@ -113,7 +113,7 @@ export default function ConnectionsPage() {
 
   const buttonStyle = {
     padding: '8px 16px',
-    borderRadius: '6px',
+    borderRadius: '12px',
     border: '1px solid #357ab2',
     backgroundColor: '#357ab2',
     color: '#ffffff',
@@ -148,7 +148,7 @@ export default function ConnectionsPage() {
         {successMessage && (
           <div style={{
             padding: '16px',
-            borderRadius: '8px',
+            borderRadius: '16px',
             border: '1px solid #10b981',
             backgroundColor: '#f0fdf4',
             marginBottom: '24px',

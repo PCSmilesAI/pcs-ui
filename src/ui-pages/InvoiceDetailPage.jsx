@@ -601,7 +601,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
               backgroundColor: '#357ab2',
               color: 'white',
               border: 'none',
-              borderRadius: '4px',
+              borderRadius: '9999px',
               cursor: 'pointer',
               marginTop: '16px',
             }}
@@ -2270,7 +2270,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
           marginBottom: '24px',
           padding: '16px 20px',
           backgroundColor: '#fef2f2',
-          borderRadius: '8px',
+          borderRadius: '16px',
           border: '1px solid #fca5a5',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
         }}>
@@ -2303,7 +2303,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
               alignItems: 'center',
               gap: '8px',
               padding: '10px 20px',
-              borderRadius: '6px',
+              borderRadius: '12px',
               fontSize: '14px',
               fontWeight: '600',
               border: 'none',
@@ -2334,7 +2334,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         <div style={{
           marginBottom: '16px',
           padding: '12px 16px',
-          borderRadius: '6px',
+          borderRadius: '12px',
           backgroundColor: reparseResult.parsing_status === 'success' ? '#d1fae5' : 
                           reparseResult.parsing_status === 'partial' ? '#fef3c7' : '#fee2e2',
           border: `1px solid ${reparseResult.parsing_status === 'success' ? '#34d399' : 
@@ -2356,7 +2356,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
           marginBottom: '24px',
           padding: '12px',
           backgroundColor: '#f8f9fa',
-          borderRadius: '6px',
+          borderRadius: '12px',
           border: '1px solid #e0e0e0',
         }}>
           <label style={{ fontWeight: '500', color: '#4a5568', whiteSpace: 'nowrap' }}>
@@ -2370,7 +2370,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
             }}
             style={{
               padding: '8px 12px',
-              borderRadius: '4px',
+              borderRadius: '12px',
               border: '1px solid #cbd5e0',
               fontSize: '14px',
               backgroundColor: '#ffffff',
@@ -2392,7 +2392,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
               disabled={reassigningInvoice}
               style={{
                 padding: '8px 16px',
-                borderRadius: '4px',
+                borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: '500',
                 border: '1px solid #059669',
@@ -2496,7 +2496,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                           onChange={(e) => setPaymentAmount(e.target.value)}
                           style={{
                             border: '1px solid #cbd5e0',
-                            borderRadius: '4px',
+                            borderRadius: '12px',
                             padding: '4px 8px',
                             fontSize: '14px',
                             width: '80px',
@@ -2549,7 +2549,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                         onChange={(e) => handleDetailChange('invoice', e.target.value)}
                         style={{
                           border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
+                          borderRadius: '12px',
                           padding: '4px 8px',
                           fontSize: '14px',
                           width: 'calc(100% - 16px)',
@@ -2571,7 +2571,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                         onChange={(e) => handleDetailChange('invoice_date', e.target.value)}
                         style={{
                           border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
+                          borderRadius: '12px',
                           padding: '4px 8px',
                           fontSize: '14px',
                           width: 'calc(100% - 16px)',
@@ -2593,7 +2593,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                         onChange={(e) => handleDetailChange('due_date', e.target.value)}
                         style={{
                           border: '1px solid #cbd5e0',
-                          borderRadius: '4px',
+                          borderRadius: '12px',
                           padding: '4px 8px',
                           fontSize: '14px',
                           width: 'calc(100% - 16px)',
@@ -2665,7 +2665,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
               padding: '12px 16px',
               backgroundColor: Math.abs(allocationSummary.unallocated) <= 0.01 ? '#ecfdf5' : '#fef2f2',
               border: `1px solid ${Math.abs(allocationSummary.unallocated) <= 0.01 ? '#10b981' : '#ef4444'}`,
-              borderRadius: '6px',
+              borderRadius: '12px',
               marginBottom: '16px'
             }}>
               <div style={{ display: 'flex', gap: '24px', fontSize: '14px' }}>
@@ -2683,7 +2683,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   backgroundColor: '#10b981', 
                   color: 'white', 
                   padding: '4px 12px', 
-                  borderRadius: '12px', 
+                  borderRadius: '20px', 
                   fontSize: '12px',
                   fontWeight: '600'
                 }}>
@@ -2694,7 +2694,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   backgroundColor: '#ef4444', 
                   color: 'white', 
                   padding: '4px 12px', 
-                  borderRadius: '12px', 
+                  borderRadius: '20px', 
                   fontSize: '12px',
                   fontWeight: '600'
                 }}>
@@ -2715,7 +2715,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                       marginBottom: '12px',
                       padding: '14px',
                       border: cat.isEditing ? '2px solid #3b82f6' : '1px solid #e2e8f0',
-                      borderRadius: '6px',
+                      borderRadius: '12px',
                       backgroundColor: cat.isEditing ? '#f0f9ff' : '#f8fafc'
                     }}>
                       {cat.isEditing ? (
@@ -2733,7 +2733,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                                   backgroundColor: '#10b981',
                                   color: 'white',
                                   border: 'none',
-                                  borderRadius: '4px',
+                                  borderRadius: '9999px',
                                   cursor: 'pointer',
                                   fontSize: '12px',
                                   fontWeight: '600'
@@ -2749,7 +2749,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                                     backgroundColor: '#fee2e2',
                                     color: '#991b1b',
                                     border: '1px solid #fca5a5',
-                                    borderRadius: '4px',
+                                    borderRadius: '12px',
                                     cursor: 'pointer',
                                     fontSize: '12px',
                                     fontWeight: 'bold'
@@ -2822,7 +2822,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                                   onChange={(e) => updateInvoiceCategory(index, 'amount', e.target.value)}
                                   style={{
                                     padding: '8px 12px 8px 24px',
-                                    borderRadius: '4px',
+                                    borderRadius: '12px',
                                     border: '1px solid #cbd5e0',
                                     fontSize: '14px',
                                     width: '100%',
@@ -2845,7 +2845,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                               onChange={(e) => updateInvoiceCategory(index, 'description', e.target.value)}
                               style={{
                                 padding: '8px 12px',
-                                borderRadius: '4px',
+                                borderRadius: '12px',
                                 border: '1px solid #cbd5e0',
                                 fontSize: '14px',
                                 width: '100%',
@@ -2867,7 +2867,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                                   color: '#10b981',
                                   backgroundColor: '#ecfdf5',
                                   padding: '2px 8px',
-                                  borderRadius: '4px'
+                                  borderRadius: '12px'
                                 }}>
                                   GL Line {index + 1}
                                 </span>
@@ -2905,7 +2905,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                                   backgroundColor: '#f3f4f6',
                                   color: '#374151',
                                   border: '1px solid #d1d5db',
-                                  borderRadius: '4px',
+                                  borderRadius: '12px',
                                   cursor: 'pointer',
                                   fontSize: '12px',
                                   fontWeight: '500'
@@ -2921,7 +2921,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                                     backgroundColor: '#fee2e2',
                                     color: '#991b1b',
                                     border: '1px solid #fca5a5',
-                                    borderRadius: '4px',
+                                    borderRadius: '12px',
                                     cursor: 'pointer',
                                     fontSize: '12px',
                                     fontWeight: 'bold'
@@ -2953,7 +2953,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   backgroundColor: '#10b981',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '4px',
+                  borderRadius: '9999px',
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: '500'
@@ -2970,7 +2970,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   backgroundColor: (processing || Math.abs(allocationSummary.unallocated) > 0.01) ? '#9ca3af' : '#3b82f6',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '4px',
+                  borderRadius: '9999px',
                   cursor: (processing || Math.abs(allocationSummary.unallocated) > 0.01) ? 'not-allowed' : 'pointer',
                   fontSize: '14px',
                   fontWeight: '500',
@@ -2991,7 +2991,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                     backgroundColor: Math.abs(allocationSummary.unallocated) > 0.01 ? '#9ca3af' : '#8b5cf6',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '4px',
+                    borderRadius: '9999px',
                     cursor: Math.abs(allocationSummary.unallocated) > 0.01 ? 'not-allowed' : 'pointer',
                     fontSize: '14px',
                     fontWeight: '500',
@@ -3009,7 +3009,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
               <div style={{
                 padding: '12px 16px',
                 backgroundColor: '#f3f4f6',
-                borderRadius: '6px',
+                borderRadius: '12px',
                 marginBottom: '16px'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -3023,7 +3023,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                     style={{
                       padding: '8px 12px',
                       border: '1px solid #d1d5db',
-                      borderRadius: '4px',
+                      borderRadius: '12px',
                       fontSize: '14px',
                       backgroundColor: 'white',
                       minWidth: '200px',
@@ -3045,7 +3045,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                       backgroundColor: (!selectedTemplateId || applyingTemplate) ? '#9ca3af' : '#2563eb',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '4px',
+                      borderRadius: '9999px',
                       cursor: (!selectedTemplateId || applyingTemplate) ? 'not-allowed' : 'pointer',
                       fontSize: '14px',
                       fontWeight: '500',
@@ -3160,7 +3160,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   width: '100%',
                   padding: '8px',
                   border: '1px solid #cbd5e0',
-                  borderRadius: '4px',
+                  borderRadius: '12px',
                   fontSize: '14px',
                   fontFamily: 'inherit',
                   boxSizing: 'border-box',
@@ -3196,7 +3196,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                     backgroundColor: '#3b82f6',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '4px',
+                    borderRadius: '9999px',
                     cursor: processing ? 'not-allowed' : 'pointer',
                     fontSize: '14px',
                     fontWeight: '500',
@@ -3217,7 +3217,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                         marginBottom: '8px',
                         backgroundColor: '#f8fafc',
                         border: '1px solid #e2e8f0',
-                        borderRadius: '4px',
+                        borderRadius: '12px',
                         fontSize: '12px',
                       }}
                     >
@@ -3244,7 +3244,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                     backgroundColor: isChatOpen ? '#dc2626' : '#3b82f6',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '4px',
+                    borderRadius: '9999px',
                     cursor: 'pointer',
                     fontSize: '12px',
                     fontWeight: '500',
@@ -3257,7 +3257,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 <div
                   style={{
                     border: '1px solid #e2e8f0',
-                    borderRadius: '4px',
+                    borderRadius: '12px',
                     backgroundColor: '#f8fafc',
                     height: '400px',
                     display: 'flex',
@@ -3286,7 +3286,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                             alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
                             maxWidth: '80%',
                             padding: '8px 12px',
-                            borderRadius: '8px',
+                            borderRadius: '16px',
                             backgroundColor: msg.role === 'user' ? '#3b82f6' : 'white',
                             color: msg.role === 'user' ? 'white' : '#333',
                             fontSize: '14px',
@@ -3315,7 +3315,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                         flex: 1,
                         padding: '8px',
                         border: '1px solid #cbd5e0',
-                        borderRadius: '4px',
+                        borderRadius: '12px',
                         fontSize: '14px',
                       }}
                     />
@@ -3327,7 +3327,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                         backgroundColor: '#3b82f6',
                         color: 'white',
                         border: 'none',
-                        borderRadius: '4px',
+                        borderRadius: '9999px',
                         cursor: sendingChat || !chatInput.trim() ? 'not-allowed' : 'pointer',
                         fontSize: '14px',
                         opacity: sendingChat || !chatInput.trim() ? 0.6 : 1,
@@ -3498,7 +3498,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         }}>
           <div style={{
             backgroundColor: 'white',
-            borderRadius: '12px',
+            borderRadius: '20px',
             padding: '24px',
             maxWidth: '500px',
             width: '90%',
@@ -3520,7 +3520,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 width: '100%',
                 padding: '12px',
                 border: '1px solid #d1d5db',
-                borderRadius: '8px',
+                borderRadius: '16px',
                 fontSize: '14px',
                 fontFamily: 'inherit',
                 boxSizing: 'border-box',
@@ -3539,7 +3539,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   backgroundColor: '#f3f4f6',
                   color: '#374151',
                   border: '1px solid #d1d5db',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: 'pointer',
@@ -3555,7 +3555,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   backgroundColor: '#d97706',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: processing ? 'not-allowed' : 'pointer',
@@ -3585,7 +3585,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         }}>
           <div style={{
             backgroundColor: 'white',
-            borderRadius: '12px',
+            borderRadius: '20px',
             padding: '24px',
             maxWidth: '450px',
             width: '90%',
@@ -3617,7 +3617,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
             <div style={{
               backgroundColor: '#fef2f2',
               border: '1px solid #fecaca',
-              borderRadius: '8px',
+              borderRadius: '16px',
               padding: '12px 16px',
               marginBottom: '20px',
             }}>
@@ -3647,7 +3647,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   backgroundColor: '#dc2626',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: 'pointer',
@@ -3676,7 +3676,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         }}>
           <div style={{
             backgroundColor: 'white',
-            borderRadius: '12px',
+            borderRadius: '20px',
             padding: '24px',
             maxWidth: '500px',
             width: '90%',
@@ -3710,7 +3710,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 <div style={{
                   backgroundColor: '#fef3c7',
                   border: '1px solid #fcd34d',
-                  borderRadius: '8px',
+                  borderRadius: '16px',
                   padding: '12px 16px',
                   marginBottom: '16px',
                 }}>
@@ -3765,7 +3765,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   <div style={{
                     backgroundColor: '#f0fdf4',
                     border: '1px solid #bbf7d0',
-                    borderRadius: '8px',
+                    borderRadius: '16px',
                     padding: '12px 16px',
                     marginBottom: '20px',
                   }}>
@@ -3814,7 +3814,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                       backgroundColor: '#16a34a',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '6px',
+                      borderRadius: '12px',
                       fontSize: '14px',
                       fontWeight: '500',
                       cursor: 'pointer',
@@ -3845,7 +3845,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         }}>
           <div style={{
             backgroundColor: 'white',
-            borderRadius: '12px',
+            borderRadius: '20px',
             padding: '24px',
             maxWidth: '500px',
             width: '90%',
@@ -3890,7 +3890,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   width: '100%',
                   padding: '10px 12px',
                   border: '1px solid #d1d5db',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   fontSize: '14px',
                   boxSizing: 'border-box',
                 }}
@@ -3910,7 +3910,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   width: '100%',
                   padding: '10px 12px',
                   border: '1px solid #d1d5db',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   fontSize: '14px',
                   resize: 'vertical',
                   boxSizing: 'border-box',
@@ -3929,7 +3929,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   width: '100%',
                   padding: '10px 12px',
                   border: '1px solid #d1d5db',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   fontSize: '14px',
                   backgroundColor: 'white',
                   cursor: 'pointer',
@@ -3944,7 +3944,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
 
             <div style={{
               backgroundColor: '#f3f4f6',
-              borderRadius: '6px',
+              borderRadius: '12px',
               padding: '12px',
               marginBottom: '20px',
             }}>
@@ -3969,7 +3969,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
             <div style={{
               backgroundColor: '#eff6ff',
               border: '1px solid #bfdbfe',
-              borderRadius: '6px',
+              borderRadius: '12px',
               padding: '12px',
               marginBottom: '20px',
               fontSize: '13px',
@@ -3990,7 +3990,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   backgroundColor: '#f3f4f6',
                   color: '#374151',
                   border: '1px solid #d1d5db',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: 'pointer',
@@ -4006,7 +4006,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                   backgroundColor: (!newTemplateName.trim() || creatingTemplate) ? '#9ca3af' : '#8b5cf6',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '12px',
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: (!newTemplateName.trim() || creatingTemplate) ? 'not-allowed' : 'pointer',

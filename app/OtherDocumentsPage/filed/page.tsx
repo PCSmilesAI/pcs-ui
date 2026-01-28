@@ -128,7 +128,7 @@ export default function FiledDocumentsPage() {
             padding: '8px 16px',
             backgroundColor: '#f3f4f6',
             border: '1px solid #e5e7eb',
-            borderRadius: '6px',
+            borderRadius: '20px',
             cursor: 'pointer',
             fontSize: '14px',
             color: '#374151',
@@ -159,7 +159,7 @@ export default function FiledDocumentsPage() {
           padding: '16px', 
           backgroundColor: '#fef2f2', 
           border: '1px solid #fecaca',
-          borderRadius: '8px',
+          borderRadius: '16px',
           color: '#dc2626',
           marginBottom: '24px'
         }}>
@@ -186,7 +186,7 @@ export default function FiledDocumentsPage() {
                   onClick={() => count > 0 && handleTypeClick(type)}
                   style={{
                     padding: '20px',
-                    borderRadius: '10px',
+                    borderRadius: '16px',
                     backgroundColor: count > 0 ? '#fff' : '#f9fafb',
                     border: `2px solid ${count > 0 ? config.text : '#e5e7eb'}`,
                     cursor: count > 0 ? 'pointer' : 'default',
@@ -255,7 +255,7 @@ export default function FiledDocumentsPage() {
               </h2>
               <div style={{ 
                 backgroundColor: '#fff', 
-                borderRadius: '8px', 
+                borderRadius: '16px', 
                 border: '1px solid #e5e7eb',
                 overflow: 'hidden',
               }}>
@@ -289,7 +289,7 @@ export default function FiledDocumentsPage() {
                             <span style={{
                               display: 'inline-block',
                               padding: '4px 8px',
-                              borderRadius: '4px',
+                              borderRadius: '9999px',
                               fontSize: '12px',
                               fontWeight: 500,
                               backgroundColor: typeBadge.bg,
@@ -346,7 +346,7 @@ export default function FiledDocumentsPage() {
               textAlign: 'center',
               padding: '60px',
               backgroundColor: '#f9fafb',
-              borderRadius: '12px',
+              borderRadius: '20px',
               marginTop: '20px',
             }}>
               <i className="fas fa-folder-open" style={{ fontSize: '48px', marginBottom: '16px', display: 'block', color: '#9ca3af' }}></i>

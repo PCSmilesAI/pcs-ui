@@ -159,7 +159,7 @@ export default function FiledDocumentViewPage() {
           padding: '16px', 
           backgroundColor: '#fef2f2', 
           border: '1px solid #fecaca',
-          borderRadius: '8px',
+          borderRadius: '16px',
           color: '#dc2626',
           marginBottom: '20px',
           display: 'inline-block',
@@ -173,7 +173,7 @@ export default function FiledDocumentViewPage() {
             padding: '10px 20px',
             backgroundColor: '#f3f4f6',
             border: '1px solid #e5e7eb',
-            borderRadius: '6px',
+            borderRadius: '20px',
             cursor: 'pointer',
             marginTop: '16px',
           }}
@@ -214,7 +214,7 @@ export default function FiledDocumentViewPage() {
               padding: '8px 16px',
               backgroundColor: '#f3f4f6',
               border: '1px solid #e5e7eb',
-              borderRadius: '6px',
+              borderRadius: '20px',
               cursor: 'pointer',
               fontSize: '14px',
               color: '#374151',
@@ -231,7 +231,7 @@ export default function FiledDocumentViewPage() {
                 padding: '4px 10px',
                 backgroundColor: typeConfig.bg,
                 color: typeConfig.text,
-                borderRadius: '12px',
+                borderRadius: '20px',
                 fontSize: '12px',
                 fontWeight: 600,
               }}>
@@ -241,7 +241,7 @@ export default function FiledDocumentViewPage() {
                 padding: '4px 10px',
                 backgroundColor: '#dcfce7',
                 color: '#16a34a',
-                borderRadius: '12px',
+                borderRadius: '20px',
                 fontSize: '12px',
                 fontWeight: 600,
               }}>
@@ -260,7 +260,7 @@ export default function FiledDocumentViewPage() {
           disabled={processing}
           style={{
             padding: '10px 24px',
-            borderRadius: '8px',
+            borderRadius: '16px',
             fontSize: '14px',
             fontWeight: '600',
             border: 'none',
@@ -286,7 +286,7 @@ export default function FiledDocumentViewPage() {
         {/* Left Panel - Document Details */}
         <div style={{ 
           backgroundColor: '#fff', 
-          borderRadius: '12px', 
+          borderRadius: '20px', 
           border: '1px solid #e5e7eb',
           padding: '20px',
           overflow: 'auto',
@@ -306,7 +306,7 @@ export default function FiledDocumentViewPage() {
                     padding: '4px 10px',
                     backgroundColor: typeConfig.bg,
                     color: typeConfig.text,
-                    borderRadius: '12px',
+                    borderRadius: '20px',
                     fontSize: '13px',
                     fontWeight: 500,
                   }}>
@@ -380,7 +380,7 @@ export default function FiledDocumentViewPage() {
         {/* Right Panel - PDF Viewer */}
         <div style={{ 
           backgroundColor: '#fff', 
-          borderRadius: '12px', 
+          borderRadius: '20px', 
           border: '1px solid #e5e7eb',
           overflow: 'hidden',
           display: 'flex',
@@ -475,7 +475,7 @@ export default function FiledDocumentViewPage() {
           <div
             style={{
               backgroundColor: '#fff',
-              borderRadius: '12px',
+              borderRadius: '20px',
               padding: '24px',
               maxWidth: '400px',
               width: '90%',
@@ -493,7 +493,7 @@ export default function FiledDocumentViewPage() {
                 onClick={() => setShowDeleteModal(false)}
                 style={{
                   padding: '10px 20px',
-                  borderRadius: '6px',
+                  borderRadius: '20px',
                   border: '1px solid #d1d5db',
                   backgroundColor: '#fff',
                   color: '#374151',
@@ -507,7 +507,7 @@ export default function FiledDocumentViewPage() {
                 disabled={processing}
                 style={{
                   padding: '10px 20px',
-                  borderRadius: '6px',
+                  borderRadius: '20px',
                   border: 'none',
                   backgroundColor: '#dc2626',
                   color: '#fff',

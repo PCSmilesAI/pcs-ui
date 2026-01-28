@@ -42,7 +42,7 @@ export default function Toast({ message, variant = 'info', duration = 4000, onDi
     minWidth: '240px',
     maxWidth: '360px',
     padding: '12px 16px',
-    borderRadius: '12px',
+    borderRadius: '16px',
     boxShadow: '0 10px 25px rgba(15, 23, 42, 0.15)',
     border: `1px solid ${palette[variant]?.borderColor || palette.info.borderColor}`,
     backgroundColor: palette[variant]?.backgroundColor || palette.info.backgroundColor,

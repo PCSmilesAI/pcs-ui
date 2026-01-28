@@ -8,7 +8,7 @@ export default function TestQboPage() {
         padding: '16px', 
         backgroundColor: '#fef3c7', 
         border: '1px solid #f59e0b', 
-        borderRadius: '8px',
+        borderRadius: '16px',
         margin: '16px 0'
       }}>
         <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>QuickBooks Not Connected</p>
@@ -21,7 +21,7 @@ export default function TestQboPage() {
             backgroundColor: '#2563eb',
             color: 'white',
             textDecoration: 'none',
-            borderRadius: '6px',
+            borderRadius: '12px',
             fontSize: '14px',
             fontWeight: '500'
           }}

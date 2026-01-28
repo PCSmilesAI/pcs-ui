@@ -121,13 +121,13 @@ const QuickBooksIntegration = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           🔗 QuickBooks Integration
         </h2>
 
         {/* Connection Status */}
-        <div className={`p-4 rounded-lg mb-6 ${
+        <div className={`p-4 rounded-2xl mb-6 ${
           isConnected ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
         }`}>
           <div className="flex items-center">
@@ -149,7 +149,7 @@ const QuickBooksIntegration = () => {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
             <p className="text-red-800">{error}</p>
           </div>
         )}
@@ -158,7 +158,7 @@ const QuickBooksIntegration = () => {
         {isConnected && (
           <div className="space-y-6">
             {/* Categories Section */}
-            <div className="border border-gray-200 rounded-lg p-4">
+            <div className="border border-gray-200 rounded-2xl p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
                   📊 Account Categories ({categories.length})
@@ -166,20 +166,20 @@ const QuickBooksIntegration = () => {
                 <button
                   onClick={syncCategories}
                   disabled={syncStatus === 'syncing'}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50"
                 >
                   {syncStatus === 'syncing' ? 'Syncing...' : 'Sync Categories'}
                 </button>
               </div>
               
               {syncStatus === 'completed' && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                <div className="bg-green-50 border border-green-200 rounded-2xl p-3 mb-4">
                   <p className="text-green-800 text-sm">✅ Categories synced successfully!</p>
                 </div>
               )}
               
               {syncStatus === 'failed' && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-3 mb-4">
                   <p className="text-red-800 text-sm">❌ Category sync failed</p>
                 </div>
               )}
@@ -203,13 +203,13 @@ const QuickBooksIntegration = () => {
             </div>
 
             {/* Integration Actions */}
-            <div className="border border-gray-200 rounded-lg p-4">
+            <div className="border border-gray-200 rounded-2xl p-4">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 🚀 Integration Actions
               </h3>
               
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
                   <div>
                     <h4 className="font-medium text-gray-900">Category Mapping</h4>
                     <p className="text-sm text-gray-600">
@@ -219,7 +219,7 @@ const QuickBooksIntegration = () => {
                   <span className="text-green-600 text-sm font-medium">Ready</span>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
                   <div>
                     <h4 className="font-medium text-gray-900">Invoice Sync</h4>
                     <p className="text-sm text-gray-600">
@@ -229,7 +229,7 @@ const QuickBooksIntegration = () => {
                   <span className="text-green-600 text-sm font-medium">Ready</span>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
                   <div>
                     <h4 className="font-medium text-gray-900">PDF Attachments</h4>
                     <p className="text-sm text-gray-600">
@@ -245,7 +245,7 @@ const QuickBooksIntegration = () => {
 
         {/* Connection Instructions */}
         {!isConnected && (
-          <div className="border border-gray-200 rounded-lg p-4">
+          <div className="border border-gray-200 rounded-2xl p-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               🔐 Connect to QuickBooks
             </h3>
@@ -254,7 +254,7 @@ const QuickBooksIntegration = () => {
             </p>
             <a
               href="/api/qbo/connect"
-              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 font-medium"
             >
               🔗 Connect to QuickBooks
             </a>

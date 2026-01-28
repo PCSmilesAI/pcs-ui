@@ -52,7 +52,7 @@ export default function LoginPage() {
   const inputStyle = {
     width: '100%',
     border: '1px solid #cbd5e0',
-    borderRadius: '4px',
+    borderRadius: '12px',
     padding: '8px',
     fontSize: '14px',
     marginBottom: '12px',
@@ -64,7 +64,7 @@ export default function LoginPage() {
     backgroundColor: '#357ab2',
     color: '#ffffff',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '12px',
     fontSize: '14px',
     fontWeight: '600',
     cursor: 'pointer',
