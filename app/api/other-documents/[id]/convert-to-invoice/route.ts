@@ -62,16 +62,19 @@ function resolvePdfPath(pdfPath: string): string | null {
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: documentId } = await params;
     const user = getCurrentUser(request);
-    const documentId = params.id;
+
+    console.log('[API][CONVERT-TO-INVOICE] Request from:', user.email, 'for doc:', documentId);
 
     // Check access
     const hasAccess = await isAdmin(user.email) || await isAP(user.email);
     if (!hasAccess) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      console.log('[API][CONVERT-TO-INVOICE] Access denied for:', user.email);
+      return NextResponse.json({ error: 'Access denied. Only admins and AP authorizers can convert documents.' }, { status: 403 });
     }
 
     const db = getDatabase();
@@ -132,19 +135,23 @@ export async function POST(
     const invoiceId = randomUUID();
     
     // Generate invoice number (use parsed or create from timestamp)
-    const invoiceNumber = parsed.invoice_number || `CONVERTED-${Date.now()}`;
+    let invoiceNumber = parsed.invoice_number || `CONVERTED-${Date.now()}`;
     
-    // Check if invoice number already exists
+    // Check if invoice number already exists - if so, add a suffix
     const existingInvoice = db.prepare(
-      'SELECT id FROM invoices WHERE invoice_number = ?'
+      'SELECT id, vendor_name FROM invoices WHERE invoice_number = ?'
     ).get(invoiceNumber) as any;
     
     if (existingInvoice) {
-      return NextResponse.json({
-        error: 'An invoice with this number already exists',
-        existingInvoiceId: existingInvoice.id,
-        invoiceNumber
-      }, { status: 409 });
+      // Add a unique suffix to make it distinct
+      const timestamp = Date.now().toString().slice(-6);
+      const originalNumber = invoiceNumber;
+      invoiceNumber = `${invoiceNumber}-R${timestamp}`;
+      console.log('[API][CONVERT-TO-INVOICE] Invoice number exists, using:', {
+        original: originalNumber,
+        modified: invoiceNumber,
+        existingVendor: existingInvoice.vendor_name
+      });
     }
 
     // Calculate amount in cents
