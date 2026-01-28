@@ -53,20 +53,22 @@ export function loadVendorCategoriesFromExcel(): VendorCategoryMapping[] {
       const vendor = (row.Vendor || row.vendor || row['Vendor'] || '').toString().trim();
       const qboClass = (row['Class full name'] || row['Class'] || row.class || row['class_full_name'] || '').toString().trim();
 
-      // Get both potential account columns
-      const accountCol1 = (row['Account full name'] || '').toString().trim();
-      const accountCol2 = (row['Account full name_1'] || row['Account Full Name'] || row['account_full_name'] || '').toString().trim();
+      // Get the expense/asset account column
+      // IMPORTANT: In QBO exports, 'Account full name' is typically the A/P liability account,
+      // while 'Account full name_1' is the actual expense/asset GL account we need
+      const apAccount = (row['Account full name'] || '').toString().trim();
+      const expenseAccount = (row['Account full name_1'] || row['Account Full Name'] || row['account_full_name'] || '').toString().trim();
 
-      // Use whichever column contains the hierarchical path (has colons)
-      // This handles inconsistent column usage in the Excel file
+      // ALWAYS prefer the expense/asset account column (Account full name_1)
+      // Skip entries where the only account is A/P (20000 Accounts Payable)
       let accountFullName = '';
-      if (accountCol1.includes(':')) {
-        accountFullName = accountCol1;
-      } else if (accountCol2.includes(':')) {
-        accountFullName = accountCol2;
+      if (expenseAccount && !expenseAccount.toLowerCase().includes('accounts payable')) {
+        accountFullName = expenseAccount;
+      } else if (apAccount && !apAccount.toLowerCase().includes('accounts payable')) {
+        accountFullName = apAccount;
       } else {
-        // Fall back to whichever is not empty
-        accountFullName = accountCol1 || accountCol2;
+        // Both columns are A/P accounts - skip this row, it's not useful for categorization
+        continue;
       }
 
       if (!vendor || !accountFullName) {

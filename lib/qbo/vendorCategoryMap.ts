@@ -38,6 +38,7 @@ const HARDCODED_VENDOR_CLASSES: Record<string, string> = {
  * These vendors always use the same account across all transactions
  */
 const HARDCODED_VENDOR_ACCOUNTS: Record<string, string> = {
+  // Original mappings
   'american express': '10010 Checking - CTR Services Northwest',
   'stampli': '53334 Software',
   'bio-tek medical': '52120 Medical Gases',
@@ -56,6 +57,35 @@ const HARDCODED_VENDOR_ACCOUNTS: Record<string, string> = {
   'dr reid donakey': '51140 Doctor-Training & Continuing Education',
   'darko marusnik': '10010 Checking - CTR Services Northwest',
   'lapriel gilpatrick': '10010 Checking - CTR Services Northwest',
+  
+  // Additional vendors (previously uncategorized)
+  'ultradent products inc': '10210 Dental Supplies Inventory',
+  'ultradent': '10210 Dental Supplies Inventory',
+  'linde gas & equipment inc': '52120 Medical Gases',
+  'linde gas': '52120 Medical Gases',
+  'heaths laundry': '53224 Uniforms & Cleaning',
+  'method procurement technologies llc': '53334 Software',
+  'method procurement': '53334 Software',
+  'fyle inc': '53334 Software',
+  'fyle': '53334 Software',
+  'megagen america': '11010 Dental Equipment',
+  'megagen': '11010 Dental Equipment',
+  'comcast business': '53331 Internet',
+  'comcast': '53331 Internet',
+  'trustworkz inc': '53334 Software',
+  'trustworkz': '53334 Software',
+  'trilogy medwaste west llc': '53225 Hazardous Disposal',
+  'trilogy medwaste': '53225 Hazardous Disposal',
+  'brassler usa': '10210 Dental Supplies Inventory',
+  'brassler': '10210 Dental Supplies Inventory',
+  'airgas usa llc': '52120 Medical Gases',
+  'airgas': '52120 Medical Gases',
+  'adt': '53361 Contract Services',
+  'adt security': '53361 Contract Services',
+  
+  // Patterson Dental - use most common account
+  'patterson dental': '10210 Dental Supplies Inventory',
+  'patterson': '10210 Dental Supplies Inventory',
 };
 
 /**
