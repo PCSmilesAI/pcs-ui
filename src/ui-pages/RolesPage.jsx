@@ -85,7 +85,8 @@ export default function RolesPage() {
         throw new Error(payload?.error || 'Failed to load roles');
       }
       const rolesPayload = await rolesRes.json();
-      const roles = rolesPayload?.roles || {};
+      // API returns roles directly, not wrapped in { roles: ... }
+      const roles = rolesPayload?.roles || rolesPayload || {};
 
       if (configRes.status === 403) {
         setError('You do not have access to view workflow configuration.');
