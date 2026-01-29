@@ -121,5 +121,10 @@ export async function GET(request: Request) {
   console.log('5. Check for: trailing slashes, http vs https, port numbers, exact path');
   console.log('═══════════════════════════════════════════════════════════');
 
-  return NextResponse.redirect(authUrl.toString(), 302);
+  // Use 302 redirect with no-cache headers to prevent browser caching issues
+  const response = NextResponse.redirect(authUrl.toString(), 302);
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  response.headers.set('Pragma', 'no-cache');
+  response.headers.set('Expires', '0');
+  return response;
 }
