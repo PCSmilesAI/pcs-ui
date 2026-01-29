@@ -184,10 +184,30 @@ export default function OtherDocumentViewPage({ document: initialDocument, onBac
     }
   };
 
-  // File document action
+  // File document action - saves any pending changes first, then files
   const handleFile = async () => {
     setProcessing(true);
     try {
+      // First save any pending changes
+      const updateRes = await fetch(`/api/other-documents/${document.id}/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vendor_name: details.vendor,
+          document_date: details.date,
+          user_note: details.note,
+          document_type: details.documentType,
+          amount: details.amount ? parseFloat(details.amount) : null,
+          location: details.location || null,
+        }),
+      });
+      
+      if (!updateRes.ok) {
+        const err = await updateRes.json();
+        throw new Error(err.error || 'Failed to save changes before filing');
+      }
+
+      // Then file the document
       const res = await fetch(`/api/other-documents/${document.id}/file`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
