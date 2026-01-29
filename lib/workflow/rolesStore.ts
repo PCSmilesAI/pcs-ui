@@ -14,7 +14,7 @@ export interface RolesFile {
 
 const DEFAULT_ROLES: RolesFile = {
   admins: ['business@pcsmilesai.com', 'mckaym@pcsmiles.com', 'laurap@pcsmiles.com'],
-  ap_authorizers: ['business@pcsmilesai.com', 'mckaym@pcsmiles.com', 'laurap@pcsmiles.com'],
+  ap_authorizers: [], // Empty for now - admins handle all invoices. When populated, invoices route to AP first.
   office_managers: {
     Milwaukie: [''],
     Roseburg: [''],

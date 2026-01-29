@@ -110,6 +110,19 @@ export default function CompanyInfoPage() {
     <div style={containerStyle}>
       <h1 style={titleStyle}>Company Info</h1>
       
+      <h2 style={sectionTitleStyle}>Billing & Contacts</h2>
+      <div style={infoStyle}><strong>Main Billing Location:</strong> Roseburg</div>
+      <div style={infoStyle}><strong>Invoice Email:</strong> invoices@pcsmilesai.com</div>
+      
+      <div style={{ marginTop: '24px', marginBottom: '24px', padding: '16px', backgroundColor: '#f0f9ff', borderRadius: '16px', border: '1px solid #bae6fd' }}>
+        <div style={{ fontWeight: '600', color: '#0369a1', marginBottom: '8px' }}>
+          📞 Contact Information
+        </div>
+        <div style={{ fontSize: '14px', color: '#0c4a6e' }}>
+          Click on any office manager's email address above to send them an email directly.
+        </div>
+      </div>
+
       <h2 style={sectionTitleStyle}>Office Locations</h2>
       <ul style={listStyle}>
         {offices.map((office, idx) => (
@@ -137,20 +150,6 @@ export default function CompanyInfoPage() {
           </li>
         ))}
       </ul>
-      
-      <h2 style={sectionTitleStyle}>Billing & Contacts</h2>
-      <div style={infoStyle}><strong>Main Billing Location:</strong> Roseburg</div>
-      <div style={infoStyle}><strong>Invoice Email:</strong> invoices@pcsmilesai.com</div>
-      <div style={infoStyle}><strong>Company Tax ID:</strong> <em>(not provided)</em></div>
-      
-      <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#f0f9ff', borderRadius: '16px', border: '1px solid #bae6fd' }}>
-        <div style={{ fontWeight: '600', color: '#0369a1', marginBottom: '8px' }}>
-          📞 Contact Information
-        </div>
-        <div style={{ fontSize: '14px', color: '#0c4a6e' }}>
-          Click on any office manager's email address above to send them an email directly.
-        </div>
-      </div>
     </div>
   );
 }

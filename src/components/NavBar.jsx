@@ -334,18 +334,6 @@ function NavBarInner({
               >
                 Company Info
               </div>
-              {/* Payout Account - Admin/AP only */}
-              {isAdminUser && (
-                <div
-                  style={dropdownItemStyle}
-                  onClick={() => {
-                    setIsAccountOpen(false);
-                    onChangePage('payoutAccount');
-                  }}
-                >
-                  Payout Account
-                </div>
-              )}
               {/* Reports - Admin/AP only */}
               {isAdminUser && (
                 <div

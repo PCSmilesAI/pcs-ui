@@ -34,7 +34,6 @@ export default function AppLayout({ children }) {
       'AllInvoicesPage': 'allInvoices',
       'AccountPage': 'account',
       'CompanyInfoPage': 'companyInfo',
-      'PayoutAccountPage': 'payoutAccount',
       'ReportsPage': 'reports',
       'RolesPage': 'roles',
       'roles': 'roles',
@@ -66,7 +65,6 @@ export default function AppLayout({ children }) {
       'allInvoices': 'AllInvoicesPage',
       'account': 'AccountPage',
       'companyInfo': 'CompanyInfoPage',
-      'payoutAccount': 'PayoutAccountPage',
       'reports': 'ReportsPage',
       'roles': 'roles',
       'connections': 'ConnectionsPage'
