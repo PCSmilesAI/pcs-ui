@@ -287,6 +287,7 @@ export default function ReportsPage() {
     fontSize: '14px',
     width: '100%',
     marginBottom: '8px',
+    boxSizing: 'border-box',
   };
 
   return (
