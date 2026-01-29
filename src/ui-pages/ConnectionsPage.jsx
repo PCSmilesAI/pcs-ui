@@ -175,15 +175,27 @@ export default function ConnectionsPage() {
                   : 'Not connected. Connect to enable automated billing and invoice synchronization.'}
               </p>
               {!qboConnected && (
-                <a href="https://pcsmilesai.com/api/qbo/auth" style={buttonStyle}>
+                <button
+                  onClick={() => {
+                    // Use direct navigation to avoid React router interference
+                    window.location.href = `https://pcsmilesai.com/api/qbo/auth?t=${Date.now()}`;
+                  }}
+                  style={buttonStyle}
+                >
                   Connect QuickBooks
-                </a>
+                </button>
               )}
               {qboConnected && (
                 <div style={{ marginTop: '12px' }}>
-                  <a href="https://pcsmilesai.com/api/qbo/auth" style={{ ...buttonStyle, backgroundColor: '#6b7280', borderColor: '#6b7280' }}>
+                  <button
+                    onClick={() => {
+                      // Use direct navigation to avoid React router interference
+                      window.location.href = `https://pcsmilesai.com/api/qbo/auth?t=${Date.now()}`;
+                    }}
+                    style={{ ...buttonStyle, backgroundColor: '#6b7280', borderColor: '#6b7280' }}
+                  >
                     Reconnect QuickBooks
-                  </a>
+                  </button>
                 </div>
               )}
             </>
