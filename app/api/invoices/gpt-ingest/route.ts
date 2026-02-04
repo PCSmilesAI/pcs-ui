@@ -11,7 +11,7 @@ import path from 'path';
 import fs from 'fs';
 
 // Import PCS AI parsing
-import { parseInvoiceWithGPT, ParseResult } from '../../../../lib/gpt/parseInvoice';
+import { parseInvoiceWithGPT, ParseResult, ParsedInvoice } from '../../../../lib/gpt/parseInvoice';
 import { QBOClient } from '../../../../lib/qbo/qboClient';
 
 // Cache for QBO vendors (5 minute TTL)
@@ -203,7 +203,143 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Successfully parsed - extract data
+    // Check if document contains multiple invoices
+    if (parseResult.multipleInvoices && parseResult.multipleInvoices.invoices.length > 1) {
+      console.log(`[PCS_AI_INGEST] Multi-invoice document detected: ${parseResult.multipleInvoices.invoices.length} invoices`);
+      
+      // Generate a group ID to link all invoices from this document
+      const documentGroupId = randomUUID();
+      const totalInvoicesInDoc = parseResult.multipleInvoices.invoices.length;
+      const createdInvoices: Array<{ id: string; invoice_number: string; vendor: string; amount: number }> = [];
+      
+      // Process each invoice
+      for (let idx = 0; idx < parseResult.multipleInvoices.invoices.length; idx++) {
+        const parsed = parseResult.multipleInvoices.invoices[idx];
+        const invoiceIndex = idx + 1; // 1-indexed
+        
+        // Validate and resolve vendor
+        const rawVendor = parsed.vendor_name || parseResult.vendorDetected || 'Unknown';
+        let validatedVendor = rawVendor;
+        
+        try {
+          const qboVendors = await getQBOVendors();
+          if (qboVendors.length > 0) {
+            const vendorMatch = resolveVendor(rawVendor, null, qboVendors);
+            validatedVendor = vendorMatch.vendor;
+          }
+        } catch (e) {
+          // Use raw vendor on error
+        }
+        
+        const normalizedVendor = normalizeVendorNameForStorage(validatedVendor);
+        
+        // Generate invoice number (append index if multiple)
+        const baseInvoiceNumber = parsed.invoice_number || 
+          normalizedPdfFilename?.replace(/\.(pdf|PDF)$/, '') ||
+          `GPT-${Date.now()}`;
+        const invoiceNumber = `${baseInvoiceNumber}`;
+        
+        // Calculate amount in cents
+        let amountCents = 0;
+        if (parsed.total && typeof parsed.total === 'number') {
+          amountCents = Math.round(parsed.total * 100);
+        }
+        
+        // Determine parsing status
+        let parsingStatus = 'success';
+        let parsingError: string | null = null;
+        
+        if (parsed.parsing_confidence < 0.5) {
+          parsingStatus = 'partial';
+          parsingError = 'Low parsing confidence';
+        } else if (!parsed.invoice_number || !parsed.total) {
+          parsingStatus = 'partial';
+          parsingError = 'Missing required fields';
+        }
+        
+        // Generate ID
+        const id = randomUUID();
+        
+        // Normalize dates
+        const normalizedInvoiceDate = normalizeDateForStorage(parsed.invoice_date);
+        const normalizedDueDate = normalizeDateForStorage(parsed.due_date);
+        
+        // Insert invoice with document group info
+        db.prepare(`
+          INSERT INTO invoices (
+            id, invoice_number, source_file,
+            parsed_vendor_name, parsed_office_id, parsed_amount_cents,
+            vendor_name, office_id, amount_cents,
+            status, approvals, deleted,
+            invoice_date, due_date, office_location, pdf_path,
+            parsing_status, parsing_error, parse_attempts,
+            document_group_id, document_invoice_index, document_invoice_total
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          id, invoiceNumber, sourceFile,
+          normalizedVendor, parsed.office_location, amountCents,
+          normalizedVendor, parsed.office_location, amountCents,
+          'incoming', JSON.stringify({}), 0,
+          normalizedInvoiceDate, normalizedDueDate, parsed.office_location,
+          buildApiPdfPath(normalizedPdfFilename),
+          parsingStatus, parsingError, 1,
+          documentGroupId, invoiceIndex, totalInvoicesInDoc
+        );
+        
+        // Audit event
+        db.prepare(`
+          INSERT INTO invoice_events (invoice_id, action, payload_json)
+          VALUES (?, 'PCS_AI_PARSED_MULTI', ?)
+        `).run(id, JSON.stringify({
+          document_group_id: documentGroupId,
+          invoice_index: invoiceIndex,
+          total_in_document: totalInvoicesInDoc,
+          vendor_raw: rawVendor,
+          amount_cents: amountCents,
+          confidence: parsed.parsing_confidence
+        }));
+        
+        // Auto-categorize
+        try {
+          const { categorizeInvoice, storeInvoiceCategories } = await import('@/lib/invoices/categoryParser');
+          const lineItems = (parsed.line_items || []).map(item => ({
+            description: item.description || '',
+            quantity: item.quantity ?? undefined,
+            unit_price: item.unit_price ?? undefined,
+            amount: item.amount ?? undefined
+          }));
+          const categories = await categorizeInvoice(
+            { vendor_name: normalizedVendor, line_items: lineItems },
+            normalizedVendor
+          );
+          await storeInvoiceCategories(id, categories);
+        } catch (err: any) {
+          console.warn('[PCS_AI_INGEST] Failed to auto-categorize:', err?.message);
+        }
+        
+        createdInvoices.push({
+          id,
+          invoice_number: invoiceNumber,
+          vendor: normalizedVendor,
+          amount: amountCents / 100
+        });
+        
+        console.log(`[PCS_AI_INGEST] Created invoice ${invoiceIndex}/${totalInvoicesInDoc}:`, {
+          id, invoice_number: invoiceNumber, vendor: normalizedVendor, amount: amountCents / 100
+        });
+      }
+      
+      return NextResponse.json({
+        ok: true,
+        message: `Multi-invoice document: created ${createdInvoices.length} invoices`,
+        multi_invoice: true,
+        document_group_id: documentGroupId,
+        invoices_created: createdInvoices.length,
+        invoices: createdInvoices
+      });
+    }
+
+    // Single invoice - extract data
     const parsed = parseResult.data;
     const rawVendor = parsed.vendor_name || parseResult.vendorDetected || 'Unknown';
     

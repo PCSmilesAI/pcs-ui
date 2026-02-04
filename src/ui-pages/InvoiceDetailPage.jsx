@@ -2890,6 +2890,30 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
               </tbody>
             </table>
           </div>
+          {/* Multi-invoice document banner */}
+          {invoice?.document_group_id && invoice?.document_invoice_total > 1 && (
+            <div style={{
+              backgroundColor: '#ebf8ff',
+              border: '1px solid #90cdf4',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <span style={{ fontSize: '18px' }}>📄</span>
+              <div>
+                <span style={{ fontWeight: '600', color: '#2b6cb0' }}>
+                  This is invoice {invoice.document_invoice_index} of {invoice.document_invoice_total}
+                </span>
+                <span style={{ color: '#4a5568', marginLeft: '8px' }}>
+                  presented in this document
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Invoice Details section */}
           <div style={{ ...sectionStyle, position: 'relative', zIndex: 100, overflow: 'visible' }}>
             <h2 style={sectionTitleStyle}>Invoice Details</h2>

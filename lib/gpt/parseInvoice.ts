@@ -178,9 +178,15 @@ export interface ParsedInvoice {
   raw_response?: string;
 }
 
+export interface MultiInvoiceParseResult {
+  invoices: ParsedInvoice[];
+  document_invoice_total: number;
+}
+
 export interface ParseResult {
   success: boolean;
   data: ParsedInvoice | null;
+  multipleInvoices?: MultiInvoiceParseResult; // Set when document contains multiple invoices
   error?: string;
   vendorDetected?: string;
   knowledgeBaseUsed?: boolean;
@@ -200,6 +206,66 @@ Look for:
 
 Return ONLY the vendor name as a single line of text. Do not include any explanation.
 If you cannot determine the vendor, respond with "Unknown".`;
+
+// Multi-invoice detection prompt
+const MULTI_INVOICE_DETECTION_PROMPT = `You are analyzing a document that may contain one or more invoices.
+
+Carefully examine ALL pages of this document and count how many DISTINCT invoices are present.
+
+Signs of multiple invoices in one document:
+- Multiple different invoice numbers
+- Multiple "Invoice" headers or titles
+- Multiple invoice date sections
+- Different billing periods or statement dates
+- Clear page breaks between separate invoices
+- Multiple "Total" or "Amount Due" sections with different amounts
+
+IMPORTANT: A multi-page invoice with line items spanning pages is still ONE invoice.
+Only count as separate invoices if they have DIFFERENT invoice numbers or are clearly distinct documents.
+
+Return ONLY a JSON object in this exact format:
+{
+  "invoice_count": <number>,
+  "invoice_numbers_found": ["INV-001", "INV-002", ...] or null if not detected,
+  "reasoning": "brief explanation of why you counted this many"
+}`;
+
+// Multi-invoice parsing prompt - extracts all invoices from a document
+const MULTI_INVOICE_PARSING_PROMPT = `You are parsing a document that contains MULTIPLE invoices.
+
+Extract data for EACH invoice in the document. Return a JSON object with an "invoices" array.
+
+EXTRACTION SCHEMA - Return a JSON object with this structure:
+{
+  "invoices": [
+    {
+      "invoice_number": "string or null",
+      "invoice_date": "MM/DD/YYYY or null",
+      "due_date": "MM/DD/YYYY or null",
+      "vendor_name": "string or null",
+      "total": number or null (as decimal, e.g., 1234.56),
+      "office_location": "string or null",
+      "line_items": [
+        {
+          "description": "string",
+          "quantity": number or null,
+          "unit_price": number or null,
+          "amount": number or null
+        }
+      ],
+      "parsing_confidence": number between 0 and 1
+    }
+  ]
+}
+
+IMPORTANT RULES:
+- Return ONLY valid JSON, no explanation text
+- Include ALL invoices found in the document
+- Each invoice should have its own complete data extracted
+- Amounts should be numbers without currency symbols or commas
+- Dates MUST be in MM/DD/YYYY format
+- parsing_confidence: 1.0 = very confident, 0.5 = uncertain, 0.0 = guessing
+`;
 
 /**
  * Detect the vendor from invoice images
@@ -225,6 +291,127 @@ export async function detectVendor(base64Images: string[]): Promise<string> {
   } catch (error: any) {
     console.error('[PCS-AI] Vendor detection error:', error.message);
     return 'Unknown';
+  }
+}
+
+/**
+ * Detect if document contains multiple invoices
+ */
+export async function detectMultipleInvoices(base64Images: string[]): Promise<{ count: number; invoiceNumbers: string[] | null }> {
+  try {
+    console.log('[PCS-AI] Checking for multiple invoices in document...');
+    const response = await getOpenAIClient().chat.completions.create({
+      model: GPT_MODEL,
+      max_completion_tokens: 500,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: MULTI_INVOICE_DETECTION_PROMPT },
+            ...formatImagesForOpenAI(base64Images, 'low')
+          ]
+        }
+      ]
+    });
+
+    const rawResponse = response.choices[0]?.message?.content?.trim() || '';
+    
+    // Parse JSON response
+    let jsonStr = rawResponse;
+    const jsonMatch = rawResponse.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1];
+    }
+    
+    const parsed = JSON.parse(jsonStr.trim());
+    const count = typeof parsed.invoice_count === 'number' ? parsed.invoice_count : 1;
+    const invoiceNumbers = Array.isArray(parsed.invoice_numbers_found) ? parsed.invoice_numbers_found : null;
+    
+    console.log('[PCS-AI] Multi-invoice detection result:', { count, invoiceNumbers, reasoning: parsed.reasoning });
+    return { count, invoiceNumbers };
+  } catch (error: any) {
+    console.error('[PCS-AI] Multi-invoice detection error:', error.message);
+    // Default to single invoice on error
+    return { count: 1, invoiceNumbers: null };
+  }
+}
+
+/**
+ * Parse multiple invoices from a single document
+ */
+async function parseMultipleInvoices(
+  base64Images: string[],
+  vendorName: string | null,
+  expectedCount: number
+): Promise<ParsedInvoice[]> {
+  try {
+    console.log(`[PCS-AI] Parsing ${expectedCount} invoices from document...`);
+    
+    // Build system prompt for multi-invoice parsing
+    let systemPrompt = MULTI_INVOICE_PARSING_PROMPT;
+    
+    // Add vendor context if known
+    if (vendorName && vendorName !== 'Unknown') {
+      systemPrompt += `\n\nKnown vendor: ${vendorName}`;
+    }
+    
+    systemPrompt += `\n\nExpected number of invoices: ${expectedCount}`;
+    
+    const response = await withRetry(async () => {
+      return await getOpenAIClient().chat.completions.create({
+        model: GPT_MODEL,
+        max_completion_tokens: PARSING_CONFIG.maxCompletionTokens * 2, // More tokens for multiple invoices
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: `Parse all ${expectedCount} invoices from this document. Return JSON with an "invoices" array.` },
+              ...formatImagesForOpenAI(base64Images, PARSING_CONFIG.imageDetailLevel)
+            ]
+          }
+        ]
+      });
+    });
+
+    const rawResponse = response.choices[0]?.message?.content || '';
+    
+    // Parse JSON response
+    let jsonStr = rawResponse;
+    const jsonMatch = rawResponse.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1];
+    }
+    
+    const parsed = JSON.parse(jsonStr.trim());
+    
+    if (!Array.isArray(parsed.invoices)) {
+      console.warn('[PCS-AI] Multi-invoice parse did not return invoices array');
+      return [];
+    }
+    
+    // Normalize each invoice
+    const invoices: ParsedInvoice[] = parsed.invoices.map((inv: any) => ({
+      invoice_number: inv.invoice_number || null,
+      invoice_date: inv.invoice_date || null,
+      due_date: inv.due_date || null,
+      vendor_name: inv.vendor_name || vendorName || null,
+      total: typeof inv.total === 'number' ? inv.total : null,
+      office_location: inv.office_location || null,
+      line_items: Array.isArray(inv.line_items) ? inv.line_items : [],
+      parsing_confidence: typeof inv.parsing_confidence === 'number' ? inv.parsing_confidence : 0.5,
+      raw_response: rawResponse
+    }));
+    
+    console.log(`[PCS-AI] Successfully parsed ${invoices.length} invoices from document`);
+    return invoices;
+    
+  } catch (error: any) {
+    console.error('[PCS-AI] Multi-invoice parsing error:', error.message);
+    return [];
   }
 }
 
@@ -264,10 +451,12 @@ IMPORTANT RULES:
 
 /**
  * Parse an invoice PDF using PCS AI vision
+ * Automatically detects and handles documents containing multiple invoices
  */
 export async function parseInvoiceWithGPT(
   pdfPath: string,
-  vendorNameHint?: string | null
+  vendorNameHint?: string | null,
+  skipMultiInvoiceDetection?: boolean // Can be set to true for reparsing single invoices
 ): Promise<ParseResult> {
   try {
     // Convert PDF to images
@@ -281,6 +470,34 @@ export async function parseInvoiceWithGPT(
       console.log('[PCS-AI] Detecting vendor...');
       vendorName = await detectVendor(base64Images);
       console.log('[PCS-AI] Detected vendor:', vendorName);
+    }
+
+    // Check for multiple invoices in document (unless explicitly skipped)
+    if (!skipMultiInvoiceDetection) {
+      const multiInvoiceCheck = await detectMultipleInvoices(base64Images);
+      
+      if (multiInvoiceCheck.count > 1) {
+        console.log(`[PCS-AI] Document contains ${multiInvoiceCheck.count} invoices - parsing all`);
+        
+        // Parse all invoices from the document
+        const parsedInvoices = await parseMultipleInvoices(base64Images, vendorName, multiInvoiceCheck.count);
+        
+        if (parsedInvoices.length > 0) {
+          // Return multi-invoice result
+          return {
+            success: true,
+            data: parsedInvoices[0], // First invoice as primary data for backward compatibility
+            multipleInvoices: {
+              invoices: parsedInvoices,
+              document_invoice_total: parsedInvoices.length
+            },
+            vendorDetected: vendorName || undefined,
+            knowledgeBaseUsed: false // KB not used in multi-invoice mode yet
+          };
+        }
+        // If multi-invoice parsing failed, fall through to single invoice parsing
+        console.log('[PCS-AI] Multi-invoice parsing failed, falling back to single invoice mode');
+      }
     }
 
     // Build the system prompt: Master Prompt + Vendor KB + Base Prompt
