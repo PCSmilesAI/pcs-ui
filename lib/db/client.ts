@@ -354,6 +354,11 @@ export function runMigrations(): void {
   ensureColumn('invoices', 'parsing_method', 'parsing_method TEXT'); // 'gpt-5-nano' | 'legacy' | null
   ensureColumn('invoices', 'parsing_confidence', 'parsing_confidence REAL'); // 0.0-1.0 confidence score from GPT
 
+  // Multi-invoice document tracking - when a single PDF contains multiple invoices
+  ensureColumn('invoices', 'document_group_id', 'document_group_id TEXT'); // UUID linking invoices from same PDF
+  ensureColumn('invoices', 'document_invoice_index', 'document_invoice_index INTEGER'); // Position in document (1, 2, 3...)
+  ensureColumn('invoices', 'document_invoice_total', 'document_invoice_total INTEGER'); // Total invoices in document
+
   // Create table_template_rows table for table template type
   // Note: invoice_id is nullable (template rows don't need an invoice)
   // Note: amount_cents is nullable (split evenly modes don't specify amounts)
