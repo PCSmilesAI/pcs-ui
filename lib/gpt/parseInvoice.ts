@@ -299,14 +299,20 @@ export async function detectVendor(base64Images: string[]): Promise<string> {
  */
 export async function detectMultipleInvoices(base64Images: string[]): Promise<{ count: number; invoiceNumbers: string[] | null }> {
   try {
-    console.log('[PCS-AI] Checking for multiple invoices in document...', { imageCount: base64Images.length });
+    // Only use first 2 pages for detection to stay within token limits
+    // Invoice numbers are typically on first page of each invoice
+    const imagesToAnalyze = base64Images.slice(0, Math.min(2, base64Images.length));
+    console.log('[PCS-AI] Checking for multiple invoices in document...', { 
+      totalPages: base64Images.length, 
+      pagesAnalyzing: imagesToAnalyze.length 
+    });
     
     const messages = [
       {
         role: 'user' as const,
         content: [
-          { type: 'text' as const, text: MULTI_INVOICE_DETECTION_PROMPT },
-          ...formatImagesForOpenAI(base64Images, 'low')
+          { type: 'text' as const, text: MULTI_INVOICE_DETECTION_PROMPT + `\n\nNOTE: You are seeing ${imagesToAnalyze.length} of ${base64Images.length} total pages. If you see signs of multiple invoices even in these pages, report that.` },
+          ...formatImagesForOpenAI(imagesToAnalyze, 'low')
         ]
       }
     ];
