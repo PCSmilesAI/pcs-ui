@@ -97,6 +97,25 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             : (locations.length > 0 
                 ? locations.join(', ') 
                 : (officeRaw || 'Unknown'));
+          // Check for payment lock status
+          const paymentLockTimeout = 10 * 60 * 1000; // 10 minutes
+          const now = Date.now();
+          let isPaymentLocked = false;
+          let paymentLockedBy = null;
+          
+          if (invoice.payment_started_by && invoice.payment_started_at) {
+            const lockTime = new Date(invoice.payment_started_at).getTime();
+            if (now - lockTime < paymentLockTimeout) {
+              isPaymentLocked = true;
+              paymentLockedBy = invoice.payment_started_by;
+            }
+          }
+          
+          // Display status - show payment lock if active
+          const displayStatus = isPaymentLocked 
+            ? `Payment in progress (${paymentLockedBy?.split('@')[0] || 'Unknown'})`
+            : 'Pending Payment';
+          
           return ({
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
@@ -106,7 +125,9 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           locations: locations, // Keep array for filtering
           dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A'),
           invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
-          displayStatus: 'Pending Payment',
+          displayStatus,
+          isPaymentLocked,
+          paymentLockedBy,
           category: (Array.isArray(invoice.invoice_categories) && invoice.invoice_categories[0]?.category_name) || invoice.category || 'Other',
           invoice_date: invoice.invoice_date,
           due_date: invoice.due_date,
@@ -354,6 +375,25 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               : (locations.length > 0 
                   ? locations.join(', ') 
                   : (officeRaw || 'Unknown'));
+            // Check for payment lock status
+            const paymentLockTimeout = 10 * 60 * 1000; // 10 minutes
+            const now = Date.now();
+            let isPaymentLocked = false;
+            let paymentLockedBy = null;
+            
+            if (invoice.payment_started_by && invoice.payment_started_at) {
+              const lockTime = new Date(invoice.payment_started_at).getTime();
+              if (now - lockTime < paymentLockTimeout) {
+                isPaymentLocked = true;
+                paymentLockedBy = invoice.payment_started_by;
+              }
+            }
+            
+            // Display status - show payment lock if active
+            const displayStatus = isPaymentLocked 
+              ? `Payment in progress (${paymentLockedBy?.split('@')[0] || 'Unknown'})`
+              : 'Pending Payment';
+            
             return ({
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number, // needed by detail view
@@ -375,7 +415,9 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               day: 'numeric',
               year: '2-digit'
             }) : 'N/A',
-            displayStatus: 'Pending Payment',
+            displayStatus,
+            isPaymentLocked,
+            paymentLockedBy,
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
             due_date: invoice.due_date,
@@ -429,7 +471,43 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     { key: 'location', label: 'Location', width: '12%' },
     { key: 'invoiceDate', label: 'Invoice Date', width: '12%' },
     { key: 'dueDate', label: 'Due Date', width: '12%' },
-    { key: 'status', label: 'Status', width: '22%' },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      width: '22%',
+      render: (row) => {
+        if (row.isPaymentLocked) {
+          return (
+            <span style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px',
+              backgroundColor: '#fef3c7',
+              color: '#92400e',
+              padding: '4px 10px',
+              borderRadius: '9999px',
+              fontSize: '13px',
+              fontWeight: 500,
+            }}>
+              <i className="fas fa-lock" style={{ fontSize: '11px' }}></i>
+              {row.displayStatus}
+            </span>
+          );
+        }
+        return (
+          <span style={{
+            backgroundColor: '#e0f2fe',
+            color: '#0369a1',
+            padding: '4px 10px',
+            borderRadius: '9999px',
+            fontSize: '13px',
+            fontWeight: 500,
+          }}>
+            {row.displayStatus}
+          </span>
+        );
+      }
+    },
   ];
 
   const wrapperStyle = { padding: '24px' };

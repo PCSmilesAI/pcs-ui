@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '../../../../lib/auth/currentUser';
-import { isAdmin, isAP, officesForManager } from '../../../../lib/workflow/rolesStore';
+import { isAdmin, isAP, officesForManager, getVendorAccessForUser, VendorAccess } from '../../../../lib/workflow/rolesStore';
 import { getDatabase } from '../../../../lib/db/client';
+import { normalizeVendorName } from '../../../../src/lib/vendorUtils';
 
 function parseSearchParam(req: NextRequest, key: string, fallback = ''): string {
   return (req.nextUrl.searchParams.get(key) || fallback).trim();
@@ -80,38 +81,80 @@ export async function GET(req: NextRequest) {
     // NEW: Check for invoices assigned to current user (reassignment feature)
     const normalizedUserEmail = user.email.trim().toLowerCase();
 
-    // Role-based filtering
-    if (!admin && !ap) {
-      const offices = await officesForManager(user.email);
-      if (offices.length === 0) {
-        console.log('[API][INVOICES]', 'visible_no_offices', { userEmail: user.email });
-        return NextResponse.json({ ok: true, count: 0, invoices: [] });
-      }
+    // Get vendor access configuration for this user
+    const vendorAccess = await getVendorAccessForUser(user.email);
+    console.log('[API][INVOICES]', 'vendor_access_check', { userEmail: user.email, vendorAccess });
 
-      // Show invoices either:
-      // 1. Assigned to this user via reassignment (if column exists), OR
-      // 2. In awaiting_office_approval status for their offices
+    // Apply vendor-based filtering based on user's vendor_access configuration
+    if (vendorAccess === 'assigned_only') {
+      // User only sees invoices explicitly assigned to them
+      // EXCEPT: For to_be_paid and completed/paid statuses, also show TC Dental invoices
+      // (shared visibility between McKay and Laura for payment workflow)
       if (hasReassignmentColumn) {
         query += ` AND (
-          LOWER(current_assigned_user_email) = ? OR
-          (status = ? AND office_id IN (${offices.map(() => '?').join(',')}))
-        )`;
-        params.push(normalizedUserEmail, 'awaiting_office_approval', ...offices);
-      } else {
-        // Fallback: just use status and office filtering
-        query += ` AND status = ? AND office_id IN (${offices.map(() => '?').join(',')})`;
-        params.push('awaiting_office_approval', ...offices);
-      }
-    } else {
-      // For admins and AP managers, also show invoices assigned to them
-      if (hasReassignmentColumn) {
-        query += ` AND (
-          LOWER(current_assigned_user_email) = ? OR
-          current_assigned_user_email IS NULL
+          LOWER(current_assigned_user_email) = ?
+          OR (
+            status IN ('to_be_paid', 'paid', 'completed') 
+            AND (
+              LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) = 'tc dental lab'
+              OR LOWER(REPLACE(REPLACE(vendor, '_', ' '), '  ', ' ')) = 'tc dental lab'
+            )
+          )
         )`;
         params.push(normalizedUserEmail);
+      } else {
+        // No reassignment column - only show to_be_paid/completed TC Dental invoices
+        query += ` AND (
+          status IN ('to_be_paid', 'paid', 'completed') 
+          AND (
+            LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) = 'tc dental lab'
+            OR LOWER(REPLACE(REPLACE(vendor, '_', ' '), '  ', ' ')) = 'tc dental lab'
+          )
+        )`;
       }
-      // If column doesn't exist, show all invoices (no filtering)
+    } else if (Array.isArray(vendorAccess)) {
+      // User only sees invoices from specific vendors (e.g., TC Dental Lab)
+      // Normalize vendor names for comparison
+      const normalizedVendors = vendorAccess.map(v => normalizeVendorName(v));
+      
+      if (normalizedVendors.length === 0) {
+        return NextResponse.json({ ok: true, count: 0, invoices: [] });
+      }
+      
+      // Match invoices where vendor_name (normalized) matches any in the list
+      // Use LOWER() for case-insensitive comparison
+      const vendorPlaceholders = normalizedVendors.map(() => '?').join(',');
+      query += ` AND (
+        LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) IN (${vendorPlaceholders})
+        OR LOWER(REPLACE(REPLACE(vendor, '_', ' '), '  ', ' ')) IN (${vendorPlaceholders})
+      )`;
+      params.push(...normalizedVendors, ...normalizedVendors);
+    } else {
+      // vendorAccess === '*' - Full access (developer account)
+      // Role-based filtering for admins/AP
+      if (!admin && !ap) {
+        const offices = await officesForManager(user.email);
+        if (offices.length === 0) {
+          console.log('[API][INVOICES]', 'visible_no_offices', { userEmail: user.email });
+          return NextResponse.json({ ok: true, count: 0, invoices: [] });
+        }
+
+        // Show invoices either:
+        // 1. Assigned to this user via reassignment (if column exists), OR
+        // 2. In awaiting_office_approval status for their offices
+        if (hasReassignmentColumn) {
+          query += ` AND (
+            LOWER(current_assigned_user_email) = ? OR
+            (status = ? AND office_id IN (${offices.map(() => '?').join(',')}))
+          )`;
+          params.push(normalizedUserEmail, 'awaiting_office_approval', ...offices);
+        } else {
+          // Fallback: just use status and office filtering
+          query += ` AND status = ? AND office_id IN (${offices.map(() => '?').join(',')})`;
+          params.push('awaiting_office_approval', ...offices);
+        }
+      }
+      // For admins with full access (*), show all invoices (no additional filtering)
     }
 
     // Add ORDER BY to get most recent invoices first
@@ -187,6 +230,8 @@ export async function GET(req: NextRequest) {
       ok: true,
       count: filtered.length,
       invoices: paginatedWithCategories,
+      vendorAccess: vendorAccess, // Include vendor access config for frontend
+      userEmail: user.email,
     });
   } catch (err: any) {
     console.error('[API][INVOICES]', 'visible_error', { userEmail: user.email, error: err?.message, stack: err?.stack });

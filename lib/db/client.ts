@@ -338,6 +338,14 @@ export function runMigrations(): void {
   
   // Payment tracking - Stripe transfer ID for payment verification
   ensureColumn('invoices', 'stripe_transfer_id', 'stripe_transfer_id TEXT');
+  
+  // Payment locking - prevent two users from paying the same invoice simultaneously
+  ensureColumn('invoices', 'payment_started_by', 'payment_started_by TEXT');
+  ensureColumn('invoices', 'payment_started_at', 'payment_started_at TEXT');
+  
+  // Verifier tracking - tracks who verified the invoice and when (for verifier workflow)
+  ensureColumn('invoices', 'verified_by_user_id', 'verified_by_user_id TEXT');
+  ensureColumn('invoices', 'verified_at', 'verified_at TEXT');
 
   // Parsing status tracking - for identifying invoices with failed parsing
   ensureColumn('invoices', 'parsing_status', 'parsing_status TEXT DEFAULT "pending"'); // 'pending' | 'success' | 'failed' | 'partial'

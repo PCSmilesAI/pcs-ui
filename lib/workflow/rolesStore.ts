@@ -7,13 +7,17 @@ export interface RolesFile {
   admins: string[];
   ap_authorizers: string[];
   office_managers: Record<string, string[]>;
+  vendor_access?: Record<string, string | string[]>;
   threshold_usd: number;
   test_mode_route_all_to_admin?: boolean;
   version?: number;
 }
 
+// Type for vendor access: "*" means all, array means specific vendors, "assigned_only" means only assigned invoices
+export type VendorAccess = '*' | string[] | 'assigned_only';
+
 const DEFAULT_ROLES: RolesFile = {
-  admins: ['business@pcsmilesai.com', 'mckaym@pcsmiles.com', 'laurap@pcsmiles.com'],
+  admins: ['business@pcsmilesai.com', 'mckaym@pcsmiles.com', 'laurag@pcsmiles.com'],
   ap_authorizers: [], // Empty for now - admins handle all invoices. When populated, invoices route to AP first.
   office_managers: {
     Milwaukie: [''],
@@ -172,4 +176,55 @@ export function loadClassOverrides(): Record<string, string[]> {
     // ignore missing file
   }
   return {};
+}
+
+/**
+ * Get vendor access configuration for a user.
+ * Returns:
+ * - "*" for full access (developer account)
+ * - string[] for specific vendor names (e.g., ["TC Dental Lab"])
+ * - "assigned_only" for users who only see invoices assigned to them
+ * - "*" as default for admins without explicit config
+ */
+export async function getVendorAccessForUser(email: string): Promise<VendorAccess> {
+  const roles = await readRoles();
+  const target = normaliseEmail(email);
+  
+  // Check vendor_access configuration
+  if (roles.vendor_access) {
+    for (const [configEmail, access] of Object.entries(roles.vendor_access)) {
+      if (normaliseEmail(configEmail) === target) {
+        logRbac('getVendorAccessForUser', { userEmail: target, access });
+        return access as VendorAccess;
+      }
+    }
+  }
+  
+  // Default: admins get full access if not explicitly configured
+  const isUserAdmin = roles.admins.map(normaliseEmail).includes(target);
+  if (isUserAdmin) {
+    logRbac('getVendorAccessForUser', { userEmail: target, access: '*', reason: 'admin_default' });
+    return '*';
+  }
+  
+  // Non-admins without config get assigned_only by default
+  logRbac('getVendorAccessForUser', { userEmail: target, access: 'assigned_only', reason: 'non_admin_default' });
+  return 'assigned_only';
+}
+
+/**
+ * Check if a user is a "verifier" (someone who verifies parsed data before sending for approval).
+ * Verifiers have specific vendor access (array of vendors) instead of full access.
+ */
+export async function isVerifier(email: string): Promise<boolean> {
+  const vendorAccess = await getVendorAccessForUser(email);
+  return Array.isArray(vendorAccess);
+}
+
+/**
+ * Get the approval destination email for invoices sent by a verifier.
+ * Currently hardcoded to McKay, but could be made configurable.
+ */
+export function getApprovalDestination(): string {
+  return 'mckaym@pcsmiles.com';
 }

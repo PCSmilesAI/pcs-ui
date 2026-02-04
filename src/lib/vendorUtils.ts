@@ -11,16 +11,34 @@
  * - Converts to lowercase
  * - Replaces underscores with spaces
  * - Removes extra spaces
+ * - Maps known vendor aliases to canonical names
  */
 export function normalizeVendorName(name: string | null | undefined): string {
   if (!name) return 'unknown';
   
-  return name
+  let normalized = name
     .trim()
     .toLowerCase()
     .replace(/_/g, ' ')  // Replace underscores with spaces
     .replace(/\s+/g, ' ') // Normalize multiple spaces to single space
     .trim();
+  
+  // Map vendor aliases to canonical names
+  // TC Dental Lab variations
+  const tcDentalVariations = [
+    'tc dental',
+    'tcdental',
+    'tc dental labs',
+    'tc dental laboratory',
+    't.c. dental',
+    't.c. dental lab',
+  ];
+  
+  if (tcDentalVariations.includes(normalized) || normalized.startsWith('tc dental')) {
+    return 'tc dental lab';
+  }
+  
+  return normalized;
 }
 
 /**

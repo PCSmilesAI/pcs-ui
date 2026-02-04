@@ -136,6 +136,31 @@ export async function updatePassword(email: string, newPassword: string): Promis
 }
 
 /**
+ * Update a user's role
+ */
+export function updateUserRole(email: string, newRole: string): { success: boolean; error?: string } {
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = getUserByEmail(normalizedEmail);
+  
+  if (!user) {
+    return { success: false, error: 'User not found' };
+  }
+  
+  try {
+    const db = getDatabase();
+    const now = new Date().toISOString();
+    
+    db.prepare(`UPDATE users SET role = ?, updated_at = ? WHERE id = ?`).run(newRole, now, user.id);
+    
+    console.log(`✅ [AUTH] Role updated for ${normalizedEmail}: ${user.role} -> ${newRole}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error('❌ [AUTH] Failed to update role:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Ensure a user exists (create if not exists, useful for seeding)
  */
 export async function ensureUserExists(
@@ -177,7 +202,7 @@ export async function seedEssentialUsers(): Promise<void> {
   const essentialUsers = [
     { email: 'mckaym@pcsmiles.com', name: 'McKay', role: 'admin' },
     { email: 'business@pcsmilesai.com', name: 'Braxton', role: 'admin' },
-    { email: 'laurap@pcsmiles.com', name: 'Laura', role: 'admin' },
+    { email: 'laurag@pcsmiles.com', name: 'Laura', role: 'admin' },
   ];
   
   for (const user of essentialUsers) {
@@ -186,7 +211,13 @@ export async function seedEssentialUsers(): Promise<void> {
       await createUser(user.email, user.name, seedPassword, user.role);
       console.log(`✅ [AUTH] Seeded user: ${user.email}`);
     } else {
-      console.log(`ℹ️ [AUTH] User already exists: ${user.email}`);
+      // Update role if it doesn't match expected role
+      if (existing.role !== user.role) {
+        updateUserRole(user.email, user.role);
+        console.log(`✅ [AUTH] Updated role for ${user.email}: ${existing.role} -> ${user.role}`);
+      } else {
+        console.log(`ℹ️ [AUTH] User already exists with correct role: ${user.email}`);
+      }
     }
   }
   
