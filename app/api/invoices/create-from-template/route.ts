@@ -101,11 +101,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check if invoice number already exists
-    const existing = db.prepare('SELECT id FROM invoices WHERE invoice_number = ?').get(invoice_number) as any;
+    // Check if invoice number already exists for the same vendor
+    // Different vendors can have the same invoice numbering system
+    const existing = db.prepare('SELECT id FROM invoices WHERE invoice_number = ? AND vendor_name = ?').get(invoice_number, vendor_name) as any;
     if (existing) {
       return NextResponse.json(
-        { error: 'Invoice number already exists' },
+        { error: 'Invoice number already exists for this vendor' },
         { status: 409 }
       );
     }

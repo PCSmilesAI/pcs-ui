@@ -164,20 +164,25 @@ export async function POST(
     }
     
     // Check for invoice_number uniqueness before attempting update
-    // This prevents UNIQUE constraint errors and provides a clearer error message
+    // Only flag as duplicate if BOTH invoice_number AND vendor_name match
+    // Different vendors can have the same invoice numbering system
     if (invoice_number !== undefined && invoice_number !== originalInvoice.invoice_number) {
+      // Determine the effective vendor name (from update or existing)
+      const effectiveVendorName = vendor_name !== undefined ? vendor_name : originalInvoice.vendor_name;
+      
       const existingWithNumber = db.prepare(
-        'SELECT id FROM invoices WHERE invoice_number = ? AND id != ?'
-      ).get(invoice_number, actualInvoiceId) as any;
+        'SELECT id, vendor_name FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND id != ?'
+      ).get(invoice_number, effectiveVendorName, actualInvoiceId) as any;
       
       if (existingWithNumber) {
-        console.warn('[API][INVOICES][UPDATE]', 'duplicate_invoice_number', {
+        console.warn('[API][INVOICES][UPDATE]', 'duplicate_invoice_number_same_vendor', {
           invoiceId: actualInvoiceId,
           attemptedInvoiceNumber: invoice_number,
+          vendorName: effectiveVendorName,
           existingInvoiceId: existingWithNumber.id
         });
         return NextResponse.json({ 
-          error: 'Invoice number already exists on another invoice',
+          error: 'Invoice number already exists for this vendor',
           existingInvoiceId: existingWithNumber.id 
         }, { status: 409 });
       }

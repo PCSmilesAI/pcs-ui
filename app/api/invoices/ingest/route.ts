@@ -67,11 +67,13 @@ export async function POST(req: NextRequest) {
       ).get(sourceFile) as { id: string } | undefined;
     }
     
-    // Fallback check by invoice_number if source_file check didn't find it
-    if (!existing && invoice_number) {
+    // Fallback check by invoice_number AND vendor if source_file check didn't find it
+    // Different vendors can have the same invoice numbering system
+    if (!existing && invoice_number && body.vendor) {
+      const normalizedVendorForCheck = normalizeVendorNameForStorage(body.vendor);
       existing = db.prepare(
-        'SELECT id FROM invoices WHERE invoice_number = ?'
-      ).get(invoice_number) as { id: string } | undefined;
+        'SELECT id FROM invoices WHERE invoice_number = ? AND vendor_name = ?'
+      ).get(invoice_number, normalizedVendorForCheck) as { id: string } | undefined;
     }
 
     if (existing) {
