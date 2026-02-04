@@ -10,8 +10,8 @@ export function InvoiceClickProvider({ children }) {
   const handleInvoiceRowClick = (invoice) => {
     console.log('🔍 InvoiceClickContext: Invoice clicked:', invoice);
     
-    // Use invoice_number if it's not empty, otherwise use ID
-    const identifier = (invoice?.invoice_number && invoice.invoice_number.trim() !== '') ? invoice.invoice_number : invoice?.id;
+    // Always use the unique UUID id - invoice_number is not unique across vendors
+    const identifier = invoice?.id;
     
     console.log('🔍 InvoiceClickContext: Using identifier:', {
       invoice_number: invoice?.invoice_number,
