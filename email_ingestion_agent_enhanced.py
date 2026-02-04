@@ -680,6 +680,11 @@ def check_inbox(full_scan=False):
     scan_mode = "FULL" if full_scan else "UNREAD"
     log(f"[INBOX][SCAN][START] Beginning {scan_mode} inbox scan")
 
+    # Initialize counters before try block to ensure they exist in finally
+    processed_count = 0
+    skipped_count = 0
+    no_pdf_count = 0
+
     try:
         # Load existing invoices with efficient lookup structures
         existing_invoices, invoice_numbers, message_ids, tombstones = load_existing_invoices()
