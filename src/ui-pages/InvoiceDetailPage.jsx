@@ -145,6 +145,11 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   const [scanResults, setScanResults] = useState(null);
   const [showScanModal, setShowScanModal] = useState(false);
   
+  // Duplicate Invoice Handling State
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateInvoiceId, setDuplicateInvoiceId] = useState(null);
+  const [pendingUpdateData, setPendingUpdateData] = useState(null); // Store update data for retry after confirmation
+  
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -1740,6 +1745,24 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
 
       // csrfClient returns { ok, status, data, error } not a Response object
       if (!response.ok) {
+        // Check for duplicate invoice error (409 Conflict)
+        if (response.status === 409 && response.data?.existingInvoiceId) {
+          console.log('⚠️ Duplicate invoice detected:', response.data.existingInvoiceId);
+          setDuplicateInvoiceId(response.data.existingInvoiceId);
+          // Store the pending update data for retry
+          setPendingUpdateData({
+            vendor_name: details.vendor,
+            office_id: details.office,
+            amount_cents: amountCents,
+            invoice_number: details.invoice,
+            invoice_date: details.invoice_date,
+            due_date: details.due_date,
+            userComment: updateComment.trim() || undefined
+          });
+          setShowDuplicateModal(true);
+          setProcessing(false);
+          return;
+        }
         throw new Error(response.error || 'Failed to update invoice');
       }
 
@@ -1931,6 +1954,124 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     } finally {
       setProcessing(false);
     }
+  }
+
+  // Handle duplicate invoice - keep this invoice and delete the duplicate
+  async function handleKeepThisDeleteDuplicate() {
+    if (!duplicateInvoiceId || !pendingUpdateData) {
+      showToast('Missing duplicate information', 'error');
+      setShowDuplicateModal(false);
+      return;
+    }
+
+    try {
+      setProcessing(true);
+      setShowDuplicateModal(false);
+
+      const invoiceId = invoice?.id || invoice?.invoice_number;
+      
+      // First, delete the duplicate invoice
+      console.log('🗑️ Deleting duplicate invoice:', duplicateInvoiceId);
+      const deleteResponse = await csrfClient.post(`/api/invoices/${encodeURIComponent(duplicateInvoiceId)}/update`, {
+        deleted: true
+      });
+      
+      // Even if soft delete fails, try marking it as deleted via transition
+      if (!deleteResponse.ok) {
+        console.log('Trying transition endpoint to mark as deleted...');
+        await fetch('/api/invoices/transition-db', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            invoiceId: duplicateInvoiceId,
+            action: 'reject',
+            reason: 'Duplicate invoice - keeping other version'
+          })
+        });
+      }
+
+      // Now retry the original update
+      console.log('🔄 Retrying update for invoice:', invoiceId);
+      const updateResponse = await csrfClient.post(`/api/invoices/${encodeURIComponent(invoiceId)}/update`, pendingUpdateData);
+
+      if (!updateResponse.ok) {
+        throw new Error(updateResponse.error || 'Failed to update invoice after deleting duplicate');
+      }
+
+      showToast('Invoice updated successfully! The duplicate has been removed.', 'success');
+      
+      // Clear state
+      setDuplicateInvoiceId(null);
+      setPendingUpdateData(null);
+      
+      // Refresh data
+      setTimeout(() => {
+        refreshInvoiceData();
+      }, 1000);
+
+    } catch (error) {
+      console.error('❌ Error handling duplicate:', error);
+      showToast(`Error: ${error?.message || 'Failed to process duplicate'}`, 'error');
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  // Handle duplicate invoice - delete this invoice and keep the other one
+  async function handleDeleteThisKeepOther() {
+    if (!invoice) {
+      showToast('Missing invoice information', 'error');
+      setShowDuplicateModal(false);
+      return;
+    }
+
+    try {
+      setProcessing(true);
+      setShowDuplicateModal(false);
+
+      const invoiceId = invoice?.id || invoice?.invoice_number;
+      
+      // Delete this invoice by transitioning to rejected
+      console.log('🗑️ Deleting this invoice:', invoiceId);
+      const response = await fetch('/api/invoices/transition-db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invoiceId: invoiceId,
+          action: 'reject',
+          reason: 'Duplicate invoice - keeping other version'
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete this invoice');
+      }
+
+      showToast('This invoice has been removed. The other invoice will be kept.', 'success');
+      
+      // Clear state
+      setDuplicateInvoiceId(null);
+      setPendingUpdateData(null);
+      
+      // Navigate back to the list
+      if (onBack) {
+        setTimeout(() => onBack(), 1500);
+      }
+
+    } catch (error) {
+      console.error('❌ Error deleting invoice:', error);
+      showToast(`Error: ${error?.message || 'Failed to delete invoice'}`, 'error');
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  // Cancel the duplicate handling modal
+  function handleCancelDuplicateModal() {
+    setShowDuplicateModal(false);
+    setDuplicateInvoiceId(null);
+    setPendingUpdateData(null);
   }
 
   // NEW: Handle chat send
@@ -3734,6 +3875,141 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 Got It
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Duplicate Invoice Confirmation Modal */}
+      {showDuplicateModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '20px',
+            padding: '28px',
+            maxWidth: '520px',
+            width: '90%',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            border: '2px solid #f59e0b',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                backgroundColor: '#fef3c7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+              }}>
+                ⚠️
+              </div>
+              <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#b45309' }}>
+                Duplicate Invoice Found
+              </h3>
+            </div>
+            
+            <p style={{ margin: '0 0 20px 0', fontSize: '15px', color: '#374151', lineHeight: '1.6' }}>
+              There is already an invoice with this number (<strong>{pendingUpdateData?.invoice_number}</strong>) for vendor <strong>{pendingUpdateData?.vendor_name}</strong>. 
+              Would you like to proceed?
+            </p>
+            
+            <div style={{
+              backgroundColor: '#fffbeb',
+              border: '1px solid #fcd34d',
+              borderRadius: '16px',
+              padding: '16px',
+              marginBottom: '24px',
+            }}>
+              <p style={{ margin: 0, fontSize: '14px', color: '#92400e', lineHeight: '1.5' }}>
+                <strong>Choose an option below:</strong>
+              </p>
+            </div>
+            
+            {/* Option 1: Keep this, delete duplicate */}
+            <button
+              onClick={handleKeepThisDeleteDuplicate}
+              disabled={processing}
+              style={{
+                width: '100%',
+                padding: '14px 20px',
+                backgroundColor: '#357ab2',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: processing ? 'not-allowed' : 'pointer',
+                opacity: processing ? 0.6 : 1,
+                marginBottom: '12px',
+                textAlign: 'left',
+              }}
+            >
+              <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                Yes, update this invoice and delete the duplicate
+              </div>
+              <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                This invoice will be updated with your changes, and the other duplicate will be removed.
+              </div>
+            </button>
+            
+            {/* Option 2: Delete this, keep other */}
+            <button
+              onClick={handleDeleteThisKeepOther}
+              disabled={processing}
+              style={{
+                width: '100%',
+                padding: '14px 20px',
+                backgroundColor: '#dc2626',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: processing ? 'not-allowed' : 'pointer',
+                opacity: processing ? 0.6 : 1,
+                marginBottom: '12px',
+                textAlign: 'left',
+              }}
+            >
+              <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                No, delete this invoice and keep the other one
+              </div>
+              <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                This invoice will be removed, and the existing duplicate will be kept unchanged.
+              </div>
+            </button>
+            
+            {/* Option 3: Cancel */}
+            <button
+              onClick={handleCancelDuplicateModal}
+              disabled={processing}
+              style={{
+                width: '100%',
+                padding: '12px 20px',
+                backgroundColor: 'white',
+                color: '#6b7280',
+                border: '2px solid #d1d5db',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: processing ? 'not-allowed' : 'pointer',
+                opacity: processing ? 0.6 : 1,
+              }}
+            >
+              Cancel - Go back without making changes
+            </button>
           </div>
         </div>
       )}
