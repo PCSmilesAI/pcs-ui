@@ -314,7 +314,7 @@ export async function detectMultipleInvoices(base64Images: string[]): Promise<{ 
     console.log('[PCS-AI] Calling OpenAI for multi-invoice detection...');
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
-      max_tokens: 1000, // Use max_tokens for broader compatibility
+      max_completion_tokens: 1000, // GPT-5 Nano uses max_completion_tokens
       messages
     });
 
