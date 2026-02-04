@@ -423,7 +423,22 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
     const invoiceDate = formatDate(options.invoiceDate || invoiceData.invoice_date || invoiceData.invoiceDate);
     const dueDate = formatDate(options.dueDate || invoiceData.due_date || invoiceData.dueDate);
 
-    const totalAmount = options.totalAmount ?? sanitizeAmount(invoiceData.total ?? invoiceData.amount ?? invoiceData.totalAmount, 0);
+    let totalAmount = options.totalAmount ?? sanitizeAmount(invoiceData.total ?? invoiceData.amount ?? invoiceData.totalAmount, 0);
+
+    // If totalAmount is 0 and we have an invoiceId, try to fetch from database
+    if (totalAmount === 0 && options.invoiceId) {
+      try {
+        const { getDatabase } = await import('../db/client');
+        const db = getDatabase();
+        const row = db.prepare('SELECT amount_cents FROM invoices WHERE id = ?').get(options.invoiceId) as { amount_cents: number } | undefined;
+        if (row && row.amount_cents > 0) {
+          totalAmount = row.amount_cents / 100;
+          console.log('[QBO][CREATE_BILL] Fetched amount from database:', { invoiceId: options.invoiceId, totalAmount });
+        }
+      } catch (err) {
+        console.warn('[QBO][CREATE_BILL] Could not fetch amount from database:', err);
+      }
+    }
 
     let lineItems = invoiceData.line_items || invoiceData.lineItems || [];
     if (!Array.isArray(lineItems)) {
