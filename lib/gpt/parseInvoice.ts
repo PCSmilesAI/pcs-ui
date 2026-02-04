@@ -299,18 +299,19 @@ export async function detectVendor(base64Images: string[]): Promise<string> {
  */
 export async function detectMultipleInvoices(base64Images: string[]): Promise<{ count: number; invoiceNumbers: string[] | null }> {
   try {
-    // For documents with 4 or fewer pages, analyze all pages to catch all invoices
-    // For larger documents, limit to first 4 pages to stay within token limits
-    const maxPagesToAnalyze = base64Images.length <= 4 ? base64Images.length : 4;
+    // Analyze first 3 pages - invoice headers typically appear on first page of each invoice
+    // With typical 1-2 pages per invoice, 3 pages should catch most multi-invoice scenarios
+    // More than 3 images causes token limit issues with the model
+    const maxPagesToAnalyze = Math.min(3, base64Images.length);
     const imagesToAnalyze = base64Images.slice(0, maxPagesToAnalyze);
     console.log('[PCS-AI] Checking for multiple invoices in document...', { 
       totalPages: base64Images.length, 
       pagesAnalyzing: imagesToAnalyze.length 
     });
     
-    // Only add partial view note if we're not showing all pages
+    // Add context about pages being shown
     const pageNote = imagesToAnalyze.length < base64Images.length 
-      ? `\n\nNOTE: You are seeing ${imagesToAnalyze.length} of ${base64Images.length} total pages. If you see signs of multiple invoices even in these pages, report that.`
+      ? `\n\nNOTE: You are seeing the first ${imagesToAnalyze.length} of ${base64Images.length} total pages. Each invoice typically starts on a new page. Count ALL distinct invoice numbers you see - if you see 3 different invoice numbers, report invoice_count: 3.`
       : `\n\nYou are seeing all ${base64Images.length} pages of this document. Count ALL distinct invoices carefully.`;
     
     const messages = [
