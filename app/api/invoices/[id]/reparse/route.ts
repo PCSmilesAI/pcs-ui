@@ -8,7 +8,12 @@ export const dynamic = 'force-dynamic';
 
 // Get the project root directory
 const PROJECT_ROOT = process.env.PROJECT_ROOT || '/var/www/pcs-ui';
-const EMAIL_INVOICES_DIR = process.env.EMAIL_INVOICES_DIR || path.join(PROJECT_ROOT, 'pcs_ui_data', 'email_invoices');
+
+// Multiple directories where PDFs might be stored (in order of preference)
+const EMAIL_INVOICES_DIRS = [
+  process.env.EMAIL_INVOICES_DIR || path.join(PROJECT_ROOT, 'pcs_ui_data', 'email_invoices'),
+  path.join(PROJECT_ROOT, 'email_invoices'),  // Legacy/root directory
+];
 
 // Smart reparse script - ISOLATED from main parsing pipeline
 const SMART_REPARSE_PATH = process.env.SMART_REPARSE_PATH || path.join(PROJECT_ROOT, 'smart_reparse.py');
@@ -62,32 +67,45 @@ function getPdfFilename(pdfPath: string | null): string | null {
 
 /**
  * Find PDF file on disk (handles hash suffix variations)
+ * Searches multiple directories where PDFs might be stored
  */
 function findPdfFile(pdfFilename: string | null): string | null {
   if (!pdfFilename) return null;
   
-  const directPath = path.join(EMAIL_INVOICES_DIR, pdfFilename);
-  if (fs.existsSync(directPath)) {
-    return directPath;
-  }
-  
-  // Try without hash suffix
+  // Try without hash suffix for fuzzy matching
   const baseName = pdfFilename.replace(/\.pdf$/i, '').replace(/_[a-f0-9]{8}$/i, '');
   
-  try {
-    const files = fs.readdirSync(EMAIL_INVOICES_DIR);
-    for (const file of files) {
-      if (file.toLowerCase().endsWith('.pdf')) {
-        const fileBase = file.replace(/\.pdf$/i, '').replace(/_[a-f0-9]{8}$/i, '');
-        if (fileBase.toLowerCase() === baseName.toLowerCase()) {
-          return path.join(EMAIL_INVOICES_DIR, file);
+  // Search each directory
+  for (const dir of EMAIL_INVOICES_DIRS) {
+    // Check if directory exists
+    if (!fs.existsSync(dir)) continue;
+    
+    // 1. Try exact match
+    const directPath = path.join(dir, pdfFilename);
+    if (fs.existsSync(directPath)) {
+      console.log('[REPARSE] Found PDF at:', directPath);
+      return directPath;
+    }
+    
+    // 2. Try fuzzy match (different hash suffix)
+    try {
+      const files = fs.readdirSync(dir);
+      for (const file of files) {
+        if (file.toLowerCase().endsWith('.pdf')) {
+          const fileBase = file.replace(/\.pdf$/i, '').replace(/_[a-f0-9]{8}$/i, '');
+          if (fileBase.toLowerCase() === baseName.toLowerCase()) {
+            const foundPath = path.join(dir, file);
+            console.log('[REPARSE] Found PDF (fuzzy match) at:', foundPath);
+            return foundPath;
+          }
         }
       }
+    } catch (err) {
+      console.error('[REPARSE] Error reading directory:', dir, err);
     }
-  } catch (err) {
-    console.error('[REPARSE] Error reading directory:', err);
   }
   
+  console.warn('[REPARSE] PDF not found in any directory:', pdfFilename, 'Searched:', EMAIL_INVOICES_DIRS);
   return null;
 }
 
