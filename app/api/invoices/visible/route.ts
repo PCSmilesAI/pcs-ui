@@ -90,12 +90,15 @@ export async function GET(req: NextRequest) {
       // User only sees invoices explicitly assigned to them
       // EXCEPT: For to_be_paid and completed/paid statuses, also show TC Dental invoices
       // (shared visibility between McKay and Laura for payment workflow)
+      // TC Dental variations: "TC Dental", "TC Dental Lab", "TC Dental Laboratory, Inc.", etc.
+      const tcDentalPattern = `(LOWER(vendor_name) LIKE 'tc dental%' OR LOWER(vendor_name) LIKE 'tc_dental%' OR LOWER(vendor_name) LIKE 'tcdental%')`;
+      
       if (hasReassignmentColumn) {
         query += ` AND (
           LOWER(current_assigned_user_email) = ?
           OR (
             status IN ('to_be_paid', 'paid', 'completed') 
-            AND LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) = 'tc dental lab'
+            AND ${tcDentalPattern}
           )
         )`;
         params.push(normalizedUserEmail);
@@ -103,23 +106,37 @@ export async function GET(req: NextRequest) {
         // No reassignment column - only show to_be_paid/completed TC Dental invoices
         query += ` AND (
           status IN ('to_be_paid', 'paid', 'completed') 
-          AND LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) = 'tc dental lab'
+          AND ${tcDentalPattern}
         )`;
       }
     } else if (Array.isArray(vendorAccess)) {
       // User only sees invoices from specific vendors (e.g., TC Dental Lab)
-      // Normalize vendor names for comparison
-      const normalizedVendors = vendorAccess.map(v => normalizeVendorName(v));
+      // Build SQL conditions that match all variations of vendor names
       
-      if (normalizedVendors.length === 0) {
+      if (vendorAccess.length === 0) {
         return NextResponse.json({ ok: true, count: 0, invoices: [] });
       }
       
-      // Match invoices where vendor_name (normalized) matches any in the list
-      // Use LOWER() for case-insensitive comparison
-      const vendorPlaceholders = normalizedVendors.map(() => '?').join(',');
-      query += ` AND LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) IN (${vendorPlaceholders})`;
-      params.push(...normalizedVendors);
+      // Build OR conditions for each vendor, using LIKE patterns for vendors with known variations
+      const vendorConditions: string[] = [];
+      
+      for (const vendorName of vendorAccess) {
+        const normalized = normalizeVendorName(vendorName);
+        
+        // TC Dental Lab has many variations: "TC Dental", "TC Dental Lab", "TC Dental Laboratory, Inc.", etc.
+        if (normalized === 'tc dental lab') {
+          // Match any vendor name starting with "tc dental" (case-insensitive)
+          vendorConditions.push(`LOWER(vendor_name) LIKE 'tc dental%'`);
+          vendorConditions.push(`LOWER(vendor_name) LIKE 'tc_dental%'`);
+          vendorConditions.push(`LOWER(vendor_name) LIKE 'tcdental%'`);
+        } else {
+          // For other vendors, use exact match on normalized name
+          vendorConditions.push(`LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) = ?`);
+          params.push(normalized);
+        }
+      }
+      
+      query += ` AND (${vendorConditions.join(' OR ')})`;
     } else {
       // vendorAccess === '*' - Full access (developer account)
       // Role-based filtering for admins/AP
