@@ -18,6 +18,7 @@ interface APIResponse<T = any> {
   status: number;
   data?: T;
   error?: string;
+  errorData?: any; // Full error response data for detailed error handling
 }
 
 /**
@@ -69,6 +70,7 @@ async function request<T = any>(
       status: response.status,
       data: response.ok ? data : undefined,
       error: !response.ok ? data?.error || 'Request failed' : undefined,
+      errorData: !response.ok ? data : undefined, // Include full error response for detailed handling
     };
   } catch (error: any) {
     return {
