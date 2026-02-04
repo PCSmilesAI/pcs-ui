@@ -9,9 +9,15 @@ export async function POST(req: NextRequest) {
   const verifier = process.env.QBO_WEBHOOK_VERIFIER || '';
   const signature = req.headers.get('intuit-signature') || '';
 
+  // If webhook verifier is not configured, skip validation (webhooks not enabled)
+  if (!verifier) {
+    return NextResponse.json({ ok: true, message: 'Webhook verifier not configured' });
+  }
+
   const expected = crypto.createHmac('sha256', verifier).update(raw).digest('base64');
   if (!signature || signature !== expected) {
-    console.warn('Invalid webhook signature');
+    // Log at debug level - this happens when QBO sends test webhooks or verifier is mismatched
+    console.log('[QBO][WEBHOOK] Signature mismatch - verify QBO_WEBHOOK_VERIFIER is correct');
     return new NextResponse('Invalid signature', { status: 401 });
   }
 

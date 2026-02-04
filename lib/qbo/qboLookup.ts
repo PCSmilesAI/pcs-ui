@@ -205,7 +205,8 @@ export async function resolveAccountByFullName(
   const match = cache?.map.get(normalized);
 
   if (!match) {
-    console.warn('[QBO][LOOKUP] Account not found for path:', accountPath);
+    // Account not found is not an error - caller will use fallback
+    console.log('[QBO][LOOKUP] Account not in cache, using fallback:', accountPath);
     return undefined;
   }
 

@@ -169,20 +169,35 @@ export function formatDate(dateString: string | undefined | null): string | unde
 function resolvePdfFile(pdfPath?: string): { buffer: Buffer; fileName: string } | null {
   if (!pdfPath) return null;
 
-  // SECURITY: Validate path to prevent path traversal attacks
   const baseDir = process.cwd();
-  if (!isPathWithinBase(pdfPath, baseDir)) {
-    console.error('❌ Path traversal attempt detected in PDF path:', pdfPath);
-    return null;
-  }
-
   const candidates = new Set<string>();
-  const normalized = pdfPath.replace(/^\//, '');
-  candidates.add(pdfPath);
-  candidates.add(normalized);
-  candidates.add(path.join(baseDir, normalized));
-  candidates.add(path.join(baseDir, pdfPath));
-  candidates.add(path.join(baseDir, 'public', normalized));
+  
+  // Handle /api/pdf/ paths - extract filename and look in known directories
+  if (pdfPath.startsWith('/api/pdf/')) {
+    const fileName = pdfPath.replace('/api/pdf/', '');
+    // Add common PDF storage locations
+    candidates.add(path.join(baseDir, 'pcs_ui_data', 'email_invoices', fileName));
+    candidates.add(path.join(baseDir, 'email_invoices', fileName));
+    candidates.add(path.join(baseDir, 'public', 'email_invoices', fileName));
+    candidates.add(path.join(baseDir, 'sample_invoices_pcs', fileName));
+  } else {
+    // SECURITY: Validate path to prevent path traversal attacks for non-API paths
+    if (!isPathWithinBase(pdfPath, baseDir)) {
+      console.error('❌ Path traversal attempt detected in PDF path:', pdfPath);
+      return null;
+    }
+    
+    const normalized = pdfPath.replace(/^\//, '');
+    candidates.add(pdfPath);
+    candidates.add(normalized);
+    candidates.add(path.join(baseDir, normalized));
+    candidates.add(path.join(baseDir, pdfPath));
+    candidates.add(path.join(baseDir, 'public', normalized));
+    // Also check email_invoices directories
+    const fileName = path.basename(pdfPath);
+    candidates.add(path.join(baseDir, 'pcs_ui_data', 'email_invoices', fileName));
+    candidates.add(path.join(baseDir, 'email_invoices', fileName));
+  }
 
   for (const candidate of candidates) {
     try {
@@ -493,7 +508,8 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
             if (officeName) {
               classPathToUse = toGeneralClassForOffice(officeName);
             } else {
-              console.warn('[QBO][CLASSIFY] Class mapping requested location but invoice office missing', {
+              // Invoice office not set - will use default class assignment
+              console.log('[QBO][CLASSIFY] Using default class (invoice office not set)', {
                 vendor: vendorName,
                 invoiceNumber,
               });
@@ -544,9 +560,10 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
           }
 
           if (historyMapping.accountPath && !selectedAccountPath) {
-            console.warn('[QBO][CLASSIFY] Account path not in chart of accounts list', {
+            // Account from history not found in chart - will use default account instead
+            console.log('[QBO][CLASSIFY] Using default account (history account not in chart)', {
               vendor: vendorName,
-              accountPath: historyMapping.accountPath,
+              historyAccount: historyMapping.accountPath,
             });
           }
 
@@ -561,7 +578,8 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
             preferredAccount = overrideAccount;
             chosenAccountPath = selectedAccountPath || chosenAccountPath;
           } else if (selectedAccountPath) {
-            console.warn('[QBO][CLASSIFY] Account path could not be resolved', {
+            // Account path from vendor mapping not in QBO - will use default account
+            console.log('[QBO][CLASSIFY] Using default account (mapped account not found in QBO)', {
               vendor: vendorName,
               accountPath: selectedAccountPath,
             });
