@@ -11,6 +11,7 @@
 import { getDatabase } from '../db/client';
 import { readRoles } from '../workflow/rolesStore';
 import { isAdmin, isAP, officesForManager } from '../workflow/rolesStore';
+import { readOffices } from '../company/officesStore';
 
 export interface ReassignmentTarget {
   type: 'office' | 'ap' | 'admin';
@@ -25,20 +26,46 @@ export interface ReassignmentTarget {
  */
 export async function getReassignmentTargets(): Promise<ReassignmentTarget[]> {
   const roles = await readRoles();
+  const offices = await readOffices();
   const targets: ReassignmentTarget[] = [];
+  const addedEmails = new Set<string>(); // Track added emails to avoid duplicates
 
-  // Add all office locations with their managers
-  if (roles.office_managers) {
-    for (const [officeName, managers] of Object.entries(roles.office_managers)) {
-      // Get the first non-empty manager email for this office
-      const managerEmail = managers?.find(e => e && e.trim());
-      if (managerEmail && managerEmail.trim()) {
+  // Add all office managers from the company offices data (office_info.json)
+  // This includes ALL office managers with their actual email addresses
+  for (const office of offices) {
+    if (office.email && office.email.trim()) {
+      const email = office.email.trim().toLowerCase();
+      if (!addedEmails.has(email)) {
+        addedEmails.add(email);
+        const managerName = office.manager ? ` - ${office.manager}` : '';
         targets.push({
           type: 'office',
-          id: officeName,
-          name: `${officeName} (Office Manager)`,
-          email: managerEmail.trim(),
+          id: office.name,
+          name: `${office.name}${managerName} (Office Manager)`,
+          email: email,
         });
+      }
+    }
+  }
+
+  // Also add any office managers from roles.json that aren't already included
+  // (in case there are configured roles not in office_info.json)
+  if (roles.office_managers) {
+    for (const [officeName, managers] of Object.entries(roles.office_managers)) {
+      // Add ALL managers for this office, not just the first one
+      for (const managerEmail of managers || []) {
+        if (managerEmail && managerEmail.trim()) {
+          const email = managerEmail.trim().toLowerCase();
+          if (!addedEmails.has(email)) {
+            addedEmails.add(email);
+            targets.push({
+              type: 'office',
+              id: officeName,
+              name: `${officeName} (Office Manager)`,
+              email: email,
+            });
+          }
+        }
       }
     }
   }
@@ -47,12 +74,16 @@ export async function getReassignmentTargets(): Promise<ReassignmentTarget[]> {
   if (roles.ap_authorizers && roles.ap_authorizers.length > 0) {
     const apEmail = roles.ap_authorizers[0];
     if (apEmail && apEmail.trim()) {
-      targets.push({
-        type: 'ap',
-        id: 'ap',
-        name: 'AP Manager',
-        email: apEmail.trim(),
-      });
+      const email = apEmail.trim().toLowerCase();
+      if (!addedEmails.has(email)) {
+        addedEmails.add(email);
+        targets.push({
+          type: 'ap',
+          id: 'ap',
+          name: 'AP Manager',
+          email: email,
+        });
+      }
     }
   }
 
@@ -60,12 +91,16 @@ export async function getReassignmentTargets(): Promise<ReassignmentTarget[]> {
   if (roles.admins) {
     for (const adminEmail of roles.admins) {
       if (adminEmail && adminEmail.trim()) {
-        targets.push({
-          type: 'admin',
-          id: adminEmail.trim(),
-          name: `Admin (${adminEmail.trim()})`,
-          email: adminEmail.trim(),
-        });
+        const email = adminEmail.trim().toLowerCase();
+        if (!addedEmails.has(email)) {
+          addedEmails.add(email);
+          targets.push({
+            type: 'admin',
+            id: email,
+            name: `Admin (${email})`,
+            email: email,
+          });
+        }
       }
     }
   }
