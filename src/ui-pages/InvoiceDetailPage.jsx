@@ -4,6 +4,7 @@ import { fetchQboCategories } from '../lib/categoriesClient';
 import ACHBadge from '../ui/ach/ACHBadge';
 import { useVendorAchMap } from '../ui/ach/useVendorAch';
 import Toast from '../components/Toast.jsx';
+import SendProgressModal from '../components/SendProgressModal.jsx';
 import { csrfClient } from '../lib/api/csrfClient';
 import { CodingTemplateSelector } from '../../components/invoices/CodingTemplateSelector';
 import SearchableSelect from '../components/SearchableSelect';
@@ -150,6 +151,14 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   const [duplicateInvoiceId, setDuplicateInvoiceId] = useState(null);
   const [pendingUpdateData, setPendingUpdateData] = useState(null); // Store update data for retry after confirmation
   
+  // NEW: Verifier workflow state (for users with specific vendor access like Laura)
+  const [isVerifier, setIsVerifier] = useState(false);
+  const [showSendModal, setShowSendModal] = useState(false);
+  const [sendStep1Status, setSendStep1Status] = useState('idle'); // 'idle' | 'processing' | 'complete' | 'error'
+  const [sendStep2Status, setSendStep2Status] = useState('idle');
+  const [sendStep1Error, setSendStep1Error] = useState(null);
+  const [sendStep2Error, setSendStep2Error] = useState(null);
+  
   const { getStatusForVendor } = useVendorAchMap();
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -198,6 +207,28 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     fetchQboClasses();
     fetchQboVendors();
   }, []);
+  
+  // Check if current user is a verifier (has specific vendor access, like Laura)
+  useEffect(() => {
+    async function checkVerifierStatus() {
+      try {
+        const userEmail = getUserEmail();
+        if (!userEmail) return;
+        
+        const response = await fetch('/api/workflow/config');
+        if (response.ok) {
+          const config = await response.json();
+          const vendorAccess = config?.vendor_access?.[userEmail.toLowerCase()];
+          // User is a verifier if they have an array of specific vendors (not "*" or "assigned_only")
+          setIsVerifier(Array.isArray(vendorAccess));
+        }
+      } catch (e) {
+        console.error('Failed to check verifier status:', e);
+      }
+    }
+    checkVerifierStatus();
+  }, []);
+  
   const dismissToast = useCallback(() => setToast(null), []);
   const STATUS_META = {
     incoming: { label: 'Incoming', fg: '#1d4ed8', bg: '#e0f2fe', border: '#60a5fa' },
@@ -1667,6 +1698,99 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     transitionInvoice('reject');
   }
 
+  // Handle "Send" button for verifiers (Laura's workflow)
+  // This does three things: 1) Train AI, 2) Create QBO bill, 3) Route to McKay for approval
+  async function handleSend() {
+    // Check if allocation is fully matched before allowing send
+    const tolerance = 0.01;
+    if (Math.abs(allocationSummary.unallocated) > tolerance) {
+      setShowAllocationErrorModal(true);
+      return;
+    }
+
+    const invoiceId = invoice?.id || invoice?.invoice_number;
+    if (!invoiceId) {
+      showToast('Missing invoice identifier', 'error');
+      return;
+    }
+
+    // Show the progress modal
+    setShowSendModal(true);
+    setSendStep1Status('processing');
+    setSendStep2Status('idle');
+    setSendStep1Error(null);
+    setSendStep2Error(null);
+
+    try {
+      // Parse amount from display format for the API
+      const amountStr = paymentAmount.replace(/\$/g, '').replace(/,/g, '');
+      const amountNum = parseFloat(amountStr) || 0;
+      const amountCents = Math.round(amountNum * 100);
+
+      // Build the corrected data payload
+      const correctedData = {
+        vendor_name: details.vendor,
+        office_id: details.office,
+        amount_cents: amountCents,
+        invoice_number: details.invoice,
+        invoice_date: details.invoice_date,
+        due_date: details.due_date,
+      };
+
+      // Call the send-for-approval API which handles all three steps
+      const response = await csrfClient.post(`/api/invoices/send-for-approval`, {
+        invoiceId: invoiceId,
+        correctedData: correctedData,
+        invoiceCategories: invoiceCategories,
+        userComment: updateComment.trim() || undefined,
+      });
+
+      // Simulate step progression based on API response
+      // Step 1: AI Training
+      if (response.aiTrainingResult?.success !== false) {
+        setSendStep1Status('complete');
+      } else {
+        setSendStep1Status('error');
+        setSendStep1Error(response.aiTrainingResult?.error || 'AI training failed');
+      }
+
+      // Short delay before step 2
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setSendStep2Status('processing');
+
+      // Step 2: QBO Bill + Route to approver
+      if (response.ok) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setSendStep2Status('complete');
+        // Modal will auto-dismiss and we navigate back
+      } else {
+        setSendStep2Status('error');
+        setSendStep2Error(response.error || 'Failed to send for approval');
+      }
+    } catch (err) {
+      console.error('Error in handleSend:', err);
+      if (sendStep1Status === 'processing') {
+        setSendStep1Status('error');
+        setSendStep1Error(err.message || 'Failed to update AI');
+      } else {
+        setSendStep2Status('error');
+        setSendStep2Error(err.message || 'Failed to send for approval');
+      }
+    }
+  }
+
+  // Callback when send modal completes successfully
+  function handleSendComplete() {
+    setShowSendModal(false);
+    setSendStep1Status('idle');
+    setSendStep2Status('idle');
+    showToast('Invoice sent for approval successfully!', 'success');
+    // Navigate back to the list
+    if (onBack) {
+      onBack();
+    }
+  }
+
   // Handle re-parsing an invoice (for invoices with parsing errors)
   async function handleReparse() {
     const invoiceId = invoice?.id || invoice?.invoice_number;
@@ -2279,7 +2403,25 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     // For all other statuses (incoming, awaiting_office_approval, awaiting_admin_approval, etc.)
     const buttons = [];
     
-    // Office managers can approve/reject but NOT update
+    // NEW: Verifier workflow (e.g., Laura with TC Dental only access)
+    // Verifiers see "Send" and "Reject" buttons instead of "Approve", "Reject", "Update"
+    if (isVerifier) {
+      // Send button - combines AI training + QBO bill creation + route to approver
+      buttons.push({ 
+        label: 'Send', 
+        onClick: handleSend, 
+        style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } 
+      });
+      // Reject button
+      buttons.push({ 
+        label: 'Reject', 
+        onClick: handleReject, 
+        style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' } 
+      });
+      return buttons;
+    }
+    
+    // Standard workflow: Office managers can approve/reject but NOT update
     if (canApprove) {
       buttons.push({ label: 'Approve', onClick: handleApprove, style: { ...actionButtonStyle, backgroundColor: '#059669', color: '#ffffff', borderColor: '#059669' } });
     }
@@ -4373,6 +4515,21 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
           </div>
         </div>
       )}
+
+      {/* Send Progress Modal for Verifiers */}
+      <SendProgressModal
+        isOpen={showSendModal}
+        onClose={() => {
+          setShowSendModal(false);
+          setSendStep1Status('idle');
+          setSendStep2Status('idle');
+        }}
+        onComplete={handleSendComplete}
+        step1Status={sendStep1Status}
+        step2Status={sendStep2Status}
+        step1Error={sendStep1Error}
+        step2Error={sendStep2Error}
+      />
 
       <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
       

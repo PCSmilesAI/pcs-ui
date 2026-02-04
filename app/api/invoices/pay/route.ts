@@ -93,43 +93,86 @@ export async function POST(req: NextRequest) {
     let successCount = 0;
     let errorCount = 0;
     let taggedCount = 0;
+    
+    // Payment lock timeout in milliseconds (10 minutes)
+    const PAYMENT_LOCK_TIMEOUT_MS = 10 * 60 * 1000;
+    const now = new Date();
+    const normalizedUserEmail = user.email.trim().toLowerCase();
 
+    // First pass: Check for locked invoices and validate all invoices
+    const invoicesToProcess: any[] = [];
     for (const invoiceId of invoiceIds) {
+      // Find invoice (by id or invoice_number)
+      let invoice = db.prepare('SELECT id, invoice_number, qbo_bill_id, status, vendor_name, amount_cents, payment_started_by, payment_started_at FROM invoices WHERE id = ?').get(invoiceId) as any;
+      if (!invoice) {
+        invoice = db.prepare('SELECT id, invoice_number, qbo_bill_id, status, vendor_name, amount_cents, payment_started_by, payment_started_at FROM invoices WHERE invoice_number = ?').get(invoiceId) as any;
+      }
+
+      if (!invoice) {
+        results.push({ invoiceId, ok: false, error: 'Invoice not found' });
+        errorCount++;
+        continue;
+      }
+
+      // Check if invoice has a QBO bill created
+      if (!invoice.qbo_bill_id) {
+        results.push({ 
+          invoiceId, 
+          ok: false, 
+          error: 'No QuickBooks bill found for this invoice. Please approve the invoice first to create a QBO bill.' 
+        });
+        errorCount++;
+        continue;
+      }
+
+      // Check invoice status - should be to_be_paid or approved
+      const status = (invoice.status || '').toLowerCase();
+      if (!['to_be_paid', 'approved'].includes(status)) {
+        results.push({ 
+          invoiceId, 
+          ok: false, 
+          error: `Invoice is not ready for payment (status: ${invoice.status})` 
+        });
+        errorCount++;
+        continue;
+      }
+      
+      // Check for payment lock by another user
+      if (invoice.payment_started_by && invoice.payment_started_at) {
+        const lockEmail = invoice.payment_started_by.trim().toLowerCase();
+        const lockTime = new Date(invoice.payment_started_at).getTime();
+        const elapsed = now.getTime() - lockTime;
+        
+        // If locked by another user and within timeout, block
+        if (lockEmail !== normalizedUserEmail && elapsed < PAYMENT_LOCK_TIMEOUT_MS) {
+          const minutesAgo = Math.floor(elapsed / 60000);
+          results.push({ 
+            invoiceId: invoice.invoice_number || invoiceId, 
+            ok: false, 
+            error: `Payment in progress by ${invoice.payment_started_by} (started ${minutesAgo} minute${minutesAgo !== 1 ? 's' : ''} ago)`,
+            lockedBy: invoice.payment_started_by,
+            lockedAt: invoice.payment_started_at,
+          });
+          errorCount++;
+          continue;
+        }
+        // If lock expired or by same user, clear it and proceed
+      }
+      
+      invoicesToProcess.push(invoice);
+    }
+    
+    // Set payment locks for all valid invoices before processing
+    const setLockStmt = db.prepare('UPDATE invoices SET payment_started_by = ?, payment_started_at = ? WHERE id = ?');
+    for (const invoice of invoicesToProcess) {
+      setLockStmt.run(normalizedUserEmail, now.toISOString(), invoice.id);
+    }
+    console.log('[PAYMENT] Set payment locks for', invoicesToProcess.length, 'invoices by', normalizedUserEmail);
+
+    // Process each validated invoice
+    for (const invoice of invoicesToProcess) {
+      const invoiceId = invoice.id;
       try {
-        // Find invoice (by id or invoice_number)
-        let invoice = db.prepare('SELECT id, invoice_number, qbo_bill_id, status, vendor_name, amount_cents FROM invoices WHERE id = ?').get(invoiceId) as any;
-        if (!invoice) {
-          invoice = db.prepare('SELECT id, invoice_number, qbo_bill_id, status, vendor_name, amount_cents FROM invoices WHERE invoice_number = ?').get(invoiceId) as any;
-        }
-
-        if (!invoice) {
-          results.push({ invoiceId, ok: false, error: 'Invoice not found' });
-          errorCount++;
-          continue;
-        }
-
-        // Check if invoice has a QBO bill created
-        if (!invoice.qbo_bill_id) {
-          results.push({ 
-            invoiceId, 
-            ok: false, 
-            error: 'No QuickBooks bill found for this invoice. Please approve the invoice first to create a QBO bill.' 
-          });
-          errorCount++;
-          continue;
-        }
-
-        // Check invoice status - should be to_be_paid or approved
-        const status = (invoice.status || '').toLowerCase();
-        if (!['to_be_paid', 'approved'].includes(status)) {
-          results.push({ 
-            invoiceId, 
-            ok: false, 
-            error: `Invoice is not ready for payment (status: ${invoice.status})` 
-          });
-          errorCount++;
-          continue;
-        }
 
         // Tag the QBO bill with a batch code in DocNumber (Reference Number) for easy filtering
         let tagSuccess = false;

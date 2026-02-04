@@ -2,21 +2,26 @@
   "admins": [
     "business@pcsmilesai.com",
     "mckaym@pcsmiles.com",
-    "laurap@pcsmiles.com"
+    "laurag@pcsmiles.com"
   ],
   "ap_authorizers": [
     "business@pcsmilesai.com",
     "mckaym@pcsmiles.com",
-    "laurap@pcsmiles.com"
+    "laurag@pcsmiles.com"
   ],
   "office_managers": {
     "Milwaukie": [
       "business@pcsmilesai.com",
       "mckaym@pcsmiles.com",
-      "laurap@pcsmiles.com"
+      "laurag@pcsmiles.com"
     ]
+  },
+  "vendor_access": {
+    "business@pcsmilesai.com": "*",
+    "laurag@pcsmiles.com": ["TC Dental Lab"],
+    "mckaym@pcsmiles.com": "assigned_only"
   },
   "threshold_usd": 1000,
   "test_mode_route_all_to_admin": true,
-  "version": 6
+  "version": 7
 }

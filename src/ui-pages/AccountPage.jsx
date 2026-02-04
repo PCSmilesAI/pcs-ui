@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 const ADMIN_EMAILS = new Set([
   'business@pcsmilesai.com',
   'mckaym@pcsmiles.com',
-  'laurap@pcsmiles.com',
+  'laurag@pcsmiles.com',
 ]);
 
 export default function AccountPage() {

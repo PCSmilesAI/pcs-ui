@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '../../../../lib/auth/currentUser';
-import { getThreshold, setThreshold } from '../../../../lib/workflow/rolesStore';
+import { getThreshold, setThreshold, readRoles } from '../../../../lib/workflow/rolesStore';
 
 export async function GET(req: NextRequest) {
   const user = getCurrentUser(req);
-  if (!user.isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  // Allow all authenticated users to read config (needed for vendor_access check)
   const admin_threshold_usd = await getThreshold();
-  return NextResponse.json({ ok: true, admin_threshold_usd });
+  const roles = await readRoles();
+  
+  return NextResponse.json({ 
+    ok: true, 
+    admin_threshold_usd,
+    admins: roles.admins || [],
+    vendor_access: roles.vendor_access || {},
+  });
 }
 
 export async function PUT(req: NextRequest) {

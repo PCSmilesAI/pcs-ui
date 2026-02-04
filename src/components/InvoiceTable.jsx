@@ -235,6 +235,11 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
                 // Add warning icon to first column if parsing failed
                 const showWarningIcon = hasParsingIssue && colIndex === 0;
                 
+                // Support custom render function for column
+                const cellContent = col.render 
+                  ? col.render(row)
+                  : row[col.key];
+                
                 return (
                   <td
                     key={col.key}
@@ -248,7 +253,7 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
                         ⚠️
                       </span>
                     )}
-                    {row[col.key]}
+                    {cellContent}
                   </td>
                 );
               })}
