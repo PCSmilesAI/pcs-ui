@@ -171,7 +171,7 @@ export async function POST(
       const effectiveVendorName = vendor_name !== undefined ? vendor_name : originalInvoice.vendor_name;
       
       const existingWithNumber = db.prepare(
-        'SELECT id, vendor_name FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND id != ?'
+        'SELECT id, vendor_name FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND id != ? AND deleted = 0'
       ).get(invoice_number, effectiveVendorName, actualInvoiceId) as any;
       
       if (existingWithNumber) {
