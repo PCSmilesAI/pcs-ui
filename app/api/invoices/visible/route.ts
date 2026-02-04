@@ -95,10 +95,7 @@ export async function GET(req: NextRequest) {
           LOWER(current_assigned_user_email) = ?
           OR (
             status IN ('to_be_paid', 'paid', 'completed') 
-            AND (
-              LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) = 'tc dental lab'
-              OR LOWER(REPLACE(REPLACE(vendor, '_', ' '), '  ', ' ')) = 'tc dental lab'
-            )
+            AND LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) = 'tc dental lab'
           )
         )`;
         params.push(normalizedUserEmail);
@@ -106,10 +103,7 @@ export async function GET(req: NextRequest) {
         // No reassignment column - only show to_be_paid/completed TC Dental invoices
         query += ` AND (
           status IN ('to_be_paid', 'paid', 'completed') 
-          AND (
-            LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) = 'tc dental lab'
-            OR LOWER(REPLACE(REPLACE(vendor, '_', ' '), '  ', ' ')) = 'tc dental lab'
-          )
+          AND LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) = 'tc dental lab'
         )`;
       }
     } else if (Array.isArray(vendorAccess)) {
@@ -124,11 +118,8 @@ export async function GET(req: NextRequest) {
       // Match invoices where vendor_name (normalized) matches any in the list
       // Use LOWER() for case-insensitive comparison
       const vendorPlaceholders = normalizedVendors.map(() => '?').join(',');
-      query += ` AND (
-        LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) IN (${vendorPlaceholders})
-        OR LOWER(REPLACE(REPLACE(vendor, '_', ' '), '  ', ' ')) IN (${vendorPlaceholders})
-      )`;
-      params.push(...normalizedVendors, ...normalizedVendors);
+      query += ` AND LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) IN (${vendorPlaceholders})`;
+      params.push(...normalizedVendors);
     } else {
       // vendorAccess === '*' - Full access (developer account)
       // Role-based filtering for admins/AP
