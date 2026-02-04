@@ -299,19 +299,29 @@ export async function detectVendor(base64Images: string[]): Promise<string> {
  */
 export async function detectMultipleInvoices(base64Images: string[]): Promise<{ count: number; invoiceNumbers: string[] | null }> {
   try {
-    console.log('[PCS-AI] Checking for multiple invoices in document...');
+    console.log('[PCS-AI] Checking for multiple invoices in document...', { imageCount: base64Images.length });
+    
+    const messages = [
+      {
+        role: 'user' as const,
+        content: [
+          { type: 'text' as const, text: MULTI_INVOICE_DETECTION_PROMPT },
+          ...formatImagesForOpenAI(base64Images, 'low')
+        ]
+      }
+    ];
+    
+    console.log('[PCS-AI] Calling OpenAI for multi-invoice detection...');
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
-      max_completion_tokens: 1000, // Increased for more complex documents
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: MULTI_INVOICE_DETECTION_PROMPT },
-            ...formatImagesForOpenAI(base64Images, 'low')
-          ]
-        }
-      ]
+      max_tokens: 1000, // Use max_tokens for broader compatibility
+      messages
+    });
+
+    console.log('[PCS-AI] OpenAI response received:', {
+      finishReason: response.choices[0]?.finish_reason,
+      hasContent: !!response.choices[0]?.message?.content,
+      contentLength: response.choices[0]?.message?.content?.length || 0
     });
 
     const rawResponse = response.choices[0]?.message?.content?.trim() || '';
