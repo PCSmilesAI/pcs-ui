@@ -1743,12 +1743,12 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         userComment: updateComment.trim() || undefined
       });
 
-      // csrfClient returns { ok, status, data, error } not a Response object
+      // csrfClient returns { ok, status, data, error, errorData } not a Response object
       if (!response.ok) {
         // Check for duplicate invoice error (409 Conflict)
-        if (response.status === 409 && response.data?.existingInvoiceId) {
-          console.log('⚠️ Duplicate invoice detected:', response.data.existingInvoiceId);
-          setDuplicateInvoiceId(response.data.existingInvoiceId);
+        if (response.status === 409 && response.errorData?.existingInvoiceId) {
+          console.log('⚠️ Duplicate invoice detected:', response.errorData.existingInvoiceId);
+          setDuplicateInvoiceId(response.errorData.existingInvoiceId);
           // Store the pending update data for retry
           setPendingUpdateData({
             vendor_name: details.vendor,
