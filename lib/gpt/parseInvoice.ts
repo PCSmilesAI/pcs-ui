@@ -302,7 +302,7 @@ export async function detectMultipleInvoices(base64Images: string[]): Promise<{ 
     console.log('[PCS-AI] Checking for multiple invoices in document...');
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
-      max_completion_tokens: 500,
+      max_completion_tokens: 1000, // Increased for more complex documents
       messages: [
         {
           role: 'user',
@@ -315,20 +315,52 @@ export async function detectMultipleInvoices(base64Images: string[]): Promise<{ 
     });
 
     const rawResponse = response.choices[0]?.message?.content?.trim() || '';
+    console.log('[PCS-AI] Multi-invoice detection raw response:', rawResponse.substring(0, 500));
     
-    // Parse JSON response
+    if (!rawResponse) {
+      console.warn('[PCS-AI] Empty response from multi-invoice detection');
+      return { count: 1, invoiceNumbers: null };
+    }
+    
+    // Parse JSON response - try multiple extraction methods
     let jsonStr = rawResponse;
+    
+    // Method 1: Extract from markdown code block
     const jsonMatch = rawResponse.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (jsonMatch) {
       jsonStr = jsonMatch[1];
     }
     
-    const parsed = JSON.parse(jsonStr.trim());
-    const count = typeof parsed.invoice_count === 'number' ? parsed.invoice_count : 1;
-    const invoiceNumbers = Array.isArray(parsed.invoice_numbers_found) ? parsed.invoice_numbers_found : null;
+    // Method 2: Find JSON object directly
+    if (!jsonMatch) {
+      const jsonObjectMatch = rawResponse.match(/\{[\s\S]*\}/);
+      if (jsonObjectMatch) {
+        jsonStr = jsonObjectMatch[0];
+      }
+    }
     
-    console.log('[PCS-AI] Multi-invoice detection result:', { count, invoiceNumbers, reasoning: parsed.reasoning });
-    return { count, invoiceNumbers };
+    try {
+      const parsed = JSON.parse(jsonStr.trim());
+      const count = typeof parsed.invoice_count === 'number' ? parsed.invoice_count : 1;
+      const invoiceNumbers = Array.isArray(parsed.invoice_numbers_found) ? parsed.invoice_numbers_found : null;
+      
+      console.log('[PCS-AI] Multi-invoice detection result:', { count, invoiceNumbers, reasoning: parsed.reasoning });
+      return { count, invoiceNumbers };
+    } catch (parseErr: any) {
+      // Try to extract count from text if JSON parsing fails
+      console.warn('[PCS-AI] JSON parse failed, trying text extraction:', parseErr.message);
+      
+      // Look for patterns like "invoice_count": 3 or "3 invoices"
+      const countMatch = rawResponse.match(/invoice_count["\s:]+(\d+)/i) || 
+                         rawResponse.match(/(\d+)\s*(?:distinct\s+)?invoices?/i);
+      if (countMatch) {
+        const count = parseInt(countMatch[1], 10);
+        console.log('[PCS-AI] Extracted count from text:', count);
+        return { count, invoiceNumbers: null };
+      }
+      
+      return { count: 1, invoiceNumbers: null };
+    }
   } catch (error: any) {
     console.error('[PCS-AI] Multi-invoice detection error:', error.message);
     // Default to single invoice on error
