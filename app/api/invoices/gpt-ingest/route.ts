@@ -264,27 +264,35 @@ export async function POST(req: NextRequest) {
         const normalizedInvoiceDate = normalizeDateForStorage(parsed.invoice_date);
         const normalizedDueDate = normalizeDateForStorage(parsed.due_date);
         
-        // Insert invoice with document group info
-        db.prepare(`
-          INSERT INTO invoices (
-            id, invoice_number, source_file,
-            parsed_vendor_name, parsed_office_id, parsed_amount_cents,
-            vendor_name, office_id, amount_cents,
-            status, approvals, deleted,
-            invoice_date, due_date, office_location, pdf_path,
-            parsing_status, parsing_error, parse_attempts,
-            document_group_id, document_invoice_index, document_invoice_total
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
-          id, invoiceNumber, sourceFile,
-          normalizedVendor, parsed.office_location, amountCents,
-          normalizedVendor, parsed.office_location, amountCents,
-          'incoming', JSON.stringify({}), 0,
-          normalizedInvoiceDate, normalizedDueDate, parsed.office_location,
-          buildApiPdfPath(normalizedPdfFilename),
-          parsingStatus, parsingError, 1,
-          documentGroupId, invoiceIndex, totalInvoicesInDoc
-        );
+        // Insert invoice with document group info - handle UNIQUE constraint gracefully
+        try {
+          db.prepare(`
+            INSERT INTO invoices (
+              id, invoice_number, source_file,
+              parsed_vendor_name, parsed_office_id, parsed_amount_cents,
+              vendor_name, office_id, amount_cents,
+              status, approvals, deleted,
+              invoice_date, due_date, office_location, pdf_path,
+              parsing_status, parsing_error, parse_attempts,
+              document_group_id, document_invoice_index, document_invoice_total
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).run(
+            id, invoiceNumber, sourceFile,
+            normalizedVendor, parsed.office_location, amountCents,
+            normalizedVendor, parsed.office_location, amountCents,
+            'incoming', JSON.stringify({}), 0,
+            normalizedInvoiceDate, normalizedDueDate, parsed.office_location,
+            buildApiPdfPath(normalizedPdfFilename),
+            parsingStatus, parsingError, 1,
+            documentGroupId, invoiceIndex, totalInvoicesInDoc
+          );
+        } catch (insertErr: any) {
+          if (insertErr.message?.includes('UNIQUE constraint')) {
+            console.warn(`[PCS_AI_INGEST] Invoice ${invoiceNumber} already exists, skipping (UNIQUE constraint)`);
+            continue; // Skip this invoice, it already exists in DB
+          }
+          throw insertErr; // Re-throw non-UNIQUE errors
+        }
         
         // Audit event
         db.prepare(`
