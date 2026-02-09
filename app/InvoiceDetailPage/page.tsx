@@ -261,6 +261,10 @@ function InvoiceDetailContent() {
             parsing_status: foundInvoice.parsing_status,
             parsing_error: foundInvoice.parsing_error,
             parse_attempts: foundInvoice.parse_attempts,
+            // Multi-invoice document tracking
+            document_group_id: foundInvoice.document_group_id,
+            document_invoice_index: foundInvoice.document_invoice_index,
+            document_invoice_total: foundInvoice.document_invoice_total,
           };
           setInvoice(transformedInvoice);
         } else {
