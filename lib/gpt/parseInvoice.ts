@@ -301,7 +301,7 @@ async function classifySinglePage(
   try {
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
-      max_completion_tokens: 150,
+      max_completion_tokens: 200,
       messages: [
         {
           role: 'user',
@@ -316,7 +316,19 @@ async function classifySinglePage(
       ]
     });
 
+    const finishReason = response.choices[0]?.finish_reason;
     const rawResponse = response.choices[0]?.message?.content?.trim() || '';
+    
+    // Log details for debugging
+    console.log(`[PCS-AI] Page ${pageIndex + 1} classification: finishReason=${finishReason}, responseLen=${rawResponse.length}, response=${rawResponse.substring(0, 200)}`);
+    
+    // If response was truncated or empty, the model may have hit token limits
+    if (!rawResponse || finishReason === 'length') {
+      console.warn(`[PCS-AI] Page ${pageIndex + 1}: empty/truncated response (finishReason=${finishReason})`);
+      // For empty responses, assume new invoice (safer for TC Dental where each page IS a separate invoice)
+      return { isNewInvoice: true, invoiceNumber: null, confidence: 0.3 };
+    }
+    
     const parsed = extractJsonFromResponse(rawResponse);
     
     if (parsed && typeof parsed.is_new_invoice === 'boolean') {
@@ -327,20 +339,25 @@ async function classifySinglePage(
       };
     }
     
-    // If parsing fails, try to detect from text
+    // If JSON parsing fails, try to detect from raw text
     const lowerResponse = rawResponse.toLowerCase();
-    if (lowerResponse.includes('"is_new_invoice": true') || lowerResponse.includes('"is_new_invoice":true')) {
-      return { isNewInvoice: true, invoiceNumber: null, confidence: 0.5 };
+    if (lowerResponse.includes('"is_new_invoice": true') || lowerResponse.includes('"is_new_invoice":true') || lowerResponse.includes('true')) {
+      const invNumMatch = rawResponse.match(/invoice_number["\s:]+["']?([^"'\s,}]+)/i);
+      return { isNewInvoice: true, invoiceNumber: invNumMatch ? invNumMatch[1] : null, confidence: 0.5 };
+    }
+    if (lowerResponse.includes('"is_new_invoice": false') || lowerResponse.includes('"is_new_invoice":false')) {
+      return { isNewInvoice: false, invoiceNumber: null, confidence: 0.5 };
     }
     
-    // Default to continuation (safer: avoids creating phantom invoices)
-    console.warn(`[PCS-AI] Page ${pageIndex + 1}: classification parse failed, defaulting to continuation`);
-    return { isNewInvoice: false, invoiceNumber: null, confidence: 0.3 };
+    // Default: if we can't tell, assume new invoice for dental invoices
+    // (each page typically IS a separate invoice for TC Dental)
+    console.warn(`[PCS-AI] Page ${pageIndex + 1}: classification parse failed, raw="${rawResponse.substring(0, 100)}", defaulting to new invoice`);
+    return { isNewInvoice: true, invoiceNumber: null, confidence: 0.2 };
     
   } catch (error: any) {
     console.error(`[PCS-AI] Page ${pageIndex + 1}: classification error:`, error.message);
-    // Default to continuation on error
-    return { isNewInvoice: false, invoiceNumber: null, confidence: 0 };
+    // Default to new invoice on error (safer for multi-invoice documents)
+    return { isNewInvoice: true, invoiceNumber: null, confidence: 0 };
   }
 }
 
