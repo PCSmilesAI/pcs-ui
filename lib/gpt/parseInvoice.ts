@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { execSync } from 'child_process';
 import { convertPdfToBase64Images, formatImagesForOpenAI } from './pdfToImages';
 import { getKnowledgeBase, getOrCreateKnowledgeBase, getTrainingPrompt, getMasterParsingPrompt, upsertKnowledgeBase } from './knowledgeBase';
 import { getRecentHistory, formatHistoryForPrompt, addToHistory, MAX_HISTORY_EXAMPLES, type HistoricalInvoice } from './vendorHistory';
@@ -207,26 +208,26 @@ Look for:
 Return ONLY the vendor name as a single line of text. Do not include any explanation.
 If you cannot determine the vendor, respond with "Unknown".`;
 
-// Page classification prompt - determines if each page starts a new invoice or continues the previous one
-const PAGE_CLASSIFICATION_PROMPT = `You are analyzing a single page from a PDF document that may contain multiple invoices.
+// Text-based page classification prompt - determines which pages start new invoices
+// Uses extracted text instead of images to avoid vision token limits
+const PAGE_CLASSIFICATION_PROMPT = `You are analyzing the extracted text from each page of a PDF document that contains one or more invoices.
 
-Determine if this page is the FIRST page of a NEW invoice or a CONTINUATION of the previous invoice.
+Determine which pages are the FIRST page of a NEW invoice.
 
-Signs this is the FIRST page of a NEW invoice:
-- Has a company logo or header at the top
-- Has an "INVOICE" or "DELIVERY SLIP" title/header
-- Has a distinct invoice number
-- Has invoice date, "Bill To", "Ship To", or patient sections
-- Starts with a clean new document layout, not a continuation
+Signs a page starts a NEW invoice:
+- Has a company header/name near the top (e.g., "TC Dental Laboratory", vendor name)
+- Has "INVOICE" or "DELIVERY SLIP" as a title
+- Has a distinct invoice number (e.g., "Invoice Number: 260-447")
+- Has invoice date, "Bill To", "Ship To" sections
+- Each distinct invoice number = a distinct invoice
 
-Signs this is a CONTINUATION of the previous page:
-- Continues line items or data from a previous page
-- Shows "Page 2 of 2" or similar pagination within one invoice
-- Has a subtotal/total that summarizes previously listed items
-- No new invoice header or invoice number at the top
+Signs a page is a CONTINUATION:
+- Continues line items from previous page
+- Shows "Page 2 of 2" pagination
+- No new invoice header or number
 
-Return ONLY a JSON object (no explanation text):
-{"is_new_invoice": true, "invoice_number": "detected number or null", "confidence": 0.9}`;
+Return ONLY a JSON object:
+{"page_starts": [1, 2, 4, 7], "invoice_count": 4, "reasoning": "brief explanation"}`;
 
 /**
  * Detect the vendor from invoice images (uses only first page to stay within token limits)
@@ -291,148 +292,169 @@ function extractJsonFromResponse(rawResponse: string): any | null {
 }
 
 /**
- * Classify a single page: is it the first page of a new invoice, or a continuation?
+ * Extract text from a PDF per page using pdftotext.
+ * Returns an array of strings, one per page.
  */
-async function classifySinglePage(
-  base64Image: string,
-  pageIndex: number,
-  totalPages: number
-): Promise<{ isNewInvoice: boolean; invoiceNumber: string | null; confidence: number }> {
+function extractTextPerPage(pdfPath: string): string[] {
   try {
-    const response = await getOpenAIClient().chat.completions.create({
-      model: GPT_MODEL,
-      max_completion_tokens: 200,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { 
-              type: 'text', 
-              text: PAGE_CLASSIFICATION_PROMPT + `\n\nThis is page ${pageIndex + 1} of ${totalPages} in the document.` 
-            },
-            ...formatImagesForOpenAI([base64Image], 'low')
-          ]
-        }
-      ]
+    const text = execSync(`pdftotext -layout "${pdfPath}" -`, {
+      encoding: 'utf-8',
+      timeout: 30000,
+      stdio: ['pipe', 'pipe', 'pipe']
     });
-
-    const finishReason = response.choices[0]?.finish_reason;
-    const rawResponse = response.choices[0]?.message?.content?.trim() || '';
     
-    // Log details for debugging
-    console.log(`[PCS-AI] Page ${pageIndex + 1} classification: finishReason=${finishReason}, responseLen=${rawResponse.length}, response=${rawResponse.substring(0, 200)}`);
-    
-    // If response was truncated or empty, the model may have hit token limits
-    if (!rawResponse || finishReason === 'length') {
-      console.warn(`[PCS-AI] Page ${pageIndex + 1}: empty/truncated response (finishReason=${finishReason})`);
-      // For empty responses, assume new invoice (safer for TC Dental where each page IS a separate invoice)
-      return { isNewInvoice: true, invoiceNumber: null, confidence: 0.3 };
-    }
-    
-    const parsed = extractJsonFromResponse(rawResponse);
-    
-    if (parsed && typeof parsed.is_new_invoice === 'boolean') {
-      return {
-        isNewInvoice: parsed.is_new_invoice,
-        invoiceNumber: parsed.invoice_number || null,
-        confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5
-      };
-    }
-    
-    // If JSON parsing fails, try to detect from raw text
-    const lowerResponse = rawResponse.toLowerCase();
-    if (lowerResponse.includes('"is_new_invoice": true') || lowerResponse.includes('"is_new_invoice":true') || lowerResponse.includes('true')) {
-      const invNumMatch = rawResponse.match(/invoice_number["\s:]+["']?([^"'\s,}]+)/i);
-      return { isNewInvoice: true, invoiceNumber: invNumMatch ? invNumMatch[1] : null, confidence: 0.5 };
-    }
-    if (lowerResponse.includes('"is_new_invoice": false') || lowerResponse.includes('"is_new_invoice":false')) {
-      return { isNewInvoice: false, invoiceNumber: null, confidence: 0.5 };
-    }
-    
-    // Default: if we can't tell, assume new invoice for dental invoices
-    // (each page typically IS a separate invoice for TC Dental)
-    console.warn(`[PCS-AI] Page ${pageIndex + 1}: classification parse failed, raw="${rawResponse.substring(0, 100)}", defaulting to new invoice`);
-    return { isNewInvoice: true, invoiceNumber: null, confidence: 0.2 };
-    
+    // pdftotext separates pages with form feed character (\f)
+    const pages = text.split('\f').filter(p => p.trim().length > 0);
+    return pages;
   } catch (error: any) {
-    console.error(`[PCS-AI] Page ${pageIndex + 1}: classification error:`, error.message);
-    // Default to new invoice on error (safer for multi-invoice documents)
-    return { isNewInvoice: true, invoiceNumber: null, confidence: 0 };
+    console.warn('[PCS-AI] pdftotext extraction failed:', error.message);
+    return [];
   }
 }
 
 /**
  * Classify all pages in a document to determine invoice boundaries.
+ * Uses text extraction + a single GPT text-only call (no images) to avoid vision token limits.
  * Returns page clusters: each cluster is an array of page indices belonging to one invoice.
  * Example: [[0], [1], [2,3], [4]] means 4 invoices, where the 3rd spans pages 3-4.
  */
-export async function classifyDocumentPages(base64Images: string[]): Promise<number[][]> {
+export async function classifyDocumentPages(pdfPath: string, totalPages: number): Promise<number[][]> {
   // Single page = single invoice cluster
-  if (base64Images.length <= 1) {
+  if (totalPages <= 1) {
     return [[0]];
   }
 
-  console.log(`[PCS-AI] Classifying ${base64Images.length} pages for invoice boundaries...`);
+  console.log(`[PCS-AI] Classifying ${totalPages} pages for invoice boundaries using text extraction...`);
 
-  // Page 0 is always a new invoice
-  const classifications: Array<{ pageIndex: number; isNewInvoice: boolean; invoiceNumber: string | null }> = [
-    { pageIndex: 0, isNewInvoice: true, invoiceNumber: null }
-  ];
-
-  // Classify remaining pages in parallel batches for speed
-  const CLASSIFICATION_BATCH_SIZE = 5;
+  // Extract text from each page
+  const pageTexts = extractTextPerPage(pdfPath);
   
-  for (let batchStart = 1; batchStart < base64Images.length; batchStart += CLASSIFICATION_BATCH_SIZE) {
-    const batchEnd = Math.min(batchStart + CLASSIFICATION_BATCH_SIZE, base64Images.length);
-    const batchPromises: Promise<{ pageIndex: number; isNewInvoice: boolean; invoiceNumber: string | null }>[] = [];
-    
-    for (let i = batchStart; i < batchEnd; i++) {
-      const pageIdx = i;
-      batchPromises.push(
-        classifySinglePage(base64Images[pageIdx], pageIdx, base64Images.length)
-          .then(result => ({
-            pageIndex: pageIdx,
-            isNewInvoice: result.isNewInvoice,
-            invoiceNumber: result.invoiceNumber
-          }))
-      );
-    }
-    
-    const batchResults = await Promise.all(batchPromises);
-    // Sort by page index to maintain order
-    batchResults.sort((a, b) => a.pageIndex - b.pageIndex);
-    classifications.push(...batchResults);
+  if (pageTexts.length === 0) {
+    console.warn('[PCS-AI] No text extracted from PDF, defaulting to one invoice per page');
+    // If we can't extract text, assume each page is a separate invoice
+    // (safer for TC Dental-style documents)
+    return Array.from({ length: totalPages }, (_, i) => [i]);
   }
 
-  // Build page clusters from classifications
-  const clusters: number[][] = [];
-  let currentCluster: number[] = [];
-  
-  for (const c of classifications) {
-    if (c.isNewInvoice) {
-      if (currentCluster.length > 0) {
-        clusters.push(currentCluster);
+  // Build a condensed text summary for each page (limit to ~400 chars per page to stay within token limits)
+  const pageSummaries = pageTexts.map((text, i) => {
+    const trimmed = text.trim().substring(0, 400);
+    return `=== PAGE ${i + 1} ===\n${trimmed}`;
+  }).join('\n\n');
+
+  console.log(`[PCS-AI] Extracted text from ${pageTexts.length} pages, sending for classification...`);
+
+  try {
+    // Single text-only GPT call - no images, no token limit issues
+    const response = await getOpenAIClient().chat.completions.create({
+      model: GPT_MODEL,
+      max_completion_tokens: 1000,
+      messages: [
+        {
+          role: 'user',
+          content: PAGE_CLASSIFICATION_PROMPT + `\n\nThe document has ${totalPages} pages total. Here is the extracted text:\n\n${pageSummaries}`
+        }
+      ]
+    });
+
+    const rawResponse = response.choices[0]?.message?.content?.trim() || '';
+    console.log(`[PCS-AI] Page classification response (${rawResponse.length} chars):`, rawResponse.substring(0, 300));
+
+    const parsed = extractJsonFromResponse(rawResponse);
+    
+    if (parsed && Array.isArray(parsed.page_starts) && parsed.page_starts.length > 0) {
+      // Convert 1-indexed page_starts to 0-indexed clusters
+      const pageStarts = parsed.page_starts
+        .map((p: number) => p - 1) // Convert to 0-indexed
+        .filter((p: number) => p >= 0 && p < totalPages)
+        .sort((a: number, b: number) => a - b);
+      
+      // Ensure page 0 is always a start
+      if (!pageStarts.includes(0)) {
+        pageStarts.unshift(0);
       }
-      currentCluster = [c.pageIndex];
-    } else {
-      currentCluster.push(c.pageIndex);
+      
+      // Build clusters from page starts
+      const clusters: number[][] = [];
+      for (let i = 0; i < pageStarts.length; i++) {
+        const start = pageStarts[i];
+        const end = i + 1 < pageStarts.length ? pageStarts[i + 1] : totalPages;
+        const cluster: number[] = [];
+        for (let p = start; p < end; p++) {
+          cluster.push(p);
+        }
+        clusters.push(cluster);
+      }
+      
+      console.log(`[PCS-AI] Page classification complete:`, {
+        totalPages,
+        invoicesFound: clusters.length,
+        clusters: clusters.map(c => c.map(p => p + 1)),
+        reasoning: parsed.reasoning
+      });
+      
+      return clusters;
+    }
+    
+    // If response parsing failed but we got an invoice_count, infer page starts
+    if (parsed && typeof parsed.invoice_count === 'number' && parsed.invoice_count > 1) {
+      console.log(`[PCS-AI] Got invoice_count=${parsed.invoice_count} but no page_starts, assuming 1 page per invoice`);
+      const count = Math.min(parsed.invoice_count, totalPages);
+      return Array.from({ length: count }, (_, i) => [i]);
+    }
+
+    console.warn('[PCS-AI] Could not parse page classification response, falling back to text heuristic');
+  } catch (error: any) {
+    console.error('[PCS-AI] GPT page classification error:', error.message);
+  }
+
+  // Fallback: use text-based heuristic to find invoice boundaries
+  console.log('[PCS-AI] Using text heuristic for page classification...');
+  return classifyPagesByTextHeuristic(pageTexts, totalPages);
+}
+
+/**
+ * Fallback text heuristic for page classification when GPT call fails.
+ * Looks for invoice-like headers on each page.
+ */
+function classifyPagesByTextHeuristic(pageTexts: string[], totalPages: number): number[][] {
+  const invoicePatterns = [
+    /\binvoice\b/i,
+    /\bdelivery\s+slip\b/i,
+    /\binvoice\s*(number|#|no\.?)\s*[:.]?\s*\d/i,
+    /\bstatement\b/i,
+  ];
+  
+  const pageStarts: number[] = [0]; // Page 0 always starts an invoice
+  
+  for (let i = 1; i < pageTexts.length; i++) {
+    const pageText = pageTexts[i].substring(0, 300); // Check first 300 chars
+    const matchCount = invoicePatterns.filter(p => p.test(pageText)).length;
+    
+    // If 2+ patterns match, this page likely starts a new invoice
+    if (matchCount >= 2) {
+      pageStarts.push(i);
     }
   }
-  if (currentCluster.length > 0) {
-    clusters.push(currentCluster);
+  
+  // Build clusters
+  const clusters: number[][] = [];
+  for (let i = 0; i < pageStarts.length; i++) {
+    const start = pageStarts[i];
+    const end = i + 1 < pageStarts.length ? pageStarts[i + 1] : totalPages;
+    const cluster: number[] = [];
+    for (let p = start; p < end; p++) {
+      cluster.push(p);
+    }
+    clusters.push(cluster);
   }
-
-  // Log results
-  const invoiceNumbers = classifications
-    .filter(c => c.isNewInvoice && c.invoiceNumber)
-    .map(c => c.invoiceNumber);
-  console.log(`[PCS-AI] Page classification complete:`, {
-    totalPages: base64Images.length,
+  
+  console.log(`[PCS-AI] Text heuristic classification:`, {
+    totalPages,
     invoicesFound: clusters.length,
-    clusters: clusters.map(c => c.map(p => p + 1)), // 1-indexed for readability
-    invoiceNumbers
+    clusters: clusters.map(c => c.map(p => p + 1))
   });
-
+  
   return clusters;
 }
 
@@ -556,9 +578,9 @@ export async function parseInvoiceWithGPT(
     }
 
     // Check for multiple invoices in document (unless explicitly skipped)
-    // Uses page-by-page classification to detect invoice boundaries reliably
+    // Uses text extraction + GPT to classify page boundaries (no vision needed)
     if (!skipMultiInvoiceDetection && base64Images.length > 1) {
-      const pageClusters = await classifyDocumentPages(base64Images);
+      const pageClusters = await classifyDocumentPages(pdfPath, base64Images.length);
       
       if (pageClusters.length > 1) {
         console.log(`[PCS-AI] Document contains ${pageClusters.length} invoices across ${base64Images.length} pages - parsing each cluster`);
