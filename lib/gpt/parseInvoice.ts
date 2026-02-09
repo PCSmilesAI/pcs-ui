@@ -207,71 +207,34 @@ Look for:
 Return ONLY the vendor name as a single line of text. Do not include any explanation.
 If you cannot determine the vendor, respond with "Unknown".`;
 
-// Multi-invoice detection prompt
-const MULTI_INVOICE_DETECTION_PROMPT = `You are analyzing a document that may contain one or more invoices.
+// Page classification prompt - determines if each page starts a new invoice or continues the previous one
+const PAGE_CLASSIFICATION_PROMPT = `You are analyzing a single page from a PDF document that may contain multiple invoices.
 
-Carefully examine ALL pages of this document and count how many DISTINCT invoices are present.
+Determine if this page is the FIRST page of a NEW invoice or a CONTINUATION of the previous invoice.
 
-Signs of multiple invoices in one document:
-- Multiple different invoice numbers
-- Multiple "Invoice" headers or titles
-- Multiple invoice date sections
-- Different billing periods or statement dates
-- Clear page breaks between separate invoices
-- Multiple "Total" or "Amount Due" sections with different amounts
+Signs this is the FIRST page of a NEW invoice:
+- Has a company logo or header at the top
+- Has an "INVOICE" or "DELIVERY SLIP" title/header
+- Has a distinct invoice number
+- Has invoice date, "Bill To", "Ship To", or patient sections
+- Starts with a clean new document layout, not a continuation
 
-IMPORTANT: A multi-page invoice with line items spanning pages is still ONE invoice.
-Only count as separate invoices if they have DIFFERENT invoice numbers or are clearly distinct documents.
+Signs this is a CONTINUATION of the previous page:
+- Continues line items or data from a previous page
+- Shows "Page 2 of 2" or similar pagination within one invoice
+- Has a subtotal/total that summarizes previously listed items
+- No new invoice header or invoice number at the top
 
-Return ONLY a JSON object in this exact format:
-{
-  "invoice_count": <number>,
-  "invoice_numbers_found": ["INV-001", "INV-002", ...] or null if not detected,
-  "reasoning": "brief explanation of why you counted this many"
-}`;
-
-// Multi-invoice parsing prompt - extracts all invoices from a document
-const MULTI_INVOICE_PARSING_PROMPT = `You are parsing a document that contains MULTIPLE invoices.
-
-Extract data for EACH invoice in the document. Return a JSON object with an "invoices" array.
-
-EXTRACTION SCHEMA - Return a JSON object with this structure:
-{
-  "invoices": [
-    {
-      "invoice_number": "string or null",
-      "invoice_date": "MM/DD/YYYY or null",
-      "due_date": "MM/DD/YYYY or null",
-      "vendor_name": "string or null",
-      "total": number or null (as decimal, e.g., 1234.56),
-      "office_location": "string or null",
-      "line_items": [
-        {
-          "description": "string",
-          "quantity": number or null,
-          "unit_price": number or null,
-          "amount": number or null
-        }
-      ],
-      "parsing_confidence": number between 0 and 1
-    }
-  ]
-}
-
-IMPORTANT RULES:
-- Return ONLY valid JSON, no explanation text
-- Include ALL invoices found in the document
-- Each invoice should have its own complete data extracted
-- Amounts should be numbers without currency symbols or commas
-- Dates MUST be in MM/DD/YYYY format
-- parsing_confidence: 1.0 = very confident, 0.5 = uncertain, 0.0 = guessing
-`;
+Return ONLY a JSON object (no explanation text):
+{"is_new_invoice": true, "invoice_number": "detected number or null", "confidence": 0.9}`;
 
 /**
- * Detect the vendor from invoice images
+ * Detect the vendor from invoice images (uses only first page to stay within token limits)
  */
 export async function detectVendor(base64Images: string[]): Promise<string> {
   try {
+    // Only use first page for vendor detection - vendor info is always on page 1
+    const imagesToUse = base64Images.slice(0, 1);
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
       max_completion_tokens: 100,
@@ -280,7 +243,7 @@ export async function detectVendor(base64Images: string[]): Promise<string> {
           role: 'user',
           content: [
             { type: 'text', text: VENDOR_DETECTION_PROMPT },
-            ...formatImagesForOpenAI(base64Images)
+            ...formatImagesForOpenAI(imagesToUse)
           ]
         }
       ]
@@ -294,180 +257,228 @@ export async function detectVendor(base64Images: string[]): Promise<string> {
   }
 }
 
+// ============================================================================
+// Multi-Invoice Detection: Page-by-Page Classification
+// ============================================================================
+
 /**
- * Detect if document contains multiple invoices
+ * Helper to extract JSON from a GPT response (handles markdown code blocks, raw JSON, etc.)
  */
-export async function detectMultipleInvoices(base64Images: string[]): Promise<{ count: number; invoiceNumbers: string[] | null }> {
+function extractJsonFromResponse(rawResponse: string): any | null {
+  if (!rawResponse || rawResponse.trim().length === 0) return null;
+  
+  let jsonStr = rawResponse.trim();
+  
+  // Method 1: Extract from markdown code block
+  const codeBlockMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeBlockMatch) {
+    jsonStr = codeBlockMatch[1].trim();
+  }
+  
+  // Method 2: Find JSON object directly
+  if (!codeBlockMatch) {
+    const objectMatch = jsonStr.match(/\{[\s\S]*\}/);
+    if (objectMatch) {
+      jsonStr = objectMatch[0];
+    }
+  }
+  
   try {
-    // Analyze first 3 pages - invoice headers typically appear on first page of each invoice
-    // With typical 1-2 pages per invoice, 3 pages should catch most multi-invoice scenarios
-    // More than 3 images causes token limit issues with the model
-    const maxPagesToAnalyze = Math.min(3, base64Images.length);
-    const imagesToAnalyze = base64Images.slice(0, maxPagesToAnalyze);
-    console.log('[PCS-AI] Checking for multiple invoices in document...', { 
-      totalPages: base64Images.length, 
-      pagesAnalyzing: imagesToAnalyze.length 
-    });
-    
-    // Add context about pages being shown
-    const pageNote = imagesToAnalyze.length < base64Images.length 
-      ? `\n\nNOTE: You are seeing the first ${imagesToAnalyze.length} of ${base64Images.length} total pages. Each invoice typically starts on a new page. Count ALL distinct invoice numbers you see - if you see 3 different invoice numbers, report invoice_count: 3.`
-      : `\n\nYou are seeing all ${base64Images.length} pages of this document. Count ALL distinct invoices carefully.`;
-    
-    const messages = [
-      {
-        role: 'user' as const,
-        content: [
-          { type: 'text' as const, text: MULTI_INVOICE_DETECTION_PROMPT + pageNote },
-          ...formatImagesForOpenAI(imagesToAnalyze, 'low')
-        ]
-      }
-    ];
-    
-    console.log('[PCS-AI] Calling OpenAI for multi-invoice detection...');
-    const response = await getOpenAIClient().chat.completions.create({
-      model: GPT_MODEL,
-      max_completion_tokens: 1000, // GPT-5 Nano uses max_completion_tokens
-      messages
-    });
-
-    console.log('[PCS-AI] OpenAI response received:', {
-      finishReason: response.choices[0]?.finish_reason,
-      hasContent: !!response.choices[0]?.message?.content,
-      contentLength: response.choices[0]?.message?.content?.length || 0
-    });
-
-    const rawResponse = response.choices[0]?.message?.content?.trim() || '';
-    console.log('[PCS-AI] Multi-invoice detection raw response:', rawResponse.substring(0, 500));
-    
-    if (!rawResponse) {
-      console.warn('[PCS-AI] Empty response from multi-invoice detection');
-      return { count: 1, invoiceNumbers: null };
-    }
-    
-    // Parse JSON response - try multiple extraction methods
-    let jsonStr = rawResponse;
-    
-    // Method 1: Extract from markdown code block
-    const jsonMatch = rawResponse.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1];
-    }
-    
-    // Method 2: Find JSON object directly
-    if (!jsonMatch) {
-      const jsonObjectMatch = rawResponse.match(/\{[\s\S]*\}/);
-      if (jsonObjectMatch) {
-        jsonStr = jsonObjectMatch[0];
-      }
-    }
-    
-    try {
-      const parsed = JSON.parse(jsonStr.trim());
-      const count = typeof parsed.invoice_count === 'number' ? parsed.invoice_count : 1;
-      const invoiceNumbers = Array.isArray(parsed.invoice_numbers_found) ? parsed.invoice_numbers_found : null;
-      
-      console.log('[PCS-AI] Multi-invoice detection result:', { count, invoiceNumbers, reasoning: parsed.reasoning });
-      return { count, invoiceNumbers };
-    } catch (parseErr: any) {
-      // Try to extract count from text if JSON parsing fails
-      console.warn('[PCS-AI] JSON parse failed, trying text extraction:', parseErr.message);
-      
-      // Look for patterns like "invoice_count": 3 or "3 invoices"
-      const countMatch = rawResponse.match(/invoice_count["\s:]+(\d+)/i) || 
-                         rawResponse.match(/(\d+)\s*(?:distinct\s+)?invoices?/i);
-      if (countMatch) {
-        const count = parseInt(countMatch[1], 10);
-        console.log('[PCS-AI] Extracted count from text:', count);
-        return { count, invoiceNumbers: null };
-      }
-      
-      return { count: 1, invoiceNumbers: null };
-    }
-  } catch (error: any) {
-    console.error('[PCS-AI] Multi-invoice detection error:', error.message);
-    // Default to single invoice on error
-    return { count: 1, invoiceNumbers: null };
+    return JSON.parse(jsonStr);
+  } catch {
+    return null;
   }
 }
 
 /**
- * Parse multiple invoices from a single document
+ * Classify a single page: is it the first page of a new invoice, or a continuation?
  */
-async function parseMultipleInvoices(
-  base64Images: string[],
-  vendorName: string | null,
-  expectedCount: number
-): Promise<ParsedInvoice[]> {
+async function classifySinglePage(
+  base64Image: string,
+  pageIndex: number,
+  totalPages: number
+): Promise<{ isNewInvoice: boolean; invoiceNumber: string | null; confidence: number }> {
   try {
-    console.log(`[PCS-AI] Parsing ${expectedCount} invoices from document...`);
-    
-    // Build system prompt for multi-invoice parsing
-    let systemPrompt = MULTI_INVOICE_PARSING_PROMPT;
-    
-    // Add vendor context if known
-    if (vendorName && vendorName !== 'Unknown') {
-      systemPrompt += `\n\nKnown vendor: ${vendorName}`;
-    }
-    
-    systemPrompt += `\n\nExpected number of invoices: ${expectedCount}`;
-    
-    const response = await withRetry(async () => {
-      return await getOpenAIClient().chat.completions.create({
-        model: GPT_MODEL,
-        max_completion_tokens: PARSING_CONFIG.maxCompletionTokens * 2, // More tokens for multiple invoices
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: `Parse all ${expectedCount} invoices from this document. Return JSON with an "invoices" array.` },
-              ...formatImagesForOpenAI(base64Images, PARSING_CONFIG.imageDetailLevel)
-            ]
-          }
-        ]
-      });
+    const response = await getOpenAIClient().chat.completions.create({
+      model: GPT_MODEL,
+      max_completion_tokens: 150,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { 
+              type: 'text', 
+              text: PAGE_CLASSIFICATION_PROMPT + `\n\nThis is page ${pageIndex + 1} of ${totalPages} in the document.` 
+            },
+            ...formatImagesForOpenAI([base64Image], 'low')
+          ]
+        }
+      ]
     });
 
-    const rawResponse = response.choices[0]?.message?.content || '';
+    const rawResponse = response.choices[0]?.message?.content?.trim() || '';
+    const parsed = extractJsonFromResponse(rawResponse);
     
-    // Parse JSON response
-    let jsonStr = rawResponse;
-    const jsonMatch = rawResponse.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1];
+    if (parsed && typeof parsed.is_new_invoice === 'boolean') {
+      return {
+        isNewInvoice: parsed.is_new_invoice,
+        invoiceNumber: parsed.invoice_number || null,
+        confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5
+      };
     }
     
-    const parsed = JSON.parse(jsonStr.trim());
-    
-    if (!Array.isArray(parsed.invoices)) {
-      console.warn('[PCS-AI] Multi-invoice parse did not return invoices array');
-      return [];
+    // If parsing fails, try to detect from text
+    const lowerResponse = rawResponse.toLowerCase();
+    if (lowerResponse.includes('"is_new_invoice": true') || lowerResponse.includes('"is_new_invoice":true')) {
+      return { isNewInvoice: true, invoiceNumber: null, confidence: 0.5 };
     }
     
-    // Normalize each invoice
-    const invoices: ParsedInvoice[] = parsed.invoices.map((inv: any) => ({
-      invoice_number: inv.invoice_number || null,
-      invoice_date: inv.invoice_date || null,
-      due_date: inv.due_date || null,
-      vendor_name: inv.vendor_name || vendorName || null,
-      total: typeof inv.total === 'number' ? inv.total : null,
-      office_location: inv.office_location || null,
-      line_items: Array.isArray(inv.line_items) ? inv.line_items : [],
-      parsing_confidence: typeof inv.parsing_confidence === 'number' ? inv.parsing_confidence : 0.5,
-      raw_response: rawResponse
-    }));
-    
-    console.log(`[PCS-AI] Successfully parsed ${invoices.length} invoices from document`);
-    return invoices;
+    // Default to continuation (safer: avoids creating phantom invoices)
+    console.warn(`[PCS-AI] Page ${pageIndex + 1}: classification parse failed, defaulting to continuation`);
+    return { isNewInvoice: false, invoiceNumber: null, confidence: 0.3 };
     
   } catch (error: any) {
-    console.error('[PCS-AI] Multi-invoice parsing error:', error.message);
-    return [];
+    console.error(`[PCS-AI] Page ${pageIndex + 1}: classification error:`, error.message);
+    // Default to continuation on error
+    return { isNewInvoice: false, invoiceNumber: null, confidence: 0 };
   }
+}
+
+/**
+ * Classify all pages in a document to determine invoice boundaries.
+ * Returns page clusters: each cluster is an array of page indices belonging to one invoice.
+ * Example: [[0], [1], [2,3], [4]] means 4 invoices, where the 3rd spans pages 3-4.
+ */
+export async function classifyDocumentPages(base64Images: string[]): Promise<number[][]> {
+  // Single page = single invoice cluster
+  if (base64Images.length <= 1) {
+    return [[0]];
+  }
+
+  console.log(`[PCS-AI] Classifying ${base64Images.length} pages for invoice boundaries...`);
+
+  // Page 0 is always a new invoice
+  const classifications: Array<{ pageIndex: number; isNewInvoice: boolean; invoiceNumber: string | null }> = [
+    { pageIndex: 0, isNewInvoice: true, invoiceNumber: null }
+  ];
+
+  // Classify remaining pages in parallel batches for speed
+  const CLASSIFICATION_BATCH_SIZE = 5;
+  
+  for (let batchStart = 1; batchStart < base64Images.length; batchStart += CLASSIFICATION_BATCH_SIZE) {
+    const batchEnd = Math.min(batchStart + CLASSIFICATION_BATCH_SIZE, base64Images.length);
+    const batchPromises: Promise<{ pageIndex: number; isNewInvoice: boolean; invoiceNumber: string | null }>[] = [];
+    
+    for (let i = batchStart; i < batchEnd; i++) {
+      const pageIdx = i;
+      batchPromises.push(
+        classifySinglePage(base64Images[pageIdx], pageIdx, base64Images.length)
+          .then(result => ({
+            pageIndex: pageIdx,
+            isNewInvoice: result.isNewInvoice,
+            invoiceNumber: result.invoiceNumber
+          }))
+      );
+    }
+    
+    const batchResults = await Promise.all(batchPromises);
+    // Sort by page index to maintain order
+    batchResults.sort((a, b) => a.pageIndex - b.pageIndex);
+    classifications.push(...batchResults);
+  }
+
+  // Build page clusters from classifications
+  const clusters: number[][] = [];
+  let currentCluster: number[] = [];
+  
+  for (const c of classifications) {
+    if (c.isNewInvoice) {
+      if (currentCluster.length > 0) {
+        clusters.push(currentCluster);
+      }
+      currentCluster = [c.pageIndex];
+    } else {
+      currentCluster.push(c.pageIndex);
+    }
+  }
+  if (currentCluster.length > 0) {
+    clusters.push(currentCluster);
+  }
+
+  // Log results
+  const invoiceNumbers = classifications
+    .filter(c => c.isNewInvoice && c.invoiceNumber)
+    .map(c => c.invoiceNumber);
+  console.log(`[PCS-AI] Page classification complete:`, {
+    totalPages: base64Images.length,
+    invoicesFound: clusters.length,
+    clusters: clusters.map(c => c.map(p => p + 1)), // 1-indexed for readability
+    invoiceNumbers
+  });
+
+  return clusters;
+}
+
+/**
+ * Parse multiple invoices by processing each page cluster individually.
+ * Each cluster is parsed using the full single-invoice pipeline (master prompt, vendor KB, history).
+ */
+async function parseMultipleInvoicesByClusters(
+  base64Images: string[],
+  pageClusters: number[][],
+  vendorName: string | null
+): Promise<ParsedInvoice[]> {
+  console.log(`[PCS-AI] Parsing ${pageClusters.length} invoice clusters...`);
+  const results: ParsedInvoice[] = [];
+  
+  // Parse clusters in parallel batches of 3 for speed
+  const PARSE_BATCH_SIZE = 3;
+  
+  for (let batchStart = 0; batchStart < pageClusters.length; batchStart += PARSE_BATCH_SIZE) {
+    const batchEnd = Math.min(batchStart + PARSE_BATCH_SIZE, pageClusters.length);
+    const batchPromises: Promise<{ index: number; invoice: ParsedInvoice }>[] = [];
+    
+    for (let i = batchStart; i < batchEnd; i++) {
+      const cluster = pageClusters[i];
+      const clusterImages = cluster.map(pageIdx => base64Images[pageIdx]);
+      const clusterIndex = i;
+      
+      console.log(`[PCS-AI] Queuing cluster ${i + 1}/${pageClusters.length} (pages: ${cluster.map(p => p + 1).join(',')})`);
+      
+      batchPromises.push(
+        parseInvoiceFromImages(clusterImages, vendorName)
+          .then(result => {
+            if (result.success && result.data) {
+              return { index: clusterIndex, invoice: result.data };
+            }
+            console.warn(`[PCS-AI] Cluster ${clusterIndex + 1} parse failed:`, result.error);
+            // Return a minimal entry so we don't lose track
+            return {
+              index: clusterIndex,
+              invoice: {
+                invoice_number: null,
+                invoice_date: null,
+                due_date: null,
+                vendor_name: vendorName,
+                total: null,
+                office_location: null,
+                line_items: [],
+                parsing_confidence: 0,
+                raw_response: result.error || 'Parsing failed'
+              }
+            };
+          })
+      );
+    }
+    
+    const batchResults = await Promise.all(batchPromises);
+    // Sort by original index to maintain order
+    batchResults.sort((a, b) => a.index - b.index);
+    results.push(...batchResults.map(r => r.invoice));
+  }
+  
+  console.log(`[PCS-AI] Successfully parsed ${results.length} invoices from ${pageClusters.length} clusters`);
+  return results;
 }
 
 // ============================================================================
@@ -528,14 +539,15 @@ export async function parseInvoiceWithGPT(
     }
 
     // Check for multiple invoices in document (unless explicitly skipped)
-    if (!skipMultiInvoiceDetection) {
-      const multiInvoiceCheck = await detectMultipleInvoices(base64Images);
+    // Uses page-by-page classification to detect invoice boundaries reliably
+    if (!skipMultiInvoiceDetection && base64Images.length > 1) {
+      const pageClusters = await classifyDocumentPages(base64Images);
       
-      if (multiInvoiceCheck.count > 1) {
-        console.log(`[PCS-AI] Document contains ${multiInvoiceCheck.count} invoices - parsing all`);
+      if (pageClusters.length > 1) {
+        console.log(`[PCS-AI] Document contains ${pageClusters.length} invoices across ${base64Images.length} pages - parsing each cluster`);
         
-        // Parse all invoices from the document
-        const parsedInvoices = await parseMultipleInvoices(base64Images, vendorName, multiInvoiceCheck.count);
+        // Parse each invoice cluster individually using the full single-invoice pipeline
+        const parsedInvoices = await parseMultipleInvoicesByClusters(base64Images, pageClusters, vendorName);
         
         if (parsedInvoices.length > 0) {
           // Return multi-invoice result
@@ -547,11 +559,11 @@ export async function parseInvoiceWithGPT(
               document_invoice_total: parsedInvoices.length
             },
             vendorDetected: vendorName || undefined,
-            knowledgeBaseUsed: false // KB not used in multi-invoice mode yet
+            knowledgeBaseUsed: true // Each cluster uses the full KB pipeline
           };
         }
         // If multi-invoice parsing failed, fall through to single invoice parsing
-        console.log('[PCS-AI] Multi-invoice parsing failed, falling back to single invoice mode');
+        console.log('[PCS-AI] Multi-invoice cluster parsing failed, falling back to single invoice mode');
       }
     }
 

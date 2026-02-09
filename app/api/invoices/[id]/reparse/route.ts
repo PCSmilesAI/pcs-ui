@@ -3,6 +3,13 @@ import { getDatabase } from '../../../../../lib/db/client';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { randomUUID } from 'crypto';
+import { parseInvoiceWithGPT } from '../../../../../lib/gpt/parseInvoice';
+import { getPdfPageCount } from '../../../../../lib/gpt/pdfToImages';
+import { normalizeVendorNameForStorage } from '../../../../../lib/invoices/vendorNormalization';
+import { resolveVendor } from '../../../../../lib/invoices/vendorMatcher';
+import { buildApiPdfPath, normalizePdfFilename } from '../../../../../lib/security/filename';
+import { normalizeDateForStorage } from '../../../../../lib/utils/dateUtils';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +60,7 @@ interface SmartReparseResult {
 /**
  * Extract PDF filename from path
  */
-function getPdfFilename(pdfPath: string | null): string | null {
+function getPdfFilenameFromPath(pdfPath: string | null): string | null {
   if (!pdfPath) return null;
   
   // Handle /api/pdf/filename.pdf format
@@ -135,8 +142,12 @@ function getMissingFields(invoice: Invoice): string[] {
 
 /**
  * POST /api/invoices/[id]/reparse
- * Re-parses an invoice's PDF file using the ISOLATED smart_reparse.py script.
- * This does NOT use the main parsing pipeline (vendor_router.py).
+ * Re-parses an invoice's PDF file.
+ * 
+ * For multi-page PDFs: Uses GPT pipeline with multi-invoice detection.
+ * When multiple invoices are found, creates new DB records and soft-deletes the original.
+ * 
+ * For single-page PDFs or fallback: Uses the ISOLATED smart_reparse.py script.
  */
 export async function POST(
   req: NextRequest,
@@ -170,7 +181,7 @@ export async function POST(
     }
 
     // Find the PDF file
-    const pdfFilename = getPdfFilename(invoice.pdf_path);
+    const pdfFilename = getPdfFilenameFromPath(invoice.pdf_path);
     const pdfPath = findPdfFile(pdfFilename);
 
     if (!pdfPath) {
@@ -190,11 +201,225 @@ export async function POST(
       );
     }
 
-    // Determine which fields need focused extraction
+    // Check PDF page count to decide which pipeline to use
+    let pageCount = 1;
+    try {
+      pageCount = getPdfPageCount(pdfPath);
+      console.log('[REPARSE] PDF page count:', pageCount);
+    } catch {
+      console.warn('[REPARSE] Could not determine page count, defaulting to 1');
+    }
+
+    // For multi-page PDFs, use GPT pipeline with multi-invoice detection
+    if (pageCount > 1) {
+      console.log(`[REPARSE] Multi-page PDF (${pageCount} pages) - using GPT pipeline with multi-invoice detection`);
+      
+      try {
+        const parseResult = await parseInvoiceWithGPT(pdfPath, invoice.vendor_name);
+        
+        // If multiple invoices detected, create new records and soft-delete original
+        if (parseResult.success && parseResult.multipleInvoices && parseResult.multipleInvoices.invoices.length > 1) {
+          const multiInvoices = parseResult.multipleInvoices.invoices;
+          console.log(`[REPARSE] Multi-invoice detected: ${multiInvoices.length} invoices in document`);
+          
+          const documentGroupId = randomUUID();
+          const totalInvoicesInDoc = multiInvoices.length;
+          const createdInvoices: Array<{ id: string; invoice_number: string; vendor: string; amount: number }> = [];
+          const normalizedPdf = normalizePdfFilename(invoice.pdf_path || '');
+          
+          for (let idx = 0; idx < multiInvoices.length; idx++) {
+            const parsed = multiInvoices[idx];
+            const invoiceIndex = idx + 1;
+            
+            // Resolve vendor
+            const rawVendor = parsed.vendor_name || parseResult.vendorDetected || invoice.vendor_name || 'Unknown';
+            const normalizedVendor = normalizeVendorNameForStorage(rawVendor);
+            
+            // Invoice number
+            const invoiceNumber = parsed.invoice_number || `${invoice.invoice_number}-${invoiceIndex}`;
+            
+            // Amount
+            let amountCents = 0;
+            if (parsed.total && typeof parsed.total === 'number') {
+              amountCents = Math.round(parsed.total * 100);
+            }
+            
+            // Parsing status
+            let parsingStatus = 'success';
+            let parsingError: string | null = null;
+            if (parsed.parsing_confidence < 0.5) {
+              parsingStatus = 'partial';
+              parsingError = 'Low parsing confidence';
+            } else if (!parsed.invoice_number || !parsed.total) {
+              parsingStatus = 'partial';
+              parsingError = 'Missing required fields';
+            }
+            
+            const newId = randomUUID();
+            const normalizedInvoiceDate = normalizeDateForStorage(parsed.invoice_date);
+            const normalizedDueDate = normalizeDateForStorage(parsed.due_date);
+            
+            db.prepare(`
+              INSERT INTO invoices (
+                id, invoice_number, source_file,
+                parsed_vendor_name, parsed_office_id, parsed_amount_cents,
+                vendor_name, office_id, amount_cents,
+                status, approvals, deleted,
+                invoice_date, due_date, office_location, pdf_path,
+                parsing_status, parsing_error, parse_attempts,
+                document_group_id, document_invoice_index, document_invoice_total
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+              newId, invoiceNumber, invoice.source_file,
+              normalizedVendor, parsed.office_location, amountCents,
+              normalizedVendor, parsed.office_location, amountCents,
+              'incoming', JSON.stringify({}), 0,
+              normalizedInvoiceDate, normalizedDueDate, parsed.office_location,
+              invoice.pdf_path || buildApiPdfPath(normalizedPdf),
+              parsingStatus, parsingError, 1,
+              documentGroupId, invoiceIndex, totalInvoicesInDoc
+            );
+            
+            // Audit event
+            db.prepare(`
+              INSERT INTO invoice_events (invoice_id, action, payload_json)
+              VALUES (?, 'REPARSE_MULTI_SPLIT', ?)
+            `).run(newId, JSON.stringify({
+              original_invoice_id: id,
+              document_group_id: documentGroupId,
+              invoice_index: invoiceIndex,
+              total_in_document: totalInvoicesInDoc,
+              vendor: normalizedVendor,
+              amount_cents: amountCents
+            }));
+            
+            // Auto-categorize
+            try {
+              const { categorizeInvoice, storeInvoiceCategories } = await import('@/lib/invoices/categoryParser');
+              const lineItems = (parsed.line_items || []).map(item => ({
+                description: item.description || '',
+                quantity: item.quantity ?? undefined,
+                unit_price: item.unit_price ?? undefined,
+                amount: item.amount ?? undefined
+              }));
+              const categories = await categorizeInvoice(
+                { vendor_name: normalizedVendor, line_items: lineItems },
+                normalizedVendor
+              );
+              await storeInvoiceCategories(newId, categories);
+            } catch (err: any) {
+              console.warn('[REPARSE] Failed to auto-categorize:', err?.message);
+            }
+            
+            createdInvoices.push({
+              id: newId,
+              invoice_number: invoiceNumber,
+              vendor: normalizedVendor,
+              amount: amountCents / 100
+            });
+            
+            console.log(`[REPARSE] Created invoice ${invoiceIndex}/${totalInvoicesInDoc}:`, {
+              id: newId, invoice_number: invoiceNumber, vendor: normalizedVendor, amount: amountCents / 100
+            });
+          }
+          
+          // Soft-delete the original invoice
+          db.prepare(`UPDATE invoices SET deleted = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(id);
+          console.log(`[REPARSE] Soft-deleted original invoice ${id}, replaced with ${createdInvoices.length} individual invoices`);
+          
+          return NextResponse.json({
+            ok: true,
+            message: `Multi-invoice document: created ${createdInvoices.length} invoices (original deleted)`,
+            multi_invoice: true,
+            document_group_id: documentGroupId,
+            invoices_created: createdInvoices.length,
+            invoices: createdInvoices,
+            original_invoice_deleted: id
+          });
+        }
+        
+        // Single invoice from GPT - update the existing record
+        if (parseResult.success && parseResult.data) {
+          const parsed = parseResult.data;
+          const rawVendor = parsed.vendor_name || parseResult.vendorDetected || invoice.vendor_name || 'Unknown';
+          const normalizedVendor = normalizeVendorNameForStorage(rawVendor);
+          const amountCents = parsed.total ? Math.round(parsed.total * 100) : 0;
+          const normalizedInvoiceDate = normalizeDateForStorage(parsed.invoice_date);
+          const normalizedDueDate = normalizeDateForStorage(parsed.due_date);
+          
+          let parsingStatus = 'success';
+          let parsingError: string | null = null;
+          if (parsed.parsing_confidence < 0.5) {
+            parsingStatus = 'partial';
+            parsingError = 'Low parsing confidence';
+          } else if (!parsed.invoice_number || !parsed.total) {
+            parsingStatus = 'partial';
+            parsingError = 'Missing required fields';
+          }
+          
+          db.prepare(`
+            UPDATE invoices SET
+              parsed_vendor_name = ?,
+              vendor_name = COALESCE(corrected_vendor_name, ?),
+              parsed_office_id = ?,
+              office_location = COALESCE(corrected_office_id, ?),
+              parsed_amount_cents = ?,
+              amount_cents = COALESCE(corrected_amount_cents, ?),
+              total = ?,
+              invoice_total = ?,
+              invoice_date = ?,
+              due_date = ?,
+              invoice_number = CASE WHEN ? IS NOT NULL AND ? != '' THEN ? ELSE invoice_number END,
+              parsing_status = ?,
+              parsing_error = ?,
+              parse_attempts = COALESCE(parse_attempts, 0) + 1,
+              updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+          `).run(
+            normalizedVendor, normalizedVendor,
+            parsed.office_location, parsed.office_location,
+            amountCents, amountCents,
+            parsed.total, parsed.total,
+            normalizedInvoiceDate, normalizedDueDate,
+            parsed.invoice_number, parsed.invoice_number, parsed.invoice_number,
+            parsingStatus, parsingError,
+            id
+          );
+          
+          db.prepare(`
+            INSERT INTO invoice_events (invoice_id, action, payload_json)
+            VALUES (?, 'GPT_REPARSE', ?)
+          `).run(id, JSON.stringify({
+            vendor: normalizedVendor,
+            amount_cents: amountCents,
+            parsing_status: parsingStatus,
+            confidence: parsed.parsing_confidence,
+            pages: pageCount
+          }));
+          
+          return NextResponse.json({
+            ok: true,
+            message: parsingStatus === 'success' 
+              ? 'Invoice re-parsed successfully' 
+              : 'Invoice re-parsed but some data could not be extracted',
+            invoice_number: parsed.invoice_number || invoice.invoice_number,
+            amount: amountCents > 0 ? (amountCents / 100).toFixed(2) : null,
+            vendor: normalizedVendor || null,
+            parsing_status: parsingStatus,
+            parsing_error: parsingError
+          });
+        }
+        
+        // GPT parse failed - fall through to smart_reparse
+        console.warn('[REPARSE] GPT pipeline failed, falling back to smart_reparse');
+      } catch (gptErr: any) {
+        console.error('[REPARSE] GPT pipeline error, falling back to smart_reparse:', gptErr.message);
+      }
+    }
+
+    // Single-page PDF or GPT fallback: use smart_reparse.py
     const missingFields = getMissingFields(invoice);
     const focusArg = missingFields.length > 0 ? `--focus=${missingFields.join(',')}` : '';
-    
-    // Force OCR if there have been previous failed attempts
     const forceOcr = (invoice.parse_attempts || 0) >= 1;
     const ocrArg = forceOcr ? '--force-ocr' : '';
 
@@ -202,7 +427,6 @@ export async function POST(
     console.log('[REPARSE] Missing fields:', missingFields);
     console.log('[REPARSE] Force OCR:', forceOcr);
 
-    // Run the ISOLATED smart_reparse.py script
     let reparseResult: SmartReparseResult | null = null;
     let parseError = '';
     
@@ -212,12 +436,11 @@ export async function POST(
       
       const output = execSync(command, { 
         cwd: path.dirname(SMART_REPARSE_PATH),
-        timeout: 120000, // 2 minute timeout
+        timeout: 120000,
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe']
       });
       
-      // Parse the JSON output from smart_reparse.py
       try {
         reparseResult = JSON.parse(output) as SmartReparseResult;
       } catch (jsonErr) {
@@ -225,9 +448,7 @@ export async function POST(
         parseError = 'Failed to parse reparse output';
       }
     } catch (err: unknown) {
-      // execSync throws on non-zero exit, but we might still have stdout
       const execError = err as { stdout?: string; stderr?: string; message?: string };
-      
       if (execError.stdout) {
         try {
           reparseResult = JSON.parse(execError.stdout) as SmartReparseResult;
@@ -237,14 +458,12 @@ export async function POST(
       } else {
         parseError = execError.message || 'Smart reparse script failed';
       }
-      
       if (execError.stderr) {
         console.error('[REPARSE] Script stderr:', execError.stderr);
       }
     }
 
     if (!reparseResult) {
-      // Update parsing status to indicate parser failure
       db.prepare(`
         UPDATE invoices 
         SET parsing_status = 'failed',
@@ -260,7 +479,6 @@ export async function POST(
       );
     }
 
-    // Extract data from the reparse result
     const extracted = reparseResult.extracted || {};
     const vendor = extracted.vendor || '';
     const amountCents = extracted.amount_cents || 0;
@@ -268,7 +486,6 @@ export async function POST(
     const invoiceDate = extracted.invoice_date || '';
     const dueDate = extracted.due_date || '';
 
-    // Determine parsing status
     const hasAmount = amountCents > 0;
     const hasVendor = vendor && vendor !== 'Unknown' && vendor.trim() !== '';
     
@@ -286,7 +503,6 @@ export async function POST(
       parsingError = 'Vendor name not extracted';
     }
 
-    // Update database with new data (only update fields that were extracted)
     db.prepare(`
       UPDATE invoices 
       SET 
@@ -321,7 +537,6 @@ export async function POST(
       id
     );
 
-    // Log the event with detailed strategies used
     db.prepare(`
       INSERT INTO invoice_events (invoice_id, action, payload_json)
       VALUES (?, 'SMART_REPARSE', ?)
