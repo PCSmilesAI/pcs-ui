@@ -135,18 +135,19 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
       >
         {/* Feedback Icon (Chat bubble with exclamation) */}
         <svg
-          width="24"
-          height="24"
+          width="26"
+          height="26"
           viewBox="0 0 24 24"
           fill="none"
           stroke="white"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
+          style={{ marginBottom: '2px', marginRight: '1px' }}
         >
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          <line x1="12" y1="8" x2="12" y2="11" />
-          <circle cx="12" cy="14" r="0.5" fill="white" />
+          <line x1="12" y1="7" x2="12" y2="11" />
+          <circle cx="12" cy="14" r="1" fill="white" stroke="none" />
         </svg>
       </button>
 
