@@ -50,7 +50,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 # Global configuration (can be reloaded via SIGHUP)
 _config = {
-    "interval_ms": int(os.environ.get("INBOX_SCAN_INTERVAL_MS", "60000")),  # Default 60s
+    "interval_ms": int(os.environ.get("INBOX_SCAN_INTERVAL_MS", "10000")),  # Default 10s
     "backoff_seconds": 10,  # Start at 10s
     "max_backoff_seconds": 300,  # Cap at 5 minutes
 }
@@ -63,6 +63,30 @@ _last_scan_result = {
     "duration_ms": 0,
     "error": None,
 }
+
+# =============================================================================
+# VENDOR FILTER: Only process invoices from these vendors
+# Set to None or empty list to process ALL vendors
+# Currently restricted to TC Dental for live production launch
+# =============================================================================
+ACTIVE_VENDOR_FILTER = ['tc dental', 'tcdentallab', 'tc dental lab', 'tcdental']
+
+def is_email_from_active_vendor(msg, subject_str):
+    """Check if an email is from one of the active vendors we should process.
+    Returns True if the email should be processed, False if it should be skipped.
+    If ACTIVE_VENDOR_FILTER is empty/None, all emails are processed."""
+    if not ACTIVE_VENDOR_FILTER:
+        return True
+    
+    sender = msg.get("From", "").lower()
+    subject_lower = (subject_str or "").lower()
+    
+    for vendor_keyword in ACTIVE_VENDOR_FILTER:
+        vk = vendor_keyword.lower()
+        if vk in sender or vk in subject_lower:
+            return True
+    
+    return False
 
 # Buffered logging
 _log_buffer = []
@@ -727,6 +751,11 @@ def check_inbox(full_scan=False):
             subject = decode_header(msg["Subject"])[0][0]
             if isinstance(subject, bytes):
                 subject = subject.decode(errors='ignore')
+
+            # VENDOR FILTER: Only process emails from active vendors (currently TC Dental only)
+            if not is_email_from_active_vendor(msg, subject):
+                skipped_count += 1
+                continue
 
             # In full_scan mode, ONLY skip if message was deleted (tombstone)
             # Otherwise, we want to re-import all emails to ensure database is in sync
