@@ -29,6 +29,7 @@ export async function getReassignmentTargets(): Promise<ReassignmentTarget[]> {
   const offices = await readOffices();
   const targets: ReassignmentTarget[] = [];
   const addedEmails = new Set<string>(); // Track added emails to avoid duplicates
+  const addedOffices = new Set<string>(); // Track offices already represented
 
   // Add all office managers from the company offices data (office_info.json)
   // This includes ALL office managers with their actual email addresses
@@ -37,6 +38,7 @@ export async function getReassignmentTargets(): Promise<ReassignmentTarget[]> {
       const email = office.email.trim().toLowerCase();
       if (!addedEmails.has(email)) {
         addedEmails.add(email);
+        addedOffices.add(office.name.toLowerCase());
         const managerName = office.manager ? ` - ${office.manager}` : '';
         targets.push({
           type: 'office',
@@ -49,22 +51,26 @@ export async function getReassignmentTargets(): Promise<ReassignmentTarget[]> {
   }
 
   // Also add any office managers from roles.json that aren't already included
-  // (in case there are configured roles not in office_info.json)
+  // Only add offices that don't already have a representative from office_info.json
   if (roles.office_managers) {
     for (const [officeName, managers] of Object.entries(roles.office_managers)) {
-      // Add ALL managers for this office, not just the first one
-      for (const managerEmail of managers || []) {
-        if (managerEmail && managerEmail.trim()) {
-          const email = managerEmail.trim().toLowerCase();
-          if (!addedEmails.has(email)) {
-            addedEmails.add(email);
-            targets.push({
-              type: 'office',
-              id: officeName,
-              name: `${officeName} (Office Manager)`,
-              email: email,
-            });
-          }
+      // Skip this office if it already has a representative from office_info.json
+      if (addedOffices.has(officeName.toLowerCase())) {
+        continue;
+      }
+      // For offices not in office_info.json, add just the first manager
+      const firstManager = (managers || [])[0];
+      if (firstManager && firstManager.trim()) {
+        const email = firstManager.trim().toLowerCase();
+        if (!addedEmails.has(email)) {
+          addedEmails.add(email);
+          addedOffices.add(officeName.toLowerCase());
+          targets.push({
+            type: 'office',
+            id: officeName,
+            name: `${officeName} (Office Manager)`,
+            email: email,
+          });
         }
       }
     }
