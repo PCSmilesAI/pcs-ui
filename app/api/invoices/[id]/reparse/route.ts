@@ -17,7 +17,9 @@ export const dynamic = 'force-dynamic';
 const PROJECT_ROOT = process.env.PROJECT_ROOT || '/var/www/pcs-ui';
 
 // Multiple directories where PDFs might be stored (in order of preference)
+const DATA_DIR = process.env.PCS_DATA_DIR || path.join(PROJECT_ROOT, 'pcs_ui_data');
 const EMAIL_INVOICES_DIRS = [
+  path.join(DATA_DIR, 'email_invoices'),
   process.env.EMAIL_INVOICES_DIR || path.join(PROJECT_ROOT, 'pcs_ui_data', 'email_invoices'),
   path.join(PROJECT_ROOT, 'email_invoices'),  // Legacy/root directory
 ];
