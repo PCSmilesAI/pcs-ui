@@ -5,6 +5,19 @@ import { createBillFromInvoice } from '../../../../lib/qbo/billCreationService';
 import { rateLimitByUser } from '../../../../lib/ratelimit/rateLimiter';
 import { getApprovalDestination, isVerifier } from '../../../../lib/workflow/rolesStore';
 import { getDatabase } from '../../../../lib/db/client';
+import { readOffices } from '../../../../lib/company/officesStore';
+
+/**
+ * Look up the office manager email for a given office location.
+ * Matches by case-insensitive name from office_info.json.
+ */
+async function getOfficeManagerEmail(officeLocation: string): Promise<string | null> {
+  if (!officeLocation) return null;
+  const offices = await readOffices();
+  const normalized = officeLocation.trim().toLowerCase();
+  const match = offices.find(o => o.name?.trim().toLowerCase() === normalized);
+  return match?.email || null;
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -177,11 +190,17 @@ export async function POST(req: NextRequest) {
     // Step 4: Route to approver based on destination choice
     let approverEmail: string;
     if (destination === 'office_manager') {
-      // Future: route to the office manager for the invoice's location
-      // For now, fall back to McKay since office manager accounts don't exist yet
-      // TODO: look up office manager email from office_info.json based on invoice.office_location
-      approverEmail = getApprovalDestination();
-      console.log('[API][SEND-FOR-APPROVAL]', 'office_manager_not_available_fallback_to_admin', { invoiceId });
+      // Route to the office manager for the invoice's location
+      const officeLocation = invoice.office_location || invoice.office_id || '';
+      const officeManagerEmail = await getOfficeManagerEmail(officeLocation);
+      if (officeManagerEmail) {
+        approverEmail = officeManagerEmail;
+        console.log('[API][SEND-FOR-APPROVAL]', 'routing_to_office_manager', { invoiceId, office: officeLocation, manager: approverEmail });
+      } else {
+        // No office manager found for this location - fall back to admin
+        approverEmail = getApprovalDestination();
+        console.log('[API][SEND-FOR-APPROVAL]', 'office_manager_not_found_fallback_to_admin', { invoiceId, office: officeLocation });
+      }
     } else {
       // Default: route to McKay (admin approval)
       approverEmail = getApprovalDestination();
