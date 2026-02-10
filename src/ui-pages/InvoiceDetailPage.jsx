@@ -4658,24 +4658,25 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 width: '100%',
                 padding: '14px 20px',
                 marginBottom: '16px',
-                backgroundColor: '#f3f4f6',
-                color: '#6b7280',
-                border: '2px dashed #d1d5db',
+                backgroundColor: '#357ab2',
+                color: '#fff',
+                border: 'none',
                 borderRadius: '12px',
                 fontSize: '15px',
                 fontWeight: 600,
-                cursor: 'not-allowed',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
-                opacity: 0.6,
+                transition: 'background-color 0.2s',
               }}
-              disabled
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#2a6190'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#357ab2'}
             >
               <span style={{ fontSize: '20px' }}>🏢</span>
               <div style={{ textAlign: 'left' }}>
                 <div>Send to Office Manager{details?.office ? ` (${details.office})` : ''}</div>
-                <div style={{ fontSize: '12px', fontWeight: 400 }}>Coming soon</div>
+                <div style={{ fontSize: '12px', fontWeight: 400, opacity: 0.85 }}>Routes to the manager of this invoice&apos;s office</div>
               </div>
             </button>
 

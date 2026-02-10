@@ -53,6 +53,9 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
   const { setInvoices: setContextInvoices } = useInvoiceData();
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [toast, setToast] = useState(null);
+  const [userVendorAccess, setUserVendorAccess] = useState(null); // null = loading, '*' = admin, array = verifier
+  const [showBulkSendRouteChoice, setShowBulkSendRouteChoice] = useState(false);
+  const isVerifier = Array.isArray(userVendorAccess);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const getRowId = (r, i) =>
     r.id ||
@@ -157,6 +160,10 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     const payload = await res.json();
     if (!payload?.ok) {
       throw new Error(payload?.error || 'Failed to load invoices');
+    }
+    // Track vendor access to detect verifier users
+    if (payload.vendorAccess !== undefined) {
+      setUserVendorAccess(payload.vendorAccess);
     }
     const list = Array.isArray(payload.invoices) ? payload.invoices : [];
     return list
@@ -432,6 +439,71 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     await reloadList();
   }, [selectedIds, filteredRows, getRowId, showToast, reloadList, setInvoices]);
 
+  // Bulk send for verifier users (Laura) - calls send-for-approval for each selected invoice
+  const bulkSend = useCallback(async (destination) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
+    setShowBulkSendRouteChoice(false);
+
+    // Show progress
+    setBulkProgress({ active: true, current: 0, total: selectedRows.length, action: 'send' });
+
+    let hadError = false;
+    let processedCount = 0;
+
+    for (const row of selectedRows) {
+      const rowId = row.id || row.invoice_number;
+      try {
+        const response = await fetch('/api/invoices/send-for-approval', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            invoiceId: rowId,
+            correctedData: {},
+            invoiceCategories: row.line_items || [],
+            destination: destination,
+          }),
+        });
+
+        processedCount++;
+        setBulkProgress(prev => ({ ...prev, current: processedCount }));
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          console.error('Bulk send error:', data?.error || `HTTP ${response.status}`);
+          hadError = true;
+        } else {
+          // Remove invoice from local state
+          setInvoices(prev => prev.filter(inv => {
+            const invId = inv.id || inv.invoice_number;
+            return invId !== rowId;
+          }));
+          setSelectedIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(getRowId(row, 0));
+            return newSet;
+          });
+        }
+      } catch (err) {
+        hadError = true;
+        console.error('Bulk send network error:', err?.message);
+      }
+    }
+
+    setBulkProgress({ active: false, current: 0, total: 0, action: '' });
+
+    if (!hadError) {
+      showToast(`${processedCount} invoice(s) sent for ${destination === 'office_manager' ? 'office manager' : 'admin'} approval.`, 'success');
+    } else {
+      showToast(`Some invoices failed to send. ${processedCount} succeeded.`, 'warning');
+    }
+
+    setSelectedIds(new Set());
+    await reloadList();
+  }, [selectedIds, filteredRows, getRowId, showToast, reloadList, setInvoices]);
+
   // Automatic inbox checker - runs every 10 seconds in the background
   const checkInboxAutomatically = useCallback(async () => {
     // Skip if already refreshing to avoid overlapping requests
@@ -698,7 +770,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
             animation: 'spin 1s linear infinite',
           }} />
           <span style={{ color: '#1e40af', fontWeight: 500 }}>
-            {bulkProgress.action === 'approve' ? 'Approving' : 'Rejecting'} invoices and creating QBO bills...
+            {bulkProgress.action === 'send' ? 'Sending' : bulkProgress.action === 'approve' ? 'Approving' : 'Rejecting'} invoices{bulkProgress.action !== 'send' ? ' and creating QBO bills' : ''}...
           </span>
           <span style={{ color: '#3b82f6', fontWeight: 600 }}>
             {bulkProgress.current} / {bulkProgress.total}
@@ -708,18 +780,89 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
 
       {selectedIds.size > 0 && !bulkProgress.active && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-          <button
-            onClick={() => bulkUpdate('approve')}
-            style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
-          >
-            Approve ({selectedIds.size})
-          </button>
+          {isVerifier ? (
+            <button
+              onClick={() => setShowBulkSendRouteChoice(true)}
+              style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
+            >
+              Send ({selectedIds.size})
+            </button>
+          ) : (
+            <button
+              onClick={() => bulkUpdate('approve')}
+              style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
+            >
+              Approve ({selectedIds.size})
+            </button>
+          )}
           <button
             onClick={() => bulkUpdate('reject')}
             style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
           >
             Reject
           </button>
+        </div>
+      )}
+
+      {/* Bulk Send Routing Choice Modal - for verifier users */}
+      {showBulkSendRouteChoice && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 9999,
+        }}>
+          <div style={{
+            backgroundColor: '#fff', borderRadius: '16px', padding: '32px',
+            maxWidth: '440px', width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 700, color: '#111827' }}>
+              Send {selectedIds.size} Invoice{selectedIds.size > 1 ? 's' : ''} for Approval
+            </h3>
+            <p style={{ margin: '0 0 24px 0', fontSize: '14px', color: '#6b7280' }}>
+              Where would you like to send {selectedIds.size > 1 ? 'these invoices' : 'this invoice'}?
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                onClick={() => bulkSend('mckay')}
+                style={{
+                  padding: '12px 20px', backgroundColor: '#2563eb', color: '#fff',
+                  borderRadius: '10px', border: 'none', fontWeight: 600, fontSize: '15px',
+                  cursor: 'pointer', textAlign: 'left',
+                }}
+              >
+                Send to McKay
+                <span style={{ display: 'block', fontSize: '12px', fontWeight: 400, opacity: 0.8, marginTop: '2px' }}>
+                  Admin approval
+                </span>
+              </button>
+
+              <button
+                onClick={() => bulkSend('office_manager')}
+                style={{
+                  padding: '12px 20px', backgroundColor: '#2563eb', color: '#fff',
+                  borderRadius: '10px', border: 'none', fontWeight: 600, fontSize: '15px',
+                  cursor: 'pointer', textAlign: 'left',
+                }}
+              >
+                Send to Office Manager{selectedIds.size > 1 ? 's' : ''}
+                <span style={{ display: 'block', fontSize: '12px', fontWeight: 400, opacity: 0.8, marginTop: '2px' }}>
+                  Each invoice routes to its office location&apos;s manager
+                </span>
+              </button>
+
+              <button
+                onClick={() => setShowBulkSendRouteChoice(false)}
+                style={{
+                  padding: '10px 20px', backgroundColor: 'transparent', color: '#6b7280',
+                  borderRadius: '10px', border: '1px solid #d1d5db', fontWeight: 500, fontSize: '14px',
+                  cursor: 'pointer', marginTop: '4px',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
