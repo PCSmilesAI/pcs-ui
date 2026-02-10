@@ -13,16 +13,25 @@ function InvoiceDetailContent() {
   const [invoiceQueue, setInvoiceQueue] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
 
+  // Use the actual invoice param string as the effect trigger (not the searchParams object)
+  // so that router.replace with a new ?invoice= reliably re-fires the effect
+  const invoiceParam = searchParams.get('invoice') || '';
+  const fromParam = searchParams.get('from') || '';
+
   useEffect(() => {
     const loadInvoice = async () => {
+      // Reset loading state for navigation transitions
+      setLoading(true);
+
       try {
-        const invoiceNumber = searchParams.get('invoice');
-        const from = searchParams.get('from');
+        const invoiceNumber = invoiceParam;
+        const from = fromParam;
         if (!invoiceNumber) {
           console.error('No invoice number provided');
           setLoading(false);
           return;
         }
+        console.log('📋 Loading invoice:', invoiceNumber, 'from:', from || '(direct)');
 
         // Get user email for API calls
         let userEmail = '';
@@ -278,7 +287,8 @@ function InvoiceDetailContent() {
     };
 
     loadInvoice();
-  }, [searchParams]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invoiceParam, fromParam]);
 
   const handleBack = () => {
     const from = searchParams.get('from');
