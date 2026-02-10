@@ -718,22 +718,40 @@ def check_inbox(full_scan=False):
         mail.select("INBOX")
 
         # Get emails based on scan mode
-        # CRITICAL FIX: Always search ALL emails, not just UNSEEN
-        # External email clients (webmail, etc.) may mark emails as read before our scanner sees them
-        # We rely on message_id tracking in the database to skip already-processed emails
-        if full_scan:
+        # When ACTIVE_VENDOR_FILTER is set, use IMAP server-side search to dramatically
+        # reduce the number of emails we need to download (instead of fetching all 2000+)
+        if ACTIVE_VENDOR_FILTER:
+            # Build IMAP OR search for each vendor keyword in SUBJECT or FROM
+            all_uids = set()
+            for vendor_keyword in ACTIVE_VENDOR_FILTER:
+                for field in ['SUBJECT', 'FROM']:
+                    try:
+                        status, messages = mail.uid('search', None, field, f'"{vendor_keyword}"')
+                        if status == 'OK' and messages[0]:
+                            for uid in messages[0].split():
+                                all_uids.add(uid)
+                    except Exception as search_err:
+                        log(f"[INBOX][SCAN][WARN] IMAP search for {field}='{vendor_keyword}' failed: {search_err}")
+            email_uids = sorted(all_uids)
+            log(f"[INBOX][SCAN][MODE] VENDOR-FILTERED SCAN - Found {len(email_uids)} emails matching vendor filter {ACTIVE_VENDOR_FILTER}")
+        elif full_scan:
             log("[INBOX][SCAN][MODE] FULL SCAN - Processing ALL emails in inbox, comparing to database")
+            status, messages = mail.uid('search', None, 'ALL')
+            if status != 'OK':
+                log("[INBOX][SCAN][ERROR] Failed to search inbox")
+                _last_scan_result["error"] = "Failed to search inbox"
+                return
+            email_uids = messages[0].split() if messages[0] else []
+            log(f"[INBOX][SCAN] Found {len(email_uids)} total emails in inbox")
         else:
             log("[INBOX][SCAN][MODE] NORMAL SCAN - Processing ALL emails, using message_id tracking to skip duplicates")
-        status, messages = mail.uid('search', None, 'ALL')
-
-        if status != 'OK':
-            log("[INBOX][SCAN][ERROR] Failed to search inbox")
-            _last_scan_result["error"] = "Failed to search inbox"
-            return
-
-        email_uids = messages[0].split() if messages[0] else []
-        log(f"[INBOX][SCAN] Found {len(email_uids)} total emails in inbox")
+            status, messages = mail.uid('search', None, 'ALL')
+            if status != 'OK':
+                log("[INBOX][SCAN][ERROR] Failed to search inbox")
+                _last_scan_result["error"] = "Failed to search inbox"
+                return
+            email_uids = messages[0].split() if messages[0] else []
+            log(f"[INBOX][SCAN] Found {len(email_uids)} total emails in inbox")
 
         processed_count = 0
         skipped_count = 0
