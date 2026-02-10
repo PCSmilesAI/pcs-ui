@@ -16,8 +16,8 @@ const assert = require('assert');
 
 const BASE_URL = 'http://localhost:3000';
 const ADMIN_EMAIL = 'business@pcsmilesai.com';
-const AP_EMAIL = 'laurag@pacificcrestsmiles.com';
-const OM_EMAIL = 'om@pacificcrestsmiles.com';
+const AP_EMAIL = 'laurag@pcsmiles.com';
+const OM_EMAIL = 'om@pcsmiles.com';
 
 let testsPassed = 0;
 let testsFailed = 0;

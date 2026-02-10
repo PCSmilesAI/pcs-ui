@@ -217,7 +217,7 @@ log('Invoice routed to McKay for approval (bypassed office managers)');
 
 log('\n=== STEP 6: McKay Approves Invoice ===');
 
-const mcKayEmail = 'mckaym@pacificcrestsmiles.com';
+const mcKayEmail = 'mckaym@pcsmiles.com';
 const approvals = {
   ap: { by: apManagerEmail, at: now },
   admin: { by: mcKayEmail, at: now }

@@ -2,7 +2,7 @@
 
 /**
  * Add Boss Account Script
- * Adds mckaym@pacificcrestsmiles.com to the user database
+ * Adds mckaym@pcsmiles.com to the user database
  * 
  * Usage: node scripts/add-boss-account.js <password>
  * Example: node scripts/add-boss-account.js "SecurePassword123!"
@@ -118,7 +118,7 @@ async function main() {
     console.log(`✅ Found ${users.length} existing users\n`);
 
     // Check if boss account already exists
-    const bossEmail = 'mckaym@pacificcrestsmiles.com';
+    const bossEmail = 'mckaym@pcsmiles.com';
     const existingBoss = users.find(u => u.email === bossEmail);
     
     if (existingBoss) {
