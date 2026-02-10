@@ -69,7 +69,11 @@ _last_scan_result = {
 # Set to None or empty list to process ALL vendors
 # Currently restricted to TC Dental for live production launch
 # =============================================================================
-ACTIVE_VENDOR_FILTER = ['tc dental', 'tcdentallab', 'tc dental lab', 'tcdental']
+# These keywords are used for IMAP server-side SUBJECT/FROM search.
+# Real email subjects include: "salem - tc invoices", "Fw: tc lab", "Fw: tc 1", "tc dental"
+# We use broad patterns to catch all TC Dental forwarding styles from office managers.
+ACTIVE_VENDOR_FILTER = ['tc dental', 'tcdentallab', 'tc dental lab', 'tcdental',
+                        'tc invoices', 'tc invoice', 'tc lab', 'tc ']
 
 def is_email_from_active_vendor(msg, subject_str):
     """Check if an email is from one of the active vendors we should process.
