@@ -240,7 +240,16 @@ export async function POST(req: NextRequest) {
         const normalizedVendor = normalizeVendorNameForStorage(validatedVendor);
         
         // Generate invoice number (append index if multiple)
-        const baseInvoiceNumber = parsed.invoice_number || 
+        // Validate parsed invoice number - reject obvious non-invoice-number values
+        let validatedInvoiceNumber = parsed.invoice_number;
+        if (validatedInvoiceNumber) {
+          // Reject if it looks like a filename (contains underscores, long hash strings, or file extensions)
+          if (/[_]/.test(validatedInvoiceNumber) || validatedInvoiceNumber.length > 20 || /\.(pdf|PDF)/.test(validatedInvoiceNumber)) {
+            console.warn(`[PCS_AI_INGEST] Rejected invalid invoice number (looks like filename): ${validatedInvoiceNumber}`);
+            validatedInvoiceNumber = null;
+          }
+        }
+        const baseInvoiceNumber = validatedInvoiceNumber || 
           normalizedPdfFilename?.replace(/\.(pdf|PDF)$/, '') ||
           `GPT-${Date.now()}`;
         const invoiceNumber = `${baseInvoiceNumber}`;
@@ -266,6 +275,24 @@ export async function POST(req: NextRequest) {
         // Generate ID
         const id = randomUUID();
         
+        // Normalize office location - strip parent company names
+        if (parsed.office_location) {
+          const loc = parsed.office_location;
+          // "Pacific Crest Smiles - Eugene" -> "Eugene"
+          const pcsMatch = loc.match(/Pacific Crest Smiles\s*[-–]\s*(.+)/i);
+          if (pcsMatch) {
+            parsed.office_location = pcsMatch[1].trim();
+          }
+          // "Pacific Crest Smiles" alone -> null (not a valid office)
+          if (/^Pacific Crest Smiles$/i.test(parsed.office_location)) {
+            parsed.office_location = null;
+          }
+          // "Smiles Dental" alone -> null
+          if (/^Smiles Dental$/i.test(parsed.office_location || '')) {
+            parsed.office_location = null;
+          }
+        }
+
         // Normalize dates
         const normalizedInvoiceDate = normalizeDateForStorage(parsed.invoice_date);
         const normalizedDueDate = normalizeDateForStorage(parsed.due_date);
