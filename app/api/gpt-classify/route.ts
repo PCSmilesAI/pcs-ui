@@ -21,8 +21,9 @@ function resolvePdfPath(pdfPath: string): string | null {
 
   // If already absolute and exists, validate and return
   const dataDir = process.env.PCS_DATA_DIR || path.join(process.cwd(), 'pcs_ui_data');
+  const inboxDataDir = process.env.INBOX_DATA_DIR || '/var/www/pcs-ui-data';
   if (path.isAbsolute(pdfPath) && fs.existsSync(pdfPath)) {
-    if (isPathWithinBase(pdfPath, process.cwd()) || isPathWithinBase(pdfPath, dataDir)) {
+    if (isPathWithinBase(pdfPath, process.cwd()) || isPathWithinBase(pdfPath, dataDir) || isPathWithinBase(pdfPath, inboxDataDir)) {
       return pdfPath;
     }
     return null;
@@ -46,9 +47,10 @@ function resolvePdfPath(pdfPath: string): string | null {
     return null;
   }
 
-  // Try multiple possible locations (including PCS_DATA_DIR which may differ from cwd)
+  // Try multiple possible locations
   const possiblePaths = [
     path.join(dataDir, 'email_invoices', filename),
+    path.join(inboxDataDir, 'email_invoices', filename),
     path.join(process.cwd(), 'pcs_ui_data', 'email_invoices', filename),
     path.join(process.cwd(), 'email_invoices', filename),
     path.join(process.cwd(), 'public', 'email_invoices', filename),
@@ -58,8 +60,8 @@ function resolvePdfPath(pdfPath: string): string | null {
 
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) {
-      // Allow paths within cwd OR within the configured data directory
-      if (isPathWithinBase(p, process.cwd()) || isPathWithinBase(p, dataDir)) {
+      // Allow paths within cwd, data dir, or inbox data dir
+      if (isPathWithinBase(p, process.cwd()) || isPathWithinBase(p, dataDir) || isPathWithinBase(p, inboxDataDir)) {
         return p;
       }
     }
