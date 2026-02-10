@@ -16,19 +16,7 @@ export default function SendProgressModal({
   step1Error = null,
   step2Error = null,
 }) {
-  const [shouldAutoDismiss, setShouldAutoDismiss] = useState(false);
-
-  // Auto-dismiss after both steps complete
-  useEffect(() => {
-    if (step1Status === 'complete' && step2Status === 'complete' && !shouldAutoDismiss) {
-      setShouldAutoDismiss(true);
-      const timer = setTimeout(() => {
-        onComplete?.();
-        onClose?.();
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [step1Status, step2Status, shouldAutoDismiss, onComplete, onClose]);
+  // No auto-dismiss - user clicks Close button
 
   if (!isOpen) return null;
 
@@ -224,11 +212,17 @@ export default function SendProgressModal({
           </div>
         )}
 
-        {/* Error state - show close button */}
-        {(step1Status === 'error' || step2Status === 'error') && (
+        {/* Close button - show on success OR error */}
+        {(step1Status === 'error' || step2Status === 'error' || 
+          (step1Status === 'complete' && step2Status === 'complete')) && (
           <div style={{ marginTop: '24px', textAlign: 'center' }}>
             <button
-              onClick={onClose}
+              onClick={() => {
+                if (step1Status === 'complete' && step2Status === 'complete') {
+                  onComplete?.();
+                }
+                onClose?.();
+              }}
               style={{
                 padding: '10px 24px',
                 backgroundColor: '#357ab2',

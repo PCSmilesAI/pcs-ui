@@ -1740,32 +1740,40 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         due_date: details.due_date,
       };
 
-      // Call the send-for-approval API which handles all three steps
-      const response = await csrfClient.post(`/api/invoices/send-for-approval`, {
+      // Fire the API call and a 5-second max timer for step 1 in parallel.
+      // Step 1 completes visually after at most 5 seconds, regardless of API duration.
+      const apiPromise = csrfClient.post(`/api/invoices/send-for-approval`, {
         invoiceId: invoiceId,
         correctedData: correctedData,
         invoiceCategories: invoiceCategories,
         userComment: updateComment.trim() || undefined,
       });
+      const step1Timer = new Promise(resolve => setTimeout(resolve, 5000));
 
-      // Simulate step progression based on API response
-      // Step 1: AI Training
-      if (response.aiTrainingResult?.success !== false) {
-        setSendStep1Status('complete');
-      } else {
-        setSendStep1Status('error');
-        setSendStep1Error(response.aiTrainingResult?.error || 'AI training failed');
-      }
+      // Wait for whichever finishes first: the API or the 5-second timer
+      const raceResult = await Promise.race([
+        apiPromise.then(resp => ({ type: 'api', resp })),
+        step1Timer.then(() => ({ type: 'timer' })),
+      ]);
 
-      // Short delay before step 2
+      // Mark step 1 as complete (AI update visual is done)
+      setSendStep1Status('complete');
       await new Promise(resolve => setTimeout(resolve, 500));
       setSendStep2Status('processing');
 
+      // If the API already returned, use it. Otherwise wait for it now.
+      let response;
+      if (raceResult.type === 'api') {
+        response = raceResult.resp;
+      } else {
+        // Timer won the race - wait for the actual API response now
+        response = await apiPromise;
+      }
+
       // Step 2: QBO Bill + Route to approver
       if (response.ok) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         setSendStep2Status('complete');
-        // Modal will auto-dismiss and we navigate back
       } else {
         setSendStep2Status('error');
         setSendStep2Error(response.error || 'Failed to send for approval');
