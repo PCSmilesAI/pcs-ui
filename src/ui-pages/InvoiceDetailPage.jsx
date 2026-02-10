@@ -3445,31 +3445,6 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
             )}
           </div>
 
-          {/* Apply Coding Template Section (Admin/AP only - hidden from Office Managers) */}
-          {permissions.canUseTemplates && !invoice?.is_multi_location && (
-            <div style={sectionStyle}>
-              <h2 style={sectionTitleStyle}>Apply Coding Template</h2>
-              <CodingTemplateSelector
-                invoiceId={invoiceIdentifier}
-                vendorName={invoice?.vendor || invoice?.vendor_name}
-                isMultiLocation={invoice?.is_multi_location}
-                onApplied={async () => {
-                  // Reload invoice to get allocations
-                  const response = await fetch(`/api/invoices/${invoiceIdentifier}`);
-                  if (response.ok) {
-                    const data = await response.json();
-                    if (data.invoice) {
-                      // Update invoice state
-                      setAllocations(data.allocations || []);
-                      setTemplate(data.template || null);
-                      showToast('Template applied successfully!', 'success');
-                    }
-                  }
-                }}
-              />
-            </div>
-          )}
-
           {/* Template Allocations Section */}
           {(invoice?.is_multi_location || allocations.length > 0) && (
             <div style={sectionStyle}>
