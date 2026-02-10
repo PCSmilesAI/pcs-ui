@@ -111,7 +111,11 @@ export async function GET(req: NextRequest) {
       }
     } else if (Array.isArray(vendorAccess)) {
       // User only sees invoices from specific vendors (e.g., TC Dental Lab)
-      // Build SQL conditions that match all variations of vendor names
+      // BUT filtered by assignment: only invoices assigned to them OR in to_be_paid/paid/completed
+      // This ensures:
+      //   - New incoming invoices (assigned to verifier) → verifier sees them
+      //   - After verifier sends → reassigned to approver → verifier no longer sees
+      //   - After approver approves (to_be_paid) → BOTH verifier and approver see
       
       if (vendorAccess.length === 0) {
         return NextResponse.json({ ok: true, count: 0, invoices: [] });
@@ -125,18 +129,29 @@ export async function GET(req: NextRequest) {
         
         // TC Dental Lab has many variations: "TC Dental", "TC Dental Lab", "TC Dental Laboratory, Inc.", etc.
         if (normalized === 'tc dental lab') {
-          // Match any vendor name starting with "tc dental" (case-insensitive)
           vendorConditions.push(`LOWER(vendor_name) LIKE 'tc dental%'`);
           vendorConditions.push(`LOWER(vendor_name) LIKE 'tc_dental%'`);
           vendorConditions.push(`LOWER(vendor_name) LIKE 'tcdental%'`);
         } else {
-          // For other vendors, use exact match on normalized name
           vendorConditions.push(`LOWER(REPLACE(REPLACE(vendor_name, '_', ' '), '  ', ' ')) = ?`);
           params.push(normalized);
         }
       }
       
-      query += ` AND (${vendorConditions.join(' OR ')})`;
+      const vendorFilter = vendorConditions.join(' OR ');
+      
+      // Must match vendor AND (assigned to this user OR in shared payment statuses)
+      if (hasReassignmentColumn) {
+        query += ` AND (${vendorFilter}) AND (
+          LOWER(current_assigned_user_email) = ?
+          OR current_assigned_user_email IS NULL
+          OR current_assigned_user_email = ''
+          OR status IN ('to_be_paid', 'paid', 'completed')
+        )`;
+        params.push(normalizedUserEmail);
+      } else {
+        query += ` AND (${vendorFilter})`;
+      }
     } else {
       // vendorAccess === '*' - Full access (developer account)
       // Role-based filtering for admins/AP
