@@ -2777,7 +2777,6 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
           gap: '12px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
         }}>
-          <span style={{ fontSize: '22px' }}>📄</span>
           <div>
             <span style={{ fontWeight: '600', color: '#2b6cb0', fontSize: '15px' }}>
               This is invoice {invoice.document_invoice_index} of {invoice.document_invoice_total}
