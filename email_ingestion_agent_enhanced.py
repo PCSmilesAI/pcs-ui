@@ -725,12 +725,13 @@ def check_inbox(full_scan=False):
         # When ACTIVE_VENDOR_FILTER is set, use IMAP server-side search to dramatically
         # reduce the number of emails we need to download (instead of fetching all 2000+)
         if ACTIVE_VENDOR_FILTER:
-            # Build IMAP OR search for each vendor keyword in SUBJECT or FROM
+            # Build IMAP search for each vendor keyword in SUBJECT or FROM
+            # Include UNSEEN to only find unread emails (processed emails are marked as read)
             all_uids = set()
             for vendor_keyword in ACTIVE_VENDOR_FILTER:
                 for field in ['SUBJECT', 'FROM']:
                     try:
-                        status, messages = mail.uid('search', None, field, f'"{vendor_keyword}"')
+                        status, messages = mail.uid('search', None, 'UNSEEN', field, f'"{vendor_keyword}"')
                         if status == 'OK' and messages[0]:
                             for uid in messages[0].split():
                                 all_uids.add(uid)
