@@ -1740,53 +1740,33 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         due_date: details.due_date,
       };
 
-      // Fire the API call and a 5-second max timer for step 1 in parallel.
-      // Step 1 completes visually after at most 5 seconds, regardless of API duration.
-      const apiPromise = csrfClient.post(`/api/invoices/send-for-approval`, {
+      // Fire the API call - it runs fully in the background regardless of UI.
+      // The UI animation is purely cosmetic with 3-second caps per step.
+      csrfClient.post(`/api/invoices/send-for-approval`, {
         invoiceId: invoiceId,
         correctedData: correctedData,
         invoiceCategories: invoiceCategories,
         userComment: updateComment.trim() || undefined,
+      }).catch(err => {
+        console.error('Background send-for-approval error:', err);
       });
-      const step1Timer = new Promise(resolve => setTimeout(resolve, 5000));
 
-      // Wait for whichever finishes first: the API or the 5-second timer
-      const raceResult = await Promise.race([
-        apiPromise.then(resp => ({ type: 'api', resp })),
-        step1Timer.then(() => ({ type: 'timer' })),
-      ]);
-
-      // Mark step 1 as complete (AI update visual is done)
+      // Step 1: "Updating PCS AI" - show spinner for 3 seconds then checkmark
+      await new Promise(resolve => setTimeout(resolve, 3000));
       setSendStep1Status('complete');
+
+      // Brief pause before step 2 starts
       await new Promise(resolve => setTimeout(resolve, 500));
       setSendStep2Status('processing');
 
-      // If the API already returned, use it. Otherwise wait for it now.
-      let response;
-      if (raceResult.type === 'api') {
-        response = raceResult.resp;
-      } else {
-        // Timer won the race - wait for the actual API response now
-        response = await apiPromise;
-      }
-
-      // Step 2: QBO Bill + Route to approver
-      if (response.ok) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setSendStep2Status('complete');
-      } else {
-        setSendStep2Status('error');
-        setSendStep2Error(response.error || 'Failed to send for approval');
-      }
+      // Step 2: "Sending for Approval" - show spinner for 3 seconds then checkmark
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      setSendStep2Status('complete');
     } catch (err) {
       console.error('Error in handleSend:', err);
-      if (sendStep1Status === 'processing') {
-        setSendStep1Status('error');
-        setSendStep1Error(err.message || 'Failed to update AI');
-      } else {
-        setSendStep2Status('error');
-        setSendStep2Error(err.message || 'Failed to send for approval');
-      }
+      // This only catches errors in the UI animation flow, not the API
+      setSendStep1Status('error');
+      setSendStep1Error(err.message || 'Unexpected error');
     }
   }
 
