@@ -217,12 +217,12 @@ function testAdminAccessControl() {
   try {
     const ADMIN_EMAILS = new Set([
       'business@pcsmilesai.com',
-      'mckaym@pacificcrestsmiles.com',
+      'mckaym@pcsmiles.com',
     ]);
     
     const testCases = [
       { email: 'business@pcsmilesai.com', shouldBeAdmin: true },
-      { email: 'mckaym@pacificcrestsmiles.com', shouldBeAdmin: true },
+      { email: 'mckaym@pcsmiles.com', shouldBeAdmin: true },
       { email: 'user1@test.com', shouldBeAdmin: false },
       { email: 'user2@test.com', shouldBeAdmin: false },
     ];
@@ -286,7 +286,7 @@ function testEmailValidation() {
     
     const validEmails = [
       'user@example.com',
-      'mckaym@pacificcrestsmiles.com',
+      'mckaym@pcsmiles.com',
       'business@pcsmilesai.com',
     ];
     
