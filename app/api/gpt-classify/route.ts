@@ -45,8 +45,10 @@ function resolvePdfPath(pdfPath: string): string | null {
     return null;
   }
 
-  // Try multiple possible locations
+  // Try multiple possible locations (including PCS_DATA_DIR which may differ from cwd)
+  const dataDir = process.env.PCS_DATA_DIR || path.join(process.cwd(), 'pcs_ui_data');
   const possiblePaths = [
+    path.join(dataDir, 'email_invoices', filename),
     path.join(process.cwd(), 'pcs_ui_data', 'email_invoices', filename),
     path.join(process.cwd(), 'email_invoices', filename),
     path.join(process.cwd(), 'public', 'email_invoices', filename),
@@ -56,7 +58,8 @@ function resolvePdfPath(pdfPath: string): string | null {
 
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) {
-      if (isPathWithinBase(p, process.cwd())) {
+      // Allow paths within cwd OR within the configured data directory
+      if (isPathWithinBase(p, process.cwd()) || isPathWithinBase(p, dataDir)) {
         return p;
       }
     }
