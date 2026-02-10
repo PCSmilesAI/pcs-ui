@@ -157,6 +157,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   // NEW: Verifier workflow state (for users with specific vendor access like Laura)
   const [isVerifier, setIsVerifier] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
+  const [showSendRouteChoice, setShowSendRouteChoice] = useState(false);
   const [sendStep1Status, setSendStep1Status] = useState('idle'); // 'idle' | 'processing' | 'complete' | 'error'
   const [sendStep2Status, setSendStep2Status] = useState('idle');
   const [sendStep1Error, setSendStep1Error] = useState(null);
@@ -1702,8 +1703,8 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   }
 
   // Handle "Send" button for verifiers (Laura's workflow)
-  // This does three things: 1) Train AI, 2) Create QBO bill, 3) Route to McKay for approval
-  async function handleSend() {
+  // Shows routing choice modal first, then proceeds with the selected destination
+  function handleSend() {
     // Check if allocation is fully matched before allowing send
     const tolerance = 0.01;
     if (Math.abs(allocationSummary.unallocated) > tolerance) {
@@ -1716,6 +1717,16 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       showToast('Missing invoice identifier', 'error');
       return;
     }
+
+    // Show the routing choice modal
+    setShowSendRouteChoice(true);
+  }
+
+  // Called after Laura picks a routing destination
+  async function handleSendToDestination(destination) {
+    setShowSendRouteChoice(false);
+
+    const invoiceId = invoice?.id || invoice?.invoice_number;
 
     // Show the progress modal
     setShowSendModal(true);
@@ -1742,11 +1753,13 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
 
       // Fire the API call - it runs fully in the background regardless of UI.
       // The UI animation is purely cosmetic with 3-second caps per step.
+      // destination: 'mckay' sends to McKay, 'office_manager' sends to the office manager
       csrfClient.post(`/api/invoices/send-for-approval`, {
         invoiceId: invoiceId,
         correctedData: correctedData,
         invoiceCategories: invoiceCategories,
         userComment: updateComment.trim() || undefined,
+        destination: destination, // 'mckay' or 'office_manager'
       }).catch(err => {
         console.error('Background send-for-approval error:', err);
       });
@@ -4582,6 +4595,107 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 {creatingTemplate ? 'Creating...' : 'Save Template'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Send Routing Choice Modal */}
+      {showSendRouteChoice && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '420px',
+            width: '90%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#111827', marginBottom: '8px', textAlign: 'center' }}>
+              Send Invoice for Approval
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '24px', textAlign: 'center' }}>
+              Where would you like to send this invoice?
+            </p>
+
+            {/* McKay option */}
+            <button
+              onClick={() => handleSendToDestination('mckay')}
+              style={{
+                width: '100%',
+                padding: '14px 20px',
+                marginBottom: '12px',
+                backgroundColor: '#357ab2',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '15px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#2a6190'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#357ab2'}
+            >
+              <span style={{ fontSize: '20px' }}>👤</span>
+              <div style={{ textAlign: 'left' }}>
+                <div>Send to McKay</div>
+                <div style={{ fontSize: '12px', fontWeight: 400, opacity: 0.85 }}>Admin approval</div>
+              </div>
+            </button>
+
+            {/* Office Manager option */}
+            <button
+              onClick={() => handleSendToDestination('office_manager')}
+              style={{
+                width: '100%',
+                padding: '14px 20px',
+                marginBottom: '16px',
+                backgroundColor: '#f3f4f6',
+                color: '#6b7280',
+                border: '2px dashed #d1d5db',
+                borderRadius: '12px',
+                fontSize: '15px',
+                fontWeight: 600,
+                cursor: 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                opacity: 0.6,
+              }}
+              disabled
+            >
+              <span style={{ fontSize: '20px' }}>🏢</span>
+              <div style={{ textAlign: 'left' }}>
+                <div>Send to Office Manager{details?.office ? ` (${details.office})` : ''}</div>
+                <div style={{ fontSize: '12px', fontWeight: 400 }}>Coming soon</div>
+              </div>
+            </button>
+
+            {/* Cancel */}
+            <button
+              onClick={() => setShowSendRouteChoice(false)}
+              style={{
+                width: '100%',
+                padding: '10px',
+                backgroundColor: 'transparent',
+                color: '#6b7280',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}

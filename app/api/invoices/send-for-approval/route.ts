@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { invoiceId, correctedData, invoiceCategories, userComment } = body;
+    const { invoiceId, correctedData, invoiceCategories, userComment, destination } = body;
 
     if (!invoiceId) {
       return NextResponse.json({ error: 'Missing invoiceId' }, { status: 400 });
@@ -174,8 +174,19 @@ export async function POST(req: NextRequest) {
       qboBillResult = { success: false, error: qboErr.message };
     }
 
-    // Step 4: Route to approver (McKay)
-    const approverEmail = getApprovalDestination();
+    // Step 4: Route to approver based on destination choice
+    let approverEmail: string;
+    if (destination === 'office_manager') {
+      // Future: route to the office manager for the invoice's location
+      // For now, fall back to McKay since office manager accounts don't exist yet
+      // TODO: look up office manager email from office_info.json based on invoice.office_location
+      approverEmail = getApprovalDestination();
+      console.log('[API][SEND-FOR-APPROVAL]', 'office_manager_not_available_fallback_to_admin', { invoiceId });
+    } else {
+      // Default: route to McKay (admin approval)
+      approverEmail = getApprovalDestination();
+    }
+    
     invoice.current_assigned_user_email = approverEmail;
     invoice.status = 'awaiting_admin_approval';
     
@@ -188,6 +199,7 @@ export async function POST(req: NextRequest) {
     
     console.log('[API][SEND-FOR-APPROVAL]', 'success', { 
       invoiceId, 
+      destination: destination || 'mckay',
       assignedTo: approverEmail,
       newStatus: invoice.status,
       qboBillCreated: qboBillResult?.success
