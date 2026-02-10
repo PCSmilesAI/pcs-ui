@@ -83,17 +83,19 @@ export async function POST(req: NextRequest) {
       
       // Insert new categories
       const insertStmt = db.prepare(`
-        INSERT INTO invoice_categories (invoice_id, category_name, class_name, amount_cents, percentage, confidence_score, source, sequence)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO invoice_categories (id, invoice_id, category_id, category_name, class_name, amount_cents, confidence_score, source, sequence)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       
+      const { randomUUID } = require('crypto');
       invoiceCategories.forEach((cat: any, index: number) => {
         insertStmt.run(
+          randomUUID(),
           invoice.id,
+          cat.category_id || cat.categoryId || '52210',
           cat.category_name || cat.categoryName || null,
           cat.class_name || cat.className || null,
           cat.amount_cents || cat.amountCents || null,
-          cat.percentage || null,
           cat.confidence_score || cat.confidenceScore || 0.9,
           'user_correction',
           index
