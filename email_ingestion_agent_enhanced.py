@@ -633,7 +633,7 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
             # Parse invoice with PCS AI and save to database
             result = parse_invoice_with_gpt(filepath, detected_vendor)
             if result and result.get("success"):
-                log(f"📦 Parsed invoice with PCS AI: {result.get('vendor', 'Unknown')} - ${result.get('amount', 0):.2f}")
+                log(f"📦 Parsed invoice with PCS AI: {result.get('vendor', 'Unknown')} - ${(result.get('amount') or 0):.2f}")
                 return True
             elif result and result.get("skipped"):
                 log(f"📦 Invoice skipped (already exists): {os.path.basename(filepath)}")
