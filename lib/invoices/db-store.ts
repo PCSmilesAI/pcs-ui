@@ -78,6 +78,9 @@ export function saveInvoice(invoice: InvoiceRecord): void {
       stripe_transfer_id = ?,
       qbo_bill_id = ?,
       qbo_bill_created_at = ?,
+      current_assigned_user_email = ?,
+      verified_by_user_id = ?,
+      verified_at = ?,
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `).run(
@@ -104,6 +107,9 @@ export function saveInvoice(invoice: InvoiceRecord): void {
     invoice.stripe_transfer_id || null,
     invoice.qbo_bill_id || null,
     invoice.qbo_bill_created_at || null,
+    invoice.current_assigned_user_email || null,
+    invoice.verified_by_user_id || null,
+    invoice.verified_at || null,
     invoice.id
   );
 }
