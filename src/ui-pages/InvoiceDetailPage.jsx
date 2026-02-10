@@ -140,6 +140,9 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   // Reparse State (for invoices with parsing errors)
   const [reparsing, setReparsing] = useState(false);
   const [reparseResult, setReparseResult] = useState(null);
+
+  // Split invoice state (for splitting multi-invoice PDFs)
+  const [splitting, setSplitting] = useState(false);
   
   // Scan & Reparse State (for post-update scanning of similar invoices)
   const [scanningInvoices, setScanningInvoices] = useState(false);
@@ -1830,6 +1833,39 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     }
   }
 
+  // Handle splitting a multi-invoice PDF into individual invoices
+  async function handleSplitInvoice() {
+    const invoiceId = invoice?.id || invoice?.invoice_number;
+    if (!invoiceId) {
+      showToast('Missing invoice identifier', 'error');
+      return;
+    }
+
+    setSplitting(true);
+    try {
+      const response = await csrfClient.post(`/api/invoices/${encodeURIComponent(invoiceId)}/reparse`, {});
+
+      if (!response.ok) {
+        throw new Error(response.error || 'Split failed');
+      }
+
+      const result = response.data;
+
+      if (result.multi_invoice) {
+        showToast(`Document split into ${result.invoices_created} invoices`, 'success');
+        // Original invoice is soft-deleted, navigate back to list
+        setTimeout(() => onBack?.(), 1500);
+      } else {
+        showToast('No additional invoices detected in this document', 'info');
+      }
+    } catch (err) {
+      console.error('Split error:', err);
+      showToast(`Split failed: ${err.message}`, 'error');
+    } finally {
+      setSplitting(false);
+    }
+  }
+
   // Open the Update confirmation modal
   function handleUpdateClick() {
     setShowUpdateModal(true);
@@ -2703,63 +2739,108 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         </div>
       )}
 
-      {/* NEW: Send to: Reassignment UI */}
-      {reassignmentTargets.length > 0 && (
+      {/* Send-to row: left-aligned Send-to pill + right-aligned Split button */}
+      {(reassignmentTargets.length > 0 || !invoice?.document_group_id) && (
         <div style={{
           display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
-          gap: '12px',
-          marginBottom: '24px',
-          padding: '12px',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '12px',
-          border: '1px solid #e0e0e0',
+          marginBottom: '16px',
         }}>
-          <label style={{ fontWeight: '500', color: '#4a5568', whiteSpace: 'nowrap' }}>
-            Send to:
-          </label>
-          <select
-            value={selectedReassignmentTarget?.email || ''}
-            onChange={(e) => {
-              const target = reassignmentTargets.find(t => t.email === e.target.value);
-              setSelectedReassignmentTarget(target || null);
-            }}
-            style={{
-              padding: '8px 12px',
+          {/* Left side: Send-to controls (fit-content width) */}
+          {reassignmentTargets.length > 0 ? (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              backgroundColor: '#f8f9fa',
               borderRadius: '12px',
-              border: '1px solid #cbd5e0',
-              fontSize: '14px',
-              backgroundColor: '#ffffff',
-              cursor: 'pointer',
-              flex: 1,
-              maxWidth: '300px',
-            }}
-          >
-            <option value="">-- Select a destination --</option>
-            {reassignmentTargets.map((target) => (
-              <option key={target.email} value={target.email}>
-                {target.name}
-              </option>
-            ))}
-          </select>
-          {selectedReassignmentTarget && (
-            <button
-              onClick={handleReassignInvoice}
-              disabled={reassigningInvoice}
+              border: '1px solid #e0e0e0',
+              width: 'fit-content',
+            }}>
+              <label style={{ fontWeight: '500', color: '#4a5568', whiteSpace: 'nowrap' }}>
+                Send to:
+              </label>
+              <select
+                value={selectedReassignmentTarget?.email || ''}
+                onChange={(e) => {
+                  const target = reassignmentTargets.find(t => t.email === e.target.value);
+                  setSelectedReassignmentTarget(target || null);
+                }}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '12px',
+                  border: '1px solid #cbd5e0',
+                  fontSize: '14px',
+                  backgroundColor: '#ffffff',
+                  cursor: 'pointer',
+                  maxWidth: '300px',
+                }}
+              >
+                <option value="">-- Select a destination --</option>
+                {reassignmentTargets.map((target) => (
+                  <option key={target.email} value={target.email}>
+                    {target.name}
+                  </option>
+                ))}
+              </select>
+              {selectedReassignmentTarget && (
+                <button
+                  onClick={handleReassignInvoice}
+                  disabled={reassigningInvoice}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    border: '1px solid #059669',
+                    backgroundColor: '#059669',
+                    color: '#ffffff',
+                    cursor: reassigningInvoice ? 'not-allowed' : 'pointer',
+                    opacity: reassigningInvoice ? 0.6 : 1,
+                  }}
+                >
+                  {reassigningInvoice ? 'Sending...' : 'Send'}
+                </button>
+              )}
+            </div>
+          ) : <div />}
+
+          {/* Right side: Split button in blue pill badge (only when not already split) */}
+          {!invoice?.document_group_id && (
+            <div
               style={{
-                padding: '8px 16px',
+                backgroundColor: '#ebf8ff',
+                border: '1px solid #90cdf4',
                 borderRadius: '12px',
-                fontSize: '14px',
-                fontWeight: '500',
-                border: '1px solid #059669',
-                backgroundColor: '#059669',
-                color: '#ffffff',
-                cursor: reassigningInvoice ? 'not-allowed' : 'pointer',
-                opacity: reassigningInvoice ? 0.6 : 1,
+                padding: '8px 4px 8px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                width: 'fit-content',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
               }}
             >
-              {reassigningInvoice ? 'Sending...' : 'Send'}
-            </button>
+              <button
+                onClick={handleSplitInvoice}
+                disabled={splitting}
+                title="Split if the PDF below contains multiple invoices"
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  border: 'none',
+                  backgroundColor: '#2b6cb0',
+                  color: '#ffffff',
+                  cursor: splitting ? 'not-allowed' : 'pointer',
+                  opacity: splitting ? 0.6 : 1,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {splitting ? 'Splitting...' : 'Split'}
+              </button>
+            </div>
           )}
         </div>
       )}
