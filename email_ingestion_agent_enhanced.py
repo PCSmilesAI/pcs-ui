@@ -106,7 +106,7 @@ def flush_logs():
 def reload_config():
     """Reload configuration from environment variables (called on SIGHUP)"""
     global _config
-    new_interval = int(os.environ.get("INBOX_SCAN_INTERVAL_MS", "60000"))
+    new_interval = int(os.environ.get("INBOX_SCAN_INTERVAL_MS", "10000"))
     if new_interval != _config["interval_ms"]:
         log(f"[INBOX][CONFIG][RELOAD] Interval changed: {_config['interval_ms']}ms → {new_interval}ms")
         _config["interval_ms"] = new_interval
