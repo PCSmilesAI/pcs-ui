@@ -2814,9 +2814,10 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 backgroundColor: '#ebf8ff',
                 border: '1px solid #90cdf4',
                 borderRadius: '12px',
-                padding: '8px 4px 8px 12px',
+                padding: '6px',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 width: 'fit-content',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
               }}
