@@ -20,8 +20,9 @@ function resolvePdfPath(pdfPath: string): string | null {
   if (!pdfPath) return null;
 
   // If already absolute and exists, validate and return
+  const dataDir = process.env.PCS_DATA_DIR || path.join(process.cwd(), 'pcs_ui_data');
   if (path.isAbsolute(pdfPath) && fs.existsSync(pdfPath)) {
-    if (isPathWithinBase(pdfPath, process.cwd())) {
+    if (isPathWithinBase(pdfPath, process.cwd()) || isPathWithinBase(pdfPath, dataDir)) {
       return pdfPath;
     }
     return null;
@@ -46,7 +47,6 @@ function resolvePdfPath(pdfPath: string): string | null {
   }
 
   // Try multiple possible locations (including PCS_DATA_DIR which may differ from cwd)
-  const dataDir = process.env.PCS_DATA_DIR || path.join(process.cwd(), 'pcs_ui_data');
   const possiblePaths = [
     path.join(dataDir, 'email_invoices', filename),
     path.join(process.cwd(), 'pcs_ui_data', 'email_invoices', filename),
