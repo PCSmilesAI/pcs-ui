@@ -109,8 +109,11 @@ const HARDCODED_VENDOR_ACCOUNTS: Record<string, string> = {
   'berman fink van horn p.c.': '53360 Professional Fees',
   'berman fink van horn': '53360 Professional Fees',
   'henry schein inc': '10210 Dental Supplies Inventory',
-  'tc dental': '10210 Dental Supplies Inventory',
+  'tc dental': '52210 Dental Lab Fees',
+  'tc dental lab': '52210 Dental Lab Fees',
   'tc dental laboratory': '52210 Dental Lab Fees',
+  'tc dental laboratory, inc.': '52210 Dental Lab Fees',
+  'tc dental laboratory inc': '52210 Dental Lab Fees',
   'glidewell': '52210 Dental Lab Fees',
   'glidewell dental': '52210 Dental Lab Fees',
   
