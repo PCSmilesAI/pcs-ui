@@ -172,7 +172,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         setBatchPaymentId('');
         setShortBatchCode('');
 
-        const invoiceIds = selectedRows.map(r => r.invoice_number || r.invoice);
+        const invoiceIds = selectedRows.map(r => r.id || r.invoice_number || r.invoice);
         
         // Fetch QBO Bill Pay URLs for all selected invoices
         const paymentRes = await fetch('/api/invoices/pay', {
@@ -204,6 +204,22 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           return;
         }
 
+        // SINGLE INVOICE: redirect directly to the specific QBO bill
+        if (validResults.length === 1) {
+          setBatchModalState('hidden');
+          const singleResult = validResults[0];
+          showToast('Opening QuickBooks bill...', 'success');
+          window.open(singleResult.payUrl, '_blank', 'noopener,noreferrer');
+          setTimeout(() => {
+            showToast('Complete payment in QuickBooks. The invoice status will update automatically.', 'info');
+          }, 1500);
+          if (failedResults.length > 0) {
+            showToast(`1 ready for payment, ${failedResults.length} not ready`, 'warning');
+          }
+          return;
+        }
+
+        // MULTIPLE INVOICES: use batch flow with short code for QBO search
         // Store all invoice IDs for verification later
         const allIds = validResults.map(r => r.invoiceId || r.invoiceNumber);
         setAllBatchInvoiceIds(allIds);
