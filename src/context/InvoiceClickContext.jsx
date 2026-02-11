@@ -10,8 +10,8 @@ export function InvoiceClickProvider({ children }) {
   const handleInvoiceRowClick = (invoice) => {
     console.log('🔍 InvoiceClickContext: Invoice clicked:', invoice);
     
-    // Always use the unique UUID id - invoice_number is not unique across vendors
-    const identifier = invoice?.id;
+    // Prefer UUID id, fall back to invoice_number for resilience
+    const identifier = invoice?.id || invoice?.invoice_number;
     
     console.log('🔍 InvoiceClickContext: Using identifier:', {
       invoice_number: invoice?.invoice_number,
