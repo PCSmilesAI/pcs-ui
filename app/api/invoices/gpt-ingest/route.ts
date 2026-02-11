@@ -342,7 +342,7 @@ export async function POST(req: NextRequest) {
         
         // Auto-categorize
         try {
-          const { categorizeInvoice, storeInvoiceCategories } = await import('@/lib/invoices/categoryParser');
+          const { categorizeInvoice, storeInvoiceCategories, mapLocationToClass } = await import('@/lib/invoices/categoryParser');
           const lineItems = (parsed.line_items || []).map(item => ({
             description: item.description || '',
             quantity: item.quantity ?? undefined,
@@ -353,6 +353,17 @@ export async function POST(req: NextRequest) {
             { vendor_name: normalizedVendor, line_items: lineItems },
             normalizedVendor
           );
+          // Auto-fill class from parsed office_location if not already set
+          const officeLocation = parsed.office_location || '';
+          const classFromLocation = mapLocationToClass(officeLocation);
+          if (classFromLocation) {
+            for (const cat of categories) {
+              if (!cat.className) {
+                cat.className = classFromLocation;
+                cat.classId = classFromLocation;
+              }
+            }
+          }
           await storeInvoiceCategories(id, categories);
         } catch (err: any) {
           console.warn('[PCS_AI_INGEST] Failed to auto-categorize:', err?.message);
@@ -508,7 +519,7 @@ export async function POST(req: NextRequest) {
 
     // Auto-categorize invoice
     try {
-      const { categorizeInvoice, storeInvoiceCategories } = await import('@/lib/invoices/categoryParser');
+      const { categorizeInvoice, storeInvoiceCategories, mapLocationToClass } = await import('@/lib/invoices/categoryParser');
       // Convert line items to expected format (handle null values)
       const lineItems = (parsed.line_items || []).map(item => ({
         description: item.description || '',
@@ -523,10 +534,22 @@ export async function POST(req: NextRequest) {
         },
         normalizedVendor
       );
+      // Auto-fill class from parsed office_location if not already set
+      const officeLocation = parsed.office_location || '';
+      const classFromLocation = mapLocationToClass(officeLocation);
+      if (classFromLocation) {
+        for (const cat of categories) {
+          if (!cat.className) {
+            cat.className = classFromLocation;
+            cat.classId = classFromLocation;
+          }
+        }
+      }
       await storeInvoiceCategories(id, categories);
       console.log('[PCS_AI_INGEST] Auto-categorized invoice', {
         invoiceId: id,
         categories: categories.map(c => c.categoryName),
+        classFromLocation,
       });
     } catch (err: any) {
       console.warn('[PCS_AI_INGEST] Failed to auto-categorize:', err?.message);
