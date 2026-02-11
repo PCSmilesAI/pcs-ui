@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { fetchQboCategories } from '../lib/categoriesClient';
 import ACHBadge from '../ui/ach/ACHBadge';
@@ -158,6 +158,10 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   const [isVerifier, setIsVerifier] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
   const [showSendRouteChoice, setShowSendRouteChoice] = useState(false);
+  const [showChangeDescriptionModal, setShowChangeDescriptionModal] = useState(false);
+  const [changeDescription, setChangeDescription] = useState('');
+  // Track original field values to detect edits
+  const originalValuesRef = useRef(null);
   const [sendStep1Status, setSendStep1Status] = useState('idle'); // 'idle' | 'processing' | 'complete' | 'error'
   const [sendStep2Status, setSendStep2Status] = useState('idle');
   const [sendStep1Error, setSendStep1Error] = useState(null);
@@ -184,14 +188,21 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
             ? `$${(amountCents / 100).toFixed(2)}`
             : (data.invoice.amount || data.invoice.total || '');
           setPaymentAmount(newAmount);
-          setDetails({
+          const refreshedDetails = {
             invoice: data.invoice.invoice_number || data.invoice.invoice || '',
             vendor: data.invoice.vendor_name || data.invoice.vendor || '',
             office: data.invoice.office_id || data.invoice.office || '',
             category: data.invoice.category || 'Dental Lab',
             invoice_date: data.invoice.invoice_date || '',
             due_date: data.invoice.due_date || '',
-          });
+          };
+          setDetails(refreshedDetails);
+          // Reset original values after refresh so edit detection starts fresh
+          originalValuesRef.current = {
+            _invoiceId: data.invoice.id,
+            details: { ...refreshedDetails },
+            amount: newAmount,
+          };
           if (data.allocations) {
             setAllocations(data.allocations);
           }
@@ -372,14 +383,24 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       : (invoice?.amount || invoice?.total || '');
     setPaymentAmount(amountDisplay);
 
-    setDetails({
+    const newDetails = {
       invoice: invoice?.invoice_number || invoice?.invoice || '',
       vendor: invoice?.vendor_name || invoice?.vendor || '',
       office: invoice?.office_id || invoice?.office || '',
       category: invoice?.category || 'Dental Lab',
       invoice_date: invoice?.invoice_date || '',
       due_date: invoice?.due_date || '',
-    });
+    };
+    setDetails(newDetails);
+
+    // Store original values for edit detection (only set once per invoice load)
+    if (!originalValuesRef.current || originalValuesRef.current._invoiceId !== invoice?.id) {
+      originalValuesRef.current = {
+        _invoiceId: invoice?.id,
+        details: { ...newDetails },
+        amount: amountDisplay,
+      };
+    }
   }, [invoice]);
 
   // Reset PDF load state when invoice changes
@@ -1702,8 +1723,27 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     transitionInvoice('reject');
   }
 
+  // Detect if the user has edited any fields compared to original values
+  function hasFieldEdits() {
+    if (!originalValuesRef.current) {
+      console.log('[EDIT_DETECT] No original values stored yet');
+      return false;
+    }
+    const orig = originalValuesRef.current;
+    const edits = [];
+    if (orig.details.invoice !== details.invoice) edits.push(`invoice: "${orig.details.invoice}" → "${details.invoice}"`);
+    if (orig.details.vendor !== details.vendor) edits.push(`vendor: "${orig.details.vendor}" → "${details.vendor}"`);
+    if (orig.details.office !== details.office) edits.push(`office: "${orig.details.office}" → "${details.office}"`);
+    if (orig.details.invoice_date !== details.invoice_date) edits.push(`invoice_date: "${orig.details.invoice_date}" → "${details.invoice_date}"`);
+    if (orig.details.due_date !== details.due_date) edits.push(`due_date: "${orig.details.due_date}" → "${details.due_date}"`);
+    if (orig.amount !== paymentAmount) edits.push(`amount: "${orig.amount}" → "${paymentAmount}"`);
+    if (glLinesModified) edits.push('GL lines modified');
+    console.log('[EDIT_DETECT] Field edits detected:', edits.length > 0 ? edits : 'none');
+    return edits.length > 0;
+  }
+
   // Handle "Send" button for verifiers (Laura's workflow)
-  // Shows routing choice modal first, then proceeds with the selected destination
+  // If fields were edited, ask for a description first, then show routing choice
   function handleSend() {
     // Check if allocation is fully matched before allowing send
     const tolerance = 0.01;
@@ -1718,7 +1758,21 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       return;
     }
 
-    // Show the routing choice modal
+    // If user edited fields, ask for a description of changes first
+    if (hasFieldEdits()) {
+      setChangeDescription('');
+      setShowChangeDescriptionModal(true);
+      return;
+    }
+
+    // No edits - go straight to routing choice
+    setShowSendRouteChoice(true);
+  }
+
+  // Called after user submits their change description
+  function handleChangeDescriptionSubmit() {
+    setShowChangeDescriptionModal(false);
+    // Proceed to routing choice
     setShowSendRouteChoice(true);
   }
 
@@ -1758,7 +1812,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         invoiceId: invoiceId,
         correctedData: correctedData,
         invoiceCategories: invoiceCategories,
-        userComment: updateComment.trim() || undefined,
+        userComment: changeDescription.trim() || updateComment.trim() || undefined,
         destination: destination, // 'mckay' or 'office_manager'
       }).catch(err => {
         console.error('Background send-for-approval error:', err);
@@ -4593,6 +4647,93 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 }}
               >
                 {creatingTemplate ? 'Creating...' : 'Save Template'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Description Modal - shown when verifier edited fields before sending */}
+      {showChangeDescriptionModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '480px',
+            width: '90%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#111827', marginBottom: '8px', textAlign: 'center' }}>
+              Describe Your Changes
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '20px', textAlign: 'center' }}>
+              You edited fields on this invoice. Please briefly describe the changes you made so PCS AI can learn from them.
+            </p>
+
+            <textarea
+              value={changeDescription}
+              onChange={(e) => setChangeDescription(e.target.value)}
+              placeholder="e.g. Corrected the invoice date and updated the amount..."
+              rows={4}
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                border: '1px solid #d1d5db',
+                borderRadius: '10px',
+                fontSize: '14px',
+                resize: 'vertical',
+                outline: 'none',
+                fontFamily: 'inherit',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#357ab2'}
+              onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+              autoFocus
+            />
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              <button
+                onClick={() => setShowChangeDescriptionModal(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: 'transparent',
+                  color: '#6b7280',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleChangeDescriptionSubmit}
+                disabled={!changeDescription.trim()}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: changeDescription.trim() ? '#357ab2' : '#9ca3af',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: changeDescription.trim() ? 'pointer' : 'not-allowed',
+                  transition: 'background-color 0.2s',
+                }}
+                onMouseEnter={e => { if (changeDescription.trim()) e.currentTarget.style.backgroundColor = '#2a6190'; }}
+                onMouseLeave={e => { if (changeDescription.trim()) e.currentTarget.style.backgroundColor = '#357ab2'; }}
+              >
+                Continue
               </button>
             </div>
           </div>
