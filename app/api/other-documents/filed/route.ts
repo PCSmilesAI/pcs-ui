@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/db/client';
 import { getCurrentUser } from '@/lib/auth/currentUser';
-import { isAdmin, isAP } from '@/lib/workflow/rolesStore';
+import { isAdmin, isAP, getVendorAccessForUser } from '@/lib/workflow/rolesStore';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +25,9 @@ export async function GET(request: NextRequest) {
     const documentType = searchParams.get('type');
     const limit = parseInt(searchParams.get('limit') || '500', 10);
     const offset = parseInt(searchParams.get('offset') || '0', 10);
+
+    // Get vendor access for this user
+    const vendorAccess = await getVendorAccessForUser(user.email);
 
     const db = getDatabase();
 
@@ -46,6 +49,19 @@ export async function GET(request: NextRequest) {
     `;
     const params: any[] = [];
 
+    // Apply vendor_access filtering
+    if (vendorAccess === '*') {
+      // Full access - no vendor filter
+    } else if (Array.isArray(vendorAccess)) {
+      const vendorPlaceholders = vendorAccess.map(() => 'LOWER(vendor_name) LIKE ?').join(' OR ');
+      const vendorParams = vendorAccess.map(v => `%${v.toLowerCase()}%`);
+      query += ` AND (${vendorPlaceholders} OR LOWER(filed_by) = ?)`;
+      params.push(...vendorParams, user.email.toLowerCase());
+    } else if (vendorAccess === 'assigned_only') {
+      query += ` AND (LOWER(vendor_name) LIKE '%tc dental%' OR LOWER(filed_by) = ?)`;
+      params.push(user.email.toLowerCase());
+    }
+
     if (documentType) {
       query += ` AND document_type = ?`;
       params.push(documentType);
@@ -56,12 +72,25 @@ export async function GET(request: NextRequest) {
 
     const documents = db.prepare(query).all(...params) as any[];
 
-    // Get total count for pagination
+    // Get total count for pagination (with same vendor filter)
     let countQuery = `SELECT COUNT(*) as total FROM other_documents WHERE status = 'filed'`;
+    const countParams: any[] = [];
+    if (vendorAccess === '*') {
+      // no filter
+    } else if (Array.isArray(vendorAccess)) {
+      const vendorPlaceholders = vendorAccess.map(() => 'LOWER(vendor_name) LIKE ?').join(' OR ');
+      const vendorParams = vendorAccess.map(v => `%${v.toLowerCase()}%`);
+      countQuery += ` AND (${vendorPlaceholders} OR LOWER(filed_by) = ?)`;
+      countParams.push(...vendorParams, user.email.toLowerCase());
+    } else if (vendorAccess === 'assigned_only') {
+      countQuery += ` AND (LOWER(vendor_name) LIKE '%tc dental%' OR LOWER(filed_by) = ?)`;
+      countParams.push(user.email.toLowerCase());
+    }
     if (documentType) {
       countQuery += ` AND document_type = ?`;
+      countParams.push(documentType);
     }
-    const countResult = db.prepare(countQuery).get(...(documentType ? [documentType] : [])) as { total: number };
+    const countResult = db.prepare(countQuery).get(...countParams) as { total: number };
 
     return NextResponse.json({
       success: true,
