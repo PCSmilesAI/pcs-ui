@@ -712,7 +712,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
           style={{
             position: 'fixed',
             bottom: '24px',
-            right: '24px',
+            right: '88px',
             zIndex: 50,
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           }}
