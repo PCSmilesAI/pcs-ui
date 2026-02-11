@@ -12,7 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/db/client';
 import { getCurrentUser } from '@/lib/auth/currentUser';
-import { isAdmin, isAP } from '@/lib/workflow/rolesStore';
+import { isAdmin, isAP, getVendorAccessForUser } from '@/lib/workflow/rolesStore';
 import { v4 as uuidv4 } from 'uuid';
 import { type DocumentType } from '@/lib/gpt/documentClassifier';
 
@@ -65,11 +65,31 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '100');
     const offset = parseInt(searchParams.get('offset') || '0');
 
+    // Get vendor access for this user
+    const vendorAccess = await getVendorAccessForUser(user.email);
+
     const db = getDatabase();
 
     // Build query with filters
     let query = 'SELECT * FROM other_documents WHERE 1=1';
     const params: any[] = [];
+
+    // Apply vendor_access filtering
+    if (vendorAccess === '*') {
+      // Full access - no vendor filter needed
+    } else if (Array.isArray(vendorAccess)) {
+      // Specific vendor list (e.g., Laura sees TC Dental Lab docs + anything she filed)
+      const vendorPlaceholders = vendorAccess.map(() => 'LOWER(vendor_name) LIKE ?').join(' OR ');
+      const vendorParams = vendorAccess.map(v => `%${v.toLowerCase()}%`);
+      query += ` AND (${vendorPlaceholders} OR LOWER(filed_by) = ?)`;
+      params.push(...vendorParams, user.email.toLowerCase());
+      console.log('[API][OTHER-DOCS] Vendor access filter applied:', { user: user.email, vendors: vendorAccess });
+    } else if (vendorAccess === 'assigned_only') {
+      // McKay: show TC Dental docs (active vendor) + anything he filed
+      query += ` AND (LOWER(vendor_name) LIKE '%tc dental%' OR LOWER(filed_by) = ?)`;
+      params.push(user.email.toLowerCase());
+      console.log('[API][OTHER-DOCS] Assigned-only filter applied (TC Dental + own):', { user: user.email });
+    }
 
     if (documentType) {
       query += ' AND document_type = ?';
