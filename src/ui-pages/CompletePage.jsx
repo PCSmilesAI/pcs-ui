@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import InvoiceTable from '../components/InvoiceTable.jsx';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
 import { useInvoiceData } from '../context/InvoiceDataContext';
 import Toast from '../components/Toast.jsx';
@@ -12,6 +13,9 @@ import { getDisplayVendorName, parseInvoiceAmount } from '../lib/vendorUtils';
  * completed. Rows are interactive.
  */
 export default function CompletePage({ onRowClick, searchQuery = '', filters = {} }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,6 +26,19 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
   const [selectedIds, setSelectedIds] = useState(new Set());
   const getRowId = (r, i) => r.invoice_number || r.json_path || r.pdf_path || r.source_file || `${r.vendor || 'v'}_${r.invoice || 'inv'}_${r.timestamp || i}`;
+
+  // Check if any filters are active
+  const hasActiveFilters = useMemo(() => {
+    return Object.values(filters).some(value => value !== undefined && value !== null && value !== '');
+  }, [filters]);
+
+  // Reset filters function
+  const handleResetFilters = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    const filterKeys = ['vendor', 'office', 'category', 'minAmount', 'maxAmount', 'dueWithin', 'ach', 'hasAttachment'];
+    filterKeys.forEach(key => params.delete(key));
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [searchParams, router, pathname]);
 
   const showToast = useCallback((message, variant = 'info') => {
     setToast({ message, variant, at: Date.now() });
@@ -359,6 +376,48 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
           });
         }}
       />
+      {/* Reset Filters Button - Only shows when filters are active */}
+      {hasActiveFilters && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '88px',
+            zIndex: 50,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          <button
+            onClick={handleResetFilters}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              backgroundColor: '#dc2626',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '16px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#b91c1c';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#dc2626';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+            title="Clear all active filters"
+          >
+            <i className="fas fa-times-circle"></i>
+            Reset Filters
+          </button>
+        </div>
+      )}
       <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
     </div>
   );

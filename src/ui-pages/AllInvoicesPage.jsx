@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import InvoiceTable from '../components/InvoiceTable.jsx';
 import { useInvoiceClick } from '../context/InvoiceClickContext';
@@ -11,6 +11,8 @@ import { getDisplayVendorName } from '../lib/vendorUtils';
 
 export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters = {} }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const { handleInvoiceRowClick } = useInvoiceClick();
   const { setInvoices: setContextInvoices } = useInvoiceData();
   const rowClickHandler = onRowClick || handleInvoiceRowClick;
@@ -27,6 +29,19 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
     ach: searchParams.get('ach') || undefined,
     hasAttachment: searchParams.get('hasAttachment') || undefined,
   };
+
+  // Check if any filters are active
+  const hasActiveFilters = useMemo(() => {
+    return Object.values(spFilters).some(value => value !== undefined && value !== null && value !== '');
+  }, [spFilters]);
+
+  // Reset filters function
+  const handleResetFilters = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    const filterKeys = ['vendor', 'office', 'category', 'minAmount', 'maxAmount', 'dueWithin', 'ach', 'hasAttachment'];
+    filterKeys.forEach(key => params.delete(key));
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [searchParams, router, pathname]);
 
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -424,6 +439,48 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           });
         }}
       />
+      {/* Reset Filters Button - Only shows when filters are active */}
+      {hasActiveFilters && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '88px',
+            zIndex: 50,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          <button
+            onClick={handleResetFilters}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              backgroundColor: '#dc2626',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '16px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#b91c1c';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#dc2626';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+            title="Clear all active filters"
+          >
+            <i className="fas fa-times-circle"></i>
+            Reset Filters
+          </button>
+        </div>
+      )}
       <Toast message={toast?.message} variant={toast?.variant} onDismiss={dismissToast} />
     </div>
   );
