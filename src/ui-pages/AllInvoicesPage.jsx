@@ -87,6 +87,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
                 ? locations.join(', ') 
                 : (officeRaw || 'Unknown'));
           return {
+            id: invoice.id,
             invoice: invoice.invoice_number || 'Unknown',
             invoice_number: invoice.invoice_number,
             vendor: getDisplayVendorName(invoice.vendor_name || invoice.vendor),
@@ -166,6 +167,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
               ? locations.join(', ') 
               : (officeRaw || 'Unknown'));
         return {
+          id: invoice.id,
           invoice: invoice.invoice_number || 'Unknown',
           invoice_number: invoice.invoice_number,
           vendor: invoice.vendor_name || invoice.vendor || 'Unknown',
