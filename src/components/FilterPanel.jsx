@@ -24,21 +24,26 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters, invoices 
   const [ach, setAch] = React.useState('');
   const [hasAttachment, setHasAttachment] = React.useState('');
 
-  // Dynamically extract unique vendors, offices, and categories from invoices
-  const { vendors, offices, categories } = useMemo(() => {
+  // Dynamically extract unique vendors, QBO classes, and categories from invoices
+  const { vendors, qboClasses, categories } = useMemo(() => {
     const vendorSet = new Set();
-    const officeSet = new Set();
+    const classSet = new Set();
     const categorySet = new Set();
 
     invoices.forEach((inv) => {
       if (inv.vendor) vendorSet.add(inv.vendor);
-      if (inv.office) officeSet.add(inv.office);
+      // Extract QBO class names from the locations array (e.g., "General-Salem")
+      if (Array.isArray(inv.locations)) {
+        inv.locations.forEach((loc) => {
+          if (loc) classSet.add(loc);
+        });
+      }
       if (inv.category) categorySet.add(inv.category);
     });
 
     return {
       vendors: Array.from(vendorSet).sort(),
-      offices: Array.from(officeSet).sort(),
+      qboClasses: Array.from(classSet).sort(),
       categories: Array.from(categorySet).sort(),
     };
   }, [invoices]);
@@ -135,18 +140,18 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters, invoices 
             style={inputStyle}
           />
         </div>
-        {/* Office */}
+        {/* Class (QBO Classes like General-Salem, General-Milwaukie, etc.) */}
         <div>
-          <label style={labelStyle}>Office</label>
+          <label style={labelStyle}>Class</label>
           <select
             style={inputStyle}
             value={office}
             onChange={(e) => setOffice(e.target.value)}
           >
             <option value="">Choose options</option>
-            {offices.map((o) => (
-              <option key={o} value={o}>
-                {o}
+            {qboClasses.map((c) => (
+              <option key={c} value={c}>
+                {c}
               </option>
             ))}
           </select>
