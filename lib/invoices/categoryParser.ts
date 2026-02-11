@@ -18,6 +18,35 @@ export interface InvoiceCategoryAssignment {
 }
 
 /**
+ * Map parsed location names to PCS QBO class names
+ * Used to auto-populate GL Line class from invoice's parsed office_location
+ */
+export function mapLocationToClass(location: string): string {
+  if (!location) return '';
+  
+  const locationLower = location.toLowerCase().trim();
+  
+  if (locationLower.includes('columbia')) return 'General-Columbia';
+  if (locationLower.includes('eugene')) return 'General-Eugene';
+  if (locationLower.includes('lebanon')) return 'General-Lebanon';
+  if (locationLower.includes('milwaukie') || locationLower.includes('milwaukee')) return 'General-Milwaukie';
+  if (locationLower.includes('riddle')) return 'General-Riddle';
+  if (locationLower.includes('ridgefield')) return 'General-Ridgefield';
+  if (locationLower.includes('roseburg')) return 'General-Roseburg';
+  if (locationLower.includes('salem')) return 'General-Salem';
+  if (locationLower.includes('insurance')) return 'General-Insurance';
+  if (locationLower.includes('executive') || locationLower.includes('corp-exec')) return 'Corp-Executive';
+  if (locationLower.includes('finance') || locationLower.includes('corp-fin')) return 'Corp-Finance';
+  if (locationLower.includes('corp-hr') || locationLower.includes('human resources')) return 'Corp-HR';
+  if (locationLower.includes('corp-it') || locationLower.includes('information tech')) return 'Corp-IT';
+  if (locationLower.includes('rcm') || locationLower.includes('corp-rcm')) return 'Corp-RCM';
+  if (locationLower.includes('marketing') || locationLower.includes('div-market')) return 'Div-Marketing';
+  if (locationLower.includes('operations') || locationLower.includes('div-op')) return 'Div-Operations';
+  
+  return '';
+}
+
+/**
  * Extract the most specific category from a hierarchical account path
  * Example: "50000 Expenses:52000 Direct Supplies:52200 Lab Fees:52210 Dental Lab Fees"
  * Returns: "52210 Dental Lab Fees"

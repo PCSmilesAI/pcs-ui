@@ -1,37 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/db/client';
 import { v4 as uuidv4 } from 'uuid';
-import { categorizeInvoice } from '@/lib/invoices/categoryParser';
-
-/**
- * Map parsed location names to PCS class names
- * Used to auto-populate GL Line class from invoice's parsed office_location
- */
-function mapLocationToClass(location: string): string {
-  if (!location) return '';
-  
-  const locationLower = location.toLowerCase().trim();
-  
-  // Map common location names/variations to PCS classes
-  if (locationLower.includes('columbia')) return 'General-Columbia';
-  if (locationLower.includes('eugene')) return 'General-Eugene';
-  if (locationLower.includes('lebanon')) return 'General-Lebanon';
-  if (locationLower.includes('milwaukie') || locationLower.includes('milwaukee')) return 'General-Milwaukie';
-  if (locationLower.includes('riddle')) return 'General-Riddle';
-  if (locationLower.includes('ridgefield')) return 'General-Ridgefield';
-  if (locationLower.includes('roseburg')) return 'General-Roseburg';
-  if (locationLower.includes('salem')) return 'General-Salem';
-  if (locationLower.includes('insurance')) return 'General-Insurance';
-  if (locationLower.includes('executive') || locationLower.includes('corp-exec')) return 'Corp-Executive';
-  if (locationLower.includes('finance') || locationLower.includes('corp-fin')) return 'Corp-Finance';
-  if (locationLower.includes('corp-hr') || locationLower.includes('human resources')) return 'Corp-HR';
-  if (locationLower.includes('corp-it') || locationLower.includes('information tech')) return 'Corp-IT';
-  if (locationLower.includes('rcm') || locationLower.includes('corp-rcm')) return 'Corp-RCM';
-  if (locationLower.includes('marketing') || locationLower.includes('div-market')) return 'Div-Marketing';
-  if (locationLower.includes('operations') || locationLower.includes('div-op')) return 'Div-Operations';
-  
-  return '';
-}
+import { categorizeInvoice, mapLocationToClass } from '@/lib/invoices/categoryParser';
 
 interface CategoryInput {
   id?: string;
@@ -130,18 +100,37 @@ export async function GET(
     const hasAmounts = categories.some(cat => cat.amount_cents && cat.amount_cents > 0);
     const amountPerCategory = hasAmounts ? 0 : (totalAmount / (categories.length || 1));
     
-    const transformedCategories: CategoryOutput[] = categories.map((cat, idx) => ({
-      id: cat.id,
-      sequence: cat.sequence || (idx + 1),
-      categoryId: cat.category_id,
-      categoryName: cat.category_name,
-      classId: cat.class_id || null,
-      className: cat.class_name || null,
-      description: cat.description || null,
-      // Use stored amount if available, otherwise distribute evenly for legacy data
-      amount: cat.amount_cents ? cat.amount_cents / 100 : amountPerCategory,
-      source: cat.source || 'manual'
-    }));
+    // Get class from parsed location for auto-filling empty class fields
+    const parsedLocation = invoice.office_location || invoice.office_id || '';
+    const classFromLocation = mapLocationToClass(parsedLocation);
+    
+    const transformedCategories: CategoryOutput[] = categories.map((cat, idx) => {
+      // Auto-fill empty class_name from parsed office_location
+      const resolvedClassName = cat.class_name || classFromLocation || null;
+      const resolvedClassId = cat.class_id || (resolvedClassName ? resolvedClassName : null);
+      
+      if (!cat.class_name && classFromLocation) {
+        console.log('[GL_LINES] Auto-filling class from parsed location', {
+          invoiceId: invoiceId,
+          categoryId: cat.id,
+          parsedLocation,
+          classFromLocation,
+        });
+      }
+      
+      return {
+        id: cat.id,
+        sequence: cat.sequence || (idx + 1),
+        categoryId: cat.category_id,
+        categoryName: cat.category_name,
+        classId: resolvedClassId,
+        className: resolvedClassName,
+        description: cat.description || null,
+        // Use stored amount if available, otherwise distribute evenly for legacy data
+        amount: cat.amount_cents ? cat.amount_cents / 100 : amountPerCategory,
+        source: cat.source || 'manual'
+      };
+    });
 
     // If no categories exist, auto-categorize based on vendor mapping
     if (transformedCategories.length === 0 && totalAmount > 0) {
