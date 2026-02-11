@@ -122,19 +122,34 @@ export async function GET(request: NextRequest) {
       extracted_data: doc.raw_extracted_data ? JSON.parse(doc.raw_extracted_data) : null
     }));
 
-    // Get stats by type
+    // Build vendor filter clause for stats (same logic as main query)
+    let statsVendorFilter = '';
+    const statsVendorParams: any[] = [];
+    if (vendorAccess === '*') {
+      // Full access - no filter
+    } else if (Array.isArray(vendorAccess)) {
+      const vendorPlaceholders = vendorAccess.map(() => 'LOWER(vendor_name) LIKE ?').join(' OR ');
+      const vParams = vendorAccess.map(v => `%${v.toLowerCase()}%`);
+      statsVendorFilter = ` WHERE (${vendorPlaceholders} OR LOWER(filed_by) = ?)`;
+      statsVendorParams.push(...vParams, user.email.toLowerCase());
+    } else if (vendorAccess === 'assigned_only') {
+      statsVendorFilter = ` WHERE (LOWER(vendor_name) LIKE '%tc dental%' OR LOWER(filed_by) = ?)`;
+      statsVendorParams.push(user.email.toLowerCase());
+    }
+
+    // Get stats by type (filtered by vendor access)
     const typeStats = db.prepare(`
       SELECT document_type, COUNT(*) as count 
-      FROM other_documents 
+      FROM other_documents${statsVendorFilter}
       GROUP BY document_type
-    `).all() as Array<{ document_type: string; count: number }>;
+    `).all(...statsVendorParams) as Array<{ document_type: string; count: number }>;
 
-    // Get stats by status
+    // Get stats by status (filtered by vendor access)
     const statusStats = db.prepare(`
       SELECT status, COUNT(*) as count 
-      FROM other_documents 
+      FROM other_documents${statsVendorFilter}
       GROUP BY status
-    `).all() as Array<{ status: string; count: number }>;
+    `).all(...statsVendorParams) as Array<{ status: string; count: number }>;
 
     return NextResponse.json({
       success: true,
