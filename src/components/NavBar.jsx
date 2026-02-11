@@ -385,8 +385,8 @@ function NavBarInner({
                   Coding Templates
                 </div>
               )}
-              {/* Knowledge Base - Admin/AP only */}
-              {isAdminUser && (
+              {/* Knowledge Base - Admin/AP only, hidden for verifier accounts */}
+              {isAdminUser && userEmail !== 'laurag@pcsmiles.com' && (
                 <div
                   style={dropdownItemStyle}
                   onClick={() => {
