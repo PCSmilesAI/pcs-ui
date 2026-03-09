@@ -80,6 +80,12 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
     dateCompleted: '_dateCompletedRaw',
   };
 
+  function parseDateToTimestamp(val) {
+    if (!val) return NaN;
+    const d = new Date(val);
+    return d.getTime();
+  }
+
   // Sort rows based on current sort configuration
   const sortedRows = useMemo(() => {
     if (!sortConfig.key || !sortConfig.direction) {
@@ -89,15 +95,16 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
     const rawKey = RAW_DATE_KEYS[sortConfig.key];
 
     const sorted = [...rows].sort((a, b) => {
-      // For date columns, use the hidden raw ISO string for correct chronological order
+      // For date columns, parse the raw value into a real timestamp
       if (rawKey) {
-        const aDate = a[rawKey] || '';
-        const bDate = b[rawKey] || '';
-        if (!aDate && !bDate) return 0;
-        if (!aDate) return sortConfig.direction === 'asc' ? 1 : -1;
-        if (!bDate) return sortConfig.direction === 'asc' ? -1 : 1;
-        const cmp = aDate.localeCompare(bDate);
-        return sortConfig.direction === 'asc' ? cmp : -cmp;
+        const aTs = parseDateToTimestamp(a[rawKey]);
+        const bTs = parseDateToTimestamp(b[rawKey]);
+        const aValid = !isNaN(aTs);
+        const bValid = !isNaN(bTs);
+        if (!aValid && !bValid) return 0;
+        if (!aValid) return sortConfig.direction === 'asc' ? 1 : -1;
+        if (!bValid) return sortConfig.direction === 'asc' ? -1 : 1;
+        return sortConfig.direction === 'asc' ? aTs - bTs : bTs - aTs;
       }
 
       const aVal = a[sortConfig.key];
