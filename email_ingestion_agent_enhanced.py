@@ -173,6 +173,46 @@ def release_scan_lock():
     except OSError as e:
         log(f"[INBOX][SCAN][LOCK][ERROR] Failed to release lock: {e}")
 
+def _get_ingest_db():
+    """Get a connection to the ingest tracking database"""
+    conn = sqlite3.connect(INGEST_DB_PATH)
+    conn.execute("""CREATE TABLE IF NOT EXISTS seen_messages (
+        message_key TEXT PRIMARY KEY,
+        provider TEXT NOT NULL,
+        first_seen_ts TEXT NOT NULL,
+        last_seen_ts TEXT NOT NULL
+    )""")
+    return conn
+
+
+def load_seen_message_keys():
+    """Load all seen message keys from the ingest tracking DB for fast O(1) lookup"""
+    try:
+        conn = _get_ingest_db()
+        cursor = conn.execute("SELECT message_key FROM seen_messages")
+        keys = {row[0] for row in cursor.fetchall()}
+        conn.close()
+        return keys
+    except Exception as e:
+        log(f"[INBOX][SEEN_DB][ERROR] Failed to load seen messages: {e}")
+        return set()
+
+
+def mark_email_seen(message_key):
+    """Record that an email has been processed so it won't be re-processed"""
+    try:
+        conn = _get_ingest_db()
+        now = datetime.now().isoformat()
+        conn.execute(
+            "INSERT OR REPLACE INTO seen_messages (message_key, provider, first_seen_ts, last_seen_ts) VALUES (?, ?, ?, ?)",
+            (message_key, "imap", now, now),
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        log(f"[INBOX][SEEN_DB][ERROR] Failed to mark seen: {e}")
+
+
 def load_existing_invoices():
     """Load existing invoices and build efficient lookup structures"""
     invoices = []
@@ -761,6 +801,10 @@ def check_inbox(full_scan=False):
         existing_invoices, invoice_numbers, message_ids, tombstones = load_existing_invoices()
         log(f"[INBOX][SCAN] Loaded {len(existing_invoices)} existing invoices from database")
 
+        # Load the set of email message_keys already processed by this scanner
+        seen_keys = load_seen_message_keys()
+        log(f"[INBOX][SCAN] Loaded {len(seen_keys)} seen message keys from ingest DB")
+
         mail = connect_imap()
         mail.select("INBOX")
 
@@ -823,6 +867,13 @@ def check_inbox(full_scan=False):
                 skipped_count += 1
                 continue
 
+            # Fast dedup: check if this email was already processed by the scanner
+            # Uses the ingest.db seen_messages table (independent of invoices table)
+            email_key = source_message_id or f"uid:{uid.decode()}"
+            if email_key in seen_keys:
+                skipped_count += 1
+                continue
+
             # In full_scan mode, ONLY skip if message was deleted (tombstone)
             # Otherwise, we want to re-import all emails to ensure database is in sync
             if full_scan:
@@ -834,7 +885,7 @@ def check_inbox(full_scan=False):
                 # In full_scan, we process ALL other emails, even if they look like duplicates
                 log(f"[INBOX][SCAN][FULL] Processing email in full scan mode: {subject}")
             else:
-                # In normal mode, skip already processed invoices
+                # In normal mode, also check against main DB
                 if is_invoice_already_processed(subject, invoice_numbers, message_ids, tombstones, source_message_id):
                     skipped_count += 1
                     continue
@@ -874,10 +925,11 @@ def check_inbox(full_scan=False):
                 # CRITICAL FIX: Only mark as read AFTER successfully extracting PDFs
                 # This ensures we don't lose emails if extraction fails
                 if pdf_files:
-                    # Only mark as processed in normal mode
-                    # In full_scan mode, leave emails as-is so they can be re-scanned
                     if not full_scan:
                         move_to_processed(mail, uid)
+                    # Track in ingest DB so we never re-process this email
+                    mark_email_seen(email_key)
+                    seen_keys.add(email_key)
                     processed_count += 1
                 else:
                     log(f"[INBOX][SCAN][WARNING] Email had PDF flag but no PDFs extracted: {subject}")
