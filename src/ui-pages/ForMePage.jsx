@@ -120,7 +120,9 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       rawOffice: officeRaw,
       locations: locations, // Keep array for filtering
       dueDate: formatDate(rawDueDate || rawInvoiceDate),
+      _dueDateRaw: rawDueDate || rawInvoiceDate || '',
       invoiceDate: formatDate(rawInvoiceDate),
+      _invoiceDateRaw: rawInvoiceDate || '',
       // Prefer invoice-level categories if present
       category:
         (Array.isArray(invoice.invoice_categories) && invoice.invoice_categories[0]?.category_name) ||

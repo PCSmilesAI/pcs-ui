@@ -139,7 +139,9 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           location: locationDisplay,
           locations: locations, // Keep array for filtering
           dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : (invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A'),
+          _dueDateRaw: invoice.due_date || invoice.invoice_date || '',
           invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
+          _invoiceDateRaw: invoice.invoice_date || '',
           displayStatus,
           isPaymentLocked,
           paymentLockedBy,
@@ -441,15 +443,16 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               day: 'numeric',
               year: '2-digit'
             }) : 'N/A'),
+            _dueDateRaw: invoice.due_date || invoice.invoice_date || '',
             invoiceDate: invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
               year: '2-digit'
             }) : 'N/A',
+            _invoiceDateRaw: invoice.invoice_date || '',
             displayStatus,
             isPaymentLocked,
             paymentLockedBy,
-            // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
             due_date: invoice.due_date,
             json_path: invoice.json_path,
