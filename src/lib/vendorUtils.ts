@@ -104,7 +104,7 @@ export function getNormalizedVendorFromInvoice(invoice: any): string {
  */
 export function parseInvoiceAmount(invoice: any): number {
   // Priority 1: amount_cents (stored in cents, need to divide by 100)
-  if (invoice?.amount_cents != null && invoice.amount_cents !== 0) {
+  if (invoice?.amount_cents != null) {
     const cents = typeof invoice.amount_cents === 'number'
       ? invoice.amount_cents
       : parseFloat(String(invoice.amount_cents).replace(/[^0-9.-]/g, '')) || 0;
@@ -112,14 +112,14 @@ export function parseInvoiceAmount(invoice: any): number {
   }
   
   // Priority 2: invoice_total (already in dollars)
-  if (invoice?.invoice_total != null && invoice.invoice_total !== 0) {
+  if (invoice?.invoice_total != null) {
     return typeof invoice.invoice_total === 'number'
       ? invoice.invoice_total
       : parseFloat(String(invoice.invoice_total).replace(/[^0-9.-]/g, '')) || 0;
   }
   
   // Priority 3: total (already in dollars)
-  if (invoice?.total != null && invoice.total !== 0) {
+  if (invoice?.total != null) {
     return typeof invoice.total === 'number'
       ? invoice.total
       : parseFloat(String(invoice.total).replace(/[^0-9.-]/g, '')) || 0;

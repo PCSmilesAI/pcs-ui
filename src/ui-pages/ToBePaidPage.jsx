@@ -394,11 +394,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         const transformedData = data
           .filter((invoice) => String(invoice.status || '').toLowerCase() === 'to_be_paid')
           .map((invoice) => {
-            const rawTotal = (invoice.invoice_total ?? invoice.total);
+            const amountCents = invoice.amount_cents ?? invoice.invoice_total ?? invoice.total ?? 0;
             const numericTotal =
-              typeof rawTotal === 'number'
-                ? rawTotal
-                : parseFloat(String(rawTotal ?? '0').replace(/[^0-9.\-]/g, '')) || 0;
+              typeof amountCents === 'number'
+                ? amountCents / 100
+                : parseFloat(String(amountCents ?? '0').replace(/[^0-9.\-]/g, '')) / 100;
             // Get locations from GL Lines (invoice_categories classes)
             const locations = invoice.locations || [];
             const officeRaw = invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '';
