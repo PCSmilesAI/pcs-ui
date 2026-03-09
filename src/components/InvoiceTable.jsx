@@ -137,28 +137,47 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
     return sorted;
   }, [rows, sortConfig]);
 
-  // Handle column header click to toggle sort
+  const DATE_COLUMNS = new Set(['invoiceDate', 'dueDate', 'dateCompleted']);
+  const DEFAULT_SORT = { key: 'invoiceDate', direction: 'desc' };
+
+  const isDefaultSort = (cfg) =>
+    cfg.key === DEFAULT_SORT.key && cfg.direction === DEFAULT_SORT.direction;
+
   const handleHeaderClick = (columnKey) => {
     setSortConfig((prev) => {
+      if (DATE_COLUMNS.has(columnKey)) {
+        // Date columns: two states -- default (desc, newest first) and asc (oldest first)
+        if (prev.key === columnKey && prev.direction === 'asc') {
+          return { key: columnKey, direction: 'desc' };
+        }
+        return { key: columnKey, direction: 'asc' };
+      }
+      // Non-date columns: cycle asc -> desc -> back to default
       if (prev.key === columnKey) {
-        // Cycle through: asc -> desc -> null
         if (prev.direction === 'asc') {
           return { key: columnKey, direction: 'desc' };
         } else if (prev.direction === 'desc') {
-          return { key: null, direction: null };
+          return DEFAULT_SORT;
         }
       }
-      // Start with ascending
       return { key: columnKey, direction: 'asc' };
     });
   };
 
-  // Get sort arrow for a column
   const getSortArrow = (columnKey) => {
     if (sortConfig.key !== columnKey) return null;
+    // Date columns in their default desc state show no arrow
+    if (DATE_COLUMNS.has(columnKey) && sortConfig.direction === 'desc') return null;
     if (sortConfig.direction === 'asc') return ' ↑';
     if (sortConfig.direction === 'desc') return ' ↓';
     return null;
+  };
+
+  const isColumnHighlighted = (columnKey) => {
+    if (sortConfig.key !== columnKey) return false;
+    // Date columns in their default desc state look normal (no highlight)
+    if (DATE_COLUMNS.has(columnKey) && sortConfig.direction === 'desc') return false;
+    return true;
   };
 
   const allVisibleIds = selectable ? sortedRows.map((r, i) => getId(r, i)) : [];
@@ -195,8 +214,8 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
                   textAlign,
                   cursor: 'pointer',
                   userSelect: 'none',
-                  backgroundColor: sortConfig.key === col.key ? '#f0f7fc' : '#ffffff',
-                  fontWeight: sortConfig.key === col.key ? 600 : 500,
+                  backgroundColor: isColumnHighlighted(col.key) ? '#f0f7fc' : '#ffffff',
+                  fontWeight: isColumnHighlighted(col.key) ? 600 : 500,
                   ...(col.width ? { width: col.width } : {}),
                 }}
                 onClick={() => handleHeaderClick(col.key)}
