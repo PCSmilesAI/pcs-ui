@@ -96,6 +96,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
               day: 'numeric',
               year: '2-digit'
             }) : 'N/A',
+            _dateCompletedRaw: invoice.uploaded_at || '',
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
             due_date: invoice.due_date,
