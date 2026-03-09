@@ -13,7 +13,7 @@
       "env": {
         "PYTHONUNBUFFERED": "1",
         "PCS_ENV": "production",
-        "PCS_DATA_DIR": "/var/www/pcs-ui-data",
+        "PCS_DATA_DIR": "/var/www/pcs-ui/pcs_ui_data",
         "PCS_API_URL": "http://localhost:3000",
         "INBOX_SCAN_INTERVAL_MS": "10000",
         "IMAP_USER": "invoices@pcsmilesai.com",
