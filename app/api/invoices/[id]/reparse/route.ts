@@ -490,7 +490,7 @@ export async function POST(
     const invoiceDate = extracted.invoice_date || '';
     const dueDate = extracted.due_date || '';
 
-    const hasAmount = amountCents > 0;
+    const hasAmount = extracted.amount_cents !== undefined && extracted.amount_cents !== null;
     const hasVendor = vendor && vendor !== 'Unknown' && vendor.trim() !== '';
     
     let parsingStatus = 'success';

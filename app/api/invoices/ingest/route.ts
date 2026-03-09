@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
     
     // Check for parsing issues if status wasn't explicitly set
     if (!body.parsing_status) {
-      const hasAmount = amountCents > 0;
+      const hasAmount = body.total !== undefined && body.total !== null && String(body.total).trim() !== '';
       const hasValidInvoiceNumber = body.invoice_number && 
         !body.invoice_number.startsWith('UNKNOWN-') && 
         body.invoice_number.trim() !== '';
