@@ -24,8 +24,8 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
   // its background colour without relying on CSS hover rules.
   const [hoverIndex, setHoverIndex] = useState(null);
 
-  // Track sorting state: { key: column key, direction: 'asc' | 'desc' | null }
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+  // Default: newest invoice date first
+  const [sortConfig, setSortConfig] = useState({ key: 'invoiceDate', direction: 'desc' });
 
   // Define reusable styles for table, header and cells. Using
   // JavaScript objects ensures the styles are always applied even
