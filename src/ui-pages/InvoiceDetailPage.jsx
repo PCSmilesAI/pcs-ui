@@ -2707,9 +2707,8 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         ))}
       </div>
 
-      {/* Parsing Error Warning Banner - Show for failed/partial parses or $0 amounts */}
-      {(invoice?.parsing_status === 'failed' || invoice?.parsing_status === 'partial' || 
-        (invoice?.amount_cents === 0 && invoice?.pdf_path)) && (
+      {/* Parsing Error Warning Banner - Show for failed/partial parses only */}
+      {(invoice?.parsing_status === 'failed' || invoice?.parsing_status === 'partial') && (
         <div style={{
           display: 'flex',
           alignItems: 'center',

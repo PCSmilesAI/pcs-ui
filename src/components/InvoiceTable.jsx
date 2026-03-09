@@ -230,9 +230,7 @@ export default function InvoiceTable({ columns, rows, onRowClick, selectable = f
       </thead>
       <tbody>
         {sortedRows.map((row, rowIndex) => {
-          // Check for parsing issues
-          const hasParsingIssue = row.parsing_status === 'failed' || row.parsing_status === 'partial' ||
-            (row.amount_cents === 0 && row.parsing_status !== 'success');
+          const hasParsingIssue = row.parsing_status === 'failed' || row.parsing_status === 'partial';
           
           // Background colour for hover effect, with red tint for parsing issues
           const backgroundColor = hasParsingIssue
