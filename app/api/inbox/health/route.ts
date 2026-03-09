@@ -7,6 +7,7 @@ const ROOT_DIR = path.resolve(process.cwd());
 const DATA_DIR = process.env.PCS_DATA_DIR || path.join(ROOT_DIR, 'pcs_ui_data');
 const INGEST_DB_PATH = path.join(DATA_DIR, 'ingest.db');
 const SCAN_LOCK_PATH = path.join(DATA_DIR, 'locks', 'inbox.scan.lock');
+const HEARTBEAT_PATH = path.join(DATA_DIR, 'inbox_heartbeat.json');
 const INVOICE_QUEUE_PATHS = [
   path.join(DATA_DIR, 'invoice_queue.json'),
   path.join(ROOT_DIR, 'pcs_ai_data', 'invoice_queue.json'),
@@ -15,6 +16,9 @@ const INVOICE_QUEUE_PATHS = [
 interface HealthStatus {
   ok: boolean;
   interval_ms: number;
+  watcher_alive: boolean;
+  watcher_last_heartbeat?: string;
+  watcher_status?: string;
   last_scan?: {
     timestamp: string;
     added: number;
@@ -84,10 +88,28 @@ function isScanInProgress(): boolean {
   return lockAge < staleThreshold;
 }
 
-function getLastScanResult(): any {
-  // Try to read from Python's last scan result
-  // For now, we'll return null and rely on the watcher to log results
-  return null;
+function getHeartbeat(): { alive: boolean; lastBeat?: string; status?: string; lastScan?: any } {
+  if (!fs.existsSync(HEARTBEAT_PATH)) {
+    return { alive: false };
+  }
+
+  try {
+    const raw = fs.readFileSync(HEARTBEAT_PATH, 'utf-8');
+    const data = JSON.parse(raw);
+    const beatTime = new Date(data.timestamp).getTime();
+    const ageMs = Date.now() - beatTime;
+    // Watcher is considered alive if heartbeat is within 2 minutes
+    const alive = ageMs < 120_000;
+    return {
+      alive,
+      lastBeat: data.timestamp,
+      status: data.status,
+      lastScan: data.last_scan,
+    };
+  } catch (err) {
+    console.error('[INBOX][HEALTH][HEARTBEAT_ERROR]', err);
+    return { alive: false };
+  }
 }
 
 export const dynamic = 'force-dynamic';
@@ -98,19 +120,22 @@ export async function GET(req: NextRequest) {
     const seenCount = getSeenMessagesCount();
     const queueCounts = getQueueCounts();
     const scanInProgress = isScanInProgress();
-    const lastScan = getLastScanResult();
+    const heartbeat = getHeartbeat();
 
     const health: HealthStatus = {
       ok: true,
       interval_ms: intervalMs,
+      watcher_alive: heartbeat.alive,
+      watcher_last_heartbeat: heartbeat.lastBeat,
+      watcher_status: heartbeat.status,
       queue_counts: queueCounts,
       seen_messages_count: seenCount,
       scan_in_progress: scanInProgress,
       data_dir: DATA_DIR,
     };
 
-    if (lastScan) {
-      health.last_scan = lastScan;
+    if (heartbeat.lastScan) {
+      health.last_scan = heartbeat.lastScan;
     }
 
     console.log('[INBOX][HEALTH]', health);

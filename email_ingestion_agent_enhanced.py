@@ -17,9 +17,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from deduplicate_invoices import deduplicate_invoices
 from filename_utils import sanitize_filename
 
-EMAIL_USER = "invoices@pcsmilesai.com"
-EMAIL_PASS = "Inv!PCSAI"
-IMAP_SERVER = "imap.secureserver.net"
+EMAIL_USER = os.environ.get("IMAP_USER", "invoices@pcsmilesai.com")
+EMAIL_PASS = os.environ.get("IMAP_PASS", "Inv!PCSAI")
+IMAP_SERVER = os.environ.get("IMAP_SERVER", "imap.secureserver.net")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("PCS_DATA_DIR", os.path.join(BASE_DIR, "pcs_ui_data"))
@@ -48,11 +48,15 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 os.makedirs(LOCKS_DIR, exist_ok=True)
 os.makedirs(DATA_DIR, exist_ok=True)
 
+# Heartbeat file so the health API can verify the watcher is alive
+HEARTBEAT_PATH = os.path.join(DATA_DIR, "inbox_heartbeat.json")
+
 # Global configuration (can be reloaded via SIGHUP)
 _config = {
     "interval_ms": int(os.environ.get("INBOX_SCAN_INTERVAL_MS", "10000")),  # Default 10s
     "backoff_seconds": 10,  # Start at 10s
     "max_backoff_seconds": 300,  # Cap at 5 minutes
+    "last_error_time": None,  # Track when the last error happened for backoff reset
 }
 
 # Global state
@@ -279,10 +283,49 @@ def is_invoice_already_processed(email_subject, invoice_numbers, message_ids, to
 
     return False
 
-def connect_imap():
-    mail = imaplib.IMAP4_SSL(IMAP_SERVER)
-    mail.login(EMAIL_USER, EMAIL_PASS)
-    return mail
+def write_heartbeat(status="ok", error=None):
+    """Write heartbeat file so the health API can verify the watcher is alive"""
+    try:
+        heartbeat = {
+            "timestamp": datetime.now().isoformat(),
+            "status": status,
+            "pid": os.getpid(),
+            "error": error,
+            "last_scan": _last_scan_result,
+        }
+        with open(HEARTBEAT_PATH, "w") as f:
+            json.dump(heartbeat, f)
+    except Exception as e:
+        print(f"[HEARTBEAT][ERROR] Failed to write heartbeat: {e}")
+
+
+def connect_imap(max_retries=3, retry_delay=5):
+    """Connect to IMAP with retry logic and error classification.
+    
+    Auth failures are NOT retried (they won't self-heal).
+    Connection/timeout errors are retried up to max_retries times.
+    """
+    last_err = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            mail = imaplib.IMAP4_SSL(IMAP_SERVER)
+            mail.login(EMAIL_USER, EMAIL_PASS)
+            return mail
+        except imaplib.IMAP4.error as e:
+            err_msg = str(e).lower()
+            if 'login' in err_msg or 'auth' in err_msg or 'credentials' in err_msg:
+                log(f"[IMAP][AUTH][CRITICAL] Authentication failed: {e} — will NOT retry")
+                raise
+            last_err = e
+            log(f"[IMAP][CONNECT][RETRY] Attempt {attempt}/{max_retries} failed: {e}")
+        except (OSError, TimeoutError, ConnectionError) as e:
+            last_err = e
+            log(f"[IMAP][CONNECT][RETRY] Attempt {attempt}/{max_retries} failed: {e}")
+        
+        if attempt < max_retries:
+            time.sleep(retry_delay)
+    
+    raise last_err or Exception("IMAP connection failed after retries")
 
 def detect_vendor_from_email(msg):
     sender = msg.get("From", "").lower()
@@ -722,23 +765,23 @@ def check_inbox(full_scan=False):
         mail.select("INBOX")
 
         # Get emails based on scan mode
-        # When ACTIVE_VENDOR_FILTER is set, use IMAP server-side search to dramatically
-        # reduce the number of emails we need to download (instead of fetching all 2000+)
+        # When ACTIVE_VENDOR_FILTER is set, search ALL emails (read + unread) matching
+        # the vendor keywords. We do NOT rely on the UNSEEN flag because external email
+        # clients can mark emails as read before the scanner processes them.
+        # Deduplication is handled by message_id tracking in the database.
         if ACTIVE_VENDOR_FILTER:
-            # Build IMAP search for each vendor keyword in SUBJECT or FROM
-            # Include UNSEEN to only find unread emails (processed emails are marked as read)
             all_uids = set()
             for vendor_keyword in ACTIVE_VENDOR_FILTER:
                 for field in ['SUBJECT', 'FROM']:
                     try:
-                        status, messages = mail.uid('search', None, 'UNSEEN', field, f'"{vendor_keyword}"')
+                        status, messages = mail.uid('search', None, field, f'"{vendor_keyword}"')
                         if status == 'OK' and messages[0]:
                             for uid in messages[0].split():
                                 all_uids.add(uid)
                     except Exception as search_err:
                         log(f"[INBOX][SCAN][WARN] IMAP search for {field}='{vendor_keyword}' failed: {search_err}")
             email_uids = sorted(all_uids)
-            log(f"[INBOX][SCAN][MODE] VENDOR-FILTERED SCAN - Found {len(email_uids)} emails matching vendor filter {ACTIVE_VENDOR_FILTER}")
+            log(f"[INBOX][SCAN][MODE] VENDOR-FILTERED SCAN (ALL) - Found {len(email_uids)} emails matching vendor filter")
         elif full_scan:
             log("[INBOX][SCAN][MODE] FULL SCAN - Processing ALL emails in inbox, comparing to database")
             status, messages = mail.uid('search', None, 'ALL')
@@ -895,10 +938,13 @@ def check_inbox(full_scan=False):
 
         # Reset backoff on success
         _config["backoff_seconds"] = 10
+        _config["last_error_time"] = None
 
     except Exception as e:
         duration_ms = int((time.time() - start_time) * 1000)
         log(f"[INBOX][SCAN][ERROR] Exception in inbox check: {e}")
+        import traceback
+        log(f"[INBOX][SCAN][TRACEBACK] {traceback.format_exc()}")
         _last_scan_result = {
             "timestamp": datetime.now().isoformat(),
             "added": 0,
@@ -907,14 +953,28 @@ def check_inbox(full_scan=False):
             "error": str(e),
         }
 
-        # Increase backoff on error
-        _config["backoff_seconds"] = min(
-            _config["backoff_seconds"] * 2,
-            _config["max_backoff_seconds"]
-        )
-        log(f"[INBOX][SCAN][BACKOFF] Increased backoff to {_config['backoff_seconds']}s")
+        now = time.time()
+        _config["last_error_time"] = now
+
+        # Increase backoff on error, but auto-reset if last error was >15 min ago
+        prev_error_time = _config.get("last_error_time")
+        if prev_error_time and (now - prev_error_time) > 900:
+            log("[INBOX][SCAN][BACKOFF] Last error was >15min ago, resetting backoff")
+            _config["backoff_seconds"] = 10
+        else:
+            _config["backoff_seconds"] = min(
+                _config["backoff_seconds"] * 2,
+                _config["max_backoff_seconds"]
+            )
+        log(f"[INBOX][SCAN][BACKOFF] Backoff now {_config['backoff_seconds']}s")
 
     finally:
+        # Write heartbeat regardless of success/failure
+        write_heartbeat(
+            status="ok" if not _last_scan_result.get("error") else "error",
+            error=_last_scan_result.get("error"),
+        )
+
         # Flush any remaining logs
         flush_logs()
 
@@ -949,7 +1009,9 @@ if __name__ == "__main__":
     
     log(f"[INBOX][WATCHER][CONFIG] PCS_DATA_DIR={DATA_DIR}")
     log(f"[INBOX][WATCHER][CONFIG] IMAP_SERVER={IMAP_SERVER}")
+    log(f"[INBOX][WATCHER][CONFIG] IMAP_USER={EMAIL_USER}")
     log(f"[INBOX][WATCHER][CONFIG] API_BASE_URL={API_BASE_URL}")
+    log(f"[INBOX][WATCHER][CONFIG] HEARTBEAT_PATH={HEARTBEAT_PATH}")
     
     if args.full_scan:
         # One-time full scan mode - process ALL emails

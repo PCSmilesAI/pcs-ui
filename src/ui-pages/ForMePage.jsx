@@ -594,7 +594,14 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
           await reloadList();
           return;
         }
-        showToast('Failed to scan inbox', 'error');
+        // Try to extract specific error from response body
+        try {
+          const errBody = await res.json();
+          const errMsg = errBody.message || errBody.error || errBody.details || 'Unknown error';
+          showToast(`Inbox scan failed: ${errMsg}`, 'error');
+        } catch {
+          showToast(`Inbox scan failed (HTTP ${res.status})`, 'error');
+        }
         return;
       }
 

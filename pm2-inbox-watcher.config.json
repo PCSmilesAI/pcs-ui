@@ -8,12 +8,17 @@
       "watch": false,
       "autorestart": true,
       "restart_delay": 5000,
+      "max_memory_restart": "200M",
+      "max_restarts": 100,
       "env": {
         "PYTHONUNBUFFERED": "1",
         "PCS_ENV": "production",
         "PCS_DATA_DIR": "/var/www/pcs-ui-data",
         "PCS_API_URL": "http://localhost:3000",
-        "INBOX_SCAN_INTERVAL_MS": "10000"
+        "INBOX_SCAN_INTERVAL_MS": "10000",
+        "IMAP_USER": "invoices@pcsmilesai.com",
+        "IMAP_PASS": "Inv!PCSAI",
+        "IMAP_SERVER": "imap.secureserver.net"
       }
     }
   ]
