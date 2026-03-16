@@ -79,6 +79,10 @@ _last_scan_result = {
 ACTIVE_VENDOR_FILTER = ['tc dental', 'tcdentallab', 'tc dental lab', 'tcdental',
                         'tc invoices', 'tc invoice', 'tc lab', 'tc ']
 
+# IMAP folders to scan (in addition to INBOX)
+# GoDaddy email uses "Junk" and "Spam" folders
+EXTRA_FOLDERS = ['Junk', 'Spam']
+
 def is_email_from_active_vendor(msg, subject_str):
     """Check if an email is from one of the active vendors we should process.
     Returns True if the email should be processed, False if it should be skipped.
@@ -806,139 +810,134 @@ def check_inbox(full_scan=False):
         log(f"[INBOX][SCAN] Loaded {len(seen_keys)} seen message keys from ingest DB")
 
         mail = connect_imap()
-        mail.select("INBOX")
 
-        # Get emails based on scan mode
-        # When ACTIVE_VENDOR_FILTER is set, search ALL emails (read + unread) matching
-        # the vendor keywords. We do NOT rely on the UNSEEN flag because external email
-        # clients can mark emails as read before the scanner processes them.
-        # Deduplication is handled by message_id tracking in the database.
-        if ACTIVE_VENDOR_FILTER:
-            all_uids = set()
-            for vendor_keyword in ACTIVE_VENDOR_FILTER:
-                for field in ['SUBJECT', 'FROM']:
-                    try:
-                        status, messages = mail.uid('search', None, field, f'"{vendor_keyword}"')
-                        if status == 'OK' and messages[0]:
-                            for uid in messages[0].split():
-                                all_uids.add(uid)
-                    except Exception as search_err:
-                        log(f"[INBOX][SCAN][WARN] IMAP search for {field}='{vendor_keyword}' failed: {search_err}")
-            email_uids = sorted(all_uids)
-            log(f"[INBOX][SCAN][MODE] VENDOR-FILTERED SCAN (ALL) - Found {len(email_uids)} emails matching vendor filter")
-        elif full_scan:
-            log("[INBOX][SCAN][MODE] FULL SCAN - Processing ALL emails in inbox, comparing to database")
-            status, messages = mail.uid('search', None, 'ALL')
-            if status != 'OK':
-                log("[INBOX][SCAN][ERROR] Failed to search inbox")
-                _last_scan_result["error"] = "Failed to search inbox"
-                return
-            email_uids = messages[0].split() if messages[0] else []
-            log(f"[INBOX][SCAN] Found {len(email_uids)} total emails in inbox")
-        else:
-            log("[INBOX][SCAN][MODE] NORMAL SCAN - Processing ALL emails, using message_id tracking to skip duplicates")
-            status, messages = mail.uid('search', None, 'ALL')
-            if status != 'OK':
-                log("[INBOX][SCAN][ERROR] Failed to search inbox")
-                _last_scan_result["error"] = "Failed to search inbox"
-                return
-            email_uids = messages[0].split() if messages[0] else []
-            log(f"[INBOX][SCAN] Found {len(email_uids)} total emails in inbox")
+        # Scan INBOX plus spam/junk folders
+        folders_to_scan = ['INBOX'] + EXTRA_FOLDERS
 
         processed_count = 0
         skipped_count = 0
         no_pdf_count = 0
         pdf_tasks = []  # For parallel processing
 
-        # First pass: identify new emails and extract PDFs
-        for uid in email_uids:
-            status, msg_data = mail.uid('fetch', uid, '(RFC822)')
-            if status != 'OK':
-                continue
-            msg = email.message_from_bytes(msg_data[0][1])
-
-            source_message_id = msg.get("Message-ID", "")
-            subject = decode_header(msg["Subject"])[0][0]
-            if isinstance(subject, bytes):
-                subject = subject.decode(errors='ignore')
-
-            # VENDOR FILTER: Only process emails from active vendors (currently TC Dental only)
-            if not is_email_from_active_vendor(msg, subject):
-                skipped_count += 1
-                continue
-
-            # Fast dedup: check if this email was already processed by the scanner
-            # Uses the ingest.db seen_messages table (independent of invoices table)
-            email_key = source_message_id or f"uid:{uid.decode()}"
-            if email_key in seen_keys:
-                skipped_count += 1
-                continue
-
-            # In full_scan mode, ONLY skip if message was deleted (tombstone)
-            # Otherwise, we want to re-import all emails to ensure database is in sync
-            if full_scan:
-                # Only skip if this message was previously deleted
-                if source_message_id and source_message_id in tombstones:
-                    log(f"[INBOX][TOMBSTONE] Message {source_message_id} was previously deleted, skipping")
-                    skipped_count += 1
+        for folder_name in folders_to_scan:
+            try:
+                status, folder_count = mail.select(folder_name)
+                if status != 'OK':
+                    log(f"[INBOX][SCAN][FOLDER] Could not select folder '{folder_name}', skipping")
                     continue
-                # In full_scan, we process ALL other emails, even if they look like duplicates
-                log(f"[INBOX][SCAN][FULL] Processing email in full scan mode: {subject}")
+                total_in_folder = int(folder_count[0]) if folder_count and folder_count[0] else 0
+                if total_in_folder == 0:
+                    log(f"[INBOX][SCAN][FOLDER] '{folder_name}' is empty, skipping")
+                    continue
+                log(f"[INBOX][SCAN][FOLDER] Scanning '{folder_name}' ({total_in_folder} emails)")
+            except Exception as folder_err:
+                log(f"[INBOX][SCAN][FOLDER] Error selecting '{folder_name}': {folder_err}")
+                continue
+
+            # Get emails based on scan mode
+            if ACTIVE_VENDOR_FILTER:
+                all_uids = set()
+                for vendor_keyword in ACTIVE_VENDOR_FILTER:
+                    for field in ['SUBJECT', 'FROM']:
+                        try:
+                            status, messages = mail.uid('search', None, field, f'"{vendor_keyword}"')
+                            if status == 'OK' and messages[0]:
+                                for uid in messages[0].split():
+                                    all_uids.add(uid)
+                        except Exception as search_err:
+                            log(f"[INBOX][SCAN][WARN] IMAP search for {field}='{vendor_keyword}' in {folder_name} failed: {search_err}")
+                email_uids = sorted(all_uids)
+                log(f"[INBOX][SCAN][MODE] VENDOR-FILTERED SCAN (ALL) in '{folder_name}' - Found {len(email_uids)} emails matching vendor filter")
+            elif full_scan:
+                log(f"[INBOX][SCAN][MODE] FULL SCAN in '{folder_name}' - Processing ALL emails")
+                status, messages = mail.uid('search', None, 'ALL')
+                if status != 'OK':
+                    log(f"[INBOX][SCAN][ERROR] Failed to search '{folder_name}'")
+                    continue
+                email_uids = messages[0].split() if messages[0] else []
+                log(f"[INBOX][SCAN] Found {len(email_uids)} total emails in '{folder_name}'")
             else:
-                # In normal mode, also check against main DB
-                if is_invoice_already_processed(subject, invoice_numbers, message_ids, tombstones, source_message_id):
+                log(f"[INBOX][SCAN][MODE] NORMAL SCAN in '{folder_name}'")
+                status, messages = mail.uid('search', None, 'ALL')
+                if status != 'OK':
+                    log(f"[INBOX][SCAN][ERROR] Failed to search '{folder_name}'")
+                    continue
+                email_uids = messages[0].split() if messages[0] else []
+                log(f"[INBOX][SCAN] Found {len(email_uids)} total emails in '{folder_name}'")
+
+            # First pass: identify new emails and extract PDFs
+            for uid in email_uids:
+                status, msg_data = mail.uid('fetch', uid, '(RFC822)')
+                if status != 'OK':
+                    continue
+                msg = email.message_from_bytes(msg_data[0][1])
+
+                source_message_id = msg.get("Message-ID", "")
+                subject = decode_header(msg["Subject"])[0][0]
+                if isinstance(subject, bytes):
+                    subject = subject.decode(errors='ignore')
+
+                # VENDOR FILTER: Only process emails from active vendors (currently TC Dental only)
+                if not is_email_from_active_vendor(msg, subject):
                     skipped_count += 1
                     continue
 
-            # Check if email has PDF attachments
-            # CRITICAL: Check ALL parts, not just those with Content-Disposition
-            has_pdf = False
-            for part in msg.walk():
-                if part.get_content_maintype() == 'multipart':
+                # Fast dedup: check if this email was already processed by the scanner
+                email_key = source_message_id or f"uid:{folder_name}:{uid.decode()}"
+                if email_key in seen_keys:
+                    skipped_count += 1
                     continue
 
-                # Check for filename in Content-Disposition
-                filename = part.get_filename()
-
-                # If no filename, check Content-Type for attachments
-                if not filename:
-                    content_type = part.get_content_type()
-                    if content_type.startswith('application/'):
-                        params = part.get_params()
-                        if params:
-                            for key, value in params:
-                                if key.lower() == 'name':
-                                    filename = value
-                                    break
-
-                # Check if it's a PDF
-                if filename and filename.lower().endswith(".pdf"):
-                    has_pdf = True
-                    break
-
-            if has_pdf:
-                log(f"[INBOX][SCAN] Processing invoice email: {subject}")
-                pdf_files = extract_and_save_pdfs(msg, subject, source_message_id)
-                # Queue PDFs for parallel processing (now includes email_context)
-                for filepath, detected_vendor, email_context in pdf_files:
-                    pdf_tasks.append((filepath, detected_vendor, email_context))
-                # CRITICAL FIX: Only mark as read AFTER successfully extracting PDFs
-                # This ensures we don't lose emails if extraction fails
-                if pdf_files:
-                    if not full_scan:
-                        move_to_processed(mail, uid)
-                    # Track in ingest DB so we never re-process this email
-                    mark_email_seen(email_key)
-                    seen_keys.add(email_key)
-                    processed_count += 1
+                # In full_scan mode, ONLY skip if message was deleted (tombstone)
+                if full_scan:
+                    if source_message_id and source_message_id in tombstones:
+                        log(f"[INBOX][TOMBSTONE] Message {source_message_id} was previously deleted, skipping")
+                        skipped_count += 1
+                        continue
+                    log(f"[INBOX][SCAN][FULL] Processing email in full scan mode: {subject}")
                 else:
-                    log(f"[INBOX][SCAN][WARNING] Email had PDF flag but no PDFs extracted: {subject}")
+                    if is_invoice_already_processed(subject, invoice_numbers, message_ids, tombstones, source_message_id):
+                        skipped_count += 1
+                        continue
+
+                # Check if email has PDF attachments
+                has_pdf = False
+                for part in msg.walk():
+                    if part.get_content_maintype() == 'multipart':
+                        continue
+                    filename = part.get_filename()
+                    if not filename:
+                        content_type = part.get_content_type()
+                        if content_type.startswith('application/'):
+                            params = part.get_params()
+                            if params:
+                                for key, value in params:
+                                    if key.lower() == 'name':
+                                        filename = value
+                                        break
+                    if filename and filename.lower().endswith(".pdf"):
+                        has_pdf = True
+                        break
+
+                if has_pdf:
+                    log(f"[INBOX][SCAN][{folder_name}] Processing invoice email: {subject}")
+                    pdf_files = extract_and_save_pdfs(msg, subject, source_message_id)
+                    for filepath, detected_vendor, email_context in pdf_files:
+                        pdf_tasks.append((filepath, detected_vendor, email_context))
+                    if pdf_files:
+                        if not full_scan:
+                            move_to_processed(mail, uid)
+                        mark_email_seen(email_key)
+                        seen_keys.add(email_key)
+                        processed_count += 1
+                    else:
+                        log(f"[INBOX][SCAN][WARNING] Email had PDF flag but no PDFs extracted: {subject}")
+                        skipped_count += 1
+                else:
+                    sender = msg.get("From", "unknown")
+                    log(f"[INBOX][SCAN][NO_PDF][{folder_name}] Skipping email without PDF - From: {sender}, Subject: {subject}")
+                    no_pdf_count += 1
                     skipped_count += 1
-            else:
-                sender = msg.get("From", "unknown")
-                log(f"[INBOX][SCAN][NO_PDF] Skipping email without PDF - From: {sender}, Subject: {subject}")
-                no_pdf_count += 1
-                skipped_count += 1
 
         mail.logout()
 
@@ -1063,6 +1062,7 @@ if __name__ == "__main__":
     log(f"[INBOX][WATCHER][CONFIG] IMAP_SERVER={IMAP_SERVER}")
     log(f"[INBOX][WATCHER][CONFIG] IMAP_USER={EMAIL_USER}")
     log(f"[INBOX][WATCHER][CONFIG] API_BASE_URL={API_BASE_URL}")
+    log(f"[INBOX][WATCHER][CONFIG] FOLDERS=INBOX + {EXTRA_FOLDERS}")
     log(f"[INBOX][WATCHER][CONFIG] HEARTBEAT_PATH={HEARTBEAT_PATH}")
     
     if args.full_scan:
