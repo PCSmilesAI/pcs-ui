@@ -451,7 +451,7 @@ function parseClassificationResponse(parsed: any, totalPages: number): { pageSta
  * Vision-based page classification: sends page images to GPT for visual analysis.
  * Used when text extraction is insufficient (scanned/image-only PDFs).
  */
-async function classifyDocumentPagesByVision(base64Images: string[], totalPages: number): Promise<number[][]> {
+async function classifyDocumentPagesByVision(base64Images: string[], totalPages: number, pdfPath?: string): Promise<number[][]> {
   console.log(`[PCS-AI] Vision-based classification for ${totalPages} pages...`);
   
   try {
@@ -474,11 +474,17 @@ async function classifyDocumentPagesByVision(base64Images: string[], totalPages:
     const response = await getOpenAIClient().chat.completions.create({
       model: GPT_MODEL,
       max_completion_tokens: 1000,
-      messages: [{ role: 'user', content: messageContent }]
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a document classification assistant. You MUST respond with ONLY a valid JSON object. No explanations, no markdown, no extra text — just the JSON object.'
+        },
+        { role: 'user', content: messageContent }
+      ]
     });
     
     const rawResponse = response.choices[0]?.message?.content?.trim() || '';
-    console.log(`[PCS-AI] Vision classification response:`, rawResponse.substring(0, 400));
+    console.log(`[PCS-AI] Vision classification response (${rawResponse.length} chars):`, rawResponse.substring(0, 500));
     
     const parsed = extractJsonFromResponse(rawResponse);
     const result = parseClassificationResponse(parsed, totalPages);
@@ -495,13 +501,23 @@ async function classifyDocumentPagesByVision(base64Images: string[], totalPages:
       return clusters;
     }
     
-    console.warn('[PCS-AI] Vision classification response could not be parsed, falling back to one-per-page');
+    console.warn('[PCS-AI] Vision classification response could not be parsed');
   } catch (error: any) {
     console.error('[PCS-AI] Vision classification error:', error.message);
   }
   
-  // Fallback: each page is a separate invoice
-  return Array.from({ length: totalPages }, (_, i) => [i]);
+  // Fallback: try text heuristic if we have the PDF path
+  if (pdfPath) {
+    const fallbackTexts = extractTextPerPage(pdfPath);
+    if (fallbackTexts.length > 0) {
+      console.log('[PCS-AI] Vision failed, falling back to text heuristic');
+      return classifyPagesByTextHeuristic(fallbackTexts, totalPages);
+    }
+  }
+  
+  // Last resort: treat the entire document as one invoice
+  console.warn('[PCS-AI] All classification methods failed, treating as single invoice');
+  return [[...Array(totalPages).keys()]];
 }
 
 /**
@@ -534,12 +550,12 @@ export async function classifyDocumentPages(
   // If text extraction covers less than 50% of pages, use vision-based classification
   if (textCoverage < 0.5 && base64Images && base64Images.length > 0) {
     console.log('[PCS-AI] Insufficient text extraction, switching to vision-based classification');
-    return classifyDocumentPagesByVision(base64Images, totalPages);
+    return classifyDocumentPagesByVision(base64Images, totalPages, pdfPath);
   }
 
   if (pageTexts.length === 0) {
     if (base64Images && base64Images.length > 0) {
-      return classifyDocumentPagesByVision(base64Images, totalPages);
+      return classifyDocumentPagesByVision(base64Images, totalPages, pdfPath);
     }
     console.warn('[PCS-AI] No text extracted and no images available, defaulting to one invoice per page');
     return Array.from({ length: totalPages }, (_, i) => [i]);
@@ -593,14 +609,14 @@ export async function classifyDocumentPages(
     // Fall back to vision if text classification failed and images are available
     if (base64Images && base64Images.length > 0) {
       console.log('[PCS-AI] Falling back to vision-based classification...');
-      return classifyDocumentPagesByVision(base64Images, totalPages);
+      return classifyDocumentPagesByVision(base64Images, totalPages, pdfPath);
     }
   } catch (error: any) {
     console.error('[PCS-AI] GPT page classification error:', error.message);
     
     if (base64Images && base64Images.length > 0) {
       console.log('[PCS-AI] Falling back to vision-based classification after error...');
-      return classifyDocumentPagesByVision(base64Images, totalPages);
+      return classifyDocumentPagesByVision(base64Images, totalPages, pdfPath);
     }
   }
 
