@@ -247,53 +247,71 @@ export async function POST(
             // Track used invoice numbers to handle duplicates
             const usedInvoiceNumbers = new Set<string>();
             
-            // Wrap in a transaction so all inserts succeed or none do
-            const insertAllInvoices = db.transaction(async () => {
-              for (let idx = 0; idx < validInvoices.length; idx++) {
-                const parsed = validInvoices[idx];
-                const invoiceIndex = idx + 1;
-                
-                const rawVendor = parsed.vendor_name || parseResult.vendorDetected || invoice.vendor_name || 'Unknown';
-                const normalizedVendor = normalizeVendorNameForStorage(rawVendor);
-                
-                // Make invoice numbers unique if duplicates exist
-                let invoiceNumber = parsed.invoice_number || `${invoice.invoice_number}-${invoiceIndex}`;
-                const baseNumber = invoiceNumber;
-                let suffix = 2;
-                while (usedInvoiceNumbers.has(`${invoiceNumber}::${normalizedVendor}`)) {
-                  invoiceNumber = `${baseNumber}-${suffix}`;
-                  suffix++;
-                }
-                usedInvoiceNumbers.add(`${invoiceNumber}::${normalizedVendor}`);
-                
-                // Also check existing DB records for uniqueness
-                const existing = db.prepare(
-                  `SELECT id FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
-                ).get(invoiceNumber, normalizedVendor) as { id: string } | undefined;
-                if (existing) {
-                  invoiceNumber = `${baseNumber}-S${invoiceIndex}`;
-                  console.log(`[REPARSE] Duplicate invoice_number detected, using ${invoiceNumber}`);
-                }
-                
-                let amountCents = 0;
-                if (parsed.total && typeof parsed.total === 'number') {
-                  amountCents = Math.round(parsed.total * 100);
-                }
-                
-                let parsingStatus = 'success';
-                let parsingError: string | null = null;
-                if (parsed.parsing_confidence < 0.5) {
-                  parsingStatus = 'partial';
-                  parsingError = 'Low parsing confidence';
-                } else if (!parsed.invoice_number || !parsed.total) {
-                  parsingStatus = 'partial';
-                  parsingError = 'Missing required fields';
-                }
-                
-                const newId = randomUUID();
-                const normalizedInvoiceDate = normalizeDateForStorage(parsed.invoice_date);
-                const normalizedDueDate = normalizeDateForStorage(parsed.due_date);
-                
+            // Prepare invoice data for bulk insert
+            const invoicesToInsert: Array<{
+              newId: string; invoiceNumber: string; normalizedVendor: string;
+              amountCents: number; parsed: typeof validInvoices[0];
+              parsingStatus: string; parsingError: string | null;
+              invoiceIndex: number; normalizedInvoiceDate: string | null;
+              normalizedDueDate: string | null;
+            }> = [];
+            
+            for (let idx = 0; idx < validInvoices.length; idx++) {
+              const parsed = validInvoices[idx];
+              const invoiceIndex = idx + 1;
+              
+              const rawVendor = parsed.vendor_name || parseResult.vendorDetected || invoice.vendor_name || 'Unknown';
+              const normalizedVendor = normalizeVendorNameForStorage(rawVendor);
+              
+              let invoiceNumber = parsed.invoice_number || `${invoice.invoice_number}-${invoiceIndex}`;
+              const baseNumber = invoiceNumber;
+              let suffix = 2;
+              while (usedInvoiceNumbers.has(`${invoiceNumber}::${normalizedVendor}`)) {
+                invoiceNumber = `${baseNumber}-${suffix}`;
+                suffix++;
+              }
+              usedInvoiceNumbers.add(`${invoiceNumber}::${normalizedVendor}`);
+              
+              const existing = db.prepare(
+                `SELECT id FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
+              ).get(invoiceNumber, normalizedVendor) as { id: string } | undefined;
+              if (existing) {
+                invoiceNumber = `${baseNumber}-S${invoiceIndex}`;
+                console.log(`[REPARSE] Duplicate invoice_number detected, using ${invoiceNumber}`);
+              }
+              
+              let amountCents = 0;
+              if (parsed.total && typeof parsed.total === 'number') {
+                amountCents = Math.round(parsed.total * 100);
+              }
+              
+              let parsingStatus = 'success';
+              let parsingError: string | null = null;
+              if (parsed.parsing_confidence < 0.5) {
+                parsingStatus = 'partial';
+                parsingError = 'Low parsing confidence';
+              } else if (!parsed.invoice_number || !parsed.total) {
+                parsingStatus = 'partial';
+                parsingError = 'Missing required fields';
+              }
+              
+              invoicesToInsert.push({
+                newId: randomUUID(),
+                invoiceNumber,
+                normalizedVendor,
+                amountCents,
+                parsed,
+                parsingStatus,
+                parsingError,
+                invoiceIndex,
+                normalizedInvoiceDate: normalizeDateForStorage(parsed.invoice_date),
+                normalizedDueDate: normalizeDateForStorage(parsed.due_date),
+              });
+            }
+            
+            // Synchronous transaction for all DB inserts (better-sqlite3 requires sync)
+            const insertAllInvoices = db.transaction(() => {
+              for (const inv of invoicesToInsert) {
                 db.prepare(`
                   INSERT INTO invoices (
                     id, invoice_number, source_file,
@@ -305,62 +323,65 @@ export async function POST(
                     document_group_id, document_invoice_index, document_invoice_total
                   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `).run(
-                  newId, invoiceNumber, invoice.source_file,
-                  normalizedVendor, parsed.office_location, amountCents,
-                  normalizedVendor, parsed.office_location, amountCents,
+                  inv.newId, inv.invoiceNumber, invoice.source_file,
+                  inv.normalizedVendor, inv.parsed.office_location, inv.amountCents,
+                  inv.normalizedVendor, inv.parsed.office_location, inv.amountCents,
                   'incoming', JSON.stringify({}), 0,
-                  normalizedInvoiceDate, normalizedDueDate, parsed.office_location,
+                  inv.normalizedInvoiceDate, inv.normalizedDueDate, inv.parsed.office_location,
                   invoice.pdf_path || buildApiPdfPath(normalizedPdf),
-                  parsingStatus, parsingError, 1,
-                  documentGroupId, invoiceIndex, totalInvoicesInDoc
+                  inv.parsingStatus, inv.parsingError, 1,
+                  documentGroupId, inv.invoiceIndex, totalInvoicesInDoc
                 );
                 
                 db.prepare(`
                   INSERT INTO invoice_events (invoice_id, action, payload_json)
                   VALUES (?, 'REPARSE_MULTI_SPLIT', ?)
-                `).run(newId, JSON.stringify({
+                `).run(inv.newId, JSON.stringify({
                   original_invoice_id: id,
                   document_group_id: documentGroupId,
-                  invoice_index: invoiceIndex,
+                  invoice_index: inv.invoiceIndex,
                   total_in_document: totalInvoicesInDoc,
-                  vendor: normalizedVendor,
-                  amount_cents: amountCents
+                  vendor: inv.normalizedVendor,
+                  amount_cents: inv.amountCents
                 }));
                 
-                try {
-                  const { categorizeInvoice, storeInvoiceCategories } = await import('@/lib/invoices/categoryParser');
-                  const lineItems = (parsed.line_items || []).map(item => ({
-                    description: item.description || '',
-                    quantity: item.quantity ?? undefined,
-                    unit_price: item.unit_price ?? undefined,
-                    amount: item.amount ?? undefined
-                  }));
-                  const categories = await categorizeInvoice(
-                    { vendor_name: normalizedVendor, line_items: lineItems },
-                    normalizedVendor
-                  );
-                  await storeInvoiceCategories(newId, categories);
-                } catch (err: any) {
-                  console.warn('[REPARSE] Failed to auto-categorize:', err?.message);
-                }
-                
                 createdInvoices.push({
-                  id: newId,
-                  invoice_number: invoiceNumber,
-                  vendor: normalizedVendor,
-                  amount: amountCents / 100
+                  id: inv.newId,
+                  invoice_number: inv.invoiceNumber,
+                  vendor: inv.normalizedVendor,
+                  amount: inv.amountCents / 100
                 });
                 
-                console.log(`[REPARSE] Created invoice ${invoiceIndex}/${totalInvoicesInDoc}:`, {
-                  id: newId, invoice_number: invoiceNumber, vendor: normalizedVendor, amount: amountCents / 100
+                console.log(`[REPARSE] Created invoice ${inv.invoiceIndex}/${totalInvoicesInDoc}:`, {
+                  id: inv.newId, invoice_number: inv.invoiceNumber, vendor: inv.normalizedVendor, amount: inv.amountCents / 100
                 });
               }
               
-              // Soft-delete the original invoice only after all inserts succeed
+              // Soft-delete the original invoice
               db.prepare(`UPDATE invoices SET deleted = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(id);
             });
             
-            await insertAllInvoices();
+            insertAllInvoices();
+            
+            // Async categorization AFTER the transaction (non-critical, won't roll back inserts)
+            for (const inv of invoicesToInsert) {
+              try {
+                const { categorizeInvoice, storeInvoiceCategories } = await import('@/lib/invoices/categoryParser');
+                const lineItems = (inv.parsed.line_items || []).map(item => ({
+                  description: item.description || '',
+                  quantity: item.quantity ?? undefined,
+                  unit_price: item.unit_price ?? undefined,
+                  amount: item.amount ?? undefined
+                }));
+                const categories = await categorizeInvoice(
+                  { vendor_name: inv.normalizedVendor, line_items: lineItems },
+                  inv.normalizedVendor
+                );
+                await storeInvoiceCategories(inv.newId, categories);
+              } catch (err: any) {
+                console.warn('[REPARSE] Failed to auto-categorize:', err?.message);
+              }
+            }
             
             console.log(`[REPARSE] Soft-deleted original invoice ${id}, replaced with ${createdInvoices.length} individual invoices`);
             
