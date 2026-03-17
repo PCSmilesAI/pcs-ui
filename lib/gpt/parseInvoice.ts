@@ -454,54 +454,116 @@ function parseClassificationResponse(parsed: any, totalPages: number): { pageSta
 async function classifyDocumentPagesByVision(base64Images: string[], totalPages: number, pdfPath?: string): Promise<number[][]> {
   console.log(`[PCS-AI] Vision-based classification for ${totalPages} pages...`);
   
+  // Strategy: classify pages in batches of up to 4 images per call for reliability
+  // Each batch asks: for these pages, which are invoices vs non-invoices?
+  const BATCH_SIZE = 4;
+  const pageClassifications: Array<{ page: number; isInvoice: boolean; isNewInvoice: boolean; invoiceNumber?: string }> = [];
+  
+  const perPagePrompt = `Classify each page image below. For EACH page, determine:
+- Is this page an actual invoice/delivery slip from a vendor? (NOT an email, NOT a QBO screenshot, NOT a system page)
+- If it IS an invoice page, does it START a new invoice or continue the previous one?
+
+Return ONLY a JSON object:
+{"pages": [{"page": 1, "is_invoice": true, "is_new_invoice": true, "invoice_number": "123-456"}, {"page": 2, "is_invoice": false, "reason": "email printout"}]}
+
+is_invoice: true if this is an actual vendor invoice page, false if it's an email, screenshot, cover letter, or blank
+is_new_invoice: true if this page starts a NEW invoice (has its own header/invoice number), false if it continues the previous invoice
+invoice_number: the invoice number if visible (null if not)`;
+
   try {
-    const messageContent: Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string; detail: 'high' | 'low' | 'auto' } }> = [];
-    
-    messageContent.push({
-      type: 'text',
-      text: VISION_PAGE_CLASSIFICATION_PROMPT + `\n\nThe document has ${totalPages} pages total. Each page image is labeled below:`
-    });
-    
-    // Send each page image at low detail (85 tokens each, very manageable)
-    for (let i = 0; i < base64Images.length; i++) {
-      messageContent.push({ type: 'text', text: `--- PAGE ${i + 1} ---` });
-      messageContent.push({
-        type: 'image_url',
-        image_url: { url: `data:image/png;base64,${base64Images[i]}`, detail: 'low' }
+    for (let batchStart = 0; batchStart < totalPages; batchStart += BATCH_SIZE) {
+      const batchEnd = Math.min(batchStart + BATCH_SIZE, totalPages);
+      const batchPages: number[] = [];
+      
+      const messageContent: Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string; detail: 'high' | 'low' | 'auto' } }> = [];
+      
+      messageContent.push({ type: 'text', text: perPagePrompt });
+      
+      for (let i = batchStart; i < batchEnd; i++) {
+        batchPages.push(i + 1);
+        messageContent.push({ type: 'text', text: `--- PAGE ${i + 1} ---` });
+        messageContent.push({
+          type: 'image_url',
+          image_url: { url: `data:image/png;base64,${base64Images[i]}`, detail: 'low' }
+        });
+      }
+      
+      console.log(`[PCS-AI] Vision batch: classifying pages ${batchPages.join(', ')}...`);
+      
+      const response = await getOpenAIClient().chat.completions.create({
+        model: GPT_MODEL,
+        max_completion_tokens: 800,
+        messages: [
+          {
+            role: 'system',
+            content: 'You classify document pages. Respond with ONLY valid JSON. No explanation text.'
+          },
+          { role: 'user', content: messageContent }
+        ]
       });
+      
+      const rawResponse = response.choices[0]?.message?.content?.trim() || '';
+      const finishReason = response.choices[0]?.finish_reason || 'unknown';
+      console.log(`[PCS-AI] Vision batch response (${rawResponse.length} chars, finish: ${finishReason}):`, rawResponse.substring(0, 300));
+      
+      if (rawResponse.length === 0) {
+        console.warn(`[PCS-AI] Empty response for pages ${batchPages.join(',')}, marking as unknown`);
+        for (const p of batchPages) {
+          pageClassifications.push({ page: p, isInvoice: true, isNewInvoice: true });
+        }
+        continue;
+      }
+      
+      const parsed = extractJsonFromResponse(rawResponse);
+      if (parsed && Array.isArray(parsed.pages)) {
+        for (const pg of parsed.pages) {
+          pageClassifications.push({
+            page: pg.page,
+            isInvoice: pg.is_invoice === true,
+            isNewInvoice: pg.is_new_invoice === true,
+            invoiceNumber: pg.invoice_number || undefined
+          });
+        }
+      } else {
+        console.warn(`[PCS-AI] Could not parse batch response, marking pages ${batchPages.join(',')} as invoice starts`);
+        for (const p of batchPages) {
+          pageClassifications.push({ page: p, isInvoice: true, isNewInvoice: true });
+        }
+      }
     }
     
-    const response = await getOpenAIClient().chat.completions.create({
-      model: GPT_MODEL,
-      max_completion_tokens: 1000,
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a document classification assistant. You MUST respond with ONLY a valid JSON object. No explanations, no markdown, no extra text — just the JSON object.'
-        },
-        { role: 'user', content: messageContent }
-      ]
+    // Build page_starts and non_invoice_pages from classifications
+    const pageStarts: number[] = [];
+    const nonInvoicePages = new Set<number>();
+    
+    for (const pc of pageClassifications) {
+      const idx = pc.page - 1; // Convert to 0-indexed
+      if (idx < 0 || idx >= totalPages) continue;
+      
+      if (!pc.isInvoice) {
+        nonInvoicePages.add(idx);
+      } else if (pc.isNewInvoice) {
+        pageStarts.push(idx);
+      }
+    }
+    
+    console.log(`[PCS-AI] Vision classification summary:`, {
+      totalPages,
+      invoiceStarts: pageStarts.map(p => p + 1),
+      nonInvoicePages: Array.from(nonInvoicePages).map(p => p + 1),
+      allClassifications: pageClassifications.map(pc => ({ page: pc.page, invoice: pc.isInvoice, new: pc.isNewInvoice }))
     });
     
-    const rawResponse = response.choices[0]?.message?.content?.trim() || '';
-    console.log(`[PCS-AI] Vision classification response (${rawResponse.length} chars):`, rawResponse.substring(0, 500));
-    
-    const parsed = extractJsonFromResponse(rawResponse);
-    const result = parseClassificationResponse(parsed, totalPages);
-    
-    if (result) {
-      const clusters = buildPageClusters(result.pageStarts, result.nonInvoicePages, totalPages);
+    if (pageStarts.length > 0) {
+      const clusters = buildPageClusters(pageStarts, nonInvoicePages, totalPages);
       console.log(`[PCS-AI] Vision classification complete:`, {
-        totalPages,
         invoicesFound: clusters.length,
-        nonInvoicePages: Array.from(result.nonInvoicePages).map(p => p + 1),
-        clusters: clusters.map(c => c.map(p => p + 1)),
-        reasoning: parsed?.reasoning
+        clusters: clusters.map(c => c.map(p => p + 1))
       });
       return clusters;
     }
     
-    console.warn('[PCS-AI] Vision classification response could not be parsed');
+    console.warn('[PCS-AI] Vision found no invoice start pages');
   } catch (error: any) {
     console.error('[PCS-AI] Vision classification error:', error.message);
   }
