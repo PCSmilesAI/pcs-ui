@@ -126,12 +126,8 @@ def is_email_from_active_vendor(msg, subject_str):
         if vk in sender or vk in subject_lower:
             return True
     
-    # Check if sender is a priority sender (e.g. Laura forwarding invoices)
-    for ps in PRIORITY_SENDERS:
-        if ps.lower() in sender:
-            return True
-    
-    # Check PDF attachment filenames for vendor keywords
+    # For priority senders and any other email, check PDF attachment filenames
+    # This catches cases where Laura forwards TC Dental with a vague subject
     if has_vendor_attachment(msg):
         return True
     
