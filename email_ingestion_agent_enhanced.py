@@ -79,12 +79,40 @@ _last_scan_result = {
 ACTIVE_VENDOR_FILTER = ['tc dental', 'tcdentallab', 'tc dental lab', 'tcdental',
                         'tc invoices', 'tc invoice', 'tc lab', 'tc ']
 
+# Priority senders: always fetch ALL emails from these addresses regardless of subject.
+# Emails are still filtered by vendor keywords in subject, FROM, or attachment filenames.
+PRIORITY_SENDERS = ['laurag@pcsmiles.com', 'laurag@pacificcrestsmiles.com']
+
 # IMAP folders to scan (in addition to INBOX)
 # GoDaddy email uses "Junk" and "Spam" folders
 EXTRA_FOLDERS = ['Junk', 'Spam']
 
+def has_vendor_attachment(msg):
+    """Check if any PDF attachment filename contains active vendor keywords."""
+    if not ACTIVE_VENDOR_FILTER:
+        return False
+    for part in msg.walk():
+        if part.get_content_maintype() == 'multipart':
+            continue
+        filename = part.get_filename()
+        if not filename:
+            params = part.get_params()
+            if params:
+                for key, value in params:
+                    if key.lower() == 'name':
+                        filename = value
+                        break
+        if filename and filename.lower().endswith('.pdf'):
+            fn_lower = filename.lower()
+            for vendor_keyword in ACTIVE_VENDOR_FILTER:
+                if vendor_keyword.lower() in fn_lower:
+                    return True
+    return False
+
+
 def is_email_from_active_vendor(msg, subject_str):
     """Check if an email is from one of the active vendors we should process.
+    Checks subject, sender, priority senders list, and PDF attachment filenames.
     Returns True if the email should be processed, False if it should be skipped.
     If ACTIVE_VENDOR_FILTER is empty/None, all emails are processed."""
     if not ACTIVE_VENDOR_FILTER:
@@ -97,6 +125,15 @@ def is_email_from_active_vendor(msg, subject_str):
         vk = vendor_keyword.lower()
         if vk in sender or vk in subject_lower:
             return True
+    
+    # Check if sender is a priority sender (e.g. Laura forwarding invoices)
+    for ps in PRIORITY_SENDERS:
+        if ps.lower() in sender:
+            return True
+    
+    # Check PDF attachment filenames for vendor keywords
+    if has_vendor_attachment(msg):
+        return True
     
     return False
 
@@ -846,8 +883,17 @@ def check_inbox(full_scan=False):
                                     all_uids.add(uid)
                         except Exception as search_err:
                             log(f"[INBOX][SCAN][WARN] IMAP search for {field}='{vendor_keyword}' in {folder_name} failed: {search_err}")
+                # Also fetch ALL emails from priority senders so we can inspect attachments
+                for sender_email in PRIORITY_SENDERS:
+                    try:
+                        status, messages = mail.uid('search', None, 'FROM', f'"{sender_email}"')
+                        if status == 'OK' and messages[0]:
+                            for uid in messages[0].split():
+                                all_uids.add(uid)
+                    except Exception as search_err:
+                        log(f"[INBOX][SCAN][WARN] IMAP search for priority sender '{sender_email}' in {folder_name} failed: {search_err}")
                 email_uids = sorted(all_uids)
-                log(f"[INBOX][SCAN][MODE] VENDOR-FILTERED SCAN (ALL) in '{folder_name}' - Found {len(email_uids)} emails matching vendor filter")
+                log(f"[INBOX][SCAN][MODE] VENDOR-FILTERED SCAN (ALL) in '{folder_name}' - Found {len(email_uids)} emails matching vendor filter + priority senders")
             elif full_scan:
                 log(f"[INBOX][SCAN][MODE] FULL SCAN in '{folder_name}' - Processing ALL emails")
                 status, messages = mail.uid('search', None, 'ALL')
