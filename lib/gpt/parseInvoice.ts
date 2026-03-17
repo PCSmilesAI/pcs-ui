@@ -24,6 +24,10 @@ function getOpenAIClient(): OpenAI {
 // Set GPT_MODEL=gpt-5-nano for faster/cheaper parsing, or gpt-4o for better accuracy
 const GPT_MODEL = process.env.GPT_MODEL || 'gpt-5-nano';
 
+// Use a more capable model for page classification tasks (multi-image reasoning)
+// gpt-5-nano returns empty responses for multi-image classification
+const CLASSIFICATION_MODEL = process.env.GPT_CLASSIFICATION_MODEL || 'gpt-4o';
+
 // Parsing configuration - can be overridden for bulk operations
 export const PARSING_CONFIG = {
   maxCompletionTokens: 4000, // Increased from 2000 for complex invoices
@@ -488,10 +492,10 @@ invoice_number: the invoice number if visible (null if not)`;
         });
       }
       
-      console.log(`[PCS-AI] Vision batch: classifying pages ${batchPages.join(', ')}...`);
+      console.log(`[PCS-AI] Vision batch: classifying pages ${batchPages.join(', ')} (model: ${CLASSIFICATION_MODEL})...`);
       
       const response = await getOpenAIClient().chat.completions.create({
-        model: GPT_MODEL,
+        model: CLASSIFICATION_MODEL,
         max_completion_tokens: 800,
         messages: [
           {
@@ -632,11 +636,11 @@ export async function classifyDocumentPages(
     return `=== PAGE ${i + 1} ===\n${trimmed}`;
   }).join('\n\n');
 
-  console.log(`[PCS-AI] Sending ${pageTexts.length} pages for text-based classification...`);
+  console.log(`[PCS-AI] Sending ${pageTexts.length} pages for text-based classification (model: ${CLASSIFICATION_MODEL})...`);
 
   try {
     const response = await getOpenAIClient().chat.completions.create({
-      model: GPT_MODEL,
+      model: CLASSIFICATION_MODEL,
       max_completion_tokens: 1000,
       messages: [
         {
