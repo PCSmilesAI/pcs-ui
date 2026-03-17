@@ -209,12 +209,37 @@ export async function POST(req: NextRequest) {
     invoice.current_assigned_user_email = approverEmail;
     invoice.status = 'awaiting_admin_approval';
     
-    // Track who verified and when
+    // Track who verified/coded and when
+    const now = new Date().toISOString();
     invoice.verified_by_user_id = user.email.toLowerCase();
-    invoice.verified_at = new Date().toISOString();
+    invoice.verified_at = now;
+    invoice.coded_by_user_id = user.email.toLowerCase();
+    invoice.coded_at = now;
 
     // Save the invoice
     saveInvoice(invoice);
+
+    // Log the verification/coding event so it appears in the invoice timeline
+    try {
+      const db = getDatabase();
+      db.prepare(`
+        INSERT INTO invoice_events (invoice_id, action, actor_email, payload_json, created_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).run(
+        invoice.id,
+        'coded_and_sent',
+        user.email.toLowerCase(),
+        JSON.stringify({
+          destination: destination || 'mckay',
+          assigned_to: approverEmail,
+          qbo_bill_id: qboBillResult?.billId || null,
+          ai_training: aiTrainingResult?.success || false,
+          user_comment: userComment || null,
+        })
+      );
+    } catch (eventErr: any) {
+      console.warn('[API][SEND-FOR-APPROVAL]', 'event_log_error', { error: eventErr.message });
+    }
     
     console.log('[API][SEND-FOR-APPROVAL]', 'success', { 
       invoiceId, 
