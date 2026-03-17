@@ -215,180 +215,216 @@ export async function POST(req: NextRequest) {
       
       // Generate a group ID to link all invoices from this document
       const documentGroupId = randomUUID();
-      const totalInvoicesInDoc = parseResult.multipleInvoices.invoices.length;
-      const createdInvoices: Array<{ id: string; invoice_number: string; vendor: string; amount: number }> = [];
+      const allParsedInvoices = parseResult.multipleInvoices.invoices;
       
-      // Process each invoice
-      for (let idx = 0; idx < parseResult.multipleInvoices.invoices.length; idx++) {
-        const parsed = parseResult.multipleInvoices.invoices[idx];
-        const invoiceIndex = idx + 1; // 1-indexed
+      // Filter out non-invoice pages (low confidence, no meaningful data)
+      const validInvoices = allParsedInvoices.filter(inv => {
+        if (inv.parsing_confidence <= 0.1) return false;
+        if (!inv.invoice_number && !inv.total && (!inv.line_items || inv.line_items.length === 0)) return false;
+        return true;
+      });
+      
+      if (validInvoices.length <= 1 && validInvoices.length < allParsedInvoices.length) {
+        console.log(`[PCS_AI_INGEST] Only ${validInvoices.length} valid invoices after filtering ${allParsedInvoices.length}, treating as single invoice`);
+        // Fall through to single-invoice handling below
+      } else {
+        const totalInvoicesInDoc = validInvoices.length;
+        const createdInvoices: Array<{ id: string; invoice_number: string; vendor: string; amount: number }> = [];
+        const usedInvoiceNumbers = new Set<string>();
         
-        // Validate and resolve vendor
-        const rawVendor = parsed.vendor_name || parseResult.vendorDetected || 'Unknown';
-        let validatedVendor = rawVendor;
+        // Prepare invoice data for all valid invoices
+        const invoicesToInsert: Array<{
+          id: string; invoiceNumber: string; normalizedVendor: string;
+          amountCents: number; parsed: typeof validInvoices[0];
+          parsingStatus: string; parsingError: string | null;
+          invoiceIndex: number; normalizedInvoiceDate: string | null;
+          normalizedDueDate: string | null; rawVendor: string;
+        }> = [];
         
-        try {
-          const qboVendors = await getQBOVendors();
-          if (qboVendors.length > 0) {
-            const vendorMatch = resolveVendor(rawVendor, null, qboVendors);
-            validatedVendor = vendorMatch.vendor;
+        for (let idx = 0; idx < validInvoices.length; idx++) {
+          const parsed = validInvoices[idx];
+          const invoiceIndex = idx + 1;
+          
+          const rawVendor = parsed.vendor_name || parseResult.vendorDetected || 'Unknown';
+          let validatedVendor = rawVendor;
+          
+          try {
+            const qboVendors = await getQBOVendors();
+            if (qboVendors.length > 0) {
+              const vendorMatch = resolveVendor(rawVendor, null, qboVendors);
+              validatedVendor = vendorMatch.vendor;
+            }
+          } catch (e) {
+            // Use raw vendor on error
           }
-        } catch (e) {
-          // Use raw vendor on error
-        }
-        
-        const normalizedVendor = normalizeVendorNameForStorage(validatedVendor);
-        
-        // Generate invoice number (append index if multiple)
-        // Validate parsed invoice number - reject obvious non-invoice-number values
-        let validatedInvoiceNumber = parsed.invoice_number;
-        if (validatedInvoiceNumber) {
-          // Reject if it looks like a filename (contains underscores, long hash strings, or file extensions)
-          if (/[_]/.test(validatedInvoiceNumber) || validatedInvoiceNumber.length > 20 || /\.(pdf|PDF)/.test(validatedInvoiceNumber)) {
-            console.warn(`[PCS_AI_INGEST] Rejected invalid invoice number (looks like filename): ${validatedInvoiceNumber}`);
-            validatedInvoiceNumber = null;
-          }
-        }
-        const baseInvoiceNumber = validatedInvoiceNumber || 
-          normalizedPdfFilename?.replace(/\.(pdf|PDF)$/, '') ||
-          `GPT-${Date.now()}`;
-        const invoiceNumber = `${baseInvoiceNumber}`;
-        
-        // Calculate amount in cents
-        let amountCents = 0;
-        if (parsed.total && typeof parsed.total === 'number') {
-          amountCents = Math.round(parsed.total * 100);
-        }
-        
-        // Determine parsing status
-        let parsingStatus = 'success';
-        let parsingError: string | null = null;
-        
-        if (parsed.parsing_confidence < 0.5) {
-          parsingStatus = 'partial';
-          parsingError = 'Low parsing confidence';
-        } else if (!parsed.invoice_number || !parsed.total) {
-          parsingStatus = 'partial';
-          parsingError = 'Missing required fields';
-        }
-        
-        // Generate ID
-        const id = randomUUID();
-        
-        // Normalize office location - strip parent company names
-        if (parsed.office_location) {
-          const loc = parsed.office_location;
-          // "Pacific Crest Smiles - Eugene" -> "Eugene"
-          const pcsMatch = loc.match(/Pacific Crest Smiles\s*[-–]\s*(.+)/i);
-          if (pcsMatch) {
-            parsed.office_location = pcsMatch[1].trim();
-          }
-          // "Pacific Crest Smiles" alone -> null (not a valid office)
-          if (/^Pacific Crest Smiles$/i.test(parsed.office_location)) {
-            parsed.office_location = null;
-          }
-          // "Smiles Dental" alone -> null
-          if (/^Smiles Dental$/i.test(parsed.office_location || '')) {
-            parsed.office_location = null;
-          }
-        }
-
-        // Normalize dates
-        const normalizedInvoiceDate = normalizeDateForStorage(parsed.invoice_date);
-        const normalizedDueDate = normalizeDateForStorage(parsed.due_date);
-        
-        // Insert invoice with document group info - handle UNIQUE constraint gracefully
-        try {
-          db.prepare(`
-            INSERT INTO invoices (
-              id, invoice_number, source_file,
-              parsed_vendor_name, parsed_office_id, parsed_amount_cents,
-              vendor_name, office_id, amount_cents,
-              status, approvals, deleted,
-              invoice_date, due_date, office_location, pdf_path,
-              parsing_status, parsing_error, parse_attempts,
-              document_group_id, document_invoice_index, document_invoice_total
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `).run(
-            id, invoiceNumber, sourceFile,
-            normalizedVendor, parsed.office_location, amountCents,
-            normalizedVendor, parsed.office_location, amountCents,
-            'incoming', JSON.stringify({}), 0,
-            normalizedInvoiceDate, normalizedDueDate, parsed.office_location,
-            buildApiPdfPath(normalizedPdfFilename),
-            parsingStatus, parsingError, 1,
-            documentGroupId, invoiceIndex, totalInvoicesInDoc
-          );
-        } catch (insertErr: any) {
-          if (insertErr.message?.includes('UNIQUE constraint')) {
-            console.warn(`[PCS_AI_INGEST] Invoice ${invoiceNumber} already exists, skipping (UNIQUE constraint)`);
-            continue; // Skip this invoice, it already exists in DB
-          }
-          throw insertErr; // Re-throw non-UNIQUE errors
-        }
-        
-        // Audit event
-        db.prepare(`
-          INSERT INTO invoice_events (invoice_id, action, payload_json)
-          VALUES (?, 'PCS_AI_PARSED_MULTI', ?)
-        `).run(id, JSON.stringify({
-          document_group_id: documentGroupId,
-          invoice_index: invoiceIndex,
-          total_in_document: totalInvoicesInDoc,
-          vendor_raw: rawVendor,
-          amount_cents: amountCents,
-          confidence: parsed.parsing_confidence
-        }));
-        
-        // Auto-categorize
-        try {
-          const { categorizeInvoice, storeInvoiceCategories, mapLocationToClass } = await import('@/lib/invoices/categoryParser');
-          const lineItems = (parsed.line_items || []).map(item => ({
-            description: item.description || '',
-            quantity: item.quantity ?? undefined,
-            unit_price: item.unit_price ?? undefined,
-            amount: item.amount ?? undefined
-          }));
-          const categories = await categorizeInvoice(
-            { vendor_name: normalizedVendor, line_items: lineItems },
-            normalizedVendor
-          );
-          // Auto-fill class from parsed office_location if not already set
-          const officeLocation = parsed.office_location || '';
-          const classFromLocation = mapLocationToClass(officeLocation);
-          if (classFromLocation) {
-            for (const cat of categories) {
-              if (!cat.className) {
-                cat.className = classFromLocation;
-                cat.classId = classFromLocation;
-              }
+          
+          const normalizedVendor = normalizeVendorNameForStorage(validatedVendor);
+          
+          // Validate parsed invoice number
+          let validatedInvoiceNumber = parsed.invoice_number;
+          if (validatedInvoiceNumber) {
+            if (/[_]/.test(validatedInvoiceNumber) || validatedInvoiceNumber.length > 20 || /\.(pdf|PDF)/.test(validatedInvoiceNumber)) {
+              console.warn(`[PCS_AI_INGEST] Rejected invalid invoice number (looks like filename): ${validatedInvoiceNumber}`);
+              validatedInvoiceNumber = null;
             }
           }
-          await storeInvoiceCategories(id, categories);
-        } catch (err: any) {
-          console.warn('[PCS_AI_INGEST] Failed to auto-categorize:', err?.message);
+          let invoiceNumber = validatedInvoiceNumber || 
+            normalizedPdfFilename?.replace(/\.(pdf|PDF)$/, '') ||
+            `GPT-${Date.now()}-${invoiceIndex}`;
+          
+          // Deduplicate: ensure unique invoice_number + vendor within this batch
+          const baseNumber = invoiceNumber;
+          let suffix = 2;
+          while (usedInvoiceNumbers.has(`${invoiceNumber}::${normalizedVendor}`)) {
+            invoiceNumber = `${baseNumber}-${suffix}`;
+            suffix++;
+          }
+          usedInvoiceNumbers.add(`${invoiceNumber}::${normalizedVendor}`);
+          
+          // Also check existing DB records
+          const existing = db.prepare(
+            `SELECT id FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
+          ).get(invoiceNumber, normalizedVendor) as { id: string } | undefined;
+          if (existing) {
+            invoiceNumber = `${baseNumber}-S${invoiceIndex}`;
+            console.log(`[PCS_AI_INGEST] Duplicate invoice_number in DB, using ${invoiceNumber}`);
+          }
+          
+          let amountCents = 0;
+          if (parsed.total && typeof parsed.total === 'number') {
+            amountCents = Math.round(parsed.total * 100);
+          }
+          
+          let parsingStatus = 'success';
+          let parsingError: string | null = null;
+          if (parsed.parsing_confidence < 0.5) {
+            parsingStatus = 'partial';
+            parsingError = 'Low parsing confidence';
+          } else if (!parsed.invoice_number || !parsed.total) {
+            parsingStatus = 'partial';
+            parsingError = 'Missing required fields';
+          }
+          
+          // Normalize office location
+          if (parsed.office_location) {
+            const loc = parsed.office_location;
+            const pcsMatch = loc.match(/Pacific Crest Smiles\s*[-–]\s*(.+)/i);
+            if (pcsMatch) {
+              parsed.office_location = pcsMatch[1].trim();
+            }
+            if (/^Pacific Crest Smiles$/i.test(parsed.office_location)) {
+              parsed.office_location = null;
+            }
+            if (/^Smiles Dental$/i.test(parsed.office_location || '')) {
+              parsed.office_location = null;
+            }
+          }
+          
+          invoicesToInsert.push({
+            id: randomUUID(),
+            invoiceNumber,
+            normalizedVendor,
+            amountCents,
+            parsed,
+            parsingStatus,
+            parsingError,
+            invoiceIndex,
+            normalizedInvoiceDate: normalizeDateForStorage(parsed.invoice_date),
+            normalizedDueDate: normalizeDateForStorage(parsed.due_date),
+            rawVendor,
+          });
         }
         
-        createdInvoices.push({
-          id,
-          invoice_number: invoiceNumber,
-          vendor: normalizedVendor,
-          amount: amountCents / 100
+        // Synchronous transaction for all DB inserts
+        const insertAllInvoices = db.transaction(() => {
+          for (const inv of invoicesToInsert) {
+            db.prepare(`
+              INSERT INTO invoices (
+                id, invoice_number, source_file,
+                parsed_vendor_name, parsed_office_id, parsed_amount_cents,
+                vendor_name, office_id, amount_cents,
+                status, approvals, deleted,
+                invoice_date, due_date, office_location, pdf_path,
+                parsing_status, parsing_error, parse_attempts,
+                document_group_id, document_invoice_index, document_invoice_total
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+              inv.id, inv.invoiceNumber, sourceFile,
+              inv.normalizedVendor, inv.parsed.office_location, inv.amountCents,
+              inv.normalizedVendor, inv.parsed.office_location, inv.amountCents,
+              'incoming', JSON.stringify({}), 0,
+              inv.normalizedInvoiceDate, inv.normalizedDueDate, inv.parsed.office_location,
+              buildApiPdfPath(normalizedPdfFilename),
+              inv.parsingStatus, inv.parsingError, 1,
+              documentGroupId, inv.invoiceIndex, totalInvoicesInDoc
+            );
+            
+            db.prepare(`
+              INSERT INTO invoice_events (invoice_id, action, payload_json)
+              VALUES (?, 'PCS_AI_PARSED_MULTI', ?)
+            `).run(inv.id, JSON.stringify({
+              document_group_id: documentGroupId,
+              invoice_index: inv.invoiceIndex,
+              total_in_document: totalInvoicesInDoc,
+              vendor_raw: inv.rawVendor,
+              amount_cents: inv.amountCents,
+              confidence: inv.parsed.parsing_confidence
+            }));
+            
+            createdInvoices.push({
+              id: inv.id,
+              invoice_number: inv.invoiceNumber,
+              vendor: inv.normalizedVendor,
+              amount: inv.amountCents / 100
+            });
+            
+            console.log(`[PCS_AI_INGEST] Created invoice ${inv.invoiceIndex}/${totalInvoicesInDoc}:`, {
+              id: inv.id, invoice_number: inv.invoiceNumber, vendor: inv.normalizedVendor, amount: inv.amountCents / 100
+            });
+          }
         });
         
-        console.log(`[PCS_AI_INGEST] Created invoice ${invoiceIndex}/${totalInvoicesInDoc}:`, {
-          id, invoice_number: invoiceNumber, vendor: normalizedVendor, amount: amountCents / 100
+        insertAllInvoices();
+        
+        // Async categorization after the transaction
+        for (const inv of invoicesToInsert) {
+          try {
+            const { categorizeInvoice, storeInvoiceCategories, mapLocationToClass } = await import('@/lib/invoices/categoryParser');
+            const lineItems = (inv.parsed.line_items || []).map(item => ({
+              description: item.description || '',
+              quantity: item.quantity ?? undefined,
+              unit_price: item.unit_price ?? undefined,
+              amount: item.amount ?? undefined
+            }));
+            const categories = await categorizeInvoice(
+              { vendor_name: inv.normalizedVendor, line_items: lineItems },
+              inv.normalizedVendor
+            );
+            const officeLocation = inv.parsed.office_location || '';
+            const classFromLocation = mapLocationToClass(officeLocation);
+            if (classFromLocation) {
+              for (const cat of categories) {
+                if (!cat.className) {
+                  cat.className = classFromLocation;
+                  cat.classId = classFromLocation;
+                }
+              }
+            }
+            await storeInvoiceCategories(inv.id, categories);
+          } catch (err: any) {
+            console.warn('[PCS_AI_INGEST] Failed to auto-categorize:', err?.message);
+          }
+        }
+        
+        return NextResponse.json({
+          ok: true,
+          message: `Multi-invoice document: created ${createdInvoices.length} invoices`,
+          multi_invoice: true,
+          document_group_id: documentGroupId,
+          invoices_created: createdInvoices.length,
+          invoices: createdInvoices
         });
       }
-      
-      return NextResponse.json({
-        ok: true,
-        message: `Multi-invoice document: created ${createdInvoices.length} invoices`,
-        multi_invoice: true,
-        document_group_id: documentGroupId,
-        invoices_created: createdInvoices.length,
-        invoices: createdInvoices
-      });
     }
 
     // Single invoice - extract data
