@@ -273,11 +273,11 @@ export async function POST(
               usedInvoiceNumbers.add(`${invoiceNumber}::${normalizedVendor}`);
               
               const existing = db.prepare(
-                `SELECT id FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
-              ).get(invoiceNumber, normalizedVendor) as { id: string } | undefined;
+                `SELECT id, invoice_number FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0 AND id != ?`
+              ).get(invoiceNumber, normalizedVendor, id) as { id: string; invoice_number: string } | undefined;
               if (existing) {
-                invoiceNumber = `${baseNumber}-S${invoiceIndex}`;
-                console.log(`[REPARSE] Duplicate invoice_number detected, using ${invoiceNumber}`);
+                console.warn(`[REPARSE] DUPLICATE SKIPPED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existing.id}`);
+                continue;
               }
               
               let amountCents = 0;

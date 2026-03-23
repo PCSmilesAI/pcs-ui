@@ -61,6 +61,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
+    const invoiceStatus = (invoice.status || '').toLowerCase();
+    if (invoiceStatus !== 'incoming' && invoiceStatus !== 'needs_review') {
+      console.warn('[API][SEND-FOR-APPROVAL]', 'duplicate_send_blocked', {
+        invoiceId, status: invoice.status, userEmail: user.email
+      });
+      return NextResponse.json(
+        { error: `This invoice has already been sent (status: ${invoice.status}). Refresh the page to see its current state.` },
+        { status: 409 }
+      );
+    }
+
+    if (invoice.qbo_bill_id) {
+      console.warn('[API][SEND-FOR-APPROVAL]', 'bill_already_exists', {
+        invoiceId, billId: invoice.qbo_bill_id, userEmail: user.email
+      });
+      return NextResponse.json(
+        { error: 'A QBO bill already exists for this invoice. It may have been sent from another tab.' },
+        { status: 409 }
+      );
+    }
+
     console.log('[API][SEND-FOR-APPROVAL]', 'processing', { 
       invoiceId, 
       userEmail: user.email,

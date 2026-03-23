@@ -488,6 +488,10 @@ def parse_invoice_with_gpt(filepath, vendor_hint=None):
             log(f"[PCS_AI_INGEST][SKIP] Invoice skipped: {data.get('message')}")
             return {"skipped": True, "message": data.get("message")}
         
+        if data.get("duplicate"):
+            log(f"[PCS_AI_INGEST][DUPLICATE] Invoice duplicate blocked: {data.get('message')}")
+            return {"skipped": True, "duplicate": True, "message": data.get("message")}
+        
         log(f"[PCS_AI_INGEST][SUCCESS] Invoice parsed: #{data.get('invoice_number')} - {data.get('vendor')} - ${data.get('amount', 0):.2f}")
         
         return {

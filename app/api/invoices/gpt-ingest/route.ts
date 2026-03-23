@@ -281,13 +281,13 @@ export async function POST(req: NextRequest) {
           }
           usedInvoiceNumbers.add(`${invoiceNumber}::${normalizedVendor}`);
           
-          // Also check existing DB records
+          // Check existing DB records -- SKIP true duplicates instead of suffixing
           const existing = db.prepare(
-            `SELECT id FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
-          ).get(invoiceNumber, normalizedVendor) as { id: string } | undefined;
+            `SELECT id, invoice_number FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
+          ).get(invoiceNumber, normalizedVendor) as { id: string; invoice_number: string } | undefined;
           if (existing) {
-            invoiceNumber = `${baseNumber}-S${invoiceIndex}`;
-            console.log(`[PCS_AI_INGEST] Duplicate invoice_number in DB, using ${invoiceNumber}`);
+            console.warn(`[PCS_AI_INGEST] DUPLICATE SKIPPED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existing.id}`);
+            continue;
           }
           
           let amountCents = 0;
@@ -466,6 +466,20 @@ export async function POST(req: NextRequest) {
     const invoiceNumber = parsed.invoice_number || 
       normalizedPdfFilename?.replace(/\.(pdf|PDF)$/, '') ||
       `GPT-${Date.now()}`;
+
+    // Block true duplicates: same invoice_number + vendor already in DB
+    if (parsed.invoice_number) {
+      const existingByNumber = db.prepare(
+        `SELECT id, invoice_number FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
+      ).get(invoiceNumber, normalizedVendor) as { id: string; invoice_number: string } | undefined;
+      if (existingByNumber) {
+        console.warn(`[PCS_AI_INGEST] DUPLICATE BLOCKED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existingByNumber.id}`);
+        return NextResponse.json(
+          { ok: true, message: `Duplicate invoice: ${invoiceNumber} for ${normalizedVendor} already exists`, duplicate: true, existing_id: existingByNumber.id },
+          { status: 200 }
+        );
+      }
+    }
 
     // Calculate amount in cents
     let amountCents = 0;

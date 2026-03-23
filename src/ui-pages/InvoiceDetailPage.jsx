@@ -1805,29 +1805,49 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         due_date: details.due_date,
       };
 
-      // Fire the API call - it runs fully in the background regardless of UI.
-      // The UI animation is purely cosmetic with 3-second caps per step.
-      // destination: 'mckay' sends to McKay, 'office_manager' sends to the office manager
-      csrfClient.post(`/api/invoices/send-for-approval`, {
+      // Fire the API call in the background. Track its result so we can show
+      // errors if it returns a conflict (duplicate send, already has QBO bill, etc.)
+      let sendFailed = false;
+      let sendErrorMsg = '';
+      const sendPromise = csrfClient.post(`/api/invoices/send-for-approval`, {
         invoiceId: invoiceId,
         correctedData: correctedData,
         invoiceCategories: invoiceCategories,
         userComment: changeDescription.trim() || updateComment.trim() || undefined,
-        destination: destination, // 'mckay' or 'office_manager'
+        destination: destination,
+      }).then(res => {
+        if (res.status === 409 || res.status === 400 || res.status === 403) {
+          sendFailed = true;
+          return res.json().then(d => { sendErrorMsg = d.error || 'This invoice was already sent.'; });
+        }
       }).catch(err => {
         console.error('Background send-for-approval error:', err);
+        sendFailed = true;
+        sendErrorMsg = err?.response?.data?.error || err.message || 'Network error';
       });
 
-      // Step 1: "Updating PCS AI" - show spinner for 3 seconds then checkmark
+      // Step 1: "Updating PCS AI" - 3 second animation
       await new Promise(resolve => setTimeout(resolve, 3000));
+      if (sendFailed) {
+        setSendStep1Status('error');
+        setSendStep1Error(sendErrorMsg);
+        return;
+      }
       setSendStep1Status('complete');
 
       // Brief pause before step 2 starts
       await new Promise(resolve => setTimeout(resolve, 500));
       setSendStep2Status('processing');
 
-      // Step 2: "Sending for Approval" - show spinner for 3 seconds then checkmark
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Step 2: "Sending for Approval" - 3 second animation
+      await Promise.all([
+        new Promise(resolve => setTimeout(resolve, 3000)),
+        sendPromise,
+      ]);
+      if (sendFailed) {
+        setSendStep2Status('error');
+        return;
+      }
       setSendStep2Status('complete');
     } catch (err) {
       console.error('Error in handleSend:', err);
