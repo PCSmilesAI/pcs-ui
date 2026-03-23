@@ -43,6 +43,11 @@ export function normalizeVendorNameForStorage(name: string | null | undefined): 
     return canonicalMap[normalized];
   }
   
+  // Handle vendor name prefix patterns (e.g. "TC Dental Laboratory, Inc." → "TC Dental Lab")
+  if (normalized.startsWith('tc dental')) {
+    return 'TC Dental Lab';
+  }
+  
   // For unknown vendors, apply title case
   return normalized
     .split(' ')

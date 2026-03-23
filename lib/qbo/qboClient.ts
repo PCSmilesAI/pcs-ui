@@ -298,6 +298,18 @@ export class QBOClient {
   async ensureVendor(name: string): Promise<any> {
     const existing = await this.findVendorByName(name);
     if (existing) return existing;
+
+    // Fuzzy fallback before creating: case-insensitive and substring matching
+    try {
+      const fuzzyMatch = await this.findVendor(name);
+      if (fuzzyMatch) {
+        console.log(`[QBO] Fuzzy matched vendor "${name}" -> "${fuzzyMatch.name}" (ID: ${fuzzyMatch.id})`);
+        return { Id: fuzzyMatch.id, DisplayName: fuzzyMatch.name };
+      }
+    } catch {
+      // findVendor throws when no match is found — fall through to create
+    }
+
     return this.createVendor(name);
   }
 
