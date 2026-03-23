@@ -62,9 +62,10 @@ const VENDOR_CONSOLIDATION: Record<string, string> = {
   'Culligan - Portland-Albany': 'Culligan',
   'Culligan Water': 'Culligan',
   
-  // TC Dental
-  'TC Dental Laboratory': 'TC Dental Laboratory, Inc.',
-  'TC Dental Laboratory, Inc': 'TC Dental Laboratory, Inc.',
+  // TC Dental — QBO canonical name is "TC Dental Lab"
+  'TC Dental Laboratory': 'TC Dental Lab',
+  'TC Dental Laboratory, Inc': 'TC Dental Lab',
+  'TC Dental Laboratory, Inc.': 'TC Dental Lab',
   
   // Stericycle
   'Stericycle': 'Stericycle, Inc.',
@@ -347,7 +348,7 @@ async function main() {
     "SMT Dental Solutions", "Snap On Smile", "Solutionreach", "Solventum", "South Coast Lumber",
     "Spectrum Reach", "Starbucks", "StatDDS", "State Industrial Products", "Stauffer Manufacturing Co",
     "Stericycle, Inc.", "Straumann", "Summit Financial Group LLC", "Sunset Heating, Cooling, & Electrical",
-    "T-Mobile", "TC Dental Laboratory, Inc.", "TDA Perks", "TDK Dental", "TechEdge Patterson Technical Service",
+    "T-Mobile", "TC Dental Lab", "TDA Perks", "TDK Dental", "TechEdge Patterson Technical Service",
     "The Hartford", "Tokuyama Dental America Inc", "Total Dental Administrators", "Town and Country",
     "Trilogy Medwaste West LLC", "Trinity Dental Lab", "TrustWorkz, Inc.", "Ultradent Products, Inc.",
     "Umpqua Valley Fire Services,Inc. dba A-1 Fire Protection", "UnitedHealthcare", "UPS", "USPS",
