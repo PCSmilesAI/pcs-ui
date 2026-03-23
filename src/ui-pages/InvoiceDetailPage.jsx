@@ -2092,6 +2092,10 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         willSend: changedFields.length > 0 || !!updateComment.trim()
       });
 
+      // Core update is done — clear processing state.
+      // PCS AI training uses its own `improvingParser` flag.
+      setProcessing(false);
+
       // Send to PCS AI Knowledge Base training when fields change or comment provided
       const shouldSend = changedFields.length > 0 || updateComment.trim();
       console.log('🤖 Will send to PCS AI for KB training?', shouldSend, '- changedFields:', changedFields.length, 'hasComment:', !!updateComment.trim());
