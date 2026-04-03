@@ -81,6 +81,7 @@ export function saveInvoice(invoice: InvoiceRecord): void {
       current_assigned_user_email = ?,
       verified_by_user_id = ?,
       verified_at = ?,
+      notes = ?,
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `).run(
@@ -110,6 +111,7 @@ export function saveInvoice(invoice: InvoiceRecord): void {
     invoice.current_assigned_user_email || null,
     invoice.verified_by_user_id || null,
     invoice.verified_at || null,
+    invoice.notes ?? null,
     invoice.id
   );
 }

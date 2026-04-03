@@ -12,7 +12,27 @@ export async function fetchQboCategories() {
     const text = await res.text(); // Read as text first to avoid JSON parse errors
     
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${text}`);
+      let detail = text;
+      try {
+        const errJson = JSON.parse(text);
+        if (
+          errJson.error === 'not_connected' ||
+          (typeof errJson.detail === 'string' && errJson.detail.includes('No realm'))
+        ) {
+          detail =
+            'QuickBooks is not connected on the server. An admin should open Connections (or /ConnectionsPage) and connect QuickBooks.';
+        } else if (errJson.error === 'refresh_failed') {
+          detail =
+            'QuickBooks login expired. An admin must reconnect QuickBooks (Connections page or /api/qbo/auth).';
+        } else if (errJson.error === 'qbo_query_failed') {
+          detail = `QuickBooks API error (HTTP ${errJson.status || res.status}). Try again or reconnect QuickBooks.`;
+        } else if (typeof errJson.error === 'string') {
+          detail = errJson.detail ? `${errJson.error}: ${errJson.detail}` : errJson.error;
+        }
+      } catch {
+        /* keep raw text */
+      }
+      throw new Error(`HTTP ${res.status}: ${detail}`);
     }
     
     // Parse JSON safely

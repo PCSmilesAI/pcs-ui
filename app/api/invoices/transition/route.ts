@@ -39,6 +39,8 @@ export async function POST(req: NextRequest) {
     const invoiceId = body?.id || body?.invoiceId;
     const action = body?.action;
     const reason = body?.reason || body?.notes || '';
+    const rejectionReason = body?.rejectionReason as 'duplicate' | 'coding_error' | 'other' | undefined;
+    const feedback = body?.feedback || '';
 
     if (!invoiceId || typeof action !== 'string') {
       console.log('[API][INVOICES][TRANSITION]', 'invalid_payload', { userEmail: user.email });
@@ -74,7 +76,67 @@ export async function POST(req: NextRequest) {
     console.log('[API][INVOICES][TRANSITION]', `transition_request_${action}`, { invoiceId: String(invoiceId), userEmail: user.email });
 
     if (action === 'reject') {
-      softDeleteInvoice(String(invoiceId), reason);
+      // Coding Error: return invoice to coder with feedback (do not delete)
+      if (rejectionReason === 'coding_error') {
+        const status = (invoice.status || '').toLowerCase();
+        const allowedStatuses = ['awaiting_admin_approval', 'awaiting_office_approval', 'categorized'];
+        if (!allowedStatuses.includes(status)) {
+          return NextResponse.json(
+            { error: `Invoice status (${status}) does not allow return for coding corrections` },
+            { status: 400 }
+          );
+        }
+        if (!feedback.trim()) {
+          return NextResponse.json({ error: 'Feedback is required for coding error returns' }, { status: 400 });
+        }
+
+        const { getDatabase } = await import('../../../../lib/db/client');
+        const db = getDatabase();
+
+        const now = new Date().toISOString();
+        const feedbackNote = `[Coding correction needed - ${now}] ${feedback.trim()}`;
+        invoice.notes = invoice.notes ? `${invoice.notes}\n\n${feedbackNote}` : feedbackNote;
+        invoice.status = 'incoming';
+        invoice.current_assigned_user_email = invoice.coded_by_user_id || invoice.verified_by_user_id || null;
+        invoice.qbo_bill_id = null;
+        invoice.qbo_bill_created_at = null;
+
+        // Clear approval fields
+        if (invoice.approvals && typeof invoice.approvals === 'object') {
+          delete invoice.approvals.office;
+          delete invoice.approvals.admin;
+        }
+        invoice.om_approved_at = null;
+        invoice.om_approved_by = null;
+        invoice.admin_approved_at = null;
+        invoice.admin_approved_by = null;
+        invoice.approved_at = null;
+        invoice.approved_by_user_id = null;
+        invoice.approval_stage = null;
+
+        saveInvoice(invoice);
+
+        db.prepare(`
+          INSERT INTO invoice_events (invoice_id, action, actor_email, payload_json, created_at)
+          VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+        `).run(
+          String(invoiceId),
+          'RETURNED_FOR_CODING',
+          user.email,
+          JSON.stringify({ feedback: feedback.trim(), rejectionReason: 'coding_error', actor: user.email })
+        );
+
+        console.log('[API][INVOICES][TRANSITION]', 'return_for_coding_success', { invoiceId: String(invoiceId), userEmail: user.email });
+        return NextResponse.json({ ok: true, invoice });
+      }
+
+      // Duplicate / Other: soft delete with formatted reason
+      const formattedReason = rejectionReason === 'duplicate'
+        ? '[Duplicate Invoice]'
+        : rejectionReason === 'other'
+          ? feedback.trim() ? `[Other] ${feedback.trim()}` : '[Other]'
+          : reason || 'No reason provided';
+      softDeleteInvoice(String(invoiceId), formattedReason);
       console.log('[API][INVOICES][TRANSITION]', 'reject_success', { invoiceId: String(invoiceId), userEmail: user.email });
       return NextResponse.json({ ok: true });
     }
