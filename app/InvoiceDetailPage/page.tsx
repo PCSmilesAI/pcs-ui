@@ -333,6 +333,27 @@ function InvoiceDetailContent() {
     }
   };
 
+  const handleAdvanceToNext = () => {
+    const currentId = invoice?.invoice_number || invoice?.id;
+    const updatedQueue = invoiceQueue.filter(inv =>
+      inv.invoice_number !== currentId && inv.id !== currentId
+    );
+
+    if (updatedQueue.length > 0) {
+      const nextIndex = Math.min(currentIndex, updatedQueue.length - 1);
+      const nextInvoice = updatedQueue[nextIndex];
+      const identifier = nextInvoice.invoice_number || nextInvoice.id;
+      const from = searchParams.get('from');
+
+      setInvoiceQueue(updatedQueue);
+      setCurrentIndex(nextIndex);
+
+      router.replace(`/InvoiceDetailPage?invoice=${encodeURIComponent(identifier)}${from ? `&from=${encodeURIComponent(from)}` : ''}`);
+    } else {
+      handleBack();
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
@@ -350,6 +371,7 @@ function InvoiceDetailContent() {
       canGoPrevious={currentIndex > 0}
       canGoNext={currentIndex < invoiceQueue.length - 1}
       onInvoiceRejected={handleInvoiceRejected}
+      onAdvanceToNext={handleAdvanceToNext}
     />
   );
 }

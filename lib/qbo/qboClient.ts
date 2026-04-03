@@ -248,6 +248,11 @@ export class QBOClient {
     return this.makeRequest(`query?query=${encoded}&minorversion=${minorVersion}`, 'GET');
   }
 
+  /** Public SQL query for maintenance scripts (e.g. bill remediation). */
+  async executeQuery<T = any>(sql: string, minorVersion = '70'): Promise<T> {
+    return this.query<T>(sql, minorVersion);
+  }
+
   async getItems(): Promise<QBOItem[]> {
     const response = await this.query<{ QueryResponse?: { Item?: QBOItem[] } }>(
       'select Id, Name, Type, IncomeAccountRef, ExpenseAccountRef from Item'

@@ -55,6 +55,9 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
   const [toast, setToast] = useState(null);
   const [userVendorAccess, setUserVendorAccess] = useState(null); // null = loading, '*' = admin, array = verifier
   const [showBulkSendRouteChoice, setShowBulkSendRouteChoice] = useState(false);
+  const [showBulkRejectModal, setShowBulkRejectModal] = useState(false);
+  const [bulkRejectReason, setBulkRejectReason] = useState('duplicate');
+  const [bulkRejectFeedback, setBulkRejectFeedback] = useState('');
   const isVerifier = Array.isArray(userVendorAccess);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const getRowId = (r, i) =>
@@ -337,7 +340,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
   const [bulkProgress, setBulkProgress] = useState({ active: false, current: 0, total: 0, action: '' });
 
   // Define bulkUpdate after filteredRows is available
-  const bulkUpdate = useCallback(async (action) => {
+  const bulkUpdate = useCallback(async (action, rejectPayload = {}) => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
@@ -375,7 +378,11 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
             id: rowId,
             action,
             ...(action === 'approve' ? { office: row.rawOffice || row.office || '' } : {}),
-            ...(action === 'reject' ? { reason: 'Rejected from For Me page' } : {}),
+            ...(action === 'reject' ? {
+              reason: rejectPayload.reason || 'Rejected from For Me page',
+              rejectionReason: rejectPayload.rejectionReason,
+              feedback: rejectPayload.feedback || '',
+            } : {}),
           }),
         });
         
@@ -440,6 +447,24 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     // Final reload to ensure sync with server (but invoices already removed visually)
     await reloadList();
   }, [selectedIds, filteredRows, getRowId, showToast, reloadList, setInvoices]);
+
+  const handleBulkRejectClick = useCallback(() => {
+    setBulkRejectReason('duplicate');
+    setBulkRejectFeedback('');
+    setShowBulkRejectModal(true);
+  }, []);
+
+  const handleBulkRejectConfirm = useCallback(() => {
+    setShowBulkRejectModal(false);
+    const formattedReason = bulkRejectReason === 'duplicate'
+      ? '[Duplicate Invoice]'
+      : bulkRejectFeedback.trim() ? `[Other] ${bulkRejectFeedback.trim()}` : '[Other]';
+    bulkUpdate('reject', {
+      rejectionReason: bulkRejectReason,
+      feedback: bulkRejectFeedback.trim(),
+      reason: formattedReason,
+    });
+  }, [bulkRejectReason, bulkRejectFeedback, bulkUpdate]);
 
   // Bulk send for verifier users (Laura) - calls send-for-approval for each selected invoice
   const bulkSend = useCallback(async (destination) => {
@@ -805,7 +830,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
             </button>
           )}
           <button
-            onClick={() => bulkUpdate('reject')}
+            onClick={handleBulkRejectClick}
             style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
           >
             Reject
@@ -875,6 +900,97 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
         </div>
       )}
 
+      {/* Bulk Reject Modal - Duplicate/Other only, Coding Error disabled */}
+      {showBulkRejectModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 9999,
+        }}>
+          <div style={{
+            backgroundColor: '#fff', borderRadius: '16px', padding: '24px',
+            maxWidth: '440px', width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            border: '2px solid #dc2626',
+          }}>
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 700, color: '#dc2626' }}>
+              Reject {selectedIds.size} Invoice{selectedIds.size > 1 ? 's' : ''}
+            </h3>
+            <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#374151' }}>
+              Select a reason. Coding Error is only available from the invoice detail page.
+            </p>
+
+            <div style={{ marginBottom: '16px' }}>
+              {[
+                { value: 'duplicate', label: 'Duplicate Invoice', desc: 'Remove from queue.' },
+                { value: 'coding_error', label: 'Coding Error', desc: 'Return to coder (use detail page)', disabled: true },
+                { value: 'other', label: 'Other', desc: 'Remove with optional reason.' },
+              ].map(({ value, label, desc, disabled }) => (
+                <label key={value} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: '10px',
+                  padding: '12px', marginBottom: '8px', borderRadius: '12px',
+                  border: `2px solid ${bulkRejectReason === value ? '#dc2626' : '#e5e7eb'}`,
+                  backgroundColor: bulkRejectReason === value ? '#fef2f2' : disabled ? '#f3f4f6' : '#f9fafb',
+                  cursor: disabled ? 'not-allowed' : 'pointer',
+                  opacity: disabled ? 0.7 : 1,
+                }} title={disabled ? 'Use invoice detail page to return for coding corrections.' : undefined}>
+                  <input
+                    type="radio"
+                    name="bulkRejectReason"
+                    value={value}
+                    checked={bulkRejectReason === value}
+                    onChange={() => !disabled && setBulkRejectReason(value)}
+                    disabled={disabled}
+                    style={{ marginTop: '3px' }}
+                  />
+                  <div>
+                    <div style={{ fontWeight: '600', color: '#1f2937' }}>{label}</div>
+                    <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{desc}</div>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            {bulkRejectReason === 'other' && (
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontWeight: 500, marginBottom: '8px', color: '#374151' }}>
+                  Reason (optional)
+                </label>
+                <textarea
+                  value={bulkRejectFeedback}
+                  onChange={(e) => setBulkRejectFeedback(e.target.value)}
+                  placeholder="Optional reason..."
+                  rows={2}
+                  style={{
+                    width: '100%', padding: '10px 12px', borderRadius: '8px',
+                    border: '1px solid #d1d5db', fontSize: '14px', resize: 'vertical', boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button
+                onClick={() => setShowBulkRejectModal(false)}
+                style={{
+                  padding: '10px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: 500,
+                  border: '1px solid #d1d5db', backgroundColor: '#fff', color: '#374151', cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBulkRejectConfirm}
+                style={{
+                  padding: '10px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: 500,
+                  border: 'none', backgroundColor: '#dc2626', color: '#fff', cursor: 'pointer',
+                }}
+              >
+                Confirm Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <InvoiceTable
         rows={filteredRows}

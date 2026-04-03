@@ -227,6 +227,8 @@ type ExpenseLine = QBOBill['Line'][number] & {
   __categoryHint?: {
     category: string;
   };
+  /** Set on invoice GL lines so vendor overrideAccount does not replace resolveAccountByFullName results */
+  __preserveResolvedAccount?: boolean;
 };
 
 function ensureAccountLines(
@@ -252,6 +254,7 @@ function ensureAccountLines(
               name: fallbackAccount.name,
             },
           },
+          __categoryHint: { category: 'dental_supplies' },
         },
       ],
       categories,
@@ -384,7 +387,33 @@ function applyAccountMappings(
   return qboLines.map((line) => {
     if (!line?.AccountBasedExpenseLineDetail) return line;
 
-    const { __categoryHint, ...rest } = line;
+    const { __categoryHint, __preserveResolvedAccount, ...rest } = line;
+
+    // Invoice GL lines: keep resolveAccountByFullName per-line AccountRef; vendor override must not flatten to COGS
+    if (
+      __preserveResolvedAccount &&
+      rest.AccountBasedExpenseLineDetail?.AccountRef?.value
+    ) {
+      const detail: QBOBill['Line'][number]['AccountBasedExpenseLineDetail'] = {
+        ...rest.AccountBasedExpenseLineDetail,
+        AccountRef: {
+          value: rest.AccountBasedExpenseLineDetail.AccountRef.value,
+          name: rest.AccountBasedExpenseLineDetail.AccountRef.name || '',
+        },
+      };
+      if (
+        !detail.ClassRef &&
+        overrideClassId &&
+        /^\d+$/.test(overrideClassId)
+      ) {
+        detail.ClassRef = { value: overrideClassId };
+      }
+      return {
+        ...rest,
+        AccountBasedExpenseLineDetail: detail,
+      };
+    }
+
     let matchedAccount = fallbackAccount;
 
     if (__categoryHint) {
@@ -662,6 +691,13 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
             // Use description from GL line, fallback to category name
             const lineDescription = cat.description || cat.categoryName || '';
             
+            if (resolvedAccount?.type === 'Cost of Goods Sold') {
+              console.warn('[QBO][CREATE_BILL] GL category_name resolved to COGS in QBO — use Expense account path (e.g. 52210 Dental Lab Fees)', {
+                categoryName: cat.categoryName,
+                vendor: vendorName,
+              });
+            }
+
             const accountId = resolvedAccount?.id || preferredAccount.id;
             const accountName = resolvedAccount?.name || preferredAccount.name;
             const rawClassId = resolvedClass?.id || overrideClassId;
@@ -683,6 +719,7 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
                 },
                 ...(classId ? { ClassRef: { value: classId } } : {}),
               },
+              __preserveResolvedAccount: true,
             });
             
             categories.push({

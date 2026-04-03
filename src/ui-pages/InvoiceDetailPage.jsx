@@ -54,7 +54,7 @@ async function checkIfAdmin(email) {
  * that the layout and colours appear even if no CSS preprocessor
  * is available.
  */
-export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext, onInvoiceRejected }) {
+export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext, onInvoiceRejected, onAdvanceToNext }) {
   // Get user permissions from context
   const { permissions } = useUserRole();
   
@@ -119,6 +119,9 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   const [showUpdateModal, setShowUpdateModal] = useState(false); // NEW: Update confirmation modal
   const [updateComment, setUpdateComment] = useState(''); // NEW: User comment for AI mechanic
   const [showAllocationErrorModal, setShowAllocationErrorModal] = useState(false); // NEW: Allocation error modal
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('duplicate');
+  const [rejectFeedback, setRejectFeedback] = useState('');
   const [pdfLoadState, setPdfLoadState] = useState('loading'); // 'loading', 'loaded', 'error'
   
   // Coding Template Creation State
@@ -1366,7 +1369,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     }
   }
 
-  async function transitionInvoice(action) {
+  async function transitionInvoice(action, extraPayload = {}) {
     if (!invoice) return;
     const invoiceId = invoice.id || invoice.invoice_number || invoice.invoice;
     if (!invoiceId) {
@@ -1398,7 +1401,11 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         action,
         // Use office_id first (effective value from 3-layer system)
         ...(action === 'approve' ? { office: details?.office || invoice.office_id || invoice.office || invoice.office_location || invoice.clinic_id || '' } : {}),
-        ...(action === 'reject' ? { reason: 'Rejected from invoice detail' } : {}),
+        ...(action === 'reject' ? {
+          reason: extraPayload.reason || 'Rejected from invoice detail',
+          rejectionReason: extraPayload.rejectionReason,
+          feedback: extraPayload.feedback || '',
+        } : {}),
       });
       const payload = response.data || {};
 
@@ -1447,7 +1454,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
           if (payload?.qboBill?.created && payload?.qboBill?.billId) {
             console.log('✅ QBO bill already created by transition endpoint:', payload.qboBill.billId);
             showToast(`Invoice approved and QBO Bill created! ID: ${payload.qboBill.billId}`, 'success');
-            if (onBack) onBack();
+            if (onAdvanceToNext) onAdvanceToNext(); else if (onBack) onBack();
             return;
           }
           
@@ -1462,7 +1469,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
 
             if (!isConnected) {
               showToast('Invoice approved! QuickBooks not connected - bill not created automatically.', 'warning');
-              if (onBack) onBack();
+              if (onAdvanceToNext) onAdvanceToNext(); else if (onBack) onBack();
               return;
             }
 
@@ -1523,20 +1530,27 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
             showToast(`Invoice approved, but QBO bill error: ${billError.message}`, 'warning');
           }
           
-          if (onBack) onBack();
+          if (onAdvanceToNext) onAdvanceToNext(); else if (onBack) onBack();
           return;
         }
       }
 
-      alert(action === 'approve' ? 'Invoice moved to the next approval step.' : 'Invoice rejected.');
-
-      // If invoice was rejected, notify parent to update the queue
-      if (action === 'reject' && onInvoiceRejected) {
-        const invoiceId = invoice.id || invoice.invoice_number || invoice.invoice;
-        onInvoiceRejected(invoiceId);
+      // Coding error return: invoice sent back to coder (not deleted)
+      if (action === 'reject' && payload?.invoice) {
+        showToast('Invoice returned for coding corrections.', 'success');
+        if (onBack) onBack();
+        return;
       }
 
-      if (onBack) onBack();
+      alert(action === 'approve' ? 'Invoice moved to the next approval step.' : 'Invoice rejected.');
+
+      // If invoice was rejected (duplicate/other), notify parent to update the queue
+      if (action === 'reject' && onInvoiceRejected) {
+        const invId = invoice.id || invoice.invoice_number || invoice.invoice;
+        onInvoiceRejected(invId);
+      }
+
+      if (onAdvanceToNext) onAdvanceToNext(); else if (onBack) onBack();
     } catch (error) {
       showToast(error?.message || 'Unexpected error while updating invoice', 'error');
     } finally {
@@ -1638,7 +1652,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
 
           if (!isConnected) {
             alert('Invoice approved. QuickBooks not connected — please connect QuickBooks first.');
-            onBack();
+            if (onAdvanceToNext) onAdvanceToNext(); else if (onBack) onBack();
             return;
           }
           const billResponse = await fetch(`${baseUrl}/api/qbo/auto-create-bill`, {
@@ -1697,8 +1711,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         alert(`Invoice ${newStatus.toLowerCase()} successfully!`);
       }
       
-      // Navigate back to refresh the list
-      onBack();
+      if (onAdvanceToNext) onAdvanceToNext(); else if (onBack) onBack();
       
     } catch (error) {
       console.error('Error updating invoice status:', error);
@@ -1720,7 +1733,23 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   }
 
   function handleReject() {
-    transitionInvoice('reject');
+    setRejectReason('duplicate');
+    setRejectFeedback('');
+    setShowRejectModal(true);
+  }
+
+  async function handleConfirmReject() {
+    if (rejectReason === 'coding_error' && !rejectFeedback.trim()) {
+      showToast('Feedback is required for coding error returns.', 'error');
+      return;
+    }
+    setShowRejectModal(false);
+    const extraPayload = {
+      rejectionReason: rejectReason,
+      feedback: rejectFeedback.trim(),
+      reason: rejectReason === 'duplicate' ? '[Duplicate Invoice]' : rejectReason === 'other' ? (rejectFeedback.trim() || '[Other]') : rejectFeedback.trim(),
+    };
+    await transitionInvoice('reject', extraPayload);
   }
 
   // Detect if the user has edited any fields compared to original values
@@ -1863,8 +1892,9 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     setSendStep1Status('idle');
     setSendStep2Status('idle');
     showToast('Invoice sent for approval successfully!', 'success');
-    // Navigate back to the list
-    if (onBack) {
+    if (onAdvanceToNext) {
+      onAdvanceToNext();
+    } else if (onBack) {
       onBack();
     }
   }
@@ -1928,8 +1958,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
 
       if (result.multi_invoice) {
         showToast(`Document split into ${result.invoices_created} invoices`, 'success');
-        // Original invoice is soft-deleted, navigate back to list
-        setTimeout(() => onBack?.(), 1500);
+        setTimeout(() => onAdvanceToNext ? onAdvanceToNext() : onBack?.(), 1500);
       } else {
         showToast('No additional invoices detected in this document', 'info');
       }
@@ -2010,8 +2039,9 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
           `Document moved to Other Documents as ${updateResult.newDocumentTypeDisplay || updateResult.newDocumentType}`,
           'success'
         );
-        // Navigate back to invoice list since this document is no longer an invoice
-        if (onBack) {
+        if (onAdvanceToNext) {
+          onAdvanceToNext();
+        } else if (onBack) {
           onBack();
         }
         return;
@@ -2293,8 +2323,9 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       setDuplicateInvoiceId(null);
       setPendingUpdateData(null);
       
-      // Navigate back to the list
-      if (onBack) {
+      if (onAdvanceToNext) {
+        setTimeout(() => onAdvanceToNext(), 1500);
+      } else if (onBack) {
         setTimeout(() => onBack(), 1500);
       }
 
@@ -2383,8 +2414,9 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       showToast(`Invoice sent to ${selectedReassignmentTarget.name}`, 'success');
       setSelectedReassignmentTarget(null);
 
-      // Refresh invoice lists after reassignment
-      if (onBack) {
+      if (onAdvanceToNext) {
+        setTimeout(() => onAdvanceToNext(), 1000);
+      } else if (onBack) {
         setTimeout(() => onBack(), 1000);
       }
     } catch (error) {
@@ -2460,7 +2492,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       // Status override functionality removed - using direct API calls
 
       alert('Invoice removed');
-      onBack();
+      if (onAdvanceToNext) onAdvanceToNext(); else if (onBack) onBack();
     } catch (e) {
       console.error(e);
       alert('Failed to remove invoice');
@@ -2730,6 +2762,36 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
           </button>
         ))}
       </div>
+
+      {/* Coder feedback banner - invoice returned for coding corrections */}
+      {((invoice?.status || '').toLowerCase() === 'incoming') && (invoice?.notes || '').includes('[Coding correction needed]') && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '16px',
+          marginBottom: '24px',
+          padding: '16px 20px',
+          backgroundColor: '#fef3c7',
+          borderRadius: '16px',
+          border: '1px solid #fcd34d',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        }}>
+          <span style={{ fontSize: '24px' }}>📝</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: '600', color: '#92400e', marginBottom: '4px' }}>
+              Returned for coding corrections
+            </div>
+            <div style={{ fontSize: '14px', color: '#78350f', lineHeight: '1.5' }}>
+              {(() => {
+                const notes = invoice?.notes || '';
+                const parts = notes.split(/\[Coding correction needed[^\]]*\]\s*/);
+                const lastFeedback = parts[parts.length - 1]?.trim();
+                return lastFeedback || notes;
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Parsing Error Warning Banner - Show for failed/partial parses only */}
       {(invoice?.parsing_status === 'failed' || invoice?.parsing_status === 'partial') && (
@@ -4084,6 +4146,170 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 }}
               >
                 {processing ? 'Submitting...' : 'Confirm Submission'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Reason Modal */}
+      {showRejectModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '20px',
+            padding: '24px',
+            maxWidth: '450px',
+            width: '90%',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            border: '2px solid #dc2626',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#fee2e2',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px',
+              }}>
+                🗑️
+              </div>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#dc2626' }}>
+                Reject Invoice
+              </h3>
+            </div>
+
+            <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#374151' }}>
+              Select a reason for rejecting this invoice:
+            </p>
+
+            <div style={{ marginBottom: '16px' }}>
+              {[
+                { value: 'duplicate', label: 'Duplicate Invoice', desc: 'This will remove the invoice from the queue.' },
+                { value: 'coding_error', label: 'Coding Error', desc: 'Return to coder with feedback for correction.' },
+                { value: 'other', label: 'Other', desc: 'Remove with optional reason.' },
+              ].map(({ value, label, desc }) => (
+                <label key={value} style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '10px',
+                  padding: '12px',
+                  marginBottom: '8px',
+                  borderRadius: '12px',
+                  border: `2px solid ${rejectReason === value ? '#dc2626' : '#e5e7eb'}`,
+                  backgroundColor: rejectReason === value ? '#fef2f2' : '#f9fafb',
+                  cursor: 'pointer',
+                }}>
+                  <input
+                    type="radio"
+                    name="rejectReason"
+                    value={value}
+                    checked={rejectReason === value}
+                    onChange={() => setRejectReason(value)}
+                    style={{ marginTop: '3px' }}
+                  />
+                  <div>
+                    <div style={{ fontWeight: '600', color: '#1f2937' }}>{label}</div>
+                    <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{desc}</div>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            {rejectReason === 'coding_error' && (
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontWeight: '500', marginBottom: '8px', color: '#374151' }}>
+                  Feedback for coder (required) <span style={{ color: '#dc2626' }}>*</span>
+                </label>
+                <textarea
+                  value={rejectFeedback}
+                  onChange={(e) => setRejectFeedback(e.target.value)}
+                  placeholder="Describe what needs to be corrected..."
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    fontSize: '14px',
+                    resize: 'vertical',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                  Will be sent to {invoice?.coded_by_user_id || invoice?.verified_by_user_id || 'the original coder'}
+                </div>
+              </div>
+            )}
+
+            {rejectReason === 'other' && (
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontWeight: '500', marginBottom: '8px', color: '#374151' }}>
+                  Reason (optional)
+                </label>
+                <textarea
+                  value={rejectFeedback}
+                  onChange={(e) => setRejectFeedback(e.target.value)}
+                  placeholder="Optional reason..."
+                  rows={2}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    fontSize: '14px',
+                    resize: 'vertical',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button
+                onClick={() => setShowRejectModal(false)}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: '#ffffff',
+                  color: '#374151',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmReject}
+                disabled={rejectReason === 'coding_error' && !rejectFeedback.trim()}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  border: 'none',
+                  backgroundColor: rejectReason === 'coding_error' && !rejectFeedback.trim() ? '#9ca3af' : '#dc2626',
+                  color: '#ffffff',
+                  cursor: rejectReason === 'coding_error' && !rejectFeedback.trim() ? 'not-allowed' : 'pointer',
+                }}
+              >
+                Confirm Reject
               </button>
             </div>
           </div>
