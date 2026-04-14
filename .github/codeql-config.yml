@@ -29,13 +29,4 @@ paths:
   - dev-server.js
   - quickbooks-routes.js
 
-# Severity levels to report
-severity: high
-
-# CodeQL will automatically respect lgtm comments in the code
-# Format: // lgtm[rule-id]
-# Examples:
-#   // lgtm[js/path-injection]
-#   // lgtm[js/tainted-format-string]
-#   // lgtm[js/incomplete-sanitization]
 
