@@ -6,8 +6,8 @@ on:
   pull_request:
     branches: [main, develop]
   schedule:
-    # Run CodeQL analysis daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
 
 permissions:
   contents: read
