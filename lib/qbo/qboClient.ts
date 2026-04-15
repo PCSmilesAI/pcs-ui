@@ -614,6 +614,18 @@ export class QBOClient {
     }
   }
 
+  async createAccount(account: {
+    Name: string;
+    AcctNum?: string;
+    AccountType: string;
+    AccountSubType?: string;
+    SubAccount?: boolean;
+    ParentRef?: { value: string };
+  }): Promise<any> {
+    const response = await this.makeRequest('account?minorversion=70', 'POST', account);
+    return response?.Account || response;
+  }
+
   /**
    * Check if a bill has been paid (Balance = 0)
    */
