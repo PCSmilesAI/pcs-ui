@@ -453,19 +453,18 @@ export class QBOClient {
 
   async getExpenseAccounts(): Promise<Array<{ id: string; name: string; type: string }>> {
     try {
-      const response = await this.query("SELECT Id, Name, AccountType, AccountSubType, FullyQualifiedName FROM Account WHERE Active = true");
-      const accounts = response.QueryResponse?.Account || [];
+      const accounts = await this.getAllAccounts();
 
-      const expenseAccounts = accounts.filter((acc: any) =>
-        acc.AccountType === 'Expense' ||
-        acc.AccountType === 'Cost of Goods Sold' ||
-        acc.AccountType === 'Other Expense'
+      const expenseAccounts = accounts.filter((acc) =>
+        acc.type === 'Expense' ||
+        acc.type === 'Cost of Goods Sold' ||
+        acc.type === 'Other Expense'
       );
 
-      return expenseAccounts.map((account: any) => ({
-        id: account.Id,
-        name: account.FullyQualifiedName || account.Name,
-        type: account.AccountType,
+      return expenseAccounts.map((account) => ({
+        id: account.id,
+        name: account.fullName || account.name,
+        type: account.type,
       }));
     } catch (error) {
       console.error('❌ Error getting expense accounts:', error);
@@ -475,19 +474,38 @@ export class QBOClient {
 
   async getAllAccounts(): Promise<Array<{ id: string; name: string; fullName: string; type: string; subType?: string; acctNum?: string }>> {
     try {
-      const response = await this.query(
-        'SELECT Id, Name, AcctNum, AccountType, AccountSubType, FullyQualifiedName FROM Account WHERE Active = true'
-      );
-      const accounts = response.QueryResponse?.Account || [];
+      const allAccounts: Array<{ id: string; name: string; fullName: string; type: string; subType?: string; acctNum?: string }> = [];
+      let startPosition = 1;
+      const maxResults = 1000;
+      let hasMore = true;
 
-      return accounts.map((account: any) => ({
-        id: account.Id,
-        name: account.Name,
-        acctNum: account.AcctNum || undefined,
-        fullName: account.FullyQualifiedName || account.Name,
-        type: account.AccountType,
-        subType: account.AccountSubType,
-      }));
+      while (hasMore) {
+        const response = await this.query(
+          `SELECT Id, Name, AcctNum, AccountType, AccountSubType, FullyQualifiedName FROM Account WHERE Active = true STARTPOSITION ${startPosition} MAXRESULTS ${maxResults}`
+        );
+        const accounts = response.QueryResponse?.Account || [];
+
+        if (accounts.length === 0) {
+          hasMore = false;
+        } else {
+          allAccounts.push(...accounts.map((account: any) => ({
+            id: account.Id,
+            name: account.Name,
+            acctNum: account.AcctNum || undefined,
+            fullName: account.FullyQualifiedName || account.Name,
+            type: account.AccountType,
+            subType: account.AccountSubType,
+          })));
+
+          if (accounts.length < maxResults) {
+            hasMore = false;
+          } else {
+            startPosition += maxResults;
+          }
+        }
+      }
+
+      return allAccounts;
     } catch (error) {
       console.error('❌ Error getting all accounts:', error);
       return [];
