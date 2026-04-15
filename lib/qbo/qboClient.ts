@@ -652,6 +652,42 @@ export class QBOClient {
     if (!bill) return false;
     return bill.Balance === 0;
   }
+
+  /**
+   * Delete a bill from QBO. Requires the bill's Id and SyncToken.
+   * QBO treats this as a hard delete — the bill will no longer appear.
+   */
+  async deleteBill(billId: string, syncToken: string): Promise<any> {
+    const response = await this.makeRequest(
+      'bill?operation=delete&minorversion=70',
+      'POST',
+      { Id: billId, SyncToken: syncToken }
+    );
+    return response;
+  }
+
+  /**
+   * Query QBO bills by a partial memo match. Returns raw Bill objects.
+   */
+  async queryBillsByMemo(memoSubstring: string): Promise<any[]> {
+    const bills: any[] = [];
+    let startPosition = 1;
+    const maxResults = 1000;
+
+    while (true) {
+      const query = `SELECT * FROM Bill WHERE PrivateNote LIKE '%${memoSubstring}%' STARTPOSITION ${startPosition} MAXRESULTS ${maxResults}`;
+      const response = await this.makeRequest(
+        `query?query=${encodeURIComponent(query)}&minorversion=70`,
+        'GET'
+      );
+      const page = response?.QueryResponse?.Bill || [];
+      bills.push(...page);
+      if (page.length < maxResults) break;
+      startPosition += maxResults;
+    }
+
+    return bills;
+  }
 }
 
 export const qboClient = new QBOClient();

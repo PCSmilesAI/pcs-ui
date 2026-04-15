@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
         : rejectionReason === 'other'
           ? feedback.trim() ? `[Other] ${feedback.trim()}` : '[Other]'
           : reason || 'No reason provided';
-      softDeleteInvoice(String(invoiceId), formattedReason);
+      await softDeleteInvoice(String(invoiceId), formattedReason);
       console.log('[API][INVOICES][TRANSITION]', 'reject_success', { invoiceId: String(invoiceId), userEmail: user.email });
       return NextResponse.json({ ok: true });
     }
@@ -192,9 +192,9 @@ export async function POST(req: NextRequest) {
 
       console.log('[API][INVOICES][TRANSITION]', 'before_save', { invoiceId: String(invoiceId), status: invoice.status });
       
-      // If transitioning to to_be_paid, create QBO bill FIRST
+      // If transitioning to to_be_paid, create QBO bill FIRST (skip if bill already exists)
       let qboBillResult: { success: boolean; billId?: string; error?: string } | null = null;
-      if (invoice.status === 'to_be_paid') {
+      if (invoice.status === 'to_be_paid' && !invoice.qbo_bill_id) {
         console.log('[API][INVOICES][TRANSITION]', 'creating_qbo_bill', { invoiceId: String(invoiceId) });
         try {
           qboBillResult = await createBillFromInvoice({
