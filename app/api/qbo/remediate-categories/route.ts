@@ -209,10 +209,9 @@ async function handleRemediation(req: NextRequest, dryRun: boolean) {
 
         if (billModified && !dryRun) {
           await qboClient.updateBill({
+            ...fullBill,
             Id: fullBill.Id,
             SyncToken: fullBill.SyncToken,
-            sparse: true,
-            Line: fullBill.Line,
           });
           updatedCount++;
           await new Promise(resolve => setTimeout(resolve, 300));
