@@ -604,6 +604,16 @@ export class QBOClient {
     }
   }
 
+  async getFullBill(billId: string): Promise<any | null> {
+    try {
+      const response = await this.makeRequest(`bill/${billId}?minorversion=70`, 'GET');
+      return response?.Bill || null;
+    } catch (error) {
+      console.error(`❌ Error getting full bill ${billId}:`, error);
+      return null;
+    }
+  }
+
   /**
    * Check if a bill has been paid (Balance = 0)
    */
