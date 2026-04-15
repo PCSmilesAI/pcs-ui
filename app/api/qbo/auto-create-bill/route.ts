@@ -16,12 +16,27 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log('🔄 Auto-create bill request for invoice:', invoiceData.invoice_number, 'ID:', invoiceData.id);
+    const invoiceId = invoiceData.id || invoiceData.invoice_id;
+    console.log('🔄 Auto-create bill request for invoice:', invoiceData.invoice_number, 'ID:', invoiceId);
+
+    if (invoiceId && !dryRun) {
+      try {
+        const { getDatabase } = await import('@/lib/db/client');
+        const db = getDatabase();
+        const row = db.prepare('SELECT qbo_bill_id FROM invoices WHERE id = ?').get(invoiceId) as { qbo_bill_id: string | null } | undefined;
+        if (row?.qbo_bill_id) {
+          return NextResponse.json({
+            success: false,
+            error: `A QBO bill already exists for this invoice (Bill ID: ${row.qbo_bill_id})`,
+          }, { status: 409 });
+        }
+      } catch (_) { /* DB lookup is best-effort */ }
+    }
 
     // Process the approved invoice - pass invoiceId for GL line lookup
     const result = await autoBillService.processApprovedInvoice(invoiceData, { 
       dryRun,
-      invoiceId: invoiceData.id || invoiceData.invoice_id
+      invoiceId,
     });
 
     if (result.success) {

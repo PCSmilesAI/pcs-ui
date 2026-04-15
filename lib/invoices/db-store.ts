@@ -119,11 +119,26 @@ export function saveInvoice(invoice: InvoiceRecord): void {
 /**
  * Soft delete invoice (mark as deleted)
  */
-export function softDeleteInvoice(invoiceId: string, reason?: string): void {
+export async function softDeleteInvoice(invoiceId: string, reason?: string): Promise<void> {
   const db = getDatabase();
 
-  // Get the invoice to retrieve source_message_id
-  const invoice = db.prepare('SELECT source_file FROM invoices WHERE id = ?').get(invoiceId) as any;
+  const invoice = db.prepare('SELECT source_file, qbo_bill_id FROM invoices WHERE id = ?').get(invoiceId) as any;
+
+  // If a QBO bill exists for this invoice, delete it so it can't be paid
+  if (invoice?.qbo_bill_id) {
+    try {
+      const { qboClient } = await import('@/lib/qbo/qboClient');
+      const fullBill = await qboClient.getFullBill(invoice.qbo_bill_id);
+      if (fullBill && fullBill.Balance > 0) {
+        await qboClient.deleteBill(fullBill.Id, fullBill.SyncToken);
+        console.log(`🗑️ Deleted QBO bill ${invoice.qbo_bill_id} for rejected invoice ${invoiceId}`);
+      } else if (fullBill && fullBill.Balance === 0) {
+        console.warn(`⚠️ QBO bill ${invoice.qbo_bill_id} is already paid — cannot delete`);
+      }
+    } catch (err) {
+      console.error(`❌ Failed to delete QBO bill ${invoice.qbo_bill_id}:`, err);
+    }
+  }
 
   db.prepare(`
     UPDATE invoices SET

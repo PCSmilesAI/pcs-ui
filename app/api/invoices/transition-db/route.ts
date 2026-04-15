@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
         : rejectionReason === 'other'
           ? feedback.trim() ? `[Other] ${feedback.trim()}` : '[Other]'
           : reason || 'No reason provided';
-      softDeleteInvoice(String(invoiceId), formattedReason);
+      await softDeleteInvoice(String(invoiceId), formattedReason);
       console.log('[API][INVOICES][DB]', 'transition_reject', { invoiceId: String(invoiceId), userEmail: user.email });
       return NextResponse.json({ ok: true });
     }
