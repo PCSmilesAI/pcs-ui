@@ -10,7 +10,7 @@ function getChartPath(): string {
 }
 
 function normalise(value: string): string {
-  return value.trim().replace(/\s+/g, ' ').toLowerCase();
+  return value.trim().replace(/\s*:\s*/g, ':').replace(/\s+/g, ' ').toLowerCase();
 }
 
 export function loadChartOfAccounts(): Set<string> {
