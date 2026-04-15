@@ -63,6 +63,7 @@ function normalizeKey(value: string): string {
   return value
     .normalize('NFKC')
     .replace(/\s*[-–—]\s*/g, '-')
+    .replace(/\s*:\s*/g, ':')
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
@@ -89,6 +90,11 @@ async function ensureAccountCache(): Promise<typeof accountCache> {
     const keys = new Set<string>();
     keys.add(normalizeKey(entry.fullName));
     keys.add(normalizeKey(entry.name));
+
+    if (account.acctNum) {
+      keys.add(normalizeKey(`${account.acctNum} ${entry.name}`));
+      keys.add(normalizeKey(`${account.acctNum}`));
+    }
 
     for (const key of keys) {
       map.set(key, entry);
@@ -193,23 +199,7 @@ async function ensureLocationCache(): Promise<typeof locationCache> {
   return locationCache;
 }
 
-export async function resolveAccountByFullName(
-  accountPath?: string
-): Promise<AccountLookupResult | undefined> {
-  if (!accountPath || !accountPath.trim()) {
-    return undefined;
-  }
-
-  const cache = await ensureAccountCache();
-  const normalized = normalizeKey(accountPath);
-  const match = cache?.map.get(normalized);
-
-  if (!match) {
-    // Account not found is not an error - caller will use fallback
-    console.log('[QBO][LOOKUP] Account not in cache, using fallback:', accountPath);
-    return undefined;
-  }
-
+function validateAccountType(match: AccountLookupResult, accountPath: string): AccountLookupResult | undefined {
   if (DISALLOWED_ACCOUNT_TYPES.has(match.type)) {
     console.warn('[QBO][LOOKUP] Account type not allowed on bill line:', {
       accountPath,
@@ -227,6 +217,60 @@ export async function resolveAccountByFullName(
   }
 
   return match;
+}
+
+export async function resolveAccountByFullName(
+  accountPath?: string
+): Promise<AccountLookupResult | undefined> {
+  if (!accountPath || !accountPath.trim()) {
+    return undefined;
+  }
+
+  const cache = await ensureAccountCache();
+  const normalized = normalizeKey(accountPath);
+  let match = cache?.map.get(normalized);
+
+  if (!match) {
+    const leaf = accountPath.includes(':')
+      ? accountPath.split(':').pop()!.trim()
+      : accountPath.trim();
+    if (leaf && leaf !== accountPath.trim()) {
+      match = cache?.map.get(normalizeKey(leaf));
+    }
+  }
+
+  if (!match) {
+    const stripped = accountPath.trim().replace(/^\d+\s+/, '');
+    if (stripped && stripped !== accountPath.trim()) {
+      match = cache?.map.get(normalizeKey(stripped));
+    }
+  }
+
+  if (!match) {
+    const numMatch = accountPath.trim().match(/^(\d+)/);
+    if (numMatch) {
+      match = cache?.map.get(normalizeKey(numMatch[1]));
+    }
+  }
+
+  if (!match) {
+    const target = normalized;
+    for (const [key, entry] of cache?.map.entries() || []) {
+      if (key.includes(target) || target.includes(key)) {
+        if (key.length > 2 && target.length > 2) {
+          match = entry;
+          break;
+        }
+      }
+    }
+  }
+
+  if (!match) {
+    console.log('[QBO][LOOKUP] Account not in cache, using fallback:', accountPath);
+    return undefined;
+  }
+
+  return validateAccountType(match, accountPath);
 }
 
 export async function resolveClassByFullName(
