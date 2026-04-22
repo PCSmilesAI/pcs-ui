@@ -655,7 +655,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
       const res = await fetch('/api/inbox/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, full_scan: true }),
+        body: JSON.stringify({ email, full_scan: false }),
       });
 
       const result = await res.json();
