@@ -164,32 +164,24 @@ async function runBackfill(execute: boolean) {
       continue;
     }
 
-    if (clusters.length !== invoices.length) {
-      console.warn(
-        `[BACKFILL] Cluster count mismatch for group ${groupId}: ${clusters.length} clusters vs ${invoices.length} invoices — skipping`
-      );
-      results.push({
-        group_id: groupId,
-        invoice_count: invoices.length,
-        pdf_found: true,
-        clusters_match: false,
-        page_assignments: clusters.map((c, i) => ({
-          id: invoices[i]?.id ?? 'N/A',
-          invoice_number: invoices[i]?.invoice_number ?? 'N/A',
-          pages: c,
-        })),
-        status: 'skipped_cluster_mismatch',
-      });
-      totalSkipped += invoices.length;
-      continue;
-    }
-
+    // Match each invoice to its cluster by document_invoice_index (1-based -> 0-based).
+    // The DB may have fewer invoices than clusters due to filtering at ingest,
+    // so we match positionally rather than requiring an exact count match.
     const pageAssignments: Array<{ id: string; invoice_number: string; pages: number[] }> = [];
     const pdfFilename = normalizePdfFilename(firstInvoice.pdf_path || '');
+    let groupUpdated = 0;
+    let groupSkipped = 0;
 
-    for (let i = 0; i < invoices.length; i++) {
-      const inv = invoices[i];
-      const cluster = clusters[i];
+    for (const inv of invoices) {
+      const clusterIdx = inv.document_invoice_index - 1; // 1-based -> 0-based
+      if (clusterIdx < 0 || clusterIdx >= clusters.length) {
+        console.warn(
+          `[BACKFILL] Invoice ${inv.id} index ${inv.document_invoice_index} out of range (${clusters.length} clusters) — skipping`
+        );
+        groupSkipped++;
+        continue;
+      }
+      const cluster = clusters[clusterIdx];
       pageAssignments.push({ id: inv.id, invoice_number: inv.invoice_number, pages: cluster });
 
       if (execute) {
@@ -209,13 +201,17 @@ async function runBackfill(execute: boolean) {
             Math.max(...cluster),
             inv.id
           );
+          groupUpdated++;
           totalUpdated++;
           console.log(`[BACKFILL] Updated invoice ${inv.id} (${inv.invoice_number}) -> pages [${cluster.join(',')}]`);
         } catch (extractErr: any) {
           console.warn(`[BACKFILL] Extraction failed for ${inv.id}:`, extractErr?.message);
+          groupSkipped++;
         }
       }
     }
+
+    totalSkipped += groupSkipped;
 
     results.push({
       group_id: groupId,
@@ -223,7 +219,7 @@ async function runBackfill(execute: boolean) {
       pdf_found: true,
       clusters_match: true,
       page_assignments: pageAssignments,
-      status: execute ? 'updated' : 'would_update',
+      status: execute ? `updated_${groupUpdated}_skipped_${groupSkipped}` : 'would_update',
     });
   }
 
