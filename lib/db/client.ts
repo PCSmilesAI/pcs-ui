@@ -359,6 +359,8 @@ export function runMigrations(): void {
   ensureColumn('invoices', 'document_group_id', 'document_group_id TEXT'); // UUID linking invoices from same PDF
   ensureColumn('invoices', 'document_invoice_index', 'document_invoice_index INTEGER'); // Position in document (1, 2, 3...)
   ensureColumn('invoices', 'document_invoice_total', 'document_invoice_total INTEGER'); // Total invoices in document
+  ensureColumn('invoices', 'pdf_page_start', 'pdf_page_start INTEGER'); // 0-based first page in source PDF
+  ensureColumn('invoices', 'pdf_page_end', 'pdf_page_end INTEGER'); // 0-based last page (inclusive) in source PDF
 
   // Create table_template_rows table for table template type
   // Note: invoice_id is nullable (template rows don't need an invoice)

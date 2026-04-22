@@ -10,6 +10,7 @@ import { normalizeVendorNameForStorage } from '../../../../../lib/invoices/vendo
 import { resolveVendor } from '../../../../../lib/invoices/vendorMatcher';
 import { buildApiPdfPath, normalizePdfFilename } from '../../../../../lib/security/filename';
 import { normalizeDateForStorage } from '../../../../../lib/utils/dateUtils';
+import { extractPdfPages, buildPerInvoiceFilename } from '../../../../../lib/pdf/extractPages';
 
 export const dynamic = 'force-dynamic';
 
@@ -309,9 +310,39 @@ export async function POST(
               });
             }
             
+            // Extract per-invoice PDFs before the transaction
+            const perInvoicePdfPaths = new Map<string, { apiPath: string; pageStart: number; pageEnd: number }>();
+            for (const inv of invoicesToInsert) {
+              if (inv.parsed.sourcePages && inv.parsed.sourcePages.length > 0) {
+                try {
+                  const outName = buildPerInvoiceFilename(
+                    normalizedPdf,
+                    inv.invoiceIndex,
+                    totalInvoicesInDoc
+                  );
+                  const outDir = path.dirname(pdfPath);
+                  const outPath = path.join(outDir, outName);
+                  await extractPdfPages(pdfPath, inv.parsed.sourcePages, outPath);
+                  perInvoicePdfPaths.set(inv.newId, {
+                    apiPath: buildApiPdfPath(outName),
+                    pageStart: Math.min(...inv.parsed.sourcePages),
+                    pageEnd: Math.max(...inv.parsed.sourcePages),
+                  });
+                  console.log(`[REPARSE] Extracted pages [${inv.parsed.sourcePages.join(',')}] -> ${outName}`);
+                } catch (extractErr: any) {
+                  console.warn(`[REPARSE] PDF extraction failed for inv ${inv.invoiceIndex}, using full PDF:`, extractErr?.message);
+                }
+              }
+            }
+
             // Synchronous transaction for all DB inserts (better-sqlite3 requires sync)
             const insertAllInvoices = db.transaction(() => {
               for (const inv of invoicesToInsert) {
+                const perInv = perInvoicePdfPaths.get(inv.newId);
+                const invPdfPath = perInv?.apiPath ?? (invoice.pdf_path || buildApiPdfPath(normalizedPdf));
+                const pageStart = perInv?.pageStart ?? null;
+                const pageEnd = perInv?.pageEnd ?? null;
+
                 db.prepare(`
                   INSERT INTO invoices (
                     id, invoice_number, source_file,
@@ -320,17 +351,19 @@ export async function POST(
                     status, approvals, deleted,
                     invoice_date, due_date, office_location, pdf_path,
                     parsing_status, parsing_error, parse_attempts,
-                    document_group_id, document_invoice_index, document_invoice_total
-                  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    document_group_id, document_invoice_index, document_invoice_total,
+                    pdf_page_start, pdf_page_end
+                  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `).run(
                   inv.newId, inv.invoiceNumber, invoice.source_file,
                   inv.normalizedVendor, inv.parsed.office_location, inv.amountCents,
                   inv.normalizedVendor, inv.parsed.office_location, inv.amountCents,
                   'incoming', JSON.stringify({}), 0,
                   inv.normalizedInvoiceDate, inv.normalizedDueDate, inv.parsed.office_location,
-                  invoice.pdf_path || buildApiPdfPath(normalizedPdf),
+                  invPdfPath,
                   inv.parsingStatus, inv.parsingError, 1,
-                  documentGroupId, inv.invoiceIndex, totalInvoicesInDoc
+                  documentGroupId, inv.invoiceIndex, totalInvoicesInDoc,
+                  pageStart, pageEnd
                 );
                 
                 db.prepare(`
