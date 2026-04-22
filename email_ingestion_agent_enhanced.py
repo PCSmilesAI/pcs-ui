@@ -415,7 +415,8 @@ def detect_vendor_from_email(msg):
         'henry': ['henry schein', 'henryschein'],
         'exodus': ['exodus', 'exodus dental'],
         'artisan': ['artisan', 'artisan dental'],
-        'tc': ['tc dental', 'tc dental supply']
+        'tc': ['tc dental', 'tc dental supply', 'tc dental lab', 'tcdentallab',
+               'tcdental', 'tc invoices', 'tc invoice', 'tc lab']
     }
     
     for vendor, patterns in vendor_patterns.items():
