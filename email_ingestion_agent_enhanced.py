@@ -1204,8 +1204,10 @@ if __name__ == "__main__":
                 test_mail = connect_imap()
                 caps = test_mail.capabilities
                 test_mail.logout()
-                has_idle = b'IDLE' in caps
-                log(f"[IMAP][IDLE] Server capabilities: {caps}")
+                # capabilities can be bytes or str depending on imaplib version
+                cap_strs = {(c.decode() if isinstance(c, bytes) else c).upper() for c in caps}
+                has_idle = 'IDLE' in cap_strs
+                log(f"[IMAP][IDLE] Server capabilities: {cap_strs}")
                 log(f"[IMAP][IDLE] IDLE supported: {has_idle}")
                 return has_idle
             except Exception as e:
