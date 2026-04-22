@@ -181,6 +181,7 @@ export interface ParsedInvoice {
   }>;
   parsing_confidence: number;
   raw_response?: string;
+  sourcePages?: number[];
 }
 
 export interface MultiInvoiceParseResult {
@@ -793,10 +794,10 @@ async function parseMultipleInvoicesByClusters(
         parseInvoiceFromImages(clusterImages, vendorName)
           .then(result => {
             if (result.success && result.data) {
+              result.data.sourcePages = cluster;
               return { index: clusterIndex, invoice: result.data };
             }
             console.warn(`[PCS-AI] Cluster ${clusterIndex + 1} parse failed:`, result.error);
-            // Return a minimal entry so we don't lose track
             return {
               index: clusterIndex,
               invoice: {
@@ -808,7 +809,8 @@ async function parseMultipleInvoicesByClusters(
                 office_location: null,
                 line_items: [],
                 parsing_confidence: 0,
-                raw_response: result.error || 'Parsing failed'
+                raw_response: result.error || 'Parsing failed',
+                sourcePages: cluster,
               }
             };
           })

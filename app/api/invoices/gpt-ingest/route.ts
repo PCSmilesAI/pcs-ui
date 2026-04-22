@@ -12,6 +12,7 @@ import fs from 'fs';
 
 // Import PCS AI parsing
 import { parseInvoiceWithGPT, ParseResult, ParsedInvoice } from '../../../../lib/gpt/parseInvoice';
+import { extractPdfPages, buildPerInvoiceFilename } from '../../../../lib/pdf/extractPages';
 import { QBOClient } from '../../../../lib/qbo/qboClient';
 
 // Cache for QBO vendors (5 minute TTL)
@@ -335,9 +336,39 @@ export async function POST(req: NextRequest) {
           });
         }
         
+        // Extract per-invoice PDFs before the transaction
+        const perInvoicePdfPaths = new Map<string, { apiPath: string; pageStart: number; pageEnd: number }>();
+        for (const inv of invoicesToInsert) {
+          if (inv.parsed.sourcePages && inv.parsed.sourcePages.length > 0) {
+            try {
+              const outName = buildPerInvoiceFilename(
+                normalizedPdfFilename,
+                inv.invoiceIndex,
+                totalInvoicesInDoc
+              );
+              const outDir = path.dirname(resolvedPdfPath);
+              const outPath = path.join(outDir, outName);
+              await extractPdfPages(resolvedPdfPath, inv.parsed.sourcePages, outPath);
+              perInvoicePdfPaths.set(inv.id, {
+                apiPath: buildApiPdfPath(outName),
+                pageStart: Math.min(...inv.parsed.sourcePages),
+                pageEnd: Math.max(...inv.parsed.sourcePages),
+              });
+              console.log(`[PCS_AI_INGEST] Extracted pages [${inv.parsed.sourcePages.join(',')}] -> ${outName}`);
+            } catch (extractErr: any) {
+              console.warn(`[PCS_AI_INGEST] PDF extraction failed for inv ${inv.invoiceIndex}, using full PDF:`, extractErr?.message);
+            }
+          }
+        }
+
         // Synchronous transaction for all DB inserts
         const insertAllInvoices = db.transaction(() => {
           for (const inv of invoicesToInsert) {
+            const perInv = perInvoicePdfPaths.get(inv.id);
+            const pdfPath = perInv?.apiPath ?? buildApiPdfPath(normalizedPdfFilename);
+            const pageStart = perInv?.pageStart ?? null;
+            const pageEnd = perInv?.pageEnd ?? null;
+
             db.prepare(`
               INSERT INTO invoices (
                 id, invoice_number, source_file,
@@ -346,17 +377,19 @@ export async function POST(req: NextRequest) {
                 status, approvals, deleted,
                 invoice_date, due_date, office_location, pdf_path,
                 parsing_status, parsing_error, parse_attempts,
-                document_group_id, document_invoice_index, document_invoice_total
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                document_group_id, document_invoice_index, document_invoice_total,
+                pdf_page_start, pdf_page_end
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `).run(
               inv.id, inv.invoiceNumber, sourceFile,
               inv.normalizedVendor, inv.parsed.office_location, inv.amountCents,
               inv.normalizedVendor, inv.parsed.office_location, inv.amountCents,
               'incoming', JSON.stringify({}), 0,
               inv.normalizedInvoiceDate, inv.normalizedDueDate, inv.parsed.office_location,
-              buildApiPdfPath(normalizedPdfFilename),
+              pdfPath,
               inv.parsingStatus, inv.parsingError, 1,
-              documentGroupId, inv.invoiceIndex, totalInvoicesInDoc
+              documentGroupId, inv.invoiceIndex, totalInvoicesInDoc,
+              pageStart, pageEnd
             );
             
             db.prepare(`
