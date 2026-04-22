@@ -11,6 +11,7 @@ import random
 import sqlite3
 import hashlib
 import logging
+import select
 import requests
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -721,14 +722,30 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
     CRITICAL: This function MUST NOT fail silently
     
     Flow:
-    1. Classify document using PCS AI
-    2. If invoice -> parse with PCS AI and save to database
-    3. If other document type -> save to other_documents table
+    1. If vendor already known from email metadata, skip classification and parse directly
+    2. Otherwise classify document using PCS AI
+    3. If invoice -> parse with PCS AI and save to database
+    4. If other document type -> save to other_documents table
     """
     try:
         if not os.path.exists(filepath):
             log(f"[ERROR][CRITICAL] PDF file does not exist: {filepath}")
             return False
+
+        # Fast path: if vendor is already known from email sender/subject, skip classification
+        # (saves ~60s per PDF for the most common TC Dental case)
+        if detected_vendor and detected_vendor.lower() not in ('unknown', ''):
+            log(f"[CLASSIFY][SKIP] Vendor already known ({detected_vendor}), skipping classification — parsing directly")
+            result = parse_invoice_with_gpt(filepath, detected_vendor)
+            if result and result.get("success"):
+                log(f"📦 Parsed invoice (fast path): {result.get('vendor', 'Unknown')} - ${(result.get('amount') or 0):.2f}")
+                return True
+            elif result and result.get("skipped"):
+                log(f"📦 Invoice skipped (already exists): {os.path.basename(filepath)}")
+                return True
+            else:
+                log(f"[WARNING] PCS AI parsing failed for {os.path.basename(filepath)}")
+                return False
 
         # Step 1: Classify the document using PCS AI
         classification = classify_document_with_gpt(filepath, email_context)
@@ -873,27 +890,55 @@ def check_inbox(full_scan=False):
 
             # Get emails based on scan mode
             if ACTIVE_VENDOR_FILTER:
-                all_uids = set()
+                # Build a single consolidated OR query instead of 8+ separate round-trips
+                search_parts = []
                 for vendor_keyword in ACTIVE_VENDOR_FILTER:
                     for field in ['SUBJECT', 'FROM']:
+                        search_parts.append(f'{field} "{vendor_keyword}"')
+                for sender_email in PRIORITY_SENDERS:
+                    search_parts.append(f'FROM "{sender_email}"')
+
+                # Chain into nested OR: OR a (OR b (OR c d))
+                if len(search_parts) == 1:
+                    combined = search_parts[0]
+                else:
+                    combined = search_parts[-1]
+                    for part in reversed(search_parts[:-1]):
+                        combined = f'OR {part} {combined}'
+
+                # For incremental scans, only fetch UNSEEN emails
+                if not full_scan:
+                    combined = f'UNSEEN {combined}'
+
+                try:
+                    status, messages = mail.uid('search', None, combined)
+                    all_uids = set(messages[0].split()) if status == 'OK' and messages[0] else set()
+                except Exception as search_err:
+                    log(f"[INBOX][SCAN][WARN] Consolidated search failed in {folder_name}: {search_err}, falling back to individual searches")
+                    all_uids = set()
+                    for vendor_keyword in ACTIVE_VENDOR_FILTER:
+                        for field in ['SUBJECT', 'FROM']:
+                            try:
+                                criteria = f'UNSEEN {field} "{vendor_keyword}"' if not full_scan else f'{field} "{vendor_keyword}"'
+                                status, messages = mail.uid('search', None, criteria)
+                                if status == 'OK' and messages[0]:
+                                    for uid in messages[0].split():
+                                        all_uids.add(uid)
+                            except Exception:
+                                pass
+                    for sender_email in PRIORITY_SENDERS:
                         try:
-                            status, messages = mail.uid('search', None, field, f'"{vendor_keyword}"')
+                            criteria = f'UNSEEN FROM "{sender_email}"' if not full_scan else f'FROM "{sender_email}"'
+                            status, messages = mail.uid('search', None, criteria)
                             if status == 'OK' and messages[0]:
                                 for uid in messages[0].split():
                                     all_uids.add(uid)
-                        except Exception as search_err:
-                            log(f"[INBOX][SCAN][WARN] IMAP search for {field}='{vendor_keyword}' in {folder_name} failed: {search_err}")
-                # Also fetch ALL emails from priority senders so we can inspect attachments
-                for sender_email in PRIORITY_SENDERS:
-                    try:
-                        status, messages = mail.uid('search', None, 'FROM', f'"{sender_email}"')
-                        if status == 'OK' and messages[0]:
-                            for uid in messages[0].split():
-                                all_uids.add(uid)
-                    except Exception as search_err:
-                        log(f"[INBOX][SCAN][WARN] IMAP search for priority sender '{sender_email}' in {folder_name} failed: {search_err}")
+                        except Exception:
+                            pass
+
                 email_uids = sorted(all_uids)
-                log(f"[INBOX][SCAN][MODE] VENDOR-FILTERED SCAN (ALL) in '{folder_name}' - Found {len(email_uids)} emails matching vendor filter + priority senders")
+                unseen_tag = " (UNSEEN only)" if not full_scan else " (ALL)"
+                log(f"[INBOX][SCAN][MODE] VENDOR-FILTERED SCAN{unseen_tag} in '{folder_name}' - Found {len(email_uids)} emails matching vendor filter + priority senders")
             elif full_scan:
                 log(f"[INBOX][SCAN][MODE] FULL SCAN in '{folder_name}' - Processing ALL emails")
                 status, messages = mail.uid('search', None, 'ALL')
@@ -903,30 +948,34 @@ def check_inbox(full_scan=False):
                 email_uids = messages[0].split() if messages[0] else []
                 log(f"[INBOX][SCAN] Found {len(email_uids)} total emails in '{folder_name}'")
             else:
-                log(f"[INBOX][SCAN][MODE] NORMAL SCAN in '{folder_name}'")
-                status, messages = mail.uid('search', None, 'ALL')
+                log(f"[INBOX][SCAN][MODE] NORMAL SCAN in '{folder_name}' - UNSEEN only")
+                status, messages = mail.uid('search', None, 'UNSEEN')
                 if status != 'OK':
                     log(f"[INBOX][SCAN][ERROR] Failed to search '{folder_name}'")
                     continue
                 email_uids = messages[0].split() if messages[0] else []
-                log(f"[INBOX][SCAN] Found {len(email_uids)} total emails in '{folder_name}'")
+                log(f"[INBOX][SCAN] Found {len(email_uids)} unseen emails in '{folder_name}'")
 
-            # First pass: identify new emails and extract PDFs
+            # First pass: lightweight header fetch for dedup, then full fetch only for new emails
             for uid in email_uids:
-                status, msg_data = mail.uid('fetch', uid, '(RFC822)')
-                if status != 'OK':
+                # Lightweight fetch: only grab headers needed for dedup (avoids downloading multi-MB bodies)
+                try:
+                    status, header_data = mail.uid('fetch', uid, '(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID SUBJECT FROM)])')
+                    if status != 'OK' or not header_data or not header_data[0]:
+                        continue
+                    header_bytes = header_data[0][1] if isinstance(header_data[0], tuple) else b''
+                    header_msg = email.message_from_bytes(header_bytes)
+                except Exception:
                     continue
-                msg = email.message_from_bytes(msg_data[0][1])
 
-                source_message_id = msg.get("Message-ID", "")
-                subject = decode_header(msg["Subject"])[0][0]
-                if isinstance(subject, bytes):
-                    subject = subject.decode(errors='ignore')
-
-                # VENDOR FILTER: Only process emails from active vendors (currently TC Dental only)
-                if not is_email_from_active_vendor(msg, subject):
-                    skipped_count += 1
-                    continue
+                source_message_id = header_msg.get("Message-ID", "")
+                raw_subject = header_msg.get("Subject", "")
+                if raw_subject:
+                    decoded = decode_header(raw_subject)[0][0]
+                    subject = decoded.decode(errors='ignore') if isinstance(decoded, bytes) else str(decoded)
+                else:
+                    subject = ""
+                header_from = header_msg.get("From", "")
 
                 # Fast dedup: check if this email was already processed by the scanner
                 email_key = source_message_id or f"uid:{folder_name}:{uid.decode()}"
@@ -940,11 +989,30 @@ def check_inbox(full_scan=False):
                         log(f"[INBOX][TOMBSTONE] Message {source_message_id} was previously deleted, skipping")
                         skipped_count += 1
                         continue
-                    log(f"[INBOX][SCAN][FULL] Processing email in full scan mode: {subject}")
                 else:
                     if is_invoice_already_processed(subject, invoice_numbers, message_ids, tombstones, source_message_id):
                         skipped_count += 1
                         continue
+
+                # Passed dedup — now do the full fetch to get attachments
+                status, msg_data = mail.uid('fetch', uid, '(RFC822)')
+                if status != 'OK':
+                    continue
+                msg = email.message_from_bytes(msg_data[0][1])
+
+                # Re-extract subject from full message (more reliable than header-only parse)
+                full_subject = decode_header(msg["Subject"])[0][0]
+                if isinstance(full_subject, bytes):
+                    full_subject = full_subject.decode(errors='ignore')
+                subject = full_subject or subject
+
+                # VENDOR FILTER: Only process emails from active vendors
+                if not is_email_from_active_vendor(msg, subject):
+                    skipped_count += 1
+                    continue
+
+                if full_scan:
+                    log(f"[INBOX][SCAN][FULL] Processing email in full scan mode: {subject}")
 
                 # Check if email has PDF attachments
                 has_pdf = False
@@ -1125,23 +1193,161 @@ if __name__ == "__main__":
         log("[INBOX][WATCHER][MODE] Single run complete. Exiting.")
     else:
         # Continuous watcher mode (default)
+        # Try IMAP IDLE for near-instant push notifications; fall back to polling
         interval_ms = _config["interval_ms"]
-        log(f"[INBOX][WATCHER][START] Starting continuous inbox watcher with {interval_ms}ms interval")
-        
-        while True:
-            # Check inbox for new emails
-            check_inbox(full_scan=False)
+        log(f"[INBOX][WATCHER][START] Starting continuous inbox watcher (polling fallback: {interval_ms}ms)")
 
-            # Calculate sleep time with jitter (±15%)
-            base_interval_s = _config["interval_ms"] / 1000.0
+        def _check_idle_support():
+            """Check if the IMAP server advertises IDLE capability."""
+            try:
+                test_mail = connect_imap()
+                caps = test_mail.capabilities
+                test_mail.logout()
+                has_idle = b'IDLE' in caps
+                log(f"[IMAP][IDLE] Server capabilities: {caps}")
+                log(f"[IMAP][IDLE] IDLE supported: {has_idle}")
+                return has_idle
+            except Exception as e:
+                log(f"[IMAP][IDLE] Could not check capabilities: {e}")
+                return False
 
-            # If we're in backoff mode, use backoff interval instead
-            if _config["backoff_seconds"] > 10:
-                base_interval_s = _config["backoff_seconds"]
-                log(f"[INBOX][WATCHER][BACKOFF] Using backoff interval: {base_interval_s}s")
+        def _run_idle_loop():
+            """Use IMAP IDLE to wait for new mail instead of polling.
+            
+            Keeps a persistent IMAP connection and uses the IDLE command
+            to receive near-instant push notifications when new mail arrives.
+            Falls back to reconnecting on any connection error.
+            """
+            IDLE_TIMEOUT = 300  # Re-issue IDLE every 5 min (RFC recommends <29 min)
+            consecutive_errors = 0
+            idle_seq = [0]  # Mutable counter for generating unique IMAP tags
 
-            jitter = random.uniform(-0.15, 0.15)  # ±15%
-            sleep_time = base_interval_s * (1 + jitter)
+            while True:
+                idle_mail = None
+                try:
+                    idle_mail = connect_imap()
+                    idle_mail.select('INBOX')
+                    consecutive_errors = 0
 
-            log(f"[INBOX][WATCHER][SLEEP] Sleeping for {sleep_time:.1f}s (base: {base_interval_s}s, jitter: {jitter*100:.1f}%)")
-            time.sleep(sleep_time)
+                    while True:
+                        # Send IDLE command using raw socket for reliability
+                        idle_seq[0] += 1
+                        tag = f'IDLE{idle_seq[0]}'.encode()
+                        idle_mail.send(tag + b' IDLE\r\n')
+
+                        # Read the continuation response ("+ idling" or similar)
+                        sock = idle_mail.socket()
+                        sock.settimeout(30)
+                        try:
+                            continuation = b''
+                            while b'\r\n' not in continuation:
+                                chunk = sock.recv(4096)
+                                if not chunk:
+                                    raise ConnectionError("IMAP connection closed during IDLE handshake")
+                                continuation += chunk
+                        except Exception as e:
+                            log(f"[IMAP][IDLE] Failed to enter IDLE mode: {e}")
+                            break
+
+                        if not continuation.startswith(b'+'):
+                            log(f"[IMAP][IDLE] Unexpected IDLE response: {continuation[:100]}")
+                            break
+
+                        # Now wait for server push (EXISTS = new mail) or timeout
+                        sock.settimeout(None)
+                        readable, _, _ = select.select([sock], [], [], IDLE_TIMEOUT)
+
+                        got_new_mail = False
+                        if readable:
+                            try:
+                                data = sock.recv(8192)
+                                if not data:
+                                    raise ConnectionError("IMAP connection closed")
+                                got_new_mail = b'EXISTS' in data
+                                if got_new_mail:
+                                    log("[IMAP][IDLE] New mail detected via IDLE push")
+                                else:
+                                    log("[IMAP][IDLE] Server event (non-EXISTS)")
+                            except Exception as e:
+                                log(f"[IMAP][IDLE] Error reading IDLE data: {e}")
+                                break
+
+                        # Send DONE to end IDLE
+                        idle_mail.send(b'DONE\r\n')
+                        # Read the tagged OK response
+                        sock.settimeout(30)
+                        try:
+                            response = b''
+                            while tag not in response:
+                                chunk = sock.recv(4096)
+                                if not chunk:
+                                    break
+                                response += chunk
+                        except Exception:
+                            pass
+                        sock.settimeout(None)
+
+                        if got_new_mail:
+                            # Disconnect IDLE connection and run the full scan pipeline
+                            try:
+                                idle_mail.logout()
+                            except Exception:
+                                pass
+                            idle_mail = None
+                            check_inbox(full_scan=False)
+                            # Reconnect for next IDLE cycle
+                            idle_mail = connect_imap()
+                            idle_mail.select('INBOX')
+                        else:
+                            write_heartbeat(status="ok")
+
+                except imaplib.IMAP4.abort:
+                    log("[IMAP][IDLE] Connection aborted, reconnecting...")
+                    consecutive_errors += 1
+                except (ConnectionError, OSError, TimeoutError) as e:
+                    log(f"[IMAP][IDLE] Connection error: {e}")
+                    consecutive_errors += 1
+                except Exception as e:
+                    log(f"[IMAP][IDLE] Error in IDLE loop: {e}")
+                    consecutive_errors += 1
+                finally:
+                    try:
+                        if idle_mail:
+                            idle_mail.logout()
+                    except Exception:
+                        pass
+
+                backoff = min(10 * (2 ** min(consecutive_errors, 5)), 300)
+                log(f"[IMAP][IDLE] Reconnecting in {backoff}s (errors: {consecutive_errors})")
+                time.sleep(backoff)
+
+        def _run_poll_loop():
+            """Original polling loop as fallback."""
+            while True:
+                check_inbox(full_scan=False)
+
+                base_interval_s = _config["interval_ms"] / 1000.0
+                if _config["backoff_seconds"] > 10:
+                    base_interval_s = _config["backoff_seconds"]
+                    log(f"[INBOX][WATCHER][BACKOFF] Using backoff interval: {base_interval_s}s")
+
+                jitter = random.uniform(-0.15, 0.15)
+                sleep_time = base_interval_s * (1 + jitter)
+                log(f"[INBOX][WATCHER][SLEEP] Sleeping for {sleep_time:.1f}s (base: {base_interval_s}s, jitter: {jitter*100:.1f}%)")
+                time.sleep(sleep_time)
+
+        # Do an initial scan immediately, then decide IDLE vs polling
+        check_inbox(full_scan=False)
+
+        if _check_idle_support():
+            log("[INBOX][WATCHER][MODE] Using IMAP IDLE (push notifications)")
+            try:
+                _run_idle_loop()
+            except KeyboardInterrupt:
+                log("[INBOX][WATCHER][STOP] Interrupted")
+            except Exception as e:
+                log(f"[IMAP][IDLE] IDLE loop crashed, falling back to polling: {e}")
+                _run_poll_loop()
+        else:
+            log("[INBOX][WATCHER][MODE] IDLE not supported, using polling")
+            _run_poll_loop()
