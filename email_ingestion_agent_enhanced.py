@@ -19,7 +19,7 @@ from deduplicate_invoices import deduplicate_invoices
 from filename_utils import sanitize_filename
 
 EMAIL_USER = os.environ.get("IMAP_USER", "invoices@pcsmilesai.com")
-EMAIL_PASS = os.environ.get("IMAP_PASS", "Inv!PCSAI")
+EMAIL_PASS = os.environ.get("IMAP_PASS", "PCS-AI-2026!")
 IMAP_SERVER = os.environ.get("IMAP_SERVER", "imap.secureserver.net")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
