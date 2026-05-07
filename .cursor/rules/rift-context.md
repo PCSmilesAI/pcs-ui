@@ -12,3 +12,11 @@ This file bridges conversation context between local Cursor sessions (Mac) and r
 ---
 
 <!-- Context entries below this line -->
+
+## [Mac] May 4, 2026 — 2:57 PM
+Local Cursor session — 1 file(s) touched:
+- .cursor/hooks/log-context.sh
+
+## [Mac] May 7, 2026 — 1:04 PM
+Local Cursor session — 1 file(s) touched:
+- .cursor/hooks/log-context.sh

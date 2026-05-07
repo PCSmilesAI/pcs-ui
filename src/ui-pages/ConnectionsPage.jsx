@@ -10,18 +10,53 @@ export default function ConnectionsPage() {
   const [openaiError, setOpenaiError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
-  // Check for success message from URL params
+  const [orphanedInvoices, setOrphanedInvoices] = useState([]);
+  const [showOrphanedModal, setShowOrphanedModal] = useState(false);
+  const [retryInProgress, setRetryInProgress] = useState(false);
+  const [retryResults, setRetryResults] = useState(null);
+
+  const checkOrphanedBills = useCallback(async () => {
+    try {
+      const res = await fetch('/api/invoices/orphaned-bills');
+      const data = await res.json();
+      if (data.ok && data.count > 0) {
+        setOrphanedInvoices(data.invoices);
+        setShowOrphanedModal(true);
+      }
+    } catch (err) {
+      console.error('Failed to check orphaned bills:', err);
+    }
+  }, []);
+
+  const handleRetryBills = async () => {
+    setRetryInProgress(true);
+    setRetryResults(null);
+    try {
+      const res = await fetch('/api/invoices/retry-bills', { method: 'POST' });
+      const data = await res.json();
+      setRetryResults(data);
+      if (data.ok) {
+        setOrphanedInvoices([]);
+      }
+    } catch (err) {
+      setRetryResults({ ok: false, message: err.message || 'Request failed' });
+    } finally {
+      setRetryInProgress(false);
+    }
+  };
+
+  // Check for success message from URL params, then check for orphaned bills
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('qbo_connected') === 'true') {
         setSuccessMessage('QuickBooks connected successfully!');
-        // Clear the URL parameter
         const newUrl = window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
+        checkOrphanedBills();
       }
     }
-  }, []);
+  }, [checkOrphanedBills]);
 
   // Check QuickBooks connection status
   const checkQboStatus = useCallback(async () => {
@@ -250,6 +285,158 @@ export default function ConnectionsPage() {
           </button>
         </div>
       </div>
+
+      {/* Orphaned Bills Modal */}
+      {showOrphanedModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff', borderRadius: '16px', padding: '32px',
+            maxWidth: '540px', width: '90%', maxHeight: '80vh', overflow: 'auto',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          }}>
+            {!retryResults ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '28px' }}>&#x26A0;&#xFE0F;</span>
+                  <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#1f2937' }}>
+                    Missing QBO Bills Detected
+                  </h2>
+                </div>
+
+                <p style={{ color: '#4b5563', marginBottom: '20px', lineHeight: 1.6 }}>
+                  We found <strong>{orphanedInvoices.length}</strong> approved invoice{orphanedInvoices.length !== 1 ? 's' : ''} that
+                  {orphanedInvoices.length !== 1 ? ' were' : ' was'} approved while QuickBooks was disconnected.
+                  {orphanedInvoices.length !== 1 ? ' These invoices don\u2019t' : ' This invoice doesn\u2019t'} have
+                  QBO bills yet. Would you like to create them now?
+                </p>
+
+                <div style={{
+                  backgroundColor: '#f9fafb', borderRadius: '12px', padding: '12px 16px',
+                  marginBottom: '24px', maxHeight: '200px', overflowY: 'auto',
+                  border: '1px solid #e5e7eb',
+                }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                        <th style={{ textAlign: 'left', padding: '6px 8px', color: '#6b7280', fontWeight: 500 }}>Invoice #</th>
+                        <th style={{ textAlign: 'left', padding: '6px 8px', color: '#6b7280', fontWeight: 500 }}>Vendor</th>
+                        <th style={{ textAlign: 'right', padding: '6px 8px', color: '#6b7280', fontWeight: 500 }}>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orphanedInvoices.map((inv) => (
+                        <tr key={inv.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                          <td style={{ padding: '6px 8px', color: '#1f2937' }}>{inv.invoice_number}</td>
+                          <td style={{ padding: '6px 8px', color: '#4b5563' }}>{inv.vendor_name}</td>
+                          <td style={{ padding: '6px 8px', color: '#1f2937', textAlign: 'right' }}>
+                            {inv.amount ? `$${Number(inv.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '\u2014'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={() => setShowOrphanedModal(false)}
+                    style={{
+                      padding: '10px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 500,
+                      border: '1px solid #d1d5db', backgroundColor: '#ffffff', color: '#374151', cursor: 'pointer',
+                    }}
+                  >
+                    Dismiss
+                  </button>
+                  <button
+                    onClick={handleRetryBills}
+                    disabled={retryInProgress}
+                    style={{
+                      padding: '10px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 500,
+                      border: '1px solid #357ab2', backgroundColor: '#357ab2', color: '#ffffff',
+                      cursor: retryInProgress ? 'not-allowed' : 'pointer',
+                      opacity: retryInProgress ? 0.7 : 1,
+                    }}
+                  >
+                    {retryInProgress ? 'Creating Bills\u2026' : `Create ${orphanedInvoices.length} Bill${orphanedInvoices.length !== 1 ? 's' : ''} Now`}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '28px' }}>{retryResults.ok && retryResults.failed === 0 ? '\u2705' : '\u26A0\uFE0F'}</span>
+                  <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#1f2937' }}>
+                    {retryResults.ok && retryResults.failed === 0 ? 'All Bills Created' : 'Bill Creation Complete'}
+                  </h2>
+                </div>
+
+                {retryResults.ok ? (
+                  <>
+                    <p style={{ color: '#4b5563', marginBottom: '16px', lineHeight: 1.6 }}>
+                      <strong>{retryResults.succeeded}</strong> bill{retryResults.succeeded !== 1 ? 's were' : ' was'} successfully
+                      created in QuickBooks.
+                      {retryResults.failed > 0 && (
+                        <span style={{ color: '#dc2626' }}>
+                          {' '}{retryResults.failed} bill{retryResults.failed !== 1 ? 's' : ''} failed.
+                        </span>
+                      )}
+                    </p>
+
+                    {retryResults.results && retryResults.results.length > 0 && (
+                      <div style={{
+                        backgroundColor: '#f9fafb', borderRadius: '12px', padding: '12px 16px',
+                        marginBottom: '24px', maxHeight: '200px', overflowY: 'auto',
+                        border: '1px solid #e5e7eb',
+                      }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                              <th style={{ textAlign: 'left', padding: '6px 8px', color: '#6b7280', fontWeight: 500 }}>Invoice #</th>
+                              <th style={{ textAlign: 'left', padding: '6px 8px', color: '#6b7280', fontWeight: 500 }}>Status</th>
+                              <th style={{ textAlign: 'left', padding: '6px 8px', color: '#6b7280', fontWeight: 500 }}>QBO Bill ID</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {retryResults.results.map((r) => (
+                              <tr key={r.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                <td style={{ padding: '6px 8px', color: '#1f2937' }}>{r.invoice_number}</td>
+                                <td style={{ padding: '6px 8px', color: r.ok ? '#059669' : '#dc2626' }}>
+                                  {r.ok ? 'Created' : `Failed: ${r.error}`}
+                                </td>
+                                <td style={{ padding: '6px 8px', color: '#4b5563' }}>{r.billId || '\u2014'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p style={{ color: '#dc2626', marginBottom: '16px' }}>
+                    {retryResults.message || 'An error occurred while creating bills.'}
+                  </p>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={() => { setShowOrphanedModal(false); setRetryResults(null); }}
+                    style={{
+                      padding: '10px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: 500,
+                      border: '1px solid #357ab2', backgroundColor: '#357ab2', color: '#ffffff', cursor: 'pointer',
+                    }}
+                  >
+                    Done
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
