@@ -13,8 +13,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   const user = getCurrentUser(req);
 
-  const adminEmails = ['business@pcsmilesai.com', 'mckaym@pcsmiles.com'];
-  if (!adminEmails.includes(user.email.toLowerCase())) {
+  if (!user.isAdmin) {
     return NextResponse.json({ error: 'Only admins can retry bill creation' }, { status: 403 });
   }
 
