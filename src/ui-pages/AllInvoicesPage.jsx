@@ -125,6 +125,8 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
             timestamp: invoice.timestamp,
             assigned_to: invoice.assigned_to,
             approved: invoice.approved,
+            qbo_bill_id: invoice.qbo_bill_id || null,
+            _rawStatus: (invoice.status || '').toLowerCase(),
           };
         });
 
@@ -204,6 +206,8 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
           timestamp: invoice.timestamp,
           assigned_to: invoice.assigned_to,
           approved: invoice.approved,
+          qbo_bill_id: invoice.qbo_bill_id || null,
+          _rawStatus: (invoice.status || '').toLowerCase(),
         };
       });
       setInvoices(transformed);
@@ -233,12 +237,35 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
 
   // 6 columns evenly distributed, all centered
   const columns = [
-    { key: 'invoice', label: 'Invoice', width: '16%' },
-    { key: 'vendor', label: 'Vendor', width: '16%' },
-    { key: 'amount', label: 'Amount', width: '12%' },
-    { key: 'location', label: 'Location', width: '14%' },
-    { key: 'category', label: 'Category', width: '24%' },
-    { key: 'status', label: 'Status', width: '14%' },
+    { key: 'invoice', label: 'Invoice', width: '14%' },
+    { key: 'vendor', label: 'Vendor', width: '15%' },
+    { key: 'amount', label: 'Amount', width: '10%' },
+    { key: 'location', label: 'Location', width: '13%' },
+    { key: 'category', label: 'Category', width: '22%' },
+    { key: 'status', label: 'Status', width: '13%' },
+    {
+      key: 'qbo',
+      label: 'QBO',
+      width: '6%',
+      render: (row) => {
+        const s = row._rawStatus;
+        if (s !== 'to_be_paid' && s !== 'paid' && s !== 'completed') {
+          return <span style={{ color: '#d1d5db' }}>&mdash;</span>;
+        }
+        if (row.qbo_bill_id) {
+          return (
+            <span title="Exported to QuickBooks" style={{ color: '#059669', fontSize: '16px' }}>
+              <i className="fas fa-check-circle"></i>
+            </span>
+          );
+        }
+        return (
+          <span title="Pending QBO export" style={{ color: '#d97706', fontSize: '16px' }}>
+            <i className="fas fa-clock"></i>
+          </span>
+        );
+      },
+    },
   ];
 
   const effectiveQuery = (spQuery || searchQuery || '').trim().toLowerCase();

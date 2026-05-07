@@ -7,8 +7,9 @@ export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/invoices/retry-bills
- * Retries QBO bill creation for all to_be_paid invoices that are missing a qbo_bill_id.
- * Use after re-authenticating with QuickBooks.
+ * Retries QBO bill creation for to_be_paid invoices that are missing a qbo_bill_id.
+ * Body (optional): { invoiceIds: string[] } to limit to specific invoices.
+ * If omitted, processes all orphaned invoices.
  */
 export async function POST(req: NextRequest) {
   const user = getCurrentUser(req);
@@ -17,16 +18,38 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Only admins can retry bill creation' }, { status: 403 });
   }
 
+  let requestedIds: string[] | null = null;
+  try {
+    const body = await req.json().catch(() => ({}));
+    if (Array.isArray(body.invoiceIds) && body.invoiceIds.length > 0) {
+      requestedIds = body.invoiceIds.map(String);
+    }
+  } catch { /* empty body is fine */ }
+
   const db = getDatabase();
 
-  const invoices = db.prepare(`
-    SELECT id, invoice_number, vendor_name, amount_cents, office_location,
-           invoice_date, due_date, pdf_path, source_file, status, qbo_bill_id
-    FROM invoices
-    WHERE status = 'to_be_paid'
-      AND deleted = 0
-      AND (qbo_bill_id IS NULL OR qbo_bill_id = '')
-  `).all() as any[];
+  let invoices: any[];
+  if (requestedIds) {
+    const placeholders = requestedIds.map(() => '?').join(',');
+    invoices = db.prepare(`
+      SELECT id, invoice_number, vendor_name, amount_cents, office_location,
+             invoice_date, due_date, pdf_path, source_file, status, qbo_bill_id
+      FROM invoices
+      WHERE status = 'to_be_paid'
+        AND deleted = 0
+        AND (qbo_bill_id IS NULL OR qbo_bill_id = '')
+        AND id IN (${placeholders})
+    `).all(...requestedIds) as any[];
+  } else {
+    invoices = db.prepare(`
+      SELECT id, invoice_number, vendor_name, amount_cents, office_location,
+             invoice_date, due_date, pdf_path, source_file, status, qbo_bill_id
+      FROM invoices
+      WHERE status = 'to_be_paid'
+        AND deleted = 0
+        AND (qbo_bill_id IS NULL OR qbo_bill_id = '')
+    `).all() as any[];
+  }
 
   if (invoices.length === 0) {
     return NextResponse.json({ ok: true, message: 'All to_be_paid invoices already have QBO bills', retried: 0 });

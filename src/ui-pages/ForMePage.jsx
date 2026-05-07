@@ -140,8 +140,10 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       assigned_to: invoice.assigned_to,
       approved: invoice.approved,
       status: invoice.status,
+      _rawStatus: (invoice.status || '').toLowerCase(),
       line_items: invoice.line_items || [],
       approvals: invoice.approvals || {},
+      qbo_bill_id: invoice.qbo_bill_id || null,
     };
   }, []);
 
@@ -671,15 +673,37 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     );
   }
 
-  // 7 columns evenly distributed, all centered
   const columns = [
-    { key: 'invoice', label: 'Invoice', width: '14%' },
+    { key: 'invoice', label: 'Invoice', width: '13%' },
     { key: 'vendor', label: 'Vendor', width: '14%' },
-    { key: 'amount', label: 'Amount', width: '10%' },
+    { key: 'amount', label: 'Amount', width: '9%' },
     { key: 'location', label: 'Location', width: '12%' },
-    { key: 'invoiceDate', label: 'Invoice Date', width: '12%' },
-    { key: 'dueDate', label: 'Due Date', width: '12%' },
-    { key: 'category', label: 'Category', width: '22%' },
+    { key: 'invoiceDate', label: 'Invoice Date', width: '11%' },
+    { key: 'dueDate', label: 'Due Date', width: '11%' },
+    { key: 'category', label: 'Category', width: '20%' },
+    {
+      key: 'qbo',
+      label: 'QBO',
+      width: '6%',
+      render: (row) => {
+        const s = row._rawStatus;
+        if (s !== 'to_be_paid' && s !== 'paid' && s !== 'completed') {
+          return <span style={{ color: '#d1d5db' }}>&mdash;</span>;
+        }
+        if (row.qbo_bill_id) {
+          return (
+            <span title="Exported to QuickBooks" style={{ color: '#059669', fontSize: '16px' }}>
+              <i className="fas fa-check-circle"></i>
+            </span>
+          );
+        }
+        return (
+          <span title="Pending QBO export" style={{ color: '#d97706', fontSize: '16px' }}>
+            <i className="fas fa-clock"></i>
+          </span>
+        );
+      },
+    },
   ];
 
   return (

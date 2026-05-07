@@ -3137,6 +3137,43 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
             </table>
           </div>
 
+          {/* QuickBooks Export Status */}
+          {(() => {
+            const s = (invoice?.status || '').toLowerCase();
+            const billId = invoice?.qbo_bill_id;
+            const isExportable = s === 'to_be_paid' || s === 'paid' || s === 'completed';
+            if (!isExportable) return null;
+            return (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '10px 16px', borderRadius: '12px', marginBottom: '16px',
+                border: `1px solid ${billId ? '#a7f3d0' : '#fde68a'}`,
+                backgroundColor: billId ? '#ecfdf5' : '#fffbeb',
+              }}>
+                <i
+                  className={billId ? 'fas fa-check-circle' : 'fas fa-clock'}
+                  style={{ fontSize: '18px', color: billId ? '#059669' : '#d97706' }}
+                ></i>
+                <span style={{ fontSize: '14px', fontWeight: 500, color: billId ? '#065f46' : '#92400e' }}>
+                  {billId ? 'Exported to QuickBooks' : 'Not yet exported to QuickBooks'}
+                </span>
+                {billId && (
+                  <a
+                    href={`https://app.qbo.intuit.com/app/bill?txnId=${billId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      marginLeft: 'auto', fontSize: '13px', fontWeight: 500,
+                      color: '#357ab2', textDecoration: 'none',
+                    }}
+                  >
+                    View in QBO &rarr;
+                  </a>
+                )}
+              </div>
+            );
+          })()}
+
           {/* Invoice Details section */}
           <div style={{ ...sectionStyle, position: 'relative', zIndex: 100, overflow: 'visible' }}>
             <h2 style={sectionTitleStyle}>Invoice Details</h2>
