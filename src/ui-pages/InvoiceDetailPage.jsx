@@ -3143,19 +3143,28 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
             const billId = invoice?.qbo_bill_id;
             const isExportable = s === 'to_be_paid' || s === 'paid' || s === 'completed';
             if (!isExportable) return null;
+            const isPaid = s === 'paid' || s === 'completed';
+            const borderColor = billId ? (isPaid ? '#a7f3d0' : '#bfdbfe') : '#fde68a';
+            const bgColor = billId ? (isPaid ? '#ecfdf5' : '#eff6ff') : '#fffbeb';
+            const iconClass = billId ? (isPaid ? 'fas fa-check-circle' : 'fas fa-cloud-upload-alt') : 'fas fa-clock';
+            const iconColor = billId ? (isPaid ? '#059669' : '#2563eb') : '#d97706';
+            const textColor = billId ? (isPaid ? '#065f46' : '#1e40af') : '#92400e';
+            const labelText = billId
+              ? (isPaid ? 'Paid in QuickBooks' : 'Bill created in QuickBooks (awaiting payment)')
+              : 'Not yet exported to QuickBooks';
             return (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '10px',
                 padding: '10px 16px', borderRadius: '12px', marginBottom: '16px',
-                border: `1px solid ${billId ? '#a7f3d0' : '#fde68a'}`,
-                backgroundColor: billId ? '#ecfdf5' : '#fffbeb',
+                border: `1px solid ${borderColor}`,
+                backgroundColor: bgColor,
               }}>
                 <i
-                  className={billId ? 'fas fa-check-circle' : 'fas fa-clock'}
-                  style={{ fontSize: '18px', color: billId ? '#059669' : '#d97706' }}
+                  className={iconClass}
+                  style={{ fontSize: '18px', color: iconColor }}
                 ></i>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: billId ? '#065f46' : '#92400e' }}>
-                  {billId ? 'Exported to QuickBooks' : 'Not yet exported to QuickBooks'}
+                <span style={{ fontSize: '14px', fontWeight: 500, color: textColor }}>
+                  {labelText}
                 </span>
                 {billId && (
                   <a
