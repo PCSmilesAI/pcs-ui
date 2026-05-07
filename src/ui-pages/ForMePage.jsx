@@ -691,14 +691,21 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
           return <span style={{ color: '#d1d5db' }}>&mdash;</span>;
         }
         if (row.qbo_bill_id) {
+          if (s === 'paid' || s === 'completed') {
+            return (
+              <span title="Paid in QuickBooks" style={{ color: '#059669', fontSize: '15px' }}>
+                <i className="fas fa-check-circle"></i>
+              </span>
+            );
+          }
           return (
-            <span title="Exported to QuickBooks" style={{ color: '#059669', fontSize: '16px' }}>
-              <i className="fas fa-check-circle"></i>
+            <span title="Bill created in QuickBooks (not yet paid)" style={{ color: '#2563eb', fontSize: '15px' }}>
+              <i className="fas fa-cloud-upload-alt"></i>
             </span>
           );
         }
         return (
-          <span title="Pending QBO export" style={{ color: '#d97706', fontSize: '16px' }}>
+          <span title="Awaiting QBO bill creation" style={{ color: '#d97706', fontSize: '15px' }}>
             <i className="fas fa-clock"></i>
           </span>
         );
