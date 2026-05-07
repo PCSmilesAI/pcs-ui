@@ -156,6 +156,7 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           approved: invoice.approved,
           status: formatStatusForDisplay(invoice.status),
           line_items: invoice.line_items || [],
+          qbo_bill_id: invoice.qbo_bill_id || null,
         })});
       setInvoices(transformedData);
       setContextInvoices(transformedData);
@@ -497,18 +498,36 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // 7 columns evenly distributed, all centered
   const columns = [
-    { key: 'invoice', label: 'Invoice', width: '14%' },
+    { key: 'invoice', label: 'Invoice', width: '13%' },
     { key: 'vendor', label: 'Vendor', width: '14%' },
-    { key: 'amount', label: 'Amount', width: '10%' },
+    { key: 'amount', label: 'Amount', width: '9%' },
     { key: 'location', label: 'Location', width: '12%' },
-    { key: 'invoiceDate', label: 'Invoice Date', width: '12%' },
-    { key: 'dueDate', label: 'Due Date', width: '12%' },
+    { key: 'invoiceDate', label: 'Invoice Date', width: '11%' },
+    { key: 'dueDate', label: 'Due Date', width: '11%' },
+    {
+      key: 'qbo',
+      label: 'QBO',
+      width: '6%',
+      render: (row) => {
+        if (row.qbo_bill_id) {
+          return (
+            <span title="Exported to QuickBooks" style={{ color: '#059669', fontSize: '16px' }}>
+              <i className="fas fa-check-circle"></i>
+            </span>
+          );
+        }
+        return (
+          <span title="Pending QBO export" style={{ color: '#d97706', fontSize: '16px' }}>
+            <i className="fas fa-clock"></i>
+          </span>
+        );
+      },
+    },
     { 
       key: 'status', 
       label: 'Status', 
-      width: '22%',
+      width: '20%',
       render: (row) => {
         if (row.isPaymentLocked) {
           return (
@@ -689,28 +708,51 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
             {filteredRows.length} invoice{filteredRows.length !== 1 ? 's' : ''} approved and awaiting payment
           </p>
         </div>
-        <button
-          onClick={handleRefreshInbox}
-          disabled={refreshing}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '9999px',
-            fontSize: '14px',
-            fontWeight: 500,
-            border: '1px solid #357ab2',
-            backgroundColor: refreshing ? '#e5e7eb' : '#ffffff',
-            color: refreshing ? '#9ca3af' : '#357ab2',
-            cursor: refreshing ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'all 0.2s ease',
-          }}
-          title="Check inbox for new invoices"
-        >
-          <i className={`fas fa-sync-alt ${refreshing ? 'fa-spin' : ''}`}></i>
-          {refreshing ? 'Refreshing...' : 'Refresh Inbox'}
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => { window.location.href = '/QboExportPage'; }}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '9999px',
+              fontSize: '14px',
+              fontWeight: 500,
+              border: '1px solid #357ab2',
+              backgroundColor: '#ffffff',
+              color: '#357ab2',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+            }}
+            title="View invoices pending QBO export"
+          >
+            <i className="fas fa-file-export"></i>
+            QBO Export
+          </button>
+          <button
+            onClick={handleRefreshInbox}
+            disabled={refreshing}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '9999px',
+              fontSize: '14px',
+              fontWeight: 500,
+              border: '1px solid #357ab2',
+              backgroundColor: refreshing ? '#e5e7eb' : '#ffffff',
+              color: refreshing ? '#9ca3af' : '#357ab2',
+              cursor: refreshing ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+            }}
+            title="Check inbox for new invoices"
+          >
+            <i className={`fas fa-sync-alt ${refreshing ? 'fa-spin' : ''}`}></i>
+            {refreshing ? 'Refreshing...' : 'Refresh Inbox'}
+          </button>
+        </div>
       </div>
       {selectedIds.size > 0 && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>

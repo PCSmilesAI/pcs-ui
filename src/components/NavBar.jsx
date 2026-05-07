@@ -370,6 +370,20 @@ function NavBarInner({
                   Connections
                 </div>
               )}
+              {/* QBO Export - Admin/AP only */}
+              {isAdminUser && (
+                <div
+                  style={dropdownItemStyle}
+                  onClick={() => {
+                    setIsAccountOpen(false);
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/QboExportPage';
+                    }
+                  }}
+                >
+                  QBO Export
+                </div>
+              )}
               {/* Coding Templates - Admin/AP only */}
               {isAdminUser && (
                 <div
