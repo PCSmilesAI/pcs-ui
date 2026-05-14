@@ -274,6 +274,9 @@ function InvoiceDetailContent() {
             document_group_id: foundInvoice.document_group_id,
             document_invoice_index: foundInvoice.document_invoice_index,
             document_invoice_total: foundInvoice.document_invoice_total,
+            // QBO export tracking
+            qbo_bill_id: foundInvoice.qbo_bill_id || null,
+            qbo_bill_created_at: foundInvoice.qbo_bill_created_at || null,
           };
           setInvoice(transformedInvoice);
         } else {
