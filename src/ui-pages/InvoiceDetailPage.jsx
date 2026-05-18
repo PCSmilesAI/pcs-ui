@@ -1747,7 +1747,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     const extraPayload = {
       rejectionReason: rejectReason,
       feedback: rejectFeedback.trim(),
-      reason: rejectReason === 'duplicate' ? '[Duplicate Invoice]' : rejectReason === 'other' ? (rejectFeedback.trim() || '[Other]') : rejectFeedback.trim(),
+      reason: rejectReason === 'duplicate' ? '[Duplicate Invoice]' : rejectReason === 'cancelled' ? '[Cancelled / No Longer Needed]' : rejectReason === 'other' ? (rejectFeedback.trim() || '[Other]') : rejectFeedback.trim(),
     };
     await transitionInvoice('reject', extraPayload);
   }
@@ -4235,17 +4235,18 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 🗑️
               </div>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#dc2626' }}>
-                Reject Invoice
+                Reject or Cancel Invoice
               </h3>
             </div>
 
             <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#374151' }}>
-              Select a reason for rejecting this invoice:
+              Select a reason:
             </p>
 
             <div style={{ marginBottom: '16px' }}>
               {[
                 { value: 'duplicate', label: 'Duplicate Invoice', desc: 'This will remove the invoice from the queue.' },
+                { value: 'cancelled', label: 'Cancelled / No Longer Needed', desc: 'Invoice is no longer needed or was entered by mistake.' },
                 { value: 'coding_error', label: 'Coding Error', desc: 'Return to coder with feedback for correction.' },
                 { value: 'other', label: 'Other', desc: 'Remove with optional reason.' },
               ].map(({ value, label, desc }) => (
