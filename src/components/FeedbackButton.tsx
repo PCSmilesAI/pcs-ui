@@ -50,6 +50,17 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
     setErrorMessage('');
 
     try {
+      let userEmail = '';
+      let userName = '';
+      try {
+        const stored = typeof window !== 'undefined' ? window.localStorage.getItem('loggedInUser') : null;
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          userEmail = parsed?.email || '';
+          userName = parsed?.name || '';
+        }
+      } catch (_) { /* ignore */ }
+
       const payload = {
         type: activeTab,
         message: currentMessage.trim(),
@@ -59,6 +70,8 @@ export default function FeedbackButton({ position = 'bottom-right' }: FeedbackBu
         timestamp: new Date().toISOString(),
         userAgent: navigator.userAgent,
         screenSize: `${window.innerWidth}x${window.innerHeight}`,
+        userEmail,
+        userName,
       };
 
       const response = await fetch('/api/feedback', {
