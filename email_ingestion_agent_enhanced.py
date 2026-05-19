@@ -472,7 +472,7 @@ def parse_invoice_with_gpt(filepath, vendor_hint=None):
         response = requests.post(
             f"{API_BASE_URL}/api/invoices/gpt-ingest",
             json=payload,
-            timeout=120  # Longer timeout for PCS AI parsing
+            timeout=600  # 10 min — large multi-page PDFs (30+ pages) need 5+ min for GPT vision
         )
         
         if response.status_code != 200:
