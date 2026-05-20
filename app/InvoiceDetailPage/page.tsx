@@ -277,6 +277,8 @@ function InvoiceDetailContent() {
             // QBO export tracking
             qbo_bill_id: foundInvoice.qbo_bill_id || null,
             qbo_bill_created_at: foundInvoice.qbo_bill_created_at || null,
+            // Assignment tracking
+            current_assigned_user_email: foundInvoice.current_assigned_user_email || null,
           };
           setInvoice(transformedInvoice);
         } else {

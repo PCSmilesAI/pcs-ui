@@ -62,6 +62,7 @@ export default function AllInvoicesPage({ onRowClick, searchQuery = '', filters 
       ? new URLSearchParams(window.location.search)
       : new URLSearchParams();
     params.set('limit', '5000');
+    params.set('scope', 'all');
     // Ensure hasAttachment filter is passed to API if present
     if (spFilters.hasAttachment) {
       params.set('hasAttachment', spFilters.hasAttachment);
