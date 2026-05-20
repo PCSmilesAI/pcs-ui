@@ -48,7 +48,12 @@ export default function IncomingQueuePage() {
       const data = await res.json();
       const list = Array.isArray(data.invoices) ? data.invoices : [];
       const incoming = list
-        .filter(inv => (inv.status || '').toLowerCase() === 'incoming' && !inv.deleted)
+        .filter(inv => {
+          if ((inv.status || '').toLowerCase() !== 'incoming' || inv.deleted) return false;
+          const ps = (inv.parsing_status || '').toLowerCase();
+          const vn = (inv.vendor_name || '').toLowerCase();
+          return ps === 'failed' || ps === 'partial' || vn === 'unknown' || vn === '';
+        })
         .map(inv => ({
           id: inv.id,
           invoice_number: inv.invoice_number || '—',
