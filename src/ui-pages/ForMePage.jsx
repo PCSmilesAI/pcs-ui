@@ -732,28 +732,29 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          {incomingCount > 0 && (
-            <button
-              onClick={() => router.push('/IncomingQueuePage?from=' + encodeURIComponent(pathname + (searchParams.toString() ? '?' + searchParams.toString() : '')))}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '9999px',
-                fontSize: '14px',
-                fontWeight: 500,
-                border: '1px solid #dc2626',
-                backgroundColor: '#ffffff',
-                color: '#dc2626',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.2s ease',
-                position: 'relative',
-              }}
-              title={`${incomingCount} invoice${incomingCount !== 1 ? 's' : ''} stuck in incoming queue`}
-            >
-              <i className="fas fa-exclamation-triangle"></i>
-              Needs Review
+          <button
+            onClick={() => router.push('/IncomingQueuePage?from=' + encodeURIComponent(pathname + (searchParams.toString() ? '?' + searchParams.toString() : '')))}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '9999px',
+              fontSize: '14px',
+              fontWeight: 500,
+              border: incomingCount > 0 ? '1px solid #dc2626' : '1px solid #2563eb',
+              backgroundColor: incomingCount > 0 ? '#ffffff' : '#2563eb',
+              color: incomingCount > 0 ? '#dc2626' : '#ffffff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+            }}
+            title={incomingCount > 0
+              ? `${incomingCount} invoice${incomingCount !== 1 ? 's' : ''} stuck in incoming queue`
+              : 'View incoming queue — no issues'}
+          >
+            <i className={incomingCount > 0 ? 'fas fa-exclamation-triangle' : 'fas fa-inbox'}></i>
+            Incoming Queue
+            {incomingCount > 0 && (
               <span style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 minWidth: '20px', height: '20px', padding: '0 6px',
@@ -763,8 +764,8 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
               }}>
                 {incomingCount}
               </span>
-            </button>
-          )}
+            )}
+          </button>
           <button
             onClick={() => setIsCreateModalOpen(true)}
             style={{
