@@ -20,3 +20,7 @@ Local Cursor session — 1 file(s) touched:
 ## [Mac] May 7, 2026 — 1:04 PM
 Local Cursor session — 1 file(s) touched:
 - .cursor/hooks/log-context.sh
+
+## [Mac] May 18, 2026 — 4:04 PM
+Local Cursor session — 1 file(s) touched:
+- src/ui-pages/InvoiceDetailPage.jsx
