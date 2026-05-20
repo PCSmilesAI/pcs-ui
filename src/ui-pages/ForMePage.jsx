@@ -54,6 +54,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [toast, setToast] = useState(null);
   const [userVendorAccess, setUserVendorAccess] = useState(null); // null = loading, '*' = admin, array = verifier
+  const [incomingCount, setIncomingCount] = useState(0);
   const [showBulkSendRouteChoice, setShowBulkSendRouteChoice] = useState(false);
   const [showBulkRejectModal, setShowBulkRejectModal] = useState(false);
   const [bulkRejectReason, setBulkRejectReason] = useState('duplicate');
@@ -259,6 +260,14 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
 
     loadInvoices();
   }, [fetchVisibleInvoices, setContextInvoices]);
+
+  // Fetch incoming queue count for the badge
+  useEffect(() => {
+    fetch('/api/invoices/incoming-count', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => setIncomingCount(d.count || 0))
+      .catch(() => {});
+  }, [invoices]); // re-check after invoice list refreshes
 
   // Refresh invoice list when page comes back into focus
   useEffect(() => {
@@ -723,6 +732,39 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
+          {incomingCount > 0 && (
+            <button
+              onClick={() => router.push('/IncomingQueuePage?from=' + encodeURIComponent(pathname + (searchParams.toString() ? '?' + searchParams.toString() : '')))}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '9999px',
+                fontSize: '14px',
+                fontWeight: 500,
+                border: '1px solid #dc2626',
+                backgroundColor: '#ffffff',
+                color: '#dc2626',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'all 0.2s ease',
+                position: 'relative',
+              }}
+              title={`${incomingCount} invoice${incomingCount !== 1 ? 's' : ''} stuck in incoming queue`}
+            >
+              <i className="fas fa-exclamation-triangle"></i>
+              Needs Review
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                minWidth: '20px', height: '20px', padding: '0 6px',
+                borderRadius: '9999px', fontSize: '11px', fontWeight: 700,
+                backgroundColor: '#dc2626', color: '#ffffff',
+                lineHeight: 1,
+              }}>
+                {incomingCount}
+              </span>
+            </button>
+          )}
           <button
             onClick={() => setIsCreateModalOpen(true)}
             style={{

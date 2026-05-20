@@ -143,6 +143,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
   // Reparse State (for invoices with parsing errors)
   const [reparsing, setReparsing] = useState(false);
   const [reparseResult, setReparseResult] = useState(null);
+  const [routingIncoming, setRoutingIncoming] = useState(false);
 
   // Split invoice state (for splitting multi-invoice PDFs)
   const [splitting, setSplitting] = useState(false);
@@ -1938,6 +1939,45 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     }
   }
 
+  // Route an incoming invoice into the normal workflow after fixing fields
+  async function handleRouteIncoming() {
+    const invoiceId = invoice?.id;
+    if (!invoiceId) {
+      showToast('Missing invoice identifier', 'error');
+      return;
+    }
+
+    const vendorName = invoice?.vendor_name || invoice?.vendor;
+    if (!vendorName || vendorName === 'Unknown') {
+      showToast('Please set a valid vendor name before routing', 'error');
+      return;
+    }
+
+    setRoutingIncoming(true);
+    try {
+      const response = await csrfClient.post(`/api/invoices/${encodeURIComponent(invoiceId)}/route-incoming`, {
+        vendor_name: vendorName,
+        amount_cents: invoice?.amount_cents,
+        invoice_number: invoice?.invoice_number,
+        office_location: invoice?.office_location || invoice?.office_id,
+      });
+
+      if (!response.ok) {
+        throw new Error(response.error || 'Failed to route invoice');
+      }
+
+      showToast('Invoice routed into workflow successfully!', 'success');
+      setTimeout(() => {
+        if (typeof onBack === 'function') onBack();
+      }, 1200);
+    } catch (err) {
+      console.error('Route incoming error:', err);
+      showToast(`Failed to route: ${err.message}`, 'error');
+    } finally {
+      setRoutingIncoming(false);
+    }
+  }
+
   // Handle splitting a multi-invoice PDF into individual invoices
   async function handleSplitInvoice() {
     const invoiceId = invoice?.id || invoice?.invoice_number;
@@ -2521,6 +2561,42 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       return []; // No buttons for removed invoices
     }
 
+    if (status === 'incoming') {
+      const buttons = [];
+      buttons.push({
+        label: reparsing ? 'Re-parsing...' : 'Re-parse with AI',
+        onClick: handleReparse,
+        disabled: reparsing || routingIncoming,
+        style: {
+          ...actionButtonStyle,
+          backgroundColor: reparsing ? '#9ca3af' : '#357ab2',
+          color: '#ffffff',
+          borderColor: reparsing ? '#9ca3af' : '#357ab2',
+          cursor: reparsing ? 'not-allowed' : 'pointer',
+        },
+      });
+      buttons.push({
+        label: routingIncoming ? 'Routing...' : 'Save & Route',
+        onClick: handleRouteIncoming,
+        disabled: routingIncoming || reparsing,
+        style: {
+          ...actionButtonStyle,
+          backgroundColor: routingIncoming ? '#9ca3af' : '#059669',
+          color: '#ffffff',
+          borderColor: routingIncoming ? '#9ca3af' : '#059669',
+          cursor: routingIncoming ? 'not-allowed' : 'pointer',
+        },
+      });
+      if (canReject) {
+        buttons.push({
+          label: 'Reject',
+          onClick: handleReject,
+          style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' },
+        });
+      }
+      return buttons;
+    }
+
     if (status === 'completed' || status === 'paid') {
       // Only admins/AP can remove completed invoices
       if (canUpdate) {
@@ -2747,20 +2823,23 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
 
       {/* Action buttons */}
       <div style={buttonRowStyle}>
-        {getActionButtons().map((button) => (
-          <button
-            key={button.label}
-            onClick={button.onClick}
-            disabled={processing || improvingParser}
-            style={{
-              ...button.style,
-              opacity: (processing || improvingParser) ? 0.6 : 1,
-              cursor: (processing || improvingParser) ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {processing ? 'Processing...' : (improvingParser ? 'Improving Parser...' : button.label)}
-          </button>
-        ))}
+        {getActionButtons().map((button) => {
+          const isDisabled = processing || improvingParser || button.disabled;
+          return (
+            <button
+              key={button.label}
+              onClick={button.onClick}
+              disabled={isDisabled}
+              style={{
+                ...button.style,
+                opacity: isDisabled ? 0.6 : 1,
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {processing ? 'Processing...' : (improvingParser ? 'Improving Parser...' : button.label)}
+            </button>
+          );
+        })}
       </div>
 
       {/* Coder feedback banner - invoice returned for coding corrections */}
