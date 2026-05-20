@@ -60,7 +60,8 @@ export async function GET(req: NextRequest) {
   const status = parseSearchParam(req, 'status');
   const vendor = parseSearchParam(req, 'vendor');
   const hasAttachment = parseSearchParam(req, 'hasAttachment');
-  console.log('[API][INVOICES]', 'visible_request', { userEmail: user.email, limit, offset, search, status, vendor, hasAttachment });
+  const scope = parseSearchParam(req, 'scope');
+  console.log('[API][INVOICES]', 'visible_request', { userEmail: user.email, limit, offset, search, status, vendor, hasAttachment, scope });
 
   try {
     const db = getDatabase();
@@ -87,13 +88,12 @@ export async function GET(req: NextRequest) {
 
     // Apply vendor-based filtering based on user's vendor_access configuration
     if (vendorAccess === 'assigned_only') {
-      // User only sees invoices explicitly assigned to them
-      // EXCEPT: For to_be_paid and completed/paid statuses, also show TC Dental invoices
-      // (shared visibility between McKay and Laura for payment workflow)
-      // TC Dental variations: "TC Dental", "TC Dental Lab", "TC Dental Laboratory, Inc.", etc.
       const tcDentalPattern = `(LOWER(vendor_name) LIKE 'tc dental%' OR LOWER(vendor_name) LIKE 'tc_dental%' OR LOWER(vendor_name) LIKE 'tcdental%')`;
       
-      if (hasReassignmentColumn) {
+      if (scope === 'all') {
+        // scope=all: show all TC Dental invoices regardless of assignment
+        query += ` AND ${tcDentalPattern}`;
+      } else if (hasReassignmentColumn) {
         query += ` AND (
           LOWER(current_assigned_user_email) = ?
           OR (
@@ -103,7 +103,6 @@ export async function GET(req: NextRequest) {
         )`;
         params.push(normalizedUserEmail);
       } else {
-        // No reassignment column - only show to_be_paid/completed TC Dental invoices
         query += ` AND (
           status IN ('to_be_paid', 'paid', 'completed') 
           AND ${tcDentalPattern}
@@ -140,8 +139,12 @@ export async function GET(req: NextRequest) {
       
       const vendorFilter = vendorConditions.join(' OR ');
       
-      // Must match vendor AND (assigned to this user OR in shared payment statuses)
-      if (hasReassignmentColumn) {
+      if (scope === 'all') {
+        // scope=all: show ALL invoices for the user's vendors (no assignment filter)
+        // Used by AllInvoicesPage so verifiers can see invoices they sent to approvers
+        query += ` AND (${vendorFilter})`;
+      } else if (hasReassignmentColumn) {
+        // Default: must match vendor AND (assigned to this user OR in shared payment statuses)
         query += ` AND (${vendorFilter}) AND (
           LOWER(current_assigned_user_email) = ?
           OR current_assigned_user_email IS NULL

@@ -2557,6 +2557,14 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
     console.log('  - User Role:', permissions.role);
     console.log('  - Can Pay:', canPay, 'Can Update:', canUpdate);
 
+    // Read-only: if the invoice is assigned to someone else and user isn't admin/AP,
+    // show no action buttons (e.g. Laura viewing an invoice on McKay's queue)
+    const assignedTo = (invoice?.current_assigned_user_email || '').toLowerCase();
+    const currentEmail = getUserEmail().toLowerCase();
+    if (assignedTo && currentEmail && assignedTo !== currentEmail && !isAdminOrAP) {
+      return [];
+    }
+
     if (status === 'removed') {
       return []; // No buttons for removed invoices
     }
@@ -2841,6 +2849,28 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
           );
         })}
       </div>
+
+      {/* Read-only banner when viewing someone else's assigned invoice */}
+      {(() => {
+        const assignedTo = (invoice?.current_assigned_user_email || '').toLowerCase();
+        const currentEmail = getUserEmail().toLowerCase();
+        if (assignedTo && currentEmail && assignedTo !== currentEmail && !isAdminOrAP) {
+          const assignedName = invoice?.current_assigned_user_email?.split('@')[0] || 'another user';
+          return (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '10px 16px', borderRadius: '12px', marginBottom: '16px',
+              border: '1px solid #d1d5db', backgroundColor: '#f9fafb',
+            }}>
+              <i className="fas fa-eye" style={{ fontSize: '16px', color: '#6b7280' }}></i>
+              <span style={{ fontSize: '14px', fontWeight: 500, color: '#4b5563' }}>
+                View only — this invoice is assigned to {assignedName}
+              </span>
+            </div>
+          );
+        }
+        return null;
+      })()}
 
       {/* Coder feedback banner - invoice returned for coding corrections */}
       {((invoice?.status || '').toLowerCase() === 'incoming') && (invoice?.notes || '').includes('[Coding correction needed]') && (
