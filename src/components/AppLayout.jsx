@@ -37,7 +37,8 @@ export default function AppLayout({ children }) {
       'ReportsPage': 'reports',
       'RolesPage': 'roles',
       'roles': 'roles',
-      'ConnectionsPage': 'connections'
+      'ConnectionsPage': 'connections',
+      'CreditCardReceiptsPage': 'creditCardReceipts',
     };
 
     // If on InvoiceDetailPage, check the 'from' query parameter to determine which tab to highlight
@@ -67,7 +68,8 @@ export default function AppLayout({ children }) {
       'companyInfo': 'CompanyInfoPage',
       'reports': 'ReportsPage',
       'roles': 'roles',
-      'connections': 'ConnectionsPage'
+      'connections': 'ConnectionsPage',
+      'creditCardReceipts': 'CreditCardReceiptsPage',
     };
     
     const urlPath = urlMapping[pageKey] || 'ForMePage';
