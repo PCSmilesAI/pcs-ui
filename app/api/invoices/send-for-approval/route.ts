@@ -62,7 +62,8 @@ export async function POST(req: NextRequest) {
     }
 
     const invoiceStatus = (invoice.status || '').toLowerCase();
-    if (invoiceStatus !== 'incoming' && invoiceStatus !== 'needs_review') {
+    const sendableStatuses = ['incoming', 'needs_review', 'categorized'];
+    if (!sendableStatuses.includes(invoiceStatus)) {
       console.warn('[API][SEND-FOR-APPROVAL]', 'duplicate_send_blocked', {
         invoiceId, status: invoice.status, userEmail: user.email
       });

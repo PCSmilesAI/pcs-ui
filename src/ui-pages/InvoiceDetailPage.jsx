@@ -1846,14 +1846,14 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
         userComment: changeDescription.trim() || updateComment.trim() || undefined,
         destination: destination,
       }).then(res => {
-        if (res.status === 409 || res.status === 400 || res.status === 403) {
+        if (!res.ok) {
           sendFailed = true;
-          return res.json().then(d => { sendErrorMsg = d.error || 'This invoice was already sent.'; });
+          sendErrorMsg = res.error || 'This invoice was already sent.';
         }
       }).catch(err => {
         console.error('Background send-for-approval error:', err);
         sendFailed = true;
-        sendErrorMsg = err?.response?.data?.error || err.message || 'Network error';
+        sendErrorMsg = err?.message || 'Network error';
       });
 
       // Step 1: "Updating PCS AI" - 3 second animation
