@@ -34,5 +34,26 @@ processed_invoices/
 env
 pcs_ui_data/pcs.db*
 
-# Backup folders
+# Backup folders and copies
 pcs-ui dec3 copy/
+backup-ui-*/
+*copy/
+
+# Debug/test artifacts (should never be committed)
+ocr_debug_overlay.png
+ocr_output.csv
+parsed_invoice*.json
+epic_invoice_*.png
+epic_invoice_*.json
+labeled_epic_invoice_*.json
+reprocess_stats.json
+vendor_audit_report.json
+invoice_queue_backup.json
+deps-graph.txt
+python-deps.txt
+test-*.html
+force_refresh.html
+~$*
+smiles_office_info.xls
+chart_of_accounts.rtf
+classes.rtf
