@@ -57,3 +57,27 @@ force_refresh.html
 smiles_office_info.xls
 chart_of_accounts.rtf
 classes.rtf
+
+# BuildLog runtime data
+# buildlog.json is gitignored: it grows continuously and contains sensitive
+# fields (user_email, transcript_path). It is not source code.
+build_audit/buildlog.json
+build_audit/buildlog.json.bak
+build_audit/buildlog_*.tmp
+
+# Reports are NOT gitignored. They are generated snapshots with no sensitive
+# data. Commit them at milestones for client proof-of-work and course material.
+# Regenerate anytime with: python3 scripts/render_report.py
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
