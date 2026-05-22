@@ -155,11 +155,11 @@ export function formatStatusForDisplay(status: string | undefined | null): strin
   if (!status) return 'Unknown';
   const normalized = String(status).toLowerCase().trim();
   const labels: Record<string, string> = {
-    'incoming': 'Incoming',
-    'categorized': 'Categorized',
-    'coded': 'Coded (Multi-Location)',
+    'incoming': 'Ready for Review',
+    'categorized': 'Ready for Review',
+    'coded': 'Ready for Review',
     'awaiting_office_approval': 'Awaiting Office Approval',
-    'awaiting_admin_approval': 'Awaiting Admin Approval',
+    'awaiting_admin_approval': 'Sent for Approval',
     'to_be_paid': 'To Be Paid',
     'paid': 'Paid',
     'rejected': 'Rejected',
