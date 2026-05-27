@@ -178,10 +178,14 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       .filter((invoice) => {
         if (invoice.deleted || invoice.workflow_deleted_at) return false;
         const status = (invoice.status || '').toLowerCase();
-        // Show invoices waiting for approval (incoming, categorized, pending, awaiting_office_approval, awaiting_admin_approval)
-        // Hide invoices that have moved past For Me: to_be_paid, completed, paid, rejected, removed
         if (status === 'to_be_paid' || status === 'completed' || status === 'paid' || status === 'rejected' || status === 'removed') return false;
         if (invoice.approved === true) return false;
+        // Hide incoming invoices with parsing problems — those belong on the Incoming Queue page
+        if (status === 'incoming') {
+          const ps = (invoice.parsing_status || '').toLowerCase();
+          const vn = (invoice.vendor_name || '').toLowerCase();
+          if (ps === 'failed' || ps === 'partial' || !vn || vn === 'unknown') return false;
+        }
         return true;
       })
       .map(transformInvoice);
