@@ -645,6 +645,20 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
     }
   });
 
+  const selectionSummary = useMemo(() => {
+    if (selectedIds.size === 0) return null;
+    let total = 0;
+    let count = 0;
+    filteredRows.forEach((row, i) => {
+      if (selectedIds.has(getRowId(row, i))) {
+        count++;
+        const num = parseFloat((row.amount || '0').replace(/[^0-9.\-]/g, ''));
+        total += isNaN(num) ? 0 : num;
+      }
+    });
+    return { count, total };
+  }, [selectedIds, filteredRows]);
+
   console.log('🎨 ToBePaidPage: Rendering with', filteredRows.length, 'invoices, loading:', loading, 'error:', error);
 
   if (loading) {
@@ -754,20 +768,31 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
           </button>
         </div>
       </div>
-      {selectedIds.size > 0 && (
-        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-          <button
-            onClick={() => bulkUpdate('completed', true)}
-            style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
-          >
-            Pay
-          </button>
-          <button
-            onClick={() => bulkUpdate('send_back', false)}
-            style={{ padding: '8px 16px', backgroundColor: '#f59e0b', color: '#fff', borderRadius: 9999, border: '1px solid #f59e0b', fontWeight: 600 }}
-          >
-            Send Back
-          </button>
+      {selectionSummary && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 16px', marginBottom: 12, borderRadius: 12,
+          backgroundColor: '#f0f4ff', border: '1px solid #c7d2fe',
+        }}>
+          <span style={{ fontSize: '14px', color: '#1e40af', fontWeight: 600 }}>
+            {selectionSummary.count} bill{selectionSummary.count !== 1 ? 's' : ''} selected
+            <span style={{ margin: '0 8px', color: '#94a3b8' }}>—</span>
+            ${selectionSummary.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} total
+          </span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => bulkUpdate('completed', true)}
+              style={{ padding: '6px 14px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600, fontSize: '13px' }}
+            >
+              Pay
+            </button>
+            <button
+              onClick={() => bulkUpdate('send_back', false)}
+              style={{ padding: '6px 14px', backgroundColor: '#f59e0b', color: '#fff', borderRadius: 9999, border: '1px solid #f59e0b', fontWeight: 600, fontSize: '13px' }}
+            >
+              Send Back
+            </button>
+          </div>
         </div>
       )}
       <InvoiceTable
