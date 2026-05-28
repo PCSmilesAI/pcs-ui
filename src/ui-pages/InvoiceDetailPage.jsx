@@ -54,7 +54,7 @@ async function checkIfAdmin(email) {
  * that the layout and colours appear even if no CSS preprocessor
  * is available.
  */
-export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext, onInvoiceRejected, onAdvanceToNext }) {
+export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext, onInvoiceRejected, onAdvanceToNext, fromIncomingQueue = false }) {
   // Get user permissions from context
   const { permissions } = useUserRole();
   
@@ -2569,49 +2569,41 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       return []; // No buttons for removed invoices
     }
 
-    if (status === 'incoming') {
-      const vendorName = (invoice?.vendor_name || invoice?.vendor || '').toLowerCase();
-      const parsingStatus = (invoice?.parsing_status || '').toLowerCase();
-      const hasProblem = parsingStatus === 'failed' || parsingStatus === 'partial'
-        || !vendorName || vendorName === 'unknown';
-
-      if (hasProblem) {
-        // Parsing issues — show queue-specific buttons (Re-parse, Save & Route)
-        const buttons = [];
+    if (status === 'incoming' && fromIncomingQueue) {
+      // Queue-specific buttons only when arriving from the Incoming Queue page
+      const buttons = [];
+      buttons.push({
+        label: reparsing ? 'Re-parsing...' : 'Re-parse with AI',
+        onClick: handleReparse,
+        disabled: reparsing || routingIncoming,
+        style: {
+          ...actionButtonStyle,
+          backgroundColor: reparsing ? '#9ca3af' : '#357ab2',
+          color: '#ffffff',
+          borderColor: reparsing ? '#9ca3af' : '#357ab2',
+          cursor: reparsing ? 'not-allowed' : 'pointer',
+        },
+      });
+      buttons.push({
+        label: routingIncoming ? 'Routing...' : 'Save & Route',
+        onClick: handleRouteIncoming,
+        disabled: routingIncoming || reparsing,
+        style: {
+          ...actionButtonStyle,
+          backgroundColor: routingIncoming ? '#9ca3af' : '#059669',
+          color: '#ffffff',
+          borderColor: routingIncoming ? '#9ca3af' : '#059669',
+          cursor: routingIncoming ? 'not-allowed' : 'pointer',
+        },
+      });
+      if (canReject) {
         buttons.push({
-          label: reparsing ? 'Re-parsing...' : 'Re-parse with AI',
-          onClick: handleReparse,
-          disabled: reparsing || routingIncoming,
-          style: {
-            ...actionButtonStyle,
-            backgroundColor: reparsing ? '#9ca3af' : '#357ab2',
-            color: '#ffffff',
-            borderColor: reparsing ? '#9ca3af' : '#357ab2',
-            cursor: reparsing ? 'not-allowed' : 'pointer',
-          },
+          label: 'Reject',
+          onClick: handleReject,
+          style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' },
         });
-        buttons.push({
-          label: routingIncoming ? 'Routing...' : 'Save & Route',
-          onClick: handleRouteIncoming,
-          disabled: routingIncoming || reparsing,
-          style: {
-            ...actionButtonStyle,
-            backgroundColor: routingIncoming ? '#9ca3af' : '#059669',
-            color: '#ffffff',
-            borderColor: routingIncoming ? '#9ca3af' : '#059669',
-            cursor: routingIncoming ? 'not-allowed' : 'pointer',
-          },
-        });
-        if (canReject) {
-          buttons.push({
-            label: 'Reject',
-            onClick: handleReject,
-            style: { ...actionButtonStyle, backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' },
-          });
-        }
-        return buttons;
       }
-      // Successfully parsed incoming invoice — fall through to normal verifier/admin buttons below
+      return buttons;
     }
 
     if (status === 'completed' || status === 'paid') {
