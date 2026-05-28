@@ -351,6 +351,20 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
     });
   }, [invoices, effectiveQuery, effectiveFilters]);
 
+  const selectionSummary = useMemo(() => {
+    if (selectedIds.size === 0) return null;
+    let total = 0;
+    let count = 0;
+    filteredRows.forEach((row, i) => {
+      if (selectedIds.has(getRowId(row, i))) {
+        count++;
+        const num = parseFloat((row.amount || '0').replace(/[^0-9.\-]/g, ''));
+        total += isNaN(num) ? 0 : num;
+      }
+    });
+    return { count, total };
+  }, [selectedIds, filteredRows]);
+
   // Track bulk operation progress
   const [bulkProgress, setBulkProgress] = useState({ active: false, current: 0, total: 0, action: '' });
 
@@ -890,29 +904,40 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
         </div>
       )}
 
-      {selectedIds.size > 0 && !bulkProgress.active && (
-        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-          {isVerifier ? (
+      {selectionSummary && !bulkProgress.active && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 16px', marginBottom: 12, borderRadius: 12,
+          backgroundColor: '#f0f4ff', border: '1px solid #c7d2fe',
+        }}>
+          <span style={{ fontSize: '14px', color: '#1e40af', fontWeight: 600 }}>
+            {selectionSummary.count} invoice{selectionSummary.count !== 1 ? 's' : ''} selected
+            <span style={{ margin: '0 8px', color: '#94a3b8' }}>—</span>
+            ${selectionSummary.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} total
+          </span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {isVerifier ? (
+              <button
+                onClick={() => setShowBulkSendRouteChoice(true)}
+                style={{ padding: '6px 14px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600, fontSize: '13px' }}
+              >
+                Send ({selectionSummary.count})
+              </button>
+            ) : (
+              <button
+                onClick={() => bulkUpdate('approve')}
+                style={{ padding: '6px 14px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600, fontSize: '13px' }}
+              >
+                Approve ({selectionSummary.count})
+              </button>
+            )}
             <button
-              onClick={() => setShowBulkSendRouteChoice(true)}
-              style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
+              onClick={handleBulkRejectClick}
+              style={{ padding: '6px 14px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600, fontSize: '13px' }}
             >
-              Send ({selectedIds.size})
+              Reject
             </button>
-          ) : (
-            <button
-              onClick={() => bulkUpdate('approve')}
-              style={{ padding: '8px 16px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600 }}
-            >
-              Approve ({selectedIds.size})
-            </button>
-          )}
-          <button
-            onClick={handleBulkRejectClick}
-            style={{ padding: '8px 16px', backgroundColor: '#dc2626', color: '#fff', borderRadius: 9999, border: '1px solid #dc2626', fontWeight: 600 }}
-          >
-            Reject
-          </button>
+          </div>
         </div>
       )}
 
