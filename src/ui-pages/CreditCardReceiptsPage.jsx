@@ -1,8 +1,11 @@
 /**
  * CreditCardReceiptsPage.jsx
  *
- * Credit Card Receipts module UI. Reached via the "Credit Card Receipts" button
- * in the top nav; sits inside the shared PCS AI layout (NavBar, auth, providers).
+ * Credit Card Receipts module UI — replicates the receipt-agent Flask app's
+ * "Sage" design (navy sidebar + topbar + Pacific-blue accents). Renders its own
+ * full-height shell; AppLayout suppresses the shared pcs-ui top nav on this route.
+ *
+ * Styling: ./CreditCardReceiptsPage.module.css (scoped — no global bleed).
  *
  * Backed by:
  *   GET    /api/receipts            → { receipts, stats }   (filters: status, mine, q)
@@ -11,26 +14,11 @@
  *   PATCH  /api/receipts/:id        → update fields, or { action:'match', transactions }
  *   DELETE /api/receipts/:id        → delete
  *   GET    /api/receipts/:id/file   → stream the stored receipt image/PDF
- *
- * Styling matches the rest of the app (inline styles, no Tailwind):
- *   primary #357ab2 · body 14px · title 24px · pills 9999px · cards 8px
  */
 
 'use client';
 import React, { useCallback, useEffect, useState } from 'react';
-
-// ─── style tokens ──────────────────────────────────────────────────────────
-const BLUE = '#357ab2';
-const MUTED = '#6b7280';
-const FAINT = '#9ca3af';
-const BORDER = '#e5e7eb';
-const BORDER_BLUE = '#c8dff0';
-
-const STATUS_COLORS = {
-  matched: { bg: '#e7f6ec', fg: '#1b7f3b' },
-  unmatched: { bg: '#fef3e2', fg: '#b9770e' },
-  disputed: { bg: '#fdecec', fg: '#c0392b' },
-};
+import styles from './CreditCardReceiptsPage.module.css';
 
 // ─── helpers ─────────────────────────────────────────────────────────────
 function money(n) {
@@ -59,11 +47,29 @@ function apiUrl(pathname, extra = {}) {
   return `${pathname}${qs ? `?${qs}` : ''}`;
 }
 
+function currentEmail() {
+  if (typeof window === 'undefined') return '';
+  return new URLSearchParams(window.location.search).get('email') || '';
+}
+
 const STATUS_TABS = [
   { key: 'all', label: 'All' },
   { key: 'unmatched', label: 'Unmatched' },
   { key: 'matched', label: 'Matched' },
   { key: 'disputed', label: 'Disputed' },
+];
+
+// Sidebar nav mirrors the Flask app. "Business Expenses" is the live receipts
+// view; "Dashboard" shows the tiles. The rest are shown for parity and render a
+// placeholder (those areas aren't part of the receipts module in pcs-ui yet).
+const NAV = [
+  { key: 'dashboard', icon: '📊', label: 'Dashboard' },
+  { key: 'expenses', icon: '🧾', label: 'Business Expenses' },
+  { key: 'reports', icon: '📑', label: 'Expense Reports', placeholder: true },
+  { key: 'transactions', icon: '💳', label: 'Transactions', placeholder: true },
+  { key: 'cards', icon: '🗂️', label: 'Manage Cards', placeholder: true },
+  { key: 'integrations', icon: '🔌', label: 'Integrations', placeholder: true },
+  { key: 'settings', icon: '⚙️', label: 'Settings', placeholder: true },
 ];
 
 const EMPTY_FORM = {
@@ -77,6 +83,7 @@ const EMPTY_FORM = {
 };
 
 export default function CreditCardReceiptsPage() {
+  const [view, setView] = useState('expenses');
   const [receipts, setReceipts] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -91,7 +98,10 @@ export default function CreditCardReceiptsPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  const [selected, setSelected] = useState(null); // receipt being viewed in drawer
+  const [selected, setSelected] = useState(null);
+
+  const email = currentEmail();
+  const avatarInitial = (email ? email[0] : 'U').toUpperCase();
 
   const flash = useCallback((message, variant = 'info') => {
     setToast({ message, variant });
@@ -165,7 +175,7 @@ export default function CreditCardReceiptsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
       if (data.parseError) {
-        flash(`Uploaded. AI parse unavailable (${data.parseError}) — fill fields manually.`, 'info');
+        flash(`Uploaded. AI parse unavailable — fill fields manually.`, 'info');
       } else {
         flash('Uploaded and parsed', 'success');
       }
@@ -207,41 +217,84 @@ export default function CreditCardReceiptsPage() {
     }
   };
 
-  // ─── render ───────────────────────────────────────────────────────────
+  const activeNav = NAV.find((n) => n.key === view) || NAV[1];
+
   return (
-    <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
-      <PageHeader
-        onAdd={() => {
-          setForm(EMPTY_FORM);
-          setShowManual(true);
-        }}
-        onUpload={handleUpload}
-        uploading={uploading}
-      />
-
-      <SummaryTiles stats={stats} />
-
-      <Toolbar
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        mineOnly={mineOnly}
-        setMineOnly={setMineOnly}
-        search={search}
-        setSearch={setSearch}
-      />
-
-      {error && (
-        <div style={{ ...cardStyle, borderColor: '#f3c6c6', color: '#c0392b', marginTop: 12 }}>
-          {error}
+    <div className={styles.shell}>
+      {/* ─── Sidebar ─────────────────────────────────────────── */}
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarHeader}>
+          <div className={styles.logo}>PC</div>
+          <div className={styles.brand}>
+            <div className={styles.brandName}>PC SMILES</div>
+            <div className={styles.brandProduct}>Receipts</div>
+          </div>
         </div>
-      )}
+        <nav className={styles.nav}>
+          {NAV.map((item) => (
+            <button
+              key={item.key}
+              className={`${styles.navItem} ${view === item.key ? styles.navItemActive : ''}`}
+              onClick={() => setView(item.key)}
+            >
+              <span className={styles.navIcon}>{item.icon}</span>
+              <span className={styles.navLabel}>{item.label}</span>
+              {item.key === 'expenses' && stats && stats.unmatched > 0 ? (
+                <span className={styles.navBadge}>{stats.unmatched}</span>
+              ) : null}
+            </button>
+          ))}
+        </nav>
+        <div className={styles.sidebarFooter}>
+          Pacific Crest Smiles Dental, LLC
+          <br />
+          <span style={{ opacity: 0.6 }}>Receipts module</span>
+        </div>
+      </aside>
 
-      <ReceiptsTable
-        receipts={receipts}
-        loading={loading}
-        onRowClick={(r) => setSelected(r)}
-        onDelete={handleDelete}
-      />
+      {/* ─── Main ────────────────────────────────────────────── */}
+      <div className={styles.main}>
+        <header className={styles.header}>
+          <div className={styles.headerTitle}>{activeNav.label}</div>
+          <div className={styles.headerRight}>
+            <div className={styles.userMenu}>
+              <div className={styles.userAvatar}>{avatarInitial}</div>
+              <span className={styles.userName}>{email || 'Not signed in'}</span>
+            </div>
+          </div>
+        </header>
+
+        <main className={styles.content}>
+          {view === 'expenses' && (
+            <ExpensesView
+              stats={stats}
+              receipts={receipts}
+              loading={loading}
+              error={error}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              mineOnly={mineOnly}
+              setMineOnly={setMineOnly}
+              search={search}
+              setSearch={setSearch}
+              uploading={uploading}
+              onUpload={handleUpload}
+              onAdd={() => {
+                setForm(EMPTY_FORM);
+                setShowManual(true);
+              }}
+              onRowClick={(r) => setSelected(r)}
+              onDelete={handleDelete}
+            />
+          )}
+
+          {view === 'dashboard' && <DashboardView stats={stats} />}
+
+          {activeNav.placeholder && (
+            <Placeholder label={activeNav.label} />
+          )}
+        </main>
+      </div>
 
       {showManual && (
         <ManualEntryModal
@@ -267,48 +320,185 @@ export default function CreditCardReceiptsPage() {
         />
       )}
 
-      {toast && <Toast toast={toast} />}
+      {toast && (
+        <div
+          className={`${styles.toast} ${
+            toast.variant === 'success' ? styles.toastSuccess : toast.variant === 'error' ? styles.toastError : ''
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }
 
 // ============================================================================
-// Sub-components
+// Views
 // ============================================================================
 
-function PageHeader({ onAdd, onUpload, uploading }) {
+function ExpensesView({
+  stats, receipts, loading, error,
+  statusFilter, setStatusFilter, mineOnly, setMineOnly, search, setSearch,
+  uploading, onUpload, onAdd, onRowClick, onDelete,
+}) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-      <div>
-        <h1 style={{ fontSize: '24px', fontWeight: 600, color: BLUE, marginBottom: '8px' }}>
-          Credit Card Receipts
-        </h1>
-        <p style={{ fontSize: '14px', color: MUTED, marginBottom: '24px' }}>
-          Submit, track, and reconcile credit card receipts against Amex transactions.
-        </p>
+    <>
+      <div className={styles.pageHeader}>
+        <div>
+          <div className={styles.pageTitle}>Business Expenses</div>
+          <div className={styles.pageSubtitle}>
+            Submit, track, and reconcile credit card receipts against Amex transactions.
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <label className={`${styles.btn} ${styles.btnSecondary} ${styles.uploadLabel}`} style={{ cursor: uploading ? 'wait' : 'pointer' }}>
+            <span>⬆</span>
+            {uploading ? 'Uploading…' : 'Upload receipt'}
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              style={{ display: 'none' }}
+              disabled={uploading}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = '';
+                onUpload(f);
+              }}
+            />
+          </label>
+          <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onAdd}>
+            <span>＋</span> Add receipt
+          </button>
+        </div>
       </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <label style={{ ...btnGhost, cursor: uploading ? 'wait' : 'pointer' }}>
-          <span className="fas fa-upload" style={{ marginRight: 6 }} />
-          {uploading ? 'Uploading…' : 'Upload receipt'}
-          <input
-            type="file"
-            accept="image/*,application/pdf"
-            style={{ display: 'none' }}
-            disabled={uploading}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              e.target.value = '';
-              onUpload(f);
-            }}
-          />
-        </label>
-        <button style={btnPrimary} onClick={onAdd}>
-          <span className="fas fa-plus" style={{ marginRight: 6 }} />
-          Add receipt
-        </button>
+
+      <SummaryTiles stats={stats} />
+
+      <div className={styles.tableWrapper}>
+        <div className={styles.tableToolbar}>
+          <div className={styles.tableFilters}>
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setStatusFilter(tab.key)}
+                className={`${styles.btn} ${statusFilter === tab.key ? styles.btnPrimary : styles.btnGhost}`}
+                style={{ padding: '5px 12px', fontSize: 12 }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div className={styles.tableFilters}>
+            <input
+              className={styles.formInput}
+              style={{ width: 220 }}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search vendor, GL, notes…"
+            />
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--color-text-muted)', cursor: 'pointer' }}>
+              <input type="checkbox" checked={mineOnly} onChange={(e) => setMineOnly(e.target.checked)} />
+              Mine only
+            </label>
+          </div>
+        </div>
+
+        {error ? (
+          <div className={styles.emptyState} style={{ color: 'var(--color-danger)' }}>{error}</div>
+        ) : loading ? (
+          <div className={styles.emptyState}>Loading receipts…</div>
+        ) : receipts.length === 0 ? (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>🧾</div>
+            <div className={styles.emptyTitle}>No receipts yet</div>
+            <div className={styles.emptyMessage}>
+              Upload a receipt image/PDF or add one manually to get started.
+            </div>
+          </div>
+        ) : (
+          <table className={styles.dataTable}>
+            <thead>
+              <tr>
+                <th>Receipt</th>
+                <th>Date</th>
+                <th>Vendor</th>
+                <th className={styles.right}>Amount</th>
+                <th>GL account</th>
+                <th>Location</th>
+                <th>Card</th>
+                <th>Status</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {receipts.map((r) => (
+                <tr key={r.id} onClick={() => onRowClick(r)}>
+                  <td>
+                    {r.image_path ? <span title="Has file">🧾</span> : <span style={{ opacity: 0.3 }} title="No file">○</span>}
+                  </td>
+                  <td>{fmtDate(r.date)}</td>
+                  <td style={{ fontWeight: 500 }}>
+                    {r.vendor || <span style={{ color: 'var(--color-text-subtle)' }}>Unknown</span>}
+                  </td>
+                  <td className={`${styles.right} ${styles.money}`}>{money(r.amount)}</td>
+                  <td style={{ color: 'var(--color-text-muted)' }}>{r.gl_account || '—'}</td>
+                  <td style={{ color: 'var(--color-text-muted)' }}>{r.location || '—'}</td>
+                  <td style={{ color: 'var(--color-text-muted)' }}>{r.card_last4 ? `•••• ${r.card_last4}` : '—'}</td>
+                  <td><StatusBadge status={r.match_status} /></td>
+                  <td className={styles.right}>
+                    <button
+                      title="Delete"
+                      className={styles.iconBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(r.id);
+                      }}
+                    >
+                      🗑
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
-    </div>
+    </>
+  );
+}
+
+function DashboardView({ stats }) {
+  return (
+    <>
+      <div className={styles.pageHeader}>
+        <div>
+          <div className={styles.pageTitle}>Dashboard</div>
+          <div className={styles.pageSubtitle}>Receipt reconciliation overview.</div>
+        </div>
+      </div>
+      <SummaryTiles stats={stats} />
+    </>
+  );
+}
+
+function Placeholder({ label }) {
+  return (
+    <>
+      <div className={styles.pageHeader}>
+        <div className={styles.pageTitle}>{label}</div>
+      </div>
+      <div className={styles.tableWrapper}>
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>🚧</div>
+          <div className={styles.emptyTitle}>{label} isn’t part of the receipts module yet</div>
+          <div className={styles.emptyMessage}>
+            This view exists in the standalone receipt-agent app. Plaid/Amex feed, expense
+            reports, and QBO export are planned for a later phase.
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -321,200 +511,68 @@ function SummaryTiles({ stats }) {
     { label: 'Disputed', value: stats ? stats.disputed : '—' },
   ];
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12, marginBottom: 20 }}>
+    <div className={styles.summaryTiles}>
       {tiles.map((t) => (
-        <div key={t.label} style={cardStyle}>
-          <div style={{ fontSize: 12, color: MUTED, marginBottom: 6 }}>{t.label}</div>
-          <div style={{ fontSize: 22, fontWeight: 600, color: '#1f2937' }}>{t.value}</div>
-          {t.suffix ? <div style={{ fontSize: 12, color: FAINT, marginTop: 4 }}>{t.suffix}</div> : null}
+        <div key={t.label} className={styles.summaryTile}>
+          <div className={styles.tileLabel}>{t.label}</div>
+          <div className={styles.tileValue}>{t.value}</div>
+          {t.suffix ? <div className={styles.tileSuffix}>{t.suffix}</div> : null}
         </div>
       ))}
     </div>
   );
 }
 
-function Toolbar({ statusFilter, setStatusFilter, mineOnly, setMineOnly, search, setSearch }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
-      <div style={{ display: 'flex', gap: 6 }}>
-        {STATUS_TABS.map((tab) => {
-          const active = statusFilter === tab.key;
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setStatusFilter(tab.key)}
-              style={active ? pillActive : pillInactive}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search vendor, GL, notes…"
-        style={{
-          flex: 1,
-          minWidth: 200,
-          padding: '8px 12px',
-          fontSize: 14,
-          border: `1px solid ${BORDER}`,
-          borderRadius: 8,
-        }}
-      />
-      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: MUTED, cursor: 'pointer' }}>
-        <input type="checkbox" checked={mineOnly} onChange={(e) => setMineOnly(e.target.checked)} />
-        Mine only
-      </label>
-    </div>
-  );
-}
-
-function ReceiptsTable({ receipts, loading, onRowClick, onDelete }) {
-  if (loading) {
-    return <div style={{ ...cardStyle, textAlign: 'center', color: MUTED }}>Loading receipts…</div>;
-  }
-  if (receipts.length === 0) {
-    return (
-      <div
-        style={{
-          border: `2px dashed ${BORDER_BLUE}`,
-          borderRadius: 12,
-          padding: 48,
-          textAlign: 'center',
-          color: BLUE,
-          fontSize: 14,
-        }}
-      >
-        <span className="fas fa-receipt" style={{ fontSize: 32, marginBottom: 12, display: 'block', opacity: 0.5 }} />
-        <strong>No receipts yet</strong>
-        <p style={{ marginTop: 8, color: FAINT }}>
-          Upload a receipt image/PDF or add one manually to get started.
-        </p>
-      </div>
-    );
-  }
-  const th = { textAlign: 'left', padding: '10px 12px', fontSize: 12, color: MUTED, fontWeight: 600, borderBottom: `1px solid ${BORDER}` };
-  const td = { padding: '10px 12px', fontSize: 14, borderBottom: `1px solid ${BORDER}`, color: '#1f2937' };
-  return (
-    <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th style={th}>Receipt</th>
-            <th style={th}>Date</th>
-            <th style={th}>Vendor</th>
-            <th style={{ ...th, textAlign: 'right' }}>Amount</th>
-            <th style={th}>GL account</th>
-            <th style={th}>Location</th>
-            <th style={th}>Card</th>
-            <th style={th}>Status</th>
-            <th style={th} />
-          </tr>
-        </thead>
-        <tbody>
-          {receipts.map((r) => (
-            <tr
-              key={r.id}
-              onClick={() => onRowClick(r)}
-              style={{ cursor: 'pointer' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = '#f9fbfd')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-            >
-              <td style={td}>
-                {r.image_path ? (
-                  <span className="fas fa-file-invoice" style={{ color: BLUE }} title="Has file" />
-                ) : (
-                  <span className="far fa-circle" style={{ color: FAINT }} title="No file" />
-                )}
-              </td>
-              <td style={td}>{fmtDate(r.date)}</td>
-              <td style={{ ...td, fontWeight: 500 }}>{r.vendor || <em style={{ color: FAINT }}>Unknown</em>}</td>
-              <td style={{ ...td, textAlign: 'right' }}>{money(r.amount)}</td>
-              <td style={{ ...td, color: MUTED }}>{r.gl_account || '—'}</td>
-              <td style={{ ...td, color: MUTED }}>{r.location || '—'}</td>
-              <td style={{ ...td, color: MUTED }}>{r.card_last4 ? `•••• ${r.card_last4}` : '—'}</td>
-              <td style={td}>
-                <StatusBadge status={r.match_status} />
-              </td>
-              <td style={{ ...td, textAlign: 'right' }}>
-                <button
-                  title="Delete"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(r.id);
-                  }}
-                  style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: FAINT }}
-                >
-                  <span className="fas fa-trash" />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 function StatusBadge({ status }) {
-  const c = STATUS_COLORS[status] || STATUS_COLORS.unmatched;
-  return (
-    <span
-      style={{
-        display: 'inline-block',
-        padding: '3px 10px',
-        borderRadius: 9999,
-        fontSize: 12,
-        fontWeight: 600,
-        backgroundColor: c.bg,
-        color: c.fg,
-        textTransform: 'capitalize',
-      }}
-    >
-      {status || 'unmatched'}
-    </span>
-  );
+  const cls =
+    status === 'matched' ? styles.badgeMatched : status === 'disputed' ? styles.badgeDisputed : styles.badgeUnmatched;
+  return <span className={`${styles.badge} ${cls}`}>{status || 'unmatched'}</span>;
 }
+
+// ============================================================================
+// Modals
+// ============================================================================
 
 function ManualEntryModal({ form, setForm, saving, onSave, onClose }) {
   const field = (label, key, props = {}) => (
-    <label style={{ display: 'block', marginBottom: 12 }}>
-      <span style={{ display: 'block', fontSize: 12, color: MUTED, marginBottom: 4 }}>{label}</span>
+    <div className={styles.formGroup}>
+      <label className={styles.formLabel}>{label}</label>
       <input
+        className={styles.formInput}
         value={form[key]}
         onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-        style={{ width: '100%', padding: '8px 10px', fontSize: 14, border: `1px solid ${BORDER}`, borderRadius: 8 }}
         {...props}
       />
-    </label>
+    </div>
   );
   return (
-    <Overlay onClose={onClose}>
-      <div style={{ ...modalStyle, maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, color: BLUE, marginBottom: 16 }}>Add receipt</h2>
-        {field('Vendor *', 'vendor')}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          {field('Amount *', 'amount', { type: 'number', step: '0.01', placeholder: '0.00' })}
-          {field('Date', 'date', { type: 'date' })}
+    <Backdrop onClose={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <div className={styles.modalTitle}>Add receipt</div>
+          <button className={styles.modalClose} onClick={onClose}>×</button>
         </div>
-        {field('GL account', 'gl_account', { placeholder: 'Auto-categorized if left blank' })}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          {field('Location', 'location')}
-          {field('Card last 4', 'card_last4', { maxLength: 4 })}
+        <div className={styles.modalBody}>
+          {field('Vendor *', 'vendor')}
+          <div className={styles.formRow}>
+            {field('Amount *', 'amount', { type: 'number', step: '0.01', placeholder: '0.00' })}
+            {field('Date', 'date', { type: 'date' })}
+          </div>
+          {field('GL account', 'gl_account', { placeholder: 'Auto-categorized if left blank' })}
+          <div className={styles.formRow}>
+            {field('Location', 'location')}
+            {field('Card last 4', 'card_last4', { maxLength: 4 })}
+          </div>
+          {field('Notes', 'notes')}
         </div>
-        {field('Notes', 'notes')}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
-          <button style={btnGhost} onClick={onClose} disabled={saving}>
-            Cancel
-          </button>
-          <button style={btnPrimary} onClick={onSave} disabled={saving}>
+        <div className={styles.modalFooter}>
+          <button className={`${styles.btn} ${styles.btnGhost}`} onClick={onClose} disabled={saving}>Cancel</button>
+          <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={saving}>
             {saving ? 'Saving…' : 'Save receipt'}
           </button>
         </div>
       </div>
-    </Overlay>
+    </Backdrop>
   );
 }
 
@@ -569,220 +627,96 @@ function ReceiptDrawer({ receipt, onClose, onPatch, onDelete, onSaved, flash }) 
   };
 
   const field = (label, key, props = {}) => (
-    <label style={{ display: 'block', marginBottom: 12 }}>
-      <span style={{ display: 'block', fontSize: 12, color: MUTED, marginBottom: 4 }}>{label}</span>
+    <div className={styles.formGroup}>
+      <label className={styles.formLabel}>{label}</label>
       <input
+        className={styles.formInput}
         value={draft[key] ?? ''}
         onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
-        style={{ width: '100%', padding: '8px 10px', fontSize: 14, border: `1px solid ${BORDER}`, borderRadius: 8 }}
         {...props}
       />
-    </label>
+    </div>
   );
 
   return (
-    <Overlay onClose={onClose}>
-      <div style={drawerStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 600, color: BLUE }}>Receipt detail</h2>
-          <button onClick={onClose} style={{ border: 'none', background: 'transparent', fontSize: 18, cursor: 'pointer', color: MUTED }}>
-            <span className="fas fa-times" />
-          </button>
+    <Backdrop onClose={onClose}>
+      <div className={styles.drawer} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <div className={styles.modalTitle}>{receipt.vendor || 'Receipt detail'}</div>
+          <button className={styles.modalClose} onClick={onClose}>×</button>
         </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-          {/* Left: editable fields */}
-          <div>
-            {field('Vendor', 'vendor')}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              {field('Amount', 'amount', { type: 'number', step: '0.01' })}
-              {field('Date', 'date', { type: 'date' })}
-            </div>
-            {field('GL account', 'gl_account')}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              {field('Location', 'location')}
-              {field('Card last 4', 'card_last4', { maxLength: 4 })}
-            </div>
-            <label style={{ display: 'block', marginBottom: 12 }}>
-              <span style={{ display: 'block', fontSize: 12, color: MUTED, marginBottom: 4 }}>Status</span>
-              <select
-                value={draft.match_status}
-                onChange={(e) => setDraft({ ...draft, match_status: e.target.value })}
-                style={{ width: '100%', padding: '8px 10px', fontSize: 14, border: `1px solid ${BORDER}`, borderRadius: 8 }}
-              >
-                <option value="unmatched">Unmatched</option>
-                <option value="matched">Matched</option>
-                <option value="disputed">Disputed</option>
-              </select>
-            </label>
-            {field('Notes', 'notes')}
-
-            <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
-              <button style={btnPrimary} onClick={saveFields} disabled={savingField}>
-                {savingField ? 'Saving…' : 'Save'}
-              </button>
-              <button style={btnGhost} onClick={runMatch} disabled={matching}>
-                {matching ? 'Matching…' : 'Find Amex match'}
-              </button>
-              <button
-                style={{ ...btnGhost, color: '#c0392b', borderColor: '#f3c6c6' }}
-                onClick={() => onDelete(receipt.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-
-          {/* Right: receipt viewer */}
-          <div>
-            <div style={{ fontSize: 12, color: MUTED, marginBottom: 6 }}>Receipt file</div>
-            {!fileUrl ? (
-              <div
-                style={{
-                  border: `2px dashed ${BORDER_BLUE}`,
-                  borderRadius: 8,
-                  padding: 32,
-                  textAlign: 'center',
-                  color: FAINT,
-                  fontSize: 13,
-                }}
-              >
-                No file attached
+        <div className={styles.modalBody}>
+          <div className={styles.popoutGrid}>
+            {/* Left: editable fields */}
+            <div>
+              {field('Vendor', 'vendor')}
+              <div className={styles.formRow}>
+                {field('Amount', 'amount', { type: 'number', step: '0.01' })}
+                {field('Date', 'date', { type: 'date' })}
               </div>
-            ) : isPdf ? (
-              <iframe title="receipt" src={fileUrl} style={{ width: '100%', height: 420, border: `1px solid ${BORDER}`, borderRadius: 8 }} />
-            ) : (
-              <img
-                src={fileUrl}
-                alt="receipt"
-                style={{ width: '100%', borderRadius: 8, border: `1px solid ${BORDER}` }}
-              />
-            )}
+              {field('GL account', 'gl_account')}
+              <div className={styles.formRow}>
+                {field('Location', 'location')}
+                {field('Card last 4', 'card_last4', { maxLength: 4 })}
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Status</label>
+                <select
+                  className={styles.formSelect}
+                  value={draft.match_status}
+                  onChange={(e) => setDraft({ ...draft, match_status: e.target.value })}
+                >
+                  <option value="unmatched">Unmatched</option>
+                  <option value="matched">Matched</option>
+                  <option value="disputed">Disputed</option>
+                </select>
+              </div>
+              {field('Notes', 'notes')}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={saveFields} disabled={savingField}>
+                  {savingField ? 'Saving…' : 'Save'}
+                </button>
+                <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={runMatch} disabled={matching}>
+                  {matching ? 'Matching…' : 'Find Amex match'}
+                </button>
+                <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => onDelete(receipt.id)}>
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            {/* Right: receipt viewer */}
+            <div>
+              <div className={styles.amexCard}>
+                <div className={styles.amexLabel}>Match status</div>
+                <StatusBadge status={receipt.match_status} />
+                {receipt.amex_txn_id ? (
+                  <div style={{ marginTop: 8, fontSize: 12, color: 'var(--color-text-muted)' }}>
+                    Amex txn: {receipt.amex_txn_id}
+                  </div>
+                ) : null}
+              </div>
+              {!fileUrl ? (
+                <div className={styles.receiptViewerEmpty}>No file attached</div>
+              ) : isPdf ? (
+                <iframe title="receipt" src={fileUrl} className={styles.receiptViewer} style={{ width: '100%', height: 420 }} />
+              ) : (
+                <div className={styles.receiptViewer}>
+                  <img src={fileUrl} alt="receipt" style={{ width: '100%', display: 'block' }} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </Overlay>
+    </Backdrop>
   );
 }
 
-function Overlay({ children, onClose }) {
+function Backdrop({ children, onClose }) {
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(15, 23, 42, 0.45)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: 24,
-      }}
-    >
+    <div className={styles.modalBackdrop} onClick={onClose}>
       {children}
     </div>
   );
 }
-
-function Toast({ toast }) {
-  const colors = {
-    success: { bg: '#e7f6ec', fg: '#1b7f3b' },
-    error: { bg: '#fdecec', fg: '#c0392b' },
-    info: { bg: '#eaf2fa', fg: BLUE },
-  };
-  const c = colors[toast.variant] || colors.info;
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        bottom: 24,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: c.bg,
-        color: c.fg,
-        padding: '10px 18px',
-        borderRadius: 9999,
-        fontSize: 14,
-        fontWeight: 500,
-        boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
-        zIndex: 1100,
-      }}
-    >
-      {toast.message}
-    </div>
-  );
-}
-
-// ─── shared inline styles ──────────────────────────────────────────────────
-const cardStyle = {
-  border: `1px solid ${BORDER}`,
-  borderRadius: 8,
-  padding: 16,
-  background: '#fff',
-};
-
-const btnPrimary = {
-  padding: '8px 16px',
-  borderRadius: 9999,
-  fontSize: 14,
-  fontWeight: 500,
-  border: `1px solid ${BLUE}`,
-  background: BLUE,
-  color: '#fff',
-  cursor: 'pointer',
-};
-
-const btnGhost = {
-  padding: '8px 16px',
-  borderRadius: 9999,
-  fontSize: 14,
-  fontWeight: 500,
-  border: `1px solid ${BLUE}`,
-  background: '#fff',
-  color: BLUE,
-  cursor: 'pointer',
-  display: 'inline-flex',
-  alignItems: 'center',
-};
-
-const pillActive = {
-  padding: '6px 14px',
-  borderRadius: 9999,
-  fontSize: 13,
-  fontWeight: 500,
-  border: `1px solid ${BLUE}`,
-  background: BLUE,
-  color: '#fff',
-  cursor: 'pointer',
-};
-
-const pillInactive = {
-  padding: '6px 14px',
-  borderRadius: 9999,
-  fontSize: 13,
-  fontWeight: 500,
-  border: `1px solid ${BLUE}`,
-  background: '#fff',
-  color: BLUE,
-  cursor: 'pointer',
-};
-
-const modalStyle = {
-  background: '#fff',
-  borderRadius: 12,
-  padding: 24,
-  width: '100%',
-  boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-};
-
-const drawerStyle = {
-  background: '#fff',
-  borderRadius: 12,
-  padding: 24,
-  width: '100%',
-  maxWidth: 900,
-  maxHeight: '90vh',
-  overflowY: 'auto',
-  boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-};
