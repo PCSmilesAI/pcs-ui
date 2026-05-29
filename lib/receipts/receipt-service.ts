@@ -21,6 +21,8 @@ import fs from 'fs';
 import path from 'path';
 import OpenAI from 'openai';
 import { convertPdfToBase64Images, formatImagesForOpenAI } from '../gpt/pdfToImages';
+import { getAllReceipts, updateReceipt } from './db-store';
+import { listTransactions, updateTransaction } from './transactions-store';
 
 // ─── Model configuration (env-driven; never hard-code) ────────────────────
 function getProvider(): string {
@@ -341,4 +343,35 @@ export async function matchReceiptToAmexTransaction(
     }
   }
   return best;
+}
+
+/**
+ * Reconcile the whole feed: match every unmatched receipt against unmatched
+ * Amex transactions and persist the links on both sides. Greedy by confidence;
+ * each Amex transaction is claimed at most once.
+ */
+export async function runAutoMatch(): Promise<{ scanned: number; matched: number }> {
+  const receipts = getAllReceipts({ matchStatus: 'unmatched' });
+  const txns = listTransactions({ matchStatus: 'unmatched' });
+  const claimed = new Set<string>();
+  let matched = 0;
+
+  for (const r of receipts) {
+    const candidates: AmexCandidate[] = txns
+      .filter((t) => !claimed.has(t.id))
+      .map((t) => ({ id: t.id, amount: t.amount, date: t.transaction_date, vendor: t.merchant_name }));
+
+    const result = await matchReceiptToAmexTransaction(r.amount, r.date, r.vendor, candidates);
+    if (result) {
+      claimed.add(result.id);
+      updateReceipt(r.id, { match_status: 'matched', amex_txn_id: result.id });
+      updateTransaction(result.id, {
+        match_status: 'matched',
+        matched_receipt_id: r.id,
+        match_score: Math.round(result.confidence * 100),
+      });
+      matched += 1;
+    }
+  }
+  return { scanned: receipts.length, matched };
 }
