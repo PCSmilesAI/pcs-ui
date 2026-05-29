@@ -39,6 +39,7 @@ export interface Receipt {
   submitted_by: string;
   notes: string;
   image_path: string | null;
+  report_id: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -725,5 +725,102 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
     CREATE INDEX IF NOT EXISTS idx_receipts_created ON receipts(created_at);
   `);
 
+  // Link a receipt to the expense report it belongs to (nullable).
+  ensureColumn('receipts', 'report_id', 'report_id TEXT');
+
+  // ─── Amex transactions (Credit Card Receipts module — McKay) ─────────────
+  // Card-charge feed. Populated by statement import today (CSV/XLSX); a Plaid
+  // sync can write the same shape later. Reconciled against receipts.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS amex_transactions (
+      id                 TEXT PRIMARY KEY,
+      transaction_date   TEXT,
+      amount             REAL,
+      merchant_name      TEXT,
+      description_raw    TEXT,
+      category           TEXT,
+      card_last4         TEXT,
+      cardholder_name    TEXT,
+      reference_number   TEXT,
+      match_status       TEXT DEFAULT 'unmatched',
+      matched_receipt_id TEXT,
+      match_score        INTEGER,
+      source             TEXT DEFAULT 'import',
+      created_at         TEXT,
+      updated_at         TEXT
+    );
+  `);
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_amex_match_status ON amex_transactions(match_status);
+    CREATE INDEX IF NOT EXISTS idx_amex_card ON amex_transactions(card_last4);
+    CREATE INDEX IF NOT EXISTS idx_amex_date ON amex_transactions(transaction_date);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_amex_dedupe
+      ON amex_transactions(transaction_date, amount, merchant_name, card_last4);
+  `);
+
+  // ─── Card assignments (Credit Card Receipts module — McKay) ──────────────
+  // Maps an Amex card (last 4) to the user who manages its receipts.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS card_assignments (
+      id              TEXT PRIMARY KEY,
+      card_last4      TEXT,
+      cardholder_name TEXT,
+      assignee_email  TEXT,
+      assigned_by     TEXT,
+      assigned_at     TEXT,
+      is_active       INTEGER DEFAULT 1,
+      created_at      TEXT,
+      updated_at      TEXT
+    );
+  `);
+  db.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_card_assignments_card ON card_assignments(card_last4);
+  `);
+
+  // ─── Expense reports (Credit Card Receipts module — McKay) ───────────────
+  // A bundle of receipts submitted together: submitted → approved → closed.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS expense_reports (
+      id             TEXT PRIMARY KEY,
+      display_number INTEGER,
+      submitted_by   TEXT,
+      submitted_at   TEXT,
+      status         TEXT DEFAULT 'submitted',
+      approver_email TEXT,
+      approved_at    TEXT,
+      closed_at      TEXT,
+      total_amount   REAL DEFAULT 0,
+      expense_count  INTEGER DEFAULT 0,
+      notes          TEXT,
+      created_at     TEXT,
+      updated_at     TEXT
+    );
+  `);
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_expense_reports_status ON expense_reports(status);
+    CREATE INDEX IF NOT EXISTS idx_expense_reports_submitted_by ON expense_reports(submitted_by);
+  `);
+  // QBO export result (populated when an approved report is pushed to QuickBooks).
+  ensureColumn('expense_reports', 'qbo_purchase_id', 'qbo_purchase_id TEXT');
+  ensureColumn('expense_reports', 'qbo_exported_at', 'qbo_exported_at TEXT');
+  ensureColumn('expense_reports', 'qbo_export_error', 'qbo_export_error TEXT');
+
+  // ─── Plaid items (Credit Card Receipts module — McKay) ───────────────────
+  // One row per Plaid-connected institution. access_token is a secret at rest
+  // (same trust model as the platform's QBO token store) — never returned by the API.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS plaid_items (
+      id               TEXT PRIMARY KEY,
+      item_id          TEXT,
+      access_token     TEXT,
+      institution_name TEXT,
+      connected_by     TEXT,
+      last_synced_at   TEXT,
+      created_at       TEXT,
+      updated_at       TEXT
+    );
+  `);
+  db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_plaid_items_item ON plaid_items(item_id);`);
+
   console.log('[DB] Migrations completed successfully');
 }

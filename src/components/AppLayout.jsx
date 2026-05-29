@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import NavBar from './NavBar';
 import { InvoiceClickProvider } from '../context/InvoiceClickContext';
 import { InvoiceDataProvider, useInvoiceData } from '../context/InvoiceDataContext';
-import { UserRoleProvider, useUserRole } from '../context/UserRoleContext';
+import { UserRoleProvider } from '../context/UserRoleContext';
 import FilterPanel from './FilterPanel.jsx'
 import FeedbackButton from './FeedbackButton';
 
@@ -21,6 +21,11 @@ export default function AppLayout({ children }) {
   // Determine if this is an auth page or vendor onboarding success page
   const isAuthPage = pathname === '/LoginPage' || pathname === '/SignupPage';
   const isVendorOnboardingSuccess = pathname === '/VendorOnboardingSuccess';
+  // Credit Card Receipts renders its own full-height shell (sidebar + topbar),
+  // so suppress the shared top NavBar/FilterPanel and chrome on that route.
+  const isReceiptsPage = pathname.startsWith('/CreditCardReceiptsPage');
+  // Routes that render full-bleed without the shared AP chrome.
+  const isChromeless = isAuthPage || isVendorOnboardingSuccess || isReceiptsPage;
 
   useEffect(() => {
     const path = pathname.split('/')[1] || 'ForMePage';
@@ -105,8 +110,8 @@ export default function AppLayout({ children }) {
   // Render content with or without InvoiceClickProvider based on page type
   const content = (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Render NavBar only on non-auth and non-vendor-onboarding pages */}
-      {!isAuthPage && !isVendorOnboardingSuccess && (
+      {/* Render NavBar only on pages that use the shared AP chrome */}
+      {!isChromeless && (
         <NavBar
           currentPage={currentPage}
           onChangePage={handleChangePage}
@@ -115,8 +120,8 @@ export default function AppLayout({ children }) {
           onLogout={handleLogout}
         />
       )}
-      {/* Render FilterPanel only on non-auth and non-vendor-onboarding pages */}
-      {!isAuthPage && !isVendorOnboardingSuccess && (
+      {/* Render FilterPanel only on pages that use the shared AP chrome */}
+      {!isChromeless && (
         <FilterPanelWrapper
           isOpen={isFilterOpen}
           onClose={() => setIsFilterOpen(false)}
@@ -138,7 +143,7 @@ export default function AppLayout({ children }) {
           }}
         />
       )}
-      <main style={{ flex: 1, padding: (isAuthPage || isVendorOnboardingSuccess) ? '0' : '20px' }}>
+      <main style={{ flex: 1, padding: isChromeless ? '0' : '20px' }}>
         {React.isValidElement(children) ? React.cloneElement(children, { filters }) : children}
       </main>
       
@@ -147,8 +152,8 @@ export default function AppLayout({ children }) {
     </div>
   );
 
-  // Only wrap with InvoiceClickProvider on non-auth and non-vendor-onboarding pages
-  if (isAuthPage || isVendorOnboardingSuccess) {
+  // Only wrap with InvoiceClickProvider on pages that use the shared AP chrome
+  if (isChromeless) {
     return content;
   }
 
