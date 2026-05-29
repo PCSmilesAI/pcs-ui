@@ -3,30 +3,159 @@
  * These are intentionally honest about what is/ isn't wired up yet.
  */
 'use client';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { styles, apiUrl, apiFetch, EmptyState, PageHeader, currentEmail } from './shared';
 
+const PLAID_SCRIPT = 'https://cdn.plaid.com/link/v2/stable/link-initialize.js';
+
+function loadPlaidScript() {
+  return new Promise((resolve, reject) => {
+    if (typeof window === 'undefined') return reject(new Error('no window'));
+    if (window.Plaid) return resolve();
+    let s = document.getElementById('plaid-link-script');
+    if (s) {
+      s.addEventListener('load', () => resolve());
+      s.addEventListener('error', () => reject(new Error('Failed to load Plaid Link')));
+      return;
+    }
+    s = document.createElement('script');
+    s.id = 'plaid-link-script';
+    s.src = PLAID_SCRIPT;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Failed to load Plaid Link'));
+    document.body.appendChild(s);
+  });
+}
+
 // ─── Integrations ────────────────────────────────────────────────────────
-export function IntegrationsView() {
-  const integrations = [
-    {
-      name: 'Plaid (Amex feed)', icon: '🏦', status: 'Available when configured',
-      detail: 'The Transactions page can pull charges via "Sync from Plaid" when PLAID_CLIENT_ID / PLAID_SECRET / PLAID_ACCESS_TOKEN (+ PLAID_ENV) are set. Without them, use CSV/XLSX statement import — both write the same feed.',
-    },
+export function IntegrationsView({ flash }) {
+  const [plaid, setPlaid] = useState(null); // { linkConfigured, env, items }
+  const [connecting, setConnecting] = useState(false);
+
+  const loadStatus = useCallback(async () => {
+    try {
+      const data = await apiFetch(apiUrl('/api/receipts/integrations/plaid'));
+      setPlaid(data);
+    } catch (e) {
+      flash?.(e.message, 'error');
+    }
+  }, [flash]);
+
+  useEffect(() => {
+    loadStatus();
+  }, [loadStatus]);
+
+  const connect = async () => {
+    try {
+      setConnecting(true);
+      const { link_token } = await apiFetch(apiUrl('/api/receipts/integrations/plaid/link-token'), { method: 'POST' });
+      await loadPlaidScript();
+      const handler = window.Plaid.create({
+        token: link_token,
+        onSuccess: async (public_token, metadata) => {
+          try {
+            await apiFetch(apiUrl('/api/receipts/integrations/plaid/exchange'), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ public_token, institution_name: metadata?.institution?.name || '' }),
+            });
+            flash?.('Bank connected', 'success');
+            loadStatus();
+          } catch (e) {
+            flash?.(e.message, 'error');
+          }
+        },
+        onExit: (err) => { if (err) flash?.(err.display_message || err.error_message || 'Plaid Link closed', 'info'); },
+      });
+      handler.open();
+    } catch (e) {
+      flash?.(e.message, 'info'); // e.g. "Plaid is not configured…"
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const disconnect = async (itemId) => {
+    if (typeof window !== 'undefined' && !window.confirm('Disconnect this bank?')) return;
+    try {
+      await apiFetch(apiUrl(`/api/receipts/integrations/plaid?item_id=${encodeURIComponent(itemId)}`), { method: 'DELETE' });
+      flash?.('Disconnected', 'success');
+      loadStatus();
+    } catch (e) {
+      flash?.(e.message, 'error');
+    }
+  };
+
+  const staticCards = [
     {
       name: 'QuickBooks Online', icon: '📗', status: 'Export when connected',
-      detail: 'Approved expense reports can be pushed to QBO as a CreditCard Purchase (uses the platform QBO connection at /api/qbo/auth). GL accounts/classes resolve against the shared chart of accounts.',
+      detail: 'Approved expense reports push to QBO as a CreditCard Purchase (uses the platform QBO connection at /api/qbo/auth). GL accounts/classes resolve against the shared chart of accounts.',
     },
     {
       name: 'AI extraction', icon: '✨', status: 'Configured via env',
       detail: 'Receipt parsing uses PCS_LLM_PROVIDER / PCS_LLM_MODEL. Uploads still work without it — they just need manual field entry.',
     },
   ];
+
   return (
     <>
       <PageHeader title="Integrations" subtitle="External connections for the receipts module." />
+
+      {/* Plaid — interactive connect */}
+      <div className={styles.summaryTile} style={{ padding: 20, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 22 }}>🏦</span>
+            <span style={{ fontWeight: 700, color: 'var(--color-navy)' }}>Plaid (Amex feed)</span>
+            {plaid && (
+              <span className={`${styles.badge} ${plaid.items?.length ? styles.badgeMatched : styles.badgeUnmatched}`}>
+                {plaid.items?.length ? `${plaid.items.length} connected` : plaid.linkConfigured ? 'Ready to connect' : 'Not configured'}
+              </span>
+            )}
+          </div>
+          {plaid?.linkConfigured ? (
+            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={connect} disabled={connecting}>
+              {connecting ? 'Opening…' : '+ Connect a bank'}
+            </button>
+          ) : null}
+        </div>
+
+        {plaid && !plaid.linkConfigured && (
+          <div style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: 10, lineHeight: 1.5 }}>
+            Set <code>PLAID_CLIENT_ID</code> and <code>PLAID_SECRET</code> (and <code>PLAID_ENV</code>) on the server to
+            enable Plaid Link. Until then, use CSV/XLSX statement import on the Transactions page — both write the same feed.
+          </div>
+        )}
+
+        {plaid?.items?.length > 0 && (
+          <table className={styles.dataTable} style={{ marginTop: 12 }}>
+            <thead>
+              <tr><th>Institution</th><th>Connected by</th><th>Last synced</th><th /></tr>
+            </thead>
+            <tbody>
+              {plaid.items.map((it) => (
+                <tr key={it.item_id}>
+                  <td style={{ fontWeight: 500 }}>{it.institution_name || it.item_id}</td>
+                  <td style={{ color: 'var(--color-text-muted)' }}>{it.connected_by || '—'}</td>
+                  <td style={{ color: 'var(--color-text-muted)' }}>{it.last_synced_at ? new Date(it.last_synced_at).toLocaleString() : 'never'}</td>
+                  <td className={styles.right}>
+                    <button className={`${styles.btn} ${styles.btnDanger}`} style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => disconnect(it.item_id)}>Disconnect</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {plaid?.items?.length > 0 && (
+          <div style={{ fontSize: 12, color: 'var(--color-text-subtle)', marginTop: 8 }}>
+            Pull charges anytime from the Transactions page → “Sync from Plaid”.
+          </div>
+        )}
+      </div>
+
+      {/* Static integration cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-        {integrations.map((i) => (
+        {staticCards.map((i) => (
           <div key={i.name} className={styles.summaryTile} style={{ padding: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
               <span style={{ fontSize: 22 }}>{i.icon}</span>

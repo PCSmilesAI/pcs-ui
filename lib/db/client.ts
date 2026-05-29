@@ -805,5 +805,22 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
   ensureColumn('expense_reports', 'qbo_exported_at', 'qbo_exported_at TEXT');
   ensureColumn('expense_reports', 'qbo_export_error', 'qbo_export_error TEXT');
 
+  // ─── Plaid items (Credit Card Receipts module — McKay) ───────────────────
+  // One row per Plaid-connected institution. access_token is a secret at rest
+  // (same trust model as the platform's QBO token store) — never returned by the API.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS plaid_items (
+      id               TEXT PRIMARY KEY,
+      item_id          TEXT,
+      access_token     TEXT,
+      institution_name TEXT,
+      connected_by     TEXT,
+      last_synced_at   TEXT,
+      created_at       TEXT,
+      updated_at       TEXT
+    );
+  `);
+  db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_plaid_items_item ON plaid_items(item_id);`);
+
   console.log('[DB] Migrations completed successfully');
 }

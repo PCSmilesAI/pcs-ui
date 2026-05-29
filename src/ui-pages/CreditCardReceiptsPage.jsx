@@ -57,7 +57,7 @@ export default function CreditCardReceiptsPage() {
       case 'transactions': return <TransactionsView flash={flash} />;
       case 'cards': return <CardsView flash={flash} />;
       case 'reports': return <ReportsView flash={flash} />;
-      case 'integrations': return <IntegrationsView />;
+      case 'integrations': return <IntegrationsView flash={flash} />;
       case 'ai': return <AIAssistantView flash={flash} />;
       case 'settings': return <SettingsView />;
       default: return <ExpensesView flash={flash} />;
