@@ -40,7 +40,7 @@ export default function IncomingQueuePage() {
   const fetchIncoming = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/invoices/visible?status=incoming&limit=5000', {
+      const res = await fetch('/api/invoices/visible?status=incoming&limit=5000&scope=all', {
         cache: 'no-store',
         credentials: 'include',
       });

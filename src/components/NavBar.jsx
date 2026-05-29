@@ -89,6 +89,18 @@ function NavBarInner({
   const isAdminUser = permissions.isAdmin || permissions.isAPManager;
   const isOfficeManager = permissions.isOfficeManager && !permissions.isAdmin && !permissions.isAPManager;
 
+  // Determine which top-level module is active based on current path
+  const activeModule = pathname.startsWith('/CreditCardReceiptsPage') ? 'receipts' : 'ap';
+
+  // Module switcher: navigate to the module's landing page
+  const handleModuleSwitch = (moduleKey) => {
+    if (moduleKey === 'ap') {
+      router.push('/ForMePage');
+    } else if (moduleKey === 'receipts') {
+      router.push('/CreditCardReceiptsPage');
+    }
+  };
+
   // Tab definitions - filtered based on user role
   const allTabs = [
     { label: 'For Me', key: 'forMe', showForOfficeManager: true },
@@ -273,14 +285,64 @@ function NavBarInner({
     return () => clearTimeout(id);
   }, [searchValue, pathname, sp, router]);
 
+  // Module switcher styles
+  const moduleSwitcherStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    marginRight: '20px',
+    padding: '3px',
+    backgroundColor: '#f0f6fc',
+    borderRadius: '9999px',
+    border: '1px solid #c8dff0',
+  };
+  const moduleButtonBase = {
+    padding: '5px 14px',
+    borderRadius: '9999px',
+    fontSize: '13px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    border: 'none',
+    transition: 'background 0.15s, color 0.15s',
+    letterSpacing: '0.01em',
+  };
+  const moduleButtonActive = {
+    ...moduleButtonBase,
+    backgroundColor: '#357ab2',
+    color: '#ffffff',
+  };
+  const moduleButtonInactive = {
+    ...moduleButtonBase,
+    backgroundColor: 'transparent',
+    color: '#357ab2',
+  };
+
   return (
     <nav style={containerStyle}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span style={titleStyle}>PCS AI Dashboard</span>
-        <div style={tabContainerStyle}>
-          {tabs.map(renderTab)}
-          {renderAllInvoicesButton()}
+        <span style={titleStyle}>PCS AI</span>
+        {/* Module switcher — top-level navigation between platform modules */}
+        <div style={moduleSwitcherStyle}>
+          <button
+            style={activeModule === 'ap' ? moduleButtonActive : moduleButtonInactive}
+            onClick={() => handleModuleSwitch('ap')}
+          >
+            AP Invoices
+          </button>
+          <button
+            style={activeModule === 'receipts' ? moduleButtonActive : moduleButtonInactive}
+            onClick={() => handleModuleSwitch('receipts')}
+          >
+            Credit Card Receipts
+          </button>
         </div>
+        {/* Module-specific tabs — only shown for AP Invoices module */}
+        {activeModule === 'ap' && (
+          <div style={tabContainerStyle}>
+            {tabs.map(renderTab)}
+            {renderAllInvoicesButton()}
+          </div>
+        )}
       </div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         {/* Search icon and search field */}

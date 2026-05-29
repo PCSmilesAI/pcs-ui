@@ -695,5 +695,35 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
   ensureColumn('other_documents', 'amount', 'amount REAL');
   ensureColumn('other_documents', 'location', 'location TEXT');
 
+  // ─── Receipts table (Credit Card Receipts module — McKay) ────────────────
+  // Single source of truth for the receipts module. Column set matches the
+  // documented model in lib/receipts/db-store.ts and
+  // context/modules/credit_card_receipts.md. Do not modify other tables here.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS receipts (
+      id            TEXT PRIMARY KEY,
+      vendor        TEXT,
+      amount        REAL,
+      date          TEXT,
+      gl_account    TEXT,
+      location      TEXT,
+      card_last4    TEXT,
+      match_status  TEXT DEFAULT 'unmatched',
+      amex_txn_id   TEXT,
+      submitted_by  TEXT,
+      notes         TEXT,
+      image_path    TEXT,
+      created_at    TEXT,
+      updated_at    TEXT
+    );
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_receipts_match_status ON receipts(match_status);
+    CREATE INDEX IF NOT EXISTS idx_receipts_submitted_by ON receipts(submitted_by);
+    CREATE INDEX IF NOT EXISTS idx_receipts_date ON receipts(date);
+    CREATE INDEX IF NOT EXISTS idx_receipts_created ON receipts(created_at);
+  `);
+
   console.log('[DB] Migrations completed successfully');
 }

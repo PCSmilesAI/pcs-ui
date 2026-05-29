@@ -1,0 +1,50 @@
+---
+description: BuildLog structured response format for audit trail capture
+globs:
+alwaysApply: true
+---
+
+# BuildLog Response Structure
+
+This project uses BuildLog, a repo-local audit trail system that captures the build process
+through Cursor lifecycle hooks. BuildLog is required project infrastructure, not optional tooling.
+
+## Response Format
+
+Every meaningful final response in this repo MUST end with a structured summary block.
+This block is parsed by the logging system and becomes the primary record of what happened.
+
+Format:
+
+**Work Completed**
+- Concise list of what was done in this response
+
+**Files Touched**
+- List of file paths created, modified, or deleted
+
+**Key Decisions**
+- Why specific approaches were chosen over alternatives
+- Trade-offs made and rationale
+
+**Next Step**
+- The single most important thing to do next
+
+## Rules
+
+- Do NOT skip the summary block on substantive responses
+- Do NOT pad the summary with filler; keep it factual and concise
+- Do NOT wait for the user to ask for logging; the summary is automatic
+- Trivial responses (single-line answers, clarifying questions) do not need the block
+- When multiple files are touched, list every path; do not summarize with "and others"
+- The summary block is the last thing in the response, after all other content
+
+## Why This Exists
+
+BuildLog captures prompts, tool usage, shell commands, file edits, and task completions
+automatically via hooks. The structured response summary adds human-readable context that
+hooks alone cannot provide. Together, they create a complete audit trail suitable for:
+
+- Project transparency and accountability
+- Client proof-of-work documentation
+- Course creation and teaching material
+- Step-by-step reconstruction of the build process
