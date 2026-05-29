@@ -367,6 +367,8 @@ function InvoiceDetailContent() {
     );
   }
 
+  const isFromIncomingQueue = (fromParam || '').includes('IncomingQueuePage');
+
   return (
     <InvoiceDetailPageImpl
       invoice={invoice}
@@ -377,6 +379,7 @@ function InvoiceDetailContent() {
       canGoNext={currentIndex < invoiceQueue.length - 1}
       onInvoiceRejected={handleInvoiceRejected}
       onAdvanceToNext={handleAdvanceToNext}
+      fromIncomingQueue={isFromIncomingQueue}
     />
   );
 }

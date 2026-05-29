@@ -54,7 +54,7 @@ async function checkIfAdmin(email) {
  * that the layout and colours appear even if no CSS preprocessor
  * is available.
  */
-export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext, onInvoiceRejected, onAdvanceToNext }) {
+export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onPrevious, onNext, canGoPrevious, canGoNext, onInvoiceRejected, onAdvanceToNext, fromIncomingQueue = false }) {
   // Get user permissions from context
   const { permissions } = useUserRole();
   
@@ -2569,7 +2569,8 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
       return []; // No buttons for removed invoices
     }
 
-    if (status === 'incoming') {
+    if (status === 'incoming' && fromIncomingQueue) {
+      // Queue-specific buttons only when arriving from the Incoming Queue page
       const buttons = [];
       buttons.push({
         label: reparsing ? 'Re-parsing...' : 'Re-parse with AI',
