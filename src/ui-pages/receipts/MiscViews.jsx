@@ -10,12 +10,12 @@ import { styles, apiUrl, apiFetch, EmptyState, PageHeader, currentEmail } from '
 export function IntegrationsView() {
   const integrations = [
     {
-      name: 'Plaid (Amex feed)', icon: '🏦', status: 'Not connected',
-      detail: 'Live Amex transaction sync. Today the Transactions feed is populated by CSV/XLSX statement import. Plaid wiring depends on platform credentials owned by the AP/platform team.',
+      name: 'Plaid (Amex feed)', icon: '🏦', status: 'Available when configured',
+      detail: 'The Transactions page can pull charges via "Sync from Plaid" when PLAID_CLIENT_ID / PLAID_SECRET / PLAID_ACCESS_TOKEN (+ PLAID_ENV) are set. Without them, use CSV/XLSX statement import — both write the same feed.',
     },
     {
-      name: 'QuickBooks Online', icon: '📗', status: 'Managed by platform',
-      detail: 'GL accounts come from the shared chart of accounts. Pushing approved expense reports to QBO uses the platform QBO integration (lib/qbo) and is a later phase for receipts.',
+      name: 'QuickBooks Online', icon: '📗', status: 'Export when connected',
+      detail: 'Approved expense reports can be pushed to QBO as a CreditCard Purchase (uses the platform QBO connection at /api/qbo/auth). GL accounts/classes resolve against the shared chart of accounts.',
     },
     {
       name: 'AI extraction', icon: '✨', status: 'Configured via env',

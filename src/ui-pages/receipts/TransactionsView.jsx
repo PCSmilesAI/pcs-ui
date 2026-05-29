@@ -22,6 +22,7 @@ export default function TransactionsView({ flash, onChanged }) {
   const [search, setSearch] = useState('');
   const [importing, setImporting] = useState(false);
   const [matching, setMatching] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -62,6 +63,19 @@ export default function TransactionsView({ flash, onChanged }) {
     }
   };
 
+  const syncPlaid = async () => {
+    try {
+      setSyncing(true);
+      const data = await apiFetch(apiUrl('/api/receipts/transactions/sync'), { method: 'POST' });
+      flash(`Plaid sync: ${data.inserted} new (${data.skipped} duplicates)`, 'success');
+      load();
+    } catch (e) {
+      flash(e.message, 'info'); // e.g. "Plaid is not configured…"
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const runMatch = async () => {
     try {
       setMatching(true);
@@ -95,6 +109,9 @@ export default function TransactionsView({ flash, onChanged }) {
               <input type="file" accept=".csv,.xlsx,.xls" style={{ display: 'none' }} disabled={importing}
                 onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; handleImport(f); }} />
             </label>
+            <button className={`${styles.btn} ${styles.btnGhost}`} onClick={syncPlaid} disabled={syncing}>
+              {syncing ? 'Syncing…' : '🏦 Sync from Plaid'}
+            </button>
             <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={runMatch} disabled={matching}>
               {matching ? 'Matching…' : '⟳ Reconcile receipts'}
             </button>

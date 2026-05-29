@@ -140,6 +140,20 @@ function ReportDrawer({ id, onClose, onChanged, flash }) {
     }
   };
 
+  const exportQbo = async () => {
+    try {
+      setBusy(true);
+      const data = await apiFetch(apiUrl(`/api/receipts/reports/${id}/export`), { method: 'POST' });
+      setReport(data.report);
+      flash(`Exported to QuickBooks (Purchase ${data.purchaseId})`, 'success');
+      onChanged?.();
+    } catch (e) {
+      flash(e.message, 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <Backdrop onClose={onClose}>
       <div className={styles.drawer} onClick={(e) => e.stopPropagation()}>
@@ -167,10 +181,19 @@ function ReportDrawer({ id, onClose, onChanged, flash }) {
                   <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setStatus('approved')} disabled={busy}>Approve</button>
                 )}
                 {report.status === 'approved' && (
-                  <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setStatus('closed')} disabled={busy}>Close</button>
+                  <>
+                    <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={exportQbo} disabled={busy}>Export to QuickBooks</button>
+                    <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setStatus('closed')} disabled={busy}>Close (no export)</button>
+                  </>
                 )}
                 {report.status !== 'submitted' && report.status !== 'closed' && (
                   <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setStatus('submitted')} disabled={busy}>Reopen</button>
+                )}
+                {report.qbo_purchase_id && (
+                  <span className={`${styles.badge} ${styles.badgeMatched}`}>QBO Purchase {report.qbo_purchase_id}</span>
+                )}
+                {report.qbo_export_error && !report.qbo_purchase_id && (
+                  <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>Last export error: {report.qbo_export_error}</span>
                 )}
               </div>
 

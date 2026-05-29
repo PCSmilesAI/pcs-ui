@@ -23,6 +23,9 @@ export interface ExpenseReport {
   total_amount: number;
   expense_count: number;
   notes: string;
+  qbo_purchase_id: string | null;
+  qbo_exported_at: string | null;
+  qbo_export_error: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -131,5 +134,28 @@ export function updateReportStatus(
          updated_at = @now
      WHERE id = @id`
   ).run({ id, status: data.status, approver_email: data.approver_email ?? null, now });
+  return getReportById(id);
+}
+
+/** Record the outcome of a QBO export attempt. On success also closes the report. */
+export function setReportQboResult(
+  id: string,
+  result: { purchaseId?: string | null; error?: string | null }
+): (ExpenseReport & { receipts: Receipt[] }) | null {
+  const db = getDatabase();
+  if (!getReportById(id)) return null;
+  const now = nowIso();
+  if (result.purchaseId) {
+    db.prepare(
+      `UPDATE expense_reports
+       SET qbo_purchase_id = @pid, qbo_exported_at = @now, qbo_export_error = NULL,
+           status = 'closed', closed_at = @now, updated_at = @now
+       WHERE id = @id`
+    ).run({ id, pid: result.purchaseId, now });
+  } else {
+    db.prepare(
+      `UPDATE expense_reports SET qbo_export_error = @err, updated_at = @now WHERE id = @id`
+    ).run({ id, err: result.error ?? 'Unknown error', now });
+  }
   return getReportById(id);
 }

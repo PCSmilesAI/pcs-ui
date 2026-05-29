@@ -800,6 +800,10 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
     CREATE INDEX IF NOT EXISTS idx_expense_reports_status ON expense_reports(status);
     CREATE INDEX IF NOT EXISTS idx_expense_reports_submitted_by ON expense_reports(submitted_by);
   `);
+  // QBO export result (populated when an approved report is pushed to QuickBooks).
+  ensureColumn('expense_reports', 'qbo_purchase_id', 'qbo_purchase_id TEXT');
+  ensureColumn('expense_reports', 'qbo_exported_at', 'qbo_exported_at TEXT');
+  ensureColumn('expense_reports', 'qbo_export_error', 'qbo_export_error TEXT');
 
   console.log('[DB] Migrations completed successfully');
 }
