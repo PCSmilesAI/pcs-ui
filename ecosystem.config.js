@@ -81,6 +81,18 @@ module.exports = {
       MAX_FILE_SIZE: '10mb',
       UPLOAD_DIR: 'uploads'
     }
+  },
+  {
+    name: 'payment-verifier',
+    script: 'scripts/cron-verify-payments.js',
+    instances: 1,
+    exec_mode: 'fork',
+    cron_restart: '*/15 * * * *',
+    autorestart: false,
+    env: {
+      PCS_BASE_URL: 'http://localhost:3000',
+      CRON_SECRET: process.env.CRON_SECRET || 'pcs-cron-verify-2024'
+    }
   }],
   deploy: {
     production: {
