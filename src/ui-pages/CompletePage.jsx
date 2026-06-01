@@ -52,7 +52,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
       ? new URLSearchParams(window.location.search)
       : new URLSearchParams();
     params.set('limit', '5000');
-    params.set('status', 'paid');
+    params.set('status', 'paid,completed');
     const res = await fetch(`/api/invoices/visible?${params.toString()}`, { cache: 'no-store', credentials: 'include' });
     if (!res.ok) throw new Error(`Failed to load invoices (HTTP ${res.status})`);
     const payload = await res.json();
@@ -91,12 +91,12 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
             amount: `$${numericTotal.toFixed(2)}`,
             location: locationDisplay,
             locations: locations, // Keep array for filtering
-            dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', {
+            dateCompleted: (invoice.paid_at || invoice.updated_at || invoice.uploaded_at) ? new Date(invoice.paid_at || invoice.updated_at || invoice.uploaded_at).toLocaleDateString('en-US', {
               month: 'numeric',
               day: 'numeric',
               year: '2-digit'
             }) : 'N/A',
-            _dateCompletedRaw: invoice.uploaded_at || '',
+            _dateCompletedRaw: invoice.paid_at || invoice.updated_at || invoice.uploaded_at || '',
             // Add additional fields for detail view
             invoice_date: invoice.invoice_date,
             due_date: invoice.due_date,
@@ -105,6 +105,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
             timestamp: invoice.timestamp,
             assigned_to: invoice.assigned_to,
             approved: invoice.approved,
+            qbo_bill_id: invoice.qbo_bill_id,
             status: formatStatusForDisplay(invoice.status)
           })});
         
@@ -166,7 +167,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
           amount: `$${numericTotal.toFixed(2)}`,
           location: locationDisplay,
           locations: locations, // Keep array for filtering
-          dateCompleted: invoice.uploaded_at ? new Date(invoice.uploaded_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
+          dateCompleted: (invoice.paid_at || invoice.updated_at || invoice.uploaded_at) ? new Date(invoice.paid_at || invoice.updated_at || invoice.uploaded_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' }) : 'N/A',
           invoice_date: invoice.invoice_date,
           due_date: invoice.due_date,
           json_path: invoice.json_path,
@@ -174,6 +175,7 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
           timestamp: invoice.timestamp,
           assigned_to: invoice.assigned_to,
           approved: invoice.approved,
+          qbo_bill_id: invoice.qbo_bill_id,
           status: formatStatusForDisplay(invoice.status)
         })});
       setInvoices(transformedData);

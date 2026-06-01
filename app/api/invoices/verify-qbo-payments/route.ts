@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '../../../../lib/auth/currentUser';
 import { getUserPermissions } from '../../../../lib/auth/permissions';
-import { getById, save } from '../../../../lib/workflow/invoiceStore';
+import { getInvoiceById, saveInvoice } from '../../../../lib/invoices/db-store';
 import { QBOClient } from '../../../../lib/qbo/qboClient';
 
 export const runtime = 'nodejs';
@@ -60,8 +60,8 @@ export async function POST(req: NextRequest) {
     // Check each invoice
     for (const invoiceId of invoiceIds) {
       try {
-        // Get the invoice from PCS database
-        const invoice = await getById(String(invoiceId));
+        // Get the invoice from SQLite database
+        const invoice = getInvoiceById(String(invoiceId));
         
         if (!invoice) {
           errors.push(`Invoice ${invoiceId}: not found in database`);
@@ -87,11 +87,11 @@ export async function POST(req: NextRequest) {
 
         // Check if bill is fully paid (Balance = 0)
         if (bill.Balance === 0) {
-          // Mark invoice as completed in PCS
-          invoice.status = 'completed';
+          // Mark invoice as paid in SQLite
+          invoice.status = 'paid';
           invoice.paid_at = new Date().toISOString();
-          invoice.payment_verified_at = new Date().toISOString();
-          await save(invoice);
+          (invoice as any).payment_verified_at = new Date().toISOString();
+          saveInvoice(invoice);
           
           paid.push(invoiceId);
           console.log(`[VERIFY_QBO_PAYMENTS] Invoice ${invoiceId} verified as PAID (QBO Bill ${qboBillId})`);

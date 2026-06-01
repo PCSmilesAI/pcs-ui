@@ -225,10 +225,11 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
         if (validResults.length === 1) {
           setBatchModalState('hidden');
           const singleResult = validResults[0];
+          const singleInvoiceId = singleResult.invoiceId || singleResult.invoiceNumber;
           showToast('Opening QuickBooks bill...', 'success');
           window.open(singleResult.payUrl, '_blank', 'noopener,noreferrer');
           setTimeout(() => {
-            showToast('Complete payment in QuickBooks. The invoice status will update automatically.', 'info');
+            showToast('After paying in QuickBooks, click "Mark as Paid" to confirm payment.', 'info');
           }, 1500);
           if (failedResults.length > 0) {
             showToast(`1 ready for payment, ${failedResults.length} not ready`, 'warning');
@@ -297,6 +298,72 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
       setSelectedIds(new Set());
       await reloadList();
     }
+  }
+
+  // Mark selected invoices as paid directly (for invoices already paid in QBO)
+  async function handleMarkAsPaid() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const selectedRows = filteredRows.filter((r, i) => ids.includes(getRowId(r, i)));
+
+    // First try QBO verification for invoices with a bill ID
+    const invoiceIds = selectedRows.map(r => r.id || r.invoice_number || r.invoice);
+    let verifiedCount = 0;
+    let manualCount = 0;
+
+    try {
+      // Attempt to verify via QBO first
+      const verifyRes = await fetch('/api/invoices/verify-qbo-payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoiceIds }),
+      });
+      const verifyResult = await verifyRes.json();
+      if (verifyResult.ok) {
+        verifiedCount = (verifyResult.paid || []).length;
+      }
+
+      // For any that weren't verified via QBO, mark manually
+      const unverified = verifyResult.ok 
+        ? (verifyResult.unpaid || []) 
+        : invoiceIds;
+      
+      for (const invId of unverified) {
+        try {
+          const res = await fetch('/api/invoices/transition', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: invId, action: 'mark_paid' }),
+          });
+          if (res.ok) manualCount++;
+        } catch (err) {
+          console.error('Error marking invoice as paid:', err);
+        }
+      }
+    } catch (err) {
+      // If QBO verification fails entirely, mark all manually
+      for (const invId of invoiceIds) {
+        try {
+          const res = await fetch('/api/invoices/transition', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: invId, action: 'mark_paid' }),
+          });
+          if (res.ok) manualCount++;
+        } catch (innerErr) {
+          console.error('Error marking invoice as paid:', innerErr);
+        }
+      }
+    }
+
+    const totalMarked = verifiedCount + manualCount;
+    if (totalMarked > 0) {
+      showToast(`${totalMarked} invoice(s) marked as paid`, 'success');
+    } else {
+      showToast('Failed to mark invoices as paid', 'error');
+    }
+    setSelectedIds(new Set());
+    await reloadList();
   }
 
   // Open QBO Pay Bills page for batch payment
@@ -785,6 +852,12 @@ export default function ToBePaidPage({ onRowClick, searchQuery = '', filters = {
               style={{ padding: '6px 14px', backgroundColor: '#059669', color: '#fff', borderRadius: 9999, border: '1px solid #059669', fontWeight: 600, fontSize: '13px' }}
             >
               Pay
+            </button>
+            <button
+              onClick={() => handleMarkAsPaid()}
+              style={{ padding: '6px 14px', backgroundColor: '#357ab2', color: '#fff', borderRadius: 9999, border: '1px solid #357ab2', fontWeight: 600, fontSize: '13px' }}
+            >
+              Mark as Paid
             </button>
             <button
               onClick={() => bulkUpdate('send_back', false)}

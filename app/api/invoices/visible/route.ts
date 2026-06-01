@@ -34,7 +34,12 @@ function matchesVendor(invoice: any, vendor: string): boolean {
 
 function matchesStatus(invoice: any, status: string): boolean {
   if (!status) return true;
-  return (invoice.status || '').toLowerCase() === status.toLowerCase();
+  const invoiceStatus = (invoice.status || '').toLowerCase();
+  // Support comma-separated status values (e.g. "paid,completed")
+  if (status.includes(',')) {
+    return status.split(',').some(s => invoiceStatus === s.trim().toLowerCase());
+  }
+  return invoiceStatus === status.toLowerCase();
 }
 
 function matchesAttachment(invoice: any, hasAttachment: string): boolean {
