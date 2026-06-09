@@ -220,12 +220,23 @@ export class QBOClient {
 
     if (response.status === 401) {
       try {
-        console.warn('QBO 401 received — attempting token refresh and retry...');
-        await this.refreshToken();
-        headers.Authorization = `Bearer ${this.tokens!.accessToken}`;
-        response = await fetch(url, options);
+        // Reload tokens from disk first — a reconnection may have saved new tokens
+        // while this process still has stale ones in memory
+        console.warn('QBO 401 received — reloading tokens from disk before retry...');
+        const freshTokens = await tokenStorage.getLatestTokens();
+        if (freshTokens && freshTokens.accessToken !== this.tokens?.accessToken) {
+          console.log('[QBO] Found newer tokens on disk, using those');
+          this.tokens = freshTokens;
+          headers.Authorization = `Bearer ${this.tokens.accessToken}`;
+          response = await fetch(url, options);
+        } else {
+          console.warn('[QBO] No newer tokens on disk, attempting refresh...');
+          await this.refreshToken();
+          headers.Authorization = `Bearer ${this.tokens!.accessToken}`;
+          response = await fetch(url, options);
+        }
       } catch (refreshError) {
-        console.error('QBO token refresh failed:', refreshError);
+        console.error('QBO token refresh/reload failed:', refreshError);
       }
     }
 
