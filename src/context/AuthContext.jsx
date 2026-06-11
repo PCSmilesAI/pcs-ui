@@ -19,7 +19,8 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (_) {}
     localStorage.removeItem('loggedInUser');
     setUser(null);
   };

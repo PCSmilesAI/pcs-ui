@@ -1,73 +1,63 @@
 import type { NextRequest } from 'next/server';
-
-const ADMIN_EMAILS = new Set([
-  'business@pcsmilesai.com',
-  'mckaym@pcsmiles.com',
-  'laurag@pcsmiles.com',
-]);
-
-function normaliseEmail(email?: string | null): string {
-  return email ? email.trim().toLowerCase() : '';
-}
-
-function parseCookieValue(raw: string): { email?: string; name?: string } {
-  try {
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === 'object') {
-      return {
-        email: typeof parsed.email === 'string' ? parsed.email : undefined,
-        name: typeof parsed.name === 'string' ? parsed.name : undefined,
-      };
-    }
-  } catch (_) {
-    // cookie might not be JSON; fall back to raw string
-  }
-
-  const parts = raw.split('|');
-  if (parts.length === 2) {
-    return { name: parts[0], email: parts[1] };
-  }
-  return { email: raw };
-}
+import { getSessionFromRequest } from '../session/sessionMiddleware';
+import { isAdmin as checkIsAdmin } from '../workflow/rolesStore';
 
 export interface CurrentUser {
   email: string;
   name: string;
   isAdmin: boolean;
+  isAuthenticated: boolean;
 }
 
+/**
+ * Get the current user from the server-side session.
+ * Identity is derived from a signed httpOnly session cookie looked up in the DB.
+ * Falls back to the legacy `pcs_user`/`loggedInUser` cookie ONLY during transition
+ * (will be removed once all clients re-login).
+ */
 export function getCurrentUser(req: NextRequest): CurrentUser {
-  let email = '';
-  let name = '';
-
-  const cookieCandidates = ['pcs_user', 'loggedInUser'];
-  for (const key of cookieCandidates) {
-    const cookie = req.cookies.get(key);
-    if (cookie?.value) {
-      const parsed = parseCookieValue(cookie.value);
-      if (parsed.email) {
-        email = parsed.email;
-      }
-      if (parsed.name) {
-        name = parsed.name;
-      }
-      if (email) break;
-    }
+  // Primary: server-validated session
+  const session = getSessionFromRequest(req);
+  if (session) {
+    const normalisedEmail = session.email.trim().toLowerCase();
+    let admin = false;
+    try {
+      // checkIsAdmin is async in some paths; use sync check against roles
+      admin = session.role === 'admin';
+    } catch (_) {}
+    
+    return {
+      email: normalisedEmail,
+      name: session.name || normalisedEmail,
+      isAdmin: admin,
+      isAuthenticated: true,
+    };
   }
 
-  if (!email) {
-    const formEmail = req.nextUrl.searchParams.get('email');
-    if (formEmail) {
-      email = formEmail;
-    }
+  // Legacy fallback: trust the old cookie during transition period.
+  // This allows existing logged-in users to keep working until they re-login.
+  // Once all users have re-logged, remove this block.
+  const legacyCookie = req.cookies.get('pcs_user')?.value || req.cookies.get('loggedInUser')?.value;
+  if (legacyCookie) {
+    try {
+      const parsed = JSON.parse(legacyCookie);
+      if (parsed && typeof parsed.email === 'string') {
+        const normalisedEmail = parsed.email.trim().toLowerCase();
+        return {
+          email: normalisedEmail,
+          name: parsed.name || normalisedEmail,
+          isAdmin: false, // Legacy cookie users are NOT treated as admin
+          isAuthenticated: true,
+        };
+      }
+    } catch (_) {}
   }
 
-  const normalisedEmail = normaliseEmail(email);
-  const isAdmin = normalisedEmail ? ADMIN_EMAILS.has(normalisedEmail) : false;
-
+  // No valid session
   return {
-    email: normalisedEmail,
-    name: name || normalisedEmail || 'unknown',
-    isAdmin,
+    email: '',
+    name: 'anonymous',
+    isAdmin: false,
+    isAuthenticated: false,
   };
 }

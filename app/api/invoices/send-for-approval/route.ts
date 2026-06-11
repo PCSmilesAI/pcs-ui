@@ -31,6 +31,10 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   const user = getCurrentUser(req);
 
+  if (!user.isAuthenticated) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   // Apply rate limiting
   const rateLimitResult = rateLimitByUser(user.email, { maxRequests: 100, windowSeconds: 60 });
   if (!rateLimitResult.allowed) {

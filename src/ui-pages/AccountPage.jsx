@@ -32,9 +32,9 @@ export default function AccountPage() {
     setLoading(false);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (_) {}
     localStorage.removeItem('loggedInUser');
-    // Clear the cookie too
     document.cookie = 'loggedInUser=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.push('/LoginPage');
   };

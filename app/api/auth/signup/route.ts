@@ -32,11 +32,13 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Determine role based on admin code
+    // Determine role based on admin code (from environment, never hardcoded)
     let role = 'user';
-    if (adminCode === 'PCSADMIN2024') {
+    const adminSecret = process.env.ADMIN_SIGNUP_CODE;
+    const apSecret = process.env.AP_SIGNUP_CODE;
+    if (adminSecret && adminCode === adminSecret) {
       role = 'admin';
-    } else if (adminCode === 'PCSAP2024') {
+    } else if (apSecret && adminCode === apSecret) {
       role = 'ap_manager';
     }
     
@@ -52,33 +54,7 @@ export async function POST(request: NextRequest) {
     
     console.log(`✅ [AUTH] New user created: ${email} (${name}) - Role: ${role}`);
     
-    // Also try to sync to Gist (best effort, don't fail if this fails)
-    try {
-      const gistResponse = await fetch(`${request.nextUrl.origin}/api/gist-users`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'no-store'
-      });
-      
-      if (gistResponse.ok) {
-        const gistUsers = await gistResponse.json();
-        const bcrypt = (await import('bcryptjs')).default;
-        const hashedPassword = await bcrypt.hash(password, 10);
-        
-        // Add new user to Gist
-        gistUsers.push({ name, email, password: hashedPassword });
-        
-        // Try to update Gist
-        await fetch(`${request.nextUrl.origin}/api/update-gist`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ users: gistUsers })
-        });
-        console.log(`🔄 [AUTH] Synced new user to Gist: ${email}`);
-      }
-    } catch (gistError: any) {
-      console.warn(`⚠️ [AUTH] Failed to sync to Gist (user saved locally): ${gistError.message}`);
-    }
+    // NOTE: Gist user sync removed — it exposed credentials publicly.
     
     return NextResponse.json({
       success: true,

@@ -1,11 +1,16 @@
+# Environment files — NEVER commit these
 .env
 .env.*
+.env.local
+.env.production
+production.env
 *.secret
 *.secrets
 production-secrets.txt
 secrets.txt
-# Note: ecosystem.config.js is tracked but should not contain secrets in production
-# Use environment variables or PM2 ecosystem file without secrets
+
+# Token databases
+qbo_tokens.db*
 
 # Node & Python junk
 node_modules/

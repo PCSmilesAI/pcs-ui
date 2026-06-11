@@ -18,28 +18,20 @@ export default function LoginPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    // Call the remote login helper.  This validates credentials
-    // against the GitHub Gist. If invalid, it returns a message.
     try {
       const result = await loginUser(email, password);
       if (!result.success || !result.user) {
         setError(result.message || 'Invalid email or password');
         return;
       }
-      // Persist only name and email locally. Do not store password.
-      const { name, email: userEmail } = result.user;
+      // Store user info in localStorage for UI display only.
+      // Auth is handled by the httpOnly session cookie set by the server.
+      const { name, email: userEmail, role } = result.user;
       localStorage.setItem(
         'loggedInUser',
-        JSON.stringify({ name, email: userEmail })
+        JSON.stringify({ name, email: userEmail, role })
       );
-      // Also set cookie for server-side API access
-      document.cookie = `loggedInUser=${encodeURIComponent(JSON.stringify({ name, email: userEmail }))}; path=/`;
-      // Navigate to For Me page after login
-      try {
-        router.push('/ForMePage');
-      } catch (_) {
-        // ignore router errors
-      }
+      router.push('/ForMePage');
     } catch (err) {
       setError('An unexpected error occurred.');
     }

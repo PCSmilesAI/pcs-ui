@@ -40,6 +40,10 @@ function generateBatchId(): string {
 export async function POST(req: NextRequest) {
   const user = getCurrentUser(req);
 
+  if (!user.isAuthenticated) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   // Apply rate limiting per user (100 requests per minute)
   const rateLimitResult = rateLimitByUser(user.email, { maxRequests: 100, windowSeconds: 60 });
   if (!rateLimitResult.allowed) {

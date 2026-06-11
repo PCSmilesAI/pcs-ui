@@ -21,6 +21,8 @@ const requiredEnvVars = [
   'QBO_CLIENT_ID',
   'QBO_CLIENT_SECRET',
   'QBO_REDIRECT_URI',
+  'CRON_SECRET',
+  'ADMIN_SIGNUP_CODE',
 ];
 
 // Validate required environment variables on startup
@@ -91,7 +93,7 @@ module.exports = {
     autorestart: false,
     env: {
       PCS_BASE_URL: 'http://localhost:3000',
-      CRON_SECRET: process.env.CRON_SECRET || 'pcs-cron-verify-2024'
+      CRON_SECRET: process.env.CRON_SECRET || ''
     }
   }],
   deploy: {
