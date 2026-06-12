@@ -659,6 +659,21 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
     CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      email TEXT NOT NULL,
+      name TEXT,
+      role TEXT,
+      data TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      expires_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_sessions_email ON sessions (email);
+    CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions (expires_at);
+  `);
+
   // Create other_documents table for non-invoice documents (credit memos, statements, etc.)
   db.exec(`
     CREATE TABLE IF NOT EXISTS other_documents (
