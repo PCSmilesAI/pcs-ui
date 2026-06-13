@@ -12,6 +12,11 @@ secrets.txt
 # Token databases
 qbo_tokens.db*
 
+# Data directories (runtime data, not source code)
+email_invoices/
+output_jsons/
+pcs_ai_data/
+
 # Node & Python junk
 node_modules/
 __pycache__/
