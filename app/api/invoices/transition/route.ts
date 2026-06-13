@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '../../../../lib/auth/currentUser';
 import { readRoles, getThreshold, isAdmin } from '../../../../lib/workflow/rolesStore';
 import { getInvoiceById, saveInvoice, softDeleteInvoice } from '../../../../lib/invoices/db-store';
-import { approveAP, approveOffice, approveAdmin, markPaid } from '../../../../lib/workflow/engine';
+import { approveAP, markPaid } from '../../../../lib/workflow/engine';
 import { rateLimitByUser } from '../../../../lib/ratelimit/rateLimiter';
 import { maybeAddToHistory } from '../../../../lib/gpt/historyAutoAdd';
 import { createBillFromInvoice } from '../../../../lib/qbo/billCreationService';
@@ -156,98 +156,120 @@ export async function POST(req: NextRequest) {
 
     if (action === 'approve') {
       console.log('[API][INVOICES][TRANSITION]', 'approve_received', { invoiceId: String(invoiceId), userEmail: user.email, invoiceStatus: invoice.status });
-      try {
-        // Ensure invoice has a valid status
-        if (!invoice.status) {
-          invoice.status = 'incoming';
-        }
-
-        const status = (invoice.status || 'incoming').toLowerCase();
-
-        // Ensure office field is populated from request body if provided
-        if (body?.office) {
-          invoice.office_id = body.office;
-        }
-
-        // Check if user is an admin - admin approval is FINAL and goes directly to to_be_paid
-        const isUserAdmin = await isAdmin(user.email);
-        
-        if (isUserAdmin) {
-          // Admin approval bypasses all intermediate steps and goes directly to to_be_paid
-          console.log('[API][INVOICES][TRANSITION]', 'admin_direct_approval', { invoiceId: String(invoiceId), userEmail: user.email, previousStatus: status });
-          approveAdmin(invoice, { email: user.email, name: user.name });
-        } else if (status === 'incoming' || status === 'categorized' || status === 'pending') {
-          approveAP(invoice, { email: user.email, name: user.name }, roles);
-        } else if (status === 'awaiting_office_approval') {
-          approveOffice(invoice, { email: user.email, name: user.name }, threshold);
-        } else if (status === 'awaiting_admin_approval') {
-          // This branch is now only for non-admins, which shouldn't happen
-          console.log('[API][INVOICES][TRANSITION]', 'admin_approval_unauthorized', { invoiceId: String(invoiceId), userEmail: user.email });
-          return NextResponse.json({ error: 'Only admins can approve invoices at this stage' }, { status: 403 });
-        } else {
-          return NextResponse.json({ error: 'Invoice status does not allow approval at this time' }, { status: 400 });
-        }
-      } catch (err: any) {
-        // Log full error server-side only
-        console.error('[WORKFLOW][ENGINE]', 'error', { invoiceId: String(invoiceId), message: err?.message });
-        // Return safe error message to client
-        return NextResponse.json({ error: 'Approval failed' }, { status: 400 });
+      
+      if (!invoice.status) {
+        invoice.status = 'incoming';
       }
 
-      console.log('[API][INVOICES][TRANSITION]', 'before_save', { invoiceId: String(invoiceId), status: invoice.status });
-      
-      // If transitioning to to_be_paid, create QBO bill FIRST (skip if bill already exists)
+      if (body?.office) {
+        invoice.office_id = body.office;
+      }
+
+      const status = (invoice.status || 'incoming').toLowerCase();
+      const actor = { email: user.email, name: user.name };
+
+      // Determine the engine action based on current status and user role
+      let engineAction: 'send_to_office' | 'approve_office' | 'approve_admin';
+      const isUserAdmin = await isAdmin(user.email);
+
+      if (isUserAdmin && status !== 'awaiting_office_approval') {
+        // Admin can approve directly from any pre-admin state
+        if (status === 'awaiting_admin_approval') {
+          engineAction = 'approve_admin';
+        } else {
+          // Admin approving from incoming/categorized — run AP step then admin step
+          approveAP(invoice, actor, roles);
+          engineAction = 'approve_admin';
+        }
+      } else if (status === 'incoming' || status === 'categorized' || status === 'pending') {
+        engineAction = 'send_to_office';
+      } else if (status === 'awaiting_office_approval') {
+        engineAction = 'approve_office';
+      } else if (status === 'awaiting_admin_approval') {
+        engineAction = 'approve_admin';
+      } else {
+        return NextResponse.json({ error: 'Invoice status does not allow approval at this time' }, { status: 400 });
+      }
+
+      // Run through engine with RBAC enforcement
+      try {
+        const { transition } = await import('../../../../lib/workflow/engine');
+        transition(invoice, engineAction, actor, { roles, thresholdOverride: threshold });
+      } catch (err: any) {
+        console.error('[WORKFLOW][ENGINE]', 'rbac_error', { invoiceId: String(invoiceId), message: err?.message });
+        const msg = err?.message?.startsWith('RBAC:') ? err.message : 'Approval failed - insufficient permissions';
+        return NextResponse.json({ error: msg }, { status: 403 });
+      }
+
+      // FAIL-CLOSED + IDEMPOTENT: If transitioning to to_be_paid, QBO bill MUST succeed
       let qboBillResult: { success: boolean; billId?: string; error?: string } | null = null;
       if (invoice.status === 'to_be_paid' && !invoice.qbo_bill_id) {
-        console.log('[API][INVOICES][TRANSITION]', 'creating_qbo_bill', { invoiceId: String(invoiceId) });
-        try {
-          qboBillResult = await createBillFromInvoice({
-            invoiceData: invoice,
-            invoiceId: String(invoiceId),
-          });
-          
-          if (qboBillResult.success && qboBillResult.billId) {
-            // Save QBO bill ID to the invoice
-            invoice.qbo_bill_id = qboBillResult.billId;
-            invoice.qbo_bill_created_at = new Date().toISOString();
-            console.log('[API][INVOICES][TRANSITION]', 'qbo_bill_created', { 
-              invoiceId: String(invoiceId), 
-              qboBillId: qboBillResult.billId 
+        // Re-read from DB inside a check to prevent concurrent duplicate bill creation
+        const { getDatabase } = await import('../../../../lib/db/client');
+        const db = getDatabase();
+        const freshRow = db.prepare('SELECT qbo_bill_id FROM invoices WHERE id = ?').get(String(invoiceId)) as { qbo_bill_id: string | null } | undefined;
+        
+        if (freshRow?.qbo_bill_id) {
+          // Another request already created the bill — use it (idempotent)
+          invoice.qbo_bill_id = freshRow.qbo_bill_id;
+          console.log('[API][INVOICES][TRANSITION]', 'qbo_bill_already_exists', { invoiceId: String(invoiceId), qboBillId: freshRow.qbo_bill_id });
+        } else {
+          console.log('[API][INVOICES][TRANSITION]', 'creating_qbo_bill', { invoiceId: String(invoiceId) });
+          try {
+            qboBillResult = await createBillFromInvoice({
+              invoiceData: invoice,
+              invoiceId: String(invoiceId),
             });
-          } else {
-            console.warn('[API][INVOICES][TRANSITION]', 'qbo_bill_failed', { 
+            
+            if (qboBillResult.success && qboBillResult.billId) {
+              invoice.qbo_bill_id = qboBillResult.billId;
+              invoice.qbo_bill_created_at = new Date().toISOString();
+              console.log('[API][INVOICES][TRANSITION]', 'qbo_bill_created', { 
+                invoiceId: String(invoiceId), 
+                qboBillId: qboBillResult.billId 
+              });
+            } else {
+              // FAIL-CLOSED: revert status, do not advance to to_be_paid
+              invoice.status = 'awaiting_admin_approval';
+              saveInvoice(invoice);
+              console.error('[API][INVOICES][TRANSITION]', 'qbo_bill_failed_reverting', { 
+                invoiceId: String(invoiceId), 
+                error: qboBillResult?.error 
+              });
+              return NextResponse.json({ 
+                error: `QBO bill creation failed: ${qboBillResult?.error || 'Unknown error'}. Invoice was not advanced.`,
+                ok: false 
+              }, { status: 502 });
+            }
+          } catch (qboErr: any) {
+            // FAIL-CLOSED: revert status
+            invoice.status = 'awaiting_admin_approval';
+            saveInvoice(invoice);
+            console.error('[API][INVOICES][TRANSITION]', 'qbo_bill_error_reverting', { 
               invoiceId: String(invoiceId), 
-              error: qboBillResult?.error 
+              error: String(qboErr) 
             });
-            // Don't block approval if QBO bill creation fails, but log it
+            return NextResponse.json({ 
+              error: `QBO bill creation error: ${qboErr?.message || 'Unknown'}. Invoice was not advanced.`,
+              ok: false 
+            }, { status: 502 });
           }
-        } catch (qboErr: any) {
-          console.error('[API][INVOICES][TRANSITION]', 'qbo_bill_error', { 
-            invoiceId: String(invoiceId), 
-            error: String(qboErr) 
-          });
-          // Don't block approval, but log the error
         }
       }
       
       try {
         saveInvoice(invoice);
-        console.log('[API][INVOICES][TRANSITION]', 'approve_success', { invoiceId: String(invoiceId), userEmail: user.email });
+        console.log('[API][INVOICES][TRANSITION]', 'approve_success', { invoiceId: String(invoiceId), userEmail: user.email, newStatus: invoice.status });
         
-        // Auto-add to vendor history for AI training (async, don't block response)
         if (invoice.status === 'to_be_paid') {
           maybeAddToHistory(invoice).then(result => {
             if (result.added) {
               console.log('[API][INVOICES][TRANSITION]', 'added_to_history', { invoiceId: String(invoiceId) });
             }
-          }).catch(err => {
-            console.warn('[API][INVOICES][TRANSITION]', 'history_add_failed', { invoiceId: String(invoiceId), error: String(err) });
-          });
+          }).catch(() => {});
         }
       } catch (err: any) {
-        // Log full error server-side only
         console.error('[API][INVOICES][TRANSITION]', 'save_error', { invoiceId: String(invoiceId), error: String(err) });
-        // Return safe error message to client
         return NextResponse.json({ error: 'Failed to save invoice' }, { status: 500 });
       }
       
@@ -257,16 +279,22 @@ export async function POST(req: NextRequest) {
         qboBill: qboBillResult ? {
           created: qboBillResult.success,
           billId: qboBillResult.billId,
-          error: qboBillResult.error,
         } : null
       });
     }
 
     if (action === 'mark_paid') {
-      // Only admins can mark invoices as paid
+      // RBAC: only admins can mark paid
       const allowed = await isAdmin(user.email);
       if (!allowed) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+      }
+
+      // Require a QBO bill to exist before marking paid
+      if (!invoice.qbo_bill_id) {
+        return NextResponse.json({ 
+          error: 'Cannot mark as paid: no QuickBooks bill exists for this invoice. Approve the invoice first.' 
+        }, { status: 400 });
       }
 
       try {
@@ -276,20 +304,15 @@ export async function POST(req: NextRequest) {
         saveInvoice(invoice);
         console.log('[API][INVOICES][TRANSITION]', 'mark_paid_success', { invoiceId: String(invoiceId), userEmail: user.email });
         
-        // Auto-add to vendor history for AI training (async, don't block response)
         maybeAddToHistory(invoice).then(result => {
           if (result.added) {
             console.log('[API][INVOICES][TRANSITION]', 'added_to_history_paid', { invoiceId: String(invoiceId) });
           }
-        }).catch(err => {
-          console.warn('[API][INVOICES][TRANSITION]', 'history_add_failed', { invoiceId: String(invoiceId), error: String(err) });
-        });
+        }).catch(() => {});
         
         return NextResponse.json({ ok: true, invoice });
       } catch (err: any) {
-        // Log full error server-side only
         console.error('[API][INVOICES][TRANSITION]', 'mark_paid_error', { invoiceId: String(invoiceId), error: String(err) });
-        // Return safe error message to client
         return NextResponse.json({ error: 'Failed to mark as paid' }, { status: 400 });
       }
     }

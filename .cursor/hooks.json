@@ -54,6 +54,10 @@
     "stop": [
       {
         "command": "python3 scripts/append_log.py"
+      },
+      {
+        "command": ".cursor/hooks/rift-update.sh",
+        "loop_limit": 1
       }
     ],
     "sessionEnd": [
