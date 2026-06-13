@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { normalizeExistingVendorNames } from '../../../../lib/db/normalize-vendor-names';
+import { getCurrentUser } from '../../../../lib/auth/currentUser';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,11 @@ export const dynamic = 'force-dynamic';
  * This is an admin-only operation
  */
 export async function POST(req: NextRequest) {
+  const user = getCurrentUser(req);
+  if (!user.isAuthenticated || !user.isAdmin) {
+    return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+  }
+
   try {
     console.log('[API][NORMALIZE-VENDORS]', 'Starting vendor name normalization');
 
