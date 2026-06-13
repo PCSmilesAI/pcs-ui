@@ -58,6 +58,7 @@ export interface QBOItem {
 
 export class QBOClient {
   private tokens: QBOTokens | null = null;
+  private refreshPromise: Promise<void> | null = null;
 
   private getBaseUrl(): string {
     const environment = process.env.QBO_ENVIRONMENT || 'sandbox';
@@ -94,8 +95,13 @@ export class QBOClient {
     const expiresSoon = now >= (this.tokens.expiresAt - 300);
 
     if (expiresSoon) {
-      console.log('🔄 QBO token expiring soon, refreshing…');
-      await this.refreshToken();
+      // Single-flight: if a refresh is already in progress, await it instead of starting another
+      if (!this.refreshPromise) {
+        this.refreshPromise = this.refreshToken().finally(() => {
+          this.refreshPromise = null;
+        });
+      }
+      await this.refreshPromise;
     }
   }
 

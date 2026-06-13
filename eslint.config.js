@@ -26,7 +26,6 @@ module.exports = [
       'dev-server.js',
       'production-server.js',
       'production.config.js',
-      'src/ui-pages/VendorDetailPage copy.jsx',
     ],
   },
   {

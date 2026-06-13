@@ -15,8 +15,8 @@ export async function POST(req: NextRequest) {
   }
 
   const expected = crypto.createHmac('sha256', verifier).update(raw).digest('base64');
-  if (!signature || signature !== expected) {
-    // Log at debug level - this happens when QBO sends test webhooks or verifier is mismatched
+  if (!signature || signature.length !== expected.length ||
+      !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
     console.log('[QBO][WEBHOOK] Signature mismatch - verify QBO_WEBHOOK_VERIFIER is correct');
     return new NextResponse('Invalid signature', { status: 401 });
   }

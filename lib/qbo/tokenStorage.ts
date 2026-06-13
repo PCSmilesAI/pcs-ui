@@ -1,6 +1,7 @@
 import { Database } from 'sqlite3';
 import fs from 'fs';
 import path from 'path';
+import { encrypt, decrypt } from './tokenEncryption';
 
 export interface QBOTokens {
   realmId: string;
@@ -46,10 +47,12 @@ function normalizeRow(row: RawTokenRow | null | undefined): QBOTokens | null {
   if (!row) return null;
 
   const realmId = row.realmId ?? row.realm_id;
-  const accessToken = row.accessToken ?? row.access_token;
-  if (!realmId || !accessToken) return null;
+  const rawAccessToken = row.accessToken ?? row.access_token;
+  if (!realmId || !rawAccessToken) return null;
 
-  const refreshToken = row.refreshToken ?? row.refresh_token ?? null;
+  const accessToken = decrypt(rawAccessToken);
+  const rawRefresh = row.refreshToken ?? row.refresh_token ?? null;
+  const refreshToken = rawRefresh ? decrypt(rawRefresh) : null;
   const expiresInRaw = toNumber(row.expiresIn ?? row.expires_in);
   const expiresAtRaw = toNumber(row.expiresAt ?? row.expires_at);
   const now = Math.floor(Date.now() / 1000);
@@ -341,6 +344,9 @@ class TokenStorage {
 
     const db = this.ensureDb();
 
+    const encAccessToken = encrypt(accessToken);
+    const encRefresh = encrypt(refresh);
+
     await new Promise<void>((resolve, reject) => {
       const sql = `
         INSERT INTO qbo_tokens (realm_id, access_token, refresh_token, expires_in, expires_at, updated_at, obtained_at)
@@ -352,7 +358,7 @@ class TokenStorage {
           expires_at = excluded.expires_at,
           updated_at = excluded.updated_at
       `;
-      db.run(sql, [realmId, accessToken, refresh, expiresInSeconds, expiresAt, now, now], (err) => {
+      db.run(sql, [realmId, encAccessToken, encRefresh, expiresInSeconds, expiresAt, now, now], (err) => {
         if (err) {
           console.error('Error saving QBO tokens:', err);
           reject(err);
