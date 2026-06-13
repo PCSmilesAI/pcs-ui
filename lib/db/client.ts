@@ -703,6 +703,15 @@ Return a JSON object with these exact fields. Return ONLY valid JSON, no explana
     CREATE INDEX IF NOT EXISTS idx_other_documents_created ON other_documents(created_at);
   `);
 
+  // Phase 3: Composite unique index for vendor-scoped invoice dedup
+  // The column-level UNIQUE on invoice_number remains for legacy safety,
+  // but this composite index is the authoritative dedup constraint.
+  db.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_invoice_vendor_dedup
+    ON invoices(invoice_number, vendor_name)
+    WHERE deleted = 0;
+  `);
+
   // Add filing workflow columns to other_documents
   ensureColumn('other_documents', 'filed_at', 'filed_at TEXT');
   ensureColumn('other_documents', 'filed_by', 'filed_by TEXT');

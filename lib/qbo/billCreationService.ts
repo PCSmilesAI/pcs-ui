@@ -288,15 +288,22 @@ function ensureAccountLines(
     return line;
   });
 
-  // Reconcile to the provided totalAmount. If line item totals do not
-  // add up to the invoice total (common when shipping/tax/fees are
-  // outside the parsed lines), add a single balancing line so the
-  // bill Total equals the invoice total shown in PCS AI.
+  // Reconcile to the provided totalAmount. Small diffs (shipping/tax/fees
+  // not parsed as lines) get a balancing line. Large discrepancies (>10%
+  // of total or >$50) indicate a data problem and throw to block bill creation.
   try {
     const sum = qboLines.reduce((acc, l) => acc + (Number(l.Amount) || 0), 0);
     const diff = Number.isFinite(totalAmount) ? Number((totalAmount - sum).toFixed(2)) : 0;
     if (Math.abs(diff) >= 0.01) {
+      const pctDiff = totalAmount > 0 ? Math.abs(diff) / totalAmount : 1;
+      if (Math.abs(diff) > 50 || pctDiff > 0.10) {
+        throw new Error(
+          `Line items ($${sum.toFixed(2)}) differ from invoice total ($${totalAmount.toFixed(2)}) ` +
+          `by $${Math.abs(diff).toFixed(2)} (${(pctDiff * 100).toFixed(1)}%). Needs manual review.`
+        );
+      }
       const description = diff > 0 ? 'Other charges (shipping/tax/fees)' : 'Adjustment to match total';
+      console.warn('[QBO][BILL_LINES]', 'auto_balance_applied', { diff, sum, totalAmount });
       categories.push({ description, category: 'adjustment' });
       qboLines.push({
         LineNum: qboLines.length + 1,
@@ -312,8 +319,8 @@ function ensureAccountLines(
         __categoryHint: { category: 'adjustment' },
       } as ExpenseLine);
     }
-  } catch (_) {
-    // If anything goes wrong, skip reconciliation silently.
+  } catch (balanceErr: any) {
+    if (balanceErr?.message?.includes('Needs manual review')) throw balanceErr;
   }
 
   return { qboLines, categories };
@@ -361,20 +368,26 @@ function createCategoryBasedLines(
     }];
   }
 
-  // Multiple categories - split amount equally
-  const amountPerCategory = totalAmount / categories.length;
-  return categories.map((cat) => ({
-    Description: `${cat.name}`,
-    Amount: amountPerCategory,
-    DetailType: 'AccountBasedExpenseLineDetail',
-    AccountBasedExpenseLineDetail: {
-      AccountRef: {
-        value: fallbackAccount.id,
-        name: fallbackAccount.name,
+  // Multiple categories - split amount equally using integer cents to avoid float drift
+  const totalCents = Math.round(totalAmount * 100);
+  const baseCents = Math.floor(totalCents / categories.length);
+  const remainder = totalCents - (baseCents * categories.length);
+
+  return categories.map((cat, idx) => {
+    const lineCents = baseCents + (idx < remainder ? 1 : 0);
+    return {
+      Description: `${cat.name}`,
+      Amount: lineCents / 100,
+      DetailType: 'AccountBasedExpenseLineDetail' as const,
+      AccountBasedExpenseLineDetail: {
+        AccountRef: {
+          value: fallbackAccount.id,
+          name: fallbackAccount.name,
+        },
       },
-    },
-    __categoryHint: { category: cat.name },
-  }));
+      __categoryHint: { category: cat.name },
+    };
+  });
 }
 
 function applyAccountMappings(
@@ -683,10 +696,10 @@ export async function createBillFromInvoice(options: BillCreationOptions): Promi
               resolvedClass = await resolveClassByFullName(cat.className);
             }
             
-            // Use actual amount from GL line, or fallback to proportional split
+            // Use actual amount from GL line, or fallback to proportional split (cents-safe)
             const lineAmount = cat.amountCents 
               ? cat.amountCents / 100 
-              : totalAmount / invoiceCategories.length;
+              : Math.round((totalAmount * 100) / invoiceCategories.length) / 100;
             
             // Use description from GL line, fallback to category name
             const lineDescription = cat.description || cat.categoryName || '';

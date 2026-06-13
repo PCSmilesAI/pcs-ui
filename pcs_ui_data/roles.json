@@ -10,7 +10,47 @@
     "laurag@pcsmiles.com"
   ],
   "office_managers": {
-    "Milwaukie": [
+    "clinic_milwaukie": [
+      "business@pcsmilesai.com",
+      "mckaym@pcsmiles.com",
+      "laurag@pcsmiles.com"
+    ],
+    "clinic_longview": [
+      "business@pcsmilesai.com",
+      "mckaym@pcsmiles.com",
+      "laurag@pcsmiles.com"
+    ],
+    "clinic_hazel_dell": [
+      "business@pcsmilesai.com",
+      "mckaym@pcsmiles.com",
+      "laurag@pcsmiles.com"
+    ],
+    "clinic_ridgefield": [
+      "business@pcsmilesai.com",
+      "mckaym@pcsmiles.com",
+      "laurag@pcsmiles.com"
+    ],
+    "clinic_eugene": [
+      "business@pcsmilesai.com",
+      "mckaym@pcsmiles.com",
+      "laurag@pcsmiles.com"
+    ],
+    "clinic_lebanon": [
+      "business@pcsmilesai.com",
+      "mckaym@pcsmiles.com",
+      "laurag@pcsmiles.com"
+    ],
+    "clinic_snohomish": [
+      "business@pcsmilesai.com",
+      "mckaym@pcsmiles.com",
+      "laurag@pcsmiles.com"
+    ],
+    "clinic_15th_st": [
+      "business@pcsmilesai.com",
+      "mckaym@pcsmiles.com",
+      "laurag@pcsmiles.com"
+    ],
+    "clinic_salem": [
       "business@pcsmilesai.com",
       "mckaym@pcsmiles.com",
       "laurag@pcsmiles.com"
@@ -23,5 +63,5 @@
   },
   "threshold_usd": 1000,
   "test_mode_route_all_to_admin": true,
-  "version": 7
+  "version": 8
 }

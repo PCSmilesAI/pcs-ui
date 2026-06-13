@@ -242,8 +242,15 @@ export async function POST(req: NextRequest) {
     invoice.coded_by_user_id = user.email.toLowerCase();
     invoice.coded_at = now;
 
-    // Save the invoice
-    saveInvoice(invoice);
+    // Save the invoice (with optimistic concurrency check)
+    try {
+      saveInvoice(invoice);
+    } catch (saveErr: any) {
+      if (saveErr?.message?.includes('CONFLICT')) {
+        return NextResponse.json({ error: 'Invoice was modified by another user. Please reload and try again.' }, { status: 409 });
+      }
+      throw saveErr;
+    }
 
     // Log the verification/coding event so it appears in the invoice timeline
     try {

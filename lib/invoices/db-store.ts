@@ -53,7 +53,9 @@ export function getInvoiceById(id: string): InvoiceRecord | undefined {
 export function saveInvoice(invoice: InvoiceRecord): void {
   const db = getDatabase();
   
-  db.prepare(`
+  const nextVersion = (invoice.status_version || 0) + 1;
+  
+  const result = db.prepare(`
     UPDATE invoices SET
       vendor_name = ?,
       office_id = ?,
@@ -83,7 +85,7 @@ export function saveInvoice(invoice: InvoiceRecord): void {
       verified_at = ?,
       notes = ?,
       updated_at = CURRENT_TIMESTAMP
-    WHERE id = ?
+    WHERE id = ? AND status_version = ?
   `).run(
     invoice.vendor_name,
     invoice.office_id,
@@ -91,7 +93,7 @@ export function saveInvoice(invoice: InvoiceRecord): void {
     invoice.status,
     JSON.stringify(invoice.approvals || {}),
     JSON.stringify(invoice.field_locks || {}),
-    invoice.status_version,
+    nextVersion,
     invoice.coded_at || null,
     invoice.coded_by_user_id || null,
     invoice.approved_at || null,
@@ -112,8 +114,15 @@ export function saveInvoice(invoice: InvoiceRecord): void {
     invoice.verified_by_user_id || null,
     invoice.verified_at || null,
     invoice.notes ?? null,
-    invoice.id
+    invoice.id,
+    invoice.status_version || 0
   );
+
+  if ((result as any).changes === 0) {
+    throw new Error('CONFLICT: Invoice was modified by another request. Please reload and try again.');
+  }
+
+  invoice.status_version = nextVersion;
 }
 
 /**

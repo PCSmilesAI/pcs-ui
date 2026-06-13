@@ -191,6 +191,31 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Invoice status does not allow approval at this time' }, { status: 400 });
       }
 
+      // PRE-APPROVAL VALIDATION GATE: block advancement if critical fields are missing/invalid
+      if (engineAction === 'approve_admin') {
+        const validationErrors: string[] = [];
+        if (!invoice.amount_cents || invoice.amount_cents <= 0) {
+          validationErrors.push('Amount must be greater than $0');
+        }
+        if (!invoice.vendor_name || invoice.vendor_name.trim() === '') {
+          validationErrors.push('Vendor name is required');
+        }
+        if (!invoice.office_id || invoice.office_id.trim() === '') {
+          validationErrors.push('Office/location assignment is required');
+        }
+        if (validationErrors.length > 0) {
+          console.warn('[API][INVOICES][TRANSITION]', 'validation_gate_blocked', { invoiceId: String(invoiceId), errors: validationErrors });
+          invoice.status = 'needs_repair';
+          invoice.notes = `Validation failed: ${validationErrors.join('; ')}`;
+          saveInvoice(invoice);
+          return NextResponse.json({ 
+            error: `Cannot approve: ${validationErrors.join('; ')}. Invoice moved to needs_repair.`,
+            ok: false,
+            status: 'needs_repair'
+          }, { status: 422 });
+        }
+      }
+
       // Run through engine with RBAC enforcement
       try {
         const { transition } = await import('../../../../lib/workflow/engine');
@@ -270,6 +295,9 @@ export async function POST(req: NextRequest) {
         }
       } catch (err: any) {
         console.error('[API][INVOICES][TRANSITION]', 'save_error', { invoiceId: String(invoiceId), error: String(err) });
+        if (err?.message?.includes('CONFLICT')) {
+          return NextResponse.json({ error: 'Invoice was modified by another user. Please reload and try again.' }, { status: 409 });
+        }
         return NextResponse.json({ error: 'Failed to save invoice' }, { status: 500 });
       }
       
