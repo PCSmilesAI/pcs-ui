@@ -86,3 +86,6 @@ __pycache__/
 *.swp
 *.swo
 *~
+Desktop
+Desktop.pub
+*.pub
