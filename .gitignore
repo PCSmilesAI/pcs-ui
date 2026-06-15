@@ -94,3 +94,4 @@ __pycache__/
 Desktop
 Desktop.pub
 *.pub
+.github/workflows/
