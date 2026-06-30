@@ -11,7 +11,10 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 export async function GET(req: NextRequest) {
   try {
     const searchParam = req.nextUrl.searchParams.get('search') || '';
-    const useCache = !searchParam && vendorsCache && (Date.now() - vendorsCache.timestamp < CACHE_TTL);
+    const useCache = !searchParam
+      && vendorsCache
+      && vendorsCache.data.length > 0
+      && (Date.now() - vendorsCache.timestamp < CACHE_TTL);
     
     if (useCache && vendorsCache) {
       return NextResponse.json({
@@ -54,8 +57,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Update cache if no search filter
-    if (!searchParam) {
+    // Only cache successful non-empty fetches — never cache an empty list from a QBO failure
+    if (!searchParam && vendors.length > 0) {
       vendorsCache = {
         data: vendors,
         timestamp: Date.now(),
