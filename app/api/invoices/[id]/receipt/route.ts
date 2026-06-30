@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getInvoiceById } from '../../../../../lib/invoices/db-store';
+import { buildQboReceiptUrl } from '../../../../../lib/qbo/qboUrls';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,10 +64,14 @@ export async function GET(
       invoiceDate: invoice.invoice_date || null,
       dueDate: invoice.due_date || null,
       
+      // QuickBooks payment receipt link
+      qboBillId: invoice.qbo_bill_id || null,
+      qboBillPaymentId: invoice.qbo_bill_payment_id || null,
+      qboReceiptUrl: buildQboReceiptUrl(invoice.qbo_bill_id, invoice.qbo_bill_payment_id),
+      paymentVerifiedAt: invoice.payment_verified_at || null,
+
       // Company info
       companyName: process.env.COMPANY_NAME || 'Pacific Crest Smiles',
-      
-      // Receipt generation metadata
       generatedAt: new Date().toISOString(),
     };
     

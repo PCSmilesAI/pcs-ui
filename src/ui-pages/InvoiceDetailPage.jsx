@@ -10,6 +10,7 @@ import { CodingTemplateSelector } from '../../components/invoices/CodingTemplate
 import SearchableSelect from '../components/SearchableSelect';
 import AddNewVendorModal from '../components/AddNewVendorModal';
 import { useUserRole } from '../context/UserRoleContext';
+import { buildQboReceiptUrl } from '../lib/qboUrls';
 
 // Helper function to get user email from localStorage/cookie
 function getUserEmail() {
@@ -3224,7 +3225,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                           <span style={{ color: '#065f46' }}>Completed</span>
                           {invoice?.qbo_bill_id && (
                             <a
-                              href={`https://app.qbo.intuit.com/app/bill?txnId=${invoice.qbo_bill_id}`}
+                              href={buildQboReceiptUrl(invoice.qbo_bill_id, invoice.qbo_bill_payment_id)}
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{
@@ -3278,7 +3279,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                 </span>
                 {billId && (
                   <a
-                    href={`https://app.qbo.intuit.com/app/bill?txnId=${billId}`}
+                    href={buildQboReceiptUrl(billId, invoice?.qbo_bill_payment_id)}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
@@ -3286,7 +3287,7 @@ export default function InvoiceDetailPage({ invoice: initialInvoice, onBack, onP
                       color: '#357ab2', textDecoration: 'none',
                     }}
                   >
-                    View in QBO &rarr;
+                    {isPaid ? 'View Receipt \u2192' : 'View in QBO \u2192'}
                   </a>
                 )}
               </div>

@@ -342,6 +342,8 @@ export function runMigrations(): void {
   // Payment locking - prevent two users from paying the same invoice simultaneously
   ensureColumn('invoices', 'payment_started_by', 'payment_started_by TEXT');
   ensureColumn('invoices', 'payment_started_at', 'payment_started_at TEXT');
+  ensureColumn('invoices', 'qbo_bill_payment_id', 'qbo_bill_payment_id TEXT');
+  ensureColumn('invoices', 'payment_verified_at', 'payment_verified_at TEXT');
   
   // Verifier tracking - tracks who verified the invoice and when (for verifier workflow)
   ensureColumn('invoices', 'verified_by_user_id', 'verified_by_user_id TEXT');

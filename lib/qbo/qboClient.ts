@@ -668,6 +668,30 @@ export class QBOClient {
   }
 
   /**
+   * Find the most recent BillPayment linked to a Bill (used for receipt deep links).
+   */
+  async getBillPaymentIdForBill(billId: string): Promise<string | null> {
+    try {
+      const safe = this.escapeQueryValue(billId);
+      const response = await this.query(
+        `SELECT * FROM BillPayment WHERE Line.LinkedTxn.TxnId = '${safe}' MAXRESULTS 10`
+      );
+      const payments = response.QueryResponse?.BillPayment;
+      if (!payments?.length) {
+        return null;
+      }
+      const sorted = [...payments].sort(
+        (a: { TxnDate?: string }, b: { TxnDate?: string }) =>
+          new Date(b.TxnDate || 0).getTime() - new Date(a.TxnDate || 0).getTime()
+      );
+      return sorted[0]?.Id || null;
+    } catch (error) {
+      console.warn(`[QBO] Could not find BillPayment for bill ${billId}:`, error);
+      return null;
+    }
+  }
+
+  /**
    * Check if a bill has been paid (Balance = 0)
    */
   async isBillPaid(billId: string): Promise<boolean> {

@@ -6,6 +6,7 @@ import { useInvoiceData } from '../context/InvoiceDataContext';
 import Toast from '../components/Toast.jsx';
 import { formatStatusForDisplay } from '../../lib/invoices/stateMachine';
 import { getDisplayVendorName, parseInvoiceAmount } from '../lib/vendorUtils';
+import { buildQboReceiptUrl } from '../lib/qboUrls';
 
 /**
  * Page for the "Complete" view. Lists invoices that have been
@@ -106,6 +107,8 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
             assigned_to: invoice.assigned_to,
             approved: invoice.approved,
             qbo_bill_id: invoice.qbo_bill_id,
+            qbo_bill_payment_id: invoice.qbo_bill_payment_id,
+            qboReceiptUrl: buildQboReceiptUrl(invoice.qbo_bill_id, invoice.qbo_bill_payment_id),
             status: formatStatusForDisplay(invoice.status)
           })});
         
@@ -176,6 +179,8 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
           assigned_to: invoice.assigned_to,
           approved: invoice.approved,
           qbo_bill_id: invoice.qbo_bill_id,
+          qbo_bill_payment_id: invoice.qbo_bill_payment_id,
+          qboReceiptUrl: buildQboReceiptUrl(invoice.qbo_bill_id, invoice.qbo_bill_payment_id),
           status: formatStatusForDisplay(invoice.status)
         })});
       setInvoices(transformedData);
@@ -211,6 +216,24 @@ export default function CompletePage({ onRowClick, searchQuery = '', filters = {
     { key: 'amount', label: 'Amount', align: 'right' },
     { key: 'location', label: 'Location' },
     { key: 'dateCompleted', label: 'Date Completed' },
+    {
+      key: 'receipt',
+      label: 'Receipt',
+      render: (row) =>
+        row.qboReceiptUrl ? (
+          <a
+            href={row.qboReceiptUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{ color: '#357ab2', textDecoration: 'underline', fontWeight: 500 }}
+          >
+            View Receipt
+          </a>
+        ) : (
+          <span style={{ color: '#9ca3af' }}>—</span>
+        ),
+    },
   ];
 
   const wrapperStyle = { padding: '24px' };

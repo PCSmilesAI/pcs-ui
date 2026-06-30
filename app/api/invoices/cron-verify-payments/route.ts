@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '../../../../lib/db/client';
-import { getInvoiceById, saveInvoice } from '../../../../lib/invoices/db-store';
+import { getInvoiceById } from '../../../../lib/invoices/db-store';
 import { QBOClient } from '../../../../lib/qbo/qboClient';
+import {
+  backfillQboBillPaymentId,
+  verifyAndMarkInvoicePaidFromQbo,
+} from '../../../../lib/qbo/verifyInvoicePayment';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,6 +17,8 @@ export const dynamic = 'force-dynamic';
  * Finds all invoices with status 'to_be_paid' that have a qbo_bill_id,
  * checks each bill's balance in QBO, and marks invoices as 'paid'
  * when the balance reaches 0.
+ *
+ * Also backfills QBO BillPayment IDs on paid invoices missing receipt links.
  *
  * Protected by a shared secret in the CRON_SECRET env var.
  * Call with: ?secret=<CRON_SECRET>
@@ -31,7 +37,6 @@ export async function GET(req: NextRequest) {
   try {
     const db = getDatabase();
 
-    // Find all to_be_paid invoices that have a QBO bill attached
     const pendingInvoices = db.prepare(`
       SELECT id, invoice_number, qbo_bill_id, vendor_name
       FROM invoices
@@ -41,21 +46,6 @@ export async function GET(req: NextRequest) {
         AND deleted = 0
     `).all() as Array<{ id: string; invoice_number: string; qbo_bill_id: string; vendor_name: string }>;
 
-    if (pendingInvoices.length === 0) {
-      console.log('[CRON_VERIFY] No pending invoices with QBO bills to verify');
-      return NextResponse.json({
-        ok: true,
-        checked: 0,
-        paid: [],
-        unpaid: [],
-        errors: [],
-        elapsed_ms: Date.now() - startTime,
-      });
-    }
-
-    console.log(`[CRON_VERIFY] Found ${pendingInvoices.length} invoices to check`);
-
-    // Initialize QBO client
     const qboClient = new QBOClient();
     await qboClient.initialize();
 
@@ -63,45 +53,76 @@ export async function GET(req: NextRequest) {
     const unpaid: string[] = [];
     const errors: string[] = [];
 
-    for (const row of pendingInvoices) {
-      try {
-        const bill = await qboClient.getBillById(row.qbo_bill_id);
+    if (pendingInvoices.length > 0) {
+      console.log(`[CRON_VERIFY] Found ${pendingInvoices.length} invoices to check`);
 
-        if (!bill) {
-          errors.push(`${row.invoice_number}: QBO bill ${row.qbo_bill_id} not found`);
-          unpaid.push(row.id);
-          continue;
-        }
-
-        if (bill.Balance === 0) {
-          // Bill is fully paid — update invoice status
+      for (const row of pendingInvoices) {
+        try {
           const invoice = getInvoiceById(row.id);
-          if (invoice) {
-            invoice.status = 'paid';
-            invoice.paid_at = new Date().toISOString();
-            (invoice as any).payment_verified_at = new Date().toISOString();
-            saveInvoice(invoice);
-            paid.push(row.id);
-            console.log(`[CRON_VERIFY] ✓ ${row.invoice_number} (${row.vendor_name}) → PAID`);
+          if (!invoice) {
+            errors.push(`${row.invoice_number}: invoice not found`);
+            unpaid.push(row.id);
+            continue;
           }
-        } else {
-          unpaid.push(row.id);
+
+          const result = await verifyAndMarkInvoicePaidFromQbo(invoice, qboClient);
+          if (result.paid) {
+            paid.push(row.id);
+            console.log(
+              `[CRON_VERIFY] ✓ ${row.invoice_number} (${row.vendor_name}) → PAID` +
+                (result.paymentId ? ` [BillPayment ${result.paymentId}]` : '')
+            );
+          } else {
+            unpaid.push(row.id);
+          }
+        } catch (err: any) {
+          const msg = `${row.invoice_number}: ${err?.message || 'check failed'}`;
+          console.error(`[CRON_VERIFY] ✗ ${msg}`);
+          errors.push(msg);
+        }
+      }
+    } else {
+      console.log('[CRON_VERIFY] No pending invoices with QBO bills to verify');
+    }
+
+    // Backfill receipt links for paid invoices that predate payment ID tracking
+    const paidMissingReceipt = db.prepare(`
+      SELECT id, invoice_number
+      FROM invoices
+      WHERE status IN ('paid', 'completed')
+        AND qbo_bill_id IS NOT NULL
+        AND qbo_bill_id != ''
+        AND (qbo_bill_payment_id IS NULL OR qbo_bill_payment_id = '')
+        AND deleted = 0
+      LIMIT 20
+    `).all() as Array<{ id: string; invoice_number: string }>;
+
+    let backfilled = 0;
+    for (const row of paidMissingReceipt) {
+      try {
+        const invoice = getInvoiceById(row.id);
+        if (!invoice) continue;
+        const paymentId = await backfillQboBillPaymentId(invoice, qboClient);
+        if (paymentId) {
+          backfilled++;
+          console.log(`[CRON_VERIFY] Backfilled BillPayment ${paymentId} for ${row.invoice_number}`);
         }
       } catch (err: any) {
-        const msg = `${row.invoice_number}: ${err?.message || 'check failed'}`;
-        console.error(`[CRON_VERIFY] ✗ ${msg}`);
-        errors.push(msg);
+        errors.push(`${row.invoice_number}: backfill failed — ${err?.message || 'unknown'}`);
       }
     }
 
     const elapsed = Date.now() - startTime;
-    console.log(`[CRON_VERIFY] Done in ${elapsed}ms — ${paid.length} paid, ${unpaid.length} still pending, ${errors.length} errors`);
+    console.log(
+      `[CRON_VERIFY] Done in ${elapsed}ms — ${paid.length} paid, ${unpaid.length} still pending, ${backfilled} receipt links backfilled, ${errors.length} errors`
+    );
 
     return NextResponse.json({
       ok: true,
       checked: pendingInvoices.length,
       paid,
       unpaid,
+      backfilled,
       errors,
       elapsed_ms: elapsed,
     });
