@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { QBOClient } from '@/lib/qbo/qboClient';
 import { tokenStorage } from '@/lib/qbo/tokenStorage';
+import { getActiveQboVendors, vendorMatchesAllowlist } from '@/lib/workflow/rolesStore';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,19 @@ export async function GET(req: NextRequest) {
       }
     } catch (qboError: any) {
       console.warn('[API][QBO][VENDORS] QBO API failed:', qboError.message);
+    }
+
+    // Phased rollout: restrict dropdown to active_qbo_vendors from roles.json when configured
+    const activeQboVendors = await getActiveQboVendors();
+    if (activeQboVendors) {
+      vendors = vendors.filter((v) =>
+        vendorMatchesAllowlist(v.displayName, activeQboVendors) ||
+        vendorMatchesAllowlist(v.name, activeQboVendors)
+      );
+      console.log('[API][QBO][VENDORS]', 'active_qbo_vendors_filter', {
+        allowlist: activeQboVendors,
+        matched: vendors.length,
+      });
     }
 
     // Sort vendors alphabetically by display name

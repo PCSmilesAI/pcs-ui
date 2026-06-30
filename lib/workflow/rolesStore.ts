@@ -8,6 +8,8 @@ export interface RolesFile {
   ap_authorizers: string[];
   office_managers: Record<string, string[]>;
   vendor_access?: Record<string, string | string[]>;
+  /** When set, the vendor dropdown only shows these QBO vendors (phased rollout). */
+  active_qbo_vendors?: string[];
   threshold_usd: number;
   test_mode_route_all_to_admin?: boolean;
   version?: number;
@@ -227,4 +229,26 @@ export async function isVerifier(email: string): Promise<boolean> {
  */
 export function getApprovalDestination(): string {
   return 'mckaym@pcsmiles.com';
+}
+
+/**
+ * Vendors shown in the QBO vendor dropdown during phased rollout.
+ * Returns null when unset — caller should show all QBO vendors.
+ */
+export async function getActiveQboVendors(): Promise<string[] | null> {
+  const roles = await readRoles();
+  const list = roles.active_qbo_vendors;
+  if (!Array.isArray(list) || list.length === 0) {
+    return null;
+  }
+  return list.map((v) => v.trim()).filter(Boolean);
+}
+
+/** Case-insensitive match of a QBO vendor name against an allowlist entry. */
+export function vendorMatchesAllowlist(vendorName: string, allowlist: string[]): boolean {
+  const normalized = vendorName.trim().toLowerCase();
+  return allowlist.some((allowed) => {
+    const a = allowed.trim().toLowerCase();
+    return normalized === a || normalized.includes(a) || a.includes(normalized);
+  });
 }

@@ -20,8 +20,16 @@ function validateRolesPayload(payload: any, existing: RolesFile): RolesFile {
       typeof payload.test_mode_route_all_to_admin === 'boolean'
         ? payload.test_mode_route_all_to_admin
         : existing.test_mode_route_all_to_admin,
+    vendor_access: existing.vendor_access,
+    active_qbo_vendors: Array.isArray(payload.active_qbo_vendors)
+      ? payload.active_qbo_vendors.map((v: any) => (typeof v === 'string' ? v.trim() : '')).filter(Boolean)
+      : existing.active_qbo_vendors,
     version: (existing.version ?? 0) + 1,
   };
+
+  if (payload.vendor_access && typeof payload.vendor_access === 'object') {
+    next.vendor_access = payload.vendor_access;
+  }
 
   if (payload.office_managers && typeof payload.office_managers === 'object') {
     const officeManagers: Record<string, string[]> = {};

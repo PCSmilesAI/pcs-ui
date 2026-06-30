@@ -45,11 +45,14 @@ export async function GET(req: NextRequest) {
 
     const isConnected = !!tokens?.accessToken && !!tokens?.realmId && !isExpired;
 
+    const qboEnvironment = process.env.QBO_ENVIRONMENT || 'sandbox';
+
     return NextResponse.json({
       connected: isConnected,
       message: isConnected 
         ? `Connected to QuickBooks (${tokens?.realmId ?? 'unknown'})` 
         : 'Not connected to QuickBooks',
+      environment: qboEnvironment,
       realmId: tokens?.realmId ?? null,
       tokens: tokens ? [{
         realmId: tokens.realmId,
