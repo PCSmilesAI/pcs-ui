@@ -76,7 +76,13 @@ export class QBOClient {
       throw new Error('No QuickBooks tokens found. Please connect to QuickBooks first.');
     }
 
-    if (process.env.NODE_ENV === 'production') {
+    // Auto-refresh in production deployments (NODE_ENV or PCS_ENV or QBO_ENVIRONMENT=production)
+    const isProductionRuntime =
+      process.env.NODE_ENV === 'production' ||
+      process.env.PCS_ENV === 'production' ||
+      process.env.QBO_ENVIRONMENT === 'production';
+
+    if (isProductionRuntime) {
       const { tokenRefreshService } = await import('./tokenRefreshService');
       tokenRefreshService.start();
     }
