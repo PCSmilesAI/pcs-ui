@@ -163,27 +163,30 @@ export async function POST(
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
     }
     
-    // Check for invoice_number uniqueness before attempting update
-    // Only flag as duplicate if BOTH invoice_number AND vendor_name match
-    // Different vendors can have the same invoice numbering system
-    if (invoice_number !== undefined && invoice_number !== originalInvoice.invoice_number) {
-      // Determine the effective vendor name (from update or existing)
+    // Check for duplicate (invoice_number, vendor_name) before attempting update.
+    // Triggers when EITHER field changes, since the composite unique index
+    // covers both columns: idx_invoice_vendor_dedup(invoice_number, vendor_name).
+    const invoiceNumberChanging = invoice_number !== undefined && invoice_number !== originalInvoice.invoice_number;
+    const vendorNameChanging = vendor_name !== undefined && vendor_name !== originalInvoice.vendor_name;
+
+    if (invoiceNumberChanging || vendorNameChanging) {
+      const effectiveInvoiceNumber = invoice_number !== undefined ? invoice_number : originalInvoice.invoice_number;
       const effectiveVendorName = vendor_name !== undefined ? vendor_name : originalInvoice.vendor_name;
       
-      const existingWithNumber = db.prepare(
+      const existingDuplicate = db.prepare(
         'SELECT id, vendor_name FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND id != ? AND deleted = 0'
-      ).get(invoice_number, effectiveVendorName, actualInvoiceId) as any;
+      ).get(effectiveInvoiceNumber, effectiveVendorName, actualInvoiceId) as any;
       
-      if (existingWithNumber) {
-        console.warn('[API][INVOICES][UPDATE]', 'duplicate_invoice_number_same_vendor', {
+      if (existingDuplicate) {
+        console.warn('[API][INVOICES][UPDATE]', 'duplicate_invoice_vendor_combo', {
           invoiceId: actualInvoiceId,
-          attemptedInvoiceNumber: invoice_number,
+          invoiceNumber: effectiveInvoiceNumber,
           vendorName: effectiveVendorName,
-          existingInvoiceId: existingWithNumber.id
+          existingInvoiceId: existingDuplicate.id
         });
         return NextResponse.json({ 
-          error: 'Invoice number already exists for this vendor',
-          existingInvoiceId: existingWithNumber.id 
+          error: 'An invoice with this number already exists for this vendor',
+          existingInvoiceId: existingDuplicate.id 
         }, { status: 409 });
       }
     }
@@ -402,15 +405,26 @@ export async function POST(
       allocations_reset: amount_cents !== undefined
     });
   } catch (err: any) {
-    // Log full error server-side only
     console.error('[API][INVOICES][UPDATE]', 'error', { invoiceId, error: err?.message });
 
     if (err?.message?.includes('locked')) {
-      // Return safe error message to client
       return NextResponse.json({ error: 'Invoice is locked' }, { status: 409 });
     }
 
-    // Return safe error message to client
+    if (err?.message?.includes('UNIQUE constraint failed')) {
+      // The pre-check above should catch this, but handle it as a safety net
+      const db2 = getDatabase();
+      const effectiveNumber = (err?.message?.includes('invoice_number') ? invoiceId : null);
+      const conflicting = effectiveNumber ? db2.prepare(
+        'SELECT id FROM invoices WHERE invoice_number = ? AND id != ? AND deleted = 0'
+      ).get(effectiveNumber, invoiceId) as any : null;
+      
+      return NextResponse.json({ 
+        error: 'An invoice with this number already exists for this vendor',
+        existingInvoiceId: conflicting?.id
+      }, { status: 409 });
+    }
+
     return NextResponse.json({ error: 'Update failed' }, { status: 400 });
   }
 }
