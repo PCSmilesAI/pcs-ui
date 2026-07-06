@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '../../../../lib/db/client';
 import { isTombstoned } from '../../../../lib/invoices/tombstoneService';
-import { normalizeVendorNameForStorage } from '../../../../lib/invoices/vendorNormalization';
+import { normalizeVendorNameForStorage, inferVendorFromHints } from '../../../../lib/invoices/vendorNormalization';
 import { resolveVendor } from '../../../../lib/invoices/vendorMatcher';
 import { buildApiPdfPath, normalizePdfFilename } from '../../../../lib/security/filename';
 import { isPathWithinBase } from '../../../../lib/security/path-validation';
@@ -51,6 +51,22 @@ interface GPTIngestPayload {
   source_file?: string;
   vendor_hint?: string;
   force_reparse?: boolean;
+}
+
+function findExistingInvoiceByNumber(
+  db: ReturnType<typeof getDatabase>,
+  invoiceNumber: string,
+  normalizedVendor: string
+): { id: string; invoice_number: string; vendor_name?: string } | undefined {
+  const exact = db.prepare(
+    `SELECT id, invoice_number, vendor_name FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
+  ).get(invoiceNumber, normalizedVendor) as { id: string; invoice_number: string; vendor_name?: string } | undefined;
+  if (exact) return exact;
+
+  // Prevent hidden Unknown duplicates when the same invoice number already exists under any vendor
+  return db.prepare(
+    `SELECT id, invoice_number, vendor_name FROM invoices WHERE invoice_number = ? AND deleted = 0 LIMIT 1`
+  ).get(invoiceNumber) as { id: string; invoice_number: string; vendor_name?: string } | undefined;
 }
 
 /**
@@ -246,7 +262,10 @@ export async function POST(req: NextRequest) {
           const parsed = validInvoices[idx];
           const invoiceIndex = idx + 1;
           
-          const rawVendor = parsed.vendor_name || parseResult.vendorDetected || 'Unknown';
+          const rawVendor = inferVendorFromHints(
+            parsed.vendor_name || parseResult.vendorDetected || 'Unknown',
+            { vendorHint: body.vendor_hint, pdfFilename: normalizedPdfFilename }
+          );
           let validatedVendor = rawVendor;
           
           try {
@@ -283,11 +302,9 @@ export async function POST(req: NextRequest) {
           usedInvoiceNumbers.add(`${invoiceNumber}::${normalizedVendor}`);
           
           // Check existing DB records -- SKIP true duplicates instead of suffixing
-          const existing = db.prepare(
-            `SELECT id, invoice_number FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
-          ).get(invoiceNumber, normalizedVendor) as { id: string; invoice_number: string } | undefined;
+          const existing = findExistingInvoiceByNumber(db, invoiceNumber, normalizedVendor);
           if (existing) {
-            console.warn(`[PCS_AI_INGEST] DUPLICATE SKIPPED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existing.id}`);
+            console.warn(`[PCS_AI_INGEST] DUPLICATE SKIPPED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existing.id} (stored vendor=${existing.vendor_name})`);
             continue;
           }
           
@@ -462,7 +479,10 @@ export async function POST(req: NextRequest) {
 
     // Single invoice - extract data
     const parsed = parseResult.data;
-    const rawVendor = parsed.vendor_name || parseResult.vendorDetected || 'Unknown';
+    const rawVendor = inferVendorFromHints(
+      parsed.vendor_name || parseResult.vendorDetected || 'Unknown',
+      { vendorHint: body.vendor_hint, pdfFilename: normalizedPdfFilename }
+    );
     
     // Validate vendor against QBO list
     let validatedVendor = rawVendor;
@@ -500,15 +520,13 @@ export async function POST(req: NextRequest) {
       normalizedPdfFilename?.replace(/\.(pdf|PDF)$/, '') ||
       `GPT-${Date.now()}`;
 
-    // Block true duplicates: same invoice_number + vendor already in DB
+    // Block true duplicates: same invoice_number already in DB (any vendor)
     if (parsed.invoice_number) {
-      const existingByNumber = db.prepare(
-        `SELECT id, invoice_number FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
-      ).get(invoiceNumber, normalizedVendor) as { id: string; invoice_number: string } | undefined;
+      const existingByNumber = findExistingInvoiceByNumber(db, invoiceNumber, normalizedVendor);
       if (existingByNumber) {
-        console.warn(`[PCS_AI_INGEST] DUPLICATE BLOCKED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existingByNumber.id}`);
+        console.warn(`[PCS_AI_INGEST] DUPLICATE BLOCKED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existingByNumber.id} (stored vendor=${existingByNumber.vendor_name})`);
         return NextResponse.json(
-          { ok: true, message: `Duplicate invoice: ${invoiceNumber} for ${normalizedVendor} already exists`, duplicate: true, existing_id: existingByNumber.id },
+          { ok: true, message: `Duplicate invoice: ${invoiceNumber} already exists`, duplicate: true, existing_id: existingByNumber.id },
           { status: 200 }
         );
       }

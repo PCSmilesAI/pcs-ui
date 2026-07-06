@@ -62,3 +62,34 @@ export function getDisplayVendorNameForBackend(name: string | null | undefined):
   return normalizeVendorNameForStorage(name);
 }
 
+/**
+ * Infer vendor from email watcher hints when GPT returns Unknown.
+ * Common for TC Dental multi-invoice PDF batches from Laura's scanner emails.
+ */
+export function inferVendorFromHints(
+  parsedVendor: string | null | undefined,
+  options?: { vendorHint?: string; pdfFilename?: string }
+): string {
+  const current = (parsedVendor || '').trim();
+  if (current && current.toLowerCase() !== 'unknown') {
+    return current;
+  }
+
+  const hint = (options?.vendorHint || '').toLowerCase();
+  const filename = (options?.pdfFilename || '').toLowerCase();
+  const blob = `${hint} ${filename}`;
+
+  if (
+    hint === 'tc' ||
+    blob.includes('tc dental') ||
+    blob.includes('tcdental') ||
+    filename.includes('tc_dental') ||
+    filename.startsWith('tc_') ||
+    filename.includes('_tc_')
+  ) {
+    return 'TC Dental Lab';
+  }
+
+  return current || 'Unknown';
+}
+
