@@ -63,10 +63,17 @@ function findExistingInvoiceByNumber(
   ).get(invoiceNumber, normalizedVendor) as { id: string; invoice_number: string; vendor_name?: string } | undefined;
   if (exact) return exact;
 
-  // Prevent hidden Unknown duplicates when the same invoice number already exists under any vendor
-  return db.prepare(
-    `SELECT id, invoice_number, vendor_name FROM invoices WHERE invoice_number = ? AND deleted = 0 LIMIT 1`
-  ).get(invoiceNumber) as { id: string; invoice_number: string; vendor_name?: string } | undefined;
+  // Prevent hidden Unknown duplicates: same number where one side's vendor is
+  // unknown is almost certainly the same document parsed twice. But a number
+  // match between two DIFFERENT known vendors is NOT a duplicate — lab/supply
+  // vendors use short sequential invoice numbers that collide across vendors,
+  // and blocking those silently dropped real invoices.
+  const isUnknownVendor = (v: string | null | undefined) => !v || v.trim().toLowerCase() === 'unknown';
+  const sameNumber = db.prepare(
+    `SELECT id, invoice_number, vendor_name FROM invoices WHERE invoice_number = ? AND deleted = 0`
+  ).all(invoiceNumber) as { id: string; invoice_number: string; vendor_name?: string }[];
+  const incomingUnknown = isUnknownVendor(normalizedVendor);
+  return sameNumber.find(row => incomingUnknown || isUnknownVendor(row.vendor_name));
 }
 
 /**
