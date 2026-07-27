@@ -53,14 +53,32 @@ interface GPTIngestPayload {
   force_reparse?: boolean;
 }
 
+type ExistingInvoiceRow = {
+  id: string;
+  invoice_number: string;
+  vendor_name?: string;
+  status?: string;
+  current_assigned_user_email?: string | null;
+};
+
+type SkippedInvoiceInfo = {
+  invoice_number: string;
+  existing_id: string;
+  existing_status: string | null;
+  existing_assigned_to: string | null;
+  existing_vendor: string | null;
+  reason: 'duplicate';
+};
+
 function findExistingInvoiceByNumber(
   db: ReturnType<typeof getDatabase>,
   invoiceNumber: string,
   normalizedVendor: string
-): { id: string; invoice_number: string; vendor_name?: string } | undefined {
+): ExistingInvoiceRow | undefined {
   const exact = db.prepare(
-    `SELECT id, invoice_number, vendor_name FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
-  ).get(invoiceNumber, normalizedVendor) as { id: string; invoice_number: string; vendor_name?: string } | undefined;
+    `SELECT id, invoice_number, vendor_name, status, current_assigned_user_email
+     FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
+  ).get(invoiceNumber, normalizedVendor) as ExistingInvoiceRow | undefined;
   if (exact) return exact;
 
   // Prevent hidden Unknown duplicates: same number where one side's vendor is
@@ -70,10 +88,33 @@ function findExistingInvoiceByNumber(
   // and blocking those silently dropped real invoices.
   const isUnknownVendor = (v: string | null | undefined) => !v || v.trim().toLowerCase() === 'unknown';
   const sameNumber = db.prepare(
-    `SELECT id, invoice_number, vendor_name FROM invoices WHERE invoice_number = ? AND deleted = 0`
-  ).all(invoiceNumber) as { id: string; invoice_number: string; vendor_name?: string }[];
+    `SELECT id, invoice_number, vendor_name, status, current_assigned_user_email
+     FROM invoices WHERE invoice_number = ? AND deleted = 0`
+  ).all(invoiceNumber) as ExistingInvoiceRow[];
   const incomingUnknown = isUnknownVendor(normalizedVendor);
   return sameNumber.find(row => incomingUnknown || isUnknownVendor(row.vendor_name));
+}
+
+function toSkippedInfo(invoiceNumber: string, existing: ExistingInvoiceRow): SkippedInvoiceInfo {
+  return {
+    invoice_number: invoiceNumber,
+    existing_id: existing.id,
+    existing_status: existing.status || null,
+    existing_assigned_to: existing.current_assigned_user_email || null,
+    existing_vendor: existing.vendor_name || null,
+    reason: 'duplicate',
+  };
+}
+
+function recordDuplicateSkippedEvent(
+  db: ReturnType<typeof getDatabase>,
+  existingId: string,
+  payload: Record<string, unknown>
+) {
+  db.prepare(`
+    INSERT INTO invoice_events (invoice_id, action, payload_json)
+    VALUES (?, 'DUPLICATE_SKIPPED', ?)
+  `).run(existingId, JSON.stringify(payload));
 }
 
 /**
@@ -253,7 +294,10 @@ export async function POST(req: NextRequest) {
         // Fall through to single-invoice handling below
       } else {
         const totalInvoicesInDoc = validInvoices.length;
+        const invoicesDetected = allParsedInvoices.length;
+        const filteredPages = invoicesDetected - validInvoices.length;
         const createdInvoices: Array<{ id: string; invoice_number: string; vendor: string; amount: number }> = [];
+        const invoicesSkipped: SkippedInvoiceInfo[] = [];
         const usedInvoiceNumbers = new Set<string>();
         
         // Prepare invoice data for all valid invoices
@@ -311,7 +355,17 @@ export async function POST(req: NextRequest) {
           // Check existing DB records -- SKIP true duplicates instead of suffixing
           const existing = findExistingInvoiceByNumber(db, invoiceNumber, normalizedVendor);
           if (existing) {
-            console.warn(`[PCS_AI_INGEST] DUPLICATE SKIPPED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existing.id} (stored vendor=${existing.vendor_name})`);
+            const skipped = toSkippedInfo(invoiceNumber, existing);
+            invoicesSkipped.push(skipped);
+            console.warn(`[PCS_AI_INGEST] DUPLICATE SKIPPED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existing.id} (stored vendor=${existing.vendor_name}, status=${existing.status})`);
+            recordDuplicateSkippedEvent(db, existing.id, {
+              invoice_number: invoiceNumber,
+              incoming_vendor: normalizedVendor,
+              existing_status: existing.status,
+              existing_assigned_to: existing.current_assigned_user_email,
+              source_file: sourceFile,
+              multi_invoice: true,
+            });
             continue;
           }
           
@@ -472,14 +526,26 @@ export async function POST(req: NextRequest) {
             console.warn('[PCS_AI_INGEST] Failed to auto-categorize:', err?.message);
           }
         }
+
+        // Completeness: detected == created + skipped + filtered_pages (+ unaccounted remainder)
+        const accounted = createdInvoices.length + invoicesSkipped.length + filteredPages;
+        const unaccounted = Math.max(0, invoicesDetected - accounted);
+        if (unaccounted > 0) {
+          console.warn(`[PCS_AI_INGEST] Completeness gap: detected=${invoicesDetected}, created=${createdInvoices.length}, skipped=${invoicesSkipped.length}, filtered=${filteredPages}, unaccounted=${unaccounted}`);
+        }
         
         return NextResponse.json({
           ok: true,
-          message: `Multi-invoice document: created ${createdInvoices.length} invoices`,
+          message: `Multi-invoice document: created ${createdInvoices.length} invoices, skipped ${invoicesSkipped.length} duplicates`,
           multi_invoice: true,
           document_group_id: documentGroupId,
+          invoices_detected: invoicesDetected,
           invoices_created: createdInvoices.length,
-          invoices: createdInvoices
+          invoices_skipped_count: invoicesSkipped.length,
+          filtered_pages: filteredPages,
+          unaccounted,
+          invoices: createdInvoices,
+          invoices_skipped: invoicesSkipped,
         });
       }
     }
@@ -531,9 +597,31 @@ export async function POST(req: NextRequest) {
     if (parsed.invoice_number) {
       const existingByNumber = findExistingInvoiceByNumber(db, invoiceNumber, normalizedVendor);
       if (existingByNumber) {
-        console.warn(`[PCS_AI_INGEST] DUPLICATE BLOCKED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existingByNumber.id} (stored vendor=${existingByNumber.vendor_name})`);
+        const skipped = toSkippedInfo(invoiceNumber, existingByNumber);
+        console.warn(`[PCS_AI_INGEST] DUPLICATE BLOCKED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existingByNumber.id} (stored vendor=${existingByNumber.vendor_name}, status=${existingByNumber.status})`);
+        recordDuplicateSkippedEvent(db, existingByNumber.id, {
+          invoice_number: invoiceNumber,
+          incoming_vendor: normalizedVendor,
+          existing_status: existingByNumber.status,
+          existing_assigned_to: existingByNumber.current_assigned_user_email,
+          source_file: sourceFile,
+          multi_invoice: false,
+        });
         return NextResponse.json(
-          { ok: true, message: `Duplicate invoice: ${invoiceNumber} already exists`, duplicate: true, existing_id: existingByNumber.id },
+          {
+            ok: true,
+            message: `Duplicate invoice: ${invoiceNumber} already exists`,
+            duplicate: true,
+            skipped: true,
+            existing_id: existingByNumber.id,
+            invoices_detected: 1,
+            invoices_created: 0,
+            invoices_skipped_count: 1,
+            filtered_pages: 0,
+            unaccounted: 0,
+            invoices: [],
+            invoices_skipped: [skipped],
+          },
           { status: 200 }
         );
       }
@@ -686,6 +774,18 @@ export async function POST(req: NextRequest) {
       parsing_status: parsingStatus,
       parsing_confidence: parsed.parsing_confidence,
       knowledge_base_used: parseResult.knowledgeBaseUsed,
+      invoices_detected: 1,
+      invoices_created: 1,
+      invoices_skipped_count: 0,
+      filtered_pages: 0,
+      unaccounted: 0,
+      invoices: [{
+        id,
+        invoice_number: invoiceNumber,
+        vendor: normalizedVendor,
+        amount: amountCents / 100,
+      }],
+      invoices_skipped: [],
       parsed_data: {
         invoice_number: parsed.invoice_number,
         invoice_date: parsed.invoice_date,

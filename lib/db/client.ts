@@ -364,6 +364,49 @@ export function runMigrations(): void {
   ensureColumn('invoices', 'pdf_page_start', 'pdf_page_start INTEGER'); // 0-based first page in source PDF
   ensureColumn('invoices', 'pdf_page_end', 'pdf_page_end INTEGER'); // 0-based last page (inclusive) in source PDF
 
+  // Ingest reports: per-email summary of what was created vs omitted (duplicates)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS ingest_reports (
+      id TEXT PRIMARY KEY,
+      email_key TEXT,
+      message_id TEXT,
+      sender_email TEXT,
+      subject TEXT,
+      received_at TEXT,
+      pdf_count INTEGER DEFAULT 0,
+      invoices_detected INTEGER DEFAULT 0,
+      created_json TEXT,
+      skipped_json TEXT,
+      failed_json TEXT,
+      status TEXT DEFAULT 'ok',
+      composed_subject TEXT,
+      composed_body TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_ingest_reports_sender ON ingest_reports(sender_email);
+    CREATE INDEX IF NOT EXISTS idx_ingest_reports_created_at ON ingest_reports(created_at);
+  `);
+
+  // User-facing in-app notifications (e.g. ingest reports for Laura)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id TEXT PRIMARY KEY,
+      user_email TEXT NOT NULL,
+      type TEXT NOT NULL,
+      title TEXT,
+      body TEXT,
+      payload_json TEXT,
+      read_at TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_email);
+    CREATE INDEX IF NOT EXISTS idx_notifications_unread ON notifications(user_email, read_at);
+  `);
+
   // Create table_template_rows table for table template type
   // Note: invoice_id is nullable (template rows don't need an invoice)
   // Note: amount_cents is nullable (split evenly modes don't specify amounts)

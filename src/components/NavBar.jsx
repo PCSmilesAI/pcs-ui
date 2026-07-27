@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUserRole } from '../context/UserRoleContext';
+import NotificationBell from './NotificationBell';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 // Navigation bar implemented with inline styles. This component avoids
@@ -345,6 +346,7 @@ function NavBarInner({
         )}
       </div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
+        <NotificationBell />
         {/* Search icon and search field */}
         <span
           className="fas fa-search"

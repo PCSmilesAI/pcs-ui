@@ -55,6 +55,7 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
   const [toast, setToast] = useState(null);
   const [userVendorAccess, setUserVendorAccess] = useState(null); // null = loading, '*' = admin, array = verifier
   const [incomingCount, setIncomingCount] = useState(0);
+  const [ingestBanner, setIngestBanner] = useState(null);
   const [showBulkSendRouteChoice, setShowBulkSendRouteChoice] = useState(false);
   const [showBulkRejectModal, setShowBulkRejectModal] = useState(false);
   const [bulkRejectReason, setBulkRejectReason] = useState('duplicate');
@@ -272,6 +273,17 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
       .then(d => setIncomingCount(d.count || 0))
       .catch(() => {});
   }, [invoices]); // re-check after invoice list refreshes
+
+  // Banner for unread ingest reports (why some invoices were omitted)
+  useEffect(() => {
+    fetch('/api/notifications?unread=1&limit=5', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => {
+        const ingest = (d.notifications || []).find(n => n.type === 'ingest_report');
+        setIngestBanner(ingest || null);
+      })
+      .catch(() => setIngestBanner(null));
+  }, [invoices]);
 
   // Refresh invoice list when page comes back into focus
   useEffect(() => {
@@ -742,6 +754,54 @@ function ForMePageImpl({ searchQuery = '', filters = {} }) {
 
   return (
     <div style={{ padding: '24px' }}>
+      {ingestBanner && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: '12px 16px',
+            borderRadius: 8,
+            border: '1px solid #bfdbfe',
+            background: '#eff6ff',
+            color: '#1e3a5f',
+            fontSize: 14,
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
+            <div>
+              <strong style={{ display: 'block', marginBottom: 4 }}>
+                <i className="fas fa-bell" style={{ marginRight: 8, color: '#357ab2' }} />
+                {ingestBanner.title || 'Invoice email update'}
+              </strong>
+              <div style={{ maxHeight: 120, overflow: 'auto' }}>{ingestBanner.body}</div>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await fetch('/api/notifications/mark-read', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: [ingestBanner.id] }),
+                  });
+                } catch (_) {}
+                setIngestBanner(null);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#357ab2',
+                cursor: 'pointer',
+                fontSize: 12,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
       <div style={{ marginBottom: '24px' }} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">For Me</h1>

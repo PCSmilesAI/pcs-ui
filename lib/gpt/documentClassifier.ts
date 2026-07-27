@@ -184,7 +184,19 @@ export async function classifyDocument(
       jsonStr = jsonMatch[1];
     }
 
-    const result = JSON.parse(jsonStr.trim()) as ClassificationResult;
+    const resultRaw = JSON.parse(jsonStr.trim());
+    // GPT sometimes returns a JSON array; normalize to a single object
+    const result = (Array.isArray(resultRaw)
+      ? (resultRaw.find((item: any) => item && typeof item === 'object' && item.document_type) || resultRaw[0] || {})
+      : resultRaw) as ClassificationResult;
+
+    if (!result || typeof result !== 'object') {
+      return {
+        success: false,
+        result: null,
+        error: 'PCS AI returned invalid classification shape'
+      };
+    }
 
     // Validate document_type
     const validTypes: DocumentType[] = ['invoice', 'credit_memo', 'statement', 'payment_confirmation', 'receipt', 'packing_slip', 'letter', 'marketing', 'other'];

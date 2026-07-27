@@ -13,6 +13,7 @@ const PUBLIC_API_PREFIXES = [
   '/api/qbo/webhooks',
   '/api/invoices/cron-verify-payments',
   '/api/invoices/gpt-ingest',
+  '/api/invoices/ingest-report',
   '/api/gpt-classify',
   '/api/other-documents',
   '/api/vendors/onboard-link',

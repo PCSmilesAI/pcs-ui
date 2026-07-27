@@ -1,6 +1,8 @@
 import imaplib
 import email
 from email.header import decode_header
+from email.mime.text import MIMEText
+from email.utils import parseaddr, formataddr
 import os
 import time
 import subprocess
@@ -12,6 +14,7 @@ import sqlite3
 import hashlib
 import logging
 import select
+import smtplib
 import requests
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -21,6 +24,8 @@ from filename_utils import sanitize_filename
 EMAIL_USER = os.environ.get("IMAP_USER", "invoices@pcsmilesai.com")
 EMAIL_PASS = os.environ.get("IMAP_PASS", "PCS-AI-2026!")
 IMAP_SERVER = os.environ.get("IMAP_SERVER", "imap.secureserver.net")
+SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtpout.secureserver.net")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "465"))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("PCS_DATA_DIR", os.path.join(BASE_DIR, "pcs_ui_data"))
@@ -472,6 +477,12 @@ def connect_imap(max_retries=3, retry_delay=5):
 def detect_vendor_from_email(msg):
     sender = msg.get("From", "").lower()
     subject = msg.get("Subject", "").lower()
+
+    # Laura forwards TC Dental scans with vague subjects ("tc", "Ridgefield invoices")
+    # and scanner filenames with no vendor keyword — always treat as TC during rollout.
+    for priority_sender in PRIORITY_SENDERS:
+        if priority_sender in sender:
+            return 'tc'
     
     vendor_patterns = {
         'epic': ['epic', 'epic dental'],
@@ -480,7 +491,8 @@ def detect_vendor_from_email(msg):
         'exodus': ['exodus', 'exodus dental'],
         'artisan': ['artisan', 'artisan dental'],
         'tc': ['tc dental', 'tc dental supply', 'tc dental lab', 'tcdentallab',
-               'tcdental', 'tc invoices', 'tc invoice', 'tc lab']
+               'tcdental', 'tc invoices', 'tc invoice', 'tc lab',
+               'ridgefield invoice', 'ridgefiled invoice', 'salem - tc']
     }
     
     for vendor, patterns in vendor_patterns.items():
@@ -520,8 +532,12 @@ def parse_invoice_with_gpt(filepath, vendor_hint=None):
     Uses PCS AI for intelligent parsing.
 
     Returns:
-        dict with invoice data if successful, TRANSIENT_FAILURE if the API was
-        unreachable (retry next scan), None on a hard parse failure
+        dict with structured ingest outcome if successful, TRANSIENT_FAILURE if the API was
+        unreachable (retry next scan), None on a hard parse failure.
+
+        Success dict keys include:
+          success, skipped, invoices, invoices_skipped, invoices_detected,
+          invoices_created, unaccounted, multi_invoice, message
     """
     try:
         log(f"[GPT_INGEST] Parsing invoice with GPT: {os.path.basename(filepath)}")
@@ -551,26 +567,68 @@ def parse_invoice_with_gpt(filepath, vendor_hint=None):
         if not data.get("ok"):
             log(f"[PCS_AI_INGEST][ERROR] Ingest failed: {data.get('error', 'Unknown error')}")
             return None
-        
-        # Check if skipped (already exists or tombstoned)
-        if data.get("skipped"):
-            log(f"[PCS_AI_INGEST][SKIP] Invoice skipped: {data.get('message')}")
-            return {"skipped": True, "message": data.get("message")}
-        
-        if data.get("duplicate"):
-            log(f"[PCS_AI_INGEST][DUPLICATE] Invoice duplicate blocked: {data.get('message')}")
-            return {"skipped": True, "duplicate": True, "message": data.get("message")}
-        
-        log(f"[PCS_AI_INGEST][SUCCESS] Invoice parsed: #{data.get('invoice_number')} - {data.get('vendor')} - ${data.get('amount', 0):.2f}")
+
+        invoices = data.get("invoices") or []
+        invoices_skipped = data.get("invoices_skipped") or []
+        invoices_detected = data.get("invoices_detected")
+        invoices_created = data.get("invoices_created")
+        unaccounted = data.get("unaccounted") or 0
+        multi_invoice = bool(data.get("multi_invoice"))
+
+        # Normalize single-invoice / legacy shapes into the structured form
+        if not invoices and data.get("id"):
+            invoices = [{
+                "id": data.get("id"),
+                "invoice_number": data.get("invoice_number"),
+                "vendor": data.get("vendor"),
+                "amount": data.get("amount"),
+            }]
+        if not invoices_skipped and (data.get("skipped") or data.get("duplicate")):
+            skipped_entry = {
+                "invoice_number": data.get("invoice_number") or data.get("existing_id"),
+                "existing_id": data.get("existing_id"),
+                "existing_status": data.get("existing_status"),
+                "existing_assigned_to": data.get("existing_assigned_to"),
+                "reason": "duplicate" if data.get("duplicate") else "skipped",
+            }
+            invoices_skipped = [skipped_entry]
+        if invoices_detected is None:
+            invoices_detected = len(invoices) + len(invoices_skipped)
+        if invoices_created is None:
+            invoices_created = len(invoices)
+
+        is_skip = bool(data.get("skipped") or data.get("duplicate") or (invoices_created == 0 and invoices_skipped))
+
+        if is_skip and not invoices:
+            log(f"[PCS_AI_INGEST][SKIP] Invoice skipped: {data.get('message')} (skipped={len(invoices_skipped)})")
+        elif multi_invoice:
+            log(f"[PCS_AI_INGEST][SUCCESS] Multi-invoice: created={invoices_created}, skipped={len(invoices_skipped)}, detected={invoices_detected}, unaccounted={unaccounted}")
+        else:
+            first = invoices[0] if invoices else {}
+            log(f"[PCS_AI_INGEST][SUCCESS] Invoice parsed: #{first.get('invoice_number')} - {first.get('vendor')} - ${first.get('amount') or 0:.2f}")
+
+        if unaccounted > 0:
+            log(f"[PCS_AI_INGEST][WARN] Completeness gap: {unaccounted} invoice(s) unaccounted in {os.path.basename(filepath)}")
         
         return {
-            "id": data.get("id"),
-            "invoice_number": data.get("invoice_number"),
-            "vendor": data.get("vendor"),
-            "amount": data.get("amount"),
+            "success": True,
+            "skipped": is_skip and not invoices,
+            "duplicate": bool(data.get("duplicate")),
+            "message": data.get("message"),
+            "multi_invoice": multi_invoice,
+            "invoices": invoices,
+            "invoices_skipped": invoices_skipped,
+            "invoices_detected": invoices_detected,
+            "invoices_created": invoices_created,
+            "filtered_pages": data.get("filtered_pages") or 0,
+            "unaccounted": unaccounted,
+            # Legacy single-invoice fields for log compatibility
+            "id": data.get("id") or (invoices[0].get("id") if invoices else None),
+            "invoice_number": data.get("invoice_number") or (invoices[0].get("invoice_number") if invoices else None),
+            "vendor": data.get("vendor") or (invoices[0].get("vendor") if invoices else None),
+            "amount": data.get("amount") if data.get("amount") is not None else (invoices[0].get("amount") if invoices else None),
             "parsing_status": data.get("parsing_status"),
             "parsing_confidence": data.get("parsing_confidence"),
-            "success": True
         }
 
     except requests.exceptions.Timeout:
@@ -619,6 +677,12 @@ def classify_document_with_gpt(filepath, email_context=None):
             return None
 
         classification = data.get("classification", {})
+        # GPT sometimes returns a JSON array; normalize to a dict before .get()
+        if isinstance(classification, list):
+            classification = classification[0] if classification and isinstance(classification[0], dict) else {}
+        if not isinstance(classification, dict):
+            log(f"[PCS_AI_CLASSIFY][ERROR] Unexpected classification type: {type(classification).__name__}")
+            return None
         log(f"[PCS_AI_CLASSIFY] Result: type={classification.get('document_type')}, confidence={classification.get('confidence')}")
         
         return classification
@@ -782,29 +846,63 @@ def extract_and_save_pdfs(msg, email_subject, source_message_id):
                 log(f"✅ Saved: {unique_filename}")
                 pdf_files.append((filepath, detected_vendor, email_context))
             except Exception as e:
-                log(f"[ERROR] Failed to save PDF {unique_filename}: {e}")
-                continue
+                # Do NOT silently drop this attachment — return None so the email
+                # is NOT marked seen (retry next scan). Empty list means "no PDFs".
+                log(f"[ERROR][CRITICAL] Failed to save PDF {unique_filename}: {e}")
+                return None
 
     if not pdf_files:
         log(f"⚠️ No PDFs found in email: {email_subject}")
 
     return pdf_files
 
+def _empty_ingest_stats():
+    return {
+        "invoices": [],
+        "invoices_skipped": [],
+        "invoices_detected": 0,
+        "invoices_created": 0,
+        "unaccounted": 0,
+        "ok": False,
+        "transient": False,
+        "hard_fail": False,
+        "marketing_skip": False,
+        "other_doc": False,
+    }
+
+
 def _interpret_parse_result(result, filepath, label):
-    """Translate a parse_invoice_with_gpt result into a processing outcome:
-    True (ingested or duplicate-skip), TRANSIENT_FAILURE (retry next scan),
-    or False (hard parse failure, counts toward the retry cap)."""
+    """Translate a parse_invoice_with_gpt result into a processing outcome dict.
+
+    Returns a dict with:
+      ok (bool) — True when ingested/skipped successfully
+      transient / hard_fail flags
+      invoices / invoices_skipped / counts from the API
+    """
+    stats = _empty_ingest_stats()
     if result == TRANSIENT_FAILURE:
         log(f"[INGEST][TRANSIENT] API unavailable for {os.path.basename(filepath)} ({label}) — will retry")
-        return TRANSIENT_FAILURE
-    if result and result.get("skipped"):
-        log(f"📦 Invoice skipped (already exists): {os.path.basename(filepath)}")
-        return True
-    if result and result.get("success"):
-        log(f"📦 Parsed invoice ({label}): {result.get('vendor', 'Unknown')} - ${(result.get('amount') or 0):.2f}")
-        return True
+        stats["transient"] = True
+        return stats
+    if result and (result.get("success") or result.get("skipped")):
+        stats["ok"] = True
+        stats["invoices"] = result.get("invoices") or []
+        stats["invoices_skipped"] = result.get("invoices_skipped") or []
+        stats["invoices_detected"] = result.get("invoices_detected") or (
+            len(stats["invoices"]) + len(stats["invoices_skipped"])
+        )
+        stats["invoices_created"] = result.get("invoices_created")
+        if stats["invoices_created"] is None:
+            stats["invoices_created"] = len(stats["invoices"])
+        stats["unaccounted"] = result.get("unaccounted") or 0
+        if result.get("skipped") and not stats["invoices"]:
+            log(f"📦 Invoice skipped (already exists): {os.path.basename(filepath)}")
+        else:
+            log(f"📦 Parsed invoice ({label}): created={stats['invoices_created']}, skipped={len(stats['invoices_skipped'])}")
+        return stats
     log(f"[WARNING] PCS AI parsing failed for {os.path.basename(filepath)} ({label})")
-    return False
+    stats["hard_fail"] = True
+    return stats
 
 
 def process_pdf_file(filepath, detected_vendor, email_context=None):
@@ -818,13 +916,15 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
     3. If invoice -> parse with PCS AI and save to database
     4. If other document type -> save to other_documents table
 
-    Returns True on success/duplicate-skip, TRANSIENT_FAILURE when the API was
-    unreachable (email stays unmarked and is retried), False on hard failure.
+    Returns a stats dict (see _interpret_parse_result). Callers check
+    stats['ok'] / stats['transient'] / stats['hard_fail'].
     """
     try:
         if not os.path.exists(filepath):
             log(f"[ERROR][CRITICAL] PDF file does not exist: {filepath}")
-            return False
+            stats = _empty_ingest_stats()
+            stats["hard_fail"] = True
+            return stats
 
         # Fast path: if vendor is already known from email sender/subject, skip classification
         # (saves ~60s per PDF for the most common TC Dental case)
@@ -852,24 +952,130 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
         elif document_type == "marketing":
             # Skip marketing materials entirely
             log(f"📧 Skipping marketing material: {os.path.basename(filepath)}")
-            return True  # Return True since we successfully handled it (by skipping)
+            stats = _empty_ingest_stats()
+            stats["ok"] = True
+            stats["marketing_skip"] = True
+            return stats
 
         else:
             # Save to other_documents table (credit_memo, statement, payment_confirmation, other)
             save_result = save_other_document(filepath, classification, email_context)
             if save_result == TRANSIENT_FAILURE:
-                return TRANSIENT_FAILURE
+                stats = _empty_ingest_stats()
+                stats["transient"] = True
+                return stats
             if save_result:
                 log(f"📄 Saved {document_type}: {os.path.basename(filepath)}")
-                return True
+                stats = _empty_ingest_stats()
+                stats["ok"] = True
+                stats["other_doc"] = True
+                return stats
             log(f"[ERROR] Failed to save {document_type}: {os.path.basename(filepath)}")
-            return False
+            stats = _empty_ingest_stats()
+            stats["hard_fail"] = True
+            return stats
 
     except Exception as e:
         log(f"[ERROR][CRITICAL] Failed to process {os.path.basename(filepath)}: {e}")
         import traceback
         log(f"[ERROR][TRACEBACK] {traceback.format_exc()}")
+        stats = _empty_ingest_stats()
+        stats["hard_fail"] = True
+        return stats
+
+def _extract_email_address(from_header):
+    """Pull bare address from a From header like 'Laura <laurag@pcsmiles.com>'."""
+    if not from_header:
+        return ""
+    _name, addr = parseaddr(from_header)
+    return (addr or from_header).strip().lower()
+
+
+def _is_internal_sender(sender_email):
+    """Only auto-reply to priority senders / @pcsmiles.com — never to vendors."""
+    if not sender_email:
         return False
+    addr = sender_email.lower()
+    if addr in [s.lower() for s in PRIORITY_SENDERS]:
+        return True
+    return addr.endswith("@pcsmiles.com") or addr.endswith("@pacificcrestsmiles.com")
+
+
+def send_ingest_reply_email(to_addr, subject, body, in_reply_to=None):
+    """Send a threaded SMTP reply from invoices@ explaining ingest outcomes."""
+    if not to_addr or not body:
+        return False
+    try:
+        msg = MIMEText(body, "plain", "utf-8")
+        msg["From"] = formataddr(("PCS AI Invoices", EMAIL_USER))
+        msg["To"] = to_addr
+        msg["Subject"] = subject or "PCS AI invoice ingest report"
+        if in_reply_to:
+            msg["In-Reply-To"] = in_reply_to
+            msg["References"] = in_reply_to
+
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, timeout=30) as smtp:
+            smtp.login(EMAIL_USER, EMAIL_PASS)
+            smtp.sendmail(EMAIL_USER, [to_addr], msg.as_string())
+        log(f"[INGEST_REPORT][EMAIL] Sent reply to {to_addr}: {subject}")
+        return True
+    except Exception as e:
+        log(f"[INGEST_REPORT][EMAIL][ERROR] Failed to send reply to {to_addr}: {e}")
+        return False
+
+
+def post_ingest_report_and_reply(job, created, skipped, failed, detected, unaccounted, status="ok"):
+    """
+    Post a per-email ingest report to PCS AI (creates in-app notification + GPT body)
+    and send a threaded auto-reply to internal senders (Laura).
+    """
+    try:
+        sender_raw = job.get("sender") or ""
+        sender_email = _extract_email_address(sender_raw)
+        payload = {
+            "email_key": job.get("email_key"),
+            "message_id": job.get("message_id") or "",
+            "sender_email": sender_email,
+            "sender_raw": sender_raw,
+            "subject": job.get("subject") or "",
+            "pdf_count": len(job.get("pdfs") or []),
+            "invoices_detected": detected,
+            "created": created,
+            "skipped": skipped,
+            "failed": failed,
+            "unaccounted": unaccounted,
+            "status": status,
+        }
+        response = requests.post(
+            f"{API_BASE_URL}/api/invoices/ingest-report",
+            json=payload,
+            timeout=90,
+        )
+        if response.status_code != 200:
+            log(f"[INGEST_REPORT][ERROR] API status {response.status_code}: {response.text[:300]}")
+            return None
+
+        data = response.json()
+        if not data.get("ok"):
+            log(f"[INGEST_REPORT][ERROR] {data.get('error', 'unknown')}")
+            return None
+
+        composed_subject = data.get("composed_subject") or f"Re: {job.get('subject') or 'your invoices'}"
+        composed_body = data.get("composed_body") or ""
+        log(f"[INGEST_REPORT] Stored report {data.get('report_id')} for {sender_email} (status={status})")
+
+        if composed_body and _is_internal_sender(sender_email):
+            send_ingest_reply_email(
+                to_addr=sender_email,
+                subject=composed_subject if composed_subject.lower().startswith("re:") else f"Re: {job.get('subject') or 'your invoices'}",
+                body=composed_body,
+                in_reply_to=job.get("message_id") or None,
+            )
+        return data
+    except Exception as e:
+        log(f"[INGEST_REPORT][ERROR] Exception posting report: {e}")
+        return None
+
 
 def flag_emails_as_read(emails):
     """Best-effort: set \\Seen on fully-processed emails so a human checking the
@@ -1115,11 +1321,10 @@ def check_inbox(full_scan=False):
                     skipped_count += 1
                     continue
 
-                if not full_scan and source_message_id and source_message_id in message_ids:
-                    log(f"[INBOX][DUPLICATE] Message ID {source_message_id} already in invoices DB")
-                    mark_email_seen(email_key)
-                    skipped_count += 1
-                    continue
+                # NOTE: Do NOT short-circuit the whole email just because one
+                # invoice row already has this source_message_id. Multi-PDF
+                # emails and multi-invoice PDFs can be partially ingested;
+                # gpt-ingest is idempotent on duplicates so reprocessing is safe.
 
                 # Passed dedup — full fetch with PEEK so a skipped email is NOT
                 # flagged read behind the watcher's back (RFC822 fetch sets \Seen,
@@ -1131,10 +1336,11 @@ def check_inbox(full_scan=False):
 
                 # Re-extract subject from full message (more reliable than header-only parse)
                 subject = decode_mime_header_value(msg.get("Subject")) or subject
+                sender = msg.get("From", "unknown")
 
                 # VENDOR FILTER: Only process emails from active vendors/priority senders
                 if not is_email_from_active_vendor(msg, subject):
-                    log(f"[INBOX][SCAN][FILTERED][{folder_name}] Not an active vendor or priority sender - From: {msg.get('From', 'unknown')}, Subject: {subject}")
+                    log(f"[INBOX][SCAN][FILTERED][{folder_name}] Not an active vendor or priority sender - From: {sender}, Subject: {subject}")
                     mark_email_seen(email_key, provider="filtered")
                     skipped_count += 1
                     continue
@@ -1143,6 +1349,11 @@ def check_inbox(full_scan=False):
                     log(f"[INBOX][SCAN][FULL] Processing email in full scan mode: {subject}")
 
                 pdf_files = extract_and_save_pdfs(msg, subject, source_message_id)
+                if pdf_files is None:
+                    # Disk write failed for at least one PDF — leave unmarked for retry
+                    log(f"[INBOX][SCAN][SAVE_FAIL][{folder_name}] PDF save failed — leaving unmarked for retry: {subject}")
+                    skipped_count += 1
+                    continue
                 if pdf_files:
                     log(f"[INBOX][SCAN][{folder_name}] Queued invoice email ({len(pdf_files)} PDFs): {subject}")
                     email_jobs.append({
@@ -1150,13 +1361,14 @@ def check_inbox(full_scan=False):
                         "folder": folder_name,
                         "uid": uid,
                         "subject": subject,
+                        "sender": sender,
+                        "message_id": source_message_id,
                         "pdfs": pdf_files,
                         "outcomes": [],
                     })
                     queued_keys.add(email_key)
                     processed_count += 1
                 else:
-                    sender = msg.get("From", "unknown")
                     log(f"[INBOX][SCAN][NO_PDF][{folder_name}] Skipping email without PDF - From: {sender}, Subject: {subject}")
                     mark_email_seen(email_key, provider="no-pdf")
                     no_pdf_count += 1
@@ -1192,12 +1404,26 @@ def check_inbox(full_scan=False):
                     try:
                         outcome = future.result()
                     except Exception as e:
-                        outcome = False
+                        outcome = _empty_ingest_stats()
+                        outcome["hard_fail"] = True
                         log(f"[INBOX][PARALLEL][ERROR] {e}")
-                    job["outcomes"].append(outcome)
+                    # Backward compat if anything still returns bare True/False/TRANSIENT
                     if outcome is True:
-                        processed_pdfs += 1
+                        outcome = _empty_ingest_stats()
+                        outcome["ok"] = True
+                    elif outcome is False:
+                        outcome = _empty_ingest_stats()
+                        outcome["hard_fail"] = True
                     elif outcome == TRANSIENT_FAILURE:
+                        outcome = _empty_ingest_stats()
+                        outcome["transient"] = True
+                    elif not isinstance(outcome, dict):
+                        outcome = _empty_ingest_stats()
+                        outcome["hard_fail"] = True
+                    job["outcomes"].append(outcome)
+                    if outcome.get("ok"):
+                        processed_pdfs += 1
+                    elif outcome.get("transient"):
                         transient_pdfs += 1
                     else:
                         failed_pdfs += 1
@@ -1208,18 +1434,43 @@ def check_inbox(full_scan=False):
             # failure (app restarting during deploy, GPT timeout) lost them forever.
             for job in email_jobs:
                 outcomes = job["outcomes"]
-                if outcomes and all(o is True for o in outcomes):
+                all_ok = outcomes and all(o.get("ok") for o in outcomes)
+                any_transient = any(o.get("transient") for o in outcomes)
+
+                # Aggregate created/skipped across PDFs for the ingest report
+                created = []
+                skipped = []
+                failed = []
+                detected = 0
+                unaccounted = 0
+                for o in outcomes:
+                    created.extend(o.get("invoices") or [])
+                    skipped.extend(o.get("invoices_skipped") or [])
+                    detected += o.get("invoices_detected") or 0
+                    unaccounted += o.get("unaccounted") or 0
+                    if o.get("hard_fail"):
+                        failed.append({"reason": "parse_failed"})
+
+                if all_ok:
                     mark_email_seen(job["email_key"])
                     clear_failed_attempts(job["email_key"])
                     if not full_scan:
                         emails_to_flag.append((job["folder"], job["uid"]))
-                elif any(o == TRANSIENT_FAILURE for o in outcomes):
+                    # Notify sender (Laura) with a summary of what was added vs omitted
+                    post_ingest_report_and_reply(job, created, skipped, failed, detected, unaccounted, status="ok" if not skipped and not unaccounted else "partial")
+                elif any_transient:
                     log(f"[INBOX][RETRY] API unavailable — email stays queued for next scan: {job['subject']}")
                 else:
                     attempts = record_failed_attempt(job["email_key"])
                     if attempts >= MAX_INGEST_ATTEMPTS:
                         log(f"[INBOX][GIVE_UP][CRITICAL] Ingest failed {attempts}x, giving up on '{job['subject']}' — PDFs kept in {SAVE_DIR}; fix the cause and run --full-scan to retry")
                         mark_email_seen(job["email_key"], provider="failed")
+                        # Alert Laura (and admins via in-app) instead of silent give-up
+                        post_ingest_report_and_reply(
+                            job, created, skipped,
+                            failed or [{"reason": f"gave_up_after_{attempts}_attempts"}],
+                            detected, unaccounted, status="failed"
+                        )
                     else:
                         log(f"[INBOX][RETRY] Parse failed (attempt {attempts}/{MAX_INGEST_ATTEMPTS}), will retry in {RETRY_DELAY_SECONDS}s: {job['subject']}")
 
