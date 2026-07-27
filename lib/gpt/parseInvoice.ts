@@ -236,6 +236,7 @@ Signs a page is a CONTINUATION:
 Signs a page is NOT an invoice:
 - Email forwarding/printout content
 - QBO/accounting software interface or screenshots
+- Stampli / AP workflow UI screenshots (status history, "Invoice Status", "paid with PCSAI", coding details)
 - System confirmation or status messages
 - Cover letters or transmittal pages
 - Blank or nearly blank pages
@@ -253,6 +254,11 @@ For each page image (labeled PAGE 1, PAGE 2, etc.), determine:
 1. Is this page an actual invoice page? Or is it something else (email printout, system screenshot, QBO page, cover letter, blank page)?
 2. If it IS an invoice page, is it the FIRST page of a NEW invoice or a CONTINUATION of the previous invoice?
 
+CRITICAL for scanned lab invoices (TC Dental, etc.):
+- A full-page scanned invoice with its OWN invoice number is ALWAYS a NEW invoice, even if the layout looks identical to the previous page.
+- Do NOT merge pages that have different invoice numbers.
+- One physical scanned invoice page = one invoice start, unless the page clearly says "Page 2 of 2" / continues line items only.
+
 Signs a page starts a NEW INVOICE:
 - Has a company header/logo (e.g., "TC Dental Laboratory", vendor name, company address)
 - Has "INVOICE" or "DELIVERY SLIP" title
@@ -262,11 +268,12 @@ Signs a page starts a NEW INVOICE:
 Signs a page is a CONTINUATION of the previous invoice:
 - Continues line items from the previous page
 - Shows pagination like "Page 2 of 2"
-- No new invoice header
+- No new invoice header AND no new invoice number
 
 Signs a page is NOT an invoice:
 - Email client interface or forwarded email
 - Accounting software (QBO) screenshot
+- Stampli / AP software UI (status timeline, coding fields, "Invoice Status", "Canceled Invoice")
 - System-generated confirmation/status page
 - Cover letter or transmittal page
 - Blank or nearly blank page
@@ -417,6 +424,77 @@ function buildPageClusters(
 }
 
 /**
+ * If GPT marks two pages as the same invoice but they have different invoice
+ * numbers, force the second page to be a new invoice start.
+ */
+function normalizeClassificationsByInvoiceNumber(
+  pageClassifications: Array<{ page: number; isInvoice: boolean; isNewInvoice: boolean; invoiceNumber?: string }>
+): void {
+  const sorted = [...pageClassifications].sort((a, b) => a.page - b.page);
+  let lastInvoiceNumber: string | null = null;
+
+  for (const pc of sorted) {
+    if (!pc.isInvoice) continue;
+    const num = (pc.invoiceNumber || '').trim();
+    if (num && lastInvoiceNumber && num !== lastInvoiceNumber) {
+      if (!pc.isNewInvoice) {
+        console.log(`[PCS-AI] Forcing new invoice start on page ${pc.page}: number ${num} != ${lastInvoiceNumber}`);
+        pc.isNewInvoice = true;
+      }
+    }
+    if (num) lastInvoiceNumber = num;
+    else if (pc.isNewInvoice) lastInvoiceNumber = null;
+  }
+
+  // Write back into original array (objects are shared by reference)
+}
+
+/**
+ * Guard for scanned multi-invoice packets (e.g. TC Dental scans): when most
+ * pages are invoice images and classification collapsed them into too few
+ * clusters, split to one invoice per invoice page.
+ */
+function applyScannedOnePerPageGuard(
+  clusters: number[][],
+  nonInvoicePages: Set<number>,
+  totalPages: number,
+  pageClassifications: Array<{ page: number; isInvoice: boolean; isNewInvoice: boolean; invoiceNumber?: string }>
+): number[][] {
+  const invoicePageCount = totalPages - nonInvoicePages.size;
+  if (invoicePageCount < 3) return clusters;
+
+  const distinctNumbers = new Set(
+    pageClassifications
+      .filter(pc => pc.isInvoice && pc.invoiceNumber)
+      .map(pc => String(pc.invoiceNumber).trim())
+  );
+
+  // Under-split: many invoice pages / many distinct numbers, but few clusters
+  const underSplitByCount = clusters.length === 1 && invoicePageCount >= 3;
+  const underSplitByNumbers =
+    distinctNumbers.size >= 3 && clusters.length < Math.max(2, Math.floor(distinctNumbers.size * 0.6));
+  const underSplitByRatio =
+    invoicePageCount >= 5 && clusters.length < Math.floor(invoicePageCount * 0.5);
+
+  if (!underSplitByCount && !underSplitByNumbers && !underSplitByRatio) {
+    return clusters;
+  }
+
+  console.warn('[PCS-AI] Scanned multi-invoice under-split detected — forcing one invoice per page', {
+    clusters: clusters.length,
+    invoicePageCount,
+    distinctNumbers: distinctNumbers.size,
+  });
+
+  const onePerPage: number[][] = [];
+  for (let p = 0; p < totalPages; p++) {
+    if (nonInvoicePages.has(p)) continue;
+    onePerPage.push([p]);
+  }
+  return onePerPage.length > 0 ? onePerPage : clusters;
+}
+
+/**
  * Parse a GPT classification response into page_starts and non_invoice_pages (0-indexed).
  */
 function parseClassificationResponse(parsed: any, totalPages: number): { pageStarts: number[]; nonInvoicePages: Set<number> } | null {
@@ -465,13 +543,15 @@ async function classifyDocumentPagesByVision(base64Images: string[], totalPages:
   const pageClassifications: Array<{ page: number; isInvoice: boolean; isNewInvoice: boolean; invoiceNumber?: string }> = [];
   
   const perPagePrompt = `Classify each page image below. For EACH page, determine:
-- Is this page an actual invoice/delivery slip from a vendor? (NOT an email, NOT a QBO screenshot, NOT a system page)
+- Is this page an actual invoice/delivery slip from a vendor? (NOT an email, NOT a QBO/Stampli screenshot, NOT a system page)
 - If it IS an invoice page, does it START a new invoice or continue the previous one?
+
+CRITICAL: Scanned lab invoices often look identical layout-wise but each page has a DIFFERENT invoice number. Different invoice number = NEW invoice. Never merge two pages that show different invoice numbers.
 
 Return ONLY a JSON object:
 {"pages": [{"page": 1, "is_invoice": true, "is_new_invoice": true, "invoice_number": "123-456"}, {"page": 2, "is_invoice": false, "reason": "email printout"}]}
 
-is_invoice: true if this is an actual vendor invoice page, false if it's an email, screenshot, cover letter, or blank
+is_invoice: true if this is an actual vendor invoice page, false if it's an email, screenshot, Stampli/QBO UI, cover letter, or blank
 is_new_invoice: true if this page starts a NEW invoice (has its own header/invoice number), false if it continues the previous invoice
 invoice_number: the invoice number if visible (null if not)`;
 
@@ -536,6 +616,9 @@ invoice_number: the invoice number if visible (null if not)`;
         }
       }
     }
+
+    // Post-process: different invoice numbers on adjacent pages MUST start new invoices
+    normalizeClassificationsByInvoiceNumber(pageClassifications);
     
     // Build page_starts and non_invoice_pages from classifications
     const pageStarts: number[] = [];
@@ -556,11 +639,12 @@ invoice_number: the invoice number if visible (null if not)`;
       totalPages,
       invoiceStarts: pageStarts.map(p => p + 1),
       nonInvoicePages: Array.from(nonInvoicePages).map(p => p + 1),
-      allClassifications: pageClassifications.map(pc => ({ page: pc.page, invoice: pc.isInvoice, new: pc.isNewInvoice }))
+      allClassifications: pageClassifications.map(pc => ({ page: pc.page, invoice: pc.isInvoice, new: pc.isNewInvoice, num: pc.invoiceNumber }))
     });
     
     if (pageStarts.length > 0) {
-      const clusters = buildPageClusters(pageStarts, nonInvoicePages, totalPages);
+      let clusters = buildPageClusters(pageStarts, nonInvoicePages, totalPages);
+      clusters = applyScannedOnePerPageGuard(clusters, nonInvoicePages, totalPages, pageClassifications);
       console.log(`[PCS-AI] Vision classification complete:`, {
         invoicesFound: clusters.length,
         clusters: clusters.map(c => c.map(p => p + 1))
@@ -659,16 +743,21 @@ export async function classifyDocumentPages(
     
     if (result) {
       const clusters = buildPageClusters(result.pageStarts, result.nonInvoicePages, totalPages);
+      // For mostly-image PDFs that somehow took the text path, still apply under-split guard
+      const imageHeavy = pageTexts.filter(t => t.trim().length < 30).length / Math.max(totalPages, 1) >= 0.5;
+      const finalClusters = imageHeavy
+        ? applyScannedOnePerPageGuard(clusters, result.nonInvoicePages, totalPages, [])
+        : clusters;
       
       console.log(`[PCS-AI] Page classification complete:`, {
         totalPages,
-        invoicesFound: clusters.length,
+        invoicesFound: finalClusters.length,
         nonInvoicePages: Array.from(result.nonInvoicePages).map(p => p + 1),
-        clusters: clusters.map(c => c.map(p => p + 1)),
+        clusters: finalClusters.map(c => c.map(p => p + 1)),
         reasoning: parsed?.reasoning
       });
       
-      return clusters;
+      return finalClusters;
     }
 
     console.warn('[PCS-AI] Could not parse page classification response');
