@@ -224,6 +224,42 @@ export async function isVerifier(email: string): Promise<boolean> {
 }
 
 /**
+ * Find the verifier email configured for a vendor via vendor_access arrays
+ * (e.g. Laura → ["TC Dental Lab"]). Returns null if no verifier is configured.
+ */
+export async function getVerifierForVendor(vendorName: string | null | undefined): Promise<string | null> {
+  const roles = await readRoles();
+  if (!roles.vendor_access || !vendorName) return null;
+
+  const normalizedVendor = vendorName.trim().toLowerCase();
+  if (!normalizedVendor || normalizedVendor === 'unknown') return null;
+
+  for (const [email, access] of Object.entries(roles.vendor_access)) {
+    if (!Array.isArray(access)) continue;
+    const matches = access.some((allowed) => {
+      const a = String(allowed || '').trim().toLowerCase();
+      if (!a) return false;
+      // TC Dental Lab matches "TC Dental", "TC Dental Laboratory, Inc.", etc.
+      if (a === 'tc dental lab' || a.startsWith('tc dental')) {
+        return normalizedVendor.startsWith('tc dental');
+      }
+      return (
+        normalizedVendor === a ||
+        normalizedVendor.includes(a) ||
+        a.includes(normalizedVendor)
+      );
+    });
+    if (matches) {
+      const resolved = normaliseEmail(email);
+      logRbac('getVerifierForVendor', { vendorName, verifier: resolved });
+      return resolved;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Get the approval destination email for invoices sent by a verifier.
  * Currently hardcoded to McKay, but could be made configurable.
  */

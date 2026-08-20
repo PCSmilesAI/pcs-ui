@@ -6,6 +6,7 @@ import { resolveVendor } from '../../../../lib/invoices/vendorMatcher';
 import { buildApiPdfPath, normalizePdfFilename } from '../../../../lib/security/filename';
 import { isPathWithinBase } from '../../../../lib/security/path-validation';
 import { normalizeDateForStorage } from '../../../../lib/utils/dateUtils';
+import { getVerifierForVendor } from '../../../../lib/workflow/rolesStore';
 import { randomUUID } from 'crypto';
 import path from 'path';
 import fs from 'fs';
@@ -115,6 +116,27 @@ function recordDuplicateSkippedEvent(
     INSERT INTO invoice_events (invoice_id, action, payload_json)
     VALUES (?, 'DUPLICATE_SKIPPED', ?)
   `).run(existingId, JSON.stringify(payload));
+}
+
+/**
+ * If a duplicate was already in the system with no assignee, claim it for the
+ * vendor's configured verifier so it shows clearly in their For Me queue.
+ */
+function ensureAssigneeOnExisting(
+  db: ReturnType<typeof getDatabase>,
+  existing: ExistingInvoiceRow,
+  verifierEmail: string | null
+) {
+  if (!verifierEmail) return;
+  const current = (existing.current_assigned_user_email || '').trim();
+  if (current) return;
+  db.prepare(`
+    UPDATE invoices
+    SET current_assigned_user_email = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND deleted = 0
+      AND (current_assigned_user_email IS NULL OR current_assigned_user_email = '')
+  `).run(verifierEmail, existing.id);
+  existing.current_assigned_user_email = verifierEmail;
 }
 
 /**
@@ -307,6 +329,7 @@ export async function POST(req: NextRequest) {
           parsingStatus: string; parsingError: string | null;
           invoiceIndex: number; normalizedInvoiceDate: string | null;
           normalizedDueDate: string | null; rawVendor: string;
+          assignedTo: string | null;
         }> = [];
         
         for (let idx = 0; idx < validInvoices.length; idx++) {
@@ -355,6 +378,8 @@ export async function POST(req: NextRequest) {
           // Check existing DB records -- SKIP true duplicates instead of suffixing
           const existing = findExistingInvoiceByNumber(db, invoiceNumber, normalizedVendor);
           if (existing) {
+            const verifierEmail = await getVerifierForVendor(normalizedVendor);
+            ensureAssigneeOnExisting(db, existing, verifierEmail);
             const skipped = toSkippedInfo(invoiceNumber, existing);
             invoicesSkipped.push(skipped);
             console.warn(`[PCS_AI_INGEST] DUPLICATE SKIPPED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existing.id} (stored vendor=${existing.vendor_name}, status=${existing.status})`);
@@ -411,6 +436,7 @@ export async function POST(req: NextRequest) {
             normalizedInvoiceDate: normalizeDateForStorage(parsed.invoice_date),
             normalizedDueDate: normalizeDateForStorage(parsed.due_date),
             rawVendor,
+            assignedTo: await getVerifierForVendor(normalizedVendor),
           });
         }
         
@@ -456,8 +482,9 @@ export async function POST(req: NextRequest) {
                 invoice_date, due_date, office_location, pdf_path,
                 parsing_status, parsing_error, parse_attempts,
                 document_group_id, document_invoice_index, document_invoice_total,
-                pdf_page_start, pdf_page_end
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                pdf_page_start, pdf_page_end,
+                current_assigned_user_email
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `).run(
               inv.id, inv.invoiceNumber, sourceFile,
               inv.normalizedVendor, inv.parsed.office_location, inv.amountCents,
@@ -467,7 +494,8 @@ export async function POST(req: NextRequest) {
               pdfPath,
               inv.parsingStatus, inv.parsingError, 1,
               documentGroupId, inv.invoiceIndex, totalInvoicesInDoc,
-              pageStart, pageEnd
+              pageStart, pageEnd,
+              inv.assignedTo || null
             );
             
             db.prepare(`
@@ -597,6 +625,8 @@ export async function POST(req: NextRequest) {
     if (parsed.invoice_number) {
       const existingByNumber = findExistingInvoiceByNumber(db, invoiceNumber, normalizedVendor);
       if (existingByNumber) {
+        const verifierEmail = await getVerifierForVendor(normalizedVendor);
+        ensureAssigneeOnExisting(db, existingByNumber, verifierEmail);
         const skipped = toSkippedInfo(invoiceNumber, existingByNumber);
         console.warn(`[PCS_AI_INGEST] DUPLICATE BLOCKED: invoice_number=${invoiceNumber}, vendor=${normalizedVendor} already exists as id=${existingByNumber.id} (stored vendor=${existingByNumber.vendor_name}, status=${existingByNumber.status})`);
         recordDuplicateSkippedEvent(db, existingByNumber.id, {
@@ -653,6 +683,7 @@ export async function POST(req: NextRequest) {
     const normalizedDueDate = normalizeDateForStorage(parsed.due_date);
 
     // Insert invoice
+    const assignedTo = await getVerifierForVendor(normalizedVendor);
     db.prepare(`
       INSERT INTO invoices (
         id,
@@ -673,8 +704,9 @@ export async function POST(req: NextRequest) {
         pdf_path,
         parsing_status,
         parsing_error,
-        parse_attempts
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        parse_attempts,
+        current_assigned_user_email
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       invoiceNumber,
@@ -694,7 +726,8 @@ export async function POST(req: NextRequest) {
       buildApiPdfPath(normalizedPdfFilename),
       parsingStatus,
       parsingError,
-      1
+      1,
+      assignedTo || null
     );
 
     // Audit event
