@@ -526,7 +526,7 @@ def run_vendor_router(filepath, detected_vendor=None):
         return None
 
 
-def parse_invoice_with_gpt(filepath, vendor_hint=None):
+def parse_invoice_with_gpt(filepath, vendor_hint=None, sender_email=None):
     """
     Call the PCS AI invoice ingest API to parse and save an invoice.
     Uses PCS AI for intelligent parsing.
@@ -549,6 +549,8 @@ def parse_invoice_with_gpt(filepath, vendor_hint=None):
 
         if vendor_hint:
             payload["vendor_hint"] = vendor_hint
+        if sender_email:
+            payload["sender_email"] = sender_email
 
         response = requests.post(
             f"{API_BASE_URL}/api/invoices/gpt-ingest",
@@ -589,6 +591,8 @@ def parse_invoice_with_gpt(filepath, vendor_hint=None):
                 "existing_id": data.get("existing_id"),
                 "existing_status": data.get("existing_status"),
                 "existing_assigned_to": data.get("existing_assigned_to"),
+                "existing_submitted_by": data.get("existing_submitted_by"),
+                "existing_submitted_at": data.get("existing_submitted_at"),
                 "reason": "duplicate" if data.get("duplicate") else "skipped",
             }
             invoices_skipped = [skipped_entry]
@@ -926,11 +930,19 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
             stats["hard_fail"] = True
             return stats
 
+        sender_email = None
+        if email_context and email_context.get("from"):
+            sender_email = _extract_email_address(email_context.get("from"))
+
         # Fast path: if vendor is already known from email sender/subject, skip classification
         # (saves ~60s per PDF for the most common TC Dental case)
         if detected_vendor and detected_vendor.lower() not in ('unknown', ''):
             log(f"[CLASSIFY][SKIP] Vendor already known ({detected_vendor}), skipping classification — parsing directly")
-            return _interpret_parse_result(parse_invoice_with_gpt(filepath, detected_vendor), filepath, "fast path")
+            return _interpret_parse_result(
+                parse_invoice_with_gpt(filepath, detected_vendor, sender_email=sender_email),
+                filepath,
+                "fast path",
+            )
 
         # Step 1: Classify the document using PCS AI
         classification = classify_document_with_gpt(filepath, email_context)
@@ -938,7 +950,11 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
         # If classification fails, fall back to treating as invoice and parse with PCS AI
         if not classification:
             log(f"[CLASSIFY][FALLBACK] Classification failed, treating as invoice: {os.path.basename(filepath)}")
-            return _interpret_parse_result(parse_invoice_with_gpt(filepath, detected_vendor), filepath, "fallback")
+            return _interpret_parse_result(
+                parse_invoice_with_gpt(filepath, detected_vendor, sender_email=sender_email),
+                filepath,
+                "fallback",
+            )
 
         document_type = classification.get("document_type", "other")
         confidence = classification.get("confidence", 0)
@@ -947,7 +963,11 @@ def process_pdf_file(filepath, detected_vendor, email_context=None):
 
         # Step 2: Route based on classification
         if document_type == "invoice":
-            return _interpret_parse_result(parse_invoice_with_gpt(filepath, detected_vendor), filepath, "classified")
+            return _interpret_parse_result(
+                parse_invoice_with_gpt(filepath, detected_vendor, sender_email=sender_email),
+                filepath,
+                "classified",
+            )
 
         elif document_type == "marketing":
             # Skip marketing materials entirely

@@ -28,6 +28,8 @@ export type SkippedFact = {
   location: PipelineLocation;
   existing_status?: string | null;
   existing_assigned_to?: string | null;
+  original_submitted_by?: string | null;
+  original_submitted_at?: string | null;
 };
 
 export type CreatedFact = {
@@ -47,12 +49,13 @@ export type IngestReportFacts = {
   invoices_detected: number;
 };
 
+export type SkippedBySubmitterPayload = Record<string, string[]>;
+
 export function mapStatusToLocation(
   status: string | null | undefined,
   assignedTo: string | null | undefined
 ): PipelineLocation {
   const s = (status || '').toLowerCase();
-  const assignee = (assignedTo || '').toLowerCase();
 
   if (s === 'paid' || s === 'completed') return 'already paid';
   if (s === 'to_be_paid') return 'approved, waiting to be paid';
@@ -64,6 +67,103 @@ export function mapStatusToLocation(
     return 'already in your For Me queue';
   }
   return 'already in PCS AI (status unknown)';
+}
+
+function normalizeEmail(email: string | null | undefined): string {
+  return (email || '').trim().toLowerCase();
+}
+
+export function formatSubmissionDate(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+type SkippedAttributionGroup = {
+  key: string;
+  label: string;
+  invoiceNumbers: string[];
+  submittedAt?: string | null;
+};
+
+/** Group skipped invoices by who originally submitted them (relative to current sender). */
+export function groupSkippedBySubmitter(facts: IngestReportFacts): SkippedAttributionGroup[] {
+  const sender = normalizeEmail(facts.sender_email);
+  const buckets = new Map<string, SkippedAttributionGroup>();
+
+  for (const item of facts.skipped) {
+    const originalBy = normalizeEmail(item.original_submitted_by);
+    let key: string;
+    let label: string;
+
+    if (originalBy && sender && originalBy === sender) {
+      key = 'self';
+      label = 'You already submitted these';
+    } else if (originalBy) {
+      key = originalBy;
+      label = `${originalBy} already submitted these invoices`;
+    } else {
+      key = 'unknown';
+      label = 'Already in PCS AI (original submitter unknown)';
+    }
+
+    if (!buckets.has(key)) {
+      buckets.set(key, { key, label, invoiceNumbers: [], submittedAt: null });
+    }
+    const bucket = buckets.get(key)!;
+    if (item.invoice_number) bucket.invoiceNumbers.push(item.invoice_number);
+    if (key === 'self' && item.original_submitted_at) {
+      const existing = bucket.submittedAt ? new Date(bucket.submittedAt) : null;
+      const candidate = new Date(item.original_submitted_at);
+      if (!existing || candidate < existing) {
+        bucket.submittedAt = item.original_submitted_at;
+      }
+    }
+  }
+
+  return Array.from(buckets.values());
+}
+
+export function buildSkippedBySubmitterPayload(facts: IngestReportFacts): SkippedBySubmitterPayload {
+  const payload: SkippedBySubmitterPayload = {};
+  for (const group of groupSkippedBySubmitter(facts)) {
+    payload[group.key] = group.invoiceNumbers;
+  }
+  return payload;
+}
+
+export function buildNotificationTitle(facts: IngestReportFacts): string {
+  const createdCount = facts.created.length;
+  const skippedCount = facts.skipped.length;
+
+  if (facts.status === 'failed') {
+    return 'Invoice email could not be processed';
+  }
+
+  if (skippedCount === 0) {
+    return `${createdCount} invoice(s) added to your queue`;
+  }
+
+  const groups = groupSkippedBySubmitter(facts);
+  if (groups.length === 1) {
+    const group = groups[0];
+    if (group.key === 'self') {
+      const dateLabel = formatSubmissionDate(group.submittedAt);
+      return dateLabel
+        ? `${createdCount} added — you already submitted ${skippedCount} on ${dateLabel}`
+        : `${createdCount} added — you already submitted ${skippedCount}`;
+    }
+    if (group.key !== 'unknown') {
+      return `${createdCount} added — ${group.key} already submitted ${skippedCount}`;
+    }
+  }
+
+  return `${createdCount} added, ${skippedCount} already in PCS AI`;
 }
 
 function groupSkippedByLocation(skipped: SkippedFact[]): Record<string, string[]> {
@@ -80,7 +180,8 @@ function groupSkippedByLocation(skipped: SkippedFact[]): Record<string, string[]
 export function composeDeterministicReport(facts: IngestReportFacts): { subject: string; body: string } {
   const createdNums = facts.created.map(c => c.invoice_number).filter(Boolean);
   const skippedNums = facts.skipped.map(s => s.invoice_number).filter(Boolean);
-  const groups = groupSkippedByLocation(facts.skipped);
+  const attributionGroups = groupSkippedBySubmitter(facts);
+  const locationGroups = groupSkippedByLocation(facts.skipped);
 
   const subject =
     facts.status === 'failed'
@@ -115,10 +216,30 @@ export function composeDeterministicReport(facts: IngestReportFacts): { subject:
   }
 
   if (skippedNums.length > 0) {
-    lines.push(`Some invoices were not published because they are already in PCS AI (${skippedNums.length}):`);
-    for (const [location, nums] of Object.entries(groups)) {
-      lines.push(`  — ${location}:`);
-      lines.push(nums.map(n => `      • ${n}`).join('\n'));
+    const hasAttribution = attributionGroups.some(g => g.key !== 'unknown');
+    if (hasAttribution) {
+      lines.push(`Some invoices were not added because they were already submitted (${skippedNums.length}):`);
+      for (const group of attributionGroups) {
+        if (group.key === 'self') {
+          const dateLabel = formatSubmissionDate(group.submittedAt);
+          lines.push(
+            dateLabel
+              ? `  — You already submitted these on ${dateLabel}:`
+              : '  — You already submitted these:'
+          );
+        } else if (group.key !== 'unknown') {
+          lines.push(`  — ${group.key} already submitted these invoices:`);
+        } else {
+          lines.push('  — Already in PCS AI (original submitter unknown):');
+        }
+        lines.push(group.invoiceNumbers.map(n => `      • ${n}`).join('\n'));
+      }
+    } else {
+      lines.push(`Some invoices were not published because they are already in PCS AI (${skippedNums.length}):`);
+      for (const [location, nums] of Object.entries(locationGroups)) {
+        lines.push(`  — ${location}:`);
+        lines.push(nums.map(n => `      • ${n}`).join('\n'));
+      }
     }
     lines.push('');
   }
@@ -159,11 +280,14 @@ export async function composeIngestReportMessage(
       messages: [
         {
           role: 'system',
-          content: `You write clear, friendly email reports for Laura (AP) about invoice emails she sent to invoices@pcsmilesai.com.
+          content: `You write clear, friendly email reports for PCS AI users about invoice emails they sent to invoices@pcsmilesai.com.
 Rules:
-- Use ONLY the invoice numbers and pipeline locations provided in the facts JSON. Never invent numbers.
+- Use ONLY the invoice numbers and facts provided in the JSON. Never invent numbers.
 - Every invoice number in the facts MUST appear in your body.
-- Group omitted (duplicate) invoices by their pipeline location.
+- For skipped duplicates, use original_submitted_by when present:
+  - If original_submitted_by equals sender_email, say "You already submitted these on [date]" using original_submitted_at.
+  - If original_submitted_by is a different email, say "[email] already submitted these invoices" using the full email address only (no display names).
+  - If original_submitted_by is missing, use the pipeline location field.
 - Be concise and professional. Plain text only (no markdown).
 - Start with a short summary line, then lists.
 - Return JSON only: {"subject":"...","body":"..."}`,

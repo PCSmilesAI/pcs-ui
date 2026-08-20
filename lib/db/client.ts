@@ -335,6 +335,8 @@ export function runMigrations(): void {
 
   // NEW: Invoice reassignment field - tracks current owner/assignee
   ensureColumn('invoices', 'current_assigned_user_email', 'current_assigned_user_email TEXT');
+  // Email submitter who first ingested this invoice (for duplicate attribution)
+  ensureColumn('invoices', 'submitted_by_email', 'submitted_by_email TEXT');
   
   // Payment tracking - Stripe transfer ID for payment verification
   ensureColumn('invoices', 'stripe_transfer_id', 'stripe_transfer_id TEXT');
@@ -448,6 +450,7 @@ export function runMigrations(): void {
     CREATE INDEX IF NOT EXISTS idx_invoice_categories_invoice_id ON invoice_categories(invoice_id);
     CREATE INDEX IF NOT EXISTS idx_table_template_rows_invoice_id ON table_template_rows(invoice_id);
     CREATE INDEX IF NOT EXISTS idx_invoices_assigned_user ON invoices(current_assigned_user_email);
+    CREATE INDEX IF NOT EXISTS idx_invoices_submitted_by ON invoices(submitted_by_email);
     CREATE INDEX IF NOT EXISTS idx_invoices_parsing_status ON invoices(parsing_status);
   `);
 

@@ -4,6 +4,8 @@ import { getDatabase } from '../../../../lib/db/client';
 import {
   composeIngestReportMessage,
   mapStatusToLocation,
+  buildNotificationTitle,
+  buildSkippedBySubmitterPayload,
   type CreatedFact,
   type SkippedFact,
   type IngestReportFacts,
@@ -25,6 +27,8 @@ interface IngestReportPayload {
     existing_id?: string;
     existing_status?: string | null;
     existing_assigned_to?: string | null;
+    existing_submitted_by?: string | null;
+    existing_submitted_at?: string | null;
     reason?: string;
   }>;
   failed?: Array<{ reason?: string }>;
@@ -37,7 +41,8 @@ function enrichSkippedFromDb(
   skipped: IngestReportPayload['skipped']
 ): SkippedFact[] {
   const stmt = db.prepare(
-    `SELECT id, invoice_number, status, current_assigned_user_email, vendor_name
+    `SELECT id, invoice_number, status, current_assigned_user_email, vendor_name,
+            submitted_by_email, created_at
      FROM invoices WHERE deleted = 0 AND (id = ? OR invoice_number = ?)
      LIMIT 1`
   );
@@ -50,16 +55,24 @@ function enrichSkippedFromDb(
           status?: string;
           current_assigned_user_email?: string | null;
           vendor_name?: string;
+          submitted_by_email?: string | null;
+          created_at?: string | null;
         }
       | undefined;
 
     const status = row?.status ?? s.existing_status ?? null;
     const assigned = row?.current_assigned_user_email ?? s.existing_assigned_to ?? null;
+    const originalSubmittedBy =
+      (row?.submitted_by_email || s.existing_submitted_by || null)?.trim().toLowerCase() || null;
+    const originalSubmittedAt = row?.created_at ?? s.existing_submitted_at ?? null;
+
     return {
       invoice_number: s.invoice_number || row?.invoice_number || s.existing_id || 'unknown',
       location: mapStatusToLocation(status, assigned),
       existing_status: status,
       existing_assigned_to: assigned,
+      original_submitted_by: originalSubmittedBy,
+      original_submitted_at: originalSubmittedAt,
     };
   });
 }
@@ -97,6 +110,8 @@ export async function POST(req: NextRequest) {
     const composed = await composeIngestReportMessage(facts);
     const reportId = randomUUID();
     const now = new Date().toISOString();
+    const skippedBySubmitter = buildSkippedBySubmitterPayload(facts);
+    const notificationTitle = buildNotificationTitle(facts);
 
     db.prepare(`
       INSERT INTO ingest_reports (
@@ -122,16 +137,10 @@ export async function POST(req: NextRequest) {
       now
     );
 
-    // Create in-app notification for the sender (Laura) when we know their email
+    // Create in-app notification for the sender when we know their email
     let notificationId: string | null = null;
     if (senderEmail) {
       notificationId = randomUUID();
-      const title =
-        status === 'failed'
-          ? 'Invoice email could not be processed'
-          : skipped.length > 0
-            ? `${created.length} added, ${skipped.length} already in PCS AI`
-            : `${created.length} invoice(s) added to your queue`;
 
       db.prepare(`
         INSERT INTO notifications (id, user_email, type, title, body, payload_json, created_at)
@@ -139,7 +148,7 @@ export async function POST(req: NextRequest) {
       `).run(
         notificationId,
         senderEmail,
-        title,
+        notificationTitle,
         composed.body,
         JSON.stringify({
           report_id: reportId,
@@ -149,6 +158,7 @@ export async function POST(req: NextRequest) {
           status,
           created_invoice_numbers: created.map((c) => c.invoice_number),
           skipped_invoice_numbers: skipped.map((s) => s.invoice_number),
+          skipped_by_submitter: skippedBySubmitter,
         }),
         now
       );
@@ -162,6 +172,7 @@ export async function POST(req: NextRequest) {
       skipped: skipped.length,
       used_gpt: composed.used_gpt,
       notificationId,
+      notificationTitle,
     });
 
     return NextResponse.json({

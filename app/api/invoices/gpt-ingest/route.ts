@@ -52,6 +52,7 @@ interface GPTIngestPayload {
   source_file?: string;
   vendor_hint?: string;
   force_reparse?: boolean;
+  sender_email?: string;
 }
 
 type ExistingInvoiceRow = {
@@ -60,6 +61,8 @@ type ExistingInvoiceRow = {
   vendor_name?: string;
   status?: string;
   current_assigned_user_email?: string | null;
+  submitted_by_email?: string | null;
+  created_at?: string | null;
 };
 
 type SkippedInvoiceInfo = {
@@ -68,8 +71,15 @@ type SkippedInvoiceInfo = {
   existing_status: string | null;
   existing_assigned_to: string | null;
   existing_vendor: string | null;
+  existing_submitted_by: string | null;
+  existing_submitted_at: string | null;
   reason: 'duplicate';
 };
+
+function normalizeSenderEmail(email: string | null | undefined): string | null {
+  const normalized = (email || '').trim().toLowerCase();
+  return normalized || null;
+}
 
 function findExistingInvoiceByNumber(
   db: ReturnType<typeof getDatabase>,
@@ -77,7 +87,8 @@ function findExistingInvoiceByNumber(
   normalizedVendor: string
 ): ExistingInvoiceRow | undefined {
   const exact = db.prepare(
-    `SELECT id, invoice_number, vendor_name, status, current_assigned_user_email
+    `SELECT id, invoice_number, vendor_name, status, current_assigned_user_email,
+            submitted_by_email, created_at
      FROM invoices WHERE invoice_number = ? AND vendor_name = ? AND deleted = 0`
   ).get(invoiceNumber, normalizedVendor) as ExistingInvoiceRow | undefined;
   if (exact) return exact;
@@ -89,7 +100,8 @@ function findExistingInvoiceByNumber(
   // and blocking those silently dropped real invoices.
   const isUnknownVendor = (v: string | null | undefined) => !v || v.trim().toLowerCase() === 'unknown';
   const sameNumber = db.prepare(
-    `SELECT id, invoice_number, vendor_name, status, current_assigned_user_email
+    `SELECT id, invoice_number, vendor_name, status, current_assigned_user_email,
+            submitted_by_email, created_at
      FROM invoices WHERE invoice_number = ? AND deleted = 0`
   ).all(invoiceNumber) as ExistingInvoiceRow[];
   const incomingUnknown = isUnknownVendor(normalizedVendor);
@@ -103,6 +115,8 @@ function toSkippedInfo(invoiceNumber: string, existing: ExistingInvoiceRow): Ski
     existing_status: existing.status || null,
     existing_assigned_to: existing.current_assigned_user_email || null,
     existing_vendor: existing.vendor_name || null,
+    existing_submitted_by: existing.submitted_by_email || null,
+    existing_submitted_at: existing.created_at || null,
     reason: 'duplicate',
   };
 }
@@ -221,6 +235,7 @@ export async function POST(req: NextRequest) {
     const db = getDatabase();
     const sourceFile = body.source_file || body.pdf_path;
     const normalizedPdfFilename = normalizePdfFilename(body.pdf_path);
+    const senderEmail = normalizeSenderEmail(body.sender_email);
 
     // Check if invoice has been tombstoned
     if (isTombstoned(sourceFile)) {
@@ -483,8 +498,8 @@ export async function POST(req: NextRequest) {
                 parsing_status, parsing_error, parse_attempts,
                 document_group_id, document_invoice_index, document_invoice_total,
                 pdf_page_start, pdf_page_end,
-                current_assigned_user_email
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                current_assigned_user_email, submitted_by_email
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `).run(
               inv.id, inv.invoiceNumber, sourceFile,
               inv.normalizedVendor, inv.parsed.office_location, inv.amountCents,
@@ -495,13 +510,14 @@ export async function POST(req: NextRequest) {
               inv.parsingStatus, inv.parsingError, 1,
               documentGroupId, inv.invoiceIndex, totalInvoicesInDoc,
               pageStart, pageEnd,
-              inv.assignedTo || null
+              inv.assignedTo || null,
+              senderEmail
             );
             
             db.prepare(`
-              INSERT INTO invoice_events (invoice_id, action, payload_json)
-              VALUES (?, 'PCS_AI_PARSED_MULTI', ?)
-            `).run(inv.id, JSON.stringify({
+              INSERT INTO invoice_events (invoice_id, action, actor_email, payload_json)
+              VALUES (?, 'PCS_AI_PARSED_MULTI', ?, ?)
+            `).run(inv.id, senderEmail, JSON.stringify({
               document_group_id: documentGroupId,
               invoice_index: inv.invoiceIndex,
               total_in_document: totalInvoicesInDoc,
@@ -705,8 +721,9 @@ export async function POST(req: NextRequest) {
         parsing_status,
         parsing_error,
         parse_attempts,
-        current_assigned_user_email
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        current_assigned_user_email,
+        submitted_by_email
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       id,
       invoiceNumber,
@@ -727,14 +744,15 @@ export async function POST(req: NextRequest) {
       parsingStatus,
       parsingError,
       1,
-      assignedTo || null
+      assignedTo || null,
+      senderEmail
     );
 
     // Audit event
     db.prepare(`
-      INSERT INTO invoice_events (invoice_id, action, payload_json)
-      VALUES (?, 'PCS_AI_PARSED', ?)
-    `).run(id, JSON.stringify({
+      INSERT INTO invoice_events (invoice_id, action, actor_email, payload_json)
+      VALUES (?, 'PCS_AI_PARSED', ?, ?)
+    `).run(id, senderEmail, JSON.stringify({
       vendor_raw: rawVendor,
       vendor_validated: validatedVendor,
       vendor_match_method: vendorMatchMethod,
